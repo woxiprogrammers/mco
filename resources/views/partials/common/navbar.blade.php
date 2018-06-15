@@ -174,6 +174,13 @@
                                                 </a>
                                             </li>
                                         @endif
+                                        @if(($user->roles[0]->role->slug == 'superadmin'))
+                                            <li aria-haspopup="true">
+                                                <a href="/address/create" class="nav-link nav-toggle ">
+                                                    <i class="fa fa-plus"></i> Address
+                                                </a>
+                                            </li>
+                                        @endif
                                     </ul>
                                 </li>
 
@@ -255,7 +262,7 @@
                     <?php $hasQuotationPermission = \App\Helper\ACLHelper::checkModuleAcl('quotation'); ?>
                     @if($hasQuotationPermission)
                         <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
-                            <a href="/quotation/manage/status#2"> Quotations
+                            <a href="/quotation/manage/status#2" id="quotationNav"> Quotations
                                 <span class="arrow"></span>
                             </a>
                         </li>

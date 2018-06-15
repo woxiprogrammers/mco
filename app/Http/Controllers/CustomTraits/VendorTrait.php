@@ -213,7 +213,19 @@ trait VendorTrait
 
     public function editVendor(Request $request, $vendor){
         try {
-             $data = $request->except(['cities','material','material_city','_token','_method']);
+            $currentVendorCities = array_column(($vendor->cityRelations->toArray()),'city_id');
+            if($request->has('cities')){
+                $deletedCities = array_diff($currentVendorCities,$request->cities);
+                $vendorCityRelationIds = VendorCityRelation::where('vendor_id',$vendor->id)->whereIn('city_id',$deletedCities)->pluck('id');
+                $deletedMaterialCityMaterialIds = VendorMaterialCityRelation::join('vendor_material_relation','vendor_material_relation.id','=','vendor_material_city_relation.vendor_material_relation_id')
+                                                    ->whereIn('vendor_material_city_relation.vendor_city_relation_id',$vendorCityRelationIds)
+                                                    ->count();
+                if(count($deletedMaterialCityMaterialIds) > 0){
+                    $request->session()->flash('success', 'City is already assigned to material');
+                    return redirect('/vendors/edit/'.$vendor->id);
+                }
+            }
+            $data = $request->except(['cities','material','material_city','_token','_method']);
             $data['name'] = ucwords(trim($data['name']));
             $vendor->update($data);
             $vendorCityData = array();
@@ -252,19 +264,28 @@ trait VendorTrait
                     $vendorMaterialCityData['vendor_material_relation_id'] = $vendorMaterial->id;
                     foreach ($request->material_city[$materialId] as $materialCityId) {
                         $vendorMaterialCity = VendorMaterialCityRelation::where('vendor_material_relation_id', $vendorMaterial->id)->where('vendor_city_relation_id', $vendorCityRelation[$materialCityId])->first();
-                        VendorMaterialCityRelation::whereNotIn('vendor_city_relation_id', $vendorCityRelation)->delete();
+                        $deletedCityRelation = VendorCityRelation::where('vendor_id',$vendor->id)->whereNotIn('city_id', $request->material_city[$materialId])->pluck('id')->toArray();
+                        VendorMaterialCityRelation::where('vendor_material_relation_id', $vendorMaterial->id)->whereIn('vendor_city_relation_id', $deletedCityRelation)->delete();
                         if ($vendorMaterialCity == null) {
                             $vendorMaterialCityData['vendor_city_relation_id'] = $vendorCityRelation[$materialCityId];
                             VendorMaterialCityRelation::create($vendorMaterialCityData);
                         }
                     }
                 }
+            }else{
+                $vendorMaterialRelations = VendorMaterialRelation::where('vendor_id', $vendor->id)->get();
+                foreach($vendorMaterialRelations as $vendorMaterialRelation){
+                    foreach($vendorMaterialRelation->vendorCityRelation as $vendorCityRelation){
+                        VendorMaterialCityRelation::where('id', $vendorCityRelation->id)->delete();
+                    }
+                    VendorMaterialRelation::where('id', $vendorMaterialRelation->id)->delete();
+                }
             }
             $request->session()->flash('success', 'Vendor Edited successfully.');
             return redirect('/vendors/manage');
         } catch (\Exception $e) {
             $data = [
-                'action' => 'Create Vendor',
+                'action' => 'Edit Vendor',
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];

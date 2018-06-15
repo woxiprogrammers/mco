@@ -17,13 +17,23 @@
                             <div class="container">
                                 <!-- BEGIN PAGE TITLE -->
                                 <div class="page-title">
-                                    <h1>Edit Main Category</h1>
+                                    <h1>Edit Sub Category</h1>
                                 </div>
                             </div>
                         </div>
                         <div class="page-content">
                             @include('partials.common.messages')
                             <div class="container">
+                                <ul class="page-breadcrumb breadcrumb">
+                                    <li>
+                                        <a href="/awareness/category-management/sub-category-manage">Manage Sub Category</a>
+                                        <i class="fa fa-circle"></i>
+                                    </li>
+                                    <li>
+                                        <a href="javascript:void(0);">Edit Sub Category</a>
+                                        <i class="fa fa-circle"></i>
+                                    </li>
+                                </ul>
                                 <div class="col-md-12">
                                     <!-- BEGIN VALIDATION STATES-->
                                     <div class="portlet light ">

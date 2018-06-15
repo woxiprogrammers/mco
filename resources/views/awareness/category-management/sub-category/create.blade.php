@@ -24,6 +24,16 @@
                         <div class="page-content">
                             @include('partials.common.messages')
                             <div class="container">
+                                <ul class="page-breadcrumb breadcrumb">
+                                    <li>
+                                        <a href="/awareness/category-management/sub-category-manage">Manage Sub Category</a>
+                                        <i class="fa fa-circle"></i>
+                                    </li>
+                                    <li>
+                                        <a href="javascript:void(0);">Create Sub Category</a>
+                                        <i class="fa fa-circle"></i>
+                                    </li>
+                                </ul>
                                 <div class="col-md-12">
                                     <!-- BEGIN VALIDATION STATES-->
                                     <div class="portlet light ">

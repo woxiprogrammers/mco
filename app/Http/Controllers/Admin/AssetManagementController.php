@@ -124,6 +124,9 @@ use InventoryTrait;
             $data['is_active'] = false;
             $data['quantity'] = $request->qty;
             $data['rent_per_day'] = $request->rent_per_day;
+            $data['maintenance_period'] = $request->maintenance_period;
+            $data['is_day_wise'] = ($request->has('maintenance_period_type') && $request['maintenance_period_type'] == 'day_wise' && $request['maintenance_period_type'] != null) ? true : false;
+
             $asset = Asset::create($data);
             if($request->work_order_images != null) {
                 $assetId = $asset['id'];

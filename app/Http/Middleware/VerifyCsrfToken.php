@@ -26,6 +26,6 @@ class VerifyCsrfToken extends BaseVerifier
         ,'/drawing/images/get-data/','/drawing/images/get-versions/','/awareness/file-management/get-subcategories-details','/checklist/category-management/change-status/*','/drawing/images/get-projects/','/drawing/images/get-project-sites/','/drawing/images/get-sub-categories/','/drawing/images/image-upload/*',
         '/drawing/images/display-images/*','/drawing/images/delete-temp-product-image/','/drawing/images/get-data/','/user/get-permission','/peticash/salary-request/get-labours','/purchase/purchase-order/reopen','/change-project-site','/asset/maintenance/request/display-images','/asset/maintenance/request/delete-temp-product-image',
         '/asset/maintenance/request/listing','/asset/maintenance/request/approval/listing','/inventory/transfer/upload-pre-grn-images'
-        ,'purchase/purchase-order-request/file-upload/*','purchase/purchase-order-request/display-files/*','/purchase/purchase-order-request/delete-temp-file'
+        ,'purchase/purchase-order-request/file-upload/*','purchase/purchase-order-request/display-files/*','/purchase/purchase-order-request/delete-temp-file','/address/get-states','/address/get-cities'
     ];
 }

@@ -96,4 +96,13 @@
 <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
+    <script>
+        $(document).ready(function(){
+            $("#quotationNav").on('click', function(e){
+                e.stopPropagation();
+                window.location.href = '/quotation/manage/status#2';
+                location.reload();
+            })
+        });
+    </script>
 @endsection

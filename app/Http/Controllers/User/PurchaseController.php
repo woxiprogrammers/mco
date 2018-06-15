@@ -346,7 +346,7 @@ class PurchaseController extends Controller
                 case 'material' :
                     $materialList = array();
                     $quotation = Quotation::where('project_site_id',$request['project_site_id'])->first();
-                    if(count($quotation) > 0){
+                    if(count($quotation) != null){
                         $quotationMaterialId = Material::whereIn('id',array_column($quotation->quotation_materials->toArray(),'material_id'))
                             ->where('name','ilike','%'.$request->keyword.'%')->pluck('id');
                         $quotationMaterials = QuotationMaterial::where('quotation_id',$quotation->id)->whereIn('material_id',$quotationMaterialId)->get();
@@ -396,8 +396,8 @@ class PurchaseController extends Controller
                             $materialList[$iterator]['material_request_component_type_id'] = $quotationMaterialSlug->id;
                             $iterator++;
                         }
-                        //$structureMaterials = Material::whereNotIn('id',$quotationMaterialId)->where('name','ilike','%'.$request->keyword.'%')->get();
-                    }/*else{
+                        $structureMaterials = Material::whereNotIn('id',$quotationMaterialId)->where('name','ilike','%'.$request->keyword.'%')->get();
+                    }else{
                         $structureMaterials = Material::where('name','ilike','%'.$request->keyword.'%')->get();
                     }
                     $structureMaterialSlug = MaterialRequestComponentTypes::where('slug','structure-material')->first();
@@ -422,7 +422,7 @@ class PurchaseController extends Controller
                         $iterator++;
                     }
                     if(count($materialList) == 0){
-                        $materialList[$iterator]['material_name'] = null;
+                        $materialList[$iterator]['material_name'] = $request->keyword;
                         $systemUnits = Unit::where('is_active',true)->get();
                         $j = 0;
                         foreach($systemUnits as $key2 => $unit){
@@ -434,8 +434,8 @@ class PurchaseController extends Controller
                         $newMaterialSlug = MaterialRequestComponentTypes::where('slug','new-material')->first();
                         $materialList[$iterator]['material_request_component_type_slug'] = $newMaterialSlug->slug;
                         $materialList[$iterator]['material_request_component_type_id'] = $newMaterialSlug->id;
-                    }*/
-                    $data= $materialList;
+                    }
+                    $data = $materialList;
                     break;
                 case "asset" :
                     $assetList = array();
@@ -450,14 +450,14 @@ class PurchaseController extends Controller
                         $assetList[$iterator]['material_request_component_type_id'] = $systemAssetStatus->id;
                         $iterator++;
                     }
-                   /* if(count($assetList) == 0){
+                    if(count($assetList) == 0){
                         $assetList[$iterator]['asset_id'] = null;
-                        $assetList[$iterator]['asset_name'] = null;
+                        $assetList[$iterator]['asset_name'] = $request['keyword'];
                         $assetList[$iterator]['asset_unit'] = $assetUnit;
                         $newAssetSlug = MaterialRequestComponentTypes::where('slug','new-asset')->first();
                         $assetList[$iterator]['material_request_component_type_slug'] = $newAssetSlug->slug;
                         $assetList[$iterator]['material_request_component_type_id'] = $newAssetSlug->id;
-                    }*/
+                    }
                     $data = $assetList;
                     break;
             }
@@ -1038,5 +1038,79 @@ class PurchaseController extends Controller
             Log::critical(json_encode($data));
             return response()->json([],500);
         }
+    }
+
+    public function validateQuantity(Request $request){
+        try{
+            $quotation = Quotation::where('project_site_id',$request['project_site_id'])->first();
+            if(count($quotation) != null){
+                $quotationMaterialId = Material::whereIn('id',array_column($quotation->quotation_materials->toArray(),'material_id'))
+                    ->where('name','ilike','%'.$request->material_name.'%')->pluck('id')->first();
+                $quotationMaterial = QuotationMaterial::where('quotation_id',$quotation->id)->where('material_id',$quotationMaterialId)->first();
+                $quotationMaterialSlug = MaterialRequestComponentTypes::where('slug','quotation-material')->first();
+                $materialRequestID = MaterialRequests::where('project_site_id',$request['project_site_id'])->pluck('id');
+                $adminApproveComponentStatusId = PurchaseRequestComponentStatuses::where('slug','admin-approved')->pluck('id')->first();
+                $usedMaterial = MaterialRequestComponents::whereIn('material_request_id',$materialRequestID)->where('component_type_id',$quotationMaterialSlug->id)->where('component_status_id',$adminApproveComponentStatusId)->where('name','ilike',$quotationMaterial->material->name)->orderBy('created_at','asc')->get();
+                $totalQuantityUsed = 0;
+                foreach($usedMaterial as $index => $material){
+                    if($material->unit_id == $request->unit_id){
+                        $totalQuantityUsed += $material->quantity;
+                    }else{
+                        $unitConversionValue = UnitConversion::where('unit_1_id',$material->unit_id)->where('unit_2_id',$request->unit_id)->first();
+                        if(count($unitConversionValue) > 0){
+                            $conversionQuantity = $material->quantity * $unitConversionValue->unit_1_value;
+                            $totalQuantityUsed += $conversionQuantity;
+                        }else{
+                            $reverseUnitConversionValue = UnitConversion::where('unit_1_id', $request->unit_id)->where('unit_2_id',$material->unit_id)->first();
+                            $conversionQuantity = $material->quantity / $reverseUnitConversionValue->unit_2_value;
+                            $totalQuantityUsed += $conversionQuantity;
+                        }
+                    }
+                }
+                $materialVersions = MaterialVersion::where('material_id',$quotationMaterial['material_id'])->where('unit_id',$quotationMaterial['unit_id'])->pluck('id');
+                $material_quantity = QuotationProduct::where('quotation_products.quotation_id',$quotation->id)
+                    ->join('product_material_relation','quotation_products.product_version_id','=','product_material_relation.product_version_id')
+                    ->whereIn('product_material_relation.material_version_id',$materialVersions)
+                    ->sum(DB::raw('quotation_products.quantity * product_material_relation.material_quantity'));
+                $quotationMaterialQuantity = 0;
+                if($quotationMaterial->unit_id == $request->unit_id){
+                    $quotationMaterialQuantity += $material_quantity;
+                }else{
+                    $unitConversionValue = UnitConversion::where('unit_1_id',$quotationMaterial->unit_id)->where('unit_2_id',$request->unit_id)->first();
+                    if(count($unitConversionValue) > 0){
+                        $conversionQuantity = $material_quantity * $unitConversionValue->unit_1_value;
+                        $quotationMaterialQuantity += $conversionQuantity;
+                    }else{
+                        $reverseUnitConversionValue = UnitConversion::where('unit_1_id', $request->unit_id)->where('unit_2_id',$quotationMaterial->unit_id)->first();
+                        $conversionQuantity = $material_quantity / $reverseUnitConversionValue->unit_2_value;
+                        $quotationMaterialQuantity += $conversionQuantity;
+                    }
+                }
+                $allowedQuantity = $quotationMaterialQuantity - $totalQuantityUsed;
+                if($allowedQuantity < $request->quantity){
+                    $status = 203;
+                    $message = 'You have entered more than allowed quantity. Allowed quotation quantity is '.$allowedQuantity;
+                }else{
+                    $status = 200;
+                    $message = 'Successful.';
+                }
+            }else{
+                $status = 200;
+                $message = 'Successful.';
+            }
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Validate Material Quantity',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            $status = 500;
+            $message = 'Something went wrong';
+            Log::critical(json_encode($data));
+        }
+        $response = [
+            'message' => $message
+        ];
+        return response()->json($response, $status);
     }
 }

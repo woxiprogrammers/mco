@@ -27,6 +27,7 @@ $(document).ready(function(){
                             name:data.material_name,
                             unit:data.unit_quantity,
                             component_type_id:data.material_request_component_type_id,
+                            component_type_slug:data.material_request_component_type_slug,
                         };
                     });
                 },
@@ -42,7 +43,7 @@ $(document).ready(function(){
             limit: 30,
             templates: {
                 suggestion: Handlebars.compile('<div class="autosuggest"><strong>{{name}}</strong></div>')
-            },
+            }
         }).on('typeahead:selected', function (obj, datum) {
             var POData = datum.unit;
             var componentTypeId = datum.component_type_id;
@@ -54,10 +55,12 @@ $(document).ready(function(){
                 options =  options+ '<option value="'+unitId +'">'+unitName +'</option>'
             });
             $('#materialUnit').html(options);
+            $("#materialModalComponentSlug").val(datum.component_type_slug);
         })
             .on('typeahead:open', function (obj, datum) {
                 $('#component_id').val(4);
                 $("#materialUnit").html($("#unitOptions").val());
+                $("#materialModalComponentSlug").val('');
             });
         $("#myModal").modal();
     });
@@ -159,25 +162,65 @@ $(document).ready(function(){
             $("#materialUnit").closest('.form-group').addClass('has-success').removeClass('has-error');
         }
         if(validFlag == true){
-            $('#searchbox').html('');
-            $('#qty').html('');
-            var componentTypeId = $('#component_id').val();
-            var images = [];
-            var iterator = $('#iterator').val();
-            var materials = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+material_name+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unitId+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">';
+            var componentSlug = $("#materialModalComponentSlug").val();
+            if(componentSlug == 'quotation-material'){
+                $.ajax({
+                    url:'/purchase/material-request/validate-quantity',
+                    type: "POST",
+                    data:{
+                        _token: $("input[name='_token']").val(),
+                        quantity: quantity,
+                        unit_id: unitId,
+                        material_name: material_name,
+                        project_site_id: $("#globalProjectSite").val()
+                    },
+                    success: function(data,textStatus, xhr){
+                        if(xhr.status == 203){
+                            alert(data.message);
+                        }
+                        $('#searchbox').html('');
+                        $('#qty').html('');
+                        var componentTypeId = $('#component_id').val();
+                        var images = [];
+                        var iterator = $('#iterator').val();
+                        var materials = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+material_name+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unitId+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">';
+                        $('.img').each(function(i, el) {
+                            var imageSrc = $(el).attr('src');
+                            materials += '<input type="hidden" name="item_list['+iterator+'][images][]" value="'+imageSrc+'">'
+                        });
+                        materials += material_name+'</td>'+'<td>'+quantity+'</td>'+'<td>'+unitName+'</td>';
+                        var rows = '<tr>'+materials+'</tr>';
+                        $('#myModal').modal('hide');
+                        $('#myModal output').html('');
+                        $('#Materialrows').append(rows);
+                        var iterator = parseInt(iterator) + 1;
+                        $('#iterator').val(iterator);
+                        $('#component_id').val(null);
+                    },
+                    error: function(errorData){
 
-            $('.img').each(function(i, el) {
-                var imageSrc = $(el).attr('src');
-                materials += '<input type="hidden" name="item_list['+iterator+'][images][]" value="'+imageSrc+'">'
-            });
-            materials += material_name+'</td>'+'<td>'+quantity+'</td>'+'<td>'+unitName+'</td>';
-            var rows = '<tr>'+materials+'</tr>';
-            $('#myModal').modal('hide');
-            $('#myModal output').html('');
-            $('#Materialrows').append(rows);
-            var iterator = parseInt(iterator) + 1;
-            $('#iterator').val(iterator);
-            $('#component_id').val(null);
+                    }
+                });
+            }else{
+                $('#searchbox').html('');
+                $('#qty').html('');
+                var componentTypeId = $('#component_id').val();
+                var images = [];
+                var iterator = $('#iterator').val();
+                var materials = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+material_name+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unitId+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">';
+                $('.img').each(function(i, el) {
+                    var imageSrc = $(el).attr('src');
+                    materials += '<input type="hidden" name="item_list['+iterator+'][images][]" value="'+imageSrc+'">'
+                });
+                materials += material_name+'</td>'+'<td>'+quantity+'</td>'+'<td>'+unitName+'</td>';
+                var rows = '<tr>'+materials+'</tr>';
+                $('#myModal').modal('hide');
+                $('#myModal output').html('');
+                $('#Materialrows').append(rows);
+                var iterator = parseInt(iterator) + 1;
+                $('#iterator').val(iterator);
+                $('#component_id').val(null);
+            }
         }
     });
 

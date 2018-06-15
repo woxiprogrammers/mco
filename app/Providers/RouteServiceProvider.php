@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Address;
 use App\Asset;
 use App\BankInfo;
 use App\Bill;
@@ -104,6 +105,7 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('purchaseOrderRequestComponent',PurchaseOrderRequestComponent::class);
         Route::model('subcontractorStructure',SubcontractorStructure::class);
         Route::model('siteTransferBill',SiteTransferBill::class);
+        Route::model('address',Address::class);
     }
 
     /**

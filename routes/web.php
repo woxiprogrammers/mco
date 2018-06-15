@@ -48,6 +48,18 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('change-status/{client}',array('uses' => 'Client\ClientController@changeClientStatus'));
     });
 
+    Route::group(['prefix' => 'address'],function (){
+        Route::get('create',array('uses' => 'Admin\AddressController@getCreateView'));
+        Route::post('create',array('uses' => 'Admin\AddressController@createAddress'));
+        Route::get('edit/{address}',array('uses' => 'Admin\AddressController@getEditView'));
+        Route::post('edit/{address}',array('uses' => 'Admin\AddressController@editAddress'));
+        Route::get('manage',array('uses' => 'Admin\AddressController@getAddressManageView'));
+        Route::post('listing',array('uses' => 'Admin\AddressController@addressListing'));
+        Route::post('get-states',array('uses' => 'Admin\AddressController@getStates'));
+        Route::post('get-cities',array('uses' => 'Admin\AddressController@getCities'));
+        Route::get('change-status/{address}',array('uses' => 'Admin\AddressController@changeAddressStatus'));
+    });
+
     Route::group(['prefix' => 'category'],function(){
         Route::get('create',array('uses' => 'Admin\CategoryController@getCreateView'));
         Route::post('create',array('uses' => 'Admin\CategoryController@createCategory'));
@@ -281,6 +293,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('change-status/{newStatus}/{componentId?}',array('uses' => 'User\PurchaseController@changeMaterialRequestComponentStatus'));
             Route::post('change-status-mti',array('uses' => 'User\PurchaseController@changeMaterialRequestComponentStatustoMTI'));
             Route::get('get-material-request-component-details/{materialRequestComponent}',array('uses' => 'User\PurchaseController@getMaterialRequestComponentDetail'));
+            Route::post('validate-quantity', array('uses' => 'User\PurchaseController@validateQuantity'));
         });
 
         Route::group(['prefix' => 'purchase-request'], function(){
@@ -291,6 +304,8 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('listing',array('uses'=> 'Purchase\PurchaseRequestController@purchaseRequestListing'));
             Route::post('change-status/{newStatus}/{componentId?}',array('uses' => 'Purchase\PurchaseRequestController@changePurchaseRequestStatus'));
             Route::post('assign-vendors',array('uses' => 'Purchase\PurchaseRequestController@assignVendors'));
+            Route::post('get-material-inventory-quantity',array('uses' => 'Purchase\PurchaseRequestController@getMaterialInventoryQuantity'));
+            Route::post('edit-quantity',array('uses' => 'Purchase\PurchaseRequestController@editComponentQuantity'));
             Route::get('get-detail/{purchaseRequestId}',array('uses' => 'Purchase\PurchaseRequestController@getPurchaseRequestDetails'));
         });
 
@@ -729,6 +744,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
                 Route::post('sub-category-listing',array('uses' => 'Awareness\CategoryManagementController@subCategoryListing'));
                 Route::get('sub-category-manage',array('uses' => 'Awareness\CategoryManagementController@getSubManageView'));
                 Route::get('sub-category-create',array('uses' => 'Awareness\CategoryManagementController@getSubCategoryCreateView'));
+                Route::get('change-status/{slug}/{categoryId}',array('uses' => 'Awareness\CategoryManagementController@changeCategoryStatus'));
           });
         Route::group(['prefix' => 'file-management'], function(){
             Route::get('manage',array('uses' => 'Awareness\FileManagementController@getManageView'));
@@ -757,6 +773,10 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('manage_dpr',array('uses' => 'Dpr\DprController@getDprManageView'));
         Route::post('category-listing',array('uses' => 'Dpr\DprController@categoryListing'));
         Route::post('dpr-listing',array('uses' => 'Dpr\DprController@dprListing'));
+        Route::post('temp-image-upload',array('uses' => 'Dpr\DprController@uploadTempImages'));
+        Route::post('display-temp-files',array('uses' => 'Dpr\DprController@displayTempImages'));
+        Route::post('delete-temp-image',array('uses' => 'Dpr\DprController@removeTempImage'));
+        Route::post('delete-image',array('uses' => 'Dpr\DprController@removeImage'));
         Route::get('change-status/{id}/{status}',array('uses'=> 'Dpr\DprController@changeStatus'));
         Route::group(['prefix' => 'subcontractor'], function(){
             Route::post('get-category',array('uses'=> 'Dpr\DprController@getSubcontractorsCategories'));

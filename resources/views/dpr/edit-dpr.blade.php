@@ -31,6 +31,16 @@
                             <div class="page-content">
                                 @include('partials.common.messages')
                                 <div class="container">
+                                    <ul class="page-breadcrumb breadcrumb">
+                                        <li>
+                                            <a href="/dpr/manage_dpr">Manage DPR</a>
+                                            <i class="fa fa-circle"></i>
+                                        </li>
+                                        <li>
+                                            <a href="javascript:void(0);">Edit DPR</a>
+                                            <i class="fa fa-circle"></i>
+                                        </li>
+                                    </ul>
                                     <div class="col-md-12">
                                         <!-- BEGIN VALIDATION STATES-->
                                         <div class="portlet light ">
@@ -75,6 +85,39 @@
                                                             </table>
                                                         </div>
                                                     </div>
+                                                    <div class="form-group" id="imageUploadDiv">
+                                                        <div class="row">
+                                                            <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12"> </div>
+                                                        </div>
+                                                        <div id="tab_images_uploader_container" class="col-md-offset-5">
+                                                            <a id="tab_images_uploader_pickfiles" href="javascript:;" class="btn green-meadow">
+                                                                Browse</a>
+                                                            <a id="tab_images_uploader_uploadfiles" href="javascript:;" class="btn btn-primary">
+                                                                <i class="fa fa-share"></i> Upload Files </a>
+                                                        </div><br>
+                                                        <table class="table table-bordered table-hover col-md-offset-3" style="width: 700px">
+                                                            <thead>
+                                                            <tr role="row" class="heading">
+                                                                <th> Image </th>
+                                                                <th> Action </th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody id="show-product-images">
+                                                            @foreach($subcontractorCategoryImages as $subcontractorCategoryImage)
+                                                                <tr id="image-{{$subcontractorCategoryImage['random']}}">
+                                                                    <td>
+                                                                        <a href="{{$subcontractorCategoryImage['path']}}" target="_blank" class="fancybox-button" data-rel="fancybox-button">
+                                                                            <img class="img-responsive" src="{{$subcontractorCategoryImage['path']}}" alt="" style="width:100px; height:100px;"> </a>
+                                                                    </td>
+                                                                    <td>
+                                                                        <a href="javascript:;" class="btn btn-default btn-sm" onclick='removeDprImages("#image-{{$subcontractorCategoryImage['random']}}","{{$subcontractorCategoryImage['path']}}",{{$subcontractorCategoryImage['dpr_image_id']}});'>
+                                                                            <i class="fa fa-times"></i> Remove </a>
+                                                                    </td>
+                                                                </tr>
+                                                            @endforeach
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -83,11 +126,23 @@
                             </div>
                         </div>
                     </form>
+                    <input type="hidden" id="path" name="path" value="">
+                    <input type="hidden" id="max_files_count" name="max_files_count" value="20">
                 </div>
             </div>
         </div>
     </div>
 @endsection
 @section('javascript')
+    <script src="/assets/global/plugins/fancybox/source/jquery.fancybox.pack.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/plupload/js/plupload.full.min.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/jstree/dist/jstree.min.js" type="text/javascript"></script>
     <script src="/assets/custom/dpr/dpr.js" type="application/javascript"></script>
+    <script src="/assets/custom/dpr/file-datatable.js" type="application/javascript"></script>
+    <script src="/assets/custom/dpr/upload-file.js" type="application/javascript"></script>
+    <script>
+        jQuery(document).ready(function() {
+            QuotationImageUpload.init()
+        });
+    </script>
 @endsection
