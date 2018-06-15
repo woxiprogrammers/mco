@@ -292,9 +292,9 @@ class InventoryManageController extends Controller
         }
     }
 
-    public function checkAvailableQuantity(Request $request){
+    public function checkInventoryAvailableQuantity($requestData){
         try{
-            $inventoryComponent = InventoryComponent::where('id',$request['inventoryComponentId'])->first();
+            $inventoryComponent = InventoryComponent::where('id',$requestData['inventoryComponentId'])->first();
             if($inventoryComponent->is_material == true){
                 $materialUnit = Material::where('id',$inventoryComponent['reference_id'])->pluck('unit_id')->first();
                 $unitID = Unit::where('id',$materialUnit)->pluck('id')->first();
@@ -337,16 +337,35 @@ class InventoryManageController extends Controller
                     ->sum('inventory_component_transfers.quantity');
             }
             $availableQuantity = $inQuantity - $outQuantity;
-            if($unitID != $request['unitId']){
-                $availableQuantity= UnitHelper::unitQuantityConversion($request['unitId'],$unitID,$availableQuantity);
+            if($unitID != $requestData['unitId']){
+                $availableQuantity = UnitHelper::unitQuantityConversion($requestData['unitId'],$unitID,$availableQuantity);
             }
-            if($request['quantity'] < $availableQuantity){
+            if($requestData['quantity'] <= $availableQuantity){
                 $show_validation = false;
             }else{
                 $show_validation = true;
             }
         }catch (\Exception $e){
             $show_validation = false;
+            $data = [
+                'action' => 'Check Inventory Available Quantity',
+                'params' => $requestData,
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+        }
+        $response = [
+            'show_validation' => $show_validation,
+            'available_quantity' => $availableQuantity
+        ];
+        return $response;
+    }
+
+    public function checkAvailableQuantity(Request $request){
+        try{
+            $responseData = $this->checkInventoryAvailableQuantity($request);
+        }catch (\Exception $e){
+            $responseData['show_validation'] = false;
             $data = [
                 'action' => 'Check Available Quantity',
                 'params' => $request->all(),
@@ -355,8 +374,8 @@ class InventoryManageController extends Controller
             Log::critical(json_encode($data));
         }
         $response = [
-            'show_validation' => $show_validation,
-            'available_quantity' => $availableQuantity
+            'show_validation' => $responseData['show_validation'],
+            'available_quantity' => $responseData['available_quantity']
         ];
         return $response;
     }
@@ -782,6 +801,14 @@ class InventoryManageController extends Controller
                 $data['inventory_component_id'] = $inventoryComponent->id;
                 $data['user_id'] = $user['id'];
                 $data['in_time'] = $data['out_time'] = $data['date'] = Carbon::now();
+                $checkAvailableQuantity['inventoryComponentId'] = $inventoryComponent->id;
+                $checkAvailableQuantity['quantity'] = $request['quantity'];
+                $checkAvailableQuantity['unitId'] = $request['unit_id'];
+                $quantityCheck = $this->checkInventoryAvailableQuantity($checkAvailableQuantity);
+                if($quantityCheck['show_validation'] == true){
+                    $request->session()->flash('success','Insufficient Quantity for this transaction. Available quantity is '.$quantityCheck['available_quantity']);
+                    return redirect('/inventory/component/manage/'.$inventoryComponent->id);
+                }
                 if($request->has('project_site_id') && $request->transfer_type =='site'){
                     $projectSite = ProjectSite::where('id',$request['project_site_id'])->first();
                     $data['source_name'] = $projectSite->project->name.'-'.$projectSite->name;

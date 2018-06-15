@@ -300,7 +300,7 @@
                                                             <label class="control-label pull-right">Quantity</label>
                                                         </div>
                                                         <div class="col-md-10">
-                                                            <input type="text" id="quantity" name="quantity" class="form-control user-quantity" placeholder="Enter Quantity" onchange="checkUserAllowedQuantity()">
+                                                            <input type="text" id="user_quantity" name="quantity" class="form-control" placeholder="Enter Quantity" onkeyup="checkUserAllowedQuantity()">
                                                         </div>
                                                     </div>
                                                     <div class="row form-group">
@@ -309,7 +309,7 @@
                                                                 <label class="control-label pull-right">Unit</label>
                                                             </div>
                                                             <div class="col-md-10">
-                                                                <select class="form-control user-unit" id="unit" name="unit_id" onchange="checkUserAllowedQuantity()">
+                                                                <select class="form-control" id="user_unit" name="unit_id" onchange="checkUserAllowedQuantity()">
                                                                     <option value="{{$nosUnitId}}">Nos</option>
                                                                 </select>
                                                             </div>
@@ -318,7 +318,7 @@
                                                                 <label class="control-label pull-right">Unit</label>
                                                             </div>
                                                             <div class="col-md-10">
-                                                                <select class="form-control" id="unit" name="unit_id">
+                                                                <select class="form-control" id="user_unit" name="unit_id" onchange="checkUserAllowedQuantity()">
                                                                     <option value=""> -- Unit -- </option>
                                                                     @foreach($units as $unit)
                                                                         <option value="{{$unit['id']}}">{{$unit['name']}}</option>
@@ -1145,6 +1145,7 @@
             InventoryComponentListing.init();
             changeType();
             $("#transaction").click(function(){
+                CreateInventoryComponentTransfer.init();
                 $("#transactionModal").modal();
             });
 
@@ -1314,7 +1315,7 @@
 
         var  CreateInventoryComponentTransfer = function () {
             var handleCreate = function() {
-                var form = $('#addTransferForm');
+                var form = $('#transactionForm');
                 var error = $('.alert-danger', form);
                 var success = $('.alert-success', form);
                 form.validate({
@@ -1371,13 +1372,10 @@
     <script>
 
         function checkUserAllowedQuantity(){
-            console.log('inside quantity');
-            //$('.user-quantity').rules('remove');
-            //$('.user-quantity').closest('form-group').removeClass('has-error');
-            var quantity = $('.user-quantity').val();
-            console.log(quantity);
-            var unitId =  $('.user-unit').val();
-            console.log(unitId);
+            $('#dynamicForm #user_quantity').rules('remove');
+            $('#dynamicForm #user_quantity').closest('form-group').removeClass('has-error');
+            var quantity = $('#user_quantity').val();
+            var unitId =  $('#user_unit').val();
             if(typeof quantity != 'undefined' && quantity != '' && !(isNaN(quantity)) && typeof unitId != 'undefined' && unitId != '' && !(isNaN(unitId))){
                 $.ajax({
                     url: '/inventory/transfer/check-quantity',
@@ -1391,15 +1389,16 @@
                     },
                     success: function(data,textStatus,xhr){
                         if(data.show_validation == true){
-                            $('.user-quantity').rules('add',{
+                            $('#user_quantity').rules('add',{
                                 max: data.available_quantity,
                                 messages: {
                                     max  : "Available quantity is "+data.available_quantity
                                 }
                             });
+
                         }else{
-                            $('.user-quantity').rules('remove');
-                            $('.user-quantity').closest('form-group').removeClass('has-error');
+                            $('#user_quantity').rules('remove');
+                            $('#user_quantity').closest('form-group').removeClass('has-error');
                         }
                     },
                     error: function(){
@@ -1418,6 +1417,7 @@
                 $("#dynamicForm .custom-upload-file").attr('id','tab_images_uploader_uploadfiles');
                 $("#inOutSubmit").show();
                 InventoryComponentImageUpload.init();
+                CreateInventoryComponentTransfer.init();
                 var citiList = new Bloodhound({
                     datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
                     queryTokenizer: Bloodhound.tokenizers.whitespace,
@@ -1457,6 +1457,7 @@
                     .on('typeahead:open', function (obj, datum) {
 
                     });
+
             }else if($(this).val() == 'site'){
                     if($('#inOutCheckbox').is(':checked') == true){
                         $("#dynamicForm").html($('#site_in_form').clone().removeAttr('hidden').show(500));
@@ -1545,8 +1546,8 @@
                 $("#dynamicForm").html('');
                 $("#inOutSubmit").hide();
             }
-            CreateInventoryComponentTransfer.init();
-        })
+
+        });
 
         function calculateTaxes(element){
             var rate = parseFloat($(element).closest('.modal-body').find('.tax-modal-rate').val());
@@ -1652,8 +1653,8 @@
         }
 
         function checkAllowedQuantity(){
-            $('#site_form_quantity').rules('remove');
-            $('#site_form_quantity').closest('form-group').removeClass('has-error');
+            $('#dynamicForm #site_form_quantity').rules('remove');
+            $('#dynamicForm #site_form_quantity').closest('form-group').removeClass('has-error');
             var quantity = $('#site_form_quantity').val();
             var unitId =  $('#unit').val();
             if(typeof quantity != 'undefined' && quantity != '' && !(isNaN(quantity)) && typeof unitId != 'undefined' && unitId != '' && !(isNaN(unitId))){
