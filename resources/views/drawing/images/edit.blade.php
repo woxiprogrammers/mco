@@ -97,14 +97,14 @@
                                                                     <a href="javascript:void(0);" onclick="showVersions({{$file['id']}})">
                                                                         <img class="img-responsive" src="{{$file['encoded_name']}}" alt="" style="width:100px; height:100px;"> </a>
 
-                                                                    <input type="hidden" class="product-image-name" name="work_order_images[{{$file['id']}}][image_name]" id="product-image-name-{{$file['id']}}" value="{{$file['encoded_name']}}"/><br>
-                                                                    <input type="text"  class="form-control" name="work_order_images[{{$file['id']}}][title]" value="{{$file['title']}}" />
+                                                                    <input type="hidden" class="product-image-name" id="product-image-name-{{$file['id']}}" value="{{$file['encoded_name']}}"/><br>
+                                                                    <input type="text"  class="form-control" value="{{$file['title']}}" />
                                                                 </td>
                                                                 <td>
                                                                     {{--<a href="javascript:;" class="btn btn-default btn-sm" onclick='removeProductImages("#image-{{$file['id']}}","{{$file['encoded_name']}}",0);'>
                                                                         <i class="fa fa-times"></i> Remove </a>--}}
-                                                                    <button  class="btn btn-default btn-sm myBtn"  value="{{$file['original_id']}}">
-                                                                        <i class="fa fa-plus-square"></i> Add Version </button>
+                                                                    <a  class="btn btn-default btn-sm myBtn"  href="javascript:void(0);" onclick="openVersionModal({{$file['original_id']}})">
+                                                                        <i class="fa fa-plus-square"></i> Add Version </a>
                                                                 </td>
                                                             </tr>
                                                         @endforeach
@@ -199,13 +199,11 @@
     <script>
         $(document).ready(function(){
             EditImage.init();
-            $(".myBtn").click(function(){
-                var id = $(this).val();
-                $('#drawing-images-id').val(id);
-                $("#myModal").modal();
-            });
         });
-
+        function openVersionModal(drawingImageId){
+            $('#drawing-images-id').val(drawingImageId);
+            $("#myModal").modal();
+        }
         function showVersions(drawingVersionId){
             $("#versionModal").modal('show');
             $.ajax({

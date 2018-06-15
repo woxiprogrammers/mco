@@ -12,7 +12,7 @@
          @if($drawing_image_latest_version['iterator'] == 0)
                 <div class="item active" style="width: 80%">
                     <a style="float: right" href="/drawing/images/get-details/{{$drawing_image_latest_version['id']}}">View Details</a>
-                    <a href="{{$drawing_image_latest_version['encoded_name']}}">
+                    <a href="{{$drawing_image_latest_version['encoded_name']}}" target="_blank">
                    <br>
                     <img src="{{$drawing_image_latest_version['encoded_name']}}" alt="" style="height: 150px">
                         <h4>{{$drawing_image_latest_version['title']}}</h4>
