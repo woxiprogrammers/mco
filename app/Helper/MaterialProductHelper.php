@@ -83,7 +83,8 @@ class MaterialProductHelper{
                                     $rateConversion = UnitHelper::unitConversion($materialRecentVersion['material_unit_id'],$materialInfo['unit_id'],$materialRecentVersion['material_rate_per_unit']);
                                 }
                                 if(!is_array($rateConversion)){
-                                    $productAmount = round($productAmount + ($rateConversion * $materialInfo['material_quantity']),3);
+                                    //$productAmount = round($productAmount + ($rateConversion * $materialInfo['material_quantity']),3);
+                                    $productAmount = $productAmount + ($rateConversion * $materialInfo['material_quantity']);
                                 }else{
                                     ProductMaterialRelation::where('product_version_id',$newProductVersion->id)->delete();
                                     ProductProfitMarginRelation::where('product_version_id',$newProductVersion->id)->delete();
@@ -110,11 +111,12 @@ class MaterialProductHelper{
                                 }
                             }else{
                                 $productMaterialRelationData['material_version_id'] = $materialInfo['material_version_id'];
-                                $productAmount = round($productAmount + ($materialInfo['rate_per_unit'] * $materialInfo['material_quantity']),3);
+                                //$productAmount = round($productAmount + ($materialInfo['rate_per_unit'] * $materialInfo['material_quantity']),3);
+                                $productAmount = $productAmount + ($materialInfo['rate_per_unit'] * $materialInfo['material_quantity']);
                             }
                             ProductMaterialRelation::create($productMaterialRelationData);
                         }
-                        $productProfitMarginRelationData =array();
+                        $productProfitMarginRelationData = array();
                         $productProfitMarginRelationData['product_version_id'] = $newProductVersion['id'];
                         $profitMarginAmount = 0;
                         if($profitMargins != null){
@@ -123,14 +125,16 @@ class MaterialProductHelper{
                                     $recentProfitMarginVersion = ProfitMarginVersion::where('profit_margin_id',$profitMargin['profit_margin_id'])->orderBy('created_at','desc')->select('id','percentage')->first();
                                     if($profitMargin['percentage'] == $recentProfitMarginVersion['percentage']){
                                         $productProfitMarginRelationData['profit_margin_version_id'] = $recentProfitMarginVersion['id'];
-                                        $profitMarginAmount = $profitMarginAmount + round($productAmount * ($profitMargin['percentage'] / 100),3);
+                                       // $profitMarginAmount = $profitMarginAmount + round($productAmount * ($profitMargin['percentage'] / 100),3);
+                                        $profitMarginAmount = $profitMarginAmount + ($productAmount * ($profitMargin['percentage'] / 100));
                                     }else{
                                         $profitMarginVersionData = array();
                                         $profitMarginVersionData['profit_margin_id'] = $profitMargin['profit_margin_id'];
                                         $profitMarginVersionData['percentage'] = $profitMargin['percentage'];
                                         $newProfitMarginVersion = ProfitMarginVersion::create($profitMarginVersionData);
                                         $productProfitMarginRelationData['profit_margin_version_id'] = $newProfitMarginVersion['id'];
-                                        $profitMarginAmount = $profitMarginAmount + round($productAmount * ($profitMargin['percentage'] / 100),3);
+                                        //$profitMarginAmount = $profitMarginAmount + round($productAmount * ($profitMargin['percentage'] / 100),3);
+                                        $profitMarginAmount = $profitMarginAmount + ($productAmount * ($profitMargin['percentage'] / 100));
                                     }
                                     ProductProfitMarginRelation::create($productProfitMarginRelationData);
                                 }
@@ -151,11 +155,13 @@ class MaterialProductHelper{
                             foreach($productProfitMargins as $profitMargin){
                                 $productProfitMarginRelationData['profit_margin_version_id'] = $profitMargin['profit_margin_version_id'];
                                 ProductProfitMarginRelation::create($productProfitMarginRelationData);
-                                $profitMarginAmount = $profitMarginAmount + round($productAmount * ($profitMargin['percentage'] / 100),3);
+                               // $profitMarginAmount = $profitMarginAmount + round($productAmount * ($profitMargin['percentage'] / 100),3);
+                                $profitMarginAmount = $profitMarginAmount + ($productAmount * ($profitMargin['percentage'] / 100));
                             }
                         }
                         $productAmount = $productAmount + $profitMarginAmount;
-                        $newProductVersion->update(['rate_per_unit' => round($productAmount,3)]);
+                        //$newProductVersion->update(['rate_per_unit' => round($productAmount,3)]);
+                        $newProductVersion->update(['rate_per_unit' => $productAmount]);
                     }
                 }
             }

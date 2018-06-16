@@ -97,7 +97,7 @@ trait MaterialTrait{
             }else{
                 $materialData['name'] = ucwords(trim($request->name));
                 $categoryMaterialData['category_id'] = $request->category_id;
-                $materialData['rate_per_unit'] = round($request->rate_per_unit,3);
+                $materialData['rate_per_unit'] = $request->rate_per_unit;
                 $materialData['unit_id'] = $request->unit;
                 $materialData['is_active'] = (boolean)0;
                 $materialData['created_at'] = $now;
@@ -108,7 +108,7 @@ trait MaterialTrait{
                 $categoryMaterialData['material_id'] = $material['id'];
                 $categoryMaterial = CategoryMaterialRelation::create($categoryMaterialData);
                 $materialVersionData['material_id'] = $material->id;
-                $materialVersionData['rate_per_unit'] = round($request->rate_per_unit,3);
+                $materialVersionData['rate_per_unit'] = $request->rate_per_unit;
                 $materialVersionData['unit_id'] = $request->unit;
                 $materialVersion = MaterialVersion::create($materialVersionData);
             }
@@ -183,7 +183,7 @@ trait MaterialTrait{
                     $records['data'][$iterator] = [
                         '<input type="checkbox" name="material_ids" value="'.$materialData[$pagination]['id'].'">',
                         $materialData[$pagination]['name'],
-                        round($materialData[$pagination]['rate_per_unit'],3),
+                        $materialData[$pagination]['rate_per_unit'],
                         Unit::where('id',$materialData[$pagination]['unit_id'])->pluck('name')->first(),
                         $material_status,
                         date('d M Y',strtotime($materialData[$pagination]['created_at'])),
@@ -205,7 +205,7 @@ trait MaterialTrait{
                         '<input type="checkbox" name="material_ids" value="'.$materialData[$pagination]['id'].'">',
                         $materialData[$pagination]['name'],
                         Unit::where('id',$materialData[$pagination]['unit_id'])->pluck('name')->first(),
-                        round($materialData[$pagination]['rate_per_unit'],3),
+                        $materialData[$pagination]['rate_per_unit'],
                         $material_status,
                         date('d M Y',strtotime($materialData[$pagination]['created_at'])),
                         '<div class="btn-group">
@@ -294,7 +294,7 @@ trait MaterialTrait{
                 $materials = $materials->toArray();
                 foreach($materials as $material){
                     $response[$iterator] = Unit::where('id',$material['unit_id'])->select('id as unit_id','name as unit')->first()->toArray();
-                    $response[$iterator]['rate_per_unit'] = round($material['rate_per_unit'],3);
+                    $response[$iterator]['rate_per_unit'] = $material['rate_per_unit'];
                     $response[$iterator]['id'] = $material['id'];
                     $response[$iterator]['name'] = $material['name'];
                     $iterator++;

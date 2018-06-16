@@ -127,7 +127,7 @@
                                                                             {{$profitMargin['name']}}
                                                                         </td>
                                                                         <td>
-                                                                            <input class="profit-margin form-control" step="any" type="number" id="profit_margin_{{$profitMargin['id']}}" name="profit_margin[{{$profitMargin['id']}}]" class="form-control" value="{{$profitMargin['base_percentage']}}" onchange="calculateProfitMargin()" onkeyup="calculateProfitMargin()"required>
+                                                                            <input class="profit-margin form-control" step="any" type="number" id="profit_margin_{{$profitMargin['id']}}" name="profit_margin[{{$profitMargin['id']}}]" value="{{$profitMargin['base_percentage']}}" onchange="calculateProfitMargin()" onkeyup="calculateProfitMargin()" required>
                                                                         </td>
                                                                         <td class="profit-margin-amount">
 
@@ -220,9 +220,9 @@
             },
         }).on('typeahead:selected', function (obj, datum) {
 
-            }).on('typeahead:open', function (obj, datum) {
+        }).on('typeahead:open', function (obj, datum) {
 
-                });
+        });
     });
 </script>
 @endsection

@@ -156,7 +156,7 @@
                                                                     <td>
                                                                         <div class="form-group">
                                                                             @if($copyProduct == true)
-                                                                            <input type="text" class="form-control material_amount material-table-input" id="material_{{$version['material_id']}}_amount" name="material_amount[{{$version['material_id']}}]" value="{!! round(($version['quantity']*$version['rate_per_unit']),3) !!}" readonly>
+                                                                                <input type="text" class="form-control material_amount material-table-input" id="material_{{$version['material_id']}}_amount" name="material_amount[{{$version['material_id']}}]" value="{!! round(($version['quantity']*$version['rate_per_unit']),3) !!}" readonly>
                                                                             @else
                                                                                 <input type="text" class="form-control material_amount material-table-input" id="material_{{$version['material_id']}}_amount" name="material[{{$version['material_id']}}][amount]" value="{!! round(($version['quantity']*$version['rate_per_unit']),3) !!}" readonly>
                                                                             @endif
