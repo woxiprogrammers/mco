@@ -94,9 +94,15 @@
                                                         @foreach($drawing_image_latest_version as $file)
                                                             <tr id="image-{{$file['id']}}">
                                                                 <td>
-                                                                    <a href="javascript:void(0);" onclick="showVersions({{$file['id']}})">
-                                                                        <img class="img-responsive" src="{{$file['encoded_name']}}" alt="" style="width:100px; height:100px;"> </a>
-
+                                                                    @if(pathinfo($file['encoded_name'], PATHINFO_EXTENSION) == 'dwg' || pathinfo($file['encoded_name'], PATHINFO_EXTENSION) == 'DWG')
+                                                                        <a href="javascript:void(0);" onclick="showVersions({{$file['id']}})">
+                                                                            <img class="img-responsive" src="/assets/global/img/dwg_thumbnail.jpg" alt="" style="width:100px; height:100px;">
+                                                                        </a>
+                                                                    @else
+                                                                        <a href="javascript:void(0);" onclick="showVersions({{$file['id']}})">
+                                                                            <img class="img-responsive" src="{{$file['encoded_name']}}" alt="" style="width:100px; height:100px;">
+                                                                        </a>
+                                                                    @endif
                                                                     <input type="hidden" class="product-image-name" id="product-image-name-{{$file['id']}}" value="{{$file['encoded_name']}}"/><br>
                                                                     <input type="text"  class="form-control" value="{{$file['title']}}" />
                                                                 </td>

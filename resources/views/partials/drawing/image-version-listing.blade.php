@@ -18,7 +18,15 @@
         @foreach($imageVersionData as $imageVersion)
             <tr>
                 <td>
-                    <img src="{{$imageVersion['image_path']}}" style="width: 250px; height: 150px">
+                    @if(pathinfo($imageVersion['image_path'], PATHINFO_EXTENSION) == 'dwg' || pathinfo($imageVersion['image_path'], PATHINFO_EXTENSION) == 'DWG')
+                        <a href="{{$imageVersion['image_path']}}">
+                            <img class="img-responsive" src="/assets/global/img/dwg_thumbnail.jpg" alt="" style="width:100px; height:100px;">
+                        </a>
+                    @else
+                        <a href="{{$imageVersion['image_path']}}">
+                            <img src="{{$imageVersion['image_path']}}" style="width: 250px; height: 150px">
+                        </a>
+                    @endif
                 </td>
                 <td>
                     <div class="form-group">

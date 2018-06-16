@@ -13,8 +13,12 @@
                 <div class="item active" style="width: 80%">
                     <a style="float: right" href="/drawing/images/get-details/{{$drawing_image_latest_version['id']}}">View Details</a>
                     <a href="{{$drawing_image_latest_version['encoded_name']}}" target="_blank">
-                   <br>
-                    <img src="{{$drawing_image_latest_version['encoded_name']}}" alt="" style="height: 150px">
+                        <br>
+                        @if(pathinfo($drawing_image_latest_version['encoded_name'], PATHINFO_EXTENSION) == 'dwg' || pathinfo($drawing_image_latest_version['encoded_name'], PATHINFO_EXTENSION) == 'DWG')
+                            <img class="img-responsive" src="/assets/global/img/dwg_thumbnail.jpg" alt="" style="width:100px; height:100px;">
+                        @else
+                            <img src="{{$drawing_image_latest_version['encoded_name']}}" alt="" style="height: 150px">
+                        @endif
                         <h4>{{$drawing_image_latest_version['title']}}</h4>
                     </a>
                 </div>
@@ -23,7 +27,11 @@
                     <a style="float: right" href="/drawing/images/get-details/{{$drawing_image_latest_version['id']}}">View Details</a>
                     <a href="{{$drawing_image_latest_version['encoded_name']}}">
                     <br>
-                    <img src="{{$drawing_image_latest_version['encoded_name']}}" alt="{{$drawing_image_latest_version['title']}}" style="height: 150px">
+                        @if(pathinfo($drawing_image_latest_version['encoded_name'], PATHINFO_EXTENSION) == 'dwg' || pathinfo($drawing_image_latest_version['encoded_name'], PATHINFO_EXTENSION) == 'DWG')
+                            <img class="img-responsive" src="/assets/global/img/dwg_thumbnail.jpg" alt="" style="width:100px; height:100px;">
+                        @else
+                            <img src="{{$drawing_image_latest_version['encoded_name']}}" alt="" style="height: 150px">
+                        @endif
                         <h4>{{$drawing_image_latest_version['title']}}</h4>
                     </a>
                 </div>

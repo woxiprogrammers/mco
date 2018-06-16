@@ -166,7 +166,10 @@ class ImagesController extends Controller
                     $files = $request->work_order_images;
                     $workOrderImagesData['project_site_id'] = $siteId;
                     $workOrderImagesData['drawing_category_id'] = $request->drawing_category_id;
-                    $drawing_categories_site_relation_id = DrawingCategorySiteRelation::insertGetId($workOrderImagesData);
+                    $drawing_categories_site_relation_id = DrawingCategorySiteRelation::where($workOrderImagesData)->pluck('id')->first();
+                    if($drawing_categories_site_relation_id == null){
+                        $drawing_categories_site_relation_id = DrawingCategorySiteRelation::insertGetId($workOrderImagesData);
+                    }
                     foreach($files as $image){
                         $imageName = urldecode(basename($image['image_name']));
                         $newTempImageUploadPath = $tempImageUploadPath.'/'.$imageName;
@@ -391,7 +394,7 @@ class ImagesController extends Controller
                     'image_path' => $imagePath
                 ];
             }
-            return view('partials.dpr.image-version-listing')->with(compact('imageVersionData'));
+            return view('partials.drawing.image-version-listing')->with(compact('imageVersionData'));
         }catch (\Exception $e){
             $data = [
                 'action' => 'Get drawing image versions',
