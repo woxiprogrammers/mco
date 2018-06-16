@@ -25,6 +25,16 @@
                         <div class="page-content">
                             @include('partials.common.messages')
                             <div class="container">
+                                <ul class="page-breadcrumb breadcrumb">
+                                    <li>
+                                        <a href="/drawing/images/manage-drawings">Manage Drawings</a>
+                                        <i class="fa fa-circle"></i>
+                                    </li>
+                                    <li>
+                                        <a href="javascript:void(0);">Image Details</a>
+                                        <i class="fa fa-circle"></i>
+                                    </li>
+                                </ul>
                                 <div class="row">
                                     <div class="col-md-12">
                                         <!-- BEGIN EXAMPLE TABLE PORTLET-->
@@ -32,13 +42,29 @@
                                             {!! csrf_field() !!}
                                             <div class="portlet-body">
                                             <div class="card">
+                                                <div class="form-group " style="float: left; margin-top:1%">
+                                                    <a class="btn btn-set red" href="/drawing/images/manage-drawings">
+                                                        <i class="fa fa-plus-circle"></i>
+                                                        Back
+                                                    </a>
+                                                </div>
                                                 <div class="form-group " style="float: right;margin-top:1%">
                                                     <button id="addCommentBtnId" class="btn btn-set red pull-right">
                                                         <i class="fa fa-plus-circle"></i>
                                                         Add Comment
                                                     </button>
                                                 </div>
-                                                <img src="{{$image_src}}" height="400px" width="100%">
+                                                @if(pathinfo($image_src, PATHINFO_EXTENSION) == 'dwg' || pathinfo($image_src, PATHINFO_EXTENSION) == 'DWG')
+                                                    <div class="row">
+                                                        <div class="col-md-4 col-md-offset-3">
+                                                            <a href="{{$image_src}}">
+                                                                <img src="/assets/global/img/dwg_thumbnail.jpg" height="150px" width="50%" style="margin-top: 20%;margin-left: 20%;">
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                @else
+                                                    <img src="{{$image_src}}" height="400px" width="100%">
+                                                @endif
                                             </div>
                                                 <br>
                                                 <input type="hidden" id="image_id" value="{{$id}}">
@@ -129,7 +155,6 @@
                         success: function(data,textStatus,xhr){
                             var option = '';
                             $.each(data, function( index, value ) {
-                                console.log(value);
                                 option += '<a href="/drawing/images/get-details/'+value.id +'"><li class="list-group-item"> Version '+ (parseInt(index)+1) +'</li></a>';
                             });
                             $('#versinListingId').html(option);
