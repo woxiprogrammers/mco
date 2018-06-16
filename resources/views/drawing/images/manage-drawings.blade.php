@@ -33,11 +33,7 @@
                             <div class="container">
                                 <ul class="page-breadcrumb breadcrumb">
                                     <li>
-                                        <a href="/drawing/images/manage">Manage Image</a>
-                                        <i class="fa fa-circle"></i>
-                                    </li>
-                                    <li>
-                                        <a href="javascript:void(0);">Add Image</a>
+                                        <a href="javascript:void(0);">Manage Image</a>
                                         <i class="fa fa-circle"></i>
                                     </li>
                                 </ul>
