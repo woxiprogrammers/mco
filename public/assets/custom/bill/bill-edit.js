@@ -252,8 +252,10 @@ function calculateQuantityAmount(current_quantity,id){
     }
     var cumulative_quantity = parseFloat($('#previous_quantity_'+id).text()) + parseFloat(current_quantity);
     var current_bill_amount = parseFloat(current_quantity) * parseFloat($('#rate_per_unit_'+id).text());
-    $('#cumulative_quantity_'+id).text(customRound(cumulative_quantity));
-    $('#current_bill_amount_'+id).text(customRound(current_bill_amount));
+    /*$('#cumulative_quantity_'+id).text(customRound(cumulative_quantity));
+    $('#current_bill_amount_'+id).text(customRound(current_bill_amount));*/
+    $('#cumulative_quantity_'+id).text((cumulative_quantity));
+    $('#current_bill_amount_'+id).text((current_bill_amount));
     getTotals();
 }
 
@@ -280,8 +282,10 @@ function getTotals(){
     }
 
     var total_current_bill_amount = total_extra_item_rate + total_product_current_bill_amount;
-    $('#sub_total_current_bill_amount').text(customRound(total_current_bill_amount));
-    $('#rounded_off_current_bill_sub_total').text(customRound(total_current_bill_amount));
+    /*$('#sub_total_current_bill_amount').text(customRound(total_current_bill_amount));
+    $('#rounded_off_current_bill_sub_total').text(customRound(total_current_bill_amount));*/
+    $('#sub_total_current_bill_amount').text((total_current_bill_amount));
+    $('#rounded_off_current_bill_sub_total').text((total_current_bill_amount));
     calculateDiscount();
 }
 
@@ -290,10 +294,13 @@ function calculateTax(){
     var final_total_current_bill = total_rounded_current_bill;
     $(".tax").each(function(){
         var tax_amount_current_bill = total_rounded_current_bill * ($(this).val() / 100);
-        final_total_current_bill = final_total_current_bill + customRound(tax_amount_current_bill);
-        $(this).parent().next().find('span').text(customRound(tax_amount_current_bill));
+        /*final_total_current_bill = final_total_current_bill + customRound(tax_amount_current_bill);
+        $(this).parent().next().find('span').text(customRound(tax_amount_current_bill));*/
+        final_total_current_bill = final_total_current_bill + (tax_amount_current_bill);
+        $(this).parent().next().find('span').text((tax_amount_current_bill));
     });
-    $("#final_current_bill_total").text(customRound(final_total_current_bill));
+    $("#final_current_bill_total").text((final_total_current_bill));
+    //$("#final_current_bill_total").text(customRound(final_total_current_bill));
     calculateSpecialTax();
 }
 
@@ -315,7 +322,8 @@ function calculateSpecialTax(){
                     taxAmount = taxAmount + ( taxOnAmount * (taxPercentage / 100));
 
                 });
-                $("#tax_current_bill_amount_"+specialTaxId).text(customRound(taxAmount));
+                $("#tax_current_bill_amount_"+specialTaxId).text((taxAmount));
+                //$("#tax_current_bill_amount_"+specialTaxId).text(customRound(taxAmount));
             }else{
                 $("#tax_current_bill_amount_"+specialTaxId).text(0);
             }
@@ -324,10 +332,12 @@ function calculateSpecialTax(){
         $(".special-tax-amount").each(function(){
             grossTotal = grossTotal + parseFloat($(this).text());
         });
-        $("#grand_current_bill_total").text((grossTotal).toFixed());
+        $("#grand_current_bill_total").text((grossTotal));
+        //$("#grand_current_bill_total").text((grossTotal).toFixed());
     }else{
         var grossTotal = parseFloat($("#final_current_bill_total").text());
-        $("#grand_current_bill_total").text((grossTotal).toFixed());
+        $("#grand_current_bill_total").text((grossTotal));
+        //$("#grand_current_bill_total").text((grossTotal).toFixed());
     }
 }
 

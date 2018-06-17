@@ -53,9 +53,11 @@ trait BillTrait{
                         $quotationProducts[$i]['category_name'] = Category::where('id',$quotationProducts[$i]['product_detail']['category_id'])->pluck('name')->first();
                         $quotationProducts[$i]['unit'] = Unit::where('id',$quotationProducts[$i]['product_detail']['unit_id'])->pluck('name')->first();
                         if($quotation['discount'] != 0){
-                            $quotationProducts[$i]['rate'] = MaterialProductHelper::customRound(($quotationProducts[$i]['rate_per_unit'] - ($quotationProducts[$i]['rate_per_unit'] * ($quotation['discount'] / 100))),3);
+                            //$quotationProducts[$i]['rate'] = MaterialProductHelper::customRound(($quotationProducts[$i]['rate_per_unit'] - ($quotationProducts[$i]['rate_per_unit'] * ($quotation['discount'] / 100))),3);
+                            $quotationProducts[$i]['rate'] = ($quotationProducts[$i]['rate_per_unit'] - ($quotationProducts[$i]['rate_per_unit'] * ($quotation['discount'] / 100)));
                         }else{
                             $quotationProducts[$i]['rate'] = MaterialProductHelper::customRound(($quotationProducts[$i]['rate_per_unit']),3);
+                            $quotationProducts[$i]['rate'] = ($quotationProducts[$i]['rate_per_unit']);
                         }
                         $bill_products = BillQuotationProducts::where('bill_id',$bills[$j]['id'])->where('quotation_product_id',$quotationProducts[$i]['id'])->get()->toArray();
                         for($k = 0 ; $k < count($bill_products) ; $k++ ){
@@ -75,9 +77,11 @@ trait BillTrait{
                     $quotationProducts[$i]['unit'] = Unit::where('id',$quotationProducts[$i]['product_detail']['unit_id'])->pluck('name')->first();
                     $quotationProducts[$i]['previous_quantity'] = 0;
                     if($quotation['discount'] != 0){
-                        $quotationProducts[$i]['rate'] = MaterialProductHelper::customRound(($quotationProducts[$i]['rate_per_unit'] - ($quotationProducts[$i]['rate_per_unit'] * ($quotation['discount'] / 100))),3);
+                        //$quotationProducts[$i]['rate'] = MaterialProductHelper::customRound(($quotationProducts[$i]['rate_per_unit'] - ($quotationProducts[$i]['rate_per_unit'] * ($quotation['discount'] / 100))),3);
+                        $quotationProducts[$i]['rate'] = ($quotationProducts[$i]['rate_per_unit'] - ($quotationProducts[$i]['rate_per_unit'] * ($quotation['discount'] / 100)));
                     }else{
-                        $quotationProducts[$i]['rate'] = MaterialProductHelper::customRound(($quotationProducts[$i]['rate_per_unit']),3);
+                        //$quotationProducts[$i]['rate'] = MaterialProductHelper::customRound(($quotationProducts[$i]['rate_per_unit']),3);
+                        $quotationProducts[$i]['rate'] = ($quotationProducts[$i]['rate_per_unit']);
                     }
                 }
             }
@@ -238,7 +242,8 @@ trait BillTrait{
                 $listingData[$iterator]['bill_no_format'] = "B-".strtoupper(date('M',strtotime($bill['created_at'])))."-".$bill->id."/".date('y',strtotime($bill['created_at']));
                 $total_amount = 0;
                 foreach($bill->bill_quotation_product as $key1 => $product){
-                    $rate = MaterialProductHelper::customRound(($product->quotation_products->rate_per_unit - ($product->quotation_products->rate_per_unit * ($product->quotation_products->quotation->discount / 100))),3);
+                    //$rate = MaterialProductHelper::customRound(($product->quotation_products->rate_per_unit - ($product->quotation_products->rate_per_unit * ($product->quotation_products->quotation->discount / 100))),3);
+                    $rate = ($product->quotation_products->rate_per_unit - ($product->quotation_products->rate_per_unit * ($product->quotation_products->quotation->discount / 100)));
                     $total_amount = $total_amount + ($product->quantity * $rate) ;
                 }
                 if(count($bill->bill_quotation_extraItems) > 0){
@@ -278,7 +283,8 @@ trait BillTrait{
                     }else{
                         $listingData[$iterator]['tax'][$tax['tax_id']] = 0;
                     }
-                    $listingData[$iterator]['final_total'] = MaterialProductHelper::customRound($listingData[$iterator]['final_total'] + $listingData[$iterator]['tax'][$tax['tax_id']]);
+                    //$listingData[$iterator]['final_total'] = MaterialProductHelper::customRound($listingData[$iterator]['final_total'] + $listingData[$iterator]['tax'][$tax['tax_id']]);
+                    $listingData[$iterator]['final_total'] = $listingData[$iterator]['final_total'] + $listingData[$iterator]['tax'][$tax['tax_id']];
                     $i++;
                 }
                 $thisBillSpecialTax = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
@@ -326,7 +332,8 @@ trait BillTrait{
                     }
 
                     $listingData[$iterator]['tax'][$tax['tax_id']] = $taxAmount;
-                    $listingData[$iterator]['final_total'] = MaterialProductHelper::customRound($listingData[$iterator]['final_total'] + $listingData[$iterator]['tax'][$tax['tax_id']]);
+                    //$listingData[$iterator]['final_total'] = MaterialProductHelper::customRound($listingData[$iterator]['final_total'] + $listingData[$iterator]['tax'][$tax['tax_id']]);
+                    $listingData[$iterator]['final_total'] = $listingData[$iterator]['final_total'] + $listingData[$iterator]['tax'][$tax['tax_id']];
                 }
                 $listingData[$iterator]['paid_amount'] = BillTransaction::where('bill_id',$bill->id)->sum('total');
                 $listingData[$iterator]['balance_amount'] = $listingData[$iterator]['final_total'] - $listingData[$iterator]['paid_amount'];
@@ -518,8 +525,10 @@ trait BillTrait{
                 $quotation_id = Bill::where('id',$billQuotationProducts[$iterator]['bill_id'])->pluck('quotation_id')->first();
                 $discount = Quotation::where('id',$quotation_id)->pluck('discount')->first();
                 $rate_per_unit = QuotationProduct::where('id',$billQuotationProducts[$iterator]['quotation_product_id'])->pluck('rate_per_unit')->first();
-                $billQuotationProducts[$iterator]['rate'] = MaterialProductHelper::customRound(($rate_per_unit - ($rate_per_unit * ($discount / 100))),3);
-                $billQuotationProducts[$iterator]['current_bill_subtotal'] = MaterialProductHelper::customRound(($billQuotationProducts[$iterator]['quantity'] * $billQuotationProducts[$iterator]['rate']),3);
+                $billQuotationProducts[$iterator]['rate'] = ($rate_per_unit - ($rate_per_unit * ($discount / 100)));
+                //$billQuotationProducts[$iterator]['rate'] = MaterialProductHelper::customRound(($rate_per_unit - ($rate_per_unit * ($discount / 100))),3);
+                $billQuotationProducts[$iterator]['current_bill_subtotal'] = ($billQuotationProducts[$iterator]['quantity'] * $billQuotationProducts[$iterator]['rate']);
+                //$billQuotationProducts[$iterator]['current_bill_subtotal'] = MaterialProductHelper::customRound(($billQuotationProducts[$iterator]['quantity'] * $billQuotationProducts[$iterator]['rate']),3);
                 $billWithoutCancelStatus = Bill::where('id','<',$bill['id'])->where('bill_status_id','!=',$cancelBillStatusId)->pluck('id')->toArray();
                 $previousBills = BillQuotationProducts::whereIn('bill_id',$billWithoutCancelStatus)->get();
                 foreach($previousBills as $key => $previousBill){
@@ -527,8 +536,10 @@ trait BillTrait{
                         $billQuotationProducts[$iterator]['previous_quantity'] = $billQuotationProducts[$iterator]['previous_quantity'] +  $previousBill['quantity'];
                     }
                 }
-                $billQuotationProducts[$iterator]['cumulative_quantity'] = MaterialProductHelper::customRound(($billQuotationProducts[$iterator]['quantity'] + $billQuotationProducts[$iterator]['previous_quantity']),3);
-                $total['current_bill_subtotal'] = MaterialProductHelper::customRound(($total['current_bill_subtotal'] + $billQuotationProducts[$iterator]['current_bill_subtotal']),3);
+                $billQuotationProducts[$iterator]['cumulative_quantity'] = ($billQuotationProducts[$iterator]['quantity'] + $billQuotationProducts[$iterator]['previous_quantity']);
+                //$billQuotationProducts[$iterator]['cumulative_quantity'] = MaterialProductHelper::customRound(($billQuotationProducts[$iterator]['quantity'] + $billQuotationProducts[$iterator]['previous_quantity']),3);
+                $total['current_bill_subtotal'] = ($total['current_bill_subtotal'] + $billQuotationProducts[$iterator]['current_bill_subtotal']);
+                //$total['current_bill_subtotal'] = MaterialProductHelper::customRound(($total['current_bill_subtotal'] + $billQuotationProducts[$iterator]['current_bill_subtotal']),3);
             }
             $extraItems = BillQuotationExtraItem::where('bill_id',$bill->id)->get();
             if(count($extraItems) > 0){
@@ -537,10 +548,13 @@ trait BillTrait{
                     $extraItem['previous_rate'] = BillQuotationExtraItem::whereIn('bill_id',array_column($bills,'id'))->where('bill_id','!=',$bill->id)->where('quotation_extra_item_id',$extraItem->quotation_extra_item_id)->sum('rate');
                     $total_extra_item = $total_extra_item + $extraItem['rate'];
                 }
-                $total['current_bill_subtotal'] = MaterialProductHelper::customRound(($total['current_bill_subtotal'] + $total_extra_item),3);
+                //$total['current_bill_subtotal'] = MaterialProductHelper::customRound(($total['current_bill_subtotal'] + $total_extra_item),3);
+                $total['current_bill_subtotal'] = ($total['current_bill_subtotal'] + $total_extra_item);
             }
-            $total_rounded['current_bill_subtotal'] = MaterialProductHelper::customRound($total['current_bill_subtotal']);
-            $final['current_bill_amount'] = $total_rounded['current_bill_amount'] =$total['current_bill_amount'] = MaterialProductHelper::customRound(($total['current_bill_subtotal'] - $bill['discount_amount']),3);
+            $total_rounded['current_bill_subtotal'] = ($total['current_bill_subtotal']);
+            //$total_rounded['current_bill_subtotal'] = MaterialProductHelper::customRound($total['current_bill_subtotal']);
+            //$final['current_bill_amount'] = $total_rounded['current_bill_amount'] =$total['current_bill_amount'] = MaterialProductHelper::customRound(($total['current_bill_subtotal'] - $bill['discount_amount']),3);
+            $final['current_bill_amount'] = $total_rounded['current_bill_amount'] = $total['current_bill_amount'] = ($total['current_bill_subtotal'] - $bill['discount_amount']);
             $billTaxes = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
                             ->where('bill_taxes.bill_id','=',$bill['id'])
                             ->where('taxes.is_special','=', false)
@@ -552,8 +566,10 @@ trait BillTrait{
             }
             for($j = 0 ; $j < count($billTaxes) ; $j++){
                 $taxes[$billTaxes[$j]['tax_id']] = $billTaxes[$j];
-                $taxes[$billTaxes[$j]['tax_id']]['current_bill_amount'] = MaterialProductHelper::customRound($total['current_bill_amount'] * ($taxes[$billTaxes[$j]['tax_id']]['percentage'] / 100) , 3);
-                $final['current_bill_amount'] = MaterialProductHelper::customRound(($final['current_bill_amount'] + $taxes[$billTaxes[$j]['tax_id']]['current_bill_amount']),3);
+                $taxes[$billTaxes[$j]['tax_id']]['current_bill_amount'] = $total['current_bill_amount'] * ($taxes[$billTaxes[$j]['tax_id']]['percentage'] / 100);
+                //$taxes[$billTaxes[$j]['tax_id']]['current_bill_amount'] = MaterialProductHelper::customRound($total['current_bill_amount'] * ($taxes[$billTaxes[$j]['tax_id']]['percentage'] / 100) , 3);
+                $final['current_bill_amount'] = ($final['current_bill_amount'] + $taxes[$billTaxes[$j]['tax_id']]['current_bill_amount']);
+                //$final['current_bill_amount'] = MaterialProductHelper::customRound(($final['current_bill_amount'] + $taxes[$billTaxes[$j]['tax_id']]['current_bill_amount']),3);
             }
             $specialTaxes= BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
                 ->where('bill_taxes.bill_id','=',$bill['id'])
@@ -576,7 +592,8 @@ trait BillTrait{
                             $specialTaxAmount = $specialTaxAmount + ($taxes[$appliedOnTaxId]['current_bill_amount'] * ($specialTaxes[$j]['percentage'] / 100));
                         }
                     }
-                    $specialTaxes[$j]['current_bill_amount'] = MaterialProductHelper::customRound($specialTaxAmount , 3);
+                    $specialTaxes[$j]['current_bill_amount'] = $specialTaxAmount;
+                    //$specialTaxes[$j]['current_bill_amount'] = MaterialProductHelper::customRound($specialTaxAmount , 3);
                     $final['current_bill_gross_total_amount'] = round(($final['current_bill_amount'] + $specialTaxAmount));
                 }
             }else{
@@ -828,9 +845,12 @@ trait BillTrait{
                     $invoiceData[$i]['description'] = $billQuotationProduct->product_description->description;
                     $invoiceData[$i]['quantity'] = (($billQuotationProduct->quantity));
                     $invoiceData[$i]['unit'] = $billQuotationProduct->quotation_products->product->unit->name;
-                    $invoiceData[$i]['rate'] = MaterialProductHelper::customRound(($billQuotationProduct->quotation_products->rate_per_unit - ($billQuotationProduct->quotation_products->rate_per_unit * ($billQuotationProduct->quotation_products->quotation->discount / 100))),3);
+                    /*$invoiceData[$i]['rate'] = MaterialProductHelper::customRound(($billQuotationProduct->quotation_products->rate_per_unit - ($billQuotationProduct->quotation_products->rate_per_unit * ($billQuotationProduct->quotation_products->quotation->discount / 100))),3);
                     $invoiceData[$i]['amount'] = MaterialProductHelper::customRound(($invoiceData[$i]['quantity'] * $invoiceData[$i]['rate']), 3);
-                    $data['productSubTotal'] = MaterialProductHelper::customRound(($data['productSubTotal'] + $invoiceData[$i]['amount']),3);
+                    $data['productSubTotal'] = MaterialProductHelper::customRound(($data['productSubTotal'] + $invoiceData[$i]['amount']),3);*/
+                    $invoiceData[$i]['rate'] = ($billQuotationProduct->quotation_products->rate_per_unit - ($billQuotationProduct->quotation_products->rate_per_unit * ($billQuotationProduct->quotation_products->quotation->discount / 100)));
+                    $invoiceData[$i]['amount'] = ($invoiceData[$i]['quantity'] * $invoiceData[$i]['rate']);
+                    $data['productSubTotal'] = ($data['productSubTotal'] + $invoiceData[$i]['amount']);
                 $i++;
             }
             $data['extraItems'] = BillQuotationExtraItem::where('bill_id',$bill->id)->get();
@@ -851,12 +871,14 @@ trait BillTrait{
             foreach($taxes as $key => $tax){
                 $taxData[$j]['name'] = $tax->taxes->name;
                 $taxData[$j]['percentage'] = abs($tax->percentage);
-                $taxData[$j]['tax_amount'] = MaterialProductHelper::customRound($data['subTotal'] * ($tax->percentage / 100) , 3);
+                $taxData[$j]['tax_amount'] = $data['subTotal'] * ($tax->percentage / 100) ;
+            //    $taxData[$j]['tax_amount'] = MaterialProductHelper::customRound($data['subTotal'] * ($tax->percentage / 100) , 3);
                 $data['grossTotal'] = $data['grossTotal'] + $taxData[$j]['tax_amount'];
                 $j++;
             }
             $data['taxData'] = $taxData;
-            $data['grossTotal'] = MaterialProductHelper::customRound($data['grossTotal'] + $data['subTotal']);
+            //$data['grossTotal'] = MaterialProductHelper::customRound($data['grossTotal'] + $data['subTotal']);
+            $data['grossTotal'] = $data['grossTotal'] + $data['subTotal'];
             $data['amountInWords'] = ucwords(NumberHelper::getIndianCurrency($data['grossTotal']));
             $data['invoice_no'] = "B-".strtoupper(date('M',strtotime($bill['created_at'])))."-".$bill->id."/".date('y',strtotime($bill['created_at']));
             $pdf = App::make('dompdf.wrapper');
@@ -896,7 +918,8 @@ trait BillTrait{
             foreach($distinctProducts as $key => $distinctProduct){
                 $invoiceData[$i]['product_name'] = $distinctProduct->quotation_products->product->name;
                 $invoiceData[$i]['unit'] = $distinctProduct->quotation_products->product->unit->name;
-                $invoiceData[$i]['rate'] = MaterialProductHelper::customRound(($distinctProduct->quotation_products->rate_per_unit - ($distinctProduct->quotation_products->rate_per_unit * ($bill->quotation->discount / 100))),3);
+               // $invoiceData[$i]['rate'] = MaterialProductHelper::customRound(($distinctProduct->quotation_products->rate_per_unit - ($distinctProduct->quotation_products->rate_per_unit * ($bill->quotation->discount / 100))),3);
+                $invoiceData[$i]['rate'] = ($distinctProduct->quotation_products->rate_per_unit - ($distinctProduct->quotation_products->rate_per_unit * ($bill->quotation->discount / 100)));
                 $invoiceData[$i]['quotation_product_id'] = $distinctProduct['quotation_product_id'];
                 $invoiceData[$i]['previous_quantity'] = 0;
                 foreach($billProducts as $k => $billProduct){
@@ -911,16 +934,23 @@ trait BillTrait{
                     }
                 }
                 $invoiceData[$i]['cumulative_quantity'] = (($invoiceData[$i]['previous_quantity'] + $invoiceData[$i]['current_quantity']));
-                $invoiceData[$i]['previous_bill_amount'] = MaterialProductHelper::customRound(($invoiceData[$i]['previous_quantity'] * $invoiceData[$i]['rate']),3);
+                /*$invoiceData[$i]['previous_bill_amount'] = MaterialProductHelper::customRound(($invoiceData[$i]['previous_quantity'] * $invoiceData[$i]['rate']),3);
                 $invoiceData[$i]['current_bill_amount'] = MaterialProductHelper::customRound(($invoiceData[$i]['current_quantity'] * $invoiceData[$i]['rate']),3);
-                $invoiceData[$i]['cumulative_bill_amount'] = MaterialProductHelper::customRound(($invoiceData[$i]['cumulative_quantity'] * $invoiceData[$i]['rate']),3);
+                $invoiceData[$i]['cumulative_bill_amount'] = MaterialProductHelper::customRound(($invoiceData[$i]['cumulative_quantity'] * $invoiceData[$i]['rate']),3);*/
+                $invoiceData[$i]['previous_bill_amount'] = ($invoiceData[$i]['previous_quantity'] * $invoiceData[$i]['rate']);
+                $invoiceData[$i]['current_bill_amount'] = ($invoiceData[$i]['current_quantity'] * $invoiceData[$i]['rate']);
+                $invoiceData[$i]['cumulative_bill_amount'] = ($invoiceData[$i]['cumulative_quantity'] * $invoiceData[$i]['rate']);
                 $total['previous_quantity'] = (($total['previous_quantity'] + $invoiceData[$i]['previous_quantity']));
                 $total['current_quantity'] = (($total['current_quantity'] + $invoiceData[$i]['current_quantity']));
                 $total['cumulative_quantity'] = (($total['cumulative_quantity'] + $invoiceData[$i]['cumulative_quantity']));
-                $total['rate'] = MaterialProductHelper::customRound(($total['rate'] + $invoiceData[$i]['rate']),3);
-                $total['product_previous_bill_amount'] = MaterialProductHelper::customRound(($total['product_previous_bill_amount'] + $invoiceData[$i]['previous_bill_amount']),3);
+                //$total['rate'] = MaterialProductHelper::customRound(($total['rate'] + $invoiceData[$i]['rate']),3);
+                $total['rate'] = ($total['rate'] + $invoiceData[$i]['rate']);
+                /*$total['product_previous_bill_amount'] = MaterialProductHelper::customRound(($total['product_previous_bill_amount'] + $invoiceData[$i]['previous_bill_amount']),3);
                 $total['product_current_bill_amount'] = MaterialProductHelper::customRound(($total['product_current_bill_amount'] + $invoiceData[$i]['current_bill_amount']),3);
-                $total['product_cumulative_bill_amount'] = MaterialProductHelper::customRound(($total['product_cumulative_bill_amount']  + $invoiceData[$i]['cumulative_bill_amount']),3);
+                $total['product_cumulative_bill_amount'] = MaterialProductHelper::customRound(($total['product_cumulative_bill_amount']  + $invoiceData[$i]['cumulative_bill_amount']),3);*/
+                $total['product_previous_bill_amount'] = ($total['product_previous_bill_amount'] + $invoiceData[$i]['previous_bill_amount']);
+                $total['product_current_bill_amount'] = ($total['product_current_bill_amount'] + $invoiceData[$i]['current_bill_amount']);
+                $total['product_cumulative_bill_amount'] = ($total['product_cumulative_bill_amount']  + $invoiceData[$i]['cumulative_bill_amount']);
                 $i++;
             }
             $extraItems = BillQuotationExtraItem::whereIn('bill_id',$allBillIds)->get();
@@ -1288,7 +1318,8 @@ trait BillTrait{
                 $currrentProductId = $billQuotationProduct['quotation_product_id'];
                 $productArray[$i]['name'] = $billQuotationProduct->quotation_products->product->name;
                 $productArray[$i]['quotation_product_id'] = $billQuotationProduct->quotation_product_id;
-                $productArray[$i]['discounted_rate'] = MaterialProductHelper::customRound(($billQuotationProduct->quotation_products->rate_per_unit - ($billQuotationProduct->quotation_products->rate_per_unit * ($bill->quotation->discount / 100))),3);
+                $productArray[$i]['discounted_rate'] = ($billQuotationProduct->quotation_products->rate_per_unit - ($billQuotationProduct->quotation_products->rate_per_unit * ($bill->quotation->discount / 100)));
+                //$productArray[$i]['discounted_rate'] = MaterialProductHelper::customRound(($billQuotationProduct->quotation_products->rate_per_unit - ($billQuotationProduct->quotation_products->rate_per_unit * ($bill->quotation->discount / 100))),3);
                 $productArray[$i]['BOQ'] = $billQuotationProduct->quotation_products->quantity;
                 $productArray[$i]['WO_amount'] = $productArray[$i]['discounted_rate'] * $productArray[$i]['BOQ'];
                 $description = BillQuotationProducts::whereIn('bill_id',array_column($data['tillThisBill']->toArray(),'id'))->where('quotation_product_id',$billQuotationProduct->quotation_product_id)->distinct('product_description_id')->select('product_description_id')->get();
@@ -1304,6 +1335,7 @@ trait BillTrait{
                         $currentProductQuantity = BillQuotationProducts::where('bill_id',$thisBill->id)->where('quotation_product_id',$currrentProductId)->where('product_description_id',$description_id->product_description_id)->pluck('quantity')->first();
                         if($currentProductQuantity != null){
                             $productArray[$i]['description'][$description_id->product_description->id]['bills'][$iterator]['quantity'] = $currentProductQuantity;
+                            $productArray[$i]['description'][$description_id->product_description->id]['bills'][$iterator]['amount'] = MaterialProductHelper::customRound(($currentProductQuantity *  $productArray[$i]['discounted_rate']),3);
                             $productArray[$i]['description'][$description_id->product_description->id]['bills'][$iterator]['amount'] = MaterialProductHelper::customRound(($currentProductQuantity *  $productArray[$i]['discounted_rate']),3);
                         }else{
                             $productArray[$i]['description'][$description_id->product_description->id]['bills'][$iterator]['quantity'] = 0;
@@ -1374,7 +1406,8 @@ trait BillTrait{
                     }else{
                         $taxInfo[$taxId['tax_id']]['bills'][$billId]['percentage'] = $isAppliedTax['percentage'];
                     }
-                    $taxInfo[$taxId['tax_id']]['bills'][$billId]['tax_amount'] = MaterialProductHelper::customRound(($subTotal['discounted_total'] * ($taxInfo[$taxId['tax_id']]['bills'][$billId]['percentage']/100)),3);
+                    $taxInfo[$taxId['tax_id']]['bills'][$billId]['tax_amount'] = ($subTotal['discounted_total'] * ($taxInfo[$taxId['tax_id']]['bills'][$billId]['percentage']/100));
+                    //$taxInfo[$taxId['tax_id']]['bills'][$billId]['tax_amount'] = MaterialProductHelper::customRound(($subTotal['discounted_total'] * ($taxInfo[$taxId['tax_id']]['bills'][$billId]['percentage']/100)),3);
                     $taxInfo[$taxId['tax_id']]['total'] += $taxInfo[$taxId['tax_id']]['bills'][$billId]['tax_amount'];
                 }
             }
@@ -1401,9 +1434,11 @@ trait BillTrait{
                         $taxAmount = 0;
                         foreach($specialTaxAppliedID as $appliedOnId){
                             if($appliedOnId == 0){
-                                $taxAmount += MaterialProductHelper::customRound(($subTotal['discounted_total'] * ($taxInfo[$taxId['tax_id']]['bills'][$billId]['percentage']/100)),3);
+                                $taxAmount += ($subTotal['discounted_total'] * ($taxInfo[$taxId['tax_id']]['bills'][$billId]['percentage']/100));
+                                //$taxAmount += MaterialProductHelper::customRound(($subTotal['discounted_total'] * ($taxInfo[$taxId['tax_id']]['bills'][$billId]['percentage']/100)),3);
                             }else{
-                                $taxAmount += MaterialProductHelper::customRound(($taxInfo[$appliedOnId]['bills'][$billId]['tax_amount'] * ($taxInfo[$taxId['tax_id']]['bills'][$billId]['percentage']/100)),3);
+                                $taxAmount += ($taxInfo[$appliedOnId]['bills'][$billId]['tax_amount'] * ($taxInfo[$taxId['tax_id']]['bills'][$billId]['percentage']/100));
+                                //$taxAmount += MaterialProductHelper::customRound(($taxInfo[$appliedOnId]['bills'][$billId]['tax_amount'] * ($taxInfo[$taxId['tax_id']]['bills'][$billId]['percentage']/100)),3);
                             }
                         }
                     }
@@ -1582,10 +1617,12 @@ trait BillTrait{
                 $taxValues[$specialTax['tax_id']] = $taxValue;
             }
             $subtotal = $data['total'] / (1 + (array_sum($taxValues)));
-            $response['subtotal'] = MaterialProductHelper::customRound($subtotal,3);
+            //$response['subtotal'] = MaterialProductHelper::customRound($subtotal,3);
+            $response['subtotal'] = $subtotal;
             foreach($taxValues as $taxId => $value){
                 $response['taxes'][$iterator]['tax_id'] = $taxId;
                 $response['taxes'][$iterator]['tax_amount'] = MaterialProductHelper::customRound(($subtotal * $value),3);
+                $response['taxes'][$iterator]['tax_amount'] = ($subtotal * $value);
                 $iterator++;
             }
             $status = 200;
@@ -1624,8 +1661,10 @@ trait BillTrait{
                 $quotation_id = Bill::where('id',$billQuotationProducts[$iterator]['bill_id'])->pluck('quotation_id')->first();
                 $discount = Quotation::where('id',$quotation_id)->pluck('discount')->first();
                 $rate_per_unit = QuotationProduct::where('id',$billQuotationProducts[$iterator]['quotation_product_id'])->pluck('rate_per_unit')->first();
-                $billQuotationProducts[$iterator]['rate'] = MaterialProductHelper::customRound(($rate_per_unit - ($rate_per_unit * ($discount / 100))),3);
-                $billQuotationProducts[$iterator]['current_bill_subtotal'] = MaterialProductHelper::customRound(($billQuotationProducts[$iterator]['quantity'] * $billQuotationProducts[$iterator]['rate']),3);
+                $billQuotationProducts[$iterator]['rate'] = ($rate_per_unit - ($rate_per_unit * ($discount / 100)));
+                //$billQuotationProducts[$iterator]['rate'] = MaterialProductHelper::customRound(($rate_per_unit - ($rate_per_unit * ($discount / 100))),3);
+                $billQuotationProducts[$iterator]['current_bill_subtotal'] = ($billQuotationProducts[$iterator]['quantity'] * $billQuotationProducts[$iterator]['rate']);
+                //$billQuotationProducts[$iterator]['current_bill_subtotal'] = MaterialProductHelper::customRound(($billQuotationProducts[$iterator]['quantity'] * $billQuotationProducts[$iterator]['rate']),3);
                 $billWithoutCancelStatus = Bill::where('id','<',$bill['id'])->where('bill_status_id','!=',$cancelBillStatusId)->pluck('id')->toArray();
                 $previousBills = BillQuotationProducts::whereIn('bill_id',$billWithoutCancelStatus)->get();
                 foreach($previousBills as $key => $previousBill){
@@ -1633,8 +1672,10 @@ trait BillTrait{
                         $billQuotationProducts[$iterator]['previous_quantity'] = $billQuotationProducts[$iterator]['previous_quantity'] +  $previousBill['quantity'];
                     }
                 }
-                $billQuotationProducts[$iterator]['cumulative_quantity'] = MaterialProductHelper::customRound(($billQuotationProducts[$iterator]['quantity'] + $billQuotationProducts[$iterator]['previous_quantity']),3);
-                $total['current_bill_subtotal'] = MaterialProductHelper::customRound(($total['current_bill_subtotal'] + $billQuotationProducts[$iterator]['current_bill_subtotal']),3);
+                $billQuotationProducts[$iterator]['cumulative_quantity'] = ($billQuotationProducts[$iterator]['quantity'] + $billQuotationProducts[$iterator]['previous_quantity']);
+                //$billQuotationProducts[$iterator]['cumulative_quantity'] = MaterialProductHelper::customRound(($billQuotationProducts[$iterator]['quantity'] + $billQuotationProducts[$iterator]['previous_quantity']),3);
+                //$total['current_bill_subtotal'] = MaterialProductHelper::customRound(($total['current_bill_subtotal'] + $billQuotationProducts[$iterator]['current_bill_subtotal']),3);
+                $total['current_bill_subtotal'] = ($total['current_bill_subtotal'] + $billQuotationProducts[$iterator]['current_bill_subtotal']);
             }
             $extraItems = BillQuotationExtraItem::where('bill_id',$bill->id)->get();
             if(count($extraItems) > 0){
@@ -1643,9 +1684,11 @@ trait BillTrait{
                     $extraItem['previous_rate'] = BillQuotationExtraItem::whereIn('bill_id',array_column($bills,'id'))->where('bill_id','!=',$bill->id)->where('quotation_extra_item_id',$extraItem->quotation_extra_item_id)->sum('rate');
                     $total_extra_item = $total_extra_item + $extraItem['rate'];
                 }
-                $total['current_bill_subtotal'] = MaterialProductHelper::customRound(($total['current_bill_subtotal'] + $total_extra_item),3);
+                //$total['current_bill_subtotal'] = MaterialProductHelper::customRound(($total['current_bill_subtotal'] + $total_extra_item),3);
+                $total['current_bill_subtotal'] = ($total['current_bill_subtotal'] + $total_extra_item);
             }
-            $total_rounded['current_bill_subtotal'] = MaterialProductHelper::customRound($total['current_bill_subtotal']);
+            //$total_rounded['current_bill_subtotal'] = MaterialProductHelper::customRound($total['current_bill_subtotal']);
+            $total_rounded['current_bill_subtotal'] = $total['current_bill_subtotal'];
             $final['current_bill_amount'] = $total_rounded['current_bill_amount'] =$total['current_bill_amount'] = MaterialProductHelper::customRound(($total['current_bill_subtotal'] - $bill['discount_amount']),3);
             $billTaxes = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
                 ->where('bill_taxes.bill_id','=',$bill['id'])
@@ -1658,8 +1701,10 @@ trait BillTrait{
             }
             for($j = 0 ; $j < count($billTaxes) ; $j++){
                 $taxes[$billTaxes[$j]['tax_id']] = $billTaxes[$j];
-                $taxes[$billTaxes[$j]['tax_id']]['current_bill_amount'] = MaterialProductHelper::customRound($total['current_bill_amount'] * ($taxes[$billTaxes[$j]['tax_id']]['percentage'] / 100) , 3);
-                $final['current_bill_amount'] = MaterialProductHelper::customRound(($final['current_bill_amount'] + $taxes[$billTaxes[$j]['tax_id']]['current_bill_amount']),3);
+                //$taxes[$billTaxes[$j]['tax_id']]['current_bill_amount'] = MaterialProductHelper::customRound($total['current_bill_amount'] * ($taxes[$billTaxes[$j]['tax_id']]['percentage'] / 100) , 3);
+                $taxes[$billTaxes[$j]['tax_id']]['current_bill_amount'] = $total['current_bill_amount'] * ($taxes[$billTaxes[$j]['tax_id']]['percentage'] / 100);
+                //$final['current_bill_amount'] = MaterialProductHelper::customRound(($final['current_bill_amount'] + $taxes[$billTaxes[$j]['tax_id']]['current_bill_amount']),3);
+                $final['current_bill_amount'] = ($final['current_bill_amount'] + $taxes[$billTaxes[$j]['tax_id']]['current_bill_amount']);
             }
             $specialTaxes= BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
                 ->where('bill_taxes.bill_id','=',$bill['id'])
@@ -1682,11 +1727,14 @@ trait BillTrait{
                             $specialTaxAmount = $specialTaxAmount + ($taxes[$appliedOnTaxId]['current_bill_amount'] * ($specialTaxes[$j]['percentage'] / 100));
                         }
                     }
-                    $specialTaxes[$j]['current_bill_amount'] = MaterialProductHelper::customRound($specialTaxAmount , 3);
-                    $final['current_bill_gross_total_amount'] = round(($final['current_bill_amount'] + $specialTaxAmount));
+                    //$specialTaxes[$j]['current_bill_amount'] = MaterialProductHelper::customRound($specialTaxAmount , 3);
+                    $specialTaxes[$j]['current_bill_amount'] = $specialTaxAmount;
+                    //$final['current_bill_gross_total_amount'] = round(($final['current_bill_amount'] + $specialTaxAmount));
+                    $final['current_bill_gross_total_amount'] = ($final['current_bill_amount'] + $specialTaxAmount);
                 }
             }else{
-                $final['current_bill_gross_total_amount'] = round($final['current_bill_amount']);
+                $final['current_bill_gross_total_amount'] = $final['current_bill_amount'];
+                $final['current_bill_gross_total_amount'] = $final['current_bill_amount'];
             }
             $totalTransactionAmount = BillTransaction::where('bill_id')->sum('amount');
             if(($totalTransactionAmount + $request->amount) > $final['current_bill_gross_total_amount']){
