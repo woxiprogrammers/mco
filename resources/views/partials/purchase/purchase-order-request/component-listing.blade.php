@@ -5,7 +5,6 @@
  * Time: 2:30 PM
  */
 ?>
-
 @foreach($purchaseRequestComponentData as $purchaseRequestComponent)
     <tr class="component-row" id="componentRow-{{$purchaseRequestComponent['vendor_relation_id']}}">
         <td style="width: 12%"><input type="hidden" name="component_vendor_relations[{{$purchaseRequestComponent['purchase_request_component_id']}}][]" class="component-vendor-relation" value="{{$purchaseRequestComponent['vendor_relation_id']}}"><span> {{$purchaseRequestComponent['vendor_name']}} </span></td>
