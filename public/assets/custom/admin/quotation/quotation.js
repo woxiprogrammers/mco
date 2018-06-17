@@ -42,13 +42,13 @@ $(document).ready(function(){
                 _token: $("input[name='_token']").val(),
                 row_count: rowCount,
                 is_edit: true
-            }
+            };
             var formId = "QuotationEditForm";
         }else{
             var data = {
                 _token: $("input[name='_token']").val(),
                 row_count: rowCount
-            }
+            };
             var formId = "QuotationCreateForm";
         }
         $.ajax({
@@ -180,8 +180,10 @@ $(document).ready(function(){
         var discount = $(this).val();
         $(".product-amount").each(function(){
             var discountAmount = parseFloat($(this).val())*(discount/100);
-            var discountedAmount = customRound(parseFloat($(this).val())-discountAmount);
-            $(this).closest("td").next().find('input[type="text"]').val(Math.round(discountedAmount * 1000) / 1000);
+            //var discountedAmount = customRound(parseFloat($(this).val())-discountAmount);
+            var discountedAmount = parseFloat($(this).val()) - discountAmount;
+            //$(this).closest("td").next().find('input[type="text"]').val(Math.round(discountedAmount * 1000) / 1000);
+            $(this).closest("td").next().find('input[type="text"]').val((discountedAmount * 1000) / 1000);
         });
         calculateProductSubtotal();
     });
@@ -374,7 +376,8 @@ function calculateAmount(row){
     if(isNaN(amount)){
         $("#productAmount"+row).val(0);
     }else{
-        $("#productAmount"+row).val(customRound(amount));
+        //$("#productAmount"+row).val(customRound(amount));
+        $("#productAmount"+row).val((amount));
     }
     calculateSubtotal();
 }
@@ -504,16 +507,19 @@ function calculateProductSubtotal(){
     $(".product-discount-amount").each(function(){
         subtotal = subtotal + parseFloat($(this).val());
     });
-    $("#subtotal").val(customRound(subtotal));
+    //$("#subtotal").val(customRound(subtotal));
+    $("#subtotal").val((subtotal));
 
     var total = subtotal;
     $(".profit-margin-percentage").each(function(){
         var percentage = parseFloat($(this).text());
         var amount = subtotal * (percentage/100);
-        $(this).next().text(customRound(amount));
+        //$(this).next().text(customRound(amount));
+        $(this).next().text((amount));
         total = total + amount;
     });
-    $("#total").text(customRound(total));
+    //$("#total").text(customRound(total));
+    $("#total").text(total);
 }
 
 function calculateSubtotal(){
@@ -524,9 +530,10 @@ function calculateSubtotal(){
     }else{
         var subtotal = 0;
         $(".product-amount").each(function(){
-            subtotal = subtotal+parseFloat($(this).val());
+            subtotal = subtotal + parseFloat($(this).val());
         });
-        $("#subtotal").val(customRound(subtotal));
+        //$("#subtotal").val(customRound(subtotal));
+        $("#subtotal").val(subtotal);
     }
 }
 
@@ -535,15 +542,19 @@ function calucalateProductViewTotal(){
     $(".material_amount").each(function(){
         subtotal = subtotal + parseFloat($(this).val());
     });
-    $("#productViewSubtotal").text((subtotal).toFixed(3));
+    //$("#productViewSubtotal").text((subtotal).toFixed(3));
+    $("#productViewSubtotal").text((subtotal));
     var total = subtotal;
     $(".profit-margin").each(function(){
-        var profitMarginAmount = (subtotal * ($(this).val() / 100)).toFixed(3);
+        //var profitMarginAmount = (subtotal * ($(this).val() / 100)).toFixed(3);
+        var profitMarginAmount = (subtotal * ($(this).val() / 100));
         total = total + parseFloat(profitMarginAmount);
         $(this).parent().next().text((profitMarginAmount));
     });
-    $("#productViewTotal").text(customRound(total));
-    $("#roundproductViewTotal,#roundQuotationProductViewTotal").text(customRound(total));
+    //$("#productViewTotal").text(customRound(total));
+    $("#productViewTotal").text(total);
+    //$("#roundproductViewTotal,#roundQuotationProductViewTotal").text(customRound(total));
+    $("#roundproductViewTotal,#roundQuotationProductViewTotal").text(total.toFixed(2));
 }
 
 function convertUnit(materialId,fromUnit){
@@ -563,10 +574,12 @@ function convertUnit(materialId,fromUnit){
         data: data,
         success: function(data,textStatus,xhr){
             if(xhr.status == 200){
-                $("#materialRate"+materialId).val(customRound(data.rate));
+                //$("#materialRate"+materialId).val(customRound(data.rate));
+                $("#materialRate"+materialId).val((data.rate));
             }else{
                 $("#materialUnit"+materialId+" option[value='"+data.unit+"']").prop('selected', true);
-                $("#materialRate"+materialId).val(customRound(data.rate));
+               // $("#materialRate"+materialId).val(customRound(data.rate));
+                $("#materialRate"+materialId).val((data.rate));
             }
         },
         error: function(data, textStatus, xhr){

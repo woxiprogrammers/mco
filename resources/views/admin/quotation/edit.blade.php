@@ -204,9 +204,12 @@
                                                                             </tr>
                                                                             @for($iterator=0; $iterator < count($quotation->quotation_products); $iterator++)
                                                                                 @php
-                                                                                    $rate = \App\Helper\MaterialProductHelper::customRound($quotation->quotation_products[$iterator]->rate_per_unit);
+                                                                                    /*$rate = \App\Helper\MaterialProductHelper::customRound($quotation->quotation_products[$iterator]->rate_per_unit);
                                                                                     $amount = \App\Helper\MaterialProductHelper::customRound($rate * $quotation->quotation_products[$iterator]->quantity);
-                                                                                    $discountedAmount = \App\Helper\MaterialProductHelper::customRound($amount - ($amount*($quotation->discount/100)));
+                                                                                    $discountedAmount = \App\Helper\MaterialProductHelper::customRound($amount - ($amount*($quotation->discount/100)));*/
+                                                                                    $rate = $quotation->quotation_products[$iterator]->rate_per_unit;
+                                                                                    $amount = $rate * $quotation->quotation_products[$iterator]->quantity;
+                                                                                    $discountedAmount = $amount - ($amount*($quotation->discount/100));
                                                                                 @endphp
                                                                                 <tr id="Row{{$iterator}}">
                                                                                     <td>

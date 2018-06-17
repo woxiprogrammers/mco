@@ -563,7 +563,8 @@ trait QuotationTrait{
                     }else{
                         $quotationProfitMargin->update($quotationProfitMarginData);
                     }
-                    $profitMarginAmount = round($profitMarginAmount + ($productAmount * ($percentage / 100)),3);
+                    //$profitMarginAmount = round($profitMarginAmount + ($productAmount * ($percentage / 100)),3);
+                    $profitMarginAmount = $profitMarginAmount + ($productAmount * ($percentage / 100));
                 }
                 if($request->has('clientSuppliedMaterial')){
                     foreach($data['clientSuppliedMaterial'] as $materialId){
@@ -575,13 +576,15 @@ trait QuotationTrait{
                                 ->select('product_material_relation.material_quantity','material_versions.unit_id as unit_id')
                                 ->first();
                             $rate = UnitHelper::unitConversion($data['material_unit'][$materialId],$materialQuantity['unit_id'],$data['material_rate'][$materialId]);
-                            $productAmount = round(($productAmount - ($materialQuantity['material_quantity'] * $rate)),3);
+                            //$productAmount = round(($productAmount - ($materialQuantity['material_quantity'] * $rate)),3);
+                            $productAmount = ($productAmount - ($materialQuantity['material_quantity'] * $rate));
                         }
                     }
                 }
                 $productAmount = round(($productAmount + $profitMarginAmount),3);
                 QuotationProduct::where('id',$quotationProduct->id)->update(['rate_per_unit' => $productAmount]);
-                $response['product_amount'] = MaterialProductHelper::customRound($productAmount);
+                //$response['product_amount'] = MaterialProductHelper::customRound($productAmount);
+                $response['product_amount'] = $productAmount;
             }
             $materialIds = array_keys($data['material_rate']);
             foreach($materialIds as $materialId){
@@ -591,13 +594,15 @@ trait QuotationTrait{
                     $material = Material::findOrFail($materialId);
                     $rateConversion = UnitHelper::unitConversion($data['material_unit'][$materialId],$material['unit_id'],$data['material_rate'][$materialId]);
                     if(!is_array($rateConversion)){
-                        $quotationMaterialData['rate_per_unit'] = MaterialProductHelper::customRound($rateConversion);
+                        //$quotationMaterialData['rate_per_unit'] = MaterialProductHelper::customRound($rateConversion);
+                        $quotationMaterialData['rate_per_unit'] = $rateConversion;
                         $quotationMaterialData['unit_id'] = $material['unit_id'];
                     }else{
                         // If conversion is array
                     }
                 }else{
-                    $quotationMaterialData['rate_per_unit'] = MaterialProductHelper::customRound($data['material_rate'][$materialId]);
+//                    $quotationMaterialData['rate_per_unit'] = MaterialProductHelper::customRound($data['material_rate'][$materialId]);
+                    $quotationMaterialData['rate_per_unit'] = $data['material_rate'][$materialId];
                     $quotationMaterialData['unit_id'] = $data['material_unit'][$materialId];
                 }
                 if($request->has('clientSuppliedMaterial') && is_array($data['clientSuppliedMaterial']) && in_array($materialId,$data['clientSuppliedMaterial'])){
@@ -735,7 +740,8 @@ trait QuotationTrait{
             }
             $taxAmount = 0;
             foreach($taxes as $tax){
-                $taxAmount = $taxAmount + MaterialProductHelper::customRound(($orderValue * ($tax['base_percentage'] / 100)));
+                //$taxAmount = $taxAmount + MaterialProductHelper::customRound(($orderValue * ($tax['base_percentage'] / 100)));
+                $taxAmount = $taxAmount + round(($orderValue * ($tax['base_percentage'] / 100)),2);
             }
             $beforeTaxOrderValue = $orderValue;
             $orderValue = $orderValue + $taxAmount;
@@ -938,7 +944,8 @@ trait QuotationTrait{
                         }
                     }
                 }
-                $response['amount'][$productId] = MaterialProductHelper::customRound($productAmount);
+                //$response['amount'][$productId] = MaterialProductHelper::customRound($productAmount);
+                $response['amount'][$productId] = $productAmount;
             }
         }catch(\Exception $e){
             $data = [
@@ -1045,7 +1052,8 @@ trait QuotationTrait{
                             }
                         }
                     }
-                    $productAmount = round(($productAmount + ($rateConversion * $material['material_quantity'])),3);
+                    //$productAmount = round(($productAmount + ($rateConversion * $material['material_quantity'])),3);
+                    $productAmount = ($productAmount + ($rateConversion * $material['material_quantity']));
                 }
                 $quotationProductData['rate_per_unit'] = $productAmount;
                 $quotationProductData['quantity'] = $data['product_quantity'][$productId];
@@ -1073,9 +1081,11 @@ trait QuotationTrait{
                     }else{
                         $quotationProfitMargin->update($quotationProfitMarginData);
                     }
-                    $profitMarginAmount = round(($profitMarginAmount + ($productAmount * ($percentage / 100))),3);
+                    //$profitMarginAmount = round(($profitMarginAmount + ($productAmount * ($percentage / 100))),3);
+                    $profitMarginAmount = (($profitMarginAmount + ($productAmount * ($percentage / 100))));
                 }
-                $productAmount = round(($productAmount + $profitMarginAmount),3);
+                //$productAmount = round(($productAmount + $profitMarginAmount),3);
+                $productAmount = ($productAmount + $profitMarginAmount);
                 if($request->has('material_rate') && $request->has('material_unit')){
                     $materialIds = array_keys($data['material_rate']);
                     $quotationMaterialIds = QuotationMaterial::where('quotation_id',$quotation['id'])->pluck('material_id')->toArray();
@@ -1113,7 +1123,8 @@ trait QuotationTrait{
                                     ->select('product_material_relation.material_quantity','material_versions.unit_id as unit_id')
                                     ->first();
                                 $rate = UnitHelper::unitConversion($data['material_unit'][$materialId],$materialQuantity['unit_id'],$data['material_rate'][$materialId]);
-                                $productAmount = round(($productAmount - ($materialQuantity['material_quantity'] * $rate)),3);
+                                //$productAmount = round(($productAmount - ($materialQuantity['material_quantity'] * $rate)),3);
+                                $productAmount = ($productAmount - ($materialQuantity['material_quantity'] * $rate));
                             }
                         }
                     }
@@ -1128,11 +1139,13 @@ trait QuotationTrait{
                                 ->select('product_material_relation.material_quantity','material_versions.unit_id as unit_id')
                                 ->first();
                             $rate = UnitHelper::unitConversion($material['unit_id'],$materialQuantity['unit_id'],$material['rate_per_unit']);
-                            $productAmount = round(($productAmount - ($materialQuantity['material_quantity'] * $rate)),3);
+                            //$productAmount = round(($productAmount - ($materialQuantity['material_quantity'] * $rate)),3);
+                            $productAmount = $productAmount - ($materialQuantity['material_quantity'] * $rate);
                         }
                     }
                 }
-                QuotationProduct::where('id',$quotationProduct->id)->update(['rate_per_unit' => MaterialProductHelper::customRound($productAmount)]);
+                //QuotationProduct::where('id',$quotationProduct->id)->update(['rate_per_unit' => MaterialProductHelper::customRound($productAmount)]);
+                QuotationProduct::where('id',$quotationProduct->id)->update(['rate_per_unit' => $productAmount]);
             }
             $request->session()->flash('success','Quotation Edited Successfully');
             return redirect('/quotation/edit/'.$quotation->id);
@@ -1163,8 +1176,10 @@ trait QuotationTrait{
                 $quotationProductData[$iterator]['category_name'] = $quotationProducts->product->category->name;
                 $quotationProductData[$iterator]['quantity'] = $quotationProducts->quantity;
                 $quotationProductData[$iterator]['unit'] = $quotationProducts->product->unit->name;
-                $quotationProductData[$iterator]['rate'] = MaterialProductHelper::customRound($quotationProducts->rate_per_unit);
-                $quotationProductData[$iterator]['amount'] = MaterialProductHelper::customRound(($quotationProductData[$iterator]['rate'] * $quotationProductData[$iterator]['quantity']));
+                $quotationProductData[$iterator]['rate'] = $quotationProducts->rate_per_unit;
+                //$quotationProductData[$iterator]['rate'] = MaterialProductHelper::customRound($quotationProducts->rate_per_unit);
+                //$quotationProductData[$iterator]['amount'] = MaterialProductHelper::customRound(($quotationProductData[$iterator]['rate'] * $quotationProductData[$iterator]['quantity']));
+                $quotationProductData[$iterator]['amount'] = $quotationProductData[$iterator]['rate'] * $quotationProductData[$iterator]['quantity'];
                 $total = $total + $quotationProductData[$iterator]['amount'];
                 $iterator++;
             }
@@ -1195,7 +1210,8 @@ trait QuotationTrait{
                     $taxData[$i]['id'] = $tax->id;
                     $taxData[$i]['name'] = $tax->tax->name;
                     $taxData[$i]['percentage'] = abs($tax->percentage);
-                    $taxData[$i]['tax_amount'] = MaterialProductHelper::customRound($discountedSubTotal * ($tax->percentage / 100));
+                    //$taxData[$i]['tax_amount'] = MaterialProductHelper::customRound($discountedSubTotal * ($tax->percentage / 100));
+                    $taxData[$i]['tax_amount'] = round($discountedSubTotal * ($tax->percentage / 100),3);
                     $rounded_amount = $rounded_amount + $taxData[$i]['tax_amount'];
                     $i++;
                 }
@@ -1361,7 +1377,8 @@ trait QuotationTrait{
                 $summary_amount = 0;
                 foreach($quotationProducts as $j => $quotationProduct){
                     if($quotationProduct->summary_id == $summary['summary_id']){
-                        $discounted_price_per_product = MaterialProductHelper::customRound(($quotationProduct->rate_per_unit - ($quotationProduct->rate_per_unit * ($quotationProduct->quotation->discount / 100))));
+                        //$discounted_price_per_product = MaterialProductHelper::customRound(($quotationProduct->rate_per_unit - ($quotationProduct->rate_per_unit * ($quotationProduct->quotation->discount / 100))));
+                        $discounted_price_per_product = round(($quotationProduct->rate_per_unit - ($quotationProduct->rate_per_unit * ($quotationProduct->quotation->discount / 100))),2);
                         $discounted_price = $quotationProduct->quantity * $discounted_price_per_product;
                         $summary_amount = $summary_amount + $discounted_price;
                     }
@@ -1369,7 +1386,8 @@ trait QuotationTrait{
                 $data['quotation'] = $quotation;
                 $summaryData[$i]['description'] = $summary->summary->name;
                 if(!empty($quotation['built_up_area'])){
-                    $summaryData[$i]['rate_per_sft'] = MaterialProductHelper::customRound(($summary_amount / $quotation['built_up_area']));
+                    //$summaryData[$i]['rate_per_sft'] = MaterialProductHelper::customRound(($summary_amount / $quotation['built_up_area']));
+                    $summaryData[$i]['rate_per_sft'] = ($summary_amount / $quotation['built_up_area']);
                 }else{
                     $summaryData[$i]['rate_per_sft'] = 0.00;
                 }
