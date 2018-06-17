@@ -307,7 +307,8 @@ class PurchaseOrderController extends Controller
             }else{
                 $materialData['name'] = ucwords(trim($request->name));
                 $categoryMaterialData['category_id'] = $request->category;
-                $materialData['rate_per_unit'] = round($request->rate_per_unit,3);
+                //$materialData['rate_per_unit'] = round($request->rate_per_unit,3);
+                $materialData['rate_per_unit'] = $request->rate_per_unit;
                 $materialData['unit_id'] = $request->unit_id;
                 $materialData['is_active'] = (boolean)0;
                 $materialData['created_at'] = $now;
@@ -317,7 +318,7 @@ class PurchaseOrderController extends Controller
                 $categoryMaterialData['material_id'] = $material['id'];
                 CategoryMaterialRelation::create($categoryMaterialData);
                 $materialVersionData['material_id'] = $material->id;
-                $materialVersionData['rate_per_unit'] = round($request->rate_per_unit,3);
+                $materialVersionData['rate_per_unit'] = $request->rate_per_unit;
                 $materialVersionData['unit_id'] = $request->unit_id;
                 MaterialVersion::create($materialVersionData);
             }
@@ -913,7 +914,8 @@ class PurchaseOrderController extends Controller
                 $vendorInfo['materials'][$iterator]['item_name'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name;
                 $vendorInfo['materials'][$iterator]['quantity'] = $purchaseOrderComponent['quantity'];
                 $vendorInfo['materials'][$iterator]['unit'] = Unit::where('id',$purchaseOrderComponent['unit_id'])->pluck('name')->first();
-                $vendorInfo['materials'][$iterator]['subtotal'] = MaterialProductHelper::customRound(($purchaseOrderComponent['quantity'] * $purchaseOrderComponent['rate_per_unit']));
+                //$vendorInfo['materials'][$iterator]['subtotal'] = MaterialProductHelper::customRound(($purchaseOrderComponent['quantity'] * $purchaseOrderComponent['rate_per_unit']));
+                $vendorInfo['materials'][$iterator]['subtotal'] = ($purchaseOrderComponent['quantity'] * $purchaseOrderComponent['rate_per_unit']);
                 if($purchaseOrderComponent['cgst_percentage'] == null || $purchaseOrderComponent['cgst_percentage'] == ''){
                     $vendorInfo['materials'][$iterator]['cgst_percentage'] = 0;
                 }else{
@@ -1431,7 +1433,8 @@ class PurchaseOrderController extends Controller
                 'hsn_code' => $purchaseOrderComponent->hsn_code,
                 'rate' => $purchaseOrderComponent->rate_per_unit,
                 'due_date' => 'Due on '.date('j/n/Y',strtotime($purchaseOrderComponent['expected_delivery_date'])),
-                'subtotal' => MaterialProductHelper::customRound(($purchaseOrderComponent['quantity'] * $purchaseOrderComponent['rate_per_unit']))
+                //'subtotal' => MaterialProductHelper::customRound(($purchaseOrderComponent['quantity'] * $purchaseOrderComponent['rate_per_unit']))
+                'subtotal' => ($purchaseOrderComponent['quantity'] * $purchaseOrderComponent['rate_per_unit'])
             ];
             $iterator = 0;
             if($purchaseOrderComponent['cgst_percentage'] == null || $purchaseOrderComponent['cgst_percentage'] == ''){

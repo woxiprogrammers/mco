@@ -358,7 +358,7 @@
                     quantity: quantity,
                     cgst_percentage : cgstPercentage,
                     sgst_percentage : sgstPercentage,
-                    igst_percentage : igstPercentage,
+                    igst_percentage : igstPercentage
                 },
                 success: function(data,textStatus, xhr){
                     $("#taxModal .modal-body").html(data);

@@ -312,7 +312,8 @@ class PurchaseOrderRequestController extends Controller
                 $purchaseOrderRequestComponentData[$iterator]['unit_id'] = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->purchaseRequestComponent->materialRequestComponent->unit_id;
                 $purchaseOrderRequestComponentData[$iterator]['rate_per_unit'] = $purchaseOrderRequestComponent->rate_per_unit;
                 $purchaseOrderRequestComponentData[$iterator]['total'] = $purchaseOrderRequestComponent->total;
-                $purchaseOrderRequestComponentData[$iterator]['rate_with_tax'] = MaterialProductHelper::customRound(($purchaseOrderRequestComponent->total / $purchaseOrderRequestComponent->quantity));
+               // $purchaseOrderRequestComponentData[$iterator]['rate_with_tax'] = MaterialProductHelper::customRound(($purchaseOrderRequestComponent->total / $purchaseOrderRequestComponent->quantity));
+                $purchaseOrderRequestComponentData[$iterator]['rate_with_tax'] = ($purchaseOrderRequestComponent->total / $purchaseOrderRequestComponent->quantity);
                 if($purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation['is_client'] == true){
                     $purchaseOrderRequestComponentData[$iterator]['vendor_name'] = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->client->company;
                     $purchaseOrderRequestComponentData[$iterator]['is_client'] = true;
@@ -820,10 +821,14 @@ class PurchaseOrderRequestController extends Controller
             $purchaseOrderRequestComponentData['rate'] = $request->rate;
             $purchaseOrderRequestComponentData['quantity'] = $purchaseOrderRequestComponent->quantity;
             $purchaseOrderRequestComponentData['subtotal'] = $purchaseOrderRequestComponentData['rate'] * $purchaseOrderRequestComponentData['quantity'];
-            $purchaseOrderRequestComponentData['transportation_cgst_amount'] = MaterialProductHelper::customRound(( $purchaseOrderRequestComponent['transportation_amount'] * ($purchaseOrderRequestComponent['transportation_cgst_percentage'] / 100)));
+            /*$purchaseOrderRequestComponentData['transportation_cgst_amount'] = MaterialProductHelper::customRound(( $purchaseOrderRequestComponent['transportation_amount'] * ($purchaseOrderRequestComponent['transportation_cgst_percentage'] / 100)));
             $purchaseOrderRequestComponentData['transportation_sgst_amount'] = MaterialProductHelper::customRound(( $purchaseOrderRequestComponent['transportation_amount'] * ($purchaseOrderRequestComponent['transportation_sgst_percentage'] / 100)));
             $purchaseOrderRequestComponentData['transportation_igst_amount'] = MaterialProductHelper::customRound(( $purchaseOrderRequestComponent['transportation_amount'] * ($purchaseOrderRequestComponent['transportation_igst_percentage'] / 100)));
-            $purchaseOrderRequestComponentData['transportation_total'] = MaterialProductHelper::customRound(($purchaseOrderRequestComponentData['transportation_cgst_amount'] + $purchaseOrderRequestComponentData['transportation_sgst_amount'] + $purchaseOrderRequestComponentData['transportation_igst_amount'] + $purchaseOrderRequestComponent['transportation_amount']));
+            $purchaseOrderRequestComponentData['transportation_total'] = MaterialProductHelper::customRound(($purchaseOrderRequestComponentData['transportation_cgst_amount'] + $purchaseOrderRequestComponentData['transportation_sgst_amount'] + $purchaseOrderRequestComponentData['transportation_igst_amount'] + $purchaseOrderRequestComponent['transportation_amount']));*/
+            $purchaseOrderRequestComponentData['transportation_cgst_amount'] = ( $purchaseOrderRequestComponent['transportation_amount'] * ($purchaseOrderRequestComponent['transportation_cgst_percentage'] / 100));
+            $purchaseOrderRequestComponentData['transportation_sgst_amount'] = ( $purchaseOrderRequestComponent['transportation_amount'] * ($purchaseOrderRequestComponent['transportation_sgst_percentage'] / 100));
+            $purchaseOrderRequestComponentData['transportation_igst_amount'] = ( $purchaseOrderRequestComponent['transportation_amount'] * ($purchaseOrderRequestComponent['transportation_igst_percentage'] / 100));
+            $purchaseOrderRequestComponentData['transportation_total'] = ($purchaseOrderRequestComponentData['transportation_cgst_amount'] + $purchaseOrderRequestComponentData['transportation_sgst_amount'] + $purchaseOrderRequestComponentData['transportation_igst_amount'] + $purchaseOrderRequestComponent['transportation_amount']);
             $date = date_format(Carbon::now(),'Y-m-d');
             $purchaseOrderRequestComponentData['vendor_quotation'] = array();
             $purchaseOrderRequestComponentData['client_approval'] = array();
