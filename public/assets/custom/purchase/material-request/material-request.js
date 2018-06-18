@@ -177,25 +177,26 @@ $(document).ready(function(){
                     success: function(data,textStatus, xhr){
                         if(xhr.status == 203){
                             alert(data.message);
+                        }else{
+                            $('#searchbox').html('');
+                            $('#qty').html('');
+                            var componentTypeId = $('#component_id').val();
+                            var images = [];
+                            var iterator = $('#iterator').val();
+                            var materials = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+material_name+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unitId+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">';
+                            $('.img').each(function(i, el) {
+                                var imageSrc = $(el).attr('src');
+                                materials += '<input type="hidden" name="item_list['+iterator+'][images][]" value="'+imageSrc+'">'
+                            });
+                            materials += material_name+'</td>'+'<td>'+quantity+'</td>'+'<td>'+unitName+'</td>';
+                            var rows = '<tr>'+materials+'</tr>';
+                            $('#myModal').modal('hide');
+                            $('#myModal output').html('');
+                            $('#Materialrows').append(rows);
+                            var iterator = parseInt(iterator) + 1;
+                            $('#iterator').val(iterator);
+                            $('#component_id').val(null);
                         }
-                        $('#searchbox').html('');
-                        $('#qty').html('');
-                        var componentTypeId = $('#component_id').val();
-                        var images = [];
-                        var iterator = $('#iterator').val();
-                        var materials = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+material_name+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unitId+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">';
-                        $('.img').each(function(i, el) {
-                            var imageSrc = $(el).attr('src');
-                            materials += '<input type="hidden" name="item_list['+iterator+'][images][]" value="'+imageSrc+'">'
-                        });
-                        materials += material_name+'</td>'+'<td>'+quantity+'</td>'+'<td>'+unitName+'</td>';
-                        var rows = '<tr>'+materials+'</tr>';
-                        $('#myModal').modal('hide');
-                        $('#myModal output').html('');
-                        $('#Materialrows').append(rows);
-                        var iterator = parseInt(iterator) + 1;
-                        $('#iterator').val(iterator);
-                        $('#component_id').val(null);
                     },
                     error: function(errorData){
 

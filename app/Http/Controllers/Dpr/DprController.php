@@ -382,7 +382,6 @@ class DprController extends Controller
             $user = Auth::user();
             foreach ($request->number_of_users as $dprDetailId => $numberOfUsers){
                 DprDetail::where('id',$dprDetailId)->update(['number_of_users' => $numberOfUsers]);
-
             }
             if($request->has('dpr_images')){
                 $projectSiteId = DprDetail::where('id', $dprDetailId)->pluck('project_site_id')->first();
