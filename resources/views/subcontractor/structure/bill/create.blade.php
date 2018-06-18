@@ -193,7 +193,8 @@
             if(isNaN(subTotal)){
                 $("#subtotal").text(0);
             }else{
-                $('#subtotal').text(subTotal.toFixed(2));
+                //$('#subtotal').text(subTotal.toFixed(2));
+                $('#subtotal').text(subTotal);
             }
             $('.percentage').each(function(){
                 calculateTaxAmount($(this));
@@ -223,7 +224,8 @@
             if(isNaN(finalTotal)){
                 $('#finalTotal').text(0);
             }else{
-                $('#finalTotal').text(finalTotal.toFixed(2));
+                $('#finalTotal').text(finalTotal);
+               // $('#finalTotal').text(finalTotal.toFixed(2));
             }
         }
     </script>

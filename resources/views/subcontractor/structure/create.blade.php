@@ -260,7 +260,7 @@
         $("#rate").on('keyup', function(){
             var rate = $('#rate').val();
             var total_work_area = $('#total_work_area').val();
-            var total_amount = rate*total_work_area;
+            var total_amount = rate * total_work_area;
             $('#total_amount').val(total_amount);
             $('#total_amount_inwords').val(number2text(total_amount));
         });
