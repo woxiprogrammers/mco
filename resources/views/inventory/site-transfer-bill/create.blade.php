@@ -274,7 +274,7 @@
                         '</div>'
                     ].join('\n'),
                     suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{grn}}</strong></div>')
-                },
+                }
             })
             .on('typeahead:selected', function (obj, datum) {
                 var POData = $.parseJSON(JSON.stringify(datum));
@@ -308,9 +308,12 @@
                 var cgstAmount = extraAmount * (cgstPercent / 100);
                 var sgstAmount = extraAmount * (sgstPercent / 100);
                 var igstAmount = extraAmount * (igstPercent / 100);
-                $("#extra_amount_cgst_amount").val(cgstAmount.toFixed(2));
+                /*$("#extra_amount_cgst_amount").val(cgstAmount.toFixed(2));
                 $("#extra_amount_sgst_amount").val(sgstAmount.toFixed(2));
-                $("#extra_amount_igst_amount").val(igstAmount.toFixed(2));
+                $("#extra_amount_igst_amount").val(igstAmount.toFixed(2));*/
+                $("#extra_amount_cgst_amount").val(cgstAmount);
+                $("#extra_amount_sgst_amount").val(sgstAmount);
+                $("#extra_amount_igst_amount").val(igstAmount);
                 var subtotal = parseFloat($("#subTotal").val());
                 if(isNaN(subtotal)){
                     subtotal = 0;
@@ -323,7 +326,8 @@
                 if(isNaN(totalAmount)){
                     totalAmount = 0;
                 }
-                $("#totalAmount").val(totalAmount.toFixed(2));
+                //$("#totalAmount").val(totalAmount.toFixed(2));
+                $("#totalAmount").val(totalAmount);
                 $(".calculate-amount").trigger('keyup');
             });
             $("#imageupload").on('change', function () {
