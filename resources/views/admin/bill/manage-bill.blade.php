@@ -63,9 +63,10 @@
                                                     <th> RA Bill number </th>
                                                     <th> Bill Number </th>
                                                     <th> Total round amount </th>
-                                                    @for($iterator = 0 ; $iterator < count($taxes); $iterator++)
+                                                    <th> Total tax </th>
+                                                    {{--@for($iterator = 0 ; $iterator < count($taxes); $iterator++)
                                                         <th> {!! $taxes[$iterator]['name'] !!} </th>
-                                                    @endfor
+                                                    @endfor--}}
                                                     <th> Final Total </th>
                                                     <th> Paid Amount </th>
                                                     <th> Balance Amount </th>
