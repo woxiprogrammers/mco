@@ -363,9 +363,11 @@ trait BillTrait{
                     $listingData[$pagination]['bill_no_format'],
                     $listingData[$pagination]['subTotal'],
                 ];
+                $totalTaxAmount = 0;
                 foreach($listingData[$pagination]['tax'] as $taxAmount){
-                    array_push($records['data'][$iterator],MaterialProductHelper::customRound($taxAmount,3));
+                    $totalTaxAmount += $taxAmount;
                 }
+                array_push($records['data'][$iterator],$totalTaxAmount);
                 array_push($records['data'][$iterator],$listingData[$iterator]['final_total']);
                 array_push($records['data'][$iterator],$listingData[$iterator]['paid_amount']);
                 array_push($records['data'][$iterator],$listingData[$iterator]['balance_amount']);
