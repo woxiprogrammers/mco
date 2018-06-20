@@ -4,7 +4,7 @@
  <span style="margin-left: 5%">{{$mailMessage}}</span>
  <br>
  <span>*This is an auto generated message</span><br>
- <span>*Please revert back at purchase.manishaconstruction@gmail.com</span>
+ <span>*Please revert back through the same mail.</span>
  <br><br>
  <span>Thanking you,</span><br>
  <span>Purchase Manager,</span><br>

@@ -72,7 +72,7 @@
                                                                     <input type="text" class="form-control employee-type" value="{{$employee->employeeType->name}}" name="employee[{{$employee['id']}}][type]" readonly style="width: 90%">
                                                                 </td>
                                                                 <td style="text-align: center">
-                                                                    <select class="form-control employee-payment-type" name="employee[{{$employee['id']}}][payment_type]" disabled>
+                                                                    <select class="form-control employee-payment-type" name="employee[{{$employee['id']}}][payment_type]" disabled required="required">
                                                                         <option value="">--Select Payment Type--</option>
                                                                         @foreach($transactionTypes as $transactionType)
                                                                             <option value="{{$transactionType['id']}}">{{$transactionType['name']}}</option>
@@ -83,10 +83,10 @@
                                                                     <input type="text" class="form-control employee-wages" value="{{$employee['per_day_wages']}}" name="employee[{{$employee['id']}}][per_day_wages]" readonly style="width: 90%">
                                                                 </td>
                                                                 <td style="text-align: center">
-                                                                    <input type="text" class="form-control employee-days" value="{{$employee['days']}}" name="employee[{{$employee['id']}}][days]" readonly style="width: 90%">
+                                                                    <input type="text" class="form-control employee-days" value="{{$employee['days']}}" name="employee[{{$employee['id']}}][days]" required="required" readonly style="width: 90%">
                                                                 </td>
                                                                 <td style="text-align: center">
-                                                                    <input type="text" class="form-control employee-amount" value="{{$employee['amount']}}" name="employee[{{$employee['id']}}][amount]" readonly style="width: 90%">
+                                                                    <input type="text" class="form-control employee-amount" value="{{$employee['amount']}}" name="employee[{{$employee['id']}}][amount]" required="required" readonly style="width: 90%">
                                                                 </td>
                                                             </tr>
                                                         @endforeach
@@ -121,6 +121,15 @@
 @section('javascript')
 <script>
         $(document).ready(function(){
+
+            $("#submit").click(function(e){
+                if($('input[type=checkbox]:checked').length == 0)
+                {
+                    alert('Please select atleast one checkbox');
+                    e.preventDefault(this);
+                }
+            });
+
             $(".employee-id").on('click',function(){
                 if ($(this).prop("checked") == true) {
                     $(this).closest('tr').find('.employee-payment-type').prop('disabled', false);
