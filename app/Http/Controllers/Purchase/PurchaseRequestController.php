@@ -726,6 +726,7 @@ class PurchaseRequestController extends Controller
                         }else{
                             $projectSiteInfo['project_site_city'] = $materialRequestComponent->materialRequest->projectSite->city->name;
                         }
+$projectSiteInfo['delivery_address'] = $projectSiteInfo['project_name'].', '.$projectSiteInfo['project_site_name'].', '.$projectSiteInfo['project_site_address'].', '.$projectSiteInfo['project_site_city'];
                         if(array_key_exists('checked_vendor_materials',$data)){
                             if(array_key_exists($vendorId,$data['checked_vendor_materials'])){
                                 $mailInfoData[$jIterator] = [
