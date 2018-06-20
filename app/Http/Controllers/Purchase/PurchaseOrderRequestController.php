@@ -213,6 +213,7 @@ class PurchaseOrderRequestController extends Controller
 
     public function listing(Request $request){
         try{
+
             $loggedInUser = Auth::user();
             if(Session::has('global_project_site')){
                 $projectSiteId = Session::get('global_project_site');
@@ -229,7 +230,20 @@ class PurchaseOrderRequestController extends Controller
                                             ->where('purchase_requests.format_id','ilike','%'.trim($request->purchase_request_format).'%')
                                             ->pluck('purchase_order_requests.id');
             }
-            $purchaseOrderRequestsData = PurchaseOrderRequest::whereIn('id', $purchaseOrderRequestIds)->orderBy('id','desc')->get();
+
+            $por_status = false;
+            if ($request->has('por_status_id')) {
+                if ($request->por_status_id == "pending_for_approval") {
+                    $purchaseOrderRequestsData = PurchaseOrderRequest::where('ready_to_approve', false)->whereIn('id', $purchaseOrderRequestIds)->orderBy('id','desc')->get();
+                } elseif ($request->por_status_id == "por_created") {
+                    $purchaseOrderRequestsData = PurchaseOrderRequest::where('ready_to_approve', true)->whereIn('id', $purchaseOrderRequestIds)->orderBy('id','desc')->get();
+                } else {
+                    $purchaseOrderRequestsData = PurchaseOrderRequest::whereIn('id', $purchaseOrderRequestIds)->orderBy('id','desc')->get();
+                }
+            } else {
+                $purchaseOrderRequestsData = PurchaseOrderRequest::where('ready_to_approve', false)->whereIn('id', $purchaseOrderRequestIds)->orderBy('id','desc')->get();
+            }
+
             $records = array();
             $records['data'] = array();
             $records["draw"] = intval($request->draw);
@@ -266,6 +280,7 @@ class PurchaseOrderRequestController extends Controller
                 $records['data'][] = [
                     $purchaseOrderRequestsData[$pagination]['id'],
                     $purchaseRequestFormat,
+                    ($purchaseOrderRequestsData[$pagination]['ready_to_approve'] == true) ? 'Pending for Director Approval' : 'PO Requested created',
                     $user['first_name'].' '.$user['last_name'],
                     $actionDropdown
                 ];
