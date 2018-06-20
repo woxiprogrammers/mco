@@ -181,7 +181,7 @@ $(document).ready(function(){
         $(".product-amount").each(function(){
             var discountAmount = parseFloat($(this).val())*(discount/100);
             //var discountedAmount = customRound(parseFloat($(this).val())-discountAmount);
-            var discountedAmount = parseFloat($(this).val()) - discountAmount;
+            var discountedAmount = (parseFloat($(this).val()) - discountAmount).toFixed(2);
             //$(this).closest("td").next().find('input[type="text"]').val(Math.round(discountedAmount * 1000) / 1000);
             $(this).closest("td").next().find('input[type="text"]').val((discountedAmount * 1000) / 1000);
         });
@@ -377,7 +377,7 @@ function calculateAmount(row){
         $("#productAmount"+row).val(0);
     }else{
         //$("#productAmount"+row).val(customRound(amount));
-        $("#productAmount"+row).val((amount));
+        $("#productAmount"+row).val((amount.toFixed(2)));
     }
     calculateSubtotal();
 }
@@ -508,18 +508,18 @@ function calculateProductSubtotal(){
         subtotal = subtotal + parseFloat($(this).val());
     });
     //$("#subtotal").val(customRound(subtotal));
-    $("#subtotal").val((subtotal));
+    $("#subtotal").val((subtotal).toFixed(2));
 
     var total = subtotal;
     $(".profit-margin-percentage").each(function(){
         var percentage = parseFloat($(this).text());
         var amount = subtotal * (percentage/100);
         //$(this).next().text(customRound(amount));
-        $(this).next().text((amount));
+        $(this).next().text((amount).toFixed(2));
         total = total + amount;
     });
     //$("#total").text(customRound(total));
-    $("#total").text(total);
+    $("#total").text(total.toFixed(2));
 }
 
 function calculateSubtotal(){
@@ -533,7 +533,7 @@ function calculateSubtotal(){
             subtotal = subtotal + parseFloat($(this).val());
         });
         //$("#subtotal").val(customRound(subtotal));
-        $("#subtotal").val(subtotal);
+        $("#subtotal").val(subtotal.toFixed(2));
     }
 }
 
@@ -543,7 +543,7 @@ function calucalateProductViewTotal(){
         subtotal = subtotal + parseFloat($(this).val());
     });
     //$("#productViewSubtotal").text((subtotal).toFixed(3));
-    $("#productViewSubtotal").text((subtotal));
+    $("#productViewSubtotal").text((subtotal).toFixed(2));
     var total = subtotal;
     $(".profit-margin").each(function(){
         //var profitMarginAmount = (subtotal * ($(this).val() / 100)).toFixed(3);
