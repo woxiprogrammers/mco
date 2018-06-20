@@ -145,20 +145,20 @@
                                                                     </td>
                                                                     <td>
                                                                         <div class="form-group">
-                                                                            <input class="form-control material-table-input" step="any" type="number" id="material_{{$version['material_id']}}_rate" name="material[{{$version['material_id']}}][rate_per_unit]" value="{{round($version['rate_per_unit'],3)}}" onkeyup="changedQuantity({{$version['material_id']}})" onchange="changedQuantity({{$version['material_id']}})">
+                                                                            <input class="form-control material-table-input" step="any" type="number" id="material_{{$version['material_id']}}_rate" name="material[{{$version['material_id']}}][rate_per_unit]" value="{{round($version['rate_per_unit'],2)}}" onkeyup="changedQuantity({{$version['material_id']}})" onchange="changedQuantity({{$version['material_id']}})">
                                                                         </div>
                                                                     </td>
                                                                     <td>
                                                                         <div class="form-group">
-                                                                            <input type="number" step="any" class="form-control material-table-input" id="material_{{$version['material_id']}}_quantity" name="material_quantity[{{$version['material_id']}}]" onkeyup="changedQuantity({{$version['material_id']}})" onchange="changedQuantity({{$version['material_id']}})" value="{{round($version['quantity'],3)}}" required>
+                                                                            <input type="number" step="any" class="form-control material-table-input" id="material_{{$version['material_id']}}_quantity" name="material_quantity[{{$version['material_id']}}]" onkeyup="changedQuantity({{$version['material_id']}})" onchange="changedQuantity({{$version['material_id']}})" value="{{round($version['quantity'],2)}}" required>
                                                                         </div>
                                                                     </td>
                                                                     <td>
                                                                         <div class="form-group">
                                                                             @if($copyProduct == true)
-                                                                                <input type="text" class="form-control material_amount material-table-input" id="material_{{$version['material_id']}}_amount" name="material_amount[{{$version['material_id']}}]" value="{!! round(($version['quantity']*$version['rate_per_unit']),3) !!}" readonly>
+                                                                                <input type="text" class="form-control material_amount material-table-input" id="material_{{$version['material_id']}}_amount" name="material_amount[{{$version['material_id']}}]" value="{!! round(($version['quantity']*$version['rate_per_unit']),2) !!}" readonly>
                                                                             @else
-                                                                                <input type="text" class="form-control material_amount material-table-input" id="material_{{$version['material_id']}}_amount" name="material[{{$version['material_id']}}][amount]" value="{!! round(($version['quantity']*$version['rate_per_unit']),3) !!}" readonly>
+                                                                                <input type="text" class="form-control material_amount material-table-input" id="material_{{$version['material_id']}}_amount" name="material[{{$version['material_id']}}][amount]" value="{!! round(($version['quantity']*$version['rate_per_unit']),2) !!}" readonly>
                                                                             @endif
                                                                         </div>
                                                                     </td>

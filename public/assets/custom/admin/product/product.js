@@ -75,27 +75,25 @@ function getMaterialDetails(){
     });
 }
 function changedQuantity(materialId){
-    console.log('quantity');
     var rate = $("#material_"+materialId+"_rate").val();
     var quantity = $("#material_"+materialId+"_quantity").val();
     var amount = rate * quantity;
-    console.log('amount - '+amount);
-    $("#material_"+materialId+"_amount").val(amount/*.toFixed(3)*/);
+    //$("#material_"+materialId+"_amount").val(amount.toFixed(3));
+    $("#material_"+materialId+"_amount").val(amount.toFixed(2));
     calculateSubTotal();
 }
 
 function calculateSubTotal(){
-    console.log('inside sub total');
     var amount = 0;
     $(".material_amount").each(function(){
         amount = amount + parseFloat($(this).val());
     });
-    console.log('amount - '+amount);
     if(isNaN(amount)){
         amount = 0;
     }
 
-    $("#subtotal").text(amount/*.toFixed(3)*/);
+    //$("#subtotal").text(amount.toFixed(3));
+    $("#subtotal").text(amount.toFixed(2));
     calculateProfitMargin();
 }
 
@@ -107,7 +105,7 @@ function calculateProfitMargin(){
         total = (total + profitMarginAmount);
         $(this).parent().next().text(profitMarginAmount);
     });
-    total = parseFloat(total);
+    total = parseFloat(total.toFixed(2));
     //$("#total").text(customRound(total));
     $("#total").text(total);
     $("#roundtotal").text(total/*.toFixed()*/);
