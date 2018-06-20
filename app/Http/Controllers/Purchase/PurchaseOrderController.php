@@ -1444,6 +1444,7 @@ class PurchaseOrderController extends Controller
             }else{
                 $projectSiteInfo['project_site_city'] = $purchaseOrder->purchaseRequest->projectSite->city->name;
             }
+	    $projectSiteInfo['delivery_address'] = $projectSiteInfo['project_name'].', '.$projectSiteInfo['project_site_name'].', '.$projectSiteInfo['project_site_address'].', '.$projectSiteInfo['project_site_city'];
             if($purchaseOrder->is_client_order == true){
                 $vendorInfo = Client::findOrFail($purchaseOrder->client_id)->toArray();
             }else{
@@ -1557,7 +1558,7 @@ class PurchaseOrderController extends Controller
                         'type_slug' => 'for-purchase-order',
                         'is_client' => false,
                         'reference_id' => $purchaseOrder->id,
-                        'client_id' => $vendorInfo['id'],
+                        'vendor_id' => $vendorInfo['id'],
                         'created_at' => Carbon::now(),
                         'updated_at' => Carbon::now()
                     ];
