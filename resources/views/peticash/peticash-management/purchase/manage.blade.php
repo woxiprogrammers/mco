@@ -390,7 +390,7 @@
         }
 
         function changeVoucherStatus(txnId){
-            var value = confirm('Are you sure?');
+            var value = confirm('Are you sure to receive voucher?');
             if(value){
                 $('#purchase_transaction_id').val(txnId);
                 $(".voucher-submit").trigger('click');

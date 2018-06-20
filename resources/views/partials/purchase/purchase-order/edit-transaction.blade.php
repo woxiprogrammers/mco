@@ -17,33 +17,37 @@
                 <div id="preview-image" class="row">
                     @foreach($preGrnImagePaths as $preGrnImagePath)
                         <div class="col-md-2">
-                            <img src="{{$preGrnImagePath}}" class="thumbimage" />
+                            <a target="_blank" href="{{$preGrnImagePath}}"><img src="{{$preGrnImagePath}}" class="thumbimage" /></a>
                         </div>
                     @endforeach
                 </div>
             </div>
-
         </div>
         <div id="afterImageUploadDiv">
-
-            <div class="form-group">
-                <div class="col-md-3">
-                    <label class="control-label pull-right"> GRN :</label>
-                </div>
-                <div class="col-md-6">
-                    <input class="form-control" name="grn" value="{{$purchaseOrderTransaction->grn}}" readonly>
+                <div class="row">
+                    <div class="form-group">
+                        <div class="col-md-1">
+                            <label class="control-label pull-right"> GRN :</label>
+                        </div>
+                        <div class="col-md-4">
+                            <input class="form-control" name="grn" value="{{$purchaseOrderTransaction->grn}}" readonly />
+                        </div>
+                        <div class="col-md-7">
+                           &nbsp;
+                        </div>
                 </div>
             </div>
             <div id="componentDetailsDiv" style="margin-top: 5%;">
-                <table class="table table-striped table-bordered table-hover" style="margin-top:1%">
+                <div class="row">
+                <table class="table table-striped table-bordered table-hover" style="margin-top:1%" width="100%">
                     <tr style="text-align: center">
-                        <th style="width: 40%">
+                        <th>
                             Name
                         </th>
                         <th>
                             Unit
                         </th>
-                        <th>
+                        <th style="width: 10%">
                             Quantity
                         </th>
                         @if($isShowTaxes == true || $isShowTaxes == 'true')
@@ -53,13 +57,13 @@
                             <th>
                                 Subtotal
                             </th>
-                            <th>
+                            <th style="width: 7%">
                                 CGST
                             </th>
-                            <th>
+                            <th style="width: 7%">
                                 SGST
                             </th>
-                            <th>
+                            <th style="width: 7%">
                                 IGST
                             </th>
                             <th>
@@ -69,7 +73,7 @@
                     </tr>
                     @foreach($materialList as $material)
                         <tr style="text-align: center">
-                            <td style="width: 40%">
+                            <td style="width: 20%">
                                 <input type="text" class="form-control" readonly name="component_data[{{$material['purchase_order_component_id']}}][name]" value="{{$material['name']}}">
                             </td>
                             <td>
@@ -114,39 +118,51 @@
                         </tr>
                     @endforeach
                 </table>
+                </div>
             </div>
             <div id="transactionCommonFieldDiv">
                 <div class="form-group row">
-                    <label>Vendor Name</label>
-                    <input type="text" class="form-control" id="vendor" name="vendor_name" placeholder="Enter Vendor Name" value="{{$vendorName}}" readonly>
+                    <div class="col-md-4">
+                        <label>Vendor Company Name : </label>
+                        <input type="text" class="form-control" id="vendor" name="vendor_name" placeholder="Enter Vendor Name" value="{{$vendorName}}" readonly>
+                    </div>
+                    <div class="col-md-4">
+                        <label>Bill Number : </label>
+                        <input type="text" class="form-control" name="bill_number" placeholder="Enter Bill Number" value="{{$purchaseOrderTransaction->bill_number}}">
+                    </div>
+                    <div class="col-md-4">
+                        <label>Vehicle Number : </label>
+                        <input type="text" class="form-control" name="vehicle_number" placeholder="Enter Vehicle Number"  value="{{$purchaseOrderTransaction->vehicle_number}}">
+                    </div>
                 </div>
-                <div class="form-group row">
-                    <input type="text" class="form-control" name="bill_number" placeholder="Enter Bill Number" value="{{$purchaseOrderTransaction->bill_number}}">
-                </div>
-                <div class="form-group row">
+                <!--<div class="form-group row">
                     <input type="text" class="form-control" name="bill_amount" placeholder="Enter Bill Amount"  value="{{$purchaseOrderTransaction->bill_amount}}">
-                </div>
+                </div>-->
                 <div class="form-group row">
-                    <input type="text" class="form-control" name="vehicle_number" placeholder="Enter Vehicle Number"  value="{{$purchaseOrderTransaction->vehicle_number}}">
-                </div>
-                <div class="form-group row">
-                    <input type="text"   class="form-control" name="in_time" placeholder="Enter In Time"  value="{!! date('d-m-Y H:i:s', strtotime($purchaseOrderTransaction->in_time)) !!}">
-                </div>
-                <div class="form-group row">
-                    <input type="text" class="form-control" name="out_time" placeholder="Enter Out Time"  value="{!! date('d-m-Y H:i:s',strtotime($purchaseOrderTransaction->out_time)) !!}">
-                </div>
-                <div class="form-group row">
-                    <input type="text" class="form-control" name="remark" placeholder="Enter Remark"  value="{{$purchaseOrderTransaction->remark}}">
+                    <div class="col-md-4">
+                        <label>In Time : </label>
+                        <input type="text" class="form-control" name="in_time" placeholder="Enter In Time"  value="{!! date('d-m-Y H:i:s', strtotime($purchaseOrderTransaction->in_time)) !!}">
+                    </div>
+                    <div class="col-md-4">
+                        <label>Out Time : </label>
+                        <input type="text" class="form-control" name="out_time" placeholder="Enter Out Time"  value="{!! date('d-m-Y H:i:s',strtotime($purchaseOrderTransaction->out_time)) !!}">
+                    </div>
+                    <div class="col-md-4">
+                        <label>Remark : </label>
+                        <input type="text" class="form-control" name="remark" placeholder="Enter Remark"  value="{{$purchaseOrderTransaction->remark}}">
+                    </div>
                 </div>
                 @if(count($postGrnImagePaths) > 0)
                     <div class="form-group">
-                        <label class="control-label">Select Images :</label>
+                        <label class="control-label">Post GRN Images :</label>
                         <br />
                         <div class="row">
                             <div id="postPreviewImage" class="row">
                                 @foreach($postGrnImagePaths as $postGrnImagePath)
                                     <div class="col-md-2">
-                                        <img src="{{$postGrnImagePath}}" class="thumbimage" />
+                                        <a target="_blank" href="{{$postGrnImagePath}}">
+                                            <img src="{{$postGrnImagePath}}" class="thumbimage" />
+                                        </a>
                                     </div>
                                 @endforeach
                             </div>

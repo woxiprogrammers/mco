@@ -66,7 +66,7 @@
                                                                 Transaction GRN
                                                             </div>
                                                         </div>
-                                                        <div class="row">
+                                                        <div class="row" style="margin-top: 20px;">
                                                             <div class="col-md-4 form-group">
                                                                 <input type="text" class="form-control purchase-order-typeahead" name="purchase_order_format">
                                                                 <input type="hidden" name="purchase_order_id" id="purchaseOrderId">
@@ -226,7 +226,7 @@
                             </div>
                         </form>
                         <div class="modal fade" id="editTransactionModal" role="dialog">
-                            <div class="modal-dialog transaction-modal" style="width: 90%; ">
+                            <div class="modal-dialog transaction-modal" style="width: 95%; ">
                                 <!-- Modal content-->
                                 <div class="modal-content" style="overflow: scroll !important;">
                                     <div class="modal-header">

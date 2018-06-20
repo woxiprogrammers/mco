@@ -28,7 +28,7 @@
     </div>
     <div class="form-group">
         <div class="col-md-3">
-            <label class="pull-right control-label"> Quantity :</label>
+            <label class="pull-right control-label"> PO Quantity :</label>
         </div>
         <div class="col-md-6">
             <input type="text" class="form-control quantity" name="quantity" value="{{$purchaseOrderComponentData['quantity']}}">

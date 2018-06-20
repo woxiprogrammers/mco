@@ -119,8 +119,8 @@
                                                                     <thead>
                                                                     <tr>
                                                                         <th> Material Name </th>
-                                                                        <th> Consumed Quantity</th>
-                                                                        <th> Quantity</th>
+                                                                        <th> Received Quantity</th>
+                                                                        <th> PO Quantity</th>
                                                                         <th> Unit </th>
                                                                         <th>Action</th>
                                                                     </tr>
@@ -372,19 +372,22 @@
                                                                 </div>
                                                                 <div id="transactionCommonFieldDiv" hidden>
                                                                     <div class="form-group row">
-                                                                        <label>Vendor Name</label>
+                                                                        <label>Vendor Company Name : </label>
                                                                         <input type="text" class="form-control" id="vendor" name="vendor_name" placeholder="Enter Vendor Name" value="{{$vendorName}}" readonly>
                                                                     </div>
                                                                     <div class="form-group row">
+                                                                        <label>Bill Number : </label>
                                                                         <input type="text" class="form-control" name="bill_number" placeholder="Enter Bill Number">
                                                                     </div>
-                                                                    <div class="form-group row">
+                                                                    <!--<div class="form-group row">
                                                                         <input type="text" class="form-control" name="bill_amount" placeholder="Enter Bill Amount">
-                                                                    </div>
+                                                                    </div>-->
                                                                     <div class="form-group row">
+                                                                        <label>Vehicle Number : </label>
                                                                         <input type="text" class="form-control" name="vehicle_number" placeholder="Enter Vehicle Number">
                                                                     </div>
                                                                     <div class="form-group row">
+                                                                        <label>Remark : </label>
                                                                         <input type="text" class="form-control" name="remark" placeholder="Enter Remark">
                                                                     </div>
                                                                     <div class="form-group">

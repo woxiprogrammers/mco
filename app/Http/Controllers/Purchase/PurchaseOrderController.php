@@ -125,10 +125,18 @@ class PurchaseOrderController extends Controller
             $month = 0;
             $year = 0;
             $po_count = 0;
+            $vendor_name = "";
+            $po_id = "";
             $postDataArray = array();
-            if ($request->has('po_name')) {
-                if ($request['po_name'] != "") {
-                    $po_name = $request['po_name'];
+            if ($request->has('po_id')) {
+                if ($request['po_id'] != "") {
+                    $po_id = $request['po_id'];
+                }
+            }
+
+            if ($request->has('vendor_name')) {
+                if ($request['vendor_name'] != "") {
+                    $vendor_name = $request['vendor_name'];
                 }
             }
 
@@ -198,9 +206,26 @@ class PurchaseOrderController extends Controller
                 }
             }
 
+            if ($vendor_name != "" & $filterFlag == true) {
+                $ids = PurchaseOrder::join('vendors','vendors.id','=','purchase_orders.vendor_id')
+                    ->where('vendors.company','ilike','%'.$vendor_name.'%')->whereIn('purchase_orders.id',$ids)->pluck('purchase_orders.id');
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+            if ($po_id != "" & $filterFlag == true) {
+                $ids = PurchaseOrder::where('format_id','ilike','%'.$po_id.'%')->whereIn('id',$ids)->pluck('id');
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
             if ($filterFlag) {
                 $purchaseOrderDetail = PurchaseOrder::whereIn('id',$ids)->orderBy('created_at','desc')->get();
             }
+
+
 
             $purchaseOrderList = array();
             $iterator = 0;
@@ -213,7 +238,7 @@ class PurchaseOrderController extends Controller
                      $purchaseOrderList[$iterator]['purchase_request_id'] = $purchaseOrder['purchase_request_id'];
                      $purchaseOrderList[$iterator]['purchase_request_format_id'] = $this->getPurchaseIDFormat('purchase-request',$projectSite['id'],$purchaseRequest['created_at'],$purchaseRequest['serial_no']);
                      $project = $projectSite->project;
-                     $purchaseOrderList[$iterator]['client_name'] = $project->client->company;
+                     $purchaseOrderList[$iterator]['client_name'] = $purchaseOrder->vendor->company;
                      $purchaseOrderList[$iterator]['site_name'] = $projectSite->name;
                      $purchaseOrderComponents = $purchaseOrder->purchaseOrderComponent;
                      $purchaseOrderList[$iterator]['approved_quantity'] = $purchaseOrderComponents->sum('quantity');
@@ -1184,7 +1209,7 @@ class PurchaseOrderController extends Controller
     public function getTransactionEditView(Request $request, $purchaseOrderTransaction){
         try{
             $purchaseOrder = $purchaseOrderTransaction->purchaseOrder;
-            $vendorName = $purchaseOrder->vendor->name;
+            $vendorName = $purchaseOrder->vendor->company;
             $materialList = array();
             $assetComponentTypeIds = MaterialRequestComponentTypes::whereIn('slug',['system-asset','new-asset'])->pluck('id')->toArray();
             $iterator = 0;
