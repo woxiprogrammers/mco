@@ -49,7 +49,6 @@ trait RoleTrait{
                 $moduleIds = array_column($moduleIds,'module_id');
                 $data = ACLHelper::getPermissions($moduleIds);
                 $roleWebPermissions = RoleHasPermission::where('role_id',$role['id'])->where('is_web', true)->pluck('permission_id')->toArray();
-                Log::info($roleWebPermissions);
                 $roleMobilePermissions = RoleHasPermission::where('role_id',$role['id'])->where('is_mobile', true)->pluck('permission_id')->toArray();
                 $webModuleResponse = $data['webModuleResponse'];
                 $permissionTypes = $data['permissionTypes'];
