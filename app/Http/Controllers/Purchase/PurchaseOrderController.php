@@ -208,7 +208,8 @@ class PurchaseOrderController extends Controller
 
             if ($vendor_name != "" & $filterFlag == true) {
                 $ids = PurchaseOrder::join('vendors','vendors.id','=','purchase_orders.vendor_id')
-                    ->where('vendors.company','ilike','%'.$vendor_name.'%')->whereIn('purchase_orders.id',$ids)->pluck('purchase_orders.id');
+                    ->join('clients','clients.id','=','purchase_orders.vendor_id')
+                    ->where('vendors.company','ilike','%'.$vendor_name.'%')->orWhere('vendors.company','ilike','%'.$vendor_name.'%')->whereIn('purchase_orders.id',$ids)->pluck('purchase_orders.id');
                 if(count($ids) <= 0) {
                     $filterFlag = false;
                 }
@@ -238,7 +239,7 @@ class PurchaseOrderController extends Controller
                      $purchaseOrderList[$iterator]['purchase_request_id'] = $purchaseOrder['purchase_request_id'];
                      $purchaseOrderList[$iterator]['purchase_request_format_id'] = $this->getPurchaseIDFormat('purchase-request',$projectSite['id'],$purchaseRequest['created_at'],$purchaseRequest['serial_no']);
                      $project = $projectSite->project;
-                     $purchaseOrderList[$iterator]['client_name'] = $purchaseOrder->vendor->company;
+                     $purchaseOrderList[$iterator]['client_name'] = ($purchaseOrder->vendor_id != null) ? $purchaseOrder->vendor->company : $purchaseOrder->client->company;
                      $purchaseOrderList[$iterator]['site_name'] = $projectSite->name;
                      $purchaseOrderComponents = $purchaseOrder->purchaseOrderComponent;
                      $purchaseOrderList[$iterator]['approved_quantity'] = $purchaseOrderComponents->sum('quantity');
@@ -310,7 +311,7 @@ class PurchaseOrderController extends Controller
             return response()->json($records,$responseStatus);
         }catch(\Exception $e){
             $data = [
-                'action' => 'Purchase Requests listing',
+                'action' => 'Purchase Order listing',
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];
@@ -1432,7 +1433,18 @@ class PurchaseOrderController extends Controller
     public function editPurchaseOrder(Request $request,$purchaseOrder){
         try{
             $purchaseOrderComponent = PurchaseOrderComponent::findOrFail($request->purchase_order_component_id);
-            $purchaseOrderComponent->update(['quantity' => $request->quantity]);
+            $subTotal = $request->quantity * $purchaseOrderComponent['rate_per_unit'];
+            $cgst_amount = $purchaseOrderComponent['cgst_percentage'] * $subTotal;
+            $sgst_amount = $purchaseOrderComponent['sgst_percentage'] * $subTotal;
+            $igst_amount = $purchaseOrderComponent['igst_percentage'] * $subTotal;
+            $total = $subTotal + $cgst_amount + $sgst_amount + $igst_amount;
+            $purchaseOrderComponent->update([
+                'quantity' => $request->quantity,
+                'cgst_amount' => $cgst_amount,
+                'sgst_amount'=> $sgst_amount,
+                'igst_amount' => $igst_amount,
+                'total' => $total,
+            ]);
             $assetComponentTypeIds = MaterialRequestComponentTypes::whereIn('slug',['new-material','system-asset'])->pluck('id')->toArray();
             $projectSiteInfo = array();
             $projectSiteInfo['project_name'] = $purchaseOrder->purchaseRequest->projectSite->project->name;
@@ -1443,6 +1455,11 @@ class PurchaseOrderController extends Controller
                 $projectSiteInfo['project_site_city'] = '';
             }else{
                 $projectSiteInfo['project_site_city'] = $purchaseOrder->purchaseRequest->projectSite->city->name;
+            }
+            if($purchaseOrder->purchaseOrderRequest->delivery_address != null){
+                $projectSiteInfo['delivery_address'] = $purchaseOrder->purchaseOrderRequest->delivery_address;
+            }else{
+                $projectSiteInfo['delivery_address'] = $projectSiteInfo['project_name'].', '.$projectSiteInfo['project_site_name'].', '.$projectSiteInfo['project_site_address'].', '.$projectSiteInfo['project_site_city'];
             }
             if($purchaseOrder->is_client_order == true){
                 $vendorInfo = Client::findOrFail($purchaseOrder->client_id)->toArray();
@@ -1557,7 +1574,7 @@ class PurchaseOrderController extends Controller
                         'type_slug' => 'for-purchase-order',
                         'is_client' => false,
                         'reference_id' => $purchaseOrder->id,
-                        'client_id' => $vendorInfo['id'],
+                        'vendor_id' => $vendorInfo['id'],
                         'created_at' => Carbon::now(),
                         'updated_at' => Carbon::now()
                     ];
