@@ -230,14 +230,21 @@ class PurchaseOrderRequestController extends Controller
                                             ->where('purchase_requests.format_id','ilike','%'.trim($request->purchase_request_format).'%')
                                             ->pluck('purchase_order_requests.id');
             }
-
             $por_status = false;
             if ($request->has('por_status_id')) {
-                if ($request->por_status_id == "pending_for_approval") {
+                $draftPurchaseOrderRequestIds = PurchaseOrderRequestComponent::whereIn('purchase_order_request_id',$purchaseOrderRequestIds)->whereNull('is_approved')->select('purchase_order_request_id')->get()->toArray();
+                if ($request->por_status_id == "por_created") {
                     $purchaseOrderRequestsData = PurchaseOrderRequest::where('ready_to_approve', false)->whereIn('id', $purchaseOrderRequestIds)->orderBy('id','desc')->get();
-                } elseif ($request->por_status_id == "por_created") {
+                } elseif ($request->por_status_id == "pending_for_approval") {
                     $purchaseOrderRequestsData = PurchaseOrderRequest::where('ready_to_approve', true)->whereIn('id', $purchaseOrderRequestIds)->orderBy('id','desc')->get();
-                } else {
+                } elseif($request->por_status_id == "po_created"){
+                    if($draftPurchaseOrderRequestIds > 0){
+                        $purchaseOrderRequestsData = PurchaseOrderRequest::whereIn('id',$draftPurchaseOrderRequestIds )->orderBy('id','desc')->get();
+                    }else{
+                        $purchaseOrderRequestsData = array();
+                    }
+
+                }else {
                     $purchaseOrderRequestsData = PurchaseOrderRequest::whereIn('id', $purchaseOrderRequestIds)->orderBy('id','desc')->get();
                 }
             } else {

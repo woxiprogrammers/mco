@@ -111,8 +111,9 @@
                                                                 <th>
                                                                     <select class="table-group-action-input form-control input-inline input-small input-sm status-select" id="por_status" name="por_status">
 
-                                                                        <option value="pending_for_approval">PO Request Created</option>
-                                                                        <option value="por_created">Pending for Approval</option>
+                                                                        <option value="por_created">PO Request Created</option>
+                                                                        <option value="pending_for_approval">Pending for Director Approval</option>
+                                                                        <option value="po_created">PO Created</option>
                                                                         <option value="all">ALL</option>
                                                                     </select>
                                                                 </th>
