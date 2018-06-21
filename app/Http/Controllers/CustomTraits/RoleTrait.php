@@ -49,6 +49,7 @@ trait RoleTrait{
                 $moduleIds = array_column($moduleIds,'module_id');
                 $data = ACLHelper::getPermissions($moduleIds);
                 $roleWebPermissions = RoleHasPermission::where('role_id',$role['id'])->where('is_web', true)->pluck('permission_id')->toArray();
+                Log::info($roleWebPermissions);
                 $roleMobilePermissions = RoleHasPermission::where('role_id',$role['id'])->where('is_mobile', true)->pluck('permission_id')->toArray();
                 $webModuleResponse = $data['webModuleResponse'];
                 $permissionTypes = $data['permissionTypes'];
@@ -151,13 +152,14 @@ trait RoleTrait{
                     $rolePermissionData['is_mobile'] = false;
                     $check = RoleHasPermission::where('role_id',$roleId)->where('permission_id',$permissions)->first();
                     if ($check != null) {
+                        $rolePermissionData['permission_id'] = $permissions;
                         RoleHasPermission::where('role_id', $roleId)->where('permission_id',$permissions)->update($rolePermissionData);
                     }else{
                         $rolePermissionData['permission_id'] = $permissions;
                         RoleHasPermission::create($rolePermissionData);
                     }
-                    RoleHasPermission::where('role_id',$roleId)->whereNotIn('permission_id',$request->web_permissions)->update(['is_web' => false]);
                 }
+                RoleHasPermission::where('role_id',$roleId)->whereNotIn('permission_id',$request->web_permissions)->update(['is_web' => false]);
                 $webPermissions = $request->web_permissions;
             }else{
                 $webPermissions = array();
@@ -170,6 +172,7 @@ trait RoleTrait{
                     $rolePermissionData['is_mobile'] = true;
                     $check = RoleHasPermission::where('role_id',$roleId)->where('permission_id',$permissions)->first();
                     if ($check != null) {
+                        $rolePermissionData['permission_id'] = $permissions;
                         RoleHasPermission::where('role_id', $roleId)->where('permission_id',$permissions)->update(['is_mobile'=> true]);
                     } else {
                         $rolePermissionData['permission_id'] = $permissions;
