@@ -149,6 +149,7 @@ class VendorMailController extends Controller
                 }else{
                     $projectSiteInfo['project_site_city'] = $purchaseRequest->projectSite->city->name;
                 }
+                $projectSiteInfo['delivery_address'] = $projectSiteInfo['project_name'].', '.$projectSiteInfo['project_site_name'].', '.$projectSiteInfo['project_site_address'].', '.$projectSiteInfo['project_site_city'];
                 foreach($materialRequestComponents as $key => $materialRequestComponent){
                     $vendorInfo['materials'][$iterator]['item_name'] = $materialRequestComponent->name;
                     $vendorInfo['materials'][$iterator]['quantity'] = $materialRequestComponent->quantity;
