@@ -597,6 +597,9 @@ class PurchaseOrderRequestController extends Controller
                                                                 ->first()->toArray();
                         $purchaseOrderComponentData['purchase_order_id'] = $purchaseOrder->id;
                         $purchaseOrderComponentData['purchase_request_component_id'] = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->purchase_request_component_id;
+                        if($purchaseOrderComponentData['rate_per_unit'] == null || $purchaseOrderComponentData['rate_per_unit'] == ''){
+                            $purchaseOrderComponentData['rate_per_unit'] = 0;
+                        }
                         $purchaseOrderComponent = PurchaseOrderComponent::create($purchaseOrderComponentData);
                         $newAssetTypeId = MaterialRequestComponentTypes::where('slug','new-asset')->pluck('id')->first();
                         $newMaterialTypeId = MaterialRequestComponentTypes::where('slug','new-material')->pluck('id')->first();
