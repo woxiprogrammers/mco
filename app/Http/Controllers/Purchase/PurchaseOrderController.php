@@ -125,10 +125,18 @@ class PurchaseOrderController extends Controller
             $month = 0;
             $year = 0;
             $po_count = 0;
+            $vendor_name = "";
+            $po_id = "";
             $postDataArray = array();
-            if ($request->has('po_name')) {
-                if ($request['po_name'] != "") {
-                    $po_name = $request['po_name'];
+            if ($request->has('po_id')) {
+                if ($request['po_id'] != "") {
+                    $po_id = $request['po_id'];
+                }
+            }
+
+            if ($request->has('vendor_name')) {
+                if ($request['vendor_name'] != "") {
+                    $vendor_name = $request['vendor_name'];
                 }
             }
 
@@ -198,9 +206,29 @@ class PurchaseOrderController extends Controller
                 }
             }
 
+            if ($vendor_name != "" & $filterFlag == true) {
+                $forVendorSearchIds = PurchaseOrder::join('vendors','vendors.id','=','purchase_orders.vendor_id')
+                    ->where('vendors.company','ilike','%'.$vendor_name.'%')->whereIn('purchase_orders.id',$ids)->pluck('purchase_orders.id')->toArray();
+                $forClientSearchIds = PurchaseOrder::join('clients','clients.id','=','purchase_orders.client_id')
+                    ->where('clients.company','ilike','%'.$vendor_name.'%')->whereIn('purchase_orders.id',$ids)->pluck('purchase_orders.id')->toArray();
+                $ids = array_merge($forVendorSearchIds , $forClientSearchIds);
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+            if ($po_id != "" & $filterFlag == true) {
+                $ids = PurchaseOrder::where('format_id','ilike','%'.$po_id.'%')->whereIn('id',$ids)->pluck('id');
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
             if ($filterFlag) {
                 $purchaseOrderDetail = PurchaseOrder::whereIn('id',$ids)->orderBy('created_at','desc')->get();
             }
+
+
 
             $purchaseOrderList = array();
             $iterator = 0;
@@ -213,7 +241,7 @@ class PurchaseOrderController extends Controller
                      $purchaseOrderList[$iterator]['purchase_request_id'] = $purchaseOrder['purchase_request_id'];
                      $purchaseOrderList[$iterator]['purchase_request_format_id'] = $this->getPurchaseIDFormat('purchase-request',$projectSite['id'],$purchaseRequest['created_at'],$purchaseRequest['serial_no']);
                      $project = $projectSite->project;
-                     $purchaseOrderList[$iterator]['client_name'] = $project->client->company;
+                     $purchaseOrderList[$iterator]['client_name'] = ($purchaseOrder->vendor_id != null) ? $purchaseOrder->vendor->company : $purchaseOrder->client->company;
                      $purchaseOrderList[$iterator]['site_name'] = $projectSite->name;
                      $purchaseOrderComponents = $purchaseOrder->purchaseOrderComponent;
                      $purchaseOrderList[$iterator]['approved_quantity'] = $purchaseOrderComponents->sum('quantity');
@@ -285,7 +313,7 @@ class PurchaseOrderController extends Controller
             return response()->json($records,$responseStatus);
         }catch(\Exception $e){
             $data = [
-                'action' => 'Purchase Requests listing',
+                'action' => 'Purchase Order listing',
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];
@@ -966,7 +994,22 @@ class PurchaseOrderController extends Controller
                 $vendorInfo['materials'][$iterator]['hsn_code'] = $purchaseOrderComponent['hsn_code'];
                 $vendorInfo['materials'][$iterator]['rate'] = $purchaseOrderComponent['rate_per_unit'];
                 $iterator++;
-                if(count($projectSiteInfo) <= 0){
+                $projectSiteInfo['project_site_address'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->materialRequest->projectSite->address;
+                if($purchaseOrder->purchaseOrderRequest->delivery_address != null){
+                    $projectSiteInfo['delivery_address'] = $purchaseOrder->purchaseOrderRequest->delivery_address;
+                }else{
+                    $projectSiteInfo['project_name'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->materialRequest->projectSite->project->name;
+                    $projectSiteInfo['project_site_name'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->materialRequest->projectSite->name;
+
+                    if($purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->materialRequest->projectSite->city_id == null){
+                        $projectSiteInfo['project_site_city'] = '';
+                    }else{
+                        $projectSiteInfo['project_site_city'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->materialRequest->projectSite->city->name;
+                    }
+                    $projectSiteInfo['delivery_address'] = $projectSiteInfo['project_name'].', '.$projectSiteInfo['project_site_name'].', '.$projectSiteInfo['project_site_address'].', '.$projectSiteInfo['project_site_city'];
+                }
+
+                /*if(count($projectSiteInfo) <= 0){
                     $projectSiteInfo['project_name'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->materialRequest->projectSite->project->name;
                     $projectSiteInfo['project_site_name'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->materialRequest->projectSite->name;
                     $projectSiteInfo['project_site_address'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->materialRequest->projectSite->address;
@@ -975,7 +1018,7 @@ class PurchaseOrderController extends Controller
                     }else{
                         $projectSiteInfo['project_site_city'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->materialRequest->projectSite->city->name;
                     }
-                }
+                }*/
             }
             $pdf = App::make('dompdf.wrapper');
             $pdfFlag = "purchase-order-listing-download";
@@ -1169,7 +1212,7 @@ class PurchaseOrderController extends Controller
     public function getTransactionEditView(Request $request, $purchaseOrderTransaction){
         try{
             $purchaseOrder = $purchaseOrderTransaction->purchaseOrder;
-            $vendorName = $purchaseOrder->vendor->name;
+            $vendorName = $purchaseOrder->vendor->company;
             $materialList = array();
             $assetComponentTypeIds = MaterialRequestComponentTypes::whereIn('slug',['system-asset','new-asset'])->pluck('id')->toArray();
             $iterator = 0;
@@ -1392,7 +1435,18 @@ class PurchaseOrderController extends Controller
     public function editPurchaseOrder(Request $request,$purchaseOrder){
         try{
             $purchaseOrderComponent = PurchaseOrderComponent::findOrFail($request->purchase_order_component_id);
-            $purchaseOrderComponent->update(['quantity' => $request->quantity]);
+            $subTotal = $request->quantity * $purchaseOrderComponent['rate_per_unit'];
+            $cgst_amount = ($purchaseOrderComponent['cgst_percentage'] * $subTotal) / 100;
+            $sgst_amount = ($purchaseOrderComponent['sgst_percentage'] * $subTotal) / 100;
+            $igst_amount = ($purchaseOrderComponent['igst_percentage'] * $subTotal) / 100;
+            $total = $subTotal + $cgst_amount + $sgst_amount + $igst_amount;
+            $purchaseOrderComponent->update([
+                'quantity' => $request->quantity,
+                'cgst_amount' => $cgst_amount,
+                'sgst_amount'=> $sgst_amount,
+                'igst_amount' => $igst_amount,
+                'total' => $total,
+            ]);
             $assetComponentTypeIds = MaterialRequestComponentTypes::whereIn('slug',['new-material','system-asset'])->pluck('id')->toArray();
             $projectSiteInfo = array();
             $projectSiteInfo['project_name'] = $purchaseOrder->purchaseRequest->projectSite->project->name;
@@ -1403,6 +1457,11 @@ class PurchaseOrderController extends Controller
                 $projectSiteInfo['project_site_city'] = '';
             }else{
                 $projectSiteInfo['project_site_city'] = $purchaseOrder->purchaseRequest->projectSite->city->name;
+            }
+            if($purchaseOrder->purchaseOrderRequest->delivery_address != null){
+                $projectSiteInfo['delivery_address'] = $purchaseOrder->purchaseOrderRequest->delivery_address;
+            }else{
+                $projectSiteInfo['delivery_address'] = $projectSiteInfo['project_name'].', '.$projectSiteInfo['project_site_name'].', '.$projectSiteInfo['project_site_address'].', '.$projectSiteInfo['project_site_city'];
             }
             if($purchaseOrder->is_client_order == true){
                 $vendorInfo = Client::findOrFail($purchaseOrder->client_id)->toArray();
@@ -1517,7 +1576,7 @@ class PurchaseOrderController extends Controller
                         'type_slug' => 'for-purchase-order',
                         'is_client' => false,
                         'reference_id' => $purchaseOrder->id,
-                        'client_id' => $vendorInfo['id'],
+                        'vendor_id' => $vendorInfo['id'],
                         'created_at' => Carbon::now(),
                         'updated_at' => Carbon::now()
                     ];

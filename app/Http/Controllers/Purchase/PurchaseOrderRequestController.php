@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Purchase;
 
+use App\Address;
 use App\Asset;
 use App\AssetType;
 use App\Category;
@@ -15,6 +16,7 @@ use App\Material;
 use App\MaterialRequestComponentTypes;
 use App\MaterialVersion;
 use App\Module;
+use App\ProjectSite;
 use App\PurchaseOrder;
 use App\PurchaseOrderComponent;
 use App\PurchaseOrderComponentImage;
@@ -62,7 +64,20 @@ class PurchaseOrderRequestController extends Controller
 
     public function getCreateView(Request $request){
         try{
-            return view('purchase.purchase-order-request.create');
+            $projectSiteId = Session::get('global_project_site');
+            $projectSiteInfo = ProjectSite::where('id',$projectSiteId)->first();
+            if($projectSiteInfo->city_id == null){
+                $deliveryAddresses[0] = $projectSiteInfo->project->name.', '.$projectSiteInfo->name.', '.$projectSiteInfo->address;
+            }else{
+                $deliveryAddresses[0] = $projectSiteInfo->project->name.', '.$projectSiteInfo->name.', '.$projectSiteInfo->address.', '.$projectSiteInfo->city->name.', '.$projectSiteInfo->city->state->name;
+            }
+            $systemAddresses = Address::where('is_active',true)->get();
+            $iterator = 1;
+            foreach ($systemAddresses as $address){
+                $deliveryAddresses[$iterator] = $address->address.', '.$address->cities->name.', '.$address->cities->state->name;
+                $iterator++;
+            }
+            return view('purchase.purchase-order-request.create')->with(compact('deliveryAddresses'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get purchase order request create view',
@@ -78,7 +93,8 @@ class PurchaseOrderRequestController extends Controller
             $user = Auth::user();
             $purchaseOrderRequestData = [
                 'purchase_request_id' => $request->purchase_request_id,
-                'user_id' => $user->id
+                'user_id' => $user->id,
+                'delivery_address' => $request->delivery_address
             ];
             $projectSiteInfo = PurchaseRequest::join('project_sites','project_sites.id','=','purchase_requests.project_site_id')
                                         ->join('projects','projects.id','=','project_sites.project_id')
@@ -197,6 +213,7 @@ class PurchaseOrderRequestController extends Controller
 
     public function listing(Request $request){
         try{
+
             $loggedInUser = Auth::user();
             if(Session::has('global_project_site')){
                 $projectSiteId = Session::get('global_project_site');
@@ -213,7 +230,28 @@ class PurchaseOrderRequestController extends Controller
                                             ->where('purchase_requests.format_id','ilike','%'.trim($request->purchase_request_format).'%')
                                             ->pluck('purchase_order_requests.id');
             }
-            $purchaseOrderRequestsData = PurchaseOrderRequest::whereIn('id', $purchaseOrderRequestIds)->orderBy('id','desc')->get();
+            if ($request->has('por_status_id')) {
+                $draftPurchaseOrderRequestIds = PurchaseOrderRequestComponent::whereIn('purchase_order_request_id',$purchaseOrderRequestIds)->whereNull('is_approved')->select('purchase_order_request_id')->get()->toArray();
+                if ($request->por_status_id == "por_created") {
+                    $purchaseOrderRequestsData = PurchaseOrderRequest::where('ready_to_approve', false)->whereIn('id', $purchaseOrderRequestIds)->orderBy('id','desc')->get();
+                    $status = "PO Request Created";
+                } elseif ($request->por_status_id == "pending_for_approval") {
+                    $purchaseOrderRequestsData = PurchaseOrderRequest::where('ready_to_approve', true)->whereIn('id',$draftPurchaseOrderRequestIds)->whereIn('id', $purchaseOrderRequestIds)->orderBy('id','desc')->get();
+                    $status = "Pending for Director Approval";
+                } elseif($request->por_status_id == "po_created"){
+                    if($draftPurchaseOrderRequestIds > 0){
+                        $purchaseOrderRequestsData = PurchaseOrderRequest::where('ready_to_approve', true)->whereNotIn('id',$draftPurchaseOrderRequestIds )->orderBy('id','desc')->get();
+                        $status = "PO Created";
+                    }else{
+                        $purchaseOrderRequestsData = array();
+                        $status = "";
+                    }
+                }
+            } else {
+                $status = "PO Request Created";
+                $purchaseOrderRequestsData = PurchaseOrderRequest::where('ready_to_approve', false)->whereIn('id', $purchaseOrderRequestIds)->orderBy('id','desc')->get();
+            }
+
             $records = array();
             $records['data'] = array();
             $records["draw"] = intval($request->draw);
@@ -250,6 +288,7 @@ class PurchaseOrderRequestController extends Controller
                 $records['data'][] = [
                     $purchaseOrderRequestsData[$pagination]['id'],
                     $purchaseRequestFormat,
+                    $status,
                     $user['first_name'].' '.$user['last_name'],
                     $actionDropdown
                 ];
@@ -581,6 +620,9 @@ class PurchaseOrderRequestController extends Controller
                                                                 ->first()->toArray();
                         $purchaseOrderComponentData['purchase_order_id'] = $purchaseOrder->id;
                         $purchaseOrderComponentData['purchase_request_component_id'] = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->purchase_request_component_id;
+                        if($purchaseOrderComponentData['rate_per_unit'] == null || $purchaseOrderComponentData['rate_per_unit'] == ''){
+                            $purchaseOrderComponentData['rate_per_unit'] = 0;
+                        }
                         $purchaseOrderComponent = PurchaseOrderComponent::create($purchaseOrderComponentData);
                         $newAssetTypeId = MaterialRequestComponentTypes::where('slug','new-asset')->pluck('id')->first();
                         $newMaterialTypeId = MaterialRequestComponentTypes::where('slug','new-material')->pluck('id')->first();

@@ -23,15 +23,15 @@
             <label class="pull-right control-label"> Rate :</label>
         </div>
         <div class="col-md-6">
-            <input type="text" class="form-control" value="{{$purchaseOrderComponentData['rate_per_unit']}}" readonly>
+            <input type="text" class="form-control" id="rate" value="{{$purchaseOrderComponentData['rate_per_unit']}}" readonly>
         </div>
     </div>
     <div class="form-group">
         <div class="col-md-3">
-            <label class="pull-right control-label"> Quantity :</label>
+            <label class="pull-right control-label"> PO Quantity :</label>
         </div>
         <div class="col-md-6">
-            <input type="text" class="form-control quantity" name="quantity" value="{{$purchaseOrderComponentData['quantity']}}">
+            <input type="text" class="form-control quantity" id="po_quantity" name="quantity" value="{{$purchaseOrderComponentData['quantity']}}" onchange="calculateTotal()">
         </div>
     </div>
     <div class="form-group">
@@ -55,7 +55,7 @@
             <label class="pull-right control-label"> Subtotal :</label>
         </div>
         <div class="col-md-6">
-            <input type="text" class="form-control" value="{!! $purchaseOrderComponentData['rate_per_unit'] * $purchaseOrderComponentData['quantity'] !!}" readonly>
+            <input type="text" id="subtotal" class="form-control" value="{!! $purchaseOrderComponentData['rate_per_unit'] * $purchaseOrderComponentData['quantity'] !!}" readonly>
         </div>
     </div>
     @if($purchaseOrderComponent['cgst_percentage'] != null && $purchaseOrderComponent['cgst_amount'] != null)
@@ -65,12 +65,12 @@
             </div>
             <div class="col-md-3">
                 <div class="input-group" >
-                    <input type="text" class="form-control" value="{{$purchaseOrderComponent['cgst_percentage']}}" readonly>
+                    <input type="text" id="cgst_percentage" class="form-control" value="{{$purchaseOrderComponent['cgst_percentage']}}" readonly>
                     <span class="input-group-addon">%</span>
                 </div>
             </div>
             <div class="col-md-3">
-                <input type="text" class="form-control" value="{{$purchaseOrderComponent['cgst_amount']}}" readonly>
+                <input type="text" id="cgst_amount" class="form-control" value="{{$purchaseOrderComponent['cgst_amount']}}" readonly>
             </div>
         </div>
     @endif
@@ -81,12 +81,12 @@
             </div>
             <div class="col-md-3">
                 <div class="input-group" >
-                    <input type="text" class="form-control" value="{{$purchaseOrderComponent['sgst_percentage']}}" readonly>
+                    <input type="text" id="sgst_percentage" class="form-control" value="{{$purchaseOrderComponent['sgst_percentage']}}" readonly>
                     <span class="input-group-addon">%</span>
                 </div>
             </div>
             <div class="col-md-3">
-                <input type="text" class="form-control" value="{{$purchaseOrderComponent['sgst_amount']}}" readonly>
+                <input type="text" id="sgst_amount" class="form-control" value="{{$purchaseOrderComponent['sgst_amount']}}" readonly>
             </div>
         </div>
     @endif
@@ -97,12 +97,12 @@
             </div>
             <div class="col-md-3">
                 <div class="input-group" >
-                    <input type="text" class="form-control" value="{{$purchaseOrderComponent['igst_percentage']}}" readonly>
+                    <input type="text" id="igst_percentage" class="form-control" value="{{$purchaseOrderComponent['igst_percentage']}}" readonly>
                     <span class="input-group-addon">%</span>
                 </div>
             </div>
             <div class="col-md-3">
-                <input type="text" class="form-control" value="{{$purchaseOrderComponent['igst_amount']}}" readonly>
+                <input type="text" id="igst_amount" class="form-control" value="{{$purchaseOrderComponent['igst_amount']}}" readonly>
             </div>
         </div>
     @endif
@@ -112,7 +112,7 @@
                 <label class="pull-right control-label"> Total :</label>
             </div>
             <div class="col-md-6">
-                <input type="text" class="form-control" value="{{$purchaseOrderComponent['total']}}" readonly>
+                <input type="text" id="total" name="total" class="form-control" value="{{$purchaseOrderComponent['total']}}" readonly>
             </div>
         </div>
     @else
@@ -223,6 +223,24 @@
 
     function closeImage(element){
         $(element).closest('tr').find('#imageDiv').hide();
+    }
+
+    function calculateTotal(){
+        var po_quantity = parseFloat($('#po_quantity').val());
+        var rate = parseFloat($('#rate').val());
+        var subtotal = po_quantity * rate;
+        $('#subtotal').val(subtotal);
+        var cgst_percentage = parseFloat($('#cgst_percentage').val());
+        var cgst_amount = parseFloat((cgst_percentage * subtotal) / 100);
+        $('#cgst_amount').val(cgst_amount);
+        var sgst_percentage = parseFloat($('#sgst_percentage').val());
+        var sgst_amount = parseFloat((sgst_percentage * subtotal) / 100);
+        $('#sgst_amount').val(sgst_amount);
+        var igst_percentage = parseFloat($('#igst_percentage').val());
+        var igst_amount = parseFloat((igst_percentage * subtotal) / 100);
+        $('#igst_amount').val(igst_amount);
+        var total = parseFloat(subtotal + cgst_amount + sgst_amount + igst_amount);
+        $('#total').val(total);
     }
 
 </script>

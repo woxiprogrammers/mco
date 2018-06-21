@@ -44,7 +44,7 @@ Dear Sir,<br>
 <span style="margin-left: 5%"> We hereby close the above mentioned PO.</span><br>
 <br>
 <span style="margin-left: 5%"> *This is an auto generated message.</span><br>
-<span style="margin-left: 5%"> *Please revert back at purchase.manishaconstruction@gmail.com for any queries.</span><br>
+<span style="margin-left: 5%"> *Please revert back through the same mail for any queries.</span><br>
 <br><br>
 <span>Thanking you,</span><br>
 <span>Purchase Manager,</span><br>

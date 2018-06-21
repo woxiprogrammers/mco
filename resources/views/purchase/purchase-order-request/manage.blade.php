@@ -101,13 +101,22 @@
                                                             <tr>
                                                                 <th style="width: 10%;"> ID. </th>
                                                                 <th> Purchase Request ID </th>
+                                                                <th> Status</th>
                                                                 <th> Created By </th>
                                                                 <th> Action </th>
                                                             </tr>
                                                             <tr class="filter">
                                                                 <th></th>
                                                                 <th><input type="text" class="form-control form-filter" name="purchase_request_format"></th>
-                                                                <th></th>
+                                                                <th>
+                                                                    <select class="table-group-action-input form-control input-inline input-small input-sm status-select" id="por_status" name="por_status">
+
+                                                                        <option value="por_created">PO Request Created</option>
+                                                                        <option value="pending_for_approval">Pending for Director Approval</option>
+                                                                        <option value="po_created">PO Created</option>
+                                                                    </select>
+                                                                </th>
+                                                                <th><input type="hidden" class="form-control form-filter" name="por_status_id" id="por_status_id"/></th>
                                                                 <th>
                                                                     <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                                     <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
@@ -145,6 +154,12 @@
         $(document).ready(function(){
             $(".form-filter").on('keyup', function(){
                     $(".filter-submit").trigger('click');
+            });
+
+            $("#por_status").change(function(){
+                var por_status = $("#por_status").val();
+                $("#por_status_id").val(por_status);
+                $(".filter-submit").trigger('click');
             });
         });
     </script>

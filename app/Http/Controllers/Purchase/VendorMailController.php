@@ -149,6 +149,7 @@ class VendorMailController extends Controller
                 }else{
                     $projectSiteInfo['project_site_city'] = $purchaseRequest->projectSite->city->name;
                 }
+                $projectSiteInfo['delivery_address'] = $projectSiteInfo['project_name'].', '.$projectSiteInfo['project_site_name'].', '.$projectSiteInfo['project_site_address'].', '.$projectSiteInfo['project_site_city'];
                 foreach($materialRequestComponents as $key => $materialRequestComponent){
                     $vendorInfo['materials'][$iterator]['item_name'] = $materialRequestComponent->name;
                     $vendorInfo['materials'][$iterator]['quantity'] = $materialRequestComponent->quantity;
@@ -172,14 +173,21 @@ class VendorMailController extends Controller
                     $vendorInfo['materials'] = array();
                     $iterator = 0;
                     $projectSiteInfo = array();
-                    $projectSiteInfo['project_name'] = $purchaseOrder->purchaseRequest->projectSite->project->name;
-                    $projectSiteInfo['project_site_name'] = $purchaseOrder->purchaseRequest->projectSite->name;
                     $projectSiteInfo['project_site_address'] = $purchaseOrder->purchaseRequest->projectSite->address;
-                    if($purchaseOrder->purchaseRequest->projectSite->city_id == null){
-                        $projectSiteInfo['project_site_city'] = '';
+                    if($purchaseOrder->purchaseOrderRequest->delivery_address != null){
+                        $projectSiteInfo['delivery_address'] = $purchaseOrder->purchaseOrderRequest->delivery_address;
                     }else{
-                        $projectSiteInfo['project_site_city'] = $purchaseOrder->purchaseRequest->projectSite->city->name;
+                        $projectSiteInfo['project_name'] = $purchaseOrder->purchaseRequest->projectSite->project->name;
+                        $projectSiteInfo['project_site_name'] = $purchaseOrder->purchaseRequest->projectSite->name;
+
+                        if($purchaseOrder->purchaseRequest->projectSite->city_id == null){
+                            $projectSiteInfo['project_site_city'] = '';
+                        }else{
+                            $projectSiteInfo['project_site_city'] = $purchaseOrder->purchaseRequest->projectSite->city->name;
+                        }
+                        $projectSiteInfo['delivery_address'] = $projectSiteInfo['project_name'].', '.$projectSiteInfo['project_site_name'].', '.$projectSiteInfo['project_site_address'].', '.$projectSiteInfo['project_site_city'];
                     }
+
                     foreach($purchaseOrder->purchaseOrderComponent as $purchaseOrderComponent){
                         $vendorInfo['materials'][$iterator] = array();
                         $vendorInfo['materials'][$iterator]['item_name'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name;

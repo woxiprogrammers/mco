@@ -13,7 +13,7 @@ var QuotationImageUpload = function() {
                 async:false,
                 multi_selection : true,
                 filters: {
-                    max_file_size: "1mb",
+                    max_file_size: "8mb",
                     mime_types: [{
                         title: "Image files",
                         extensions: "jpg,jpeg,png,dwg"

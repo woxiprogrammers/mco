@@ -587,6 +587,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('get-details/{id}',array('uses'=> 'Drawing\ImagesController@getDetails'));
             Route::get('manage-drawings',array('uses'=> 'Drawing\ImagesController@getManageDrawingsView'));
             Route::get('edit/{id}/{site_id}',array('uses'=> 'Drawing\ImagesController@getEditView'));
+            Route::post('edit',array('uses'=> 'Drawing\ImagesController@edit'));
             Route::post('image-upload',array('uses'=>'Drawing\ImagesController@uploadTempDrawingImages'));
             Route::post('get-projects',array('uses'=>'Drawing\ImagesController@getProjects'));
             Route::post('get-project-sites',array('uses'=>'Drawing\ImagesController@getProjectSites'));
@@ -598,6 +599,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('add-version',array('uses'=>'Drawing\ImagesController@createVersion'));
             Route::post('get-data',array('uses'=>'Drawing\ImagesController@getData'));
             Route::post('get-versions',array('uses'=>'Drawing\ImagesController@getAllVersions'));
+            Route::post('get-version-images',array('uses'=>'Drawing\ImagesController@getAllVersionImages'));
             Route::post('add-comment',array('uses'=>'Drawing\ImagesController@addComment'));
         });
     });

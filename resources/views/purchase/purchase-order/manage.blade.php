@@ -92,18 +92,18 @@
                                                             <tr>
                                                                 <th> PO Id </th>
                                                                 <th> PR Id </th>
-                                                                <th> Client Name </th>
-                                                                <th> Project Name - Site Name</th>
+                                                                <th> Vendor Company Name </th>
+                                                                <th> Project Name</th>
                                                                 <th> Created At</th>
                                                                 <th> Approved Quantity</th>
-                                                                <th> Remaining Quantity</th>
+                                                                <th> Remaining Quantity(10% extra)</th>
                                                                 <th> Status </th>
                                                                 <th> Action </th>
                                                             </tr>
                                                             <tr class="filter">
-                                                                <th><input type="text" class="form-control form-filter" name="po_name" readonly></th>
+                                                                <th><input type="text" class="form-control form-filter" name="po_id"></th>
                                                                 <th><input type="hidden" class="form-control form-filter" name="postdata" id="postdata"></th>
-                                                                <th></th>
+                                                                <th><input type="text" class="form-control form-filter" name="vendor_name"></th>
                                                                 <th></th>
                                                                 <th></th>
                                                                 <th></th>
@@ -185,15 +185,26 @@
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
     <script src="/assets/custom/purchase/purchase-order/manage-datatables.js" type="text/javascript"></script>
     <script>
+
         $(document).ready(function() {
             $('#purchaseOrder').DataTable();
+
+            $("input[name='po_id']").on('keyup',function(){
+                $(".filter-submit").trigger('click');
+            });
+
+            $("input[name='vendor_name']").on('keyup',function(){
+                $(".filter-submit").trigger('click');
+            });
+
             $("#status_id").on('change',function(){
                 var site_id = $('#globalProjectSite').val();
                 var year = $('#year').val();
                 var month = $('#month').val();
                 var status_id = $('#status_id').val();
-                var po_name = $('#po_name').val();
+                var po_id = $('#po_id').val();
                 var po_count = $('#po_count').val();
+                var vendor_name = $('#vendor_name').val();
                 var postData =
                         'site_id=>'+site_id+','+
                         'year=>'+year+','+
@@ -201,7 +212,8 @@
                         'po_count=>'+po_count;
 
                 $("input[name='postdata']").val(postData);
-                $("input[name='po_name']").val(po_name);
+                $("input[name='po_id']").val(po_id);
+                $("input[name='vendor_name']").val(vendor_name);
                 $("input[name='status']").val(status_id);
                 $(".filter-submit").trigger('click');
             });
@@ -211,15 +223,18 @@
                 var year = $('#year').val();
                 var month = $('#month').val();
                 var status_id = $('#status_id').val();
-                var po_name = $('#po_name').val();
+                var po_id = $('#po_id').val();
                 var po_count = $('#po_count').val();
+                var vendor_name = $('#vendor_name').val();
                 var postData =
-                        'site_id=>'+site_id+','+
+                    'site_id=>'+site_id+','+
                         'year=>'+year+','+
                         'month=>'+month+','+
                         'po_count=>'+po_count;
+
                 $("input[name='postdata']").val(postData);
-                $("input[name='po_name']").val(po_name);
+                $("input[name='po_id']").val(po_id);
+                $("input[name='vendor_name']").val(vendor_name);
                 $("input[name='status']").val(status_id);
                 $(".filter-submit").trigger('click');
             });
