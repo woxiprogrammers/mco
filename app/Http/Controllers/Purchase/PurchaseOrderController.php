@@ -207,9 +207,13 @@ class PurchaseOrderController extends Controller
             }
 
             if ($vendor_name != "" & $filterFlag == true) {
-                $ids = PurchaseOrder::join('vendors','vendors.id','=','purchase_orders.vendor_id')
+                $forVendorSearchIds = PurchaseOrder::join('vendors','vendors.id','=','purchase_orders.vendor_id')
                     ->join('clients','clients.id','=','purchase_orders.vendor_id')
                     ->where('vendors.company','ilike','%'.$vendor_name.'%')->orWhere('vendors.company','ilike','%'.$vendor_name.'%')->whereIn('purchase_orders.id',$ids)->pluck('purchase_orders.id');
+                $forClientSearchIds = PurchaseOrder::join('clients','clients.id','=','purchase_orders.client_id')
+                    ->join('clients','clients.id','=','purchase_orders.client_id')
+                    ->where('clients.company','ilike','%'.$vendor_name.'%')->orWhere('clients.company','ilike','%'.$vendor_name.'%')->whereIn('purchase_orders.id',$ids)->pluck('purchase_orders.id');
+                $ids = array_merge($forVendorSearchIds,$forClientSearchIds);
                 if(count($ids) <= 0) {
                     $filterFlag = false;
                 }

@@ -114,7 +114,6 @@
                                                                         <option value="por_created">PO Request Created</option>
                                                                         <option value="pending_for_approval">Pending for Director Approval</option>
                                                                         <option value="po_created">PO Created</option>
-                                                                        <option value="all">ALL</option>
                                                                     </select>
                                                                 </th>
                                                                 <th><input type="hidden" class="form-control form-filter" name="por_status_id" id="por_status_id"/></th>
