@@ -1434,9 +1434,9 @@ class PurchaseOrderController extends Controller
         try{
             $purchaseOrderComponent = PurchaseOrderComponent::findOrFail($request->purchase_order_component_id);
             $subTotal = $request->quantity * $purchaseOrderComponent['rate_per_unit'];
-            $cgst_amount = $purchaseOrderComponent['cgst_percentage'] * $subTotal;
-            $sgst_amount = $purchaseOrderComponent['sgst_percentage'] * $subTotal;
-            $igst_amount = $purchaseOrderComponent['igst_percentage'] * $subTotal;
+            $cgst_amount = ($purchaseOrderComponent['cgst_percentage'] * $subTotal) / 100;
+            $sgst_amount = ($purchaseOrderComponent['sgst_percentage'] * $subTotal) / 100;
+            $igst_amount = ($purchaseOrderComponent['igst_percentage'] * $subTotal) / 100;
             $total = $subTotal + $cgst_amount + $sgst_amount + $igst_amount;
             $purchaseOrderComponent->update([
                 'quantity' => $request->quantity,

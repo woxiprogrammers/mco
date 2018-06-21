@@ -231,13 +231,13 @@
         var subtotal = po_quantity * rate;
         $('#subtotal').val(subtotal);
         var cgst_percentage = parseFloat($('#cgst_percentage').val());
-        var cgst_amount = parseFloat(cgst_percentage * subtotal);
+        var cgst_amount = parseFloat((cgst_percentage * subtotal) / 100);
         $('#cgst_amount').val(cgst_amount);
         var sgst_percentage = parseFloat($('#sgst_percentage').val());
-        var sgst_amount = parseFloat(sgst_percentage * subtotal);
+        var sgst_amount = parseFloat((sgst_percentage * subtotal) / 100);
         $('#sgst_amount').val(sgst_amount);
         var igst_percentage = parseFloat($('#igst_percentage').val());
-        var igst_amount = parseFloat(igst_percentage * subtotal);
+        var igst_amount = parseFloat((igst_percentage * subtotal) / 100);
         $('#igst_amount').val(igst_amount);
         var total = parseFloat(subtotal + cgst_amount + sgst_amount + igst_amount);
         $('#total').val(total);
