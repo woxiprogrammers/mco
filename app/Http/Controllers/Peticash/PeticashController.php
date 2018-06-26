@@ -1729,9 +1729,14 @@ class PeticashController extends Controller
             $data['project_site'] = $peticashSalaryTransaction->projectSite->name;
             $data['date'] = date('d/m/Y',strtotime($peticashSalaryTransaction->date));
             $data['paid_to'] = $peticashSalaryTransaction->employee->name;
-            $data['amount_in_words'] = ucwords(NumberHelper::getIndianCurrency($peticashSalaryTransaction->amount));;
             $data['particulars'] = $peticashSalaryTransaction->remark;
-            $data['amount'] = $peticashSalaryTransaction->amount;
+            if ($peticashSalaryTransaction->peticashTransactionType->slug == 'salary'){
+                    $data['amount_in_words'] = ucwords(NumberHelper::getIndianCurrency($peticashSalaryTransaction->payable_amount));
+                    $data['amount'] = $peticashSalaryTransaction->payable_amount;
+                } else {
+                    $data['amount_in_words'] = ucwords(NumberHelper::getIndianCurrency($peticashSalaryTransaction->amount));
+                    $data['amount'] = $peticashSalaryTransaction->amount;
+            }
             $data['approved_by'] = $peticashSalaryTransaction->referenceUser->first_name.' '.$peticashSalaryTransaction->referenceUser->last_name;
             $pdf = App::make('dompdf.wrapper');
             $pdf->loadHTML(view('peticash.peticash-management.salary.payment-voucher',$data));

@@ -90,7 +90,7 @@
                                                     <table class="table table-striped table-bordered table-hover table-checkable order-column" id="purchaseRequestTable">
                                                         <thead>
                                                             <tr>
-                                                                <th style="width:20%"> PR Id </th>
+                                                                <th style="width:20%;"> PR Id </th>
                                                                 <th> Client Name</th>
                                                                 <th> Project Name - Site Name </th>
                                                                 <th> Created At</th>
