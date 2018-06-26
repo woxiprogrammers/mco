@@ -1027,11 +1027,12 @@ class PurchaseOrderRequestController extends Controller
     }
     public function disapproveComponent(Request $request, $purchaseOrderRequest, $purchaseRequestComponent){
         try{
+            $user = Auth::user();
             $purchaseOrderRequestComponentId = PurchaseOrderRequestComponent::join('purchase_request_component_vendor_relation','purchase_request_component_vendor_relation.id','=','purchase_order_request_components.purchase_request_component_vendor_relation_id')
                                                 ->where('purchase_order_request_components.purchase_order_request_id', $purchaseOrderRequest->id)
                                                 ->where('purchase_request_component_vendor_relation.purchase_request_component_id', $purchaseRequestComponent->id)
                                                 ->pluck('purchase_order_request_components.id');
-            PurchaseOrderRequestComponent::whereIn('id', $purchaseOrderRequestComponentId)->update(['is_approved' => false]);
+            PurchaseOrderRequestComponent::whereIn('id', $purchaseOrderRequestComponentId)->update(['is_approved' => false,'approve_disapprove_by_user' => $user['id']]);
             $request->session()->flash('success', "Material / Asset removed successfully !!");
             return redirect('/purchase/purchase-order-request/approve/'.$purchaseOrderRequest->id);
         }catch(\Exception $e){
