@@ -153,7 +153,7 @@ class PurchaseRequestController extends Controller
                     }else{
                         $materialRequestComponentDetails[$iterator]['vendors'] = $allVendors;
                     }
-                    $materialRequestComponentDetails[$iterator]['disapproved_by_user_name'] = '';
+                    $materialRequestComponentDetails[$iterator]['disapproved_by_user_name'] = '-';
                     $purchaseOrderRequestComponentData = PurchaseOrderRequestComponent::join('purchase_request_component_vendor_relation','purchase_request_component_vendor_relation.id','=','purchase_order_request_components.purchase_request_component_vendor_relation_id')
                         ->join('purchase_request_components','purchase_request_components.id','=','purchase_request_component_vendor_relation.purchase_request_component_id')
                         ->where('purchase_request_components.material_request_component_id',$materialRequestComponent['id'])->orderBy('id','desc')->select('purchase_order_request_components.id','purchase_order_request_components.is_approved','purchase_order_request_components.approve_disapprove_by_user','purchase_order_request_components.purchase_request_component_vendor_relation_id')->get();
@@ -482,7 +482,9 @@ class PurchaseRequestController extends Controller
                     ->join('clients','clients.id','=','projects.client_id')
                     ->where('project_sites.id','=',$purchaseRequests[$pagination]['project_site_id'])
                     ->select('project_sites.name as site_name','projects.name as proj_name', 'clients.company as company')->first()->toArray();
-                $isDisapproved  = false;
+                $formatId  = '<a href="javascript:void(0);" onclick="openDetails('.$purchaseRequests[$pagination]['id'].')"  >
+                        '.$this->getPurchaseIDFormat('purchase-request', $purchaseRequests[$pagination]['project_site_id'], $purchaseRequests[$pagination]['created_at'], $purchaseRequests[$pagination]['serial_no']).'
+                    </a>';
                 foreach($purchaseRequestComponentIds as $purchaseRequestComponentId){
                     $purchaseOrderRequestComponentData = PurchaseOrderRequestComponent::join('purchase_request_component_vendor_relation','purchase_request_component_vendor_relation.id','=','purchase_order_request_components.purchase_request_component_vendor_relation_id')
                         ->join('purchase_request_components','purchase_request_components.id','=','purchase_request_component_vendor_relation.purchase_request_component_id')
@@ -493,16 +495,14 @@ class PurchaseRequestController extends Controller
                     if(count($purchaseOrderRequestComponentData) > 0){
                         $disapprovedCount = $purchaseOrderRequestComponentData->where('is_approved',false)->whereNotIn('id',$purchaseOrderRequestComponentNullIds)->count();
                         if($disapprovedCount == count($purchaseOrderRequestComponentData)){
-                            $isDisapproved = true;
+                            $formatId = '<a href="javascript:void(0);" onclick="openDetails('.$purchaseRequests[$pagination]['id'].')" style="color: red">
+                                            '.$this->getPurchaseIDFormat('purchase-request', $purchaseRequests[$pagination]['project_site_id'], $purchaseRequests[$pagination]['created_at'], $purchaseRequests[$pagination]['serial_no']).'
+                                         </a>';
                             break;
                         }
                     }
                 }
-                $formatId = ($isDisapproved) ? '<a href="javascript:void(0);" onclick="openDetails('.$purchaseRequests[$pagination]['id'].')">
-                        '.$this->getPurchaseIDFormat('purchase-request', $purchaseRequests[$pagination]['project_site_id'], $purchaseRequests[$pagination]['created_at'], $purchaseRequests[$pagination]['serial_no']).'
-                    </a>' : '<a href="javascript:void(0);" onclick="openDetails('.$purchaseRequests[$pagination]['id'].')"  style="color: red">
-                        '.$this->getPurchaseIDFormat('purchase-request', $purchaseRequests[$pagination]['project_site_id'], $purchaseRequests[$pagination]['created_at'], $purchaseRequests[$pagination]['serial_no']).'
-                    </a>';
+
                 $records['data'][$iterator] = [
                     $formatId,
                     $projectdata['company'],

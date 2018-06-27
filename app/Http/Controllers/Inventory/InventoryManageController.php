@@ -256,7 +256,8 @@ class InventoryManageController extends Controller
                     ->select('purchase_order_components.rate_per_unit','purchase_order_components.cgst_percentage as cgst_percentage','purchase_order_components.cgst_amount as cgst_amount','purchase_order_components.sgst_percentage as sgst_percentage','purchase_order_components.sgst_amount as sgst_amount','purchase_order_components.igst_percentage as igst_percentage','purchase_order_components.igst_amount as igst_amount')
                     ->first();
             }else{
-                $amount = Asset::where('name',$inventoryComponent['name'])->pluck('rent_per_day')->first();
+                $amount['rate_per_unit'] = Asset::where('name',$inventoryComponent['name'])->pluck('rent_per_day')->first();
+                $amount['cgst_percentage'] = $amount['cgst_amount'] = $amount['sgst_percentage'] = $amount['sgst_amount'] = $amount['igst_percentage'] = $amount['igst_amount '] = 0;
                 $units = Unit::where('slug','nos')->select('id','name')->get();
             }
             $nosUnitId = Unit::where('slug','nos')->pluck('id')->first();
