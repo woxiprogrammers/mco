@@ -15,12 +15,14 @@
                     <div class="page-content-wrapper">
                         <div class="page-head">
                             <div class="container">
+                                <div class="row">
                                 <!-- BEGIN PAGE TITLE -->
-                                <div class="page-title">
-                                    <h1>Edit Purchase Request</h1>
-                                </div>
-                                <div class="form-group " style="float: right;margin-top:1%">
-                                    {!! csrf_field() !!}
+                                    <div class="page-title">
+                                        <h1>Edit Purchase Request</h1>
+                                    </div>
+                                    <div class="form-group " style="float: right;margin-top:1%">
+                                        {!! csrf_field() !!}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -37,93 +39,98 @@
                                         <i class="fa fa-circle"></i>
                                     </li>
                                 </ul>
-                                <div class="col-md-12">
-                                    <!-- BEGIN VALIDATION STATES-->
-                                    <div class="portlet light ">
-                                        <input type="hidden" id="purchaseRequestId" value="{{$purchaseRequest->id}}">
-                                        <div class="portlet-body form">
-                                            <div class="row">
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
+                                <div class="row" style="margin-left: -25px; margin-right: -25px">
+                                    <div class="col-md-12">
+                                        <!-- BEGIN VALIDATION STATES-->
+                                        <div class="portlet light ">
+                                            <input type="hidden" id="purchaseRequestId" value="{{$purchaseRequest->id}}">
+                                            <div class="portlet-body form">
+                                                <div class="row">
+                                                    <div class="col-md-4">
                                                         <div class="form-group">
-                                                            <input type="text" class="form-control" name="client_name" value="{{$purchaseRequest->projectSite->project->client->company}}" readonly tabindex="-1">
+                                                            <div class="form-group">
+                                                                <input type="text" class="form-control" name="client_name" value="{{$purchaseRequest->projectSite->project->client->company}}" readonly tabindex="-1">
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <div class="btn-group bootstrap-select bs-select form-control dropup">
-                                                            <div class="form-group">
-                                                                <input type="text" class="form-control" name="project_sites_name" value="{{$purchaseRequest->projectSite->name}}" readonly tabindex="-1">
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <div class="btn-group bootstrap-select bs-select form-control dropup">
+                                                                <div class="form-group">
+                                                                    <input type="text" class="form-control" name="project_sites_name" value="{{$purchaseRequest->projectSite->name}}" readonly tabindex="-1">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <div class="btn-group bootstrap-select bs-select form-control dropup">
+                                                                <div class="form-group">
+                                                                    <input type="text" class="form-control" id="on_behalf_of" value="{{$purchaseRequest->onBehalfOfUser->first_name}} {{$purchaseRequest->onBehalfOfUser->last_name}}" readonly tabindex="-1">
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <div class="btn-group bootstrap-select bs-select form-control dropup">
-                                                            <div class="form-group">
-                                                                <input type="text" class="form-control" id="on_behalf_of" value="{{$purchaseRequest->onBehalfOfUser->first_name}} {{$purchaseRequest->onBehalfOfUser->last_name}}" readonly tabindex="-1">
+                                                @if($userRole == 'superadmin')
+                                                    {{--<div class="row">
+                                                        <div class="col-md-6">
+                                                            <a href="#" class="btn btn-set yellow pull-right"  id="assetBtn">
+                                                                <i class="fa fa-plus" style="font-size: large"></i>
+                                                                Asset&nbsp &nbsp &nbsp &nbsp
+                                                            </a>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="form-group " style="text-align: center">
+                                                                <a href="#" class="btn btn-set yellow pull-left"  id="myBtn">
+                                                                    <i class="fa fa-plus" style="font-size: large"></i>
+                                                                    Material
+                                                                </a>&nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp
                                                             </div>
-                                                    </div>
-                                                </div>
-                                                </div>
+                                                        </div>
+                                                    </div>--}}
+                                                @endif
                                             </div>
-                                        @if($userRole == 'superadmin')
-                                            {{--<div class="row">
-                                                <div class="col-md-6">
-                                                    <a href="#" class="btn btn-set yellow pull-right"  id="assetBtn">
-                                                        <i class="fa fa-plus" style="font-size: large"></i>
-                                                        Asset&nbsp &nbsp &nbsp &nbsp
-                                                    </a>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-group " style="text-align: center">
-                                                        <a href="#" class="btn btn-set yellow pull-left"  id="myBtn">
-                                                            <i class="fa fa-plus" style="font-size: large"></i>
-                                                            Material
-                                                        </a>&nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp
-                                                    </div>
-                                                </div>
-                                            </div>--}}
-                                        @endif
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-12">
-                                    <div class="portlet light ">
-                                        <div class="portlet-body form">
-                                            <div class="portlet light ">
-                                                <div class="portlet-title">
-                                                    @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-vendor-assignment'))
-                                                        <button class="btn btn-xs green  pull-right" type="button" aria-expanded="true" id="previewBtn">
-                                                            Preview
-                                                        </button>
-                                                    @endif
-                                                    <div class="caption">
-                                                        <i class="fa fa-bars font-red"></i>&nbsp
-                                                        <span class="caption-subject font-red sbold uppercase">Material / Asset List</span>
+                                <div class="row"  style="margin-left: -25px; margin-right: -25px">
+                                    <div class="col-md-12">
+                                        <div class="portlet light ">
+                                            <div class="portlet-body form">
+                                                <div class="portlet light ">
+                                                    <div class="portlet-title">
+                                                        @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-vendor-assignment'))
+                                                            <button class="btn btn-xs green  pull-right" type="button" aria-expanded="true" id="previewBtn">
+                                                                Preview
+                                                            </button>
+                                                        @endif
+                                                        <div class="caption">
+                                                            <i class="fa fa-bars font-red"></i>&nbsp
+                                                            <span class="caption-subject font-red sbold uppercase">Material / Asset List</span>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div class="portlet-body">
-                                                    <table class="table table-hover table-light" style="overflow-y: scroll" id="componentTable">
-                                                        <thead>
-                                                        <tr>
-                                                            <th> ID </th>
-                                                            <th> Name </th>
-                                                            <th> Quantity </th>
-                                                            <th> Available Quantity</th>
-                                                            <th> Unit </th>
-                                                            @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-vendor-assignment'))
-                                                                <th width="50%"> Action </th>
-                                                            @endif
-                                                        </tr>
-                                                        </thead>
-                                                        <tbody>
+                                                    <div class="portlet-body">
+                                                        <table class="table table-hover table-light" style="overflow-y: scroll" id="componentTable">
+                                                            <thead>
+                                                            <tr>
+                                                                <th> ID </th>
+                                                                <th> Name </th>
+                                                                <th> Disapproved By </th>
+                                                                <th> Quantity </th>
+                                                                <th> Available Quantity</th>
+                                                                <th> Unit </th>
+                                                                @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-vendor-assignment'))
+                                                                    <th width="50%"> Action </th>
+                                                                @endif
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody>
                                                             @for($iterator = 0 ; $iterator < count($materialRequestComponentDetails); $iterator++)
                                                                 <tr>
                                                                     <td> {{$materialRequestComponentDetails[$iterator]['id']}} </td>
                                                                     <td> {{$materialRequestComponentDetails[$iterator]['name']}} </td>
+                                                                    <td> {{$materialRequestComponentDetails[$iterator]['disapproved_by_user_name']}} </td>
                                                                     <td> <a href="javascript:void(0);" onclick="editQuantity({{$materialRequestComponentDetails[$iterator]['id']}})" id="componentQuantity-{{$materialRequestComponentDetails[$iterator]['id']}}">{{$materialRequestComponentDetails[$iterator]['quantity']}}</a> </td>
                                                                     <td> <a href="javascript:void(0);"  onclick="checkQuantity({{$materialRequestComponentDetails[$iterator]['id']}})"> Check Quantity </a></td>
                                                                     <td> {{$materialRequestComponentDetails[$iterator]->unit->name}} </td>
@@ -153,8 +160,9 @@
                                                                     @endif
                                                                 </tr>
                                                             @endfor
-                                                        </tbody>
-                                                    </table>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -375,8 +383,8 @@
     <link rel="stylesheet"  href="/assets/global/plugins/bootstrap-select/css/bootstrap-select.min.css"/>
     <link rel="stylesheet"  href="/assets/global/css/app.css"/>
     <link rel="stylesheet" href="/assets/global/plugins/bootstrap/css/bootstrap.min.css" type="text/css"/>
-<link href="/assets/global/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css" />
-<link href="/assets/global/plugins/select2/css/select2-bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/assets/global/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css" />
+    <link href="/assets/global/plugins/select2/css/select2-bootstrap.min.css" rel="stylesheet" type="text/css" />
     <script type="text/javascript" src="/assets/global/plugins/bootstrap-multiselect/js/bootstrap-multiselect.js"></script>
     <script src="/assets/global/plugins/select2/js/select2.full.min.js" type="text/javascript"></script>
     <script src="/assets/pages/scripts/components-select2.min.js" type="text/javascript"></script>

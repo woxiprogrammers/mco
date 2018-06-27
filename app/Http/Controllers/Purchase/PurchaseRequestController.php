@@ -153,7 +153,7 @@ class PurchaseRequestController extends Controller
                     }else{
                         $materialRequestComponentDetails[$iterator]['vendors'] = $allVendors;
                     }
-                    $materialRequestComponentDetails[$iterator]['disapproved_by_user_name'] = '';
+                    $materialRequestComponentDetails[$iterator]['disapproved_by_user_name'] = '-';
                     $purchaseOrderRequestComponentData = PurchaseOrderRequestComponent::join('purchase_request_component_vendor_relation','purchase_request_component_vendor_relation.id','=','purchase_order_request_components.purchase_request_component_vendor_relation_id')
                         ->join('purchase_request_components','purchase_request_components.id','=','purchase_request_component_vendor_relation.purchase_request_component_id')
                         ->where('purchase_request_components.material_request_component_id',$materialRequestComponent['id'])->orderBy('id','desc')->select('purchase_order_request_components.id','purchase_order_request_components.is_approved','purchase_order_request_components.approve_disapprove_by_user','purchase_order_request_components.purchase_request_component_vendor_relation_id')->get();
