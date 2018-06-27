@@ -1257,7 +1257,7 @@ class PeticashController extends Controller
             $now = Carbon::now();
             $user = Auth::user();
             if($request->comp_type == MaterialRequestComponentTypes::where('slug','new-material')->pluck('slug')->first()) {
-                $materialData['name'] = ucwords(trim($request->mat_name));
+                $materialData['name'] = ucwords($request->mat_name);
                 $categoryMaterialData['category_id'] = $request->category_id;
                 $materialData['rate_per_unit'] = round($request->rate_per_unit,3);
                 $materialData['unit_id'] = $request->unit_id;
@@ -1281,7 +1281,7 @@ class PeticashController extends Controller
                     QuotationMaterial::create($quotMaterialData);
                 }
             } elseif ($request->comp_type == MaterialRequestComponentTypes::where('slug','new-asset')->pluck('slug')->first()) {
-                $assetData['name'] = ucwords(trim($request->mat_name));
+                $assetData['name'] = ucwords($request->mat_name);
                 $assetData['is_active'] = (boolean)1;
                 $assetData['created_at'] = $now;
                 $assetData['updated_at'] = $now;
