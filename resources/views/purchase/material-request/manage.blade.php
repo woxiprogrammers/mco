@@ -304,7 +304,7 @@
                                   </div>
                               </div>
                           </div>
-                        </div>
+                          </div>
                             <div class="modal fade" id="purchaseDetailModel" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <!-- Modal content-->
@@ -322,11 +322,12 @@
                                     </div>
                                 </div>
                             </div>
-                   </div>
+                        </div>
+                    </div>
                 </div>
-           </div>
-      </div>
-   </div>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
 @section('javascript')

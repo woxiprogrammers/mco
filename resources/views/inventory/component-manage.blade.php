@@ -517,6 +517,7 @@
                                                                 <input type="text" id="site_form_quantity" name="quantity" class="form-control tax-modal-quantity" placeholder="Enter Quantity" onkeyup="calculateTaxes(this)" onchange="checkAllowedQuantity()">
                                                             </div>
                                                         </div>
+
                                                         <div class="row form-group" id="site_out_rate">
                                                             <div class="col-md-3">
                                                                 <label class="control-label pull-right">Rate</label>

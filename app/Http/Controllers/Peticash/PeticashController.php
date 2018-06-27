@@ -1257,7 +1257,7 @@ class PeticashController extends Controller
             $now = Carbon::now();
             $user = Auth::user();
             if($request->comp_type == MaterialRequestComponentTypes::where('slug','new-material')->pluck('slug')->first()) {
-                $materialData['name'] = ucwords(trim($request->mat_name));
+                $materialData['name'] = ucwords($request->mat_name);
                 $categoryMaterialData['category_id'] = $request->category_id;
                 $materialData['rate_per_unit'] = round($request->rate_per_unit,3);
                 $materialData['unit_id'] = $request->unit_id;
@@ -1281,7 +1281,7 @@ class PeticashController extends Controller
                     QuotationMaterial::create($quotMaterialData);
                 }
             } elseif ($request->comp_type == MaterialRequestComponentTypes::where('slug','new-asset')->pluck('slug')->first()) {
-                $assetData['name'] = ucwords(trim($request->mat_name));
+                $assetData['name'] = ucwords($request->mat_name);
                 $assetData['is_active'] = (boolean)1;
                 $assetData['created_at'] = $now;
                 $assetData['updated_at'] = $now;
@@ -1730,13 +1730,12 @@ class PeticashController extends Controller
             $data['date'] = date('d/m/Y',strtotime($peticashSalaryTransaction->date));
             $data['paid_to'] = $peticashSalaryTransaction->employee->name;
             $data['particulars'] = $peticashSalaryTransaction->remark;
-
-            if ($peticashSalaryTransaction->peticash_transaction_type_id == 5) {
-                $data['amount_in_words'] = ucwords(NumberHelper::getIndianCurrency($peticashSalaryTransaction->payable_amount));
-                $data['amount'] = $peticashSalaryTransaction->payable_amount;
-            } else {
-                $data['amount_in_words'] = ucwords(NumberHelper::getIndianCurrency($peticashSalaryTransaction->amount));
-                $data['amount'] = $peticashSalaryTransaction->amount;
+            if ($peticashSalaryTransaction->peticashTransactionType->slug == 'salary'){
+                    $data['amount_in_words'] = ucwords(NumberHelper::getIndianCurrency($peticashSalaryTransaction->payable_amount));
+                    $data['amount'] = $peticashSalaryTransaction->payable_amount;
+                } else {
+                    $data['amount_in_words'] = ucwords(NumberHelper::getIndianCurrency($peticashSalaryTransaction->amount));
+                    $data['amount'] = $peticashSalaryTransaction->amount;
             }
             $data['approved_by'] = $peticashSalaryTransaction->referenceUser->first_name.' '.$peticashSalaryTransaction->referenceUser->last_name;
             $pdf = App::make('dompdf.wrapper');
