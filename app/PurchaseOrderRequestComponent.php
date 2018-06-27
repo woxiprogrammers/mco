@@ -29,4 +29,8 @@ class PurchaseOrderRequestComponent extends Model
     public function unit(){
         return $this->belongsTo('App\Unit','unit_id');
     }
+
+    public function user(){
+        return $this->belongsTo('App\User','approve_disapprove_by_user');
+    }
 }

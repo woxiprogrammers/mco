@@ -511,6 +511,7 @@ class PurchaseOrderController extends Controller
 
     public function getPurchaseOrderComponentDetails(Request $request){
         try{
+            Log::info('inside');
             $data = $request->all();
             $purchaseOrderComponent = PurchaseOrderComponent::where('id',$data['component_id'])->first();
             if($purchaseOrderComponent->purchaseOrder->is_client_order == true){
@@ -1086,28 +1087,23 @@ class PurchaseOrderController extends Controller
                     }
                 }else{
                     $quantityIsFixed = false;
-                    $newMaterialTypeId = MaterialRequestComponentTypes::where('slug', 'new-material')->pluck('id')->first();
-                    if ($newMaterialTypeId == $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->component_type_id) {
-                        $purchaseOrderComponentData[$iterator]['units'] = Unit::where('is_active', true)->select('id', 'name')->orderBy('name')->get()->toArray();
-                    } else {
-                        $material = Material::where('name', 'ilike', $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name)->first();
-                        $unit1Array = UnitConversion::join('units', 'units.id', '=', 'unit_conversions.unit_2_id')
-                            ->where('unit_conversions.unit_1_id', $material->unit_id)
-                            ->select('units.id as id', 'units.name as name')
-                            ->get()
-                            ->toArray();
-                        $units2Array = UnitConversion::join('units', 'units.id', '=', 'unit_conversions.unit_1_id')
-                            ->where('unit_conversions.unit_2_id', $material->unit_id)
-                            ->whereNotIn('unit_conversions.unit_1_id', array_column($unit1Array, 'id'))
-                            ->select('units.id as id', 'units.name as name')
-                            ->get()
-                            ->toArray();
-                        $purchaseOrderComponentData[$iterator]['units'] = array_merge($unit1Array, $units2Array);
-                        $purchaseOrderComponentData[$iterator]['units'][] = [
-                            'id' => $material->unit->id,
-                            'name' => $material->unit->name,
-                        ];
-                    }
+                    $material = Material::where('name', 'ilike', $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name)->first();
+                    $unit1Array = UnitConversion::join('units', 'units.id', '=', 'unit_conversions.unit_2_id')
+                        ->where('unit_conversions.unit_1_id', $material->unit_id)
+                        ->select('units.id as id', 'units.name as name')
+                        ->get()
+                        ->toArray();
+                    $units2Array = UnitConversion::join('units', 'units.id', '=', 'unit_conversions.unit_1_id')
+                        ->where('unit_conversions.unit_2_id', $material->unit_id)
+                        ->whereNotIn('unit_conversions.unit_1_id', array_column($unit1Array, 'id'))
+                        ->select('units.id as id', 'units.name as name')
+                        ->get()
+                        ->toArray();
+                    $purchaseOrderComponentData[$iterator]['units'] = array_merge($unit1Array, $units2Array);
+                    $purchaseOrderComponentData[$iterator]['units'][] = [
+                        'id' => $material->unit->id,
+                        'name' => $material->unit->name,
+                    ];
                 }
                $iterator++;
             }
