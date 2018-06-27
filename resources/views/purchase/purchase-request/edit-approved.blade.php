@@ -39,7 +39,7 @@
                                         <i class="fa fa-circle"></i>
                                     </li>
                                 </ul>
-                                <div class="row" style="margin-left: -25px; margin-right: -25px">
+                                <div class="row" {{--style="margin-left: -25px; margin-right: -25px"--}}>
                                     <div class="col-md-12">
                                         <!-- BEGIN VALIDATION STATES-->
                                         <div class="portlet light ">
@@ -94,7 +94,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="row"  style="margin-left: -25px; margin-right: -25px">
+                                <div class="row"  {{--style="margin-left: -25px; margin-right: -25px"--}}>
                                     <div class="col-md-12">
                                         <div class="portlet light ">
                                             <div class="portlet-body form">
