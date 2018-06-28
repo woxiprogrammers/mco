@@ -813,6 +813,7 @@ class PeticashController extends Controller
             }
             $message = 'Peticash Salary Txn Status changed successfully.';
         }catch(\Exception $e){
+            $message = "Something went wrong";
             $data = [
                 'action' => 'Change Salary status',
                 'param' => $request->all(),
@@ -859,6 +860,7 @@ class PeticashController extends Controller
             }
             $message = 'Peticash Requested Salary Txn Status changed successfully.';
         }catch(\Exception $e){
+            $message = "Something went wrong";
             $data = [
                 'action' => 'Change Requested Salary status',
                 'param' => $request->all(),
@@ -881,6 +883,7 @@ class PeticashController extends Controller
             }
             $message = 'Peticash Purchase Txn Disapproved successfully.';
         }catch(\Exception $e){
+            $message = "Something went wrong";
             $data = [
                 'action' => 'Change Salary status',
                 'param' => $request->all(),
