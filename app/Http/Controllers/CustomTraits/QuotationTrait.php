@@ -1137,7 +1137,7 @@ trait QuotationTrait{
                         }
                     }
                 }
-                QuotationProduct::where('id',$quotationProduct->id)->update(['rate_per_unit' => MaterialProductHelper::customRound($productAmount)]);
+                QuotationProduct::where('id',$quotationProduct->id)->update(['rate_per_unit' => round($productAmount,3)]);
             }
             $request->session()->flash('success','Quotation Edited Successfully');
             return redirect('/quotation/edit/'.$quotation->id);
