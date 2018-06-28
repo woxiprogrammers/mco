@@ -739,10 +739,10 @@ trait QuotationTrait{
             $taxAmount = 0;
             foreach($taxes as $tax){
                 //$taxAmount = $taxAmount + MaterialProductHelper::customRound(($orderValue * ($tax['base_percentage'] / 100)));
-                $taxAmount = $taxAmount + round(($orderValue * ($tax['base_percentage'] / 100)),3);
+                $taxAmount = round($taxAmount + round(($orderValue * ($tax['base_percentage'] / 100)),3),3);
             }
-            $beforeTaxOrderValue = $orderValue;
-            $orderValue = $orderValue + $taxAmount;
+            $beforeTaxOrderValue = round($orderValue,3);
+            $orderValue = round(($orderValue + $taxAmount),3);
             $extraItems = QuotationExtraItem::join('extra_items','extra_items.id','=','quotation_extra_items.extra_item_id')
                                             ->where('quotation_extra_items.quotation_id',$quotation['id'])
                                             ->select('quotation_extra_items.extra_item_id as id','quotation_extra_items.rate as rate','extra_items.name as name')
