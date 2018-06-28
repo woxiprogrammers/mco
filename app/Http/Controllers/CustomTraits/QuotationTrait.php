@@ -581,7 +581,8 @@ trait QuotationTrait{
                 }
                 $productAmount = round(($productAmount + $profitMarginAmount),3);
                 QuotationProduct::where('id',$quotationProduct->id)->update(['rate_per_unit' => $productAmount]);
-                $response['product_amount'] = MaterialProductHelper::customRound($productAmount);
+                //$response['product_amount'] = MaterialProductHelper::customRound($productAmount);
+                $response['product_amount'] = round($productAmount,3);
             }
             $materialIds = array_keys($data['material_rate']);
             foreach($materialIds as $materialId){
@@ -591,13 +592,15 @@ trait QuotationTrait{
                     $material = Material::findOrFail($materialId);
                     $rateConversion = UnitHelper::unitConversion($data['material_unit'][$materialId],$material['unit_id'],$data['material_rate'][$materialId]);
                     if(!is_array($rateConversion)){
-                        $quotationMaterialData['rate_per_unit'] = MaterialProductHelper::customRound($rateConversion);
+                        $quotationMaterialData['rate_per_unit'] = round($rateConversion,3);
+                        //$quotationMaterialData['rate_per_unit'] = MaterialProductHelper::customRound($rateConversion);
                         $quotationMaterialData['unit_id'] = $material['unit_id'];
                     }else{
                         // If conversion is array
                     }
                 }else{
-                    $quotationMaterialData['rate_per_unit'] = MaterialProductHelper::customRound($data['material_rate'][$materialId]);
+                    //$quotationMaterialData['rate_per_unit'] = MaterialProductHelper::customRound($data['material_rate'][$materialId]);
+                    $quotationMaterialData['rate_per_unit'] = round($data['material_rate'][$materialId],3);
                     $quotationMaterialData['unit_id'] = $data['material_unit'][$materialId];
                 }
                 if($request->has('clientSuppliedMaterial') && is_array($data['clientSuppliedMaterial']) && in_array($materialId,$data['clientSuppliedMaterial'])){
@@ -938,7 +941,8 @@ trait QuotationTrait{
                         }
                     }
                 }
-                $response['amount'][$productId] = MaterialProductHelper::customRound($productAmount);
+               // $response['amount'][$productId] = MaterialProductHelper::customRound($productAmount);
+                $response['amount'][$productId] = round($productAmount,3);
             }
         }catch(\Exception $e){
             $data = [
