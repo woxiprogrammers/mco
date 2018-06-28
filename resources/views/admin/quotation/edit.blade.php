@@ -589,7 +589,7 @@
                                                                         </label>
                                                                     </div>
                                                                     <div class="col-md-5">
-                                                                        <input class="form-control" name="extra_item[{{$extraItem['id']}}]" value="{{$extraItem['rate']}}">
+                                                                        <input class="form-control" name="extra_item[{{$extraItem['id']}}]" value="{{round($extraItem['rate'],3)}}">
                                                                         @if(array_key_exists('slug',$extraItem))
                                                                             <i> Note : This is newly created item and not added to quotation yet</i>
                                                                         @endif

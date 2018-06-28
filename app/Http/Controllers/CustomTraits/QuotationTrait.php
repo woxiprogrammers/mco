@@ -1475,7 +1475,7 @@ trait QuotationTrait{
             $quotationExtraItemData['quotation_id'] = $request->quotation_id;
             foreach($request->extra_item as $extraItemId => $extraItemValue){
                 $quotationExtraItemData['extra_item_id'] = $extraItemId;
-                $quotationExtraItemData['rate'] = $extraItemValue;
+                $quotationExtraItemData['rate'] = round($extraItemValue,3);
                 $quotationExtraItem = QuotationExtraItem::where('quotation_id',$request->quotation_id)->where('extra_item_id',$extraItemId)->first();
                 if($quotationExtraItem != null){
                     $quotationExtraItem->update($quotationExtraItemData);
