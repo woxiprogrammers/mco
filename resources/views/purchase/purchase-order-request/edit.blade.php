@@ -8,7 +8,7 @@
 ?>
 
 @extends('layout.master')
-@section('title','Constro | Create Purchase Order Request')
+@section('title','Constro | Edit Purchase Order Request')
 @include('partials.common.navbar')
 @section('css')
     <!-- BEGIN PAGE LEVEL PLUGINS -->

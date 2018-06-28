@@ -335,7 +335,8 @@ class PurchaseOrderRequestController extends Controller
                 $purchaseOrderRequestComponentData[$iterator]['unit_id'] = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->purchaseRequestComponent->materialRequestComponent->unit_id;
                 $purchaseOrderRequestComponentData[$iterator]['rate_per_unit'] = $purchaseOrderRequestComponent->rate_per_unit;
                 $purchaseOrderRequestComponentData[$iterator]['total'] = $purchaseOrderRequestComponent->total;
-                $purchaseOrderRequestComponentData[$iterator]['rate_with_tax'] = MaterialProductHelper::customRound(($purchaseOrderRequestComponent->total / $purchaseOrderRequestComponent->quantity));
+                //$purchaseOrderRequestComponentData[$iterator]['rate_with_tax'] = MaterialProductHelper::customRound(($purchaseOrderRequestComponent->total / $purchaseOrderRequestComponent->quantity));
+                $purchaseOrderRequestComponentData[$iterator]['rate_with_tax'] = round(($purchaseOrderRequestComponent->total / $purchaseOrderRequestComponent->quantity),3);
                 if($purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation['is_client'] == true){
                     $purchaseOrderRequestComponentData[$iterator]['vendor_name'] = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->client->company;
                     $purchaseOrderRequestComponentData[$iterator]['is_client'] = true;
@@ -549,9 +550,9 @@ class PurchaseOrderRequestController extends Controller
             $purchaseRequestComponentData['name'] = $purchaseRequestComponent->materialRequestComponent->name;
             $purchaseRequestComponentData['unit'] = $purchaseRequestComponent->materialRequestComponent->unit->name;
             $purchaseRequestComponentData['unit_id'] = $purchaseRequestComponent->materialRequestComponent->unit_id;
-            $purchaseRequestComponentData['rate'] = $request->rate;
+            $purchaseRequestComponentData['rate'] = round($request->rate,3);
             $purchaseRequestComponentData['quantity'] = $purchaseRequestComponent->materialRequestComponent->quantity;
-            $purchaseRequestComponentData['subtotal'] = $purchaseRequestComponentData['rate'] * $purchaseRequestComponentData['quantity'];
+            $purchaseRequestComponentData['subtotal'] = round(($purchaseRequestComponentData['rate'] * $purchaseRequestComponentData['quantity']),3);
             $date = date_format(Carbon::now(),'Y-m-d');
             return view('partials.purchase.purchase-order-request.component-tax-details')->with(compact('date','purchaseRequestComponentData'));
         }catch(\Exception $e){
@@ -846,10 +847,14 @@ class PurchaseOrderRequestController extends Controller
             $purchaseOrderRequestComponentData['rate'] = $request->rate;
             $purchaseOrderRequestComponentData['quantity'] = $purchaseOrderRequestComponent->quantity;
             $purchaseOrderRequestComponentData['subtotal'] = $purchaseOrderRequestComponentData['rate'] * $purchaseOrderRequestComponentData['quantity'];
-            $purchaseOrderRequestComponentData['transportation_cgst_amount'] = MaterialProductHelper::customRound(( $purchaseOrderRequestComponent['transportation_amount'] * ($purchaseOrderRequestComponent['transportation_cgst_percentage'] / 100)));
+            /*$purchaseOrderRequestComponentData['transportation_cgst_amount'] = MaterialProductHelper::customRound(( $purchaseOrderRequestComponent['transportation_amount'] * ($purchaseOrderRequestComponent['transportation_cgst_percentage'] / 100)));
             $purchaseOrderRequestComponentData['transportation_sgst_amount'] = MaterialProductHelper::customRound(( $purchaseOrderRequestComponent['transportation_amount'] * ($purchaseOrderRequestComponent['transportation_sgst_percentage'] / 100)));
             $purchaseOrderRequestComponentData['transportation_igst_amount'] = MaterialProductHelper::customRound(( $purchaseOrderRequestComponent['transportation_amount'] * ($purchaseOrderRequestComponent['transportation_igst_percentage'] / 100)));
-            $purchaseOrderRequestComponentData['transportation_total'] = MaterialProductHelper::customRound(($purchaseOrderRequestComponentData['transportation_cgst_amount'] + $purchaseOrderRequestComponentData['transportation_sgst_amount'] + $purchaseOrderRequestComponentData['transportation_igst_amount'] + $purchaseOrderRequestComponent['transportation_amount']));
+            $purchaseOrderRequestComponentData['transportation_total'] = MaterialProductHelper::customRound(($purchaseOrderRequestComponentData['transportation_cgst_amount'] + $purchaseOrderRequestComponentData['transportation_sgst_amount'] + $purchaseOrderRequestComponentData['transportation_igst_amount'] + $purchaseOrderRequestComponent['transportation_amount']));*/
+            $purchaseOrderRequestComponentData['transportation_cgst_amount'] = round(( $purchaseOrderRequestComponent['transportation_amount'] * ($purchaseOrderRequestComponent['transportation_cgst_percentage'] / 100)),3);
+            $purchaseOrderRequestComponentData['transportation_sgst_amount'] = round(( $purchaseOrderRequestComponent['transportation_amount'] * ($purchaseOrderRequestComponent['transportation_sgst_percentage'] / 100)),3);
+            $purchaseOrderRequestComponentData['transportation_igst_amount'] = round(( $purchaseOrderRequestComponent['transportation_amount'] * ($purchaseOrderRequestComponent['transportation_igst_percentage'] / 100)),3);
+            $purchaseOrderRequestComponentData['transportation_total'] = round(($purchaseOrderRequestComponentData['transportation_cgst_amount'] + $purchaseOrderRequestComponentData['transportation_sgst_amount'] + $purchaseOrderRequestComponentData['transportation_igst_amount'] + $purchaseOrderRequestComponent['transportation_amount']),3);
             $date = date_format(Carbon::now(),'Y-m-d');
             $purchaseOrderRequestComponentData['vendor_quotation'] = array();
             $purchaseOrderRequestComponentData['client_approval'] = array();
@@ -1025,6 +1030,7 @@ class PurchaseOrderRequestController extends Controller
             abort(500);
         }
     }
+
     public function disapproveComponent(Request $request, $purchaseOrderRequest, $purchaseRequestComponent){
         try{
             $user = Auth::user();

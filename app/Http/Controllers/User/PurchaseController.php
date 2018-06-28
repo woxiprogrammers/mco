@@ -210,7 +210,7 @@ class PurchaseController extends Controller
             $user = Auth::user();
             $records['data'] = array();
             $assetComponentTypeIds = MaterialRequestComponentTypes::whereIn('slug',['system-asset','new-asset'])->pluck('id')->toArray();
-            for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($materialRequestList); $iterator++,$pagination++ ){
+            for($iterator = 0,$pagination = $request->start; $iterator < $length && $pagination < count($materialRequestList); $iterator++,$pagination++ ){
                 switch(strtolower($materialRequestList[$pagination]['component_status'])){
                     case 'pending':
                         if(in_array($materialRequestList[$pagination]['component_type_id'],$assetComponentTypeIds)){
