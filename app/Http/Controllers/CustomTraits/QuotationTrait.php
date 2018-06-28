@@ -738,7 +738,8 @@ trait QuotationTrait{
             }
             $taxAmount = 0;
             foreach($taxes as $tax){
-                $taxAmount = $taxAmount + MaterialProductHelper::customRound(($orderValue * ($tax['base_percentage'] / 100)));
+                //$taxAmount = $taxAmount + MaterialProductHelper::customRound(($orderValue * ($tax['base_percentage'] / 100)));
+                $taxAmount = $taxAmount + round(($orderValue * ($tax['base_percentage'] / 100)),3);
             }
             $beforeTaxOrderValue = $orderValue;
             $orderValue = $orderValue + $taxAmount;
@@ -1167,8 +1168,10 @@ trait QuotationTrait{
                 $quotationProductData[$iterator]['category_name'] = $quotationProducts->product->category->name;
                 $quotationProductData[$iterator]['quantity'] = $quotationProducts->quantity;
                 $quotationProductData[$iterator]['unit'] = $quotationProducts->product->unit->name;
-                $quotationProductData[$iterator]['rate'] = MaterialProductHelper::customRound($quotationProducts->rate_per_unit);
-                $quotationProductData[$iterator]['amount'] = MaterialProductHelper::customRound(($quotationProductData[$iterator]['rate'] * $quotationProductData[$iterator]['quantity']));
+                /*$quotationProductData[$iterator]['rate'] = MaterialProductHelper::customRound($quotationProducts->rate_per_unit);
+                $quotationProductData[$iterator]['amount'] = MaterialProductHelper::customRound(($quotationProductData[$iterator]['rate'] * $quotationProductData[$iterator]['quantity']));*/
+                $quotationProductData[$iterator]['rate'] = round($quotationProducts->rate_per_unit,3);
+                $quotationProductData[$iterator]['amount'] = round(($quotationProductData[$iterator]['rate'] * $quotationProductData[$iterator]['quantity']),3);
                 $total = $total + $quotationProductData[$iterator]['amount'];
                 $iterator++;
             }
@@ -1199,7 +1202,8 @@ trait QuotationTrait{
                     $taxData[$i]['id'] = $tax->id;
                     $taxData[$i]['name'] = $tax->tax->name;
                     $taxData[$i]['percentage'] = abs($tax->percentage);
-                    $taxData[$i]['tax_amount'] = MaterialProductHelper::customRound($discountedSubTotal * ($tax->percentage / 100));
+                    //$taxData[$i]['tax_amount'] = MaterialProductHelper::customRound($discountedSubTotal * ($tax->percentage / 100));
+                    $taxData[$i]['tax_amount'] = round(($discountedSubTotal * ($tax->percentage / 100)),3);
                     $rounded_amount = $rounded_amount + $taxData[$i]['tax_amount'];
                     $i++;
                 }
@@ -1365,7 +1369,8 @@ trait QuotationTrait{
                 $summary_amount = 0;
                 foreach($quotationProducts as $j => $quotationProduct){
                     if($quotationProduct->summary_id == $summary['summary_id']){
-                        $discounted_price_per_product = MaterialProductHelper::customRound(($quotationProduct->rate_per_unit - ($quotationProduct->rate_per_unit * ($quotationProduct->quotation->discount / 100))));
+                        //$discounted_price_per_product = MaterialProductHelper::customRound(($quotationProduct->rate_per_unit - ($quotationProduct->rate_per_unit * ($quotationProduct->quotation->discount / 100))));
+                        $discounted_price_per_product = round(($quotationProduct->rate_per_unit - ($quotationProduct->rate_per_unit * ($quotationProduct->quotation->discount / 100))),3);
                         $discounted_price = $quotationProduct->quantity * $discounted_price_per_product;
                         $summary_amount = $summary_amount + $discounted_price;
                     }
@@ -1373,9 +1378,10 @@ trait QuotationTrait{
                 $data['quotation'] = $quotation;
                 $summaryData[$i]['description'] = $summary->summary->name;
                 if(!empty($quotation['built_up_area'])){
-                    $summaryData[$i]['rate_per_sft'] = MaterialProductHelper::customRound(($summary_amount / $quotation['built_up_area']));
+                    //$summaryData[$i]['rate_per_sft'] = MaterialProductHelper::customRound(($summary_amount / $quotation['built_up_area']));
+                    $summaryData[$i]['rate_per_sft'] = round(($summary_amount / $quotation['built_up_area']),3);
                 }else{
-                    $summaryData[$i]['rate_per_sft'] = 0.00;
+                    $summaryData[$i]['rate_per_sft'] = 0.000;
                 }
                 $total['rate_per_sft'] = $total['rate_per_sft'] + $summaryData[$i]['rate_per_sft'];
                 $i++;
