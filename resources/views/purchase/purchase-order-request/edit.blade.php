@@ -89,7 +89,8 @@
                                                                         <td style="width: 15%"><span> {{$purchaseOrderRequestComponent['name']}} </span></td>
                                                                         <td style="width: 10%"><span class="quantity"> {{$purchaseOrderRequestComponent['quantity']}} </span></td>
                                                                         <td style="width: 10%;"><span> {{$purchaseOrderRequestComponent['unit']}} </span></td>
-                                                                        <td style="width: 10%"><span class="rate-without-tax">{!!  \App\Helper\MaterialProductHelper::customRound($purchaseOrderRequestComponent['rate_per_unit']) !!} </span></td>
+                                                                        {{--<td style="width: 10%"><span class="rate-without-tax">{!!  \App\Helper\MaterialProductHelper::customRound($purchaseOrderRequestComponent['rate_per_unit']) !!} </span></td>--}}
+                                                                        <td style="width: 10%"><span class="rate-without-tax">{!!  round($purchaseOrderRequestComponent['rate_per_unit'],3) !!} </span></td>
                                                                         <td style="width: 10%"><span class="rate-with-tax"> {!!  ($purchaseOrderRequestComponent['rate_with_tax']) !!} </span></td>
                                                                         @if($purchaseOrderRequestComponent['is_client'] == true)
                                                                             <td style="width: 10%"><span class="total-with-tax"> - </span></td>

@@ -372,9 +372,9 @@ class PurchaseOrderRequestController extends Controller
                     $purchaseOrderRequestComponents[$purchaseRequestComponentId]['purchase_request_component_id'] = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->purchase_request_component_id;
                 }
                 $rateWithTax = $purchaseOrderRequestComponent->rate_per_unit;
-                $rateWithTax += ($purchaseOrderRequestComponent->rate_per_unit * ($purchaseOrderRequestComponent->cgst_percentage / 100));
-                $rateWithTax += ($purchaseOrderRequestComponent->rate_per_unit * ($purchaseOrderRequestComponent->sgst_percentage / 100));
-                $rateWithTax += ($purchaseOrderRequestComponent->rate_per_unit * ($purchaseOrderRequestComponent->igst_percentage / 100));
+                $rateWithTax += round(($purchaseOrderRequestComponent->rate_per_unit * ($purchaseOrderRequestComponent->cgst_percentage / 100)),3);
+                $rateWithTax += round(($purchaseOrderRequestComponent->rate_per_unit * ($purchaseOrderRequestComponent->sgst_percentage / 100)),3);
+                $rateWithTax += round(($purchaseOrderRequestComponent->rate_per_unit * ($purchaseOrderRequestComponent->igst_percentage / 100)),3);
                 if($purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->is_client == true){
                     $vendorName = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->client->company;
                     $vendorId = 'client_'.$purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->client->id;
@@ -383,9 +383,9 @@ class PurchaseOrderRequestController extends Controller
                     $vendorId = $purchaseOrderRequestComponent->purchaseRequestComponentVendorRelation->vendor->id;
                 }
                 $transportationWithTax = $purchaseOrderRequestComponent->transportation_amount;
-                $transportationWithTax += ($purchaseOrderRequestComponent->transportation_amount * ($purchaseOrderRequestComponent->transportation_cgst_percentage / 100));
-                $transportationWithTax += ($purchaseOrderRequestComponent->transportation_amount * ($purchaseOrderRequestComponent->transportation_sgst_percentage / 100));
-                $transportationWithTax += ($purchaseOrderRequestComponent->transportation_amount * ($purchaseOrderRequestComponent->transportation_igst_percentage / 100));
+                $transportationWithTax += round(($purchaseOrderRequestComponent->transportation_amount * ($purchaseOrderRequestComponent->transportation_cgst_percentage / 100)),3);
+                $transportationWithTax += round(($purchaseOrderRequestComponent->transportation_amount * ($purchaseOrderRequestComponent->transportation_sgst_percentage / 100)),3);
+                $transportationWithTax += round(($purchaseOrderRequestComponent->transportation_amount * ($purchaseOrderRequestComponent->transportation_igst_percentage / 100)),3);
                 $purchaseOrderRequestComponents[$purchaseRequestComponentId]['vendor_relations'][] = [
                     'component_vendor_relation_id' => $purchaseOrderRequestComponent->purchase_request_component_vendor_relation_id,
                     'purchase_order_request_component_id' => $purchaseOrderRequestComponent->id,
@@ -393,7 +393,7 @@ class PurchaseOrderRequestController extends Controller
                     'vendor_id' => $vendorId,
                     'rate_without_tax' => $purchaseOrderRequestComponent->rate_per_unit,
                     'rate_with_tax' => $rateWithTax,
-                    'total_with_tax' => $rateWithTax * $purchaseOrderRequestComponents[$purchaseRequestComponentId]['quantity'],
+                    'total_with_tax' => round(($rateWithTax * $purchaseOrderRequestComponents[$purchaseRequestComponentId]['quantity']),3),
                     'transportation_without_tax' => $purchaseOrderRequestComponent->transportation_amount,
                     'transportation_with_tax' => $transportationWithTax
                 ];
