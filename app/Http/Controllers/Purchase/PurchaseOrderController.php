@@ -511,7 +511,6 @@ class PurchaseOrderController extends Controller
 
     public function getPurchaseOrderComponentDetails(Request $request){
         try{
-            Log::info('inside');
             $data = $request->all();
             $purchaseOrderComponent = PurchaseOrderComponent::where('id',$data['component_id'])->first();
             if($purchaseOrderComponent->purchaseOrder->is_client_order == true){
