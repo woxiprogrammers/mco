@@ -150,10 +150,16 @@ class PurchaseOrderBillingController extends Controller
             if(count($billPendingTransactions) > 0){
                 $iterator = 0;
                 foreach($billPendingTransactions as $purchaseOrderTransaction){
+                    $purchaseOrder = PurchaseOrder::where('id',($purchaseOrderTransaction['purchase_order_id']))->first()->toArray();
+                    if ($purchaseOrder['is_client_order']) {
+                        $clientvendorInfo = Client::where('id',$purchaseOrder['client_id'])->first(['company','mobile'])->toArray();
+                    } else {
+                        $clientvendorInfo = Vendor::where('id',$purchaseOrder['vendor_id'])->first(['company','mobile'])->toArray();
+                    }
                     $response[$iterator]['list'] = '<li><input type="checkbox" class="transaction-select" name="transaction_id[]" value="'.$purchaseOrderTransaction['id'].'"><label class="control-label" style="margin-left: 0.5%;">'. $purchaseOrderTransaction['grn'].' </label><a href="javascript:void(0);" onclick="viewTransactionDetails('.$purchaseOrderTransaction['id'].')" class="btn blue btn-xs" style="margin-left: 2%">View Details </a></li>';
                     $response[$iterator]['purchase_order_id'] = $purchaseOrderTransaction['purchase_order_id'];
                     $response[$iterator]['id'] = $purchaseOrderTransaction['id'];
-                    $response[$iterator]['grn'] = $purchaseOrderTransaction['grn'];
+                    $response[$iterator]['grn'] = $purchaseOrderTransaction['grn'].' : '.$clientvendorInfo['company'].' ('.$clientvendorInfo['mobile'].')';
                     $iterator++;
                 }
             }else{
