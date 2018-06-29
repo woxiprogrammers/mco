@@ -383,9 +383,9 @@ class PurchaseOrderBillingController extends Controller
                     $billTotals = $total - $paidAmount;
                     $billPaidAmount = PurchaseOrderPayment::whereIn('purchase_order_bill_id', $purchaseOrderBillData->pluck('id'))->sum('amount');;
                 }
-                $records['total'] = MaterialProductHelper::customRound($total);
-                $records['billtotal'] = MaterialProductHelper::customRound($billTotals);
-                $records['paidtotal'] = MaterialProductHelper::customRound($billPaidAmount);
+                $records['total'] = round($total,3);
+                $records['billtotal'] = round($billTotals,3);
+                $records['paidtotal'] = round($billPaidAmount,3);
             } else {
                 $records = array();
                 $records["recordsFiltered"] = $records["recordsTotal"] = count($purchaseOrderBillData);
@@ -397,10 +397,10 @@ class PurchaseOrderBillingController extends Controller
                     $length = $request->length;
                 }
                 for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($purchaseOrderBillData); $iterator++,$pagination++ ){
-                    $taxAmount = $purchaseOrderBillData[$pagination]['transportation_tax_amount'] + $purchaseOrderBillData[$pagination]['extra_tax_amount'] + $purchaseOrderBillData[$pagination]['tax_amount'];
-                    $basicAmount = $purchaseOrderBillData[$pagination]['amount'] - $taxAmount;
-                    $paidAmount = PurchaseOrderPayment::where('purchase_order_bill_id', $purchaseOrderBillData[$pagination]['id'])->sum('amount');
-                    $pendingAmount = $purchaseOrderBillData[$pagination]['amount'] - $paidAmount;
+                    $taxAmount = round(($purchaseOrderBillData[$pagination]['transportation_tax_amount'] + $purchaseOrderBillData[$pagination]['extra_tax_amount'] + $purchaseOrderBillData[$pagination]['tax_amount']),3);
+                    $basicAmount = round(($purchaseOrderBillData[$pagination]['amount'] - $taxAmount),3);
+                    $paidAmount = round((PurchaseOrderPayment::where('purchase_order_bill_id', $purchaseOrderBillData[$pagination]['id'])->sum('amount')),3);
+                    $pendingAmount = round(($purchaseOrderBillData[$pagination]['amount'] - $paidAmount),3);
                     $vendorName = Vendor::where('id', $purchaseOrderBillData[$pagination]['vendor_id'])->pluck('company')->first();
                     $entryDate = '';
                     if(isset($purchaseOrderBillData[$pagination]['bill_date'])){
