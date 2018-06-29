@@ -213,7 +213,6 @@ class PurchaseOrderRequestController extends Controller
 
     public function listing(Request $request){
         try{
-
             $loggedInUser = Auth::user();
             if(Session::has('global_project_site')){
                 $projectSiteId = Session::get('global_project_site');
@@ -224,23 +223,35 @@ class PurchaseOrderRequestController extends Controller
             }else{
                 $purchaseOrderRequestIds = PurchaseOrderRequest::orderBy('id','desc')->pluck('id');
             }
+
             if($request->has('purchase_request_format')){
                 $purchaseOrderRequestIds = PurchaseOrderRequest::join('purchase_requests','purchase_requests.id','=','purchase_order_requests.purchase_request_id')
                                             ->whereIn('purchase_order_requests.id', $purchaseOrderRequestIds)
                                             ->where('purchase_requests.format_id','ilike','%'.trim($request->purchase_request_format).'%')
                                             ->pluck('purchase_order_requests.id');
             }
+
             if ($request->has('por_status_id')) {
-                $draftPurchaseOrderRequestIds = PurchaseOrderRequestComponent::whereIn('purchase_order_request_id',$purchaseOrderRequestIds)->whereNull('is_approved')->select('purchase_order_request_id')->get()->toArray();
+                $draftPurchaseOrderRequestIds = PurchaseOrderRequestComponent::whereIn('purchase_order_request_id',$purchaseOrderRequestIds)
+                    ->whereNull('is_approved')
+                    ->pluck('purchase_order_request_id')->toArray();
                 if ($request->por_status_id == "por_created") {
-                    $purchaseOrderRequestsData = PurchaseOrderRequest::where('ready_to_approve', false)->whereIn('id', $purchaseOrderRequestIds)->orderBy('id','desc')->get();
+                    $purchaseOrderRequestsData = PurchaseOrderRequest::where('ready_to_approve', false)
+                        ->whereIn('id', $purchaseOrderRequestIds)
+                        ->orderBy('id','desc')->get();
                     $status = "PO Request Created";
                 } elseif ($request->por_status_id == "pending_for_approval") {
-                    $purchaseOrderRequestsData = PurchaseOrderRequest::where('ready_to_approve', true)->whereIn('id',$draftPurchaseOrderRequestIds)->whereIn('id', $purchaseOrderRequestIds)->orderBy('id','desc')->get();
+                    $purchaseOrderRequestsData = PurchaseOrderRequest::where('ready_to_approve', true)
+                        ->whereIn('id',$draftPurchaseOrderRequestIds)
+                        ->whereIn('id', $purchaseOrderRequestIds)
+                        ->orderBy('id','desc')->get();
                     $status = "Pending for Director Approval";
                 } elseif($request->por_status_id == "po_created"){
                     if($draftPurchaseOrderRequestIds > 0){
-                        $purchaseOrderRequestsData = PurchaseOrderRequest::where('ready_to_approve', true)->whereNotIn('id',$draftPurchaseOrderRequestIds )->orderBy('id','desc')->get();
+                        $diffIds = array_diff($purchaseOrderRequestIds->toArray(),$draftPurchaseOrderRequestIds);
+                        $purchaseOrderRequestsData = PurchaseOrderRequest::where('ready_to_approve', true)
+                            ->whereIn('id',$diffIds)
+                            ->orderBy('id','desc')->get();
                         $status = "PO Created";
                     }else{
                         $purchaseOrderRequestsData = array();

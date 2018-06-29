@@ -27,10 +27,26 @@
                                                         <thead>
                                                             <tr>
                                                                 <th style="width:20%"> Seq. No. </th>
-                                                                <th> Vendor Name</th>
+                                                                <th> Vendor/Client Name</th>
                                                                 <th> Mailed For</th>
                                                                 <th> Mail Sent Date</th>
                                                                 <th> PDF </th>
+                                                            </tr>
+                                                            <tr>
+                                                                <th  style="width: 5%"> </th>
+                                                                <th style="width: 25%"> <input type="text" class="form-control form-filter" name="vendor_name" id="vendor_name"> </th>
+                                                                <th>
+                                                                    <select class="form-control" name="status" id="status">
+                                                                        <option value="all">All</option>
+                                                                        <option value="for-purchase-order">For Purchase Order</option>
+                                                                        <option value="for-quotation">For Quotation</option>
+                                                                    </select>
+                                                                </th>
+                                                                <th> <input type="hidden" class="form-control form-filter" name="status_id" id="status_id">  </th>
+                                                                <th>
+                                                                    <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
+                                                                    <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
+                                                                </th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
@@ -59,4 +75,17 @@
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
     <script src="/assets/custom/purchase/vendor-email-datatable.js"></script>
+    <script>
+        $(document).ready(function() {
+            $("input[name='vendor_name']").on('keyup',function(){
+                $(".filter-submit").trigger('click');
+            });
+
+            $("#status").on('change',function(){
+                var status_id = $('#status').val();
+                $("input[name='status_id']").val(status_id);
+                $(".filter-submit").trigger('click');
+            });
+        });
+    </script>
 @endsection

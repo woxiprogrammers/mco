@@ -41,7 +41,51 @@ class VendorMailController extends Controller
     public function listing(Request $request){
         try{
             $status = 200;
-            $vendorMailData = PurchaseRequestComponentVendorMailInfo::orderBy('created_at','desc')->get();
+            $vendor_name = null;
+            $statusId = null;
+            $vendorMailData = array();
+            if ($request->has('vendor_name')) {
+                if ($request['vendor_name'] != "") {
+                    $vendor_name = $request['vendor_name'];
+                }
+            }
+
+            if ($request->has('status_id')) {
+                if ($request['status_id'] != "") {
+                    $statusId = $request['status_id'];
+                }
+            }
+
+            $ids = PurchaseRequestComponentVendorMailInfo::all()->pluck('id');
+            $filterFlag = true;
+            if ($vendor_name != null && $filterFlag == true) {
+                $idsVendor = PurchaseRequestComponentVendorMailInfo::join('vendors','purchase_request_component_vendor_mail_info.vendor_id','=','vendors.id')
+                    ->where('vendors.company','ilike', '%'.$vendor_name.'%')
+                    ->whereIn('purchase_request_component_vendor_mail_info.id',$ids)
+                    ->pluck('purchase_request_component_vendor_mail_info.id')->toArray();
+                $idsClients = PurchaseRequestComponentVendorMailInfo::join('clients','purchase_request_component_vendor_mail_info.vendor_id','=','clients.id')
+                    ->where('clients.company','ilike', '%'.$vendor_name.'%')
+                    ->whereIn('purchase_request_component_vendor_mail_info.id',$ids)
+                    ->pluck('purchase_request_component_vendor_mail_info.id')->toArray();
+                $ids = array_merge($idsVendor, $idsClients);
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+            if (($statusId != null && $statusId != "all") && $filterFlag == true) {
+                $ids = PurchaseRequestComponentVendorMailInfo::where('type_slug',$statusId)
+                    ->whereIn('id',$ids)->pluck('id')->toArray();
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+            if ($filterFlag) {
+                $vendorMailData = PurchaseRequestComponentVendorMailInfo::
+                whereIn('id',$ids)->orderBy('created_at','desc')->get();
+            }
+
             $iTotalRecords = count($vendorMailData);
             if($request->length == -1){
                 $length = count($vendorMailData);
@@ -54,7 +98,6 @@ class VendorMailController extends Controller
                 'recordsTotal' => $iTotalRecords,
                 'recordsFiltered' => $iTotalRecords
             ];
-            Log::info($request->start);
             for($iterator = 0,$pagination = $request->start; $iterator < $length && $pagination < count($vendorMailData); $iterator++,$pagination++ ){
                 switch($vendorMailData[$pagination]['type_slug']){
                     case 'for-quotation':
