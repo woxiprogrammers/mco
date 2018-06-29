@@ -62,7 +62,7 @@
                 <label class="control-label pull-right">Subtotal</label>
             </div>
             <div class="col-md-6">
-                <input type="text" class="form-control tax-modal-subtotal" name="subtotal" readonly value="{!!$purchaseOrderRequestComponentData['quantity'] * $purchaseOrderRequestComponentData['rate']!!}">
+                <input type="text" class="form-control tax-modal-subtotal" name="subtotal" readonly value="{!! round(($purchaseOrderRequestComponentData['quantity'] * $purchaseOrderRequestComponentData['rate']),3)!!}">
             </div>
         </div>
         <div class="row form-group">

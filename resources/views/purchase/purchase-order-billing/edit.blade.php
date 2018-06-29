@@ -508,9 +508,9 @@
 
         function calculateTotal(){
             var total = 0;
-            var extra_amount  = $('#extra_amount').val();
-            var extra_tax_amount_percentage = $('#extra_tax_percentage').val();
-            var extra_tax_amount = parseFloat((extra_amount * extra_tax_amount_percentage) / 100);
+            var extra_amount  = parseFloat($('#extra_amount').val());
+            var extra_tax_amount_percentage = parseFloat($('#extra_tax_percentage').val());
+            var extra_tax_amount = (parseFloat((extra_amount * extra_tax_amount_percentage) / 100)).toFixed(3);
             $('#extra_tax_amount').val(extra_tax_amount);
             $(".calculate-amount").each(function(){
                 var amount = $(this).val();
@@ -518,7 +518,7 @@
                     total += parseFloat(amount);
                 }
             });
-            $('#totalAmount').val(total);
+            $('#totalAmount').val(parseFloat(total).toFixed(3));
         }
 
         function checkAmount(){

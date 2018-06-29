@@ -6,7 +6,7 @@
  */
 ?>
 @extends('layout.master')
-@section('title','Constro | Edit Purchase Order Request')
+@section('title','Constro | Approval Purchase Order Request')
 @include('partials.common.navbar')
 @section('css')
 
@@ -23,7 +23,7 @@
                             <div class="container">
                                 <!-- BEGIN PAGE TITLE -->
                                 <div class="page-title">
-                                    <h1>Edit Purchase Order Request</h1>
+                                    <h1>Approval Purchase Order Request</h1>
                                 </div>
                             </div>
                         </div>
@@ -280,7 +280,7 @@
             if(typeof quantity == 'undefined' || quantity == '' || isNaN(quantity)){
                 quantity = 0;
             }
-            var subtotal = rate * quantity;
+            var subtotal = (parseFloat(rate) * parseFloat(quantity)).toFixed(3);
             $(element).closest('.modal-body').find('.tax-modal-subtotal').val(subtotal);
             var cgstPercentage = parseFloat($(element).closest('.modal-body').find('.tax-modal-cgst-percentage').val());
             if(typeof cgstPercentage == 'undefined' || cgstPercentage == '' || isNaN(cgstPercentage)){
@@ -294,14 +294,14 @@
             if(typeof igstPercentage == 'undefined' || igstPercentage == '' || isNaN(igstPercentage)){
                 igstPercentage = 0;
             }
-            var cgstAmount = customRound(subtotal * (cgstPercentage / 100));
-            var sgstAmount = customRound(subtotal * (sgstPercentage / 100));
-            var igstAmount = customRound(subtotal * (igstPercentage / 100));
+            var cgstAmount = (subtotal * (cgstPercentage / 100)).toFixed(3);
+            var sgstAmount = (subtotal * (sgstPercentage / 100)).toFixed(3);
+            var igstAmount = (subtotal * (igstPercentage / 100)).toFixed(3);
             $(element).closest('.modal-body').find('.tax-modal-cgst-amount').val(cgstAmount);
             $(element).closest('.modal-body').find('.tax-modal-sgst-amount').val(sgstAmount);
             $(element).closest('.modal-body').find('.tax-modal-igst-amount').val(igstAmount);
-            var total = customRound(subtotal + cgstAmount + sgstAmount + igstAmount);
-            $(element).closest('.modal-body').find('.tax-modal-total').val(total);
+            var total = parseFloat(subtotal) + parseFloat(cgstAmount) + parseFloat(sgstAmount) + parseFloat(igstAmount);
+            $(element).closest('.modal-body').find('.tax-modal-total').val(total.toFixed(3));
         }
 
         function openPdf(random,fullPath){

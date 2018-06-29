@@ -127,7 +127,7 @@
                                                                             {{$profitMargin['name']}}
                                                                         </td>
                                                                         <td>
-                                                                            <input class="profit-margin form-control" step="any" type="number" id="profit_margin_{{$profitMargin['id']}}" name="profit_margin[{{$profitMargin['id']}}]" class="form-control" value="{{$profitMargin['base_percentage']}}" onchange="calculateProfitMargin()" onkeyup="calculateProfitMargin()"required>
+                                                                            <input class="profit-margin form-control" step="any" type="number" id="profit_margin_{{$profitMargin['id']}}" name="profit_margin[{{$profitMargin['id']}}]" value="{{$profitMargin['base_percentage']}}" onchange="calculateProfitMargin()" onkeyup="calculateProfitMargin()"required>
                                                                         </td>
                                                                         <td class="profit-margin-amount">
 
@@ -145,16 +145,6 @@
                                                                         </label>
                                                                     </div>
                                                                 </div>
-                                                                {{--<div class="col-md-offset-6">
-                                                                    <div class="col-md-5 col-md-offset-2" style="align-items: ">
-                                                                        <label class="control-label" style="font-weight: bold; text-align: right">
-                                                                           Round Total:
-                                                                        </label>
-                                                                        <label class="control-label" style="font-weight: bold; margin-left: 1%" id="roundtotal">
-
-                                                                        </label>
-                                                                    </div>
-                                                                </div>--}}
                                                                 <div class="form-group">
                                                                     <div class="col-md-3 col-md-offset-4" style="margin-left: 78%">
                                                                         <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit </button>
@@ -198,7 +188,7 @@
                     return $.map(x, function (data) {
                         return {
                             id:data.id,
-                            name:data.name,
+                            name:data.name
                         };
                     });
                 },
@@ -217,7 +207,7 @@
                     '</div>'
                 ].join('\n'),
                 suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{name}}</strong></div>')
-            },
+            }
         }).on('typeahead:selected', function (obj, datum) {
 
             }).on('typeahead:open', function (obj, datum) {
