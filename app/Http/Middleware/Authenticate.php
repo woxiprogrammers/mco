@@ -29,7 +29,7 @@ class Authenticate
                     $globalProjectSites = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
                         ->where('projects.is_active', true)
                         ->select('projects.name as project_name','project_sites.id as project_site_id','project_sites.name as project_site_name')
-                        ->orderBy('project_site_id','desc')
+                        ->orderBy('project_name','asc')
                         ->get();
                 }else{
                     $globalProjectSites = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
@@ -37,7 +37,7 @@ class Authenticate
                         ->where('projects.is_active', true)
                         ->where('user_project_site_relation.user_id', $user->id)
                         ->select('projects.name as project_name','project_sites.id as project_site_id','project_sites.name as project_site_name')
-                        ->orderBy('project_site_id','desc')
+                        ->orderBy('project_name','asc')
                         ->get();
                 }
                 if(count($globalProjectSites) > 0){
