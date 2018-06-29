@@ -184,24 +184,24 @@ class PurchaseOrderBillingController extends Controller
                     $purchaseOrderComponent = $purchaseOrderTransactionComponent->purchaseOrderComponent;
                     $unitConversionRate = UnitHelper::unitConversion($purchaseOrderTransactionComponent->purchaseOrderComponent->unit_id,$purchaseOrderTransactionComponent->unit_id,$purchaseOrderTransactionComponent->purchaseOrderComponent->rate_per_unit);
                     if(!is_array($unitConversionRate)){
-                        $tempAmount = $purchaseOrderTransactionComponent->quantity * $unitConversionRate;
+                        $tempAmount = round(($purchaseOrderTransactionComponent->quantity * $unitConversionRate),3);
                         $amount += $tempAmount;
                         if($purchaseOrderComponent->cgst_percentage != null || $purchaseOrderComponent->cgst_percentage != ''){
-                            $taxAmount += $tempAmount * ($purchaseOrderComponent->cgst_percentage/100);
+                            $taxAmount += round(($tempAmount * ($purchaseOrderComponent->cgst_percentage/100)),3);
                         }
                         if($purchaseOrderComponent->sgst_percentage != null || $purchaseOrderComponent->sgst_percentage != ''){
-                            $taxAmount += $tempAmount * ($purchaseOrderComponent->sgst_percentage/100);
+                            $taxAmount += round(($tempAmount * ($purchaseOrderComponent->sgst_percentage/100)),3);
                         }
                         if($purchaseOrderComponent->igst_percentage != null || $purchaseOrderComponent->igst_percentage != ''){
-                            $taxAmount += $tempAmount * ($purchaseOrderComponent->igst_percentage/100);
+                            $taxAmount += round(($tempAmount * ($purchaseOrderComponent->igst_percentage/100)),3);
                         }
                     }
                     $purchaseOrderRequestComponent = $purchaseOrderComponent->purchaseOrderRequestComponent;
                     $transportationAmount += $purchaseOrderRequestComponent->transportation_amount;
-                    $transportation_cgst_amount = ($purchaseOrderRequestComponent->transportation_amount * $purchaseOrderRequestComponent->transportation_cgst_percentage) /100;
-                    $transportation_sgst_amount = ($purchaseOrderRequestComponent->transportation_amount * $purchaseOrderRequestComponent->transportation_sgst_percentage) / 100;
-                    $transportation_igst_amount = ($purchaseOrderRequestComponent->transportation_amount * $purchaseOrderRequestComponent->transportation_igst_percentage) / 100;
-                    $transportationTaxAmount = $transportation_cgst_amount + $transportation_sgst_amount + $transportation_igst_amount;
+                    $transportation_cgst_amount = round((($purchaseOrderRequestComponent->transportation_amount * $purchaseOrderRequestComponent->transportation_cgst_percentage) /100),3);
+                    $transportation_sgst_amount = round((($purchaseOrderRequestComponent->transportation_amount * $purchaseOrderRequestComponent->transportation_sgst_percentage) / 100),3);
+                    $transportation_igst_amount = round((($purchaseOrderRequestComponent->transportation_amount * $purchaseOrderRequestComponent->transportation_igst_percentage) / 100),3);
+                    $transportationTaxAmount = round(($transportation_cgst_amount + $transportation_sgst_amount + $transportation_igst_amount),3);
                     $totalTransportationTaxAmount += $transportationTaxAmount;
                 }
             }

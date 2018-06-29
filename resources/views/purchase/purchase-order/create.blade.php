@@ -1,5 +1,5 @@
 @extends('layout.master')
-@section('title','Constro | Manage Materials')
+@section('title','Constro | PO Bills')
 @include('partials.common.navbar')
 @section('css')
     <!-- BEGIN PAGE LEVEL PLUGINS -->
@@ -19,7 +19,7 @@
                                 <div class="container">
                                     <!-- BEGIN PAGE TITLE -->
                                     <div class="page-title">
-                                        <h1>Create Purchase Order</h1>
+                                        <h1>Create Purchase Order Bill</h1>
                                     </div>
                                     <div class="form-group " style="text-align: center">
                                         <button type="submit" class="btn red pull-right margin-top-15">
@@ -406,13 +406,13 @@
             if(typeof igstPercentage == 'undefined' || igstPercentage == '' || isNaN(igstPercentage)){
                 igstPercentage = 0;
             }
-            var cgstAmount = subtotal * (cgstPercentage / 100);
-            var sgstAmount = subtotal * (sgstPercentage / 100);
-            var igstAmount = subtotal * (igstPercentage / 100);
+            var cgstAmount = (parseFloat(subtotal) * (parseFloat(cgstPercentage) / 100)).toFixed(3);
+            var sgstAmount = (parseFloat(subtotal) * (parseFloat(sgstPercentage) / 100)).toFixed(3);
+            var igstAmount = (parseFloat(subtotal) * (parseFloat(igstPercentage) / 100)).toFixed(3);
             $(element).closest('.modal-body').find('.tax-modal-cgst-amount').val(cgstAmount);
             $(element).closest('.modal-body').find('.tax-modal-sgst-amount').val(sgstAmount);
             $(element).closest('.modal-body').find('.tax-modal-igst-amount').val(igstAmount);
-            var total = subtotal + cgstAmount + sgstAmount + igstAmount;
+            var total = (parseFloat(subtotal) + parseFloat(cgstAmount) + parseFloat(sgstAmount) + parseFloat(igstAmount)).toFixed(3);
             $(element).closest('.modal-body').find('.tax-modal-total').val(total);
         }
     </script>
