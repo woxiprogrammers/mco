@@ -6,7 +6,7 @@
  */
 ?>
 @extends('layout.master')
-@section('title','Constro | Edit Purchase Order Request')
+@section('title','Constro | Approval Purchase Order Request')
 @include('partials.common.navbar')
 @section('css')
 
@@ -23,7 +23,7 @@
                             <div class="container">
                                 <!-- BEGIN PAGE TITLE -->
                                 <div class="page-title">
-                                    <h1>Edit Purchase Order Request</h1>
+                                    <h1>Approval Purchase Order Request</h1>
                                 </div>
                             </div>
                         </div>
@@ -280,7 +280,7 @@
             if(typeof quantity == 'undefined' || quantity == '' || isNaN(quantity)){
                 quantity = 0;
             }
-            var subtotal = (parseFloat(rate) * parseFloat(quantity)).toFixes(3);
+            var subtotal = (parseFloat(rate) * parseFloat(quantity)).toFixed(3);
             $(element).closest('.modal-body').find('.tax-modal-subtotal').val(subtotal);
             var cgstPercentage = parseFloat($(element).closest('.modal-body').find('.tax-modal-cgst-percentage').val());
             if(typeof cgstPercentage == 'undefined' || cgstPercentage == '' || isNaN(cgstPercentage)){
