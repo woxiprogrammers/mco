@@ -77,7 +77,7 @@ function getMaterialDetails(){
 function changedQuantity(materialId){
     var rate = $("#material_"+materialId+"_rate").val();
     var quantity = $("#material_"+materialId+"_quantity").val();
-    var amount = rate*quantity;
+    var amount = rate * quantity;
     $("#material_"+materialId+"_amount").val(amount.toFixed(3));
     calculateSubTotal();
 }
@@ -85,7 +85,7 @@ function changedQuantity(materialId){
 function calculateSubTotal(){
     var amount = 0;
     $(".material_amount").each(function(){
-        amount = amount+parseFloat($(this).val());
+        amount = amount + parseFloat($(this).val());
     });
     if(isNaN(amount)){
         amount = 0;
@@ -104,17 +104,19 @@ function calculateProfitMargin(){
         $(this).parent().next().text(profitMarginAmount);
     });
     total = parseFloat(total);
-    $("#total").text(customRound(total));
+    //$("#total").text(customRound(total));
+    $("#total").text(total.toFixed(3));
     $("#roundtotal").text(total.toFixed());
 }
 
 function convertUnits(materialId){
     var newUnit = $("#material_"+materialId+"_unit").val();
     var url = window.location.href;
+    var data;
     if(url.indexOf("edit") > 0){
         var materialVersionUnitId = $("input[name='unit_"+materialId+"']").val();
         var materialVersionRate = $("input[name='rate_"+materialId+"']").val();
-        var data = {
+         data = {
                 current_unit: materialVersionUnitId,
                 rate: materialVersionRate,
                 new_unit: newUnit,
@@ -122,7 +124,7 @@ function convertUnits(materialId){
                 _token: $("input[name='_token']").val()
             };
     }else{
-        var data = {
+         data = {
                 new_unit: newUnit,
                 material_id:materialId,
                 _token: $("input[name='_token']").val()
@@ -135,10 +137,12 @@ function convertUnits(materialId){
         data: data,
         success: function(data,textStatus,xhr){
             if(xhr.status == 200){
-                $("#material_"+materialId+"_rate").val(customRound(data.rate));
+                //$("#material_"+materialId+"_rate").val(customRound(data.rate));
+                $("#material_"+materialId+"_rate").val(data.rate.toFixed(3));
             }else{
                 $("#material_"+materialId+"_unit option[value='"+data.unit+"']").prop('selected', true);
-                $("#material_"+materialId+"_rate").val(customRound(data.rate));
+               // $("#material_"+materialId+"_rate").val(customRound(data.rate));
+                $("#material_"+materialId+"_rate").val(data.rate.toFixed(3));
             }
             changedQuantity(materialId);
         },

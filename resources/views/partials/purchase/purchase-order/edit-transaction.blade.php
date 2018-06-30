@@ -100,19 +100,19 @@
                                     <input type="text" class="form-control" value="{!! $material['rate_per_unit'] !!}">
                                 </td>
                                 <td>
-                                    <input type="text" class="form-control" value="{!! $material['rate_per_unit'] * $material['quantity']!!}">
+                                    <input type="text" class="form-control" value="{!! round(($material['rate_per_unit'] * $material['quantity']),3)!!}">
                                 </td>
                                 <td>
-                                    <input type="text" class="form-control" value="{!! ($material['rate_per_unit'] * $material['quantity']) * ($material['cgst_percentage'] / 100) !!}">
+                                    <input type="text" class="form-control" value="{!! round((($material['rate_per_unit'] * $material['quantity']) * ($material['cgst_percentage'] / 100)),3) !!}">
                                 </td>
                                 <td>
-                                    <input type="text" class="form-control" value="{!! ($material['rate_per_unit'] * $material['quantity']) * ($material['sgst_percentage'] / 100) !!}">
+                                    <input type="text" class="form-control" value="{!! round((($material['rate_per_unit'] * $material['quantity']) * ($material['sgst_percentage'] / 100)),3) !!}">
                                 </td>
                                 <td>
-                                    <input type="text" class="form-control" value="{!! ($material['rate_per_unit'] * $material['quantity']) * ($material['igst_percentage'] / 100) !!}">
+                                    <input type="text" class="form-control" value="{!! round((($material['rate_per_unit'] * $material['quantity']) * ($material['igst_percentage'] / 100)),3) !!}">
                                 </td>
                                 <td>
-                                    <input type="text" class="form-control" value="{!! (($material['rate_per_unit'] * $material['quantity']) + (($material['rate_per_unit'] * $material['quantity']) * ($material['cgst_percentage'] / 100)) + (($material['rate_per_unit'] * $material['quantity']) * ($material['sgst_percentage'] / 100)) + (($material['rate_per_unit'] * $material['quantity']) * ($material['igst_percentage'] / 100))) !!}">
+                                    <input type="text" class="form-control" value="{!! round(((($material['rate_per_unit'] * $material['quantity']) + (($material['rate_per_unit'] * $material['quantity']) * ($material['cgst_percentage'] / 100)) + (($material['rate_per_unit'] * $material['quantity']) * ($material['sgst_percentage'] / 100)) + (($material['rate_per_unit'] * $material['quantity']) * ($material['igst_percentage'] / 100)))),3) !!}">
                                 </td>
                             @endif
                         </tr>

@@ -300,10 +300,10 @@
                        },
                         success: function(data,textStatus, xhr){
                             $("#subTotal").val(data.sub_total);
-                            $("#totalAmount").val(data.tax_amount + data.sub_total);
-                            $("#taxAmount").val(data.tax_amount);
-                            $("#transportation_total").val(data.transportation_amount);
-                            $("#transportation_tax_amount").val(data.transportation_tax_amount);
+                            $("#totalAmount").val((data.tax_amount + data.sub_total).toFixed(3));
+                            $("#taxAmount").val(data.tax_amount.toFixed(3));
+                            $("#transportation_total").val(data.transportation_amount.toFixed(3));
+                            $("#transportation_tax_amount").val(data.transportation_tax_amount.toFixed(3));
                             $("#extra_amount_tax_value").val(data.extra_tax_percentage);
                             $("#billData").show();
                             $("#vendorBillNumber").rules('add',{
@@ -336,9 +336,9 @@
             });
 
             $(".tax").on('keyup',function(){
-               var subtotal = $("#subTotal").val();
-               var percentage = $(this).val();
-               var amount = subtotal * (percentage / 100);
+               var subtotal = parseFloat($("#subTotal").val());
+               var percentage = parseFloat($(this).val());
+               var amount = (subtotal * (percentage / 100)).toFixed(3);
                $(this).closest('#inputGroup').next().find("input[type='text']").val(amount);
                 calculateTotal();
             });
@@ -480,13 +480,13 @@
         function calculateTotal(){
             var total = 0;
             $(".calculate-amount").each(function(){
-                var amount = $(this).val();
+                var amount = parseFloat($(this).val());
                 if(typeof amount != 'undefined' && amount != '' && amount != null){
                     total += parseFloat($(this).val());
                 }
             });
             if($('#transportationCheckbox').is(':checked') == true){
-                total = total + parseFloat($('#transportation_total').val()) + parseFloat($('#transportation_tax_amount').val()) ;
+                total = (parseFloat(total) + parseFloat($('#transportation_total').val()) + parseFloat($('#transportation_tax_amount').val())).toFixed(3) ;
                 $("#totalAmount").val(total);
             }else{
                 $("#totalAmount").val(total);

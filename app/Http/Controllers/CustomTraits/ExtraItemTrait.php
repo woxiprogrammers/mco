@@ -53,7 +53,7 @@ trait ExtraItemTrait{
     public function createExtraItem(Request $request){
         try{
             $data['name'] = ucwords(trim($request->name));
-            $data['rate'] = $request->rate;
+            $data['rate'] = round($request->rate,3);
             $data['is_active'] = false;
             $extraItem = ExtraItem::create($data);
             $request->session()->flash('success', 'Extra Item Created successfully.');
@@ -71,7 +71,7 @@ trait ExtraItemTrait{
 
     public function editExtraItem(Request $request, $extraItem){
         try{
-            $extraItem->update(['name' => ucwords(trim($request->name)) , 'rate' => $request->rate]);
+            $extraItem->update(['name' => ucwords(trim($request->name)) , 'rate' => round($request->rate,3)]);
             $request->session()->flash('success', 'Extra Item Edited successfully.');
             return redirect('/extra-item/manage');
         }catch(\Exception $e){

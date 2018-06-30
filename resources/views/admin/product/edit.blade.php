@@ -42,9 +42,9 @@
                                         <input type="hidden" id="productId" value="{{$product['id']}}">
                                         @if($copyProduct == true)
                                             <form role="form" id="edit-product" class="form-horizontal" action="/product/create" method="post">
-                                                @else
-                                                    <form role="form" id="edit-product" class="form-horizontal" action="/product/edit/{{$product['id']}}" method="post">
-                                                        @endif
+                                        @else
+                                            <form role="form" id="edit-product" class="form-horizontal" action="/product/edit/{{$product['id']}}" method="post">
+                                        @endif
                                             {!! csrf_field() !!}
                                             <div>
                                                 <fieldset>
@@ -53,10 +53,10 @@
                                                         <label class="col-md-3 control-label">Product Title</label>
                                                         <div class="col-md-6">
                                                             @if($copyProduct == true)
-                                                            <input type="text" id="name" name="name" class="form-control" value="Copy of {{$product['name']}}">
-                                                                @else
+                                                                <input type="text" id="name" name="name" class="form-control" value="Copy of {{$product['name']}}">
+                                                            @else
                                                                 <input type="text" id="name" name="name" class="form-control" value="{{$product['name']}}">
-                                                                @endif
+                                                            @endif
                                                         </div>
                                                     </div>
                                                     <div class="form-group">
@@ -70,11 +70,11 @@
                                                         <div class="col-md-6">
                                                             <select class="form-control" id="unit_id" name="unit_id">
                                                                 @foreach($units as $unit)
-                                                                @if($unit['id'] == $product['unit_id'])
-                                                                <option value="{{$unit['id']}}" selected>{{$unit['name']}}</option>
-                                                                @else
-                                                                <option value="{{$unit['id']}}">{{$unit['name']}}</option>
-                                                                @endif
+                                                                    @if($unit['id'] == $product['unit_id'])
+                                                                        <option value="{{$unit['id']}}" selected>{{$unit['name']}}</option>
+                                                                    @else
+                                                                        <option value="{{$unit['id']}}">{{$unit['name']}}</option>
+                                                                    @endif
                                                                 @endforeach
                                                             </select>
                                                         </div>
@@ -194,9 +194,9 @@
                                                                         </td>
                                                                         <td>
                                                                             @if(isset($productProfitMargins[$profitMargin['id']]))
-                                                                                <input class="profit-margin form-control" step="any" type="number" id="profit_margin_{{$profitMargin['id']}}" name="profit_margin[{{$profitMargin['id']}}]" class="form-control" value="{{$productProfitMargins[$profitMargin['id']]}}" onchange="calculateProfitMargin()" onkeyup="calculateProfitMargin()"required>
+                                                                                <input class="profit-margin form-control" step="any" type="number" id="profit_margin_{{$profitMargin['id']}}" name="profit_margin[{{$profitMargin['id']}}]" value="{{$productProfitMargins[$profitMargin['id']]}}" onchange="calculateProfitMargin()" onkeyup="calculateProfitMargin()" required>
                                                                             @else
-                                                                                <input class="profit-margin form-control" step="any" type="number" id="profit_margin_{{$profitMargin['id']}}" name="profit_margin[{{$profitMargin['id']}}]" class="form-control" value="0" onchange="calculateProfitMargin()" onkeyup="calculateProfitMargin()"required>
+                                                                                <input class="profit-margin form-control" step="any" type="number" id="profit_margin_{{$profitMargin['id']}}" name="profit_margin[{{$profitMargin['id']}}]" value="0" onchange="calculateProfitMargin()" onkeyup="calculateProfitMargin()"required>
                                                                             @endif
                                                                         </td>
                                                                         <td class="profit-margin-amount">
@@ -217,18 +217,6 @@
                                                                     </label>
                                                                 </div>
                                                             </div>
-                                                            {{--<div class="col-md-offset-7">
-                                                                <div class="col-md-3 col-md-offset-3" style="align-items: ">
-                                                                    <label class="control-label" style="font-weight: bold; text-align: right">
-                                                                        Round Total:
-                                                                    </label>
-                                                                </div>
-                                                                <div class="col-md-2">
-                                                                    <label class="control-label" style="font-weight: bold; margin-left: 1%" id="roundtotal">
-
-                                                                    </label>
-                                                                </div>
-                                                            </div>--}}
                                                             @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('edit-product'))
                                                                 <div class="form-group">
                                                                     <div class="col-md-3 col-md-offset-4" style="margin-left: 84%">

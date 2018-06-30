@@ -203,10 +203,15 @@
                                                                                 <th style="text-align: center"> Action </th>
                                                                             </tr>
                                                                             @for($iterator=0; $iterator < count($quotation->quotation_products); $iterator++)
-                                                                                @php
+                                                                                {{--@php
                                                                                     $rate = \App\Helper\MaterialProductHelper::customRound($quotation->quotation_products[$iterator]->rate_per_unit);
                                                                                     $amount = \App\Helper\MaterialProductHelper::customRound($rate * $quotation->quotation_products[$iterator]->quantity);
                                                                                     $discountedAmount = \App\Helper\MaterialProductHelper::customRound($amount - ($amount*($quotation->discount/100)));
+                                                                                @endphp--}}
+                                                                                @php
+                                                                                    $rate = round($quotation->quotation_products[$iterator]->rate_per_unit,3);
+                                                                                    $amount = round($rate * $quotation->quotation_products[$iterator]->quantity,3);
+                                                                                    $discountedAmount = round(($amount - ($amount*($quotation->discount/100))),3);
                                                                                 @endphp
                                                                                 <tr id="Row{{$iterator}}">
                                                                                     <td>
@@ -589,7 +594,7 @@
                                                                         </label>
                                                                     </div>
                                                                     <div class="col-md-5">
-                                                                        <input class="form-control" name="extra_item[{{$extraItem['id']}}]" value="{{$extraItem['rate']}}">
+                                                                        <input class="form-control" name="extra_item[{{$extraItem['id']}}]" value="{{round($extraItem['rate'],3)}}">
                                                                         @if(array_key_exists('slug',$extraItem))
                                                                             <i> Note : This is newly created item and not added to quotation yet</i>
                                                                         @endif

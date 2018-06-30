@@ -150,10 +150,16 @@ class PurchaseOrderBillingController extends Controller
             if(count($billPendingTransactions) > 0){
                 $iterator = 0;
                 foreach($billPendingTransactions as $purchaseOrderTransaction){
+                    $purchaseOrder = PurchaseOrder::where('id',($purchaseOrderTransaction['purchase_order_id']))->first()->toArray();
+                    if ($purchaseOrder['is_client_order']) {
+                        $clientvendorInfo = Client::where('id',$purchaseOrder['client_id'])->first(['company','mobile'])->toArray();
+                    } else {
+                        $clientvendorInfo = Vendor::where('id',$purchaseOrder['vendor_id'])->first(['company','mobile'])->toArray();
+                    }
                     $response[$iterator]['list'] = '<li><input type="checkbox" class="transaction-select" name="transaction_id[]" value="'.$purchaseOrderTransaction['id'].'"><label class="control-label" style="margin-left: 0.5%;">'. $purchaseOrderTransaction['grn'].' </label><a href="javascript:void(0);" onclick="viewTransactionDetails('.$purchaseOrderTransaction['id'].')" class="btn blue btn-xs" style="margin-left: 2%">View Details </a></li>';
                     $response[$iterator]['purchase_order_id'] = $purchaseOrderTransaction['purchase_order_id'];
                     $response[$iterator]['id'] = $purchaseOrderTransaction['id'];
-                    $response[$iterator]['grn'] = $purchaseOrderTransaction['grn'];
+                    $response[$iterator]['grn'] = $purchaseOrderTransaction['grn'].' : '.$clientvendorInfo['company'].' ('.$clientvendorInfo['mobile'].')';
                     $iterator++;
                 }
             }else{
@@ -184,24 +190,24 @@ class PurchaseOrderBillingController extends Controller
                     $purchaseOrderComponent = $purchaseOrderTransactionComponent->purchaseOrderComponent;
                     $unitConversionRate = UnitHelper::unitConversion($purchaseOrderTransactionComponent->purchaseOrderComponent->unit_id,$purchaseOrderTransactionComponent->unit_id,$purchaseOrderTransactionComponent->purchaseOrderComponent->rate_per_unit);
                     if(!is_array($unitConversionRate)){
-                        $tempAmount = $purchaseOrderTransactionComponent->quantity * $unitConversionRate;
+                        $tempAmount = round(($purchaseOrderTransactionComponent->quantity * $unitConversionRate),3);
                         $amount += $tempAmount;
                         if($purchaseOrderComponent->cgst_percentage != null || $purchaseOrderComponent->cgst_percentage != ''){
-                            $taxAmount += $tempAmount * ($purchaseOrderComponent->cgst_percentage/100);
+                            $taxAmount += round(($tempAmount * ($purchaseOrderComponent->cgst_percentage/100)),3);
                         }
                         if($purchaseOrderComponent->sgst_percentage != null || $purchaseOrderComponent->sgst_percentage != ''){
-                            $taxAmount += $tempAmount * ($purchaseOrderComponent->sgst_percentage/100);
+                            $taxAmount += round(($tempAmount * ($purchaseOrderComponent->sgst_percentage/100)),3);
                         }
                         if($purchaseOrderComponent->igst_percentage != null || $purchaseOrderComponent->igst_percentage != ''){
-                            $taxAmount += $tempAmount * ($purchaseOrderComponent->igst_percentage/100);
+                            $taxAmount += round(($tempAmount * ($purchaseOrderComponent->igst_percentage/100)),3);
                         }
                     }
                     $purchaseOrderRequestComponent = $purchaseOrderComponent->purchaseOrderRequestComponent;
                     $transportationAmount += $purchaseOrderRequestComponent->transportation_amount;
-                    $transportation_cgst_amount = ($purchaseOrderRequestComponent->transportation_amount * $purchaseOrderRequestComponent->transportation_cgst_percentage) /100;
-                    $transportation_sgst_amount = ($purchaseOrderRequestComponent->transportation_amount * $purchaseOrderRequestComponent->transportation_sgst_percentage) / 100;
-                    $transportation_igst_amount = ($purchaseOrderRequestComponent->transportation_amount * $purchaseOrderRequestComponent->transportation_igst_percentage) / 100;
-                    $transportationTaxAmount = $transportation_cgst_amount + $transportation_sgst_amount + $transportation_igst_amount;
+                    $transportation_cgst_amount = round((($purchaseOrderRequestComponent->transportation_amount * $purchaseOrderRequestComponent->transportation_cgst_percentage) /100),3);
+                    $transportation_sgst_amount = round((($purchaseOrderRequestComponent->transportation_amount * $purchaseOrderRequestComponent->transportation_sgst_percentage) / 100),3);
+                    $transportation_igst_amount = round((($purchaseOrderRequestComponent->transportation_amount * $purchaseOrderRequestComponent->transportation_igst_percentage) / 100),3);
+                    $transportationTaxAmount = round(($transportation_cgst_amount + $transportation_sgst_amount + $transportation_igst_amount),3);
                     $totalTransportationTaxAmount += $transportationTaxAmount;
                 }
             }
@@ -383,9 +389,9 @@ class PurchaseOrderBillingController extends Controller
                     $billTotals = $total - $paidAmount;
                     $billPaidAmount = PurchaseOrderPayment::whereIn('purchase_order_bill_id', $purchaseOrderBillData->pluck('id'))->sum('amount');;
                 }
-                $records['total'] = MaterialProductHelper::customRound($total);
-                $records['billtotal'] = MaterialProductHelper::customRound($billTotals);
-                $records['paidtotal'] = MaterialProductHelper::customRound($billPaidAmount);
+                $records['total'] = round($total,3);
+                $records['billtotal'] = round($billTotals,3);
+                $records['paidtotal'] = round($billPaidAmount,3);
             } else {
                 $records = array();
                 $records["recordsFiltered"] = $records["recordsTotal"] = count($purchaseOrderBillData);
@@ -397,10 +403,10 @@ class PurchaseOrderBillingController extends Controller
                     $length = $request->length;
                 }
                 for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($purchaseOrderBillData); $iterator++,$pagination++ ){
-                    $taxAmount = $purchaseOrderBillData[$pagination]['transportation_tax_amount'] + $purchaseOrderBillData[$pagination]['extra_tax_amount'] + $purchaseOrderBillData[$pagination]['tax_amount'];
-                    $basicAmount = $purchaseOrderBillData[$pagination]['amount'] - $taxAmount;
-                    $paidAmount = PurchaseOrderPayment::where('purchase_order_bill_id', $purchaseOrderBillData[$pagination]['id'])->sum('amount');
-                    $pendingAmount = $purchaseOrderBillData[$pagination]['amount'] - $paidAmount;
+                    $taxAmount = round(($purchaseOrderBillData[$pagination]['transportation_tax_amount'] + $purchaseOrderBillData[$pagination]['extra_tax_amount'] + $purchaseOrderBillData[$pagination]['tax_amount']),3);
+                    $basicAmount = round(($purchaseOrderBillData[$pagination]['amount'] - $taxAmount),3);
+                    $paidAmount = round((PurchaseOrderPayment::where('purchase_order_bill_id', $purchaseOrderBillData[$pagination]['id'])->sum('amount')),3);
+                    $pendingAmount = round(($purchaseOrderBillData[$pagination]['amount'] - $paidAmount),3);
                     $vendorName = Vendor::where('id', $purchaseOrderBillData[$pagination]['vendor_id'])->pluck('company')->first();
                     $entryDate = '';
                     if(isset($purchaseOrderBillData[$pagination]['bill_date'])){

@@ -180,8 +180,10 @@ $(document).ready(function(){
         var discount = $(this).val();
         $(".product-amount").each(function(){
             var discountAmount = parseFloat($(this).val())*(discount/100);
-            var discountedAmount = customRound(parseFloat($(this).val())-discountAmount);
-            $(this).closest("td").next().find('input[type="text"]').val(Math.round(discountedAmount * 1000) / 1000);
+            //var discountedAmount = customRound(parseFloat($(this).val())-discountAmount);
+            //$(this).closest("td").next().find('input[type="text"]').val(Math.round(discountedAmount * 1000) / 1000);
+            var discountedAmount = (parseFloat($(this).val()) - discountAmount).toFixed(3);
+            $(this).closest("td").next().find('input[type="text"]').val(((discountedAmount * 1000) / 1000).toFixed(3));
         });
         calculateProductSubtotal();
     });
@@ -304,7 +306,8 @@ function getProductDetails(product_id,rowNumber){
             $("#productDescription"+rowNumber).val(data.description);
             $("#productDescription"+rowNumber).attr('name','product_description['+data.id+']');
             var rate = parseInt(data.rate_per_unit);
-            $("#productRate"+rowNumber).val(rate.toFixed());
+            //$("#productRate"+rowNumber).val(rate.toFixed());
+            $("#productRate"+rowNumber).val(rate.toFixed(3));
             $("#productRate"+rowNumber).attr('name','product_rate['+data.id+']');
             $("#productQuantity"+rowNumber).prop('readonly', false);
             $("#productUnit"+rowNumber).val(data.unit);
@@ -374,7 +377,8 @@ function calculateAmount(row){
     if(isNaN(amount)){
         $("#productAmount"+row).val(0);
     }else{
-        $("#productAmount"+row).val(customRound(amount));
+        //$("#productAmount"+row).val(customRound(amount));
+        $("#productAmount"+row).val((amount).toFixed(3));
     }
     calculateSubtotal();
 }
@@ -504,16 +508,19 @@ function calculateProductSubtotal(){
     $(".product-discount-amount").each(function(){
         subtotal = subtotal + parseFloat($(this).val());
     });
-    $("#subtotal").val(customRound(subtotal));
+   // $("#subtotal").val(customRound(subtotal));
+    $("#subtotal").val((subtotal).toFixed(3));
 
     var total = subtotal;
     $(".profit-margin-percentage").each(function(){
         var percentage = parseFloat($(this).text());
         var amount = subtotal * (percentage/100);
-        $(this).next().text(customRound(amount));
+        //$(this).next().text(customRound(amount));
+        $(this).next().text((amount).toFixed(3));
         total = total + amount;
     });
-    $("#total").text(customRound(total));
+    //$("#total").text(customRound(total));
+    $("#total").text((total).toFixed(3));
 }
 
 function calculateSubtotal(){
@@ -524,9 +531,10 @@ function calculateSubtotal(){
     }else{
         var subtotal = 0;
         $(".product-amount").each(function(){
-            subtotal = subtotal+parseFloat($(this).val());
+            subtotal = subtotal + parseFloat($(this).val());
         });
-        $("#subtotal").val(customRound(subtotal));
+        //$("#subtotal").val(customRound(subtotal));
+        $("#subtotal").val((subtotal).toFixed(3));
     }
 }
 
@@ -542,8 +550,10 @@ function calucalateProductViewTotal(){
         total = total + parseFloat(profitMarginAmount);
         $(this).parent().next().text((profitMarginAmount));
     });
-    $("#productViewTotal").text(customRound(total));
-    $("#roundproductViewTotal,#roundQuotationProductViewTotal").text(customRound(total));
+    /*$("#productViewTotal").text(customRound(total));
+    $("#roundproductViewTotal,#roundQuotationProductViewTotal").text(customRound(total));*/
+    $("#productViewTotal").text((total).toFixed(3));
+    $("#roundproductViewTotal,#roundQuotationProductViewTotal").text((total).toFixed(3));
 }
 
 function convertUnit(materialId,fromUnit){
@@ -563,10 +573,12 @@ function convertUnit(materialId,fromUnit){
         data: data,
         success: function(data,textStatus,xhr){
             if(xhr.status == 200){
-                $("#materialRate"+materialId).val(customRound(data.rate));
+                //$("#materialRate"+materialId).val(customRound(data.rate));
+                $("#materialRate"+materialId).val((data.rate).toFixed(3));
             }else{
                 $("#materialUnit"+materialId+" option[value='"+data.unit+"']").prop('selected', true);
-                $("#materialRate"+materialId).val(customRound(data.rate));
+                //$("#materialRate"+materialId).val(customRound(data.rate));
+                $("#materialRate"+materialId).val((data.rate).toFixed(3));
             }
         },
         error: function(data, textStatus, xhr){

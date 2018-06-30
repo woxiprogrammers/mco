@@ -216,7 +216,8 @@ trait ProductTrait{
             }
             $productVersionData = array();
             $productVersionData['product_id'] = $product->id;
-            $productVersionData['rate_per_unit'] = MaterialProductHelper::customRound(($subTotal + $taxAmount));
+//            $productVersionData['rate_per_unit'] = MaterialProductHelper::customRound(($subTotal + $taxAmount));
+            $productVersionData['rate_per_unit'] = round(($subTotal + $taxAmount),3);
             $productVersion = ProductVersion::create($productVersionData);
             foreach($productMaterialProfitMarginData as $versions){
                 if(array_key_exists('material_version_id',$versions) && array_key_exists('material_quantity',$versions)){
@@ -303,7 +304,8 @@ trait ProductTrait{
                     $records['data'][$iterator] = [
                         $productData[$pagination]['name'],
                         Category::where('id',$productData[$pagination]['category_id'])->pluck('name')->first(),
-                        MaterialProductHelper::customRound($productVersion['rate_per_unit']),
+                        //MaterialProductHelper::customRound($productVersion['rate_per_unit']),
+                        round($productVersion['rate_per_unit'],3),
                         Unit::where('id',$productData[$pagination]['unit_id'])->pluck('name')->first(),
                         $product_status,
                         '<div class="btn-group">
@@ -348,7 +350,8 @@ trait ProductTrait{
                     $records['data'][$iterator] = [
                         $productData[$pagination]['name'],
                         Category::where('id',$productData[$pagination]['category_id'])->pluck('name')->first(),
-                        MaterialProductHelper::customRound($productVersion['rate_per_unit']),
+                        //MaterialProductHelper::customRound($productVersion['rate_per_unit']),
+                        round($productVersion['rate_per_unit'],3),
                         Unit::where('id',$productData[$pagination]['unit_id'])->pluck('name')->first(),
                         $product_status,
                         '<div class="btn-group">
@@ -380,7 +383,8 @@ trait ProductTrait{
                     $records['data'][$iterator] = [
                         $productData[$pagination]['name'],
                         Category::where('id',$productData[$pagination]['category_id'])->pluck('name')->first(),
-                        MaterialProductHelper::customRound($productVersion['rate_per_unit']),
+                        //MaterialProductHelper::customRound($productVersion['rate_per_unit']),
+                        round($productVersion['rate_per_unit'],3),
                         Unit::where('id',$productData[$pagination]['unit_id'])->pluck('name')->first(),
                         $product_status,
                         '<div class="btn-group">
@@ -482,7 +486,8 @@ trait ProductTrait{
             }
             $productVersionData = array();
             $productVersionData['product_id'] = $product->id;
-            $productVersionData['rate_per_unit'] = MaterialProductHelper::customRound(($subTotal + $taxAmount));
+//            $productVersionData['rate_per_unit'] = MaterialProductHelper::customRound(($subTotal + $taxAmount));
+            $productVersionData['rate_per_unit'] = round(($subTotal + $taxAmount),3);
             $productVersion = ProductVersion::create($productVersionData);
             foreach($productMaterialProfitMarginData as $versions){
                 if(array_key_exists('material_version_id',$versions) && array_key_exists('material_quantity',$versions)){
@@ -602,7 +607,7 @@ trait ProductTrait{
             $data['productMaterialVersions'] = $productMaterialVersions;
             $subtotal = 0;
             foreach ($productMaterialVersions as $mat) {
-                $subtotal = $subtotal + ($mat['quantity']*$mat['rate_per_unit']);
+                $subtotal = $subtotal + ($mat['quantity'] * $mat['rate_per_unit']);
             }
             $data['subtotal'] = $subtotal;
 
@@ -613,13 +618,14 @@ trait ProductTrait{
                 $pmArray = array(
                     'pm_name' => ProfitMargin::findOrfail($key)->name,
                     'percentage' => $pm,
-                    'total' => MaterialProductHelper::customRound(($subtotal*$pm)/100)
+                    //'total' => MaterialProductHelper::customRound(($subtotal*$pm)/100)
+                    'total' => round((($subtotal * $pm) / 100),3)
                 );
                 array_push($profitMarginRestruct, $pmArray);
-                $finalAmount = $finalAmount + ($subtotal*$pm)/100;
+                $finalAmount = $finalAmount + ($subtotal * $pm)/100;
                 $pmCount++;
             }
-            $data['finalAmount'] = MaterialProductHelper::customRound($finalAmount);
+            $data['finalAmount'] = round($finalAmount,3);
             $data['productProfitMargins'] = $profitMarginRestruct;
             $data['materialVersionIds'] = $materialVersionIds;
             $pdf = App::make('dompdf.wrapper');

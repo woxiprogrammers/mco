@@ -104,7 +104,7 @@ function calculateProfitMargin(){
         $(this).parent().next().text(profitMarginAmount);
     });
     total = parseFloat(total);
-    $("#productViewTotal").text(customRound(total));
+    $("#productViewTotal").text((total).toFixed(3));
 }
 
 function convertUnits(materialId){
