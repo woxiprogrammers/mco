@@ -19,6 +19,7 @@ use App\PurchaseOrderComponent;
 use App\PurchaseOrderPayment;
 use App\PurchaseOrderTransaction;
 use App\PurchaseOrderTransactionStatus;
+use App\PurchaseRequest;
 use App\Vendor;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -49,6 +50,19 @@ class PurchaseOrderBillingController extends Controller
         }
     }
 
+    public function getManageViewForPendingPOBill(Request $request){
+        try{
+            return view('purchase.pending-po-bills.manage');
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Manage Pending PO Bills',
+                'exception' => $e->getMessage()
+            ];
+            Log::cirtical(json_encode($data));
+            abort(500);
+        }
+    }
+
     public function getCreateView(Request $request){
         try{
             $clients = Client::join('projects','projects.client_id','=','clients.id')
@@ -72,6 +86,110 @@ class PurchaseOrderBillingController extends Controller
             Log::critical(json_encode($data));
             abort(500);
         }
+    }
+
+    public function getManageViewForPendingPOBillListing(Request $request){
+        try{
+
+            $status = 200;
+            $billPendingTransactions = array();
+            $ids = PurchaseOrderTransaction::join('purchase_order_transaction_statuses', 'purchase_order_transactions.purchase_order_transaction_status_id', '=', 'purchase_order_transaction_statuses.id')
+                ->join('purchase_orders', 'purchase_orders.id', '=', 'purchase_order_transactions.purchase_order_id')
+                ->where('purchase_orders.is_client_order', '!=', true)
+                ->where('purchase_order_transaction_statuses.slug', 'bill-pending')
+                // ->where('purchase_order_transactions.grn','ilike','%'.$request->keyword.'%')
+                //->select('purchase_order_transactions.id as id','purchase_order_transactions.grn as grn','purchase_order_transactions.purchase_order_id as purchase_order_id')
+                ->pluck('purchase_order_transactions.id');
+
+            $filterFlag = true;
+
+            if($request->has('project_name') && $request->project_name != '' && $filterFlag == true){
+                $ids = '';
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+
+            }
+
+            if($request->has('po_number') && $request->po_number != '' && $filterFlag == true){
+                $ids = '';
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+
+            }
+
+            if($request->has('grn_number') && $request->grn_number != '' && $filterFlag == true){
+                $ids = '';
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+
+            }
+
+            if($request->has('vendor_name') && $request->vendor_name != '' && $filterFlag == true){
+                $ids = '';
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+
+            }
+
+           if($filterFlag) {
+                $billPendingTransactions = PurchaseOrderTransaction::join('purchase_order_transaction_statuses', 'purchase_order_transactions.purchase_order_transaction_status_id', '=', 'purchase_order_transaction_statuses.id')
+                    ->join('purchase_orders', 'purchase_orders.id', '=', 'purchase_order_transactions.purchase_order_id')
+                    ->where('purchase_orders.is_client_order', '!=', true)
+                    ->where('purchase_order_transaction_statuses.slug', 'bill-pending')
+                    // ->where('purchase_order_transactions.grn','ilike','%'.$request->keyword.'%')
+                    //->select('purchase_order_transactions.id as id','purchase_order_transactions.grn as grn','purchase_order_transactions.purchase_order_id as purchase_order_id')
+                    ->get()->toArray();
+            }
+
+            $iTotalRecords = count($billPendingTransactions);
+            $records = array();
+            $records['data'] = array();
+            $end = $request->length < 0 ? count($billPendingTransactions) : $request->length;
+
+            if(count($billPendingTransactions) > 0){
+                    for($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($billPendingTransactions); $iterator++,$pagination++ ){
+                        $purchaseOrder = PurchaseOrder::where('id',($billPendingTransactions[$iterator]['purchase_order_id']))->first()->toArray();
+                        $clientvendorInfo = Vendor::where('id',$purchaseOrder['vendor_id'])->first(['company','mobile'])->toArray();
+                        $projectSite = PurchaseRequest::join('project_sites','project_sites.id','=','purchase_requests.project_site_id')
+                            ->join('projects','projects.id','=','project_sites.project_id')
+                            ->where('purchase_requests.id', $billPendingTransactions[$iterator]['purchase_request_id'])
+                            ->select('projects.name')
+                            ->first()->toArray();
+
+                        $poNumber = PurchaseOrder::where('id',$billPendingTransactions[$iterator]['purchase_order_id'])->pluck('format_id');
+
+
+                        $records['data'][$iterator] = [
+                            $projectSite['name'],
+                            $poNumber,
+                            $billPendingTransactions[$iterator]['grn'],
+                            $clientvendorInfo['company'],
+                            'First Material name',
+                            $clientvendorInfo['mobile'],
+                            ''
+                        ];
+
+                    }
+            }
+
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $iTotalRecords;
+            $records["recordsFiltered"] = $iTotalRecords;
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Get PO billing listings',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $records = array();
+            $status = 500;
+        }
+        return response()->json($records,$status);
     }
 
     public function getPurchaseOrders(Request $request){
