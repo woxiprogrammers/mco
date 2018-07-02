@@ -97,14 +97,18 @@ class PurchaseOrderBillingController extends Controller
                 ->join('purchase_orders', 'purchase_orders.id', '=', 'purchase_order_transactions.purchase_order_id')
                 ->where('purchase_orders.is_client_order', '!=', true)
                 ->where('purchase_order_transaction_statuses.slug', 'bill-pending')
-                // ->where('purchase_order_transactions.grn','ilike','%'.$request->keyword.'%')
-                //->select('purchase_order_transactions.id as id','purchase_order_transactions.grn as grn','purchase_order_transactions.purchase_order_id as purchase_order_id')
                 ->pluck('purchase_order_transactions.id');
 
             $filterFlag = true;
 
             if($request->has('project_name') && $request->project_name != '' && $filterFlag == true){
-                $ids = '';
+                $ids = PurchaseOrderTransaction::join('purchase_orders','purchase_orders.id','=','purchase_order_transactions.purchase_order_id')
+                    ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
+                    ->join('project_sites','project_sites.id','=','purchase_requests.project_site_id')
+                    ->join('projects','projects.id','=','project_sites.project_id')
+                    ->where('projects.name', 'ilike','%'.$request->project_name.'%')
+                    ->whereIn('purchase_order_transactions.id',$ids)
+                    ->pluck('purchase_order_transactions.id');
                 if(count($ids) <= 0) {
                     $filterFlag = false;
                 }
@@ -112,7 +116,10 @@ class PurchaseOrderBillingController extends Controller
             }
 
             if($request->has('po_number') && $request->po_number != '' && $filterFlag == true){
-                $ids = '';
+                $ids = PurchaseOrderTransaction::join('purchase_orders','purchase_orders.id','=','purchase_order_transactions.purchase_order_id')
+                    ->where('purchase_orders.format_id','ilike','%'.$request->po_number.'%')
+                    ->whereIn('purchase_order_transactions.id',$ids)
+                    ->pluck('purchase_order_transactions.id');
                 if(count($ids) <= 0) {
                     $filterFlag = false;
                 }
@@ -120,7 +127,9 @@ class PurchaseOrderBillingController extends Controller
             }
 
             if($request->has('grn_number') && $request->grn_number != '' && $filterFlag == true){
-                $ids = '';
+                $ids = PurchaseOrderTransaction::where('purchase_order_transactions.grn','ilike','%'.$request->grn_number.'%')
+                    ->whereIn('purchase_order_transactions.id',$ids)
+                    ->pluck('purchase_order_transactions.id');
                 if(count($ids) <= 0) {
                     $filterFlag = false;
                 }
@@ -128,7 +137,11 @@ class PurchaseOrderBillingController extends Controller
             }
 
             if($request->has('vendor_name') && $request->vendor_name != '' && $filterFlag == true){
-                $ids = '';
+                $ids = PurchaseOrderTransaction::join('purchase_orders','purchase_orders.id','=','purchase_order_transactions.purchase_order_id')
+                    ->join('vendors','vendors.id','=','purchase_orders.vendor_id')
+                    ->where('vendors.company','ilike','%'.$request->vendor_name.'%')
+                    ->whereIn('purchase_order_transactions.id',$ids)
+                    ->pluck('purchase_order_transactions.id');
                 if(count($ids) <= 0) {
                     $filterFlag = false;
                 }
@@ -140,8 +153,7 @@ class PurchaseOrderBillingController extends Controller
                     ->join('purchase_orders', 'purchase_orders.id', '=', 'purchase_order_transactions.purchase_order_id')
                     ->where('purchase_orders.is_client_order', '!=', true)
                     ->where('purchase_order_transaction_statuses.slug', 'bill-pending')
-                    // ->where('purchase_order_transactions.grn','ilike','%'.$request->keyword.'%')
-                    //->select('purchase_order_transactions.id as id','purchase_order_transactions.grn as grn','purchase_order_transactions.purchase_order_id as purchase_order_id')
+                    ->whereIn('purchase_order_transactions.id',$ids)
                     ->get()->toArray();
             }
 
@@ -162,13 +174,20 @@ class PurchaseOrderBillingController extends Controller
 
                         $poNumber = PurchaseOrder::where('id',$billPendingTransactions[$iterator]['purchase_order_id'])->pluck('format_id');
 
+                        $firstname = PurchaseOrderTransaction::join('purchase_orders','purchase_orders.id','=','purchase_order_transactions.purchase_order_id')
+                            ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
+                            ->join('purchase_request_components','purchase_request_components.purchase_request_id','=','purchase_requests.id')
+                            ->join('material_request_components','material_request_components.id','=','purchase_request_components.material_request_component_id')
+                            ->where('purchase_order_transactions.purchase_order_id', $billPendingTransactions[$iterator]['purchase_order_id'])
+                            ->pluck('material_request_components.name')
+                            ->first();
 
                         $records['data'][$iterator] = [
                             $projectSite['name'],
                             $poNumber,
                             $billPendingTransactions[$iterator]['grn'],
                             $clientvendorInfo['company'],
-                            'First Material name',
+                            $firstname,
                             $clientvendorInfo['mobile'],
                             ''
                         ];
