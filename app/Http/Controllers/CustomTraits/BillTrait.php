@@ -242,11 +242,14 @@ trait BillTrait{
                 $listingData[$iterator]['bill_no_format'] = "B-".strtoupper(date('M',strtotime($bill['created_at'])))."-".$bill->id."/".date('y',strtotime($bill['created_at']));
                 $total_amount = 0;
                 foreach($bill->bill_quotation_product as $key1 => $product){
-                    $rate = MaterialProductHelper::customRound(($product->quotation_products->rate_per_unit - ($product->quotation_products->rate_per_unit * ($product->quotation_products->quotation->discount / 100))),3);
-                    $total_amount = $total_amount + ($product->quantity * $rate) ;
+                    /*$rate = MaterialProductHelper::customRound(($product->quotation_products->rate_per_unit - ($product->quotation_products->rate_per_unit * ($product->quotation_products->quotation->discount / 100))),3);
+                    $total_amount = $total_amount + ($product->quantity * $rate) ;*/
+                    $rate = round(($product->quotation_products->rate_per_unit - ($product->quotation_products->rate_per_unit * ($product->quotation_products->quotation->discount / 100))),3);
+                    $total_amount = round(($total_amount + ($product->quantity * $rate)),3) ;
                 }
                 if(count($bill->bill_quotation_extraItems) > 0){
-                    $extraItemsTotal = $bill->bill_quotation_extraItems->sum('rate');
+                    //$extraItemsTotal = $bill->bill_quotation_extraItems->sum('rate');
+                    $extraItemsTotal = round($bill->bill_quotation_extraItems->sum('rate'),3);
                 }else{
                     $extraItemsTotal = 0;
                 }
@@ -278,11 +281,13 @@ trait BillTrait{
                 $listingData[$iterator]['final_total'] = $total_amount;
                 foreach($currentTaxes as $key2 => $tax){
                     if(array_key_exists('percentage',$tax)){
-                        $listingData[$iterator]['tax'][$tax['tax_id']] = $total_amount * ($tax['percentage'] / 100);
+                        //$listingData[$iterator]['tax'][$tax['tax_id']] = $total_amount * ($tax['percentage'] / 100);
+                        $listingData[$iterator]['tax'][$tax['tax_id']] = round(($total_amount * ($tax['percentage'] / 100)),3);
                     }else{
                         $listingData[$iterator]['tax'][$tax['tax_id']] = 0;
                     }
-                    $listingData[$iterator]['final_total'] = MaterialProductHelper::customRound($listingData[$iterator]['final_total'] + $listingData[$iterator]['tax'][$tax['tax_id']]);
+                    //$listingData[$iterator]['final_total'] = MaterialProductHelper::customRound($listingData[$iterator]['final_total'] + $listingData[$iterator]['tax'][$tax['tax_id']]);
+                    $listingData[$iterator]['final_total'] = round(($listingData[$iterator]['final_total'] + $listingData[$iterator]['tax'][$tax['tax_id']]),3);
                     $i++;
                 }
                 $thisBillSpecialTax = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
@@ -320,17 +325,21 @@ trait BillTrait{
                         $appliedOnTaxes = json_decode($tax['applied_on']);
                         foreach($appliedOnTaxes as $appliedTaxId){
                             if($appliedTaxId == 0){                 // On Subtotal
-                                $taxAmount += $total_amount * ($tax['percentage'] / 100);
+                                //$taxAmount += $total_amount * ($tax['percentage'] / 100);
+                                $taxAmount += round(($total_amount * ($tax['percentage'] / 100)),3);
                             }else{
-                                $taxAmount += $listingData[$iterator]['tax'][$appliedTaxId] * ($tax['percentage'] / 100);
+                                //$taxAmount += $listingData[$iterator]['tax'][$appliedTaxId] * ($tax['percentage'] / 100);
+                                $taxAmount += round(($listingData[$iterator]['tax'][$appliedTaxId] * ($tax['percentage'] / 100)),3);
                             }
                         }
                     }else{
-                        $taxAmount += $total_amount * ($tax['percentage'] / 100);
+                        //$taxAmount += $total_amount * ($tax['percentage'] / 100);
+                        $taxAmount += round(($total_amount * ($tax['percentage'] / 100)),3);
                     }
 
                     $listingData[$iterator]['tax'][$tax['tax_id']] = $taxAmount;
-                    $listingData[$iterator]['final_total'] = MaterialProductHelper::customRound($listingData[$iterator]['final_total'] + $listingData[$iterator]['tax'][$tax['tax_id']]);
+                   // $listingData[$iterator]['final_total'] = MaterialProductHelper::customRound($listingData[$iterator]['final_total'] + $listingData[$iterator]['tax'][$tax['tax_id']]);
+                    $listingData[$iterator]['final_total'] = round(($listingData[$iterator]['final_total'] + $listingData[$iterator]['tax'][$tax['tax_id']]),3);
                 }
                 $listingData[$iterator]['paid_amount'] = BillTransaction::where('bill_id',$bill->id)->sum('total');
                 $listingData[$iterator]['balance_amount'] = $listingData[$iterator]['final_total'] - $listingData[$iterator]['paid_amount'];
@@ -362,9 +371,9 @@ trait BillTrait{
                 ];
                 $totalTaxAmount = 0;
                 foreach($listingData[$pagination]['tax'] as $taxAmount){
-                    $totalTaxAmount += $taxAmount;
+                    $totalTaxAmount += round($taxAmount,3);
                 }
-                array_push($records['data'][$iterator],$totalTaxAmount);
+                array_push($records['data'][$iterator],round($totalTaxAmount,3));
                 array_push($records['data'][$iterator],$listingData[$iterator]['final_total']);
                 array_push($records['data'][$iterator],$listingData[$iterator]['paid_amount']);
                 array_push($records['data'][$iterator],$listingData[$iterator]['balance_amount']);
