@@ -1,10 +1,6 @@
 var PurchaseOrderListing = function () {
     var handleOrders = function () {
         var grid = new Datatable();
-       /* var projectSiteId = $("#globalProjectSite").val();
-        if(typeof projectSiteId == 'undefined' || projectSiteId == ''){
-            projectSiteId = 0;
-        }*/
         grid.init({
             src: $("#pendingPOBillTable"),
             onSuccess: function (grid) {

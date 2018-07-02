@@ -35,13 +35,6 @@
                                 <div class="page-title">
                                     <h1>Manage Pending PO Bills</h1>
                                 </div>
-                               {{-- @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-purchase-bill-entry'))
-                                    <div class="btn-group pull-right margin-top-15">
-                                        <div id="sample_editable_1_new" class="btn yellow" ><a href="/purchase/purchase-order-bill/create" style="color: white"> <i class="fa fa-plus"></i>  &nbsp; Purchase Order Bill
-                                            </a>
-                                        </div>
-                                    </div>
-                                @endif--}}
                             </div>
                         </div>
                         <div class="page-content">
@@ -55,28 +48,6 @@
                                             {!! csrf_field() !!}
                                                 <div class="portlet-body">
                                                     <div class="table-container">
-                                                        {{--<div class="row">
-                                                            <div class="col-md-3" style="text-align: right">
-                                                                <label>Date Range :  </label>
-                                                            </div>
-                                                            <div class="col-md-3">
-                                                                <div class="input-group input-large date-picker input-daterange" data-date-format="yyyy-mm-dd">
-                                                                    <input type="text" class="form-control" name="start_date" id="start_date" required="required">
-                                                                    <span class="input-group-addon"> to </span>
-                                                                    <input type="text" class="form-control" name="end_date" id="end_date" required="required"> </div>
-                                                                <!-- /input-group -->
-                                                                <span class="help-block"> Select date range </span>
-                                                            </div>
-                                                            <div class="col-md-3">
-                                                                <div class="btn-group">
-                                                                    <div id="search-withfilter" class="btn blue" >
-                                                                        <a href="#" style="color: white"> Submit
-                                                                            <i class="fa fa-plus"></i>
-                                                                        </a>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>--}}
                                                         <div class="table-scrollable profit-margin-table" style="overflow: scroll !important;">
                                                             <table class="table table-striped table-bordered table-hover order-column" id="pendingPOBillTable">
                                                                 <thead>
@@ -87,11 +58,6 @@
                                                                     <th style="width: 11%">Vendor Name</th>
                                                                     <th style="width: 11%">First Material Name</th>
                                                                     <th style="width: 11%">Mobile Number</th>
-                                                                    {{--<th style="width: 11%">Vendor Name</th>
-                                                                    <th style="width: 11%">Basic Amount</th>
-                                                                    <th style="width: 11%">Tax Amount</th>
-                                                                    <th style="width: 11%">Pending Amount</th>
-                                                                    <th style="width: 11%">Paid Amount</th>--}}
                                                                     <th style="width: 11%">Action</th>
                                                                 </tr>
                                                                 <tr class="filter">
@@ -101,21 +67,6 @@
                                                                     <th style="width: 11%"> <input style="width: 90%; margin-left: 5%" type="text" name="vendor_name" id="vendor_name" class="form-control form-filter search_filter"> </th>
                                                                     <th style="width: 11%"></th>
                                                                     <th style="width: 11%"></th>
-                                                                    {{--
-                                                                        <div class="input-group date date-picker" data-date-format="yyyy-mm-dd" data-date-end-date="+0d">
-                                                                            <input type="text" class="form-control form-filter" name="bill_date" style="font-size: 9px" readonly>
-                                                                            <span class="input-group-btn">
-                                                                                <button class="btn default" type="button">
-                                                                                    <i class="fa fa-calendar"></i>
-                                                                                </button>
-                                                                            </span>
-                                                                        </div>--}}
-
-                                                                   {{-- <th style="width: 11%"> <input style="width: 90%; margin-left: 5%" type="text" name="bill_number" id="bill_number" class="form-control form-filter search_filter"> </th>
-                                                                    <th style="width: 11%"> </th>
-                                                                    <th style="width: 11%"> </th>
-                                                                    <th style="width: 11%"> </th>
-                                                                    <th style="width: 11%"> </th>--}}
                                                                     <th style="width: 11%">
                                                                         <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                                         <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
@@ -125,15 +76,6 @@
                                                                 <tbody>
 
                                                                 </tbody>
-                                                               {{-- <tfoot>
-                                                                <tr>
-                                                                    <th colspan="8" style="text-align:right">Total Page Wise: </th>
-                                                                    <th></th>
-                                                                    <th></th>
-                                                                    <th></th>
-                                                                    <th></th>
-                                                                </tr>
-                                                                </tfoot>--}}
                                                             </table>
                                                         </div>
 
