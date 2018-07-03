@@ -188,8 +188,7 @@ class PurchaseOrderBillingController extends Controller
                             $billPendingTransactions[$iterator]['grn'],
                             $clientvendorInfo['company'],
                             $firstname,
-                            $clientvendorInfo['mobile'],
-                            ''
+                            $clientvendorInfo['mobile']
                         ];
 
                     }
