@@ -10,7 +10,7 @@ $(document).ready(function(){
     var iterator = parseInt(0);
     $('#iterator').val(iterator);
     $("#myBtn").click(function(){
-        $('#component_id').val(4);
+       // $('#component_id').val(4);
         var site_name = $("#globalProjectSite").val();
         var search_in = 'material';
         var materialList = new Bloodhound({
@@ -27,7 +27,7 @@ $(document).ready(function(){
                             name:data.material_name,
                             unit:data.unit_quantity,
                             component_type_id:data.material_request_component_type_id,
-                            component_type_slug:data.material_request_component_type_slug,
+                            component_type_slug:data.material_request_component_type_slug
                         };
                     });
                 },
@@ -58,14 +58,14 @@ $(document).ready(function(){
             $("#materialModalComponentSlug").val(datum.component_type_slug);
         })
             .on('typeahead:open', function (obj, datum) {
-                $('#component_id').val(4);
+               // $('#component_id').val(4);
                 $("#materialUnit").html($("#unitOptions").val());
                 $("#materialModalComponentSlug").val('');
             });
         $("#myModal").modal();
     });
     $("#assetBtn").click(function(){
-        $('#component_id').val(6);
+        //$('#component_id').val(6);
         var search_in = 'asset';
         var site_name = $("#globalProjectSite").val();
         var assetList = new Bloodhound({
@@ -81,7 +81,7 @@ $(document).ready(function(){
                         return {
                             name:data.asset_name,
                             unit:data.asset_unit,
-                            component_type_id:data.material_request_component_type_id,
+                            component_type_id:data.material_request_component_type_id
                         };
                     });
                 },
@@ -89,7 +89,7 @@ $(document).ready(function(){
             }
         });
         $('#Assetsearchbox').addClass('assetTypeahead');
-        $('#component_id').val(6);
+       // $('#component_id').val(6);
         assetList.initialize();
         var unitName = "Nos";
         $('.assetTypeahead').typeahead(null, {
@@ -111,7 +111,7 @@ $(document).ready(function(){
             $('#component_id').val(componentTypeId);
         })
             .on('typeahead:open', function (obj, datum) {
-                $('#component_id').val(6);
+               // $('#component_id').val(6);
             });
         $("#myModal1").modal();
 
@@ -142,7 +142,15 @@ $(document).ready(function(){
         var quantity = $('#qty').val();
         var unitId = $('#materialUnit').val();
         var unitName = $('#materialUnit option[value="'+unitId+'"]').text();
+        var componentTypeId = $('#component_id').val();
         var validFlag = true;
+        if(typeof componentTypeId == 'undefined' || componentTypeId == ''){
+            $("#searchbox").closest('.form-group').addClass('has-error').removeClass('has-success');
+            alert('Please select from dropdown');
+            validFlag = false;
+        }else{
+            $("#searchbox").closest('.form-group').addClass('has-success').removeClass('has-error');
+        }
         if(typeof material_name == 'undefined' || material_name == ''){
             $("#searchbox").closest('.form-group').addClass('has-error').removeClass('has-success');
             validFlag = false;
@@ -230,7 +238,15 @@ $(document).ready(function(){
         var quantity = $('#Assetqty').val();
         var unit = $('#AssetUnitsearchbox').val();
         var unitId = $('#nosUnitId').val();
+        var componentTypeId = $('#component_id').val();
         var validFlag = true;
+        if(typeof componentTypeId == 'undefined' || componentTypeId == ''){
+            $("#Assetsearchbox").closest('.form-group').addClass('has-error').removeClass('has-success');
+            alert('Please select from dropdown');
+            validFlag = false;
+        }else{
+            $("#Assetsearchbox").closest('.form-group').addClass('has-success').removeClass('has-error');
+        }
         if(typeof asset_name == 'undefined' || asset_name == ''){
             $("#Assetsearchbox").closest('.form-group').addClass('has-error').removeClass('has-success');
             validFlag = false;
