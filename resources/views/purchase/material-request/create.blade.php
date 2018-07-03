@@ -1,5 +1,5 @@
 @extends('layout.master')
-@section('title','Constro | Manage Materials')
+@section('title','Constro | Create Material Request')
 @include('partials.common.navbar')
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->
@@ -251,29 +251,29 @@
             }
         }
         document.getElementById('files').addEventListener('change', handleFileSelect, false);
-    function handleFileSelectForAsset() {
-        //Check File API support
-        if (window.File && window.FileList && window.FileReader) {
-            var files = event.target.files; //FileList object
-            var output = document.getElementById("resultAsset");
-            for (var i = 0; i < files.length; i++) {
-                var file = files[i];
-                //Only pics
-                if (!file.type.match('image')) continue;
-                var picReader = new FileReader();
-                picReader.addEventListener("load", function (event) {
-                    var picFile = event.target;
-                    var div = document.createElement("div");
-                    div.innerHTML = "<img class='thumbnail assetImg' src='" + picFile.result + "'" + "title='" + picFile.name + "'/>";
-                    output.insertBefore(div, null);
-                });
-                //Read the image
-                picReader.readAsDataURL(file);
+        function handleFileSelectForAsset() {
+            //Check File API support
+            if (window.File && window.FileList && window.FileReader) {
+                var files = event.target.files; //FileList object
+                var output = document.getElementById("resultAsset");
+                for (var i = 0; i < files.length; i++) {
+                    var file = files[i];
+                    //Only pics
+                    if (!file.type.match('image')) continue;
+                    var picReader = new FileReader();
+                    picReader.addEventListener("load", function (event) {
+                        var picFile = event.target;
+                        var div = document.createElement("div");
+                        div.innerHTML = "<img class='thumbnail assetImg' src='" + picFile.result + "'" + "title='" + picFile.name + "'/>";
+                        output.insertBefore(div, null);
+                    });
+                    //Read the image
+                    picReader.readAsDataURL(file);
+                }
+            } else {
+                alert("Your browser does not support File API");
             }
-        } else {
-            alert("Your browser does not support File API");
         }
-    }
-    document.getElementById('filesAsset').addEventListener('change', handleFileSelectForAsset, false);
+        document.getElementById('filesAsset').addEventListener('change', handleFileSelectForAsset, false);
 </script>
 @endsection
