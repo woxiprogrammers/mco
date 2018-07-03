@@ -239,7 +239,7 @@ class PurchaseOrderRequestController extends Controller
                     $purchaseOrderRequestsData = PurchaseOrderRequest::where('ready_to_approve', false)
                         ->whereIn('id', $purchaseOrderRequestIds)
                         ->orderBy('id','desc')->get();
-                    $status = "PO Request Created";
+                    $status = "Pending for Ready to Approve";
                 } elseif ($request->por_status_id == "pending_for_approval") {
                     $purchaseOrderRequestsData = PurchaseOrderRequest::where('ready_to_approve', true)
                         ->whereIn('id',$draftPurchaseOrderRequestIds)
@@ -259,7 +259,7 @@ class PurchaseOrderRequestController extends Controller
                     }
                 }
             } else {
-                $status = "PO Request Created";
+                $status = "Pending for Ready to Approve";
                 $purchaseOrderRequestsData = PurchaseOrderRequest::where('ready_to_approve', false)->whereIn('id', $purchaseOrderRequestIds)->orderBy('id','desc')->get();
             }
 
