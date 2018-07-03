@@ -30,7 +30,7 @@
                                         $user->customHasPermission('create-purchase-order-request') || $user->customHasPermission('approve-purchase-order-request'))
                                     <div class="btn-group pull-right margin-top-15">
                                         <div id="sample_editable_1_new" class="btn yellow" ><a href="/purchase/purchase-order-request/create" style="color: white">
-                                                <i class="fa fa-plus"></i>  &nbsp; Purchase Order Request
+                                                <i class="fa fa-plus"></i> Purchase Order Request
                                             </a>
                                         </div>
                                     </div>
@@ -47,54 +47,6 @@
                                             {!! csrf_field() !!}
                                             <div class="portlet-body">
                                                 <div class="portlet-body">
-                                                    {{--<div class="row">
-                                                        <div class="col-md-2">
-                                                            <label>Select Year :</label>
-                                                            <select class="form-control" id="year" name="year">
-                                                                <option value="0">ALL</option>
-                                                                <option value="2017">2017</option>
-                                                                <option value="2018">2018</option>
-                                                                <option value="2019">2019</option>
-                                                                <option value="2020">2020</option>
-                                                                <option value="2021">2021</option>
-                                                                <option value="2022">2022</option>
-                                                                <option value="2023">2023</option>
-                                                            </select>
-                                                        </div>
-                                                        <div class="col-md-2">
-                                                            <label>Select Month :</label>
-                                                            <select class="form-control" id="month" name="month">
-                                                                <option value="0">ALL</option>
-                                                                <option value="01">Jan</option>
-                                                                <option value="02">Feb</option>
-                                                                <option value="03">Mar</option>
-                                                                <option value="04">Apr</option>
-                                                                <option value="05">May</option>
-                                                                <option value="06">Jun</option>
-                                                                <option value="07">Jul</option>
-                                                                <option value="08">Aug</option>
-                                                                <option value="09">Sep</option>
-                                                                <option value="10">Oct</option>
-                                                                <option value="11">Nov</option>
-                                                                <option value="12">Dec</option>
-                                                            </select>
-                                                        </div>
-                                                        <div class="col-md-1">
-                                                            <label>PO Id :</label>
-                                                            <input  class="form-control" type="number" id="po_count" name="po_count"/>
-                                                        </div>
-                                                        <div class="col-md-1">
-                                                            <label>&nbsp;</label>
-                                                            <div class="btn-group">
-                                                                <div id="search-withfilter" class="btn blue" >
-                                                                    <a href="#" style="color: white"> Submit
-                                                                        <i class="fa fa-plus"></i>
-                                                                    </a>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <hr/>--}}
                                                     <div class="table-container">
                                                         <table class="table table-striped table-bordered table-hover order-column" id="purchaseOrderRequestTable">
                                                             <thead>
@@ -111,7 +63,7 @@
                                                                 <th>
                                                                     <select class="table-group-action-input form-control input-inline input-small input-sm status-select" id="por_status" name="por_status">
 
-                                                                        <option value="por_created">PO Request Created</option>
+                                                                        <option value="por_created">Pending for Ready to Approve</option>
                                                                         <option value="pending_for_approval">Pending for Director Approval</option>
                                                                         <option value="po_created">PO Created</option>
                                                                     </select>
