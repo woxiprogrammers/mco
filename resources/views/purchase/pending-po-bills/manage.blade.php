@@ -15,11 +15,6 @@
     <link href="/assets/global/plugins/bootstrap-timepicker/css/bootstrap-timepicker.min.css" rel="stylesheet" type="text/css" />
     <link href="/assets/global/plugins/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css" rel="stylesheet" type="text/css" />
     <!-- END PAGE LEVEL PLUGINS -->
-    <style>
-        #pendingPOBillTable tr th, #pendingPOBillTable tr td,#pendingPOBillTable tr td input{
-            font-size: 13px !important;
-        }
-    </style>
 @endsection
 @section('content')
     <div class="page-wrapper">
@@ -48,26 +43,24 @@
                                             {!! csrf_field() !!}
                                                 <div class="portlet-body">
                                                     <div class="table-container">
-                                                        <div class="table-scrollable profit-margin-table" style="overflow: scroll !important;">
+                                                        <div class="table-scrollable profit-margin-table">
                                                             <table class="table table-striped table-bordered table-hover order-column" id="pendingPOBillTable">
                                                                 <thead>
                                                                 <tr>
-                                                                    <th style="width: 11%">Project</th>
-                                                                    <th style="width: 11%">PO Number</th>
-                                                                    <th style="width: 11%">GRN Number</th>
-                                                                    <th style="width: 11%">Vendor Name</th>
-                                                                    <th style="width: 11%">First Material Name</th>
-                                                                    <th style="width: 11%">Mobile Number</th>
-                                                                    <th style="width: 11%">Action</th>
+                                                                    <th>Project</th>
+                                                                    <th>PO Number</th>
+                                                                    <th>GRN Number</th>
+                                                                    <th>Vendor Name</th>
+                                                                    <th>First Material Name</th>
+                                                                    <th>Mobile Number</th>
                                                                 </tr>
                                                                 <tr class="filter">
-                                                                    <th style="width: 11%"><input style="width: 90%; margin-left: 5%" type="text" name="project_name" id="project_name" class="form-control form-filter search_filter"></th>
-                                                                    <th style="width: 11%"><input style="width: 90%; margin-left: 5%" type="text" name="po_number" id="po_number" class="form-control form-filter search_filter"></th>
-                                                                    <th style="width: 11%"><input style="width: 90%; margin-left: 5%" type="text" name="grn_number" id="grn_number" class="form-control form-filter search_filter"></th>
-                                                                    <th style="width: 11%"> <input style="width: 90%; margin-left: 5%" type="text" name="vendor_name" id="vendor_name" class="form-control form-filter search_filter"> </th>
-                                                                    <th style="width: 11%"></th>
-                                                                    <th style="width: 11%"></th>
-                                                                    <th style="width: 11%">
+                                                                    <th><input style="width: 90%; margin-left: 5%" type="text" name="project_name" id="project_name" class="form-control form-filter search_filter"></th>
+                                                                    <th><input style="width: 90%; margin-left: 5%" type="text" name="po_number" id="po_number" class="form-control form-filter search_filter"></th>
+                                                                    <th><input style="width: 90%; margin-left: 5%" type="text" name="grn_number" id="grn_number" class="form-control form-filter search_filter"></th>
+                                                                    <th> <input style="width: 90%; margin-left: 5%" type="text" name="vendor_name" id="vendor_name" class="form-control form-filter search_filter"> </th>
+                                                                    <th></th>
+                                                                    <th>
                                                                         <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                                         <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
                                                                     </th>
