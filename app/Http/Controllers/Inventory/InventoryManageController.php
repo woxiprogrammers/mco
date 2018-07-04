@@ -384,18 +384,34 @@ class InventoryManageController extends Controller
     public function inventoryListing(Request $request){
         try{
             $status = 200;
+            $material_name = null;
+            if ($request->has('search_name')) {
+                $material_name = $request->search_name;
+            }
             if(Session::has('global_project_site')){
                 $projectSiteId = Session::get('global_project_site');
-                $inventoryData = InventoryComponent::where('project_site_id', $projectSiteId)->orderBy('created_at','desc')->get();
+                if ($material_name != null && $material_name != "") {
+                    $inventoryData = InventoryComponent::where('project_site_id', $projectSiteId)
+                        ->where('name', 'ilike', '%' . $request->search_name . '%')
+                        ->orderBy('created_at', 'desc')->get();
+                } else {
+                    $inventoryData = InventoryComponent::where('project_site_id', $projectSiteId)
+                        ->orderBy('created_at', 'desc')->get();
+                }
             }else{
-                $inventoryData = InventoryComponent::orderBy('created_at','desc')->get();
+                if ($material_name != null && $material_name != "") {
+                    $inventoryData = InventoryComponent::where('name', 'ilike', '%' . $request->search_name . '%')
+                        ->orderBy('created_at', 'desc')->get();
+                } else {
+                    $inventoryData = InventoryComponent::orderBy('created_at', 'desc')->get();
+                }
             }
             $iTotalRecords = count($inventoryData);
             $records = array();
             $records['data'] = array();
             $end = $request->length < 0 ? count($inventoryData) : $request->length;
+            $sr_no = 0;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($inventoryData); $iterator++,$pagination++ ){
-                $projectName = $inventoryData[$pagination]->projectSite->project->name.' - '.$inventoryData[$pagination]->projectSite->name.' ('.$inventoryData[$pagination]->projectSite->project->client->company.')';
                 if($inventoryData[$pagination]->is_material == true){
                     $materialUnit = Material::where('id',$inventoryData[$iterator]['reference_id'])->pluck('unit_id')->first();
                     if($materialUnit == null){
@@ -442,8 +458,8 @@ class InventoryManageController extends Controller
                 }
                 $availableQuantity = $inQuantity - $outQuantity;
                 $records['data'][$iterator] = [
-                    $projectName,
-                    $inventoryData[$pagination]->name,
+                    ++$sr_no,
+                    ucwords($inventoryData[$pagination]->name),
                     $inQuantity.' '.$unitName,
                     $outQuantity.' '.$unitName,
                     $availableQuantity.' '.$unitName,

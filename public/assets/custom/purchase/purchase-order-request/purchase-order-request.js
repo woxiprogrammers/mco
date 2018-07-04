@@ -15,7 +15,7 @@ $(document).ready(function(){
                 return $.map(x, function (data) {
                     return {
                         id:data.id,
-                        format_id: data.format_id
+                        format_id: data.format_id  + " : " + data.material_string + " Material Count (" + data.material_count + ")"
                     };
                 });
             },
@@ -38,6 +38,7 @@ $(document).ready(function(){
         },
     }).on('typeahead:selected', function (obj, datum) {
         var POData = $.parseJSON(JSON.stringify(datum));
+        console.log(POData);
         $('.typeahead').typeahead('val',POData.format_id);
         var purchaseRequestId = POData.id;
         $("#purchaseRequestId").val(purchaseRequestId);
