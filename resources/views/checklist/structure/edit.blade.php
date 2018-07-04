@@ -23,7 +23,7 @@
                 <div class="page-container">
                     <!-- BEGIN CONTENT -->
                     <div class="page-content-wrapper">
-                        <form role="form" id="createChecklistStructureForm" class="form-horizontal" method="post" action="/checklist/structure/create">
+                        <form role="form" id="editChecklistStructureForm" class="form-horizontal" method="post" action="/checklist/structure/edit/{{$checklistCategory['id']}}">
                             {!! csrf_field() !!}
                             <div class="page-head">
                                 <div class="container">
@@ -31,9 +31,9 @@
                                     <div class="page-title">
                                         <h1>Edit CheckList Structure</h1>
                                     </div>
-                                    {{--<div class="form-group " style="float: right;margin-top:1%">
+                                    <div class="form-group " style="float: right;margin-top:1%">
                                         <button type="submit" class="btn red" id="submit"><i class="fa fa-check"></i> Submit </button>
-                                    </div>--}}
+                                    </div>
                                 </div>
                             </div>
                             <div class="page-content">
@@ -51,7 +51,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" class="form-control" value="{{$checklistCategory->mainCategory->name}}" readonly>
+                                                            <input type="text" name="main_category" class="form-control" value="{{$checklistCategory->mainCategory->name}}" readonly>
                                                         </div>
                                                     </div>
                                                     <div class="form-group">
@@ -60,7 +60,7 @@
                                                             <span>*</span>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" class="form-control" value="{{$checklistCategory->name}}" readonly>
+                                                            <input type="text" name="sub_category" class="form-control" value="{{$checklistCategory->name}}" readonly>
                                                         </div>
                                                     </div>
                                                     <div class="input_fields_wrap">
@@ -77,12 +77,9 @@
                                                                             <span>*</span>
                                                                         </div>
                                                                         <div class="col-md-7">
-                                                                            <textarea class="form-control checkpoint-description" placeholder="Enter Description" style="width: 85%">
+                                                                            <textarea class="form-control checkpoint-description" name="checkpoints[{{$checkpoint['id']}}][description]" placeholder="Enter Description" style="width: 85%">
                                                                                 {{$checkpoint['description']}}
                                                                             </textarea>
-                                                                            {{--<a class="add_field_button btn blue" id="add" style="margin-left: 87%; margin-top: -4.5%">
-                                                                                <i class="fa fa-plus"></i>
-                                                                            </a>--}}
                                                                         </div>
                                                                     </div>
                                                                     <div class="form-group">
@@ -91,7 +88,7 @@
                                                                             <span>*</span>
                                                                         </div>
                                                                         <div class="col-md-2">
-                                                                            <select class="form-control" id="isMandatory">
+                                                                            <select class="form-control" id="isMandatory" name="checkpoints[{{$checkpoint['id']}}][is_remark_required]">
                                                                                 @if($checkpoint['is_remark_required'] == true)
                                                                                     <option value="false">No</option>
                                                                                     <option value="true" selected>Yes</option>
@@ -108,10 +105,10 @@
                                                                             <span>*</span>
                                                                         </div>
                                                                         <div class="col-md-2">
-                                                                            <input type="text" class="form-control number-of-image" value="{!! count($checkpoint->checklistCheckpointsImages) !!}">
+                                                                            <input type="text" class="form-control number-of-image" name="checkpoints[{{$checkpoint['id']}}][no_of_images]" value="{!! count($checkpoint->checklistCheckpointsImages) !!}">
                                                                         </div>
                                                                         <div class="col-md-2">
-                                                                            <a class="btn blue" href="javascript:void(0);" onclick="getImageTable(this,0)">Set</a>
+                                                                            <a class="btn blue" href="javascript:void(0);" onclick="getImageTable({{$checkpoint['id']}},this)">Set</a>
                                                                         </div>
                                                                     </div>
                                                                     <div class="form-group">
@@ -137,10 +134,10 @@
                                                                                             {!! $iterator++ !!}.
                                                                                         </td>
                                                                                         <td>
-                                                                                            <input type="text" class="form-control" value="{{$checklistCheckpointsImage['caption']}}">
+                                                                                            <input type="text" class="form-control" name="checkpoints[{{$checkpoint['id']}}][images][{{$iterator-2}}][caption]" value="{{$checklistCheckpointsImage['caption']}}">
                                                                                         </td>
                                                                                         <td>
-                                                                                            <select class="form-control">
+                                                                                            <select class="form-control" name="checkpoints[{{$checkpoint['id']}}][images][{{$iterator-2}}][is_required]">
                                                                                                 @if($checklistCheckpointsImage['is_required'] == true)
                                                                                                     <option value="false">No</option>
                                                                                                     <option value="true" selected>Yes</option>
@@ -172,3 +169,28 @@
         </div>
     </div>
 @endsection
+
+<script>
+    function getImageTable(index,element){
+        var noOfImage = $(element).closest('.form-group').find('.number-of-image').val();
+        if(typeof noOfImage != 'undefined' && noOfImage != '' && $.isNumeric(noOfImage)){
+            $.ajax({
+                url: '/checklist/structure/get-checkpoint-image-partial-view',
+                type: 'POST',
+                data:{
+                    _token: $('input[name="_token"]').val(),
+                    index: index,
+                    number_of_images: noOfImage
+                },
+                success: function (data,textStatus,xhr) {
+                    $(element).closest('.form-group').next().find('.image-table-section').html(data);
+                },
+                error: function (errorData) {
+
+                }
+            });
+        }
+
+    }
+
+</script>
