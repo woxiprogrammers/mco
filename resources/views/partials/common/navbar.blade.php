@@ -342,6 +342,15 @@
                             <?php $hasPurchaseOrderBillPermission = \App\Helper\ACLHelper::checkModuleAcl('purchase-bill-entry');?>
                             @if($hasPurchaseOrderBillPermission)
                                 <li aria-haspopup="true">
+                                    <a href="/purchase/pending-po-bills/manage" class="nav-link nav-toggle ">
+                                        <i class="fa fa-calculator"></i> Pending PO Bills
+                                    </a>
+                                </li>
+                            @endif
+
+                            <?php $hasPurchaseOrderBillPermission = \App\Helper\ACLHelper::checkModuleAcl('purchase-bill-entry');?>
+                            @if($hasPurchaseOrderBillPermission)
+                                <li aria-haspopup="true">
                                     <a href="/purchase/purchase-order-bill/manage" class="nav-link nav-toggle ">
                                         <i class="fa fa-calculator"></i> Purchase Order Billing
                                     </a>

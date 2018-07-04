@@ -387,6 +387,11 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('display-files/{forSlug}/{purchaseOrderRequestID}',array('uses'=>'Purchase\PurchaseOrderRequestController@displayFiles'));
             Route::post('delete-temp-file',array('uses'=>'Purchase\PurchaseOrderRequestController@removeTempImage'));
         });
+
+        Route::group(['prefix' => 'pending-po-bills'],function(){
+            Route::get('manage',array('uses' => 'Purchase\PurchaseOrderBillingController@getManageViewForPendingPOBill'));
+            Route::post('listing',array('uses' => 'Purchase\PurchaseOrderBillingController@getManageViewForPendingPOBillListing'));
+        });
     });
 
     Route::group(['prefix' => 'inventory'], function(){
