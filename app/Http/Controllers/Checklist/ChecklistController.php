@@ -183,6 +183,20 @@ class ChecklistController extends Controller
             abort(500);
         }
     }
+
+    public function editStructure(Request $request,$checklistCategory){
+        try{
+            dd($request->all());
+        }catch (\Exception $e){
+            $data = [
+                'action' => "Edit Checklist structure",
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
 }
 
 

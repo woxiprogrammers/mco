@@ -23,7 +23,7 @@
                 <div class="page-container">
                     <!-- BEGIN CONTENT -->
                     <div class="page-content-wrapper">
-                        <form role="form" id="createChecklistStructureForm" class="form-horizontal" method="post" action="/checklist/structure/create">
+                        <form role="form" id="editChecklistStructureForm" class="form-horizontal" method="post" action="/checklist/structure/edit/{{$checklistCategory['id']}}">
                             {!! csrf_field() !!}
                             <div class="page-head">
                                 <div class="container">
@@ -31,9 +31,9 @@
                                     <div class="page-title">
                                         <h1>Edit CheckList Structure</h1>
                                     </div>
-                                    {{--<div class="form-group " style="float: right;margin-top:1%">
+                                    <div class="form-group " style="float: right;margin-top:1%">
                                         <button type="submit" class="btn red" id="submit"><i class="fa fa-check"></i> Submit </button>
-                                    </div>--}}
+                                    </div>
                                 </div>
                             </div>
                             <div class="page-content">
