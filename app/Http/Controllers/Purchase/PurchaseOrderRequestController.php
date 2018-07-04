@@ -458,6 +458,26 @@ class PurchaseOrderRequestController extends Controller
                     ->get()
                     ->toArray();
             }
+            $purchaseRequestsFinalData = array();
+            $pr_itr = 0;
+            foreach ($purchaseRequests as $purchaseReq) {
+                $purchaseRequestsFinalData[$pr_itr]['id'] = $purchaseReq['id'];
+                $purchaseRequestsFinalData[$pr_itr]['format_id'] = $purchaseReq['format_id'];
+                $purchaseRequestComponents = PurchaseRequestComponent::where('purchase_request_id', $purchaseReq['id'])->get();
+                $iterator = 0;
+                $purchaseRequestComponentData = array();
+                foreach($purchaseRequestComponents as $purchaseRequestComponent) {
+                    foreach ($purchaseRequestComponent->vendorRelations as $vendorRelation) {
+                        $vendorRelationAlreadyExists = PurchaseOrderRequestComponent::where('purchase_request_component_vendor_relation_id', $vendorRelation->id)->first();
+                        if($vendorRelationAlreadyExists == null) {
+                            $purchaseRequestComponentData[] = $purchaseRequestComponent->materialRequestComponent->name;
+                        }
+                        $iterator++;
+                    }
+                }
+                $purchaseRequestsFinalData[$pr_itr]['material_string'] = substr(implode(",",$purchaseRequestComponentData),0,36)."...";
+                $purchaseRequestsFinalData[$pr_itr]['material_count'] = count($purchaseRequestComponentData);
+            }
             $status = 200;
         }catch (\Exception $e){
             $data = [
@@ -467,9 +487,9 @@ class PurchaseOrderRequestController extends Controller
             ];
             Log::critical(json_encode($data));
             $status = 500;
-            $purchaseRequests = array();
+            $purchaseRequestsFinalData = array();
         }
-        return response()->json($purchaseRequests,$status);
+        return response()->json($purchaseRequestsFinalData,$status);
     }
 
     public function getPurchaseRequestComponentDetails(Request $request){
