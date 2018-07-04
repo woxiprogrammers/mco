@@ -186,7 +186,39 @@ class ChecklistController extends Controller
 
     public function editStructure(Request $request,$checklistCategory){
         try{
-            dd($request->all());
+            foreach($request['checkpoints'] as $checkpointId => $checkpointData){
+                $checklistCheckpoints = ChecklistCheckpoint::where('id',$checkpointId)->first();
+                $checklistCheckpoints->update([
+                    'description' => $checkpointData['description'],
+                    'is_remark_required' => $checkpointData['is_remark_required']
+                ]);
+                if(array_key_exists('images',$checkpointData)){
+                    $checklistCheckpointImagesCount = ChecklistCheckpointImages::where('checklist_checkpoint_id',$checkpointId)->count();
+                    if($checklistCheckpointImagesCount > count($checkpointData['images'])){
+                        $toBeDeletedImageCount =  $checklistCheckpointImagesCount - count($checkpointData['images']);
+                        $toBeDeletedImageIds = ChecklistCheckpointImages::where('checklist_checkpoint_id',$checkpointId)->orderBy('id','desc')->limit($toBeDeletedImageCount)->pluck('id');
+                        ChecklistCheckpointImages::whereIn('id',$toBeDeletedImageIds)->delete();
+                        $checklistCheckpointImagesCount = count($checkpointData['images']);
+                    }
+                    for($iterator = 0 ; $iterator < $checklistCheckpointImagesCount; $iterator++){
+                        $checklistImageData = ChecklistCheckpointImages::where('checklist_checkpoint_id',$checkpointId)->first();
+                        $checklistImageData->update([
+                            'caption' => $checkpointData['images'][$iterator]['caption'],
+                            'is_required' => $checkpointData['images'][$iterator]['is_required']
+                        ]);
+                    }
+                    $toCreateNewCount = count($checkpointData['images'])-  $checklistCheckpointImagesCount ;
+                    for($jIterator = 0 ; $jIterator < $toCreateNewCount ; $jIterator++){
+                        ChecklistCheckpointImages::create([
+                            'checklist_checkpoint_id' => $checkpointId,
+                            'caption' => $checkpointData['images'][$iterator]['caption'],
+                            'is_required' => $checkpointData['images'][$iterator]['is_required']
+                        ]);
+                        $iterator++;
+                    }
+                }
+            }
+            return redirect('/checklist/structure/edit/'.$checklistCategory['id']);
         }catch (\Exception $e){
             $data = [
                 'action' => "Edit Checklist structure",
