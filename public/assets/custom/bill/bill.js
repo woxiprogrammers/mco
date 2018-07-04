@@ -184,8 +184,10 @@ function calculateQuantityAmount(current_quantity,id){
     }
     var cumulative_quantity = parseFloat($('#previous_quantity_'+id).text()) + parseFloat(current_quantity);
     var current_bill_amount = parseFloat(current_quantity) * parseFloat($('#rate_per_unit_'+id).text());
-    $('#cumulative_quantity_'+id).text(customRound(cumulative_quantity));
-    $('#current_bill_amount_'+id).text(customRound(current_bill_amount));
+    /*$('#cumulative_quantity_'+id).text(customRound(cumulative_quantity));
+    $('#current_bill_amount_'+id).text(customRound(current_bill_amount));*/
+    $('#cumulative_quantity_'+id).text((cumulative_quantity).toFixed(3));
+    $('#current_bill_amount_'+id).text((current_bill_amount).toFixed(3));
     getTotals();
 }
 
@@ -211,21 +213,24 @@ function getTotals(){
         })
     }
 
-    var total_current_bill_amount = total_extra_item_rate + total_product_current_bill_amount;
-    $('#sub_total_current_bill_amount').text(customRound(total_current_bill_amount));
-    $('#rounded_off_current_bill_sub_total').text(customRound(total_current_bill_amount));
+    var total_current_bill_amount = parseFloat(total_extra_item_rate) + parseFloat(total_product_current_bill_amount);
+    /*$('#sub_total_current_bill_amount').text(customRound(total_current_bill_amount));
+    $('#rounded_off_current_bill_sub_total').text(customRound(total_current_bill_amount));*/
+    $('#sub_total_current_bill_amount').text((total_current_bill_amount).toFixed(3));
+    $('#rounded_off_current_bill_sub_total').text((total_current_bill_amount).toFixed(3));
     calculateDiscount();
 }
 
 function calculateTax(){
-    var total_rounded_current_bill = parseFloat($("#rounded_off_current_bill_amount").text());
+    var total_rounded_current_bill = parseFloat($("#rounded_off_current_bill_amount").text()).toFixed(3);
     var final_total_current_bill = total_rounded_current_bill;
     $(".tax").each(function(){
         var tax_amount_current_bill = total_rounded_current_bill * ($(this).val() / 100);
         final_total_current_bill = final_total_current_bill + tax_amount_current_bill;
         $(this).parent().next().find('span').text(tax_amount_current_bill.toFixed(3));
     });
-    $("#final_current_bill_total").text(customRound(final_total_current_bill));
+    //$("#final_current_bill_total").text(customRound(final_total_current_bill));
+    $("#final_current_bill_total").text(parseFloat(final_total_current_bill).toFixed(3));
     calculateSpecialTax()
 }
 
@@ -244,33 +249,35 @@ function calculateSpecialTax(){
                         taxOnAmount = taxOnAmount + parseFloat($("#tax_current_bill_amount_"+taxId).text());
                     }
                     var taxPercentage = $("#tax_percentage_"+specialTaxId).val();
-                    taxAmount = taxAmount + ( taxOnAmount * (taxPercentage / 100));
+                    taxAmount = parseFloat((taxAmount + ( taxOnAmount * (taxPercentage / 100))).toFixed(3));
 
                 });
-                $("#tax_current_bill_amount_"+specialTaxId).text(customRound(taxAmount));
+               // $("#tax_current_bill_amount_"+specialTaxId).text(customRound(taxAmount));
+                $("#tax_current_bill_amount_"+specialTaxId).text(parseFloat(taxAmount).toFixed(3));
             }else{
                 $("#tax_current_bill_amount_"+specialTaxId).text(0);
             }
         });
-        var grossTotal = parseFloat($("#final_current_bill_total").text());
+        var grossTotal = parseFloat($("#final_current_bill_total").text()).toFixed(3);
         $(".special-tax-amount").each(function(){
             grossTotal = grossTotal + parseFloat($(this).text());
         });
-        $("#grand_current_bill_total").text((grossTotal).toFixed());
+        $("#grand_current_bill_total").text((grossTotal).toFixed(3));
     }else{
         var grossTotal = parseFloat($("#final_current_bill_total").text());
-        $("#grand_current_bill_total").text((grossTotal).toFixed());
+        $("#grand_current_bill_total").text((grossTotal).toFixed(3));
     }
 }
 
 function calculateDiscount(){
-    var discountAmount = $('#discountAmount').val();
-    var totalBillAmount = parseInt($('#rounded_off_current_bill_sub_total').text());
+    var discountAmount = parseFloat($('#discountAmount').val()).toFixed(3);
+    //var totalBillAmount = parseInt($('#rounded_off_current_bill_sub_total').text());
+    var totalBillAmount = parseFloat($('#rounded_off_current_bill_sub_total').text()).toFixed(3);
     if((typeof discountAmount == 'undefined') || discountAmount == ''){
         $('#rounded_off_current_bill_amount').text(totalBillAmount);
     }else{
-        discountAmount = parseInt(discountAmount);
-        $('#rounded_off_current_bill_amount').text((totalBillAmount-discountAmount));
+        //discountAmount = parseInt(discountAmount);
+        $('#rounded_off_current_bill_amount').text((totalBillAmount-discountAmount).toFixed(3));
     }
     calculateTax();
 }

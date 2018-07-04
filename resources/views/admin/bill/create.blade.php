@@ -129,13 +129,13 @@
                                                             <span id="rate_per_unit_{{$quotationProducts[$iterator]['id']}}">{{$quotationProducts[$iterator]['rate']}}</span>
                                                         </td>
                                                         <td>
-                                                            <span>{{$quotationProducts[$iterator]['rate'] * $quotationProducts[$iterator]['quantity']}}</span>
+                                                            <span>{{round(($quotationProducts[$iterator]['rate'] * $quotationProducts[$iterator]['quantity']),3)}}</span>
                                                         </td>
                                                         <td>
                                                             <span id="previous_quantity_{{$quotationProducts[$iterator]['id']}}">{{$quotationProducts[$iterator]['previous_quantity']}}</span>
                                                         </td>
                                                         <td class="form-group">
-                                                                <input class="form-control current_quantity" type="text" id="current_quantity_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][current_quantity]" disabled>
+                                                            <input class="form-control current_quantity" type="text" id="current_quantity_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][current_quantity]" disabled>
                                                         </td>
                                                         <td>
                                                             <span id="cumulative_quantity_{{$quotationProducts[$iterator]['id']}}"></span>

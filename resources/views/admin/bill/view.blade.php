@@ -151,7 +151,7 @@
                                                     </td>
 
                                                     <td>
-                                                        <span>{!! round($billQuotationProducts[$iterator]['rate'] * $billQuotationProducts[$iterator]['quotationProducts']['quantity']) !!}</span>
+                                                        <span>{!! round(($billQuotationProducts[$iterator]['rate'] * $billQuotationProducts[$iterator]['quotationProducts']['quantity']),3) !!}</span>
                                                     </td>
 
                                                     <td>
