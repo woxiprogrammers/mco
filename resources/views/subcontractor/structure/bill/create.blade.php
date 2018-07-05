@@ -193,7 +193,7 @@
             if(isNaN(subTotal)){
                 $("#subtotal").text(0);
             }else{
-                $('#subtotal').text(subTotal.toFixed(2));
+                $('#subtotal').text(subTotal.toFixed(3));
             }
             $('.percentage').each(function(){
                 calculateTaxAmount($(this));
@@ -209,7 +209,7 @@
             if(isNaN(tax_amount)){
                 $('#tax_amount_'+taxId).text(0);
             }else{
-                $('#tax_amount_'+taxId).text(tax_amount.toFixed(2));
+                $('#tax_amount_'+taxId).text(tax_amount.toFixed(3));
             }
             calulateFinalTotal();
         }
@@ -223,7 +223,7 @@
             if(isNaN(finalTotal)){
                 $('#finalTotal').text(0);
             }else{
-                $('#finalTotal').text(finalTotal.toFixed(2));
+                $('#finalTotal').text(finalTotal.toFixed(3));
             }
         }
     </script>

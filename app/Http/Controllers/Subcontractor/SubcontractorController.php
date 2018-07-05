@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Subcontractor;
 use App\BankInfo;
 use App\DprMainCategory;
 use App\Employee;
+use App\EmployeeType;
 use App\Http\Controllers\CustomTraits\PeticashTrait;
 use App\PaymentType;
 use App\Project;
@@ -766,18 +767,18 @@ class SubcontractorController extends Controller
             $structureSlug = $subcontractorStructure->contractType->slug;
             if($structureSlug == 'sqft'){
                 $rate = $subcontractorStructure['rate'];
-                $subTotal = $subcontractorBill['qty'] * $rate;
+                $subTotal = round(($subcontractorBill['qty'] * $rate),3);
                 foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
-                    $taxTotal += ($subcontractorBillTaxData['percentage'] * $subTotal) / 100;
+                    $taxTotal += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
                 }
-                $finalTotal = $subTotal + $taxTotal;
+                $finalTotal = round(($subTotal + $taxTotal),3);
             }else{
                 $rate = $subcontractorStructure['rate'] * $subcontractorStructure['total_work_area'];
-                $subTotal = $subcontractorBill['qty'] * $rate;
+                $subTotal = round(($subcontractorBill['qty'] * $rate),3);
                 foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
-                    $taxTotal += ($subcontractorBillTaxData['percentage'] * $subTotal) / 100;
+                    $taxTotal += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
                 }
-                $finalTotal = $subTotal + $taxTotal;
+                $finalTotal = round(($subTotal + $taxTotal),3);
             }
             $billNo = 1;
             foreach($totalBills as $billId){
