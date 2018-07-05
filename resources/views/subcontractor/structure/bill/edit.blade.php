@@ -172,10 +172,10 @@
             }
         });
         function calculateTaxAmount(element){
-            var percentage = $(element).val();
+            var percentage = parseFloat($(element).val());
             var taxId = $(element).attr('id').match(/\d+/)[0];
-            var subtotal = $('#subtotal').text();
-            var tax_amount = (percentage * subtotal) / 100;
+            var subtotal = parseFloat($('#subtotal').text());
+            var tax_amount = parseFloat((percentage * subtotal) / 100).toFixed(3);
             $('#tax_amount_'+taxId).text(tax_amount);
             calulateFinalTotal();
         }
@@ -186,7 +186,7 @@
                 var taxAmount = parseFloat($(this).text());
                 finalTotal += taxAmount;
             });
-            $('#finalTotal').text(finalTotal);
+            $('#finalTotal').text(parseFloat(finalTotal).toFixed(3));
         }
     </script>
 @endsection
