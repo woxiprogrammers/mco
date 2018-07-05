@@ -288,7 +288,9 @@
                 $("#billData").hide();
                 $("#inventoryComponentTransferId").removeAttr('value');
             });
+
             $(".calculate-amount").on('keyup', function(){
+                console.log('inside calculate amount');
                 var extraAmount = parseFloat($("#extra_amount").val());
                 if(isNaN(extraAmount)){
                     extraAmount = 0;
@@ -305,12 +307,12 @@
                 if(isNaN(igstPercent)){
                     igstPercent = 0;
                 }
-                var cgstAmount = extraAmount * (cgstPercent / 100);
-                var sgstAmount = extraAmount * (sgstPercent / 100);
-                var igstAmount = extraAmount * (igstPercent / 100);
-                $("#extra_amount_cgst_amount").val(cgstAmount.toFixed(2));
-                $("#extra_amount_sgst_amount").val(sgstAmount.toFixed(2));
-                $("#extra_amount_igst_amount").val(igstAmount.toFixed(2));
+                var cgstAmount = parseFloat(extraAmount * (cgstPercent / 100)).toFixed(3);
+                var sgstAmount = parseFloat(extraAmount * (sgstPercent / 100)).toFixed(3);
+                var igstAmount = parseFloat(extraAmount * (igstPercent / 100)).toFixed(3);
+                $("#extra_amount_cgst_amount").val(cgstAmount);
+                $("#extra_amount_sgst_amount").val(sgstAmount);
+                $("#extra_amount_igst_amount").val(igstAmount);
                 var subtotal = parseFloat($("#subTotal").val());
                 if(isNaN(subtotal)){
                     subtotal = 0;
@@ -319,13 +321,14 @@
                 if(isNaN(taxAmount)){
                     taxAmount = 0;
                 }
-                var totalAmount = subtotal + taxAmount + extraAmount + cgstAmount + sgstAmount + igstAmount;
+                var totalAmount = parseFloat(parseFloat(subtotal) + parseFloat(taxAmount) + extraAmount + cgstAmount + sgstAmount + igstAmount).toFixed(3);
                 if(isNaN(totalAmount)){
                     totalAmount = 0;
                 }
-                $("#totalAmount").val(totalAmount.toFixed(2));
-                $(".calculate-amount").trigger('keyup');
+                $("#totalAmount").val(totalAmount);
+                //$(".calculate-amount").trigger('keyup');
             });
+
             $("#imageupload").on('change', function () {
                 var countFiles = $(this)[0].files.length;
                 var imgPath = $(this)[0].value;
