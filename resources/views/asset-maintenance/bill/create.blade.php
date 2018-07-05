@@ -235,7 +235,7 @@
                     cgst_percentage = 0;
                     $(".calculatable-field:input[name='cgst_percentage']").val(0);
                 }
-                var cgst_amount = (parseFloat(subTotal)) * (parseFloat(cgst_percentage)/100);
+                var cgst_amount = parseFloat((parseFloat(subTotal)) * (parseFloat(cgst_percentage)/100)).toFixed(3);
                 $(".calculatable-field:input[name='cgst_amount']").val(cgst_amount);
 
                 var sgst_percentage = $(".calculatable-field:input[name='sgst_percentage']").val();
@@ -243,7 +243,7 @@
                     sgst_percentage = 0;
                     $(".calculatable-field:input[name='sgst_percentage']").val(0);
                 }
-                var sgst_amount = (parseFloat(subTotal)) * (parseFloat(sgst_percentage)/100);
+                var sgst_amount = parseFloat((parseFloat(subTotal)) * (parseFloat(sgst_percentage)/100)).toFixed(3);
                 $(".calculatable-field:input[name='sgst_amount']").val(sgst_amount);
 
                 var igst_percentage = $(".calculatable-field:input[name='igst_percentage']").val();
@@ -251,7 +251,7 @@
                     igst_percentage = 0;
                     $(".calculatable-field:input[name='igst_percentage']").val(0);
                 }
-                var igst_amount = (parseFloat(subTotal)) * (parseFloat(igst_percentage)/100);
+                var igst_amount = parseFloat((parseFloat(subTotal)) * (parseFloat(igst_percentage)/100)).toFixed(3);
                 $(".calculatable-field:input[name='igst_amount']").val(igst_amount);
 
                 var extra_amount = $(".calculatable-field:input[name='extra_amount']").val();
@@ -259,8 +259,8 @@
                     extra_amount = 0;
                     $(".calculatable-field:input[name='extra_amount']").val(0);
                 }
-                var total = (parseFloat(subTotal) + parseFloat(cgst_amount) +parseFloat(sgst_amount) +parseFloat(igst_amount) +parseFloat(extra_amount));
-                $(".calculatable-field:input[name='total']").val(total)
+                var total = (parseFloat(subTotal) + parseFloat(cgst_amount) + parseFloat(sgst_amount) + parseFloat(igst_amount) + parseFloat(extra_amount));
+                $(".calculatable-field:input[name='total']").val(parseFloat(total).toFixed(3));
             });
 
             $("#transactionSelectButton").on('click', function(event){
