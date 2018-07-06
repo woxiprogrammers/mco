@@ -19,6 +19,7 @@ use App\Project;
 use App\ProjectSite;
 use App\ProjectSiteAdvancePayment;
 use App\PurcahsePeticashTransaction;
+use App\PurchaseOrderAdvancePayment;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 
@@ -54,7 +55,12 @@ trait PeticashTrait{
                 ->where('project_site_id',$projectSiteId)
                 ->where('peticash_status_id',$approvedPeticashStatusId)
                 ->sum('bill_amount');
-            $remainingAmount = ($allocatedAmount + $projectSiteAdvancedAmount + $salesBillCashAmount + $salesBillTransactions) - ($totalSalaryAmount + $totalAdvanceAmount + $totalPurchaseAmount);
+            $cashPurchaseOrderAdvancePaymentTotal = PurchaseOrderAdvancePayment::join('purchase_orders','purchase_orders.id','=','purchase_order_advance_payments.purchase_order_id')
+                                                        ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
+                                                        ->where('purchase_order_advance_payments.paid_from_slug','cash')
+                                                        ->where('purchase_requests.project_site_id',$projectSiteId)
+                                                        ->sum('amount');
+            $remainingAmount = ($allocatedAmount + $projectSiteAdvancedAmount + $salesBillCashAmount + $salesBillTransactions) - ($totalSalaryAmount + $totalAdvanceAmount + $totalPurchaseAmount - $cashPurchaseOrderAdvancePaymentTotal);
         }catch (\Exception $e){
             $data = [
                 'action' => 'Get Peticash sitewise statistics',
@@ -113,7 +119,12 @@ trait PeticashTrait{
                     ->where('project_site_id',$projectSiteId)
                     ->where('peticash_status_id',$approvedPeticashStatusId)
                     ->sum('bill_amount');
-                $remainingAmount = ($allocatedAmount + $projectSiteAdvancedAmount + $salesBillCashAmount + $salesBillTransactions) - ($totalSalaryAmount + $totalAdvanceAmount + $totalPurchaseAmount);
+                $cashPurchaseOrderAdvancePaymentTotal = PurchaseOrderAdvancePayment::join('purchase_orders','purchase_orders.id','=','purchase_order_advance_payments.purchase_order_id')
+                    ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
+                    ->where('purchase_order_advance_payments.paid_from_slug','cash')
+                    ->where('purchase_requests.project_site_id',$projectSiteId)
+                    ->sum('amount');
+                $remainingAmount = ($allocatedAmount + $projectSiteAdvancedAmount + $salesBillCashAmount + $salesBillTransactions) - ($totalSalaryAmount + $totalAdvanceAmount + $totalPurchaseAmount + $cashPurchaseOrderAdvancePaymentTotal);
                 $allocatedAmount = $allocatedAmount + $salesBillCashAmount + $salesBillTransactions + $projectSiteAdvancedAmount;
                 $projectName = Project::join('project_sites','projects.id','=','project_sites.project_id')
                                         ->where('project_sites.id', $projectSiteId)
