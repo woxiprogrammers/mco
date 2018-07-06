@@ -138,7 +138,7 @@
                                                                         <span class="input-group-addon" style="font-size: 18px">&nbsp;&nbsp; % &nbsp; &nbsp;</span>
                                                                     </div>
                                                                     <div class="col-md-6">
-                                                                        <input type="text" class="form-control" name="extra_amount_cgst_amount" id="extra_amount_cgst_amount" value="{{$siteTransferBill->extra_amount_csgst_amount}}" readonly>
+                                                                        <input type="text" class="form-control" name="extra_amount_cgst_amount" id="extra_amount_cgst_amount" value="{{$siteTransferBill->extra_amount_cgst_amount}}" readonly>
                                                                     </div>
                                                                 </div>
                                                             </div>

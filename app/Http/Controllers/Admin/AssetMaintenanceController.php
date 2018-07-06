@@ -756,8 +756,9 @@ class AssetMaintenanceController extends Controller{
 
     public function createBill(Request $request){
         try{
-            $assetMaintenanceBillData = $request->only('asset_maintenance_id','cgst_percentage','cgst_amount','sgst_percentage','sgst_amount','igst_percentage','igst_amount','extra_amount','bill_number');
-            $assetMaintenanceBillData['amount'] = $request['sub_total'];
+            $assetMaintenanceBillData = $request->only('asset_maintenance_id','cgst_percentage','cgst_amount','sgst_percentage','sgst_amount','igst_percentage','igst_amount','bill_number');
+            $assetMaintenanceBillData['amount'] = round($request['sub_total'],3);
+            $assetMaintenanceBillData['extra_amount'] = round($request['extra_amount'],3);
             $assetMaintenanceBill = AssetMaintenanceBill::create($assetMaintenanceBillData);
             if($request->has('bill_images')){
                 $assetMaintenanceDirectoryName = sha1($request->asset_maintenance_id);
