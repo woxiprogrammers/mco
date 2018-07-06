@@ -95,7 +95,8 @@ class SiteTransferBillingController extends Controller
 
     public function createSiteTransferBill(Request $request){
         try{
-            $siteTransferBillData = $request->except('_token','transfer_grn');
+            $siteTransferBillData = $request->except('_token','transfer_grn','extra_amount');
+            $siteTransferBillData['extra_amount'] = round($request['extra_amount'],3);
             $siteTransferBill = SiteTransferBill::create($siteTransferBillData);
             $imageUploadPath = public_path().env('SITE_TRANSFER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.sha1($siteTransferBill->id);
             if(!file_exists($imageUploadPath)){
@@ -203,8 +204,8 @@ class SiteTransferBillingController extends Controller
                         date('j M Y', strtotime($siteTransferBillData[$pagination]['bill_date'])),
                         $siteTransferBillData[$pagination]['bill_number'],
                         $vendorName,
-                        $siteTransferBillData[$pagination]['subtotal'] + $siteTransferBillData[$pagination]['extra_amount'],
-                        $siteTransferBillData[$pagination]['tax_amount'] + $siteTransferBillData[$pagination]['extra_amount_cgst_amount'] + $siteTransferBillData[$pagination]['extra_amount_sgst_amount'] + $siteTransferBillData[$pagination]['extra_amount_igst_amount'],
+                        round(($siteTransferBillData[$pagination]['subtotal'] + $siteTransferBillData[$pagination]['extra_amount']),3),
+                        round(($siteTransferBillData[$pagination]['tax_amount'] + $siteTransferBillData[$pagination]['extra_amount_cgst_amount'] + $siteTransferBillData[$pagination]['extra_amount_sgst_amount'] + $siteTransferBillData[$pagination]['extra_amount_igst_amount']),3),
                         $siteTransferBillData[$pagination]['total'],
                         $paidAmount,
                         $pendingAmount,
