@@ -96,6 +96,8 @@ class InventoryManageController extends Controller
                                                 PDF <i class="fa fa-download" aria-hidden="true"></i>
                                             </a>
                                         </div>';
+                }elseif($inventoryTransferData[$pagination]->inventoryComponentTransferStatus->slug == 'disapproved'){
+                    $actionDropDown =  '';
                 }elseif($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-asset-maintenance-approval')){
                     $actionDropDown =  '<button class="btn btn-xs blue"> 
                                             <form action="/inventory/transfer/change-status/approved/'.$inventoryTransferData[$pagination]->id.'" method="post">
