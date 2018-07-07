@@ -6,14 +6,6 @@
      * Time: 3:37 PM
      */
     ?>
-
-<?php
-    /**
-     * Created by Ameya Joshi.
-     * Date: 5/12/17
-     * Time: 11:37 AM
-     */
-?>
 @extends('layout.master')
 @section('title','Constro | Manage Cash Transaction')
 @include('partials.common.navbar')
