@@ -57,15 +57,17 @@
                                             <table class="table table-striped table-bordered table-hover table-checkable order-column" id="unitsTable">
                                                 <thead>
                                                 <tr>
+                                                    <th>Sr. No</th>
                                                     <th style="width:30%"> Name </th>
                                                     <th> Status </th>
                                                     <th> Created On </th>
                                                     <th> Actions </th>
                                                 </tr>
                                                 <tr>
+                                                    <th></th>
                                                     <th style="width:30%"> <input type="text" class="form-control form-filter" name="search_name"> </th>
-                                                    <th> <input type="text" class="form-control form-filter" name="search_status" readonly> </th>
-                                                    <th> <input type="text" class="form-control form-filter" name="search_created_on" readonly> </th>
+                                                    <th> {{--<input type="text" class="form-control form-filter" name="search_status" readonly>--}} </th>
+                                                    <th> {{--<input type="text" class="form-control form-filter" name="search_created_on" readonly>--}} </th>
                                                     <th>
                                                         <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                         <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
@@ -110,6 +112,7 @@
                                             <table class="table table-striped table-bordered table-hover table-checkable order-column" id="unitConversionTable">
                                                 <thead>
                                                 <tr>
+                                                    <th>Sr. No</th>
                                                     <th style="width:30%"> Unit  </th>
                                                     <th> Value </th>
                                                     <th style="width:30%"> Unit </th>
@@ -117,10 +120,11 @@
                                                     <th style="width: 20%"> Action </th>
                                                 </tr>
                                                 <tr>
+                                                    <th></th>
                                                     <th style="width:30%"> <input type="text" class="form-control form-filter" name="search_unit_1_name"> </th>
-                                                    <th> <input type="text" class="form-control form-filter" name="search_unit_1_value" readonly> </th>
+                                                    <th> {{--<input type="text" class="form-control form-filter" name="search_unit_1_value" readonly>--}} </th>
                                                     <th style="width:30%"> <input type="text" class="form-control form-filter" name="search_unit_2_name"> </th>
-                                                    <th> <input type="text" class="form-control form-filter" name="search_unit_2_value" readonly> </th>
+                                                    <th>{{-- <input type="text" class="form-control form-filter" name="search_unit_2_value" readonly>--}} </th>
                                                     <th>
                                                         <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                         <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>

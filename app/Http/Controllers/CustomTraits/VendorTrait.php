@@ -354,6 +354,8 @@ trait VendorTrait
                     $vendorsData[$pagination]['company'],
                     $vendorsData[$pagination]['name'],
                     $vendorsData[$pagination]['mobile'],
+                    $vendorsData[$pagination]['alternate_contact'],
+                    $vendorsData[$pagination]['gstin'],
                     $vendor_status,
                     $actionButton
                 ];

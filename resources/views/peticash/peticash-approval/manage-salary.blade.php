@@ -109,7 +109,7 @@
                                                     <th></th>
                                                     <th></th>
                                                     <th> <input type="text" class="form-filter" name="emp_id" id="emp_id"> </th>
-                                                    <th> <input type="hidden" class="form-control form-filter" name="search_name" id="search_name"> </th>
+                                                    <th> <input type="text" class="form-control form-filter" name="search_name" id="search_name"> </th>
                                                     <th> <input type="hidden" class="form-control form-filter" name="postdata" id="postdata"></th>
                                                     <th></th>
                                                     <th></th>
@@ -427,6 +427,30 @@
                     'site_id=>'+site_id+','+
                     'year=>'+year+','+
                     'month=>'+month;
+
+            $("input[name='postdata']").val(postData);
+            $("input[name='search_name']").val(search_name);
+            $("input[name='emp_id']").val(emp_id);
+            $("input[name='status']").val(status_id);
+            $(".filter-submit").trigger('click');
+        });
+
+        $("input[name='search_name']").on('keyup',function(){
+            var client_id = $('#client_id').val();
+            var project_id = $('#project_id').val();
+            var site_id = $('#site_id').val();
+            var year = $('#year').val();
+            var month = $('#month').val();
+            var status_id = $('#status_id').val();
+            var search_name = $('#search_name').val();
+            var emp_id = $('#emp_id').val();
+
+            var postData =
+                'client_id=>'+client_id+','+
+                'project_id=>'+project_id+','+
+                'site_id=>'+site_id+','+
+                'year=>'+year+','+
+                'month=>'+month;
 
             $("input[name='postdata']").val(postData);
             $("input[name='search_name']").val(search_name);
