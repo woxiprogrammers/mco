@@ -12,9 +12,6 @@ var  CreateSiteTransferBill = function () {
             errorClass: 'help-block', // default input error message class
             focusInvalid: false, // do not focus the last invalid input
             rules: {
-                subtotal:{
-                    min: 0.000001
-                },
                 transfer_component_transfer_id: {
                     required: true
                 },

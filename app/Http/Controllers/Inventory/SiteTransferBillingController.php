@@ -70,13 +70,13 @@ class SiteTransferBillingController extends Controller
                 $response[$iterator]['inventory_component_transfer_id'] = $transferInfo['id'];
                 $response[$iterator]['grn'] = $transferInfo['grn'];
                 if(isset($transferInfo['transportation_amount']) || $transferInfo['transportation_amount'] != null){
-                    $response[$iterator]['subtotal'] = $transferInfo['transportation_amount'];
+                    $response[$iterator]['subtotal'] = round($transferInfo['transportation_amount'],3);
                 }else{
                     $response[$iterator]['subtotal'] = 0;
                 }
-                $response[$iterator]['tax_amount'] = $response[$iterator]['subtotal'] * ($transferInfo['transportation_cgst_percent'] / 100);
-                $response[$iterator]['tax_amount'] += $response[$iterator]['subtotal'] * ($transferInfo['transportation_sgst_percent'] / 100);
-                $response[$iterator]['tax_amount'] += $response[$iterator]['subtotal'] * ($transferInfo['transportation_igst_percent'] / 100);
+                $response[$iterator]['tax_amount'] = round(($response[$iterator]['subtotal'] * ($transferInfo['transportation_cgst_percent'] / 100)),3);
+                $response[$iterator]['tax_amount'] += round(($response[$iterator]['subtotal'] * ($transferInfo['transportation_sgst_percent'] / 100)),3);
+                $response[$iterator]['tax_amount'] += round(($response[$iterator]['subtotal'] * ($transferInfo['transportation_igst_percent'] / 100)),3);
                 $iterator++;
             }
             $status = 200;
@@ -95,7 +95,8 @@ class SiteTransferBillingController extends Controller
 
     public function createSiteTransferBill(Request $request){
         try{
-            $siteTransferBillData = $request->except('_token','transfer_grn');
+            $siteTransferBillData = $request->except('_token','transfer_grn','extra_amount');
+            $siteTransferBillData['extra_amount'] = round($request['extra_amount'],3);
             $siteTransferBill = SiteTransferBill::create($siteTransferBillData);
             $imageUploadPath = public_path().env('SITE_TRANSFER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.sha1($siteTransferBill->id);
             if(!file_exists($imageUploadPath)){
@@ -203,8 +204,8 @@ class SiteTransferBillingController extends Controller
                         date('j M Y', strtotime($siteTransferBillData[$pagination]['bill_date'])),
                         $siteTransferBillData[$pagination]['bill_number'],
                         $vendorName,
-                        $siteTransferBillData[$pagination]['subtotal'] + $siteTransferBillData[$pagination]['extra_amount'],
-                        $siteTransferBillData[$pagination]['tax_amount'] + $siteTransferBillData[$pagination]['extra_amount_cgst_amount'] + $siteTransferBillData[$pagination]['extra_amount_sgst_amount'] + $siteTransferBillData[$pagination]['extra_amount_igst_amount'],
+                        round(($siteTransferBillData[$pagination]['subtotal'] + $siteTransferBillData[$pagination]['extra_amount']),3),
+                        round(($siteTransferBillData[$pagination]['tax_amount'] + $siteTransferBillData[$pagination]['extra_amount_cgst_amount'] + $siteTransferBillData[$pagination]['extra_amount_sgst_amount'] + $siteTransferBillData[$pagination]['extra_amount_igst_amount']),3),
                         $siteTransferBillData[$pagination]['total'],
                         $paidAmount,
                         $pendingAmount,

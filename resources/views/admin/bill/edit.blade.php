@@ -46,6 +46,7 @@
                                             <div class="portlet-body">
                                                 <div class="tab-content">
                                                     <input type="hidden" id="quotation_id" value="{{$bill->quotation_id}}">
+                                                    <input type="hidden" id="bank_info_id" value="{{$bill->bank_info_id}}">
                                                     <form role="form" id="edit_bill" class="form-horizontal" action="/bill/edit/{{$bill->id}}" method="post">
                                                         <div class="col-md-12 form-group">
                                                             <div class="col-md-4 date date-picker" data-date-end-date="0d">
@@ -80,7 +81,7 @@
                                                             </div>
                                                             <div class="col-md-2" style="margin-left: -4%">
                                                                 <select class="table-group-action-input form-control input-inline input-small input-sm" name="assign_bank" id="assign_bank">
-                                                                    <option value="default">Select Bank</option>
+                                                                    <option value="">Select Bank</option>
                                                                     @foreach($allbankInfoIds as $bank)
                                                                         <option value="{{$bank['bank_info_id']}}"> {!! $bank->bankInfo->bank_name !!} - {!! $bank->bankInfo->account_number !!} </option>
                                                                     @endforeach
@@ -149,7 +150,7 @@
                                                                 </td>
 
                                                                 <td>
-                                                                    <span>{{$quotationProducts[$iterator]['discounted_rate'] * $quotationProducts[$iterator]['quantity']}}</span>
+                                                                    <span>{{round(($quotationProducts[$iterator]['discounted_rate'] * $quotationProducts[$iterator]['quantity']),3)}}</span>
                                                                 </td>
 
                                                                 <td>
@@ -367,10 +368,8 @@
 <script src="/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script>
 
 <script>
-    $(document).ready(function(){
-        CreateBank.init();
-    });
-    $('select[name="assign_bank"]').find('option[value={{$bill->bank_info_id}}]').attr("selected",true);
+    var bank_info_id = $('#bank_info_id').val();
+    $('select[name="assign_bank"]').find('option[value="' + bank_info_id + '"]').attr("selected",true);
 </script>
 @endsection
 

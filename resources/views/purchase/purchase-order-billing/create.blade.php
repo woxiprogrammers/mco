@@ -267,7 +267,7 @@
             $('#extra_amount').on('keyup', function(){
                 if(parseFloat($('#extra_amount').val()) > 0){
                     $('#extra_tax_div').show();
-                    var total_tax = (parseFloat($("#extra_amount_tax_value").val()) * parseFloat($(this).val())) / 100 ;
+                    var total_tax = parseFloat((parseFloat($("#extra_amount_tax_value").val()) * parseFloat($(this).val())) / 100).toFixed(3) ;
                     $('#extra_tax_amount').val(total_tax);
                 }else{
                     $('#extra_tax_div').hide();
@@ -338,7 +338,7 @@
             $(".tax").on('keyup',function(){
                var subtotal = parseFloat($("#subTotal").val());
                var percentage = parseFloat($(this).val());
-               var amount = (subtotal * (percentage / 100)).toFixed(3);
+               var amount = parseFloat(subtotal * (percentage / 100)).toFixed(3);
                $(this).closest('#inputGroup').next().find("input[type='text']").val(amount);
                 calculateTotal();
             });
@@ -486,10 +486,10 @@
                 }
             });
             if($('#transportationCheckbox').is(':checked') == true){
-                total = (parseFloat(total) + parseFloat($('#transportation_total').val()) + parseFloat($('#transportation_tax_amount').val())).toFixed(3) ;
+                total = parseFloat((parseFloat(total) + parseFloat($('#transportation_total').val()) + parseFloat($('#transportation_tax_amount').val()))).toFixed(3) ;
                 $("#totalAmount").val(total);
             }else{
-                $("#totalAmount").val(total);
+                $("#totalAmount").val(total.toFixed(3));
             }
 
         }

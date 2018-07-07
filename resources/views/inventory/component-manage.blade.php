@@ -1234,7 +1234,7 @@
                     }
                 });
             }
-        };
+        }
 
         function initializeDateTimePicker(){
             $("#readingFormModel form .date").each(function(){
@@ -1559,7 +1559,7 @@
             if(typeof quantity == 'undefined' || quantity == '' || isNaN(quantity)){
                 quantity = 0;
             }
-            var subtotal = rate * quantity;
+            var subtotal = (parseFloat(rate) * parseFloat(quantity)).toFixed(3);
             var cgstPercentage = parseFloat($(element).closest('.modal-body').find('.tax-modal-cgst-percentage').val());
             if(typeof cgstPercentage == 'undefined' || cgstPercentage == '' || isNaN(cgstPercentage)){
                 cgstPercentage = 0;
@@ -1572,13 +1572,13 @@
             if(typeof igstPercentage == 'undefined' || igstPercentage == '' || isNaN(igstPercentage)){
                 igstPercentage = 0;
             }
-            var cgstAmount = subtotal * (cgstPercentage / 100);
-            var sgstAmount = subtotal * (sgstPercentage / 100);
-            var igstAmount = subtotal * (igstPercentage / 100);
+            var cgstAmount = (subtotal * (parseFloat(cgstPercentage) / 100)).toFixed(3);
+            var sgstAmount = (subtotal * (parseFloat(sgstPercentage) / 100)).toFixed(3);
+            var igstAmount = (subtotal * (parseFloat(igstPercentage) / 100)).toFixed(3);
             $(element).closest('.modal-body').find('.tax-modal-cgst-amount').val(cgstAmount);
             $(element).closest('.modal-body').find('.tax-modal-sgst-amount').val(sgstAmount);
             $(element).closest('.modal-body').find('.tax-modal-igst-amount').val(igstAmount);
-            var total = subtotal + cgstAmount + sgstAmount + igstAmount;
+            var total = parseFloat((subtotal + cgstAmount + sgstAmount + igstAmount)).toFixed(3);
             $(element).closest('.modal-body').find('.tax-modal-total').val(total);
         }
 
@@ -1608,13 +1608,13 @@
                 transportationTotalAmount = 0;
             }
 
-            var cgstAmount = (transportationCGSTPercent * transportationAmount) / 100;
-            var sgstAmount = (transportationSGSTPercent * transportationAmount) / 100;
-            var igstAmount = (transportationIGSTPercent * transportationAmount) / 100;
+            var cgstAmount = ((parseFloat(transportationCGSTPercent) * parseFloat(transportationAmount)) / 100).toFixed(3);
+            var sgstAmount = ((parseFloat(transportationSGSTPercent) * parseFloat(transportationAmount)) / 100).toFixed(3);
+            var igstAmount = ((parseFloat(transportationIGSTPercent) * parseFloat(transportationAmount)) / 100).toFixed(3);
             $(element).closest('.modal-body').find('.transportation-cgst-amount').val(cgstAmount);
             $(element).closest('.modal-body').find('.transportation-sgst-amount').val(sgstAmount);
             $(element).closest('.modal-body').find('.transportation-igst-amount').val(igstAmount);
-            var transportationTotal = transportationAmount + cgstAmount + sgstAmount + igstAmount;
+            var transportationTotal = parseFloat(parseFloat(transportationAmount) + cgstAmount + sgstAmount + igstAmount).toFixed(3);
             $(element).closest('.modal-body').find('.transportation-total').val(transportationTotal);
         }
 

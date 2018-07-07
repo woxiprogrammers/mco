@@ -44,7 +44,7 @@
                                                         <table class="table table-striped table-bordered table-hover order-column" id="inventoryListingTable">
                                                             <thead>
                                                                 <tr>
-                                                                    <th> Project </th>
+                                                                    <th> Sr. No </th>
                                                                     <th> Material Name </th>
                                                                     <th> In</th>
                                                                     <th> Out </th>
@@ -52,11 +52,11 @@
                                                                     <th> Action </th>
                                                                 </tr>
                                                                 <tr class="filter">
-                                                                    <th> <input type="text" class="form-control form-filter" name="search_project" readonly> </th>
-                                                                    <th> <input type="text" class="form-control form-filter" name="search_name" readonly> </th>
-                                                                    <th> <input type="text" class="form-control form-filter" name="search_status" readonly> </th>
-                                                                    <th> <input type="text" class="form-control form-filter" name="search_created_on" readonly> </th>
-                                                                    <th> <input type="text" class="form-control form-filter" name="search_created_on" readonly> </th>
+                                                                    <th> </th>
+                                                                    <th> <input type="text" class="form-control form-filter search_filter" name="search_name"> </th>
+                                                                    <th> </th>
+                                                                    <th> </th>
+                                                                    <th> </th>
                                                                     <th>
                                                                         <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                                         <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
@@ -150,6 +150,11 @@
             $("#createInventoryComponent").click(function(){
                 $("#inventoryComponentModal").modal();
             });
+
+            $('.search_filter').on('keyup',function(){
+                $(".filter-submit").trigger('click');
+            });
+
             $("#inventory_type").on('change',function(){
                 var componentType = $("#inventory_type").val();
                 var project_site_id = $('#project_site').val();

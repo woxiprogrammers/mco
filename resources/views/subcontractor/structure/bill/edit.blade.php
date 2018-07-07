@@ -113,7 +113,7 @@
                                                                         <input type="text" class="form-control percentage" name="taxes[{!! $billTaxData->id !!}]" id="percentage_{!! $billTaxData->id !!}" value="{!! $billTaxData->percentage !!}" onkeyup="calculateTaxAmount(this)">
                                                                     </td>
                                                                     <td colspan="1">
-                                                                        <span class="tax_amount" id="tax_amount_{!! $billTaxData->id !!}">{!! ($billTaxData->percentage * $subTotal) / 100 !!}</span>
+                                                                        <span class="tax_amount" id="tax_amount_{!! $billTaxData->id !!}">{!! round((($billTaxData->percentage * $subTotal) / 100),3) !!}</span>
                                                                     </td>
                                                                 </tr>
                                                             @endforeach
@@ -172,10 +172,10 @@
             }
         });
         function calculateTaxAmount(element){
-            var percentage = $(element).val();
+            var percentage = parseFloat($(element).val());
             var taxId = $(element).attr('id').match(/\d+/)[0];
-            var subtotal = $('#subtotal').text();
-            var tax_amount = (percentage * subtotal) / 100;
+            var subtotal = parseFloat($('#subtotal').text());
+            var tax_amount = parseFloat((percentage * subtotal) / 100).toFixed(3);
             $('#tax_amount_'+taxId).text(tax_amount);
             calulateFinalTotal();
         }
@@ -186,7 +186,7 @@
                 var taxAmount = parseFloat($(this).text());
                 finalTotal += taxAmount;
             });
-            $('#finalTotal').text(finalTotal);
+            $('#finalTotal').text(parseFloat(finalTotal).toFixed(3));
         }
     </script>
 @endsection

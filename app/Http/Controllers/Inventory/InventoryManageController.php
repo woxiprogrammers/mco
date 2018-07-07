@@ -96,6 +96,8 @@ class InventoryManageController extends Controller
                                                 PDF <i class="fa fa-download" aria-hidden="true"></i>
                                             </a>
                                         </div>';
+                }elseif($inventoryTransferData[$pagination]->inventoryComponentTransferStatus->slug == 'disapproved'){
+                    $actionDropDown =  '';
                 }elseif($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-asset-maintenance-approval')){
                     $actionDropDown =  '<button class="btn btn-xs blue"> 
                                             <form action="/inventory/transfer/change-status/approved/'.$inventoryTransferData[$pagination]->id.'" method="post">
@@ -384,18 +386,34 @@ class InventoryManageController extends Controller
     public function inventoryListing(Request $request){
         try{
             $status = 200;
+            $material_name = null;
+            if ($request->has('search_name')) {
+                $material_name = $request->search_name;
+            }
             if(Session::has('global_project_site')){
                 $projectSiteId = Session::get('global_project_site');
-                $inventoryData = InventoryComponent::where('project_site_id', $projectSiteId)->orderBy('created_at','desc')->get();
+                if ($material_name != null && $material_name != "") {
+                    $inventoryData = InventoryComponent::where('project_site_id', $projectSiteId)
+                        ->where('name', 'ilike', '%' . $request->search_name . '%')
+                        ->orderBy('created_at', 'desc')->get();
+                } else {
+                    $inventoryData = InventoryComponent::where('project_site_id', $projectSiteId)
+                        ->orderBy('created_at', 'desc')->get();
+                }
             }else{
-                $inventoryData = InventoryComponent::orderBy('created_at','desc')->get();
+                if ($material_name != null && $material_name != "") {
+                    $inventoryData = InventoryComponent::where('name', 'ilike', '%' . $request->search_name . '%')
+                        ->orderBy('created_at', 'desc')->get();
+                } else {
+                    $inventoryData = InventoryComponent::orderBy('created_at', 'desc')->get();
+                }
             }
             $iTotalRecords = count($inventoryData);
             $records = array();
             $records['data'] = array();
             $end = $request->length < 0 ? count($inventoryData) : $request->length;
+            $sr_no = 0;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($inventoryData); $iterator++,$pagination++ ){
-                $projectName = $inventoryData[$pagination]->projectSite->project->name.' - '.$inventoryData[$pagination]->projectSite->name.' ('.$inventoryData[$pagination]->projectSite->project->client->company.')';
                 if($inventoryData[$pagination]->is_material == true){
                     $materialUnit = Material::where('id',$inventoryData[$iterator]['reference_id'])->pluck('unit_id')->first();
                     if($materialUnit == null){
@@ -442,8 +460,8 @@ class InventoryManageController extends Controller
                 }
                 $availableQuantity = $inQuantity - $outQuantity;
                 $records['data'][$iterator] = [
-                    $projectName,
-                    $inventoryData[$pagination]->name,
+                    ++$sr_no,
+                    ucwords($inventoryData[$pagination]->name),
                     $inQuantity.' '.$unitName,
                     $outQuantity.' '.$unitName,
                     $availableQuantity.' '.$unitName,
@@ -1082,23 +1100,23 @@ class InventoryManageController extends Controller
             $data['grn'] = $inventoryComponentTransfer['grn'];
             $data['component_name'] = $inventoryComponent['name'];
             $data['quantity'] = $inventoryComponentTransfer['quantity'];
-            $data['rate_per_unit'] = $inventoryComponentTransfer['rate_per_unit'];
-            $data['cgst_percentage'] = $inventoryComponentTransfer['cgst_percentage'];
-            $data['sgst_percentage'] = $inventoryComponentTransfer['sgst_percentage'];
-            $data['igst_percentage'] = $inventoryComponentTransfer['igst_percentage'];
-            $data['cgst_amount'] = $inventoryComponentTransfer['cgst_amount'];
-            $data['sgst_amount'] = $inventoryComponentTransfer['sgst_amount'];
-            $data['igst_amount'] = $inventoryComponentTransfer['igst_amount'];
-            $data['total'] = $inventoryComponentTransfer['total'];
+            $data['rate_per_unit'] = round($inventoryComponentTransfer['rate_per_unit'],3);
+            $data['cgst_percentage'] = round($inventoryComponentTransfer['cgst_percentage'],3);
+            $data['sgst_percentage'] = round($inventoryComponentTransfer['sgst_percentage'],3);
+            $data['igst_percentage'] = round($inventoryComponentTransfer['igst_percentage'],3);
+            $data['cgst_amount'] = round($inventoryComponentTransfer['cgst_amount'],3);
+            $data['sgst_amount'] = round($inventoryComponentTransfer['sgst_amount'],3);
+            $data['igst_amount'] = round($inventoryComponentTransfer['igst_amount'],3);
+            $data['total'] = round($inventoryComponentTransfer['total'],3);
             $data['unit'] = $inventoryComponentTransfer->unit->name;
             $data['is_material'] = $inventoryComponentTransfer->inventoryComponent->is_material;
-            $data['transportation_amount'] = $inventoryComponentTransfer->transportation_amount;
-            $data['transportation_cgst_percent'] = $inventoryComponentTransfer->transportation_cgst_percent;
-            $data['transportation_cgst_amount'] = ($inventoryComponentTransfer->transportation_amount * $inventoryComponentTransfer->transportation_cgst_percent) / 100;
-            $data['transportation_sgst_percent'] = $inventoryComponentTransfer->transportation_sgst_percent;
-            $data['transportation_sgst_amount'] = ($inventoryComponentTransfer->transportation_amount * $inventoryComponentTransfer->transportation_sgst_percent) / 100;
-            $data['transportation_igst_percent'] = $inventoryComponentTransfer->transportation_igst_percent;
-            $data['transportation_igst_amount'] = ($inventoryComponentTransfer->transportation_amount * $inventoryComponentTransfer->transportation_igst_percent) / 100;
+            $data['transportation_amount'] = round($inventoryComponentTransfer->transportation_amount,3);
+            $data['transportation_cgst_percent'] = round($inventoryComponentTransfer->transportation_cgst_percent,3);
+            $data['transportation_cgst_amount'] = round((($inventoryComponentTransfer->transportation_amount * $inventoryComponentTransfer->transportation_cgst_percent) / 100),3);
+            $data['transportation_sgst_percent'] = round($inventoryComponentTransfer->transportation_sgst_percent,3);
+            $data['transportation_sgst_amount'] = round((($inventoryComponentTransfer->transportation_amount * $inventoryComponentTransfer->transportation_sgst_percent) / 100),3);
+            $data['transportation_igst_percent'] = round($inventoryComponentTransfer->transportation_igst_percent,3);
+            $data['transportation_igst_amount'] = round((($inventoryComponentTransfer->transportation_amount * $inventoryComponentTransfer->transportation_igst_percent) / 100),3);
             $data['driver_name'] = $inventoryComponentTransfer->driver_name;
             $data['mobile'] = $inventoryComponentTransfer->mobile;
             $data['vehicle_number'] = $inventoryComponentTransfer->vehicle_number;
