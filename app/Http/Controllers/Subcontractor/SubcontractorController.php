@@ -183,7 +183,9 @@ class SubcontractorController extends Controller
             $banks = BankInfo::where('is_active',true)->select('id','bank_name','balance_amount')->get();
             $statistics = $this->getSiteWiseStatistics();
             $cashAllowedLimit = ($statistics['remainingAmount'] > 0) ? $statistics['remainingAmount'] : 0 ;
-            return view('subcontractor.edit')->with(compact('subcontractor','transaction_types','banks','cashAllowedLimit'));
+            $projects = Project::join('project_sites','project_sites.project_id','=','projects.id')
+                    ->where('projects.is_active',true)->select('project_sites.id','projects.name')->get()->toArray();
+            return view('subcontractor.edit')->with(compact('subcontractor','transaction_types','banks','cashAllowedLimit','projects'));
         }catch(\Exception $e){
             $data = [
                 'action' => "Get role edit view",
@@ -621,14 +623,14 @@ class SubcontractorController extends Controller
                     $structureTypeSlug = SubcontractorStructureType::where('id',$data['sc_structure_type_id'])->pluck('slug')->first();
                     if($structureTypeSlug == 'sqft'){
                         $rate = $data['rate'];
-                        $basicAmount = $rate * $data['qty'];
+                        $basicAmount = round(($rate * $data['qty']),3);
                     }else{
-                        $rate = $data['rate'] * $data['total_work_area'];
-                        $basicAmount = $rate * $data['qty'];
+                        $rate = round(($data['rate'] * $data['total_work_area']),3);
+                        $basicAmount = round(($rate * $data['qty']),3);
                     }
                     $taxesApplied = SubcontractorBillTax::where('subcontractor_bills_id',$data['id'])->sum('percentage');
-                    $taxAmount = $basicAmount * ($taxesApplied / 100);
-                    $finalAmount += $basicAmount + $taxAmount;
+                    $taxAmount = round(($basicAmount * ($taxesApplied / 100)),3);
+                    $finalAmount += round(($basicAmount + $taxAmount),3);
                     $paidAmount += SubcontractorBillTransaction::where('subcontractor_bills_id', $data['id'])->sum('total');
                 }
                 $records['final_amount'] = $finalAmount;
@@ -649,10 +651,10 @@ class SubcontractorController extends Controller
                     $structureTypeSlug = SubcontractorStructureType::where('id',$listingData[$pagination]['sc_structure_type_id'])->pluck('slug')->first();
                     if($structureTypeSlug == 'sqft'){
                         $rate = $listingData[$pagination]['rate'];
-                        $basicAmount = $rate * $listingData[$pagination]['qty'];
+                        $basicAmount = round(($rate * $listingData[$pagination]['qty']),3);
                     }else{
                         $rate = $listingData[$pagination]['rate'] * $listingData[$pagination]['total_work_area'];
-                        $basicAmount = $rate * $listingData[$pagination]['qty'];
+                        $basicAmount = round(($rate * $listingData[$pagination]['qty']),3);
                     }
                     if($billStatusSlug == 'disapproved'){
                         $billNo = "-";
@@ -661,8 +663,8 @@ class SubcontractorController extends Controller
                         $billArrayNo++;
                     }
                     $taxesApplied = SubcontractorBillTax::where('subcontractor_bills_id',$listingData[$pagination]['id'])->sum('percentage');
-                    $taxAmount = $basicAmount * ($taxesApplied / 100);
-                    $finalAmount = $basicAmount + $taxAmount;
+                    $taxAmount = round(($basicAmount * ($taxesApplied / 100)),3);
+                    $finalAmount = round(($basicAmount + $taxAmount),3);
                     $paidAmount = SubcontractorBillTransaction::where('subcontractor_bills_id', $listingData[$pagination]['id'])->sum('total');
                     $records['data'][$iterator] = [
                         $billNo,
@@ -703,18 +705,18 @@ class SubcontractorController extends Controller
             $structureSlug = $subcontractorStructure->contractType->slug;
             if($structureSlug == 'sqft'){
                 $rate = $subcontractorStructure['rate'];
-                $subTotal = $subcontractorBill['qty'] * $rate;
+                $subTotal = round(($subcontractorBill['qty'] * $rate),3);
                 foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
-                    $taxTotal += ($subcontractorBillTaxData['percentage'] * $subTotal) / 100;
+                    $taxTotal += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
                 }
-                $finalTotal = $subTotal + $taxTotal;
+                $finalTotal = round(($subTotal + $taxTotal),3);
             }else{
-                $rate = $subcontractorStructure['rate'] * $subcontractorStructure['total_work_area'];
-                $subTotal = $subcontractorBill['qty'] * $rate;
+                $rate = round(($subcontractorStructure['rate'] * $subcontractorStructure['total_work_area']),3);
+                $subTotal = round(($subcontractorBill['qty'] * $rate),3);
                 foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
-                    $taxTotal += ($subcontractorBillTaxData['percentage'] * $subTotal) / 100;
+                    $taxTotal += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
                 }
-                $finalTotal = $subTotal + $taxTotal;
+                $finalTotal = round(($subTotal + $taxTotal),3);
             }
             $billNo = 1;
             foreach($totalBills as $billId){
@@ -1190,6 +1192,7 @@ class SubcontractorController extends Controller
             for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($paymentData); $iterator++,$pagination++ ){
                 $records['data'][] = [
                     date('d M Y',strtotime($paymentData[$pagination]['created_at'])),
+                    $paymentData[$pagination]->projectSite->project->name,
                     $paymentData[$pagination]['amount'],
                     $paymentData[$pagination]->paymentType->name,
                     $paymentData[$pagination]['reference_number']

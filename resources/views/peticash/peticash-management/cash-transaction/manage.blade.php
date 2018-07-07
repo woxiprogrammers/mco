@@ -6,6 +6,7 @@
      * Time: 3:37 PM
      */
     ?>
+
 @extends('layout.master')
 @section('title','Constro | Manage Cash Transaction')
 @include('partials.common.navbar')

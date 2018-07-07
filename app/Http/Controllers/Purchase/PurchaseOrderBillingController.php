@@ -375,9 +375,10 @@ class PurchaseOrderBillingController extends Controller
     use MaterialRequestTrait;
     public function createBill(Request $request){
         try{
-            $purchaseOrderBillData = $request->except('_token','project_site_id','bill_images','transaction_id','sub_total','transaction_grn','purchase_order_format','is_transportation','transportation_total','transportation_tax_amount');
+            $purchaseOrderBillData = $request->except('_token','project_site_id','bill_images','transaction_id','sub_total','transaction_grn','purchase_order_format','is_transportation','transportation_total','transportation_tax_amount','extra_amount');
             $today = Carbon::now();
             $purchaseOrderBillCount = PurchaseOrderBill::whereDate('created_at', $today)->count();
+            $purchaseOrderBillData['extra_amount'] = round($request['extra_amount'],3);
             $purchaseOrderBillData['bill_number'] = $this->getPurchaseIDFormat('purchase-order-bill',$request->project_site_id,$today,(++$purchaseOrderBillCount));
             $purchaseOrderBillData['transportation_tax_amount'] = ($request['is_transportation'] == 'on') ? $request['transportation_tax_amount'] : 0;
             $purchaseOrderBillData['transportation_total_amount'] = ($request['is_transportation'] == 'on') ? $request['transportation_total'] : 0;
@@ -766,6 +767,9 @@ class PurchaseOrderBillingController extends Controller
     public function editPurchaseOrderBill(Request $request,$purchaseOrderBill){
         try{
             $purchaseOrderBillData = $request->except('_token');
+            if($request->has('extra_amount')){
+                $purchaseOrderBillData['extra_amount'] = round($request['extra_amount'],3);
+            }
             $purchaseOrderBill = PurchaseOrderBill::where('id',$purchaseOrderBill['id'])->first();
             $purchaseOrderBill->update($purchaseOrderBillData);
             $request->session()->flash('success','Purchase Order Bill Edited Successfully');

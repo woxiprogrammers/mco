@@ -394,6 +394,9 @@ var PaymentCreate = function () {
             errorClass: 'help-block', // default input error message class
             focusInvalid: false, // do not focus the last invalid input
             rules: {
+                project_site_id : {
+                  required : true
+                },
                 bank_id: {
                     required: true
                 },
