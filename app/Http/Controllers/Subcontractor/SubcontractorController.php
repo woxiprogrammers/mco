@@ -183,7 +183,9 @@ class SubcontractorController extends Controller
             $banks = BankInfo::where('is_active',true)->select('id','bank_name','balance_amount')->get();
             $statistics = $this->getSiteWiseStatistics();
             $cashAllowedLimit = ($statistics['remainingAmount'] > 0) ? $statistics['remainingAmount'] : 0 ;
-            return view('subcontractor.edit')->with(compact('subcontractor','transaction_types','banks','cashAllowedLimit'));
+            $projects = Project::join('project_sites','project_sites.project_id','=','projects.id')
+                    ->where('projects.is_active',true)->select('project_sites.id','projects.name')->get()->toArray();
+            return view('subcontractor.edit')->with(compact('subcontractor','transaction_types','banks','cashAllowedLimit','projects'));
         }catch(\Exception $e){
             $data = [
                 'action' => "Get role edit view",
@@ -1190,6 +1192,7 @@ class SubcontractorController extends Controller
             for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($paymentData); $iterator++,$pagination++ ){
                 $records['data'][] = [
                     date('d M Y',strtotime($paymentData[$pagination]['created_at'])),
+                    $paymentData[$pagination]->projectSite->project->name,
                     $paymentData[$pagination]['amount'],
                     $paymentData[$pagination]->paymentType->name,
                     $paymentData[$pagination]['reference_number']
