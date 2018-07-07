@@ -56,23 +56,14 @@
                                                                     <th> Name </th>
                                                                     <th> Amount </th>
                                                                     <th> Date  </th>
-                                                                    <th> Remark </th>
-                                                                    <th> Action </th>
                                                                 </tr>
-                                                                <tr class="filter">
-                                                                    <th> {{--<input type="text" class="form-control form-filter" name="search_id" hidden>--}} </th>
-                                                                    <th> {{--<input type="text" class="form-control form-filter" name="search_name" id="search_name">--}} </th>
-                                                                    <th> {{--<input type="text" class="form-control form-filter" name="search_name" hidden>--}} </th>
-                                                                    <th> {{--<input type="text" class="form-control form-filter" name="search_type" hidden>--}} </th>
-                                                                    <th> {{--<input type="text" class="form-control form-filter" name="search_amount" hidden>--}} </th>
-                                                                    <th> {{--<input type="text" class="form-control form-filter" name="search_amount" hidden>--}} </th>
-                                                                    <th>
-                                                                        <input type="hidden" class="form-control form-filter" name="postdata" id="postdata">
-                                                                        <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
-                                                                        <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
-                                                                    </th>
-
-                                                                </tr>
+                                                                {{--<tr class="filter">--}}
+                                                                    {{--<th> --}}{{--<input type="text" class="form-control form-filter" name="search_id" hidden>--}}{{-- </th>--}}
+                                                                    {{--<th> --}}{{--<input type="text" class="form-control form-filter" name="search_name" id="search_name">--}}{{-- </th>--}}
+                                                                    {{--<th> --}}{{--<input type="text" class="form-control form-filter" name="search_name" hidden>--}}{{-- </th>--}}
+                                                                    {{--<th> --}}{{--<input type="text" class="form-control form-filter" name="search_type" hidden>--}}{{-- </th>--}}
+                                                                    {{--<th> --}}{{--<input type="text" class="form-control form-filter" name="search_amount" hidden>--}}{{-- </th>--}}
+                                                                {{--</tr>--}}
                                                             </thead>
                                                             <tbody>
 

@@ -736,7 +736,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             });
             Route::group(['prefix' => 'cash-transaction'], function(){
                 Route::get('manage',array('uses' => 'Peticash\PeticashController@getCashTransactionManage'));
-                Route::get('listing',array('uses' => 'Peticash\PeticashController@getCashTransactionListing'));
+                Route::post('listing',array('uses' => 'Peticash\PeticashController@getCashTransactionListing'));
             });
         });
     });
