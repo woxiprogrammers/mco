@@ -290,7 +290,6 @@
             });
 
             $(".calculate-amount").on('keyup', function(){
-                console.log('inside calculate amount');
                 var extraAmount = parseFloat($("#extra_amount").val());
                 if(isNaN(extraAmount)){
                     extraAmount = 0;

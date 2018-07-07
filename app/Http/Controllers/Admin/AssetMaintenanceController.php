@@ -733,8 +733,8 @@ class AssetMaintenanceController extends Controller{
                 $iterator = 0;
                 foreach($billPendingTransactions as $assetMaintenanceTransaction){
                     $response[$iterator]['list'] = '<li><input type="checkbox" class="transaction-select" name="transaction_id[]" value="'.$assetMaintenanceTransaction['id'].'"><label class="control-label" style="margin-left: 0.5%;">'. $assetMaintenanceTransaction['grn'].' </label><a href="javascript:void(0);" onclick="viewTransactionDetails('.$assetMaintenanceTransaction['asset_maintenance_transaction_id'].')" class="btn blue btn-xs" style="margin-left: 2%">View Details </a></li>';
-                    $response[$iterator]['asset_maintenance_id'] = $assetMaintenanceTransaction['asset_maintenance_id'];
-                    $response[$iterator]['id'] = $assetMaintenanceTransaction['id'];
+                    $response[$iterator]['asset_maintenance_id'] = $assetMaintenanceTransaction['id'];
+                    $response[$iterator]['id'] = $assetMaintenanceTransaction['asset_maintenance_transaction_id'];
                     $response[$iterator]['grn'] = $assetMaintenanceTransaction['grn'];
                     $iterator++;
                 }
