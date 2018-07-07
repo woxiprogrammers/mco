@@ -57,9 +57,9 @@
                                                 </tr>
                                                 <tr>
                                                     <th style="width:30%"> <input type="text" name="search_name" class="form-control form-filter"> </th>
-                                                    <th> <input type="text" name="search_percentage" class="form-control form-filter" readonly> </th>
-                                                    <th> <input type="text" name="search_status" class="form-control form-filter" readonly> </th>
-                                                    <th> <input type="text" name="search_created_on" class="form-control form-filter" readonly> </th>
+                                                    <th>{{-- <input type="text" name="search_percentage" class="form-control form-filter" readonly> --}}</th>
+                                                    <th>{{-- <input type="text" name="search_status" class="form-control form-filter" readonly> --}}</th>
+                                                    <th>{{-- <input type="text" name="search_created_on" class="form-control form-filter" readonly> --}}</th>
                                                     <th>
                                                         <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                         <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>

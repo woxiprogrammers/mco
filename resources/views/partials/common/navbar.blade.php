@@ -176,7 +176,7 @@
                                         @endif
                                         @if(($user->roles[0]->role->slug == 'superadmin'))
                                             <li aria-haspopup="true">
-                                                <a href="/address/create" class="nav-link nav-toggle ">
+                                                <a href="/address/manage" class="nav-link nav-toggle ">
                                                     <i class="fa fa-plus"></i> Address
                                                 </a>
                                             </li>

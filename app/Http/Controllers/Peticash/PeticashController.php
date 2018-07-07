@@ -616,6 +616,7 @@ class PeticashController extends Controller
             if ($request->has('search_name')) {
                 $emp_name = $request['search_name'];
             }
+
             if ($request->has('status')) {
                 $status = $request['status'];
             }
@@ -666,6 +667,16 @@ class PeticashController extends Controller
                                             ->whereIn('peticash_requested_salary_transactions.id',$ids)
                                             ->where('employees.employee_id','ilike',"%".$emp_id."%")
                                             ->pluck('peticash_requested_salary_transactions.id');
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+            if ($emp_name != null && $emp_name != "" && $filterFlag == true) {
+                $ids = PeticashRequestedSalaryTransaction::join('employees','employees.id','=','peticash_requested_salary_transactions.employee_id')
+                    ->whereIn('peticash_requested_salary_transactions.id',$ids)
+                    ->where('employees.name','ilike',"%".$emp_name."%")
+                    ->pluck('peticash_requested_salary_transactions.id');
                 if(count($ids) <= 0) {
                     $filterFlag = false;
                 }
@@ -1641,6 +1652,10 @@ class PeticashController extends Controller
                 $month = $postDataArray['month'];
                 $year = $postDataArray['year'];
             }
+
+            if ($request->has('search_name')) {
+                $emp_name = $request->search_name;
+            }
             $ids = PeticashSalaryTransaction::where('project_site_id',$projectSiteId)->pluck('id');
             $filterFlag = true;
 
@@ -1653,6 +1668,16 @@ class PeticashController extends Controller
                     $filterFlag = false;
                 }
             }
+            if ($emp_name != null && $emp_name != "" && $filterFlag == true) {
+                $ids = PeticashSalaryTransaction::join('employees','employees.id','=','peticash_salary_transactions.employee_id')
+                    ->whereIn('peticash_salary_transactions.id',$ids)
+                    ->where('employees.name','ilike','%'.$emp_name.'%')
+                    ->pluck('peticash_salary_transactions.id');
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
             if ($year != 0 && $filterFlag == true) {
                 $ids = PeticashSalaryTransaction::whereIn('id',$ids)->whereYear('created_at', $year)->pluck('id');
                 if(count($ids) <= 0) {

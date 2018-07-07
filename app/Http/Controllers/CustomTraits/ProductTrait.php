@@ -250,11 +250,34 @@ trait ProductTrait{
     public function productListing(Request $request){
         try{
             $user = Auth::user();
-            if($request->has('search_product_name')){
-                $productData = Product::where('name','ilike','%'.$request->search_product_name.'%')->orderBy('name','asc')->get()->toArray();
-            }else{
-                $productData = Product::orderBy('name','asc')->get()->toArray();
+            $productData = array();
+            $ids = Product::pluck('id')->toArray();
+            $filterFlag = true;
+            if($request->has('search_product_name') && $request->search_product_name != '' && $filterFlag == true){
+                $ids = Product::whereIn('id',$ids)
+                    ->where('name','ilike','%'.$request->search_product_name.'%')
+                    ->pluck('id')->toArray();
+                if(count($ids) <= 0){
+                    $filterFlag = false;
+                }
             }
+
+            if($request->has('search_category_name') && $request->search_category_name != '' && $filterFlag == true){
+                $ids = Product::join('categories','categories.id','=','products.category_id')
+                    ->whereIn('products.id',$ids)
+                    ->where('categories.name','ilike','%'.$request->search_category_name.'%')
+                    ->pluck('products.id')->toArray();
+                if(count($ids) <= 0){
+                    $filterFlag = false;
+                }
+            }
+
+            if($filterFlag == true) {
+                $productData = Product::whereIn('id',$ids)
+                    ->orderBy('name','asc')
+                    ->get()->toArray();
+            }
+
             $iTotalRecords = count($productData);
             $records = array();
             $records['data'] = array();
