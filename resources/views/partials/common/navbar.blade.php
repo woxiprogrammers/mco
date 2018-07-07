@@ -579,6 +579,11 @@
                                                 <i class="fa fa-bars"></i> Salary
                                             </a>
                                         </li>
+                                        <li aria-haspopup="true">
+                                            <a href="/peticash/peticash-management/cash-transaction/manage" class="nav-link nav-toggle ">
+                                                <i class="fa fa-bars"></i> Cash Transaction
+                                            </a>
+                                        </li>
                                     </ul>
                                 </li>
                             @endif

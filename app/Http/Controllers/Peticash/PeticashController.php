@@ -33,6 +33,7 @@ use App\PeticashTransactionType;
 use App\Project;
 use App\ProjectSite;
 use App\PurcahsePeticashTransaction;
+use App\PurchaseOrderAdvancePayment;
 use App\PurchasePeticashTransactionImage;
 use App\PurchaseOrderBillPayment;
 use App\Quotation;
@@ -1909,5 +1910,73 @@ class PeticashController extends Controller
             ];
             Log::critical(json_encode($data));
         }
+    }
+
+    public function getCashTransactionManage(Request $request){
+        try{
+            return view('peticash.peticash-management.cash-transaction.manage');
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Salary Management View',
+                'exception' => $e->getMessage(),
+                'request' => $request->all()
+            ];
+            Log::critical(json_encode($data));
+        }
+    }
+
+    public function getCashTransactionListing(Request $request){
+        try{
+            $status = 200;
+                $purchaseOrderAdvancePayment = PurchaseOrderAdvancePayment::get()
+                $iTotalRecords = count($purchaseOrderAdvancePayment);
+                $records = array();
+                $records['data'] = array();
+                $end = $request->length < 0 ? count($purchaseTransactionData) : $request->length;
+                for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($purchaseTransactionData); $iterator++,$pagination++ ){
+                    if($purchaseTransactionData[$pagination]->is_voucher_created == true){
+                        $voucherButtonText = 'Delete';
+                        $voucherStatusTest = 'Yes';
+                    }else{
+                        $voucherButtonText = 'Create';
+                        $voucherStatusTest = 'No';
+                    }
+                    $records['data'][] = [
+                        $purchaseTransactionData[$pagination]->id,
+                        ucwords($purchaseTransactionData[$pagination]->name),
+                        $purchaseTransactionData[$pagination]->quantity,
+                        $purchaseTransactionData[$pagination]->unit->name,
+                        $purchaseTransactionData[$pagination]->bill_amount,
+                        $purchaseTransactionData[$pagination]->referenceUser->first_name.' '.$purchaseTransactionData[$pagination]->referenceUser->last_name,
+                        date('j M Y',strtotime($purchaseTransactionData[$pagination]->date)),
+                        $purchaseTransactionData[$pagination]->projectSite->project->name,
+                        '<td><span class="label label-sm label-danger"> '.$voucherStatusTest.' </span></td>',
+                        '<button class="btn btn-xs blue"> 
+                            <a href="javascript:void(0);" onclick="detailsPurchaseModal('.$purchaseTransactionData[$pagination]->id.')" style="color: white">
+                                Details
+                            </a>
+                        </button>
+                        <button class="btn btn-xs default "> 
+                            <a href="javascript:void(0);" onclick="changeVoucherStatus('.$purchaseTransactionData[$pagination]->id.')" style="color: grey">
+                                '.$voucherButtonText.'
+                            </a>
+                        </button>'
+
+                    ];
+                }
+                $records["draw"] = intval($request->draw);
+                $records["recordsTotal"] = $iTotalRecords;
+                $records["recordsFiltered"] = $iTotalRecords;
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Purchase Transaction Listing',
+                'exception' => $e->getMessage(),
+                'request' => $request->all()
+            ];
+            $records = array();
+            $status = 500;
+            Log::critical(json_encode($data));
+        }
+        return response()->json($records,$status);
     }
 }
