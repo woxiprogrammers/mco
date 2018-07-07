@@ -145,7 +145,7 @@
                                                                             {!! $billTaxData->percentage !!} %
                                                                         </td>
                                                                         <td colspan="1">
-                                                                            {!! ($billTaxData->percentage * $subTotal) / 100 !!}
+                                                                            {!! round((($billTaxData->percentage * $subTotal) / 100),3) !!}
                                                                         </td>
                                                                     </tr>
                                                                 @endforeach

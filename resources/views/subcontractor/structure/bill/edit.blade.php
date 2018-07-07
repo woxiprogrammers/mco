@@ -113,7 +113,7 @@
                                                                         <input type="text" class="form-control percentage" name="taxes[{!! $billTaxData->id !!}]" id="percentage_{!! $billTaxData->id !!}" value="{!! $billTaxData->percentage !!}" onkeyup="calculateTaxAmount(this)">
                                                                     </td>
                                                                     <td colspan="1">
-                                                                        <span class="tax_amount" id="tax_amount_{!! $billTaxData->id !!}">{!! ($billTaxData->percentage * $subTotal) / 100 !!}</span>
+                                                                        <span class="tax_amount" id="tax_amount_{!! $billTaxData->id !!}">{!! round((($billTaxData->percentage * $subTotal) / 100),3) !!}</span>
                                                                     </td>
                                                                 </tr>
                                                             @endforeach

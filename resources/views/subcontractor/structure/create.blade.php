@@ -260,16 +260,16 @@
         $("#rate").on('keyup', function(){
             var rate = $('#rate').val();
             var total_work_area = $('#total_work_area').val();
-            var total_amount = rate*total_work_area;
-            $('#total_amount').val(total_amount);
+            var total_amount = parseFloat(rate)*parseFloat(total_work_area);
+            $('#total_amount').val(parseFloat(total_amount).toFixed(3));
             $('#total_amount_inwords').val(number2text(total_amount));
         });
 
         $("#total_work_area").on('keyup', function(){
             var rate = $('#rate').val();
             var total_work_area = $('#total_work_area').val();
-            var total_amount = rate*total_work_area;
-            $('#total_amount').val(total_amount);
+            var total_amount = parseFloat(rate)*parseFloat(total_work_area);
+            $('#total_amount').val(parseFloat(total_amount).toFixed(3));
             $('#total_amount_inwords').val(number2text(total_amount));
         });
 
@@ -414,10 +414,8 @@
             $('#quantity_'+currentRow).val(quantityToBeAssigned);
             var currentAmount = parseFloat(quantityToBeAssigned) * parseFloat(total_amount);
             if(isNaN(currentAmount)){
-                console.log(3);
                 $('#amount_'+currentRow).val(0);
             }else{
-                console.log(4);
                 $('#amount_'+currentRow).val(currentAmount);
             }
             currentRow++;
