@@ -758,31 +758,31 @@ trait QuotationTrait{
                 }
             }
             $bankInfo = BankInfo::where('is_active', true)->get();
-            $miscellaneousCategoryIds = Category::where('is_miscellaneous',true)->where('is_active',true)->pluck('id');
-            $miscellaneousMaterialIds = CategoryMaterialRelation::whereIn('category_id',$miscellaneousCategoryIds)->pluck('material_id');
             $quotationMiscellaneousMaterials = QuotationMaterial::join('materials','materials.id','=','quotation_materials.material_id')
-                ->whereIn('materials.id',$miscellaneousMaterialIds)
-                ->where('quotation_materials.quotation_id',$quotation['id'])
                 ->join('units','units.id','=','materials.unit_id')
                 ->join('category_material_relations','category_material_relations.material_id','=','materials.id')
                 ->join('categories','category_material_relations.category_id','=','categories.id')
+                ->where('categories.is_miscellaneous', true)
+                ->where('quotation_materials.quotation_id',$quotation['id'])
                 ->select('categories.name as category_name','quotation_materials.id as quotation_material_id','quotation_materials.material_id as material_id','materials.name as material_name','quotation_materials.rate_per_unit as rate_per_unit','units.id as unit_id','units.name as unit_name','quotation_materials.quantity as quantity','quotation_materials.is_client_supplied')
                 ->get();
-            if($quotationMiscellaneousMaterials == null || count($quotationMiscellaneousMaterials) == 0){
+            if(count($quotationMiscellaneousMaterials) == 0){
                 $quotationMiscellaneousMaterials = Material::join('units','units.id','=','materials.unit_id')
-                                                    ->whereIn('materials.id',$miscellaneousMaterialIds)
                                                     ->join('category_material_relations','category_material_relations.material_id','=','materials.id')
                                                     ->join('categories','category_material_relations.category_id','=','categories.id')
-                                                    ->select('categories.name as category_name','materials.id as material_id','materials.name as material_name','materials.rate_per_unit','units.id as unit_id','units.name as unit_name')->get();
+                                                    ->where('categories.is_miscellaneous', true)
+                                                    ->select('categories.name as category_name','materials.id as material_id','materials.name as material_name','materials.rate_per_unit as rate_per_unit','units.id as unit_id','units.name as unit_name')
+                                                    ->get();
             }else{
                 $quotationMiscellaneousMaterials = $quotationMiscellaneousMaterials->toArray();
                 $newMiscellaneousMaterials = Material::join('units','units.id','=','materials.unit_id')
-                    ->whereIn('materials.id',$miscellaneousMaterialIds)
-                    ->whereNotIn('materials.id',array_column($quotationMiscellaneousMaterials,'material_id'))
                     ->join('category_material_relations','category_material_relations.material_id','=','materials.id')
                     ->join('categories','category_material_relations.category_id','=','categories.id')
-                    ->select('categories.name as category_name','materials.id as material_id','materials.name as material_name','materials.rate_per_unit','units.id as unit_id','units.name as unit_name')->get();;
-                if($newMiscellaneousMaterials != null){
+                    ->where('categories.is_miscellaneous', true)
+                    ->whereNotIn('materials.id',array_column($quotationMiscellaneousMaterials,'material_id'))
+                    ->select('categories.name as category_name','materials.id as material_id','materials.name as material_name','materials.rate_per_unit','units.id as unit_id','units.name as unit_name')
+                    ->get();
+                if(count($newMiscellaneousMaterials) > 0){
                     $newMiscellaneousMaterials = $newMiscellaneousMaterials->toArray();
                     $quotationMiscellaneousMaterials = array_merge($quotationMiscellaneousMaterials,$newMiscellaneousMaterials);
                 }
@@ -1502,15 +1502,22 @@ trait QuotationTrait{
                     }else{
                         $is_client_supplied = 0;
                     }
-                    if(array_key_exists('quotation_material_id',$materialData)){
-                        QuotationMaterial::where('id',$materialData['quotation_material_id'])->update(['quantity' => $materialData['quantity'],'rate_per_unit' => $materialData['rate_per_unit'], 'is_client_supplied' => $is_client_supplied]);
-                    }else{
-                        QuotationMaterial::create([
+                    $quotationMaterial = QuotationMaterial::where('quotation_id', $request['quotation_id'])->where('material_id', $material_id)->first();
+                    if ($quotationMaterial == null){
+                        $quotationMaterial = QuotationMaterial::create([
                             'material_id' => $material_id,
                             'rate_per_unit' => $materialData['rate_per_unit'],
                             'unit_id' => $materialData['unit_id'],
                             'is_client_supplied' => $is_client_supplied,
                             'quotation_id' => $request['quotation_id'],
+                            'quantity' => $materialData['quantity']
+                        ]);
+
+                    } else {
+                        $quotationMaterial->update([
+                            'rate_per_unit' => $materialData['rate_per_unit'],
+                            'unit_id' => $materialData['unit_id'],
+                            'is_client_supplied' => $is_client_supplied,
                             'quantity' => $materialData['quantity']
                         ]);
                     }
