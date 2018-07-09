@@ -262,7 +262,7 @@ trait BillTrait{
                                         ->toArray();
                 $otherTaxes = array_values(array_diff($taxesAppliedToBills,$thisBillTax));
                 if($thisBillTax != null){
-                    $currentTaxes = Tax::whereIn('id',$otherTaxes)->where('is_active',true)->where('is_special', false)->select('id as tax_id','name')->get();
+                    $currentTaxes = Tax::whereIn('id',$otherTaxes)->where('is_active',true)->where('is_special', false)->select('id as tax_id','name')->get()->toArray();
                 }
                 if($currentTaxes != null){
                     $thisBillTaxInfo = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
@@ -271,7 +271,7 @@ trait BillTrait{
                         ->select('bill_taxes.percentage as percentage','bill_taxes.tax_id as tax_id')
                         ->get()
                         ->toArray();
-                    $currentTaxes = array_merge($thisBillTaxInfo,$currentTaxes->toArray());
+                    $currentTaxes = array_merge($thisBillTaxInfo,$currentTaxes);
                     usort($currentTaxes, function($a, $b) {
                         return $a['tax_id'] > $b['tax_id'];
                     });
@@ -831,10 +831,16 @@ trait BillTrait{
             $data['address']= $bill->quotation->project_site->project->client->address;
             $data['billData'] = $bill;
             $data['currentBillID'] = 1;
+            $billIterator = 0;
+            $cancelBillStatusId = BillStatus::where('slug','cancelled')->pluck('id')->first();
             foreach($allBillIds as $key => $billId){
-                 if($billId == $bill['id']){
-                     $data['currentBillID'] = $key+1;
-                 }
+                $billStatusId = Bill::where('id',$billId)->pluck('bill_status_id');
+                    if($billStatusId != $cancelBillStatusId){
+                        if($billId == $bill['id']){
+                            $data['currentBillID'] = $billIterator+1;
+                        }
+                        $billIterator++;
+                    }
              }
              if($slug == "performa-invoice"){
                  $data['billDate'] = date('d/m/Y',strtotime($bill['performa_invoice_date']));
@@ -1056,6 +1062,8 @@ trait BillTrait{
             if($billTaxes != null){
                 $currentTaxes = Tax::whereNotIn('id',$billTaxes)
                     ->where('is_active',true)->where('is_special', false)->get()->toArray();
+            }else{
+                $currentTaxes = Tax::where('is_active',true)->where('is_special', false)->get()->toArray();
             }
 
             $billTaxInfo = BillTax::where('bill_id',$bill->id)
