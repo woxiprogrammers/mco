@@ -79,4 +79,7 @@ jQuery(document).ready(function() {
     $("input[name='search_product_name']").on('keyup',function(){
         $(".filter-submit").trigger('click');
     });
+    $("input[name='search_category_name']").on('keyup',function(){
+        $(".filter-submit").trigger('click');
+    });
 });

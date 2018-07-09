@@ -162,11 +162,33 @@ trait MaterialTrait{
     public function materialListing(Request $request){
         try{
             $user = Auth::user();
-            if($request->has('search_name')){
-                $materialData = Material::where('name','ilike','%'.$request->search_name.'%')->orderBy('name','asc')->get()->toArray();
-            }else{
-                $materialData = Material::orderBy('name','asc')->get()->toArray();
+            $materialData = array();
+            $ids = Material::pluck('id')->toArray();
+            $filterFlag = true;
+            if($request->has('search_name') && $request->search_name != '' && $filterFlag == true){
+                $ids = Material::whereIn('id',$ids)
+                                ->where('name','ilike','%'.$request->search_name.'%')
+                                ->pluck('id')->toArray();
+                if(count($ids) <= 0){
+                    $filterFlag = false;
+                }
             }
+
+            if($request->has('search_rate') && $request->search_rate != '' && $filterFlag == true){
+                $ids = Material::whereIn('id',$ids)
+                    ->where('rate_per_unit',$request->search_rate)
+                    ->pluck('id')->toArray();
+                if(count($ids) <= 0){
+                    $filterFlag = false;
+                }
+            }
+
+            if($filterFlag == true) {
+                $materialData = Material::whereIn('id',$ids)
+                                ->orderBy('name','asc')
+                                ->get()->toArray();
+            }
+
             $iTotalRecords = count($materialData);
             $records = array();
             $records['data'] = array();

@@ -118,6 +118,7 @@ trait UnitsTrait{
             $records = array();
             $records['data'] = array();
             $end = $request->length < 0 ? count($unitData) : $request->length;
+            $sr_no = 0;
             for($iterator = 0 , $pagination = $request->start ; $iterator < $end && $pagination < count($unitData) ; $iterator++ , $pagination++){
                 if($unitData[$pagination]['is_active'] == true){
                     $unit_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
@@ -158,6 +159,7 @@ trait UnitsTrait{
                     </div>';
                 }
                     $records['data'][$iterator] = [
+                        ++$sr_no,
                         $unitData[$pagination]['name'],
                         $unit_status,
                         date('d M Y',strtotime($unitData[$pagination]['created_at'])),
@@ -237,10 +239,12 @@ trait UnitsTrait{
             $records = array();
             $records['data'] = array();
             $end = $request->length < 0 ? count($conversions) : $request->length;
+            $sr_no = 0;
             for($iterator = 0 , $pagination = $request->start ; $iterator < $end && $pagination < count($conversions) ; $iterator++ , $pagination++){
                 $fromUnit = Unit::findOrFail($conversions[$pagination]['unit_1_id']);
                 $toUnit = Unit::findOrFail($conversions[$pagination]['unit_2_id']);
                 $records['data'][$iterator] = [
+                    ++$sr_no,
                     $fromUnit['name'],
                     $conversions[$pagination]['unit_1_value'],
                     $toUnit['name'],
