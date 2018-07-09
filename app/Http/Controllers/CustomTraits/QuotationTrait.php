@@ -1434,23 +1434,23 @@ trait QuotationTrait{
             $imageUploadPath = public_path().env('QUOTATION_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$quotationDirectoryName.DIRECTORY_SEPARATOR.'work_order_images';
             $workOrderImagesData = array();
             $workOrderImagesData['quotation_work_order_id'] = $workOrderId;
-            foreach($images as $image){
-                $imageName = basename($image['image_name']);
-                $newTempImageUploadPath = $tempImageUploadPath.'/'.$imageName;
-                $workOrderImagesData['image'] = $imageName;
-                WorkOrderImage::create($workOrderImagesData);
-                if (!file_exists($imageUploadPath)) {
-                    File::makeDirectory($imageUploadPath, $mode = 0777, true, true);
-                }
-                if(File::exists($newTempImageUploadPath)){
+            foreach ($images as $image) {
+                    $imageName = basename($image['image_name']);
+                    $newTempImageUploadPath = $tempImageUploadPath . '/' . $imageName;
+                    $workOrderImagesData['image'] = $imageName;
+                    WorkOrderImage::create($workOrderImagesData);
+                    if (!file_exists($imageUploadPath)) {
+                        File::makeDirectory($imageUploadPath, $mode = 0777, true, true);
+                    }
+                    if (File::exists($newTempImageUploadPath)) {
 
-                    $imageUploadNewPath = $imageUploadPath.DIRECTORY_SEPARATOR.$imageName;
-                    File::move($newTempImageUploadPath,$imageUploadNewPath);
+                        $imageUploadNewPath = $imageUploadPath . DIRECTORY_SEPARATOR . $imageName;
+                        File::move($newTempImageUploadPath, $imageUploadNewPath);
+                    }
                 }
-            }
-            if(count(scandir($tempImageUploadPath)) <= 2){
-                rmdir($tempImageUploadPath);
-            }
+                if(count(scandir($tempImageUploadPath)) <= 2){
+                    rmdir($tempImageUploadPath);
+                }
             return true;
         }catch (\Exception $e){
             $data = [
@@ -1498,9 +1498,9 @@ trait QuotationTrait{
             if($request->has('miscellaneous_material_id')){
                 foreach ($request['miscellaneous_material_id'] as $material_id => $materialData){
                     if(array_key_exists('is_client_supplied',$materialData)){
-                        $is_client_supplied = true;
+                        $is_client_supplied = 1;
                     }else{
-                        $is_client_supplied = false;
+                        $is_client_supplied = 0;
                     }
                     if(array_key_exists('quotation_material_id',$materialData)){
                         QuotationMaterial::where('id',$materialData['quotation_material_id'])->update(['quantity' => $materialData['quantity'],'rate_per_unit' => $materialData['rate_per_unit'], 'is_client_supplied' => $is_client_supplied]);
@@ -1516,7 +1516,9 @@ trait QuotationTrait{
                     }
                 }
             }
-            $isImagesUploaded = $this->uploadWorkOrderImages($request->work_order_images,$workOrder->quotation_id,$workOrder['id']);
+            if ($request->work_order_images != null) {
+                $isImagesUploaded = $this->uploadWorkOrderImages($request->work_order_images, $workOrder->quotation_id, $workOrder['id']);
+            }
             if($request->has('quotation_floor')){
                 $quotationFloors = QuotationFloor::where('quotation_id',$request->quotation_id)->orderBy('id')->get();
                 $quotationFloorData = [

@@ -262,7 +262,7 @@ trait BillTrait{
                                         ->toArray();
                 $otherTaxes = array_values(array_diff($taxesAppliedToBills,$thisBillTax));
                 if($thisBillTax != null){
-                    $currentTaxes = Tax::whereIn('id',$otherTaxes)->where('is_active',true)->where('is_special', false)->select('id as tax_id','name')->get();
+                    $currentTaxes = Tax::whereIn('id',$otherTaxes)->where('is_active',true)->where('is_special', false)->select('id as tax_id','name')->get()->toArray();
                 }
                 if($currentTaxes != null){
                     $thisBillTaxInfo = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
@@ -271,7 +271,7 @@ trait BillTrait{
                         ->select('bill_taxes.percentage as percentage','bill_taxes.tax_id as tax_id')
                         ->get()
                         ->toArray();
-                    $currentTaxes = array_merge($thisBillTaxInfo,$currentTaxes->toArray());
+                    $currentTaxes = array_merge($thisBillTaxInfo,$currentTaxes);
                     usort($currentTaxes, function($a, $b) {
                         return $a['tax_id'] > $b['tax_id'];
                     });
@@ -831,10 +831,16 @@ trait BillTrait{
             $data['address']= $bill->quotation->project_site->project->client->address;
             $data['billData'] = $bill;
             $data['currentBillID'] = 1;
+            $billIterator = 0;
+            $cancelBillStatusId = BillStatus::where('slug','cancelled')->pluck('id')->first();
             foreach($allBillIds as $key => $billId){
-                 if($billId == $bill['id']){
-                     $data['currentBillID'] = $key+1;
-                 }
+                $billStatusId = Bill::where('id',$billId)->pluck('bill_status_id');
+                    if($billStatusId != $cancelBillStatusId){
+                        if($billId == $bill['id']){
+                            $data['currentBillID'] = $billIterator+1;
+                        }
+                        $billIterator++;
+                    }
              }
              if($slug == "performa-invoice"){
                  $data['billDate'] = date('d/m/Y',strtotime($bill['performa_invoice_date']));
@@ -1007,7 +1013,7 @@ trait BillTrait{
         }
     }
 
-    public function editBillView(Request $request,$bill){
+    public function editBillView(Request $request, $bill){
         try{
             $i = 0;
             $quotationProducts = $bill->quotation->quotation_products;
@@ -1054,10 +1060,15 @@ trait BillTrait{
                                 ->toArray();
             $taxes = $currentTaxes =  array();
             if($billTaxes != null){
-                $currentTaxes = Tax::whereNotIn('id',$billTaxes)->where('is_active',true)->where('is_special', false)->get();
+                $currentTaxes = Tax::whereNotIn('id',$billTaxes)
+                    ->where('is_active',true)->where('is_special', false)->get()->toArray();
+            }else{
+                $currentTaxes = Tax::where('is_active',true)->where('is_special', false)->get()->toArray();
             }
-            $billTaxInfo = BillTax::where('bill_id',$bill->id)->whereIn('tax_id',$billTaxes)->get()->toArray();
-            $currentTaxes = array_merge($billTaxInfo,$currentTaxes->toArray());
+
+            $billTaxInfo = BillTax::where('bill_id',$bill->id)
+                ->whereIn('tax_id',$billTaxes)->get()->toArray();
+            $currentTaxes = array_merge($billTaxInfo, $currentTaxes);
             foreach($currentTaxes as $key => $tax){
                 if(!(array_key_exists('name',$tax))){
                     $taxes[$i] = Tax::where('id',$tax['tax_id'])->select('id','name','slug')->first()->toArray();
@@ -1182,23 +1193,25 @@ trait BillTrait{
             }else{
                 BillQuotationExtraItem::where('bill_id',$bill->id)->delete();
             }
-
             $tax_applied = $request->tax_data;
-            foreach($tax_applied as $taxId => $tax){
-                if($tax['is_already_applied'] == true){
-                    $alreadyPresentTax = BillTax::where('tax_id',$taxId)->where('bill_id',$bill->id)->pluck('percentage');
-                    if($alreadyPresentTax != $tax['percentage']){
-                        BillTax::where('tax_id',$taxId)->where('bill_id',$bill->id)->update(['percentage' => $tax['percentage']]);
-                    }
-                }else{
-                    if($tax['percentage'] != 0){
-                        $taxData['bill_id'] = $bill->id;
-                        $taxData['tax_id'] = $taxId;
-                        $taxData['percentage'] = $tax['percentage'];
-                        BillTax::create($taxData);
+            if ($tax_applied != null) {
+                foreach($tax_applied as $taxId => $tax){
+                    if($tax['is_already_applied'] == true){
+                        $alreadyPresentTax = BillTax::where('tax_id',$taxId)->where('bill_id',$bill->id)->pluck('percentage');
+                        if($alreadyPresentTax != $tax['percentage']){
+                            BillTax::where('tax_id',$taxId)->where('bill_id',$bill->id)->update(['percentage' => $tax['percentage']]);
+                        }
+                    }else{
+                        if($tax['percentage'] != 0){
+                            $taxData['bill_id'] = $bill->id;
+                            $taxData['tax_id'] = $taxId;
+                            $taxData['percentage'] = $tax['percentage'];
+                            BillTax::create($taxData);
+                        }
                     }
                 }
             }
+
             if($request->has('applied_on')){
                 foreach($request->applied_on as $taxId => $specialTax){
                     if(!array_key_exists('on',$specialTax) && $specialTax['is_already_applied'] == true){

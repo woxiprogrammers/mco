@@ -68,9 +68,9 @@
                                                         <th style="width: 20%"> <input type="text" class="form-control form-filter" name="employee_name"> </th>
                                                         <th> <input type="text" class="form-control form-filter" name="employee_contact" > </th>
                                                         <th> <input type="text" class="form-control form-filter" name="employee_wages" > </th>
-                                                        <th> <input type="text" class="form-control form-filter" disabled="" > </th>
+                                                        <th>{{-- <input type="text" class="form-control form-filter" disabled="" >--}} </th>
                                                         <th> <input type="text" class="form-control form-filter" name="employee_project"> </th>
-                                                        <th> <input type="text" class="form-control form-filter" name="search_created_on" readonly> </th>
+                                                        <th> {{--<input type="text" class="form-control form-filter" name="search_created_on" readonly>--}} </th>
                                                         <th>
                                                             <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                             <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>

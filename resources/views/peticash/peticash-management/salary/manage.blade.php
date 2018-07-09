@@ -110,7 +110,7 @@
                                                                 <tr class="filter">
                                                                     <th> {{--<input type="text" class="form-control form-filter" name="search_id" hidden>--}} </th>
                                                                     <th> <input type="text" class="form-control form-filter" name="search_employee_id" id="search_employee_id"> </th>
-                                                                    <th> {{--<input type="text" class="form-control form-filter" name="search_name" hidden>--}} </th>
+                                                                    <th> <input type="text" class="form-control form-filter" name="search_name"> </th>
                                                                     <th> {{--<input type="text" class="form-control form-filter" name="search_type" hidden>--}} </th>
                                                                     <th> {{--<input type="text" class="form-control form-filter" name="search_amount" hidden>--}} </th>
                                                                     <th> {{--<input type="text" class="form-control form-filter" name="search_payable_amount" hidden>--}} </th>
@@ -264,6 +264,10 @@
         $(document).ready(function(){
             peticashManagementListing.init();
             $("input[name='search_employee_id']").on('keyup',function(){
+                $(".filter-submit").trigger('click');
+            });
+
+            $("input[name='search_name']").on('keyup',function(){
                 $(".filter-submit").trigger('click');
             });
             $("#search-withfilter").on('click',function(){

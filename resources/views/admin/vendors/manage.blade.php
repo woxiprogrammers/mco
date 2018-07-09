@@ -50,17 +50,21 @@
                                                 <table class="table table-striped table-bordered table-hover table-checkable order-column" id="vendorTable">
                                                     <thead>
                                                     <tr>
-                                                        <th style="width: 30%"> Comapny </th>
-                                                        <th > Name </th>
+                                                        <th style="width: 30%"> Vendor Comapny Name</th>
+                                                        <th > Vendor Name </th>
                                                         <th> Mobile Number </th>
+                                                        <th> Alt Mobile Number </th>
+                                                        <th> GST Number</th>
                                                         <th> Status </th>
                                                         <th> Actions </th>
                                                     </tr>
                                                     <tr class="filter">
                                                         <th style="width: 30%"> <input type="text" class="form-control form-filter" name="search_company"> </th>
                                                         <th> <input type="text" class="form-control form-filter" name="search_name"> </th>
-                                                        <th> <input type="text" class="form-control form-filter" name="search_mobile" readonly> </th>
-                                                        <th> <input type="text" class="form-control form-filter" name="search_status" readonly> </th>
+                                                        <th> {{--<input type="text" class="form-control form-filter" name="search_mobile" readonly>--}} </th>
+                                                        <th> {{--<input type="text" class="form-control form-filter" name="search_status" readonly>--}} </th>
+                                                        <th></th>
+                                                        <th></th>
                                                         <th>
                                                             <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                             <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>

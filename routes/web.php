@@ -734,6 +734,10 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
                 Route::post('listing',array('uses' => 'Peticash\PeticashController@salaryTransactionListing'));
                 Route::get('payment-voucher-pdf/{salaryTransactionId}',array('uses' => 'Peticash\PeticashController@getPaymentVoucherPdf'));
             });
+            Route::group(['prefix' => 'cash-transaction'], function(){
+                Route::get('manage',array('uses' => 'Peticash\PeticashController@getCashTransactionManage'));
+                Route::post('listing',array('uses' => 'Peticash\PeticashController@getCashTransactionListing'));
+            });
         });
     });
 

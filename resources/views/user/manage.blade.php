@@ -61,8 +61,8 @@
                                                     <th> <input type="text" class="form-control form-filter" name="search_email"> </th>
                                                     <th> <input type="text" class="form-control form-filter" name="search_mobile"> </th>
                                                     <th> <input type="text" class="form-control form-filter" name="search_role"> </th>
-                                                    <th> <input type="text" class="form-control form-filter" readonly> </th>
-                                                    <th> <input type="text" class="form-control form-filter" readonly> </th>
+                                                    <th> {{--<input type="text" class="form-control form-filter" readonly>--}} </th>
+                                                    <th> {{--<input type="text" class="form-control form-filter" readonly>--}} </th>
                                                     <th>
                                                         <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                         <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
