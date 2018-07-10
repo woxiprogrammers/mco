@@ -62,37 +62,47 @@ $(document).ready(function(){
         });
 });
 function componentTaxDetailSubmit(){
-    var formData = $("#componentDetailForm").serializeArray();
     var componentRelationId = $("#modalComponentID").val();
+    var formData = $("#componentDetailForm").serializeArray();
     $("#componentRow-"+componentRelationId+" #hiddenInputs").remove();
     $("<div id='hiddenInputs'></div>").insertAfter("#componentRow-"+componentRelationId+" .component-vendor-relation");
+    var rateQuantityValidateflag = false;
     $.each(formData, function(key, value){
-        if(value.name != 'vendor_images[]' && value.name != 'client_images[]'){
-            $("#componentRow-"+componentRelationId+" #hiddenInputs").append("<input type='hidden' value='"+value.value+"' name='data["+componentRelationId+"]["+value.name+"]'>");
+        if((value.name == 'quantity' || value.name == "rate_per_unit") && (value.value == 0)){
+            rateQuantityValidateflag = true;
         }else{
-            if(value.name == 'vendor_images[]'){
-                $("#componentRow-"+componentRelationId+" #hiddenInputs").append("<input type='hidden' value='"+value.value+"' name='data["+componentRelationId+"][vendor_images][]'>");
+            if(value.name != 'vendor_images[]' && value.name != 'client_images[]'){
+                $("#componentRow-"+componentRelationId+" #hiddenInputs").append("<input type='hidden' value='"+value.value+"' name='data["+componentRelationId+"]["+value.name+"]'>");
             }else{
-                $("#componentRow-"+componentRelationId+" #hiddenInputs").append("<input type='hidden' value='"+value.value+"' name='data["+componentRelationId+"][client_images][]'>");
+                if(value.name == 'vendor_images[]'){
+                    $("#componentRow-"+componentRelationId+" #hiddenInputs").append("<input type='hidden' value='"+value.value+"' name='data["+componentRelationId+"][vendor_images][]'>");
+                }else{
+                    $("#componentRow-"+componentRelationId+" #hiddenInputs").append("<input type='hidden' value='"+value.value+"' name='data["+componentRelationId+"][client_images][]'>");
+                }
             }
         }
-    });
-    var rate = parseFloat($("input[name='data["+componentRelationId+"][rate_per_unit]'").val()).toFixed(3);
-    if(rate == '-'){
-        $("#componentRow-"+componentRelationId+" .rate-without-tax").text('-');
-        $("#componentRow-"+componentRelationId+" .rate-with-tax").text('-');
-        $("#componentRow-"+componentRelationId+" .total-with-tax").text('-');
-    }else{
-        var cgst_percentage = $("input[name='data["+componentRelationId+"][cgst_percentage]'").val();
-        var sgst_percentage = $("input[name='data["+componentRelationId+"][sgst_percentage]'").val();
-        var igst_percentage = $("input[name='data["+componentRelationId+"][igst_percentage]'").val();
-        var rate_with_tax = parseFloat(rate) + parseFloat(rate * (cgst_percentage/100)) + parseFloat(rate * (sgst_percentage/100)) + parseFloat(rate * (igst_percentage/100));
-        $("#componentRow-"+componentRelationId+" .rate-without-tax").text((rate));
-        $("#componentRow-"+componentRelationId+" .rate-with-tax").text((rate_with_tax).toFixed(3));
-        $("#componentRow-"+componentRelationId+" .total-with-tax").text(parseFloat($("input[name='data["+componentRelationId+"][total]'").val()).toFixed(3));
-    }
 
-    $('#detailsModal').modal('toggle');
+    });
+    if(rateQuantityValidateflag){
+        alert("Rate and Quantity must not be 0");
+    }else{
+        var rate = parseFloat($("input[name='data["+componentRelationId+"][rate_per_unit]'").val()).toFixed(3);
+        if(rate == '-'){
+            $("#componentRow-"+componentRelationId+" .rate-without-tax").text('-');
+            $("#componentRow-"+componentRelationId+" .rate-with-tax").text('-');
+            $("#componentRow-"+componentRelationId+" .total-with-tax").text('-');
+        }else{
+            var cgst_percentage = $("input[name='data["+componentRelationId+"][cgst_percentage]'").val();
+            var sgst_percentage = $("input[name='data["+componentRelationId+"][sgst_percentage]'").val();
+            var igst_percentage = $("input[name='data["+componentRelationId+"][igst_percentage]'").val();
+            var rate_with_tax = parseFloat(rate) + parseFloat(rate * (cgst_percentage/100)) + parseFloat(rate * (sgst_percentage/100)) + parseFloat(rate * (igst_percentage/100));
+            $("#componentRow-"+componentRelationId+" .rate-without-tax").text((rate));
+            $("#componentRow-"+componentRelationId+" .rate-with-tax").text((rate_with_tax).toFixed(3));
+            $("#componentRow-"+componentRelationId+" .total-with-tax").text(parseFloat($("input[name='data["+componentRelationId+"][total]'").val()).toFixed(3));
+        }
+
+        $('#detailsModal').modal('toggle');
+    }
 }
 function openDetailsModal(element, purchaseRequestComponentVendorRelationId){
     $("#modalComponentID").val(purchaseRequestComponentVendorRelationId);
