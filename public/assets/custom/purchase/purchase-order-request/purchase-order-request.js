@@ -38,7 +38,6 @@ $(document).ready(function(){
         },
     }).on('typeahead:selected', function (obj, datum) {
         var POData = $.parseJSON(JSON.stringify(datum));
-        console.log(POData);
         $('.typeahead').typeahead('val',POData.format_id);
         var purchaseRequestId = POData.id;
         $("#purchaseRequestId").val(purchaseRequestId);
@@ -100,7 +99,8 @@ function componentTaxDetailSubmit(){
             $("#componentRow-"+componentRelationId+" .rate-with-tax").text((rate_with_tax).toFixed(3));
             $("#componentRow-"+componentRelationId+" .total-with-tax").text(parseFloat($("input[name='data["+componentRelationId+"][total]'").val()).toFixed(3));
         }
-
+        var quantity = parseFloat($("input[name='data["+componentRelationId+"][quantity]'").val());
+        $("#componentRow-"+componentRelationId+" .quantity").text(quantity);
         $('#detailsModal').modal('toggle');
     }
 }

@@ -1,7 +1,7 @@
 function componentTaxDetailSubmit(){
     var quantity = $(".tax-modal-quantity").val();
+    var rate = $(".tax-modal-rate").val();
     var componentRelationId = $("#modalComponentID").val();
-    var rate = parseFloat($("input[name='data["+componentRelationId+"][rate_per_unit]'").val()).toFixed(3);
     if(quantity == 0 || rate == 0){
         alert("Quantity or Rate must not be 0");
     }else{
@@ -19,7 +19,7 @@ function componentTaxDetailSubmit(){
                 }
             }
         });
-
+        var rate = parseFloat($("input[name='data["+componentRelationId+"][rate_per_unit]'").val()).toFixed(3);
         if(rate == '-'){
             $("#componentRow-"+componentRelationId+" .rate-without-tax").text('-');
             $("#componentRow-"+componentRelationId+" .rate-with-tax").text('-');
