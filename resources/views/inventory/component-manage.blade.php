@@ -596,7 +596,6 @@
                                                         </div>
                                                         <div class="col-md-9">
                                                             <select class="form-control" id="vendor_id" name="vendor_id">
-                                                                <option value="default">Select Transportation Vendor</option>
                                                                 @foreach($transportationVendors as $vendor)
                                                                     <option value="{{$vendor['id']}}">{{$vendor['name']}}</option>
                                                                 @endforeach
@@ -1324,10 +1323,13 @@
                     errorClass: 'help-block', // default input error message class
                     focusInvalid: false, // do not focus the last invalid input
                     rules: {
-                        quantity: {
+                        unit_id:{
                             required: true
                         },
-                        unit_id:{
+                        project_site_id:{
+                            required: true
+                        },
+                        quantity: {
                             required: true
                         }
                     },
@@ -1537,7 +1539,8 @@
                                 alert("Select Only images");
                             }
                         });
-
+                        CreateInventoryComponentTransfer.init();
+                        $("#inOutSubmit").hide();
                     }else{
                         $("#dynamicForm").html($('#site_form').clone().removeAttr('hidden').show(500));
                         $("#imageupload").unbind('change');
@@ -1686,6 +1689,10 @@
                     error: function(){
 
                     }
+                });
+            }else{
+                $('#site_form_quantity').rules('add',{
+                    required: true
                 });
             }
         }
