@@ -771,6 +771,7 @@ trait QuotationTrait{
                                                     ->join('category_material_relations','category_material_relations.material_id','=','materials.id')
                                                     ->join('categories','category_material_relations.category_id','=','categories.id')
                                                     ->where('categories.is_miscellaneous', true)
+                                                    ->where('categories.is_active',true)
                                                     ->select('categories.name as category_name','materials.id as material_id','materials.name as material_name','materials.rate_per_unit as rate_per_unit','units.id as unit_id','units.name as unit_name')
                                                     ->get();
             }else{
@@ -779,6 +780,7 @@ trait QuotationTrait{
                     ->join('category_material_relations','category_material_relations.material_id','=','materials.id')
                     ->join('categories','category_material_relations.category_id','=','categories.id')
                     ->where('categories.is_miscellaneous', true)
+                    ->where('categories.is_active',true)
                     ->whereNotIn('materials.id',array_column($quotationMiscellaneousMaterials,'material_id'))
                     ->select('categories.name as category_name','materials.id as material_id','materials.name as material_name','materials.rate_per_unit','units.id as unit_id','units.name as unit_name')
                     ->get();

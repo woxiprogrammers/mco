@@ -389,9 +389,9 @@
                                                         <li>
                                                             <a href="#bankassignFormTab" data-toggle="tab"> Assign Bank </a>
                                                         </li>
-                                                        <li>
+                                                        {{--<li>
                                                             <a href="#miscellaneousFormTab" data-toggle="tab"> Miscellaneous Category </a>
-                                                        </li>
+                                                        </li>--}}
                                                         <li>
                                                             <a href="#floorFormTab" data-toggle="tab"> Floors </a>
                                                         </li>
@@ -624,7 +624,7 @@
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <div class="tab-pane fade in" id="miscellaneousFormTab">
+                                                        {{--<div class="tab-pane fade in" id="miscellaneousFormTab">
                                                             <table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll; " id="createBillTable">
                                                                 <tr>
                                                                     <th style="width: 13%; text-align: center" >
@@ -671,7 +671,7 @@
                                                                     </tr>
                                                                 @endforeach
                                                             </table>
-                                                        </div>
+                                                        </div>--}}
                                                         <div class="tab-pane fade in" id="openingExpensesFormTab">
                                                             <div class="form-group">
                                                                 <div class="col-md-3">
