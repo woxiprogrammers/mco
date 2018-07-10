@@ -250,6 +250,7 @@ class PurchaseOrderController extends Controller
                      foreach($purchaseOrderComponents as $purchaseOrderComponent){
                          $consumedQuantity += $purchaseOrderComponent->purchaseOrderTransactionComponent->sum('quantity');
                      }
+                     $purchaseOrderList[$iterator]['received_quantity'] = $consumedQuantity;
                      $purchaseOrderList[$iterator]['remaining_quantity'] = $quantity - $consumedQuantity;
                      $purchaseOrderList[$iterator]['project'] = $project->name;
                      $purchaseOrderList[$iterator]['chk_status'] = $purchaseOrder['is_approved'];
@@ -267,7 +268,7 @@ class PurchaseOrderController extends Controller
             }else{
                 $length = $request->length;
             }
-            for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($purchaseOrderList); $iterator++,$pagination++ ){
+            for($iterator = 0,$pagination = $request->start; $iterator < $length && $pagination < count($purchaseOrderList); $iterator++,$pagination++ ){
                 $actionData = "";
                 if ($purchaseOrderList[$pagination]['chk_status'] == true) {
                     if($purchaseOrderList[$pagination]['is_email_sent'] == true || !isset($purchaseOrderList[$pagination]['is_email_sent'])){
@@ -298,11 +299,11 @@ class PurchaseOrderController extends Controller
                         '.$purchaseOrderList[$pagination]['purchase_request_format_id'].'
                     </a>',
                     $purchaseOrderList[$pagination]['client_name'],
-                    $purchaseOrderList[$pagination]['project']." - ".$purchaseOrderList[$pagination]['site_name'],
-                    date('d M Y',strtotime($purchaseOrderList[$pagination]['created_at'])),
                     $purchaseOrderList[$pagination]['approved_quantity'],
+                    $purchaseOrderList[$pagination]['received_quantity'],
                     $purchaseOrderList[$pagination]['remaining_quantity'],
                     $purchaseOrderList[$pagination]['status'],
+                    date('d M Y',strtotime($purchaseOrderList[$pagination]['created_at'])),
                     $actionData
                 ];
             }

@@ -621,7 +621,6 @@ class InventoryManageController extends Controller
 
     public function uploadTempImages(Request $request,$inventoryComponent){
         try{
-            Log::info('inside upload images');
             $user = Auth::user();
             $userDirectoryName = sha1($user->id);
             $inventoryComponentDirectoryName = sha1($inventoryComponent->id);

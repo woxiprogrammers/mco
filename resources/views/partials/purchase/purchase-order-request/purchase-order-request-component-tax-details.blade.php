@@ -365,7 +365,7 @@
 
         $('#expected_delivery_date').attr("readonly", "readonly");
         var date = new Date();
-        $('#expected_delivery_date').val((date.getMonth()+1)+"/"+date.getDate()+"/"+date.getFullYear());
+        $('#expected_delivery_date').val(date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear());
 
         $(".tax-modal-quantity").each(function(){
             calculateTaxes(this);

@@ -93,18 +93,17 @@
                                                                 <th> PO Id </th>
                                                                 <th> PR Id </th>
                                                                 <th> Vendor Company Name </th>
-                                                                <th> Project Name</th>
-                                                                <th> Created At</th>
                                                                 <th> Approved Quantity</th>
+                                                                <th> Received  Quantity</th>
                                                                 <th> Remaining Quantity(10% extra)</th>
                                                                 <th> Status </th>
+                                                                <th> Created At</th>
                                                                 <th> Action </th>
                                                             </tr>
                                                             <tr class="filter">
                                                                 <th><input type="text" class="form-control form-filter" name="po_id"></th>
                                                                 <th><input type="hidden" class="form-control form-filter" name="postdata" id="postdata"></th>
                                                                 <th><input type="text" class="form-control form-filter" name="vendor_name"></th>
-                                                                <th></th>
                                                                 <th></th>
                                                                 <th></th>
                                                                 <th></th>
@@ -116,6 +115,7 @@
                                                                     </select>
                                                                     <input type="hidden" class="form-control form-filter" name="status" id="status">
                                                                 </th>
+                                                                <th></th>
                                                                 <th>
                                                                     <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                                     <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
