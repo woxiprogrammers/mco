@@ -89,7 +89,11 @@ class SubcontractorController extends Controller
     public function subcontractorListing(Request $request){
         try{
             $user = Auth::user();
-            $listingData = Subcontractor::get();
+            $search_name = null;
+            if($request->has('search_name')) {
+                $search_name = $request->search_name;
+            }
+            $listingData = Subcontractor::where('company_name','ilike','%'.$search_name.'%')->get();
             $iTotalRecords = count($listingData);
             $records = array();
             $records['data'] = array();
@@ -134,11 +138,11 @@ class SubcontractorController extends Controller
                     </div>';
                 }
                 $records['data'][$iterator] = [
-                    $listingData[$pagination]['subcontractor_name'],
-                    $listingData[$pagination]['company_name'],
-                    $listingData[$pagination]['primary_cont_person_name'],
+                    ucwords($listingData[$pagination]['subcontractor_name']),
+                    ucwords($listingData[$pagination]['company_name']),
+                    ucwords($listingData[$pagination]['primary_cont_person_name']),
                     $listingData[$pagination]['primary_cont_person_mob_number'],
-                    $listingData[$pagination]['escalation_cont_person_name'],
+                    ucwords($listingData[$pagination]['escalation_cont_person_name']),
                     $listingData[$pagination]['escalation_cont_person_mob_number'],
                     $labourStatus,
                     $actionButton

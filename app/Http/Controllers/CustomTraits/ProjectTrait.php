@@ -64,10 +64,21 @@ trait ProjectTrait{
     public function projectListing(Request $request){
         try{
             $listingData = array();
+            $company_name = null;
+            $project_name = null;
+            if($request->has('company_name')) {
+                $company_name = $request->company_name;
+            }
+
+            if($request->has('project_name')) {
+                $project_name = $request->project_name;
+            }
             $k = 0;
-            $clientData = Client::where('is_active',true)->orderBy('updated_at','desc')->get()->toArray();
+            $clientData = Client::where('company','ilike','%'.$company_name.'%')
+                          ->where('is_active',true)->orderBy('updated_at','desc')->get()->toArray();
             for($i = 0 ; $i < count($clientData) ; $i++){
-                $project = Project::where('client_id',$clientData[$i]['id'])->orderBy('updated_at','desc')->get()->toArray();
+                $project = Project::where('name','ilike','%'.$project_name.'%')
+                           ->where('client_id',$clientData[$i]['id'])->orderBy('updated_at','desc')->get()->toArray();
                 for($j = 0 ; $j < count($project) ; $j++){
                     $project_site = ProjectSite::where('project_id',$project[$j]['id'])->orderBy('updated_at','desc')->get()->toArray();
                     for($l = 0 ; $l < count($project_site) ; $l++){
@@ -127,9 +138,9 @@ trait ProjectTrait{
                         </div>';
                 }
                 $records['data'][$iterator] = [
-                    $listingData[$pagination]['company'],
-                    $listingData[$pagination]['project_name'],
-                    $listingData[$pagination]['project_site_name'],
+                    ucwords($listingData[$pagination]['company']),
+                    ucwords($listingData[$pagination]['project_name']),
+                    ucwords($listingData[$pagination]['project_site_name']),
                     $projectStatus,
                     $button
                 ];

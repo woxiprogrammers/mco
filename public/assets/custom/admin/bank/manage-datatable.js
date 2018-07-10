@@ -71,4 +71,7 @@ jQuery(document).ready(function() {
     $("input[name='search_name']").on('keyup',function(){
         $(".filter-submit").trigger('click');
     });
+    $("input[name='account_number']").on('keyup',function(){
+        $(".filter-submit").trigger('click');
+    });
 });
