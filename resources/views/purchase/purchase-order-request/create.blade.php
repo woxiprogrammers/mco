@@ -69,18 +69,18 @@
                                                 <div class="table-scrollable" style="overflow: scroll !important;">
                                                     <table class="table table-striped table-bordered table-hover" id="purchaseRequestComponentTable" style="overflow: scroll; table-layout: fixed">
                                                         <thead>
-                                                        <tr>
-                                                            <th style="width: 12%"> Vendor </th>
-                                                            <th style="width: 15%"> Material Name </th>
-                                                            <th style="width: 10%"> Quantity </th>
-                                                            <th style="width: 10%;"> Unit </th>
-                                                            <th style="width: 10%"> Rate w/o Tax </th>
-                                                            <th style="width: 10%"> Rate w/ Tax </th>
-                                                            <th style="width: 10%"> Total Amount w/ Tax </th>
-                                                            <th style="width: 10%">
-                                                                Action
-                                                            </th>
-                                                        </tr>
+                                                            <tr>
+                                                                <th style="width: 12%"> Vendor </th>
+                                                                <th style="width: 15%"> Material Name </th>
+                                                                <th style="width: 10%"> Quantity </th>
+                                                                <th style="width: 10%;"> Unit </th>
+                                                                <th style="width: 10%"> Rate w/o Tax </th>
+                                                                <th style="width: 10%"> Rate w/ Tax </th>
+                                                                <th style="width: 10%"> Total Amount w/ Tax </th>
+                                                                <th style="width: 10%">
+                                                                    Action
+                                                                </th>
+                                                            </tr>
                                                         </thead>
                                                         <tbody>
 

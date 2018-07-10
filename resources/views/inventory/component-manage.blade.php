@@ -1,5 +1,5 @@
 @extends('layout.master')
-@section('title','Constro | Manage Materials')
+@section('title','Constro | Manage Inventory Transfers')
 @section('nav-bar')
     @include('partials.common.navbar')
 @endsection
@@ -1460,6 +1460,7 @@
                     });
 
             }else if($(this).val() == 'site'){
+                CreateInventoryComponentTransfer.init();
                     if($('#inOutCheckbox').is(':checked') == true){
                         $("#dynamicForm").html($('#site_in_form').clone().removeAttr('hidden').show(500));
                         $("#imageupload").on('change',function () {
