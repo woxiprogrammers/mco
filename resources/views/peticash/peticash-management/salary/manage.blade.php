@@ -110,8 +110,15 @@
                                                                 <tr class="filter">
                                                                     <th> {{--<input type="text" class="form-control form-filter" name="search_id" hidden>--}} </th>
                                                                     <th> <input type="text" class="form-control form-filter" name="search_employee_id" id="search_employee_id"> </th>
-                                                                    <th> <input type="text" class="form-control form-filter" name="search_name"> </th>
-                                                                    <th> {{--<input type="text" class="form-control form-filter" name="search_type" hidden>--}} </th>
+                                                                    <th> <input type="text" class="form-control form-filter" name="search_name" id="search_name"> </th>
+                                                                    <th>
+                                                                        <select class="form-control" id="status_id" name="status_id">
+                                                                            <option value="all">ALL</option>
+                                                                            <option value="salary">Salary</option>
+                                                                            <option value="advance">Advance</option>
+                                                                        </select>
+                                                                        <input type="hidden" class="form-control form-filter" name="status" id="status">
+                                                                    </th>
                                                                     <th> {{--<input type="text" class="form-control form-filter" name="search_amount" hidden>--}} </th>
                                                                     <th> {{--<input type="text" class="form-control form-filter" name="search_payable_amount" hidden>--}} </th>
                                                                     <th> {{--<input type="text" class="form-control form-filter" name="search_created_by" hidden>--}} </th>
@@ -270,6 +277,24 @@
             $("input[name='search_name']").on('keyup',function(){
                 $(".filter-submit").trigger('click');
             });
+
+            $("#status_id").on('change',function(){
+                var year = $('#year').val();
+                var month = $('#month').val();
+                var status_id = $('#status_id').val();
+                var search_name = $('#search_name').val();
+                var emp_id = $('#emp_id').val();
+
+                var postData =
+                    'year=>'+year+','+
+                    'month=>'+month;
+                $("input[name='status']").val(status_id)
+                $("input[name='postdata']").val(postData);
+                $("input[name='search_name']").val(search_name);
+                $("input[name='search_employee_id']").val(emp_id);
+                $(".filter-submit").trigger('click');
+            });
+
             $("#search-withfilter").on('click',function(){
                 var client_id = $('#client_id').val();
                 var project_id = $('#project_id').val();
@@ -283,7 +308,7 @@
                 var postData =
                     'year=>'+year+','+
                     'month=>'+month;
-
+                $("input[name='status']").val(status_id)
                 $("input[name='postdata']").val(postData);
                 $("input[name='search_name']").val(search_name);
                 $("input[name='search_employee_id']").val(emp_id);

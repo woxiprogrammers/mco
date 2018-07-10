@@ -96,7 +96,7 @@
                                                                 <th> Quantity</th>
                                                                 <th> Unit </th>
                                                                 <th> Amount  </th>
-                                                                <th> Created By </th>
+                                                                <th> Purchased By </th>
                                                                 <th> Date </th>
                                                                 <th> Site </th>
                                                                 <th> Voucher Created </th>
@@ -108,7 +108,7 @@
                                                                 <th> {{--<input type="text" class="form-control form-filter" name="search_name" hidden>--}} </th>
                                                                 <th> {{--<input type="text" class="form-control form-filter" name="search_type" hidden>--}} </th>
                                                                 <th> {{--<input type="text" class="form-control form-filter" name="search_amount" hidden>--}} </th>
-                                                                <th> {{--<input type="text" class="form-control form-filter" name="search_payable_amount" hidden>--}} </th>
+                                                                <th> <input type="text" class="form-control form-filter" name="purchase_by"> </th>
                                                                 <th> {{--<input type="text" class="form-control form-filter" name="search_created_by" hidden>--}} </th>
                                                                 <th> {{--<input type="text" class="form-control form-filter" name="search_created_on" hidden>--}} </th>
                                                                 <th> {{--<input type="text" class="form-control form-filter" name="search_created_on" hidden>--}} </th>
@@ -333,7 +333,7 @@
     <script>
         $(document).ready(function(){
             peticashManagementListing.init();
-            $("input[name='search_name']").on('keyup',function(){
+            $("input[name='search_name'], input[name='purchase_by'] ").on('keyup',function(){
                 $(".filter-submit").trigger('click');
             });
             $("#search-withfilter").on('click',function(){

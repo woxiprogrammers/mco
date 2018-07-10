@@ -1505,6 +1505,7 @@ class PeticashController extends Controller
             $status = 200;
             $postdata = null;
             $material_name = null;
+            $purchase_by = null;
             $month = 0;
             $year = 0;
             $total = 0;
@@ -1529,11 +1530,26 @@ class PeticashController extends Controller
                 $material_name = $request['search_name'];
             }
 
+            if ($request->has('purchase_by')) {
+                $purchase_by = $request['purchase_by'];
+            }
+
+
             $ids = PurcahsePeticashTransaction::where('project_site_id',$projectSiteId)->pluck('id');
             $filterFlag = true;
             if ($request->has('search_name') && $filterFlag == true) {
                 $ids = PurcahsePeticashTransaction::whereIn('id',$ids)
                     ->where('name','ilike','%'.$material_name.'%')->pluck('id');
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+            if ($request->has('purchase_by') && $filterFlag == true) {
+                $ids = PurcahsePeticashTransaction::
+                    join('users','users.id','purchase_peticash_transactions.reference_user_id')
+                    ->whereIn('purchase_peticash_transactions.id',$ids)
+                    ->whereRaw("CONCAT(users.first_name,' ',users.last_name) ilike '%".$purchase_by."%'")
+                    ->pluck('purchase_peticash_transactions.id');
                 if(count($ids) <= 0) {
                     $filterFlag = false;
                 }
@@ -1638,6 +1654,7 @@ class PeticashController extends Controller
             $status = 200;
             $postdata = null;
             $emp_name = null;
+            $peticashStatus = null;
             $site_id = 0;
             $month = 0;
             $year = 0;
@@ -1662,6 +1679,9 @@ class PeticashController extends Controller
             if ($request->has('search_name')) {
                 $emp_name = $request->search_name;
             }
+            if ($request->has('status')) {
+                $peticashStatus = $request->status;
+            }
             $ids = PeticashSalaryTransaction::where('project_site_id',$projectSiteId)->pluck('id');
             $filterFlag = true;
 
@@ -1678,6 +1698,16 @@ class PeticashController extends Controller
                 $ids = PeticashSalaryTransaction::join('employees','employees.id','=','peticash_salary_transactions.employee_id')
                     ->whereIn('peticash_salary_transactions.id',$ids)
                     ->where('employees.name','ilike','%'.$emp_name.'%')
+                    ->pluck('peticash_salary_transactions.id');
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+           if ($peticashStatus != 'all' && $peticashStatus != null && $filterFlag == true) {
+                $ids = PeticashSalaryTransaction::join('peticash_transaction_types','peticash_transaction_types.id','=','peticash_salary_transactions.peticash_transaction_type_id')
+                    ->whereIn('peticash_salary_transactions.id',$ids)
+                    ->where('peticash_transaction_types.slug',$peticashStatus)
                     ->pluck('peticash_salary_transactions.id');
                 if(count($ids) <= 0) {
                     $filterFlag = false;
