@@ -1254,9 +1254,12 @@ class PeticashController extends Controller
             $data['admin_remark'] = ($purchaseTransactionData->admin_remark == null) ? '' : $purchaseTransactionData->admin_remark;
             $transactionImages = PurchasePeticashTransactionImage::where('purchase_peticash_transaction_id',$purchaseTransactionData->id)->get();
             if(count($transactionImages) > 0){
-                $data['list_of_images'] = $this->getUploadedImages($transactionImages,$purchaseTransactionData->id);
-            }else{
-                $data['list_of_images'][0]['image_url'] = null;
+                $imageData = $this->getUploadedImages($transactionImages,$purchaseTransactionData->id);
+                foreach ($imageData as $image) {
+                    $data['list_of_images'][] = url('/').env('PETICASH_PURCHASE_TRANSACTION_IMAGE_UPLOAD').$image['image_url'];
+                }
+                }else{
+                $data['list_of_images']= null;
             }
             $status = 200;
         }catch(\Exception $e){
