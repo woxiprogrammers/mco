@@ -1179,9 +1179,12 @@ class PeticashController extends Controller
             $data['payment_type'] = ($salaryTransactionData['payment_type_id'] != null) ? $salaryTransactionData->paymentType->name : '';
             $transactionImages = PeticashSalaryTransactionImages::where('peticash_salary_transaction_id',$request['txn_id'])->get();
             if(count($transactionImages) > 0){
-                $data['list_of_images'] = $this->getUploadedImages($transactionImages,$request['txn_id']);
+                $imageData = $this->getUploadedImages($transactionImages,$request['txn_id']);
+                foreach ($imageData as $image) {
+                    $data['list_of_images'][] = url('/').env('PETICASH_SALARY_TRANSACTION_IMAGE_UPLOAD').$image['image_url'];
+                }
             }else{
-                $data['list_of_images'][0]['image_url'] = null;
+                $data['list_of_images']= null;
             }
             $status = 200;
         }catch(\Exception $e){
@@ -1258,7 +1261,7 @@ class PeticashController extends Controller
                 foreach ($imageData as $image) {
                     $data['list_of_images'][] = url('/').env('PETICASH_PURCHASE_TRANSACTION_IMAGE_UPLOAD').$image['image_url'];
                 }
-                }else{
+            }else{
                 $data['list_of_images']= null;
             }
             $status = 200;

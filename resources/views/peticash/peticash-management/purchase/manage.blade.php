@@ -138,7 +138,7 @@
                                     </div>
                                 </div>
                                 <div class="modal fade" id="detailsPurchaseModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
-                                    <div class="modal-dialog" style="width: 60%">
+                                    <div class="modal-dialog" style="width: 98%">
                                         <form class="modal-content" method="post">
                                             {!! csrf_field() !!}
                                             <div class="modal-header">
@@ -152,136 +152,136 @@
                                                     <div class="form-group row">
                                                         <div class="col-md-12" style="text-align: left;">
                                                             <div class="row">
-                                                                <div class="col-md-3">
-                                                                    <label>Material/Asset Name : </label>
+                                                                <div class="col-md-1">
+                                                                    <label>Material/Asset Name:</label>
                                                                 </div>
-                                                                <div class="col-md-3">
+                                                                <div class="col-md-5">
                                                                     <input type="text" class="form-control" id="mat_name" name="mat_name" value="" readonly>
                                                                 </div>
-                                                                <div class="col-md-3">
-                                                                    <label>Project Site Name : </label>
+                                                                <div class="col-md-1">
+                                                                    <label>Project Site Name:</label>
                                                                 </div>
-                                                                <div class="col-md-3">
+                                                                <div class="col-md-5">
                                                                     <input type="text" class="form-control" id="project_site_name" name="project_site_name" value="" readonly>
                                                                 </div>
                                                             </div>
                                                             <div class="row">
-                                                                <div class="col-md-3">
-                                                                    <label>Transaction Type  : </label>
+                                                                <div class="col-md-1">
+                                                                    <label>Transaction Type:</label>
                                                                 </div>
-                                                                <div class="col-md-3">
+                                                                <div class="col-md-5">
                                                                     <input type="text" class="form-control" id="txn_type" name="txn_type" value="" readonly>
                                                                 </div>
-                                                                <div class="col-md-3">
-                                                                    <label>GRN : </label>
+                                                                <div class="col-md-1">
+                                                                    <label>GRN:</label>
                                                                 </div>
-                                                                <div class="col-md-3">
+                                                                <div class="col-md-5">
                                                                     <input type="text" class="form-control" id="txn_grn" name="txn_grn" value="" readonly>
                                                                 </div>
                                                             </div>
                                                             <div class="row">
-                                                                <div class="col-md-3">
-                                                                    <label>Source Name : </label>
+                                                                <div class="col-md-1">
+                                                                    <label>Source Name:</label>
                                                                 </div>
-                                                                <div class="col-md-3">
+                                                                <div class="col-md-5">
                                                                     <input type="text" class="form-control" id="src_name" name="src_name" value="" readonly>
                                                                 </div>
-                                                                <div class="col-md-3">
-                                                                    <label>Component Type : </label>
+                                                                <div class="col-md-1">
+                                                                    <label>Component Type:</label>
                                                                 </div>
-                                                                <div class="col-md-3">
+                                                                <div class="col-md-5">
                                                                     <input type="text" class="form-control" id="cmp_type" name="cmp_type" value="" readonly>
                                                                 </div>
                                                             </div>
                                                             <div class="row">
-                                                                <div class="col-md-3">
-                                                                    <label>Quantity : </label>
+                                                                <div class="col-md-1">
+                                                                    <label>Quantity:</label>
                                                                 </div>
-                                                                <div class="col-md-3">
+                                                                <div class="col-md-5">
                                                                     <input type="text" class="form-control" id="purchase_qty" name="purchase_qty" value="" readonly>
                                                                 </div>
-                                                                <div class="col-md-3">
-                                                                    <label>Unit Name : </label>
+                                                                <div class="col-md-1">
+                                                                    <label>Unit Name:</label>
                                                                 </div>
-                                                                <div class="col-md-3">
+                                                                <div class="col-md-5">
                                                                     <input type="text" class="form-control" id="unit_name" name="unit_name" value="" readonly>
                                                                 </div>
                                                             </div>
                                                             <div class="row">
-                                                                <div class="col-md-3">
-                                                                    <label>Bill Amount : </label>
+                                                                <div class="col-md-1">
+                                                                    <label>Bill Amount:</label>
                                                                 </div>
-                                                                <div class="col-md-3">
+                                                                <div class="col-md-5">
                                                                     <input type="text" class="form-control" id="bill_amt" name="bill_amt" value="" readonly>
                                                                 </div>
-                                                                <div class="col-md-3">
-                                                                    <label>Bill Number : </label>
+                                                                <div class="col-md-1">
+                                                                    <label>Bill Number:</label>
                                                                 </div>
-                                                                <div class="col-md-3">
+                                                                <div class="col-md-5">
                                                                     <input type="text" class="form-control" id="bill_number" name="bill_number" value="" readonly>
                                                                 </div>
                                                             </div>
                                                             <div class="row">
-                                                                <div class="col-md-3">
-                                                                    <label>vehicle Number : </label>
+                                                                <div class="col-md-1">
+                                                                    <label>vehicle Number:</label>
                                                                 </div>
-                                                                <div class="col-md-3">
+                                                                <div class="col-md-5">
                                                                     <input type="text" class="form-control" id="veh_number" name="veh_number" value="" readonly>
                                                                 </div>
-                                                                <div class="col-md-3">
-                                                                    <label>Date  : </label>
+                                                                <div class="col-md-1">
+                                                                    <label>Date:</label>
                                                                 </div>
-                                                                <div class="col-md-3">
+                                                                <div class="col-md-5">
                                                                     <input type="text" class="form-control" id="txn_date" name="txn_date" value="" readonly>
                                                                 </div>
                                                             </div>
                                                             <div class="row">
-                                                                <div class="col-md-3">
-                                                                    <label>In Time : </label>
+                                                                <div class="col-md-1">
+                                                                    <label>In Time:</label>
                                                                 </div>
-                                                                <div class="col-md-3">
+                                                                <div class="col-md-5">
                                                                     <input type="text" class="form-control" id="in_time" name="in_time" value="" readonly>
                                                                 </div>
-                                                                <div class="col-md-3">
-                                                                    <label>Out Time : </label>
+                                                                <div class="col-md-1">
+                                                                    <label>Out Time:</label>
                                                                 </div>
-                                                                <div class="col-md-3">
+                                                                <div class="col-md-5">
                                                                     <input type="text" class="form-control" id="out_time" name="out_time" value="" readonly>
                                                                 </div>
                                                             </div>
                                                             <div class="row">
-                                                                <div class="col-md-3">
-                                                                    <label>Reference Number : </label>
+                                                                <div class="col-md-1">
+                                                                    <label>Reference Number:</label>
                                                                 </div>
-                                                                <div class="col-md-3">
+                                                                <div class="col-md-5">
                                                                     <input type="text" class="form-control" id="reference_number" name="reference_number" value="" readonly>
                                                                 </div>
-                                                                <div class="col-md-3">
-                                                                    <label>Payment Type : </label>
+                                                                <div class="col-md-1">
+                                                                    <label>Payment Type:</label>
                                                                 </div>
-                                                                <div class="col-md-3">
+                                                                <div class="col-md-5">
                                                                     <input type="text" class="form-control" id="pay_type" name="pay_type" value="" readonly>
                                                                 </div>
                                                             </div>
                                                             <div class="row">
-                                                                <div class="col-md-3">
-                                                                    <label>Remark  : </label>
+                                                                <div class="col-md-1">
+                                                                    <label>Remark:</label>
                                                                 </div>
-                                                                <div class="col-md-3">
+                                                                <div class="col-md-5">
                                                                     <input type="text" class="form-control" id="txn_remark" name="txn_remark" value="" readonly>
                                                                 </div>
-                                                                <div class="col-md-3">
-                                                                    <label>Admin Remark  : </label>
+                                                                <div class="col-md-1">
+                                                                    <label>Admin Remark:</label>
                                                                 </div>
-                                                                <div class="col-md-3">
+                                                                <div class="col-md-5">
                                                                     <input type="text" class="form-control" id="admin_remark" name="admin_remark" value="" readonly>
                                                                 </div>
                                                             </div>
                                                             <div class="row" style="margin-top: 10px;">
-                                                                <div class="col-md-3">
-                                                                    <label>Captured Images  : </label>
+                                                                <div class="col-md-1">
+                                                                    <label>Captured Images:</label>
                                                                 </div>
-                                                                <div class="col-md-9" id="purchase_images">
+                                                                <div class="col-md-11" id="purchase_images">
 
                                                                 </div>
                                                             </div>

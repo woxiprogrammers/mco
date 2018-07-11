@@ -150,7 +150,7 @@
                                     </div>
                                 </div>
                                 <div class="modal fade" id="detailsSalaryModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
-                                    <div class="modal-dialog">
+                                    <div class="modal-dialog" style="width: 98%">
                                         <form class="modal-content" method="post">
                                             {!! csrf_field() !!}
                                             <div class="modal-header">
@@ -162,85 +162,83 @@
                                             <div class="modal-body">
                                                 <div class="form-body">
                                                     <div class="form-group row">
-                                                        <div class="col-md-12" style="text-align: right;">
+                                                        <div class="col-md-12" style="text-align: left;">
                                                             <div class="row">
-                                                                <div class="col-md-6">
-                                                                    <label>Employee Name : </label>
+                                                                <div class="col-md-1">
+                                                                    <label>Employee Name:</label>
                                                                 </div>
-                                                                <div class="col-md-6">
+                                                                <div class="col-md-5">
                                                                     <input type="text" class="form-control" id="employee_name" name="employee_name" value="" readonly>
                                                                 </div>
-                                                            </div>
-                                                            <div class="row">
-                                                                <div class="col-md-6">
-                                                                    <label>Project Site Name : </label>
+                                                                <div class="col-md-1">
+                                                                    <label>Project Site Name:</label>
                                                                 </div>
-                                                                <div class="col-md-6">
+                                                                <div class="col-md-5">
                                                                     <input type="text" class="form-control" id="project_site_name" name="project_site_name" value="" readonly>
                                                                 </div>
                                                             </div>
                                                             <div class="row">
-                                                                <div class="col-md-6">
-                                                                    <label>Transaction Type  : </label>
+                                                                <div class="col-md-1">
+                                                                    <label>Transaction Type:</label>
                                                                 </div>
-                                                                <div class="col-md-6">
+                                                                <div class="col-md-5">
                                                                     <input type="text" class="form-control" id="txn_type" name="txn_type" value="" readonly>
                                                                 </div>
-                                                            </div>
-                                                            <div class="row">
-                                                                <div class="col-md-6">
-                                                                    <label>Amount : </label>
+                                                                <div class="col-md-1">
+                                                                    <label>Amount:</label>
                                                                 </div>
-                                                                <div class="col-md-6">
+                                                                <div class="col-md-5">
                                                                     <input type="text" class="form-control" id="txn_amount" name="txn_amount" value="" readonly>
                                                                 </div>
                                                             </div>
                                                             <div class="row">
-                                                                <div class="col-md-6">
-                                                                    <label>Payable Amount : </label>
+                                                                <div class="col-md-1">
+                                                                    <label>Payable Amount:</label>
                                                                 </div>
-                                                                <div class="col-md-6">
+                                                                <div class="col-md-5">
                                                                     <input type="text" class="form-control" id="payable_amount" name="payable_amount" value="" readonly>
                                                                 </div>
-                                                            </div>
-                                                            <div class="row">
-                                                                <div class="col-md-6">
-                                                                    <label>Requested By : </label>
+                                                                <div class="col-md-1">
+                                                                    <label>Requested By:</label>
                                                                 </div>
-                                                                <div class="col-md-6">
+                                                                <div class="col-md-5">
                                                                     <input type="text" class="form-control" id="reference_user_name" name="reference_user_name" value="" readonly>
                                                                 </div>
                                                             </div>
                                                             <div class="row">
-                                                                <div class="col-md-6">
-                                                                    <label>Date  : </label>
+                                                                <div class="col-md-1">
+                                                                    <label>Date:</label>
                                                                 </div>
-                                                                <div class="col-md-6">
+                                                                <div class="col-md-5">
                                                                     <input type="text" class="form-control" id="txn_date" name="txn_date" value="" readonly>
                                                                 </div>
-                                                            </div>
-                                                            <div class="row">
-                                                                <div class="col-md-6">
-                                                                    <label>Working Days  : </label>
+                                                                <div class="col-md-1">
+                                                                    <label>Working Days:</label>
                                                                 </div>
-                                                                <div class="col-md-6">
+                                                                <div class="col-md-5">
                                                                     <input type="text" class="form-control" id="working_days" name="working_days" value="" readonly>
                                                                 </div>
                                                             </div>
                                                             <div class="row">
-                                                                <div class="col-md-6">
-                                                                    <label>Remark  : </label>
+                                                                <div class="col-md-1">
+                                                                    <label>Remark:</label>
                                                                 </div>
-                                                                <div class="col-md-6">
+                                                                <div class="col-md-5">
                                                                     <input type="text" class="form-control" id="txn_remark" name="txn_remark" value="" readonly>
                                                                 </div>
-                                                            </div>
-                                                            <div class="row">
-                                                                <div class="col-md-6">
-                                                                    <label>Admin Remark  : </label>
+                                                                <div class="col-md-1">
+                                                                    <label>Admin Remark:</label>
                                                                 </div>
-                                                                <div class="col-md-6">
+                                                                <div class="col-md-5">
                                                                     <input type="text" class="form-control" id="admin_remark" name="admin_remark" value="" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row" style="margin-top: 10px;">
+                                                                <div class="col-md-1">
+                                                                    <label>Captured Images:</label>
+                                                                </div>
+                                                                <div class="col-md-11" id="purchase_images">
+
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -327,6 +325,14 @@
                     txn_id : txnId
                 },
                 success: function(data, textStatus, xhr){
+                    var images = "";
+                    if (data.list_of_images != null) {
+                        data.list_of_images.forEach(function(img) {
+                            images = images + "<a href='"+img+"' target='_blank'><img src='"+img+"' width='150px' height='150px'/></a>";
+                        });
+                    } else {
+                        images = "<span>No images Found</span>";
+                    }
                     $("#employee_name").val(data.employee_name);
                     $("#project_site_name").val(data.project_site_name);
                     $("#txn_amount").val(data.amount);
@@ -337,6 +343,7 @@
                     $("#txn_remark").val(data.remark);
                     $("#admin_remark").val(data.admin_remark);
                     $("#txn_type").val(data.peticash_transaction_type);
+                    $("#purchase_images").html(images);
                     $("#detailsSalaryModal").modal('show');
                 },
                 error: function(data){
