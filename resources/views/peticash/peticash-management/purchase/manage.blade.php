@@ -207,7 +207,7 @@
                                                                     <input type="text" class="form-control" id="unit_name" name="unit_name" value="" readonly>
                                                                 </div>
                                                             </div>
-                                                            <div class="row">
+                                                            <div class="row" style="margin-top: 10px;">
                                                                 <div class="col-md-1">
                                                                     <label>Bill Amount:</label>
                                                                 </div>
@@ -221,7 +221,7 @@
                                                                     <input type="text" class="form-control" id="bill_number" name="bill_number" value="" readonly>
                                                                 </div>
                                                             </div>
-                                                            <div class="row">
+                                                            <div class="row" style="margin-top: 10px;">
                                                                 <div class="col-md-1">
                                                                     <label>vehicle Number:</label>
                                                                 </div>
@@ -235,7 +235,7 @@
                                                                     <input type="text" class="form-control" id="txn_date" name="txn_date" value="" readonly>
                                                                 </div>
                                                             </div>
-                                                            <div class="row">
+                                                            <div class="row" style="margin-top: 10px;">
                                                                 <div class="col-md-1">
                                                                     <label>In Time:</label>
                                                                 </div>
@@ -249,7 +249,7 @@
                                                                     <input type="text" class="form-control" id="out_time" name="out_time" value="" readonly>
                                                                 </div>
                                                             </div>
-                                                            <div class="row">
+                                                            <div class="row" style="margin-top: 10px;">
                                                                 <div class="col-md-1">
                                                                     <label>Reference Number:</label>
                                                                 </div>

@@ -1179,9 +1179,9 @@ class PeticashController extends Controller
             $data['payment_type'] = ($salaryTransactionData['payment_type_id'] != null) ? $salaryTransactionData->paymentType->name : '';
             $transactionImages = PeticashSalaryTransactionImages::where('peticash_salary_transaction_id',$request['txn_id'])->get();
             if(count($transactionImages) > 0){
-                $imageData = $this->getUploadedImages($transactionImages,$request['txn_id']);
+                $imageData = $this->getUploadedImages($transactionImages,$request['txn_id'],'salary');
                 foreach ($imageData as $image) {
-                    $data['list_of_images'][] = url('/').env('PETICASH_SALARY_TRANSACTION_IMAGE_UPLOAD').$image['image_url'];
+                    $data['list_of_images'][] = $image['image_url'];
                 }
             }else{
                 $data['list_of_images']= null;
@@ -1201,11 +1201,16 @@ class PeticashController extends Controller
         return response()->json($data,$status);
     }
 
-    public function getUploadedImages($transactionImages,$transactionId){
+    public function getUploadedImages($transactionImages,$transactionId,$type){
         $iterator = 0;
         $images = array();
         $sha1SalaryTransactionId = sha1($transactionId);
-        $imageUploadPath = env('PETICASH_SALARY_TRANSACTION_IMAGE_UPLOAD').$sha1SalaryTransactionId;
+        if ($type == "purchase") {
+            $imageUploadPath = url('/').env('PETICASH_PURCHASE_TRANSACTION_IMAGE_UPLOAD').$sha1SalaryTransactionId;
+        } else {
+            $imageUploadPath = url('/').env('PETICASH_SALARY_TRANSACTION_IMAGE_UPLOAD').$sha1SalaryTransactionId;
+        }
+
         foreach($transactionImages as $index => $image){
             $images[$iterator]['image_url'] = $imageUploadPath.DIRECTORY_SEPARATOR.$image->name;
             $iterator++;
@@ -1257,9 +1262,9 @@ class PeticashController extends Controller
             $data['admin_remark'] = ($purchaseTransactionData->admin_remark == null) ? '' : $purchaseTransactionData->admin_remark;
             $transactionImages = PurchasePeticashTransactionImage::where('purchase_peticash_transaction_id',$purchaseTransactionData->id)->get();
             if(count($transactionImages) > 0){
-                $imageData = $this->getUploadedImages($transactionImages,$purchaseTransactionData->id);
+                $imageData = $this->getUploadedImages($transactionImages,$purchaseTransactionData->id,'purchase');
                 foreach ($imageData as $image) {
-                    $data['list_of_images'][] = url('/').env('PETICASH_PURCHASE_TRANSACTION_IMAGE_UPLOAD').$image['image_url'];
+                    $data['list_of_images'][] = $image['image_url'];
                 }
             }else{
                 $data['list_of_images']= null;
