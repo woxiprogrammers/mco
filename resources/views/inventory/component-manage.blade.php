@@ -1164,8 +1164,8 @@
                         opening_stock: $("#openingStockInput").val()
                     },
                     success: function(data,textStatus,xhr){
-                        $("#openingStock").val($("#openingStockInput").val());
-                        alert('Opening stock saved Successfully !!');
+                        $("#openingStock").val(data.opening_stock);
+                        alert(data.message);
                     },
                     error: function(errorData){
                         alert('Something went wrong');

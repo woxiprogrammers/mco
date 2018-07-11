@@ -13,6 +13,7 @@ use App\Helper\UnitHelper;
 use App\Http\Controllers\CustomTraits\Inventory\InventoryTrait;
 use App\Http\Controllers\CustomTraits\Notification\NotificationTrait;
 use App\InventoryComponent;
+use App\InventoryComponentOpeningStockHistory;
 use App\InventoryComponentTransferImage;
 use App\InventoryComponentTransfers;
 use App\InventoryComponentTransferStatus;
@@ -44,9 +45,11 @@ class InventoryManageController extends Controller
 {
     use InventoryTrait;
     use NotificationTrait;
+
     public function __construct(){
         $this->middleware('custom.auth');
     }
+
     public function getManageView(Request $request){
         try{
             $projectSites  = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
@@ -183,7 +186,11 @@ class InventoryManageController extends Controller
                 $inventoryComponentData['project_site_id'] = $projectSiteId;
                 $inventoryComponentData['opening_stock'] = ($request->has('opening_stock')) ? $request['opening_stock'] : 0;
                 $inventoryComponentData['reference_id'] = $request['reference_id'];
-                InventoryComponent::create($inventoryComponentData);
+                $inventoryComponent = InventoryComponent::create($inventoryComponentData);
+                InventoryComponentOpeningStockHistory::create([
+                    'inventory_component_id' => $inventoryComponent['id'],
+                    'opening_stock' => $inventoryComponent['opening_stock']
+                ]);
             }
             return redirect('/inventory/manage');
         }catch (\Exception $e){
@@ -339,7 +346,7 @@ class InventoryManageController extends Controller
                     ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
                     ->sum('inventory_component_transfers.quantity');
             }
-            $availableQuantity = $inQuantity - $outQuantity;
+            $availableQuantity = ($inQuantity + $inventoryComponent['opening_stock']) - $outQuantity;
             if($unitID != $requestData['unitId']){
                 $availableQuantity = UnitHelper::unitQuantityConversion($requestData['unitId'],$unitID,$availableQuantity);
             }
@@ -458,11 +465,11 @@ class InventoryManageController extends Controller
                         ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
                         ->sum('inventory_component_transfers.quantity');
                 }
-                $availableQuantity = $inQuantity - $outQuantity;
+                $availableQuantity = ($inQuantity + $inventoryData[$iterator]['opening_stock']) - $outQuantity;
                 $records['data'][$iterator] = [
                     ++$sr_no,
                     ucwords($inventoryData[$pagination]->name),
-                    $inQuantity.' '.$unitName,
+                    ($inQuantity + $inventoryData[$iterator]['opening_stock']).' '.$unitName,
                     $outQuantity.' '.$unitName,
                     $availableQuantity.' '.$unitName,
                     '<div class="btn btn-xs green">
@@ -571,14 +578,65 @@ class InventoryManageController extends Controller
 
     public function editOpeningStock(Request $request){
         try{
-            InventoryComponent::where('id',$request->inventory_component_id)->update(['opening_stock' => $request->opening_stock]);
+            $inventoryComponent = InventoryComponent::where('id',$request->inventory_component_id)->first();
+            if($inventoryComponent->is_material == true){
+                $materialUnit = Material::where('id',$inventoryComponent['reference_id'])->pluck('unit_id')->first();
+                $unitID = Unit::where('id',$materialUnit)->pluck('id')->first();
+                $inTransferQuantities = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
+                    ->where('inventory_transfer_types.type','ilike','in')
+                    ->where('inventory_component_transfers.inventory_component_id',$inventoryComponent->id)
+                    ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
+                    ->select('inventory_component_transfers.quantity as quantity','inventory_component_transfers.unit_id as unit_id')
+                    ->get();
+                $outTransferQuantities = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
+                    ->where('inventory_transfer_types.type','ilike','out')
+                    ->where('inventory_component_transfers.inventory_component_id',$inventoryComponent->id)
+                    ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
+                    ->select('inventory_component_transfers.quantity as quantity','inventory_component_transfers.unit_id as unit_id')
+                    ->get();
+                $inQuantity = $outQuantity = 0;
+                foreach($inTransferQuantities as $inTransferQuantity){
+                    $unitConversionQuantity = UnitHelper::unitQuantityConversion($inTransferQuantity['unit_id'],$materialUnit,$inTransferQuantity['quantity']);
+                    if(!is_array($unitConversionQuantity)){
+                        $inQuantity += $unitConversionQuantity;
+                    }
+                }
+                foreach($outTransferQuantities as $outTransferQuantity){
+                    $unitConversionQuantity = UnitHelper::unitQuantityConversion($outTransferQuantity['unit_id'],$materialUnit,$outTransferQuantity['quantity']);
+                    if(!is_array($unitConversionQuantity)){
+                        $outQuantity += $unitConversionQuantity;
+                    }
+                }
+            }else{
+                $unitID = Unit::where('slug','nos')->pluck('id')->first();
+                $inQuantity = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
+                    ->where('inventory_transfer_types.type','ilike','in')
+                    ->where('inventory_component_transfers.inventory_component_id',$inventoryComponent->id)
+                    ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
+                    ->sum('inventory_component_transfers.quantity');
+                $outQuantity = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
+                    ->where('inventory_transfer_types.type','ilike','out')
+                    ->where('inventory_component_transfers.inventory_component_id',$inventoryComponent->id)
+                    ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
+                    ->sum('inventory_component_transfers.quantity');
+            }
+            if(($request->opening_stock + $inQuantity) > $outQuantity){
+                $inventoryComponent->update(['opening_stock' => $request->opening_stock]);
+                InventoryComponentOpeningStockHistory::create([
+                    'inventory_component_id' => $request->inventory_component_id,
+                    'opening_stock' => $request->opening_stock
+                ]);
+                $response['message'] = 'Opening stock saved Successfully !!';
+                $response['opening_stock'] = $request->opening_stock;
+            }else{
+                $quantityAllowed = $outQuantity - ($request->opening_stock + $inQuantity);
+                $response['message'] = 'Allowed Quantity to update is '.$quantityAllowed;
+                $response['opening_stock'] = $inventoryComponent['opening_stock'];
+            }
             $status = 200;
-            $response = [
-                'message' => 'Opening stock saved Successfully !!'
-            ];
         }catch(\Exception $e){
             $data = [
-                'action' => 'Inventory Component listing',
+                'action' => 'Edit Opening stock of Inventory Component',
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];
@@ -1006,7 +1064,7 @@ class InventoryManageController extends Controller
 
                 $inQuantity = InventoryComponentTransfers::where('inventory_component_id',$dieselcomponentId)->whereIn('transfer_type_id',$inTransferIds)->sum('quantity');
                 $outQuantity = InventoryComponentTransfers::where('inventory_component_id',$dieselcomponentId)->whereIn('transfer_type_id',$outTransferIds)->sum('quantity');
-                $availableQuantity = $inQuantity - $outQuantity;
+                $availableQuantity = ($inQuantity + $inventoryComponent['opening_stock']) - $outQuantity;
                 if($availableQuantity < $data['top_up']){
                     $request->session()->flash('error','Diesel top-up\'s required quantity is not available on site');
                     return redirect('/inventory/component/manage/'.$inventoryComponent->id);
