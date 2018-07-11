@@ -38,7 +38,9 @@ var peticashManagementListing = function () {
                     var site_id = $('#site_id').val();
                     var year = $('#year').val();
                     var month = $('#month').val();
-                    var search_employee_id = $('#search_employee_id').val();
+                    var search_employee_id = $('#search_employee_id').val()
+                    var status_id = $('#status_id').val()
+                    var search_name = $('#search_name').val();
 
                     var postData =
                         'client_id=>'+client_id+','+
@@ -55,7 +57,9 @@ var peticashManagementListing = function () {
                         data :{
                             "get_total" : true,
                             "search_employee_id" : search_employee_id,
-                            "postdata" : postData
+                            "postdata" : postData,
+                            "search_name" : search_name,
+                            "status" : status_id
                         },
                         success: function(result){
                             total = result['total'];

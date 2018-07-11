@@ -1179,9 +1179,12 @@ class PeticashController extends Controller
             $data['payment_type'] = ($salaryTransactionData['payment_type_id'] != null) ? $salaryTransactionData->paymentType->name : '';
             $transactionImages = PeticashSalaryTransactionImages::where('peticash_salary_transaction_id',$request['txn_id'])->get();
             if(count($transactionImages) > 0){
-                $data['list_of_images'] = $this->getUploadedImages($transactionImages,$request['txn_id']);
+                $imageData = $this->getUploadedImages($transactionImages,$request['txn_id']);
+                foreach ($imageData as $image) {
+                    $data['list_of_images'][] = url('/').env('PETICASH_SALARY_TRANSACTION_IMAGE_UPLOAD').$image['image_url'];
+                }
             }else{
-                $data['list_of_images'][0]['image_url'] = null;
+                $data['list_of_images']= null;
             }
             $status = 200;
         }catch(\Exception $e){
@@ -1254,9 +1257,12 @@ class PeticashController extends Controller
             $data['admin_remark'] = ($purchaseTransactionData->admin_remark == null) ? '' : $purchaseTransactionData->admin_remark;
             $transactionImages = PurchasePeticashTransactionImage::where('purchase_peticash_transaction_id',$purchaseTransactionData->id)->get();
             if(count($transactionImages) > 0){
-                $data['list_of_images'] = $this->getUploadedImages($transactionImages,$purchaseTransactionData->id);
+                $imageData = $this->getUploadedImages($transactionImages,$purchaseTransactionData->id);
+                foreach ($imageData as $image) {
+                    $data['list_of_images'][] = url('/').env('PETICASH_PURCHASE_TRANSACTION_IMAGE_UPLOAD').$image['image_url'];
+                }
             }else{
-                $data['list_of_images'][0]['image_url'] = null;
+                $data['list_of_images']= null;
             }
             $status = 200;
         }catch(\Exception $e){
@@ -1505,6 +1511,7 @@ class PeticashController extends Controller
             $status = 200;
             $postdata = null;
             $material_name = null;
+            $purchase_by = null;
             $month = 0;
             $year = 0;
             $total = 0;
@@ -1529,11 +1536,26 @@ class PeticashController extends Controller
                 $material_name = $request['search_name'];
             }
 
+            if ($request->has('purchase_by')) {
+                $purchase_by = $request['purchase_by'];
+            }
+
+
             $ids = PurcahsePeticashTransaction::where('project_site_id',$projectSiteId)->pluck('id');
             $filterFlag = true;
             if ($request->has('search_name') && $filterFlag == true) {
                 $ids = PurcahsePeticashTransaction::whereIn('id',$ids)
                     ->where('name','ilike','%'.$material_name.'%')->pluck('id');
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+            if ($request->has('purchase_by') && $filterFlag == true) {
+                $ids = PurcahsePeticashTransaction::
+                    join('users','users.id','purchase_peticash_transactions.reference_user_id')
+                    ->whereIn('purchase_peticash_transactions.id',$ids)
+                    ->whereRaw("CONCAT(users.first_name,' ',users.last_name) ilike '%".$purchase_by."%'")
+                    ->pluck('purchase_peticash_transactions.id');
                 if(count($ids) <= 0) {
                     $filterFlag = false;
                 }
@@ -1582,7 +1604,7 @@ class PeticashController extends Controller
                         $purchaseTransactionData[$pagination]->quantity,
                         $purchaseTransactionData[$pagination]->unit->name,
                         $purchaseTransactionData[$pagination]->bill_amount,
-                        $purchaseTransactionData[$pagination]->referenceUser->first_name.' '.$purchaseTransactionData[$pagination]->referenceUser->last_name,
+                        ucwords($purchaseTransactionData[$pagination]->referenceUser->first_name.' '.$purchaseTransactionData[$pagination]->referenceUser->last_name),
                         date('j M Y',strtotime($purchaseTransactionData[$pagination]->date)),
                         $purchaseTransactionData[$pagination]->projectSite->project->name,
                         '<td><span class="label label-sm label-danger"> '.$voucherStatusTest.' </span></td>',
@@ -1638,6 +1660,7 @@ class PeticashController extends Controller
             $status = 200;
             $postdata = null;
             $emp_name = null;
+            $peticashStatus = null;
             $site_id = 0;
             $month = 0;
             $year = 0;
@@ -1662,6 +1685,9 @@ class PeticashController extends Controller
             if ($request->has('search_name')) {
                 $emp_name = $request->search_name;
             }
+            if ($request->has('status')) {
+                $peticashStatus = $request->status;
+            }
             $ids = PeticashSalaryTransaction::where('project_site_id',$projectSiteId)->pluck('id');
             $filterFlag = true;
 
@@ -1678,6 +1704,16 @@ class PeticashController extends Controller
                 $ids = PeticashSalaryTransaction::join('employees','employees.id','=','peticash_salary_transactions.employee_id')
                     ->whereIn('peticash_salary_transactions.id',$ids)
                     ->where('employees.name','ilike','%'.$emp_name.'%')
+                    ->pluck('peticash_salary_transactions.id');
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+           if ($peticashStatus != 'all' && $peticashStatus != null && $filterFlag == true) {
+                $ids = PeticashSalaryTransaction::join('peticash_transaction_types','peticash_transaction_types.id','=','peticash_salary_transactions.peticash_transaction_type_id')
+                    ->whereIn('peticash_salary_transactions.id',$ids)
+                    ->where('peticash_transaction_types.slug',$peticashStatus)
                     ->pluck('peticash_salary_transactions.id');
                 if(count($ids) <= 0) {
                     $filterFlag = false;
@@ -1730,11 +1766,11 @@ class PeticashController extends Controller
                     $records['data'][] = [
                         $salaryTransactionData[$pagination]->id,
                         $salaryTransactionData[$pagination]->employee->employee_id,
-                        $salaryTransactionData[$pagination]->employee->name,
+                        ucwords($salaryTransactionData[$pagination]->employee->name),
                         $salaryTransactionData[$pagination]->peticashTransactionType->name,
                         $salaryTransactionData[$pagination]->amount,
                         $salaryTransactionData[$pagination]->payable_amount,
-                        $salaryTransactionData[$pagination]->referenceUser->first_name.' '.$salaryTransactionData[$pagination]->referenceUser->last_name,
+                        ucwords($salaryTransactionData[$pagination]->referenceUser->first_name.' '.$salaryTransactionData[$pagination]->referenceUser->last_name),
                         date('j M Y',strtotime($salaryTransactionData[$pagination]->date)),
                         $salaryTransactionData[$pagination]->projectSite->project->name,
                         $actionDropDown
@@ -1958,58 +1994,83 @@ class PeticashController extends Controller
     public function getCashTransactionListing(Request $request){
         try{
             $status = 200;
-                $purchaseOrderAdvancePayments = PurchaseOrderAdvancePayment::join('purchase_orders','purchase_orders.id','purchase_order_advance_payments.purchase_order_id')
-                                                                                ->join('vendors','vendors.id','=','purchase_orders.vendor_id')
-                                                                                ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
-                                                                                ->where('purchase_order_advance_payments.paid_from_slug','cash')
-                                                                                ->select('purchase_order_advance_payments.id as payment_id','purchase_order_advance_payments.amount as amount'
-                                                                                    ,'purchase_order_advance_payments.created_at as created_at','purchase_requests.project_site_id as project_site_id'
-                                                                                    ,'vendors.company as name')->get()->toArray();
+            $projectSiteId = Session::get('global_project_site');
+            $search_name = null;
+            if ($request->has('search_name')) {
+                $search_name = $request->search_name;
+            }
 
-                $purchaseOrderBillPayments = PurchaseOrderPayment::join('purchase_order_bills','purchase_order_bills.id','=','purchase_order_payments.purchase_order_bill_id')
-                                                                    ->join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
-                                                                    ->join('vendors','vendors.id','=','purchase_orders.vendor_id')
-                                                                    ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
-                                                                    ->where('purchase_order_payments.paid_from_slug','cash')
-                                                                    ->select('purchase_order_payments.id as payment_id','purchase_order_payments.amount as amount'
-                                                                        ,'purchase_order_payments.created_at as created_at','purchase_requests.project_site_id as project_site_id'
-                                                                        ,'vendors.company as name')->get()->toArray();
 
-                $subcontractorAdvancePayments = SubcontractorAdvancePayment::join('subcontractor','subcontractor.id','=','subcontractor_advance_payments.subcontractor_id')
-                                                                                ->where('subcontractor_advance_payments.paid_from_slug','cash')
-                                                                                ->select('subcontractor_advance_payments.id as payment_id','subcontractor_advance_payments.amount as amount'
-                                                                                    ,'subcontractor_advance_payments.project_site_id as project_site_id'
-                                                                                    ,'subcontractor_advance_payments.created_at as created_at'
-                                                                                    ,'subcontractor.company_name as name')->get()->toArray();
+            $purchaseOrderAdvancePayments = PurchaseOrderAdvancePayment::join('purchase_orders','purchase_orders.id','purchase_order_advance_payments.purchase_order_id')
+                                                                            ->join('vendors','vendors.id','=','purchase_orders.vendor_id')
+                                                                            ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
+                                                                            ->where('purchase_order_advance_payments.paid_from_slug','cash')
+                                                                            ->where('purchase_requests.project_site_id',$projectSiteId)
+                                                                            ->where('vendors.company','ilike','%'.$search_name.'%')
+                                                                            ->select('purchase_order_advance_payments.id as payment_id','purchase_order_advance_payments.amount as amount'
+                                                                                ,'purchase_order_advance_payments.created_at as created_at','purchase_requests.project_site_id as project_site_id'
+                                                                                ,'vendors.company as name')->get()->toArray();
 
-                $projectSiteAdvancePayments = ProjectSiteAdvancePayment::join('project_sites','project_sites.id','=','project_site_advance_payments.project_site_id')
-                                                                            ->select('project_site_advance_payments.id as payment_id'
-                                                                            ,'project_site_advance_payments.amount as amount'
-                                                                            ,'project_site_advance_payments.created_at as created_at'
-                                                                            ,'project_site_advance_payments.project_site_id as project_site_id'
-                                                                            ,'project_sites.name as name')->get()->toArray();
+            $purchaseOrderBillPayments = PurchaseOrderPayment::join('purchase_order_bills','purchase_order_bills.id','=','purchase_order_payments.purchase_order_bill_id')
+                                                                ->join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
+                                                                ->join('vendors','vendors.id','=','purchase_orders.vendor_id')
+                                                                ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
+                                                                ->where('purchase_order_payments.paid_from_slug','cash')
+                                                                ->where('vendors.company','ilike','%'.$search_name.'%')
+                                                                ->where('purchase_requests.project_site_id',$projectSiteId)
+                                                                ->select('purchase_order_payments.id as payment_id','purchase_order_payments.amount as amount'
+                                                                    ,'purchase_order_payments.created_at as created_at','purchase_requests.project_site_id as project_site_id'
+                                                                    ,'vendors.company as name')->get()->toArray();
 
-                $siteTransferPayments = SiteTransferBillPayment::join('site_transfer_bills','site_transfer_bills.id','=','site_transfer_bill_payments.site_transfer_bill_id')
-                                                                    ->join('inventory_component_transfers','inventory_component_transfers.id','=','site_transfer_bills.inventory_component_transfer_id')
-                                                                    ->join('vendors','vendors.id','=','inventory_component_transfers.vendor_id')
-                                                                    ->join('inventory_components','inventory_components.id','inventory_component_transfers.inventory_component_id')
-                                                                    ->select('site_transfer_bill_payments.id as payment_id','site_transfer_bill_payments.amount as amount'
-                                                                        ,'site_transfer_bill_payments.created_at as created_at'
-                                                                        ,'inventory_components.project_site_id as project_site_id'
-                                                                        ,'vendors.company as name')->get()->toArray();
+            $subcontractorAdvancePayments = SubcontractorAdvancePayment::join('subcontractor','subcontractor.id','=','subcontractor_advance_payments.subcontractor_id')
+                                                                            ->where('subcontractor_advance_payments.paid_from_slug','cash')
+                                                                            ->where('subcontractor_advance_payments.project_site_id',$projectSiteId)
+                                                                            ->where('subcontractor.company_name','ilike','%'.$search_name.'%')
+                                                                            ->select('subcontractor_advance_payments.id as payment_id','subcontractor_advance_payments.amount as amount'
+                                                                                ,'subcontractor_advance_payments.project_site_id as project_site_id'
+                                                                                ,'subcontractor_advance_payments.created_at as created_at'
+                                                                                ,'subcontractor.company_name as name')->get()->toArray();
 
-                $assetMaintenancePayments = AssetMaintenanceBillPayment::join('asset_maintenance_bills','asset_maintenance_bills.id','asset_maintenance_bill_payments.asset_maintenance_bill_id')
-                                                ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
-                                                ->join('asset_maintenance_vendor_relation','asset_maintenance_vendor_relation.asset_maintenance_id','=','asset_maintenance.id')
-                                                ->where('asset_maintenance_vendor_relation.is_approved',true)
-                                                ->join('vendors','vendors.id','=','asset_maintenance_vendor_relation.vendor_id')
-                                                ->select('asset_maintenance_bill_payments.id as payment_id','asset_maintenance_bill_payments.amount as amount'
-                                                    ,'asset_maintenance_bill_payments.created_at as created_at'
-                                                    ,'asset_maintenance.project_site_id as project_site_id'
-                                                    ,'vendors.company as name')->get()->toArray();
+            $projectSiteAdvancePayments = ProjectSiteAdvancePayment::join('project_sites','project_sites.id','=','project_site_advance_payments.project_site_id')
+                                                                        ->where('project_site_advance_payments.project_site_id',$projectSiteId)
+                                                                        ->where('project_sites.name','ilike','%'.$search_name.'%')
+                                                                        ->select('project_site_advance_payments.id as payment_id'
+                                                                        ,'project_site_advance_payments.amount as amount'
+                                                                        ,'project_site_advance_payments.created_at as created_at'
+                                                                        ,'project_site_advance_payments.project_site_id as project_site_id'
+                                                                        ,'project_sites.name as name')->get()->toArray();
 
-                $cashPaymentData = array_merge($purchaseOrderAdvancePayments,$purchaseOrderBillPayments,$subcontractorAdvancePayments,$projectSiteAdvancePayments,$siteTransferPayments,$assetMaintenancePayments);
+            $siteTransferPayments = SiteTransferBillPayment::join('site_transfer_bills','site_transfer_bills.id','=','site_transfer_bill_payments.site_transfer_bill_id')
+                                                                ->join('inventory_component_transfers','inventory_component_transfers.id','=','site_transfer_bills.inventory_component_transfer_id')
+                                                                ->join('vendors','vendors.id','=','inventory_component_transfers.vendor_id')
+                                                                ->join('inventory_components','inventory_components.id','inventory_component_transfers.inventory_component_id')
+                                                                ->where('inventory_components.project_site_id',$projectSiteId)
+                                                                ->where('vendors.company','ilike','%'.$search_name.'%')
+                                                                ->select('site_transfer_bill_payments.id as payment_id','site_transfer_bill_payments.amount as amount'
+                                                                    ,'site_transfer_bill_payments.created_at as created_at'
+                                                                    ,'inventory_components.project_site_id as project_site_id'
+                                                                    ,'vendors.company as name')->get()->toArray();
 
+            $assetMaintenancePayments = AssetMaintenanceBillPayment::join('asset_maintenance_bills','asset_maintenance_bills.id','asset_maintenance_bill_payments.asset_maintenance_bill_id')
+                                            ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
+                                            ->join('asset_maintenance_vendor_relation','asset_maintenance_vendor_relation.asset_maintenance_id','=','asset_maintenance.id')
+                                            ->where('asset_maintenance_vendor_relation.is_approved',true)
+                                            ->join('vendors','vendors.id','=','asset_maintenance_vendor_relation.vendor_id')
+                                            ->where('asset_maintenance.project_site_id',$projectSiteId)
+                                            ->where('vendors.company','ilike','%'.$search_name.'%')
+                                            ->select('asset_maintenance_bill_payments.id as payment_id','asset_maintenance_bill_payments.amount as amount'
+                                                ,'asset_maintenance_bill_payments.created_at as created_at'
+                                                ,'asset_maintenance.project_site_id as project_site_id'
+                                                ,'vendors.company as name')->get()->toArray();
+
+            $cashPaymentData = array_merge($purchaseOrderAdvancePayments,$purchaseOrderBillPayments,$subcontractorAdvancePayments,$projectSiteAdvancePayments,$siteTransferPayments,$assetMaintenancePayments);
+            $total = 0;
+            if ($request->has('get_total')) {
+                foreach($cashPaymentData as $salarytxn) {
+                    $total = $total + $salarytxn['amount'];
+                }
+                $records['total'] = $total;
+            } else {
                 usort($cashPaymentData, function($a, $b) {
                     return $a['created_at'] < $b['created_at'];
                 });
@@ -2029,6 +2090,7 @@ class PeticashController extends Controller
                 $records["draw"] = intval($request->draw);
                 $records["recordsTotal"] = $iTotalRecords;
                 $records["recordsFiltered"] = $iTotalRecords;
+            }
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Cash Transaction Listing',
