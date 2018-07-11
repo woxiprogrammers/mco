@@ -620,7 +620,7 @@ class InventoryManageController extends Controller
                     ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
                     ->sum('inventory_component_transfers.quantity');
             }
-            if(($request->opening_stock + $inQuantity) > $outQuantity){
+            if(($request->opening_stock + $inQuantity) >= $outQuantity){
                 $inventoryComponent->update(['opening_stock' => $request->opening_stock]);
                 InventoryComponentOpeningStockHistory::create([
                     'inventory_component_id' => $request->inventory_component_id,
@@ -629,7 +629,7 @@ class InventoryManageController extends Controller
                 $response['message'] = 'Opening stock saved Successfully !!';
                 $response['opening_stock'] = $request->opening_stock;
             }else{
-                $quantityAllowed = $outQuantity - ($request->opening_stock + $inQuantity);
+                $quantityAllowed = $outQuantity - $inQuantity;
                 $response['message'] = 'Allowed Quantity to update is '.$quantityAllowed;
                 $response['opening_stock'] = $inventoryComponent['opening_stock'];
             }
