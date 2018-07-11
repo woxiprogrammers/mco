@@ -268,7 +268,7 @@ class PurchaseOrderController extends Controller
             }else{
                 $length = $request->length;
             }
-            for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($purchaseOrderList); $iterator++,$pagination++ ){
+            for($iterator = 0,$pagination = $request->start; $iterator < $length && $pagination < count($purchaseOrderList); $iterator++,$pagination++ ){
                 $actionData = "";
                 if ($purchaseOrderList[$pagination]['chk_status'] == true) {
                     if($purchaseOrderList[$pagination]['is_email_sent'] == true || !isset($purchaseOrderList[$pagination]['is_email_sent'])){
