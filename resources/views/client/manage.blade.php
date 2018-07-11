@@ -55,6 +55,17 @@
                                                     <th> Created On </th>
                                                     <th> Actions </th>
                                                 </tr>
+                                                <tr>
+                                                    <th> <input class="form-control form-filter" name="search_name" id="search_name" type="text"> </th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th>
+                                                        <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
+                                                        <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
+                                                    </th>
+                                                </tr>
                                                 </thead>
                                                 <tbody>
 
@@ -86,6 +97,11 @@
 <script>
     $(document).ready(function() {
         $('#clientTable').DataTable();
+        $("input[name='search_name']").on('keyup',function(){
+            var search_name = $('#search_name').val();
+            $("input[name='search_name']").val(search_name);
+            $(".filter-submit").trigger('click');
+        });
     });
 </script>
 @endsection

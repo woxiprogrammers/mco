@@ -21,7 +21,7 @@ var cashTransactionListing = function () {
                 // setup uses scrollable div(table-scrollable) with overflow:auto to enable vertical scroll(see: assets/global/scripts/datatable.js).
                 // So when dropdowns used the scrollable div should be removed.
                 //"dom": "<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'<'table-group-actions pull-right'>>r>t<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'>>",
-               /* "footerCallback": function ( row, data, start, end, display ) {
+                "footerCallback": function ( row, data, start, end, display ) {
                     var api = this.api(), data;
 
                     // Remove the formatting to get integer data for summation
@@ -32,47 +32,34 @@ var cashTransactionListing = function () {
                                 i : 0;
                     };
 
-                    var client_id = $('#client_id').val();
-                    var project_id = $('#project_id').val();
-                    var site_id = $('#site_id').val();
-                    var year = $('#year').val();
-                    var month = $('#month').val();
                     var search_name = $('#search_name').val();
-
-                    var postData =
-                        'client_id=>'+client_id+','+
-                        'project_id=>'+project_id+','+
-                        'site_id=>'+site_id+','+
-                        'year=>'+year+','+
-                        'month=>'+month;
-
 
                     // Total over all pages
                     $.ajax({
-                        url: "/peticash/peticash-management/purchase/listing?_token="+$("input[name='_token']").val(),
+                        //url: "/peticash/peticash-management/purchase/listing?_token="+$("input[name='_token']").val(),
+                        url: "/peticash/peticash-management/cash-transaction/listing?_token="+$("input[name='_token']").val(), // ajax source
                         type: 'POST',
                         data :{
                             "get_total" : true,
-                            "search_name" : search_name,
-                            "postdata" : postData
+                            "search_name" : search_name
                         },
                         success: function(result){
                             total = result['total'];
 
                             // Total over this page
                             pageTotal = api
-                                .column( 4, { page: 'current'} )
+                                .column( 3, { page: 'current'} )
                                 .data()
                                 .reduce( function (a, b) {
                                     return intVal(a) + intVal(b);
                                 }, 0 );
 
                             // Update footer
-                            $( api.column( 4 ).footer() ).html(
+                            $( api.column( 3 ).footer() ).html(
                                 pageTotal +' ( '+ total +' total)'
                             );
                         }});
-                },*/
+                },
 
                 "lengthMenu": [
                     [50, 100, 150],
