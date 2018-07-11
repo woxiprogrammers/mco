@@ -44,30 +44,33 @@
                                                         <table class="table table-striped table-bordered table-hover order-column" id="cashTransactionManageTable">
                                                             <thead>
                                                                 <tr>
-                                                                    <th> ID </th>
+                                                                    <th> Sr No </th>
                                                                     <th> Site </th>
-                                                                    <th> Name </th>
+                                                                    <th> Vendor/Subcontractor/Project Name </th>
                                                                     <th> Amount </th>
                                                                     <th> Date  </th>
                                                                 </tr>
-                                                                {{--<tr class="filter">--}}
-                                                                    {{--<th> --}}{{--<input type="text" class="form-control form-filter" name="search_id" hidden>--}}{{-- </th>--}}
-                                                                    {{--<th> --}}{{--<input type="text" class="form-control form-filter" name="search_name" id="search_name">--}}{{-- </th>--}}
-                                                                    {{--<th> --}}{{--<input type="text" class="form-control form-filter" name="search_name" hidden>--}}{{-- </th>--}}
-                                                                    {{--<th> --}}{{--<input type="text" class="form-control form-filter" name="search_type" hidden>--}}{{-- </th>--}}
-                                                                    {{--<th> --}}{{--<input type="text" class="form-control form-filter" name="search_amount" hidden>--}}{{-- </th>--}}
-                                                                {{--</tr>--}}
+                                                                <tr class="filter">
+                                                                    <th> </th>
+                                                                    <th> </th>
+                                                                    <th> <input type="text" class="form-control form-filter" name="search_name" id="search_name"> </th>
+                                                                    <th> </th>
+                                                                    <th>
+                                                                        <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
+                                                                        <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
+                                                                    </th>
+                                                                </tr>
                                                             </thead>
                                                             <tbody>
 
                                                             </tbody>
-                                                            {{--<tfoot>
+                                                            <tfoot>
                                                                 <tr>
-                                                                    <th colspan="4" style="text-align:right">Total Page Wise: </th>
+                                                                    <th colspan="3" style="text-align:right">Total Page Wise: </th>
                                                                     <th></th>
-                                                                    <th colspan="5"></th>
+                                                                    <th colspan="1"></th>
                                                                 </tr>
-                                                            </tfoot>--}}
+                                                            </tfoot>
                                                         </table>
                                                     </div>
                                                 </div>
@@ -94,6 +97,11 @@
     <script>
         $(document).ready(function(){
             cashTransactionListing.init();
+            $("input[name='search_name']").on('keyup',function(){
+                var search_name = $('#search_name').val();
+                $("input[name='search_name']").val(search_name);
+                $(".filter-submit").trigger('click');
+            });
         });
     </script>
 @endsection
