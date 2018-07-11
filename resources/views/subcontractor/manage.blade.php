@@ -61,6 +61,19 @@
                                                     <th> Status </th>
                                                     <th> Actions </th>
                                                 </tr>
+                                                <tr>
+                                                    <th></th>
+                                                    <th> <input class="form-control form-filter" name="search_name" type="text"> </th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th>
+                                                        <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
+                                                        <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
+                                                    </th>
+                                                </tr>
                                                 </thead>
                                                 <tbody>
                                                 </tbody>
@@ -88,6 +101,10 @@
 <script>
     $(document).ready(function() {
         $('#subcontractorTable').DataTable();
+
+        $("input[name='search_name']").on('keyup',function(){
+            $(".filter-submit").trigger('click');
+        });
     });
 </script>
 @endsection

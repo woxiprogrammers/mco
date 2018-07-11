@@ -65,6 +65,16 @@
                                                     <th> Status </th>
                                                     <th> Actions </th>
                                                 </tr>
+                                                <tr>
+                                                    <th> <input class="form-control form-filter" name="company_name" id="company_name" type="text"> </th>
+                                                    <th> <input class="form-control form-filter" name="project_name" id="project_name" type="text"> </th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th>
+                                                        <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
+                                                        <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
+                                                    </th>
+                                                </tr>
                                                 </thead>
                                                 <tbody>
 
@@ -93,6 +103,13 @@
 <script>
     $(document).ready(function() {
         $('#projectTable').DataTable();
+        $("input[name='company_name'],input[name='project_name']").on('keyup',function(){
+            var company_name = $('#company_name').val();
+            var project_name = $('#project_name').val();
+            $("input[name='company_name']").val(company_name);
+            $("input[name='project_name']").val(project_name);
+            $(".filter-submit").trigger('click');
+        });
     });
 </script>
 @endsection

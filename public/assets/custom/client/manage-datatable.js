@@ -25,9 +25,6 @@ var ClientListing = function () {
                 "pageLength": 50, // default record count per page
                 "ajax": {
                     "url": "/client/listing", // ajax source
-                    "data" :{
-                        '_token' : $("input[name='_token']").val()
-                    }
                 },
                 "order": [
                     [1, "asc"]

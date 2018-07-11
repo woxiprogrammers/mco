@@ -249,7 +249,9 @@ class UserController extends Controller
                 ->select('users.id as id')
                 ->get()->toArray();
             if($request->has('search_name')){
-                $userId = User::whereIn('id',$userId)->where('first_name','ilike','%'.$request->search_name.'%')->orWhere('last_name','ilike','%'.$request->search_name.'%')->pluck('id')->toArray();
+                $userId = User::whereIn('id',$userId)
+                    ->whereRaw("CONCAT(first_name,' ',last_name) ilike '%".$request->search_name."%'")
+                    ->pluck('id')->toArray();
             }
             if($request->has('search_email')){
                 $userId = User::whereIn('id',$userId)->where('email','ilike','%'.$request->search_email.'%')->pluck('id')->toArray();

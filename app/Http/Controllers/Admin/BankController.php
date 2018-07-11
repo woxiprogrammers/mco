@@ -67,10 +67,43 @@ class BankController extends Controller
     public function bankListing(Request $request){
         try{
             $user = Auth::user();
-            if($request->has('search_name')){
-                $bankData = BankInfo::where('bank_name','ilike','%'.$request->search_name.'%')->orderBy('bank_name','asc')->get()->toArray();
-            }else{
-                $bankData = BankInfo::orderBy('bank_name','asc')->get()->toArray();
+            $bank_name = null;
+            $account_number = null;
+            if ($request->has('search_name')) {
+                $bank_name = $request->search_name;
+            }
+
+            if ($request->has('account_number')) {
+                $account_number = $request->account_number;
+            }
+
+            $bankData = array();
+            $filterFlag = true;
+            $ids = BankInfo::where('is_active',true)
+                ->pluck('id')->toArray();
+
+
+            if($request->has('search_name') && $bank_name != null && $bank_name != "") {
+                $ids = BankInfo::where('bank_name','ilike','%'.$bank_name.'%')
+                    ->whereIn('id',$ids)
+                    ->pluck('id')->toArray();
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+            if ($request->has('account_number') && $account_number != null && $account_number != "") {
+                $ids = BankInfo::where('account_number','ilike','%'.$account_number.'%')
+                    ->whereIn('id',$ids)
+                    ->pluck('id')->toArray();
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+            if ($filterFlag) {
+                $bankData = BankInfo::whereIn('id',$ids)
+                            ->orderBy('bank_name','asc')->get()->toArray();
             }
             $iTotalRecords = count($bankData);
             $records = array();

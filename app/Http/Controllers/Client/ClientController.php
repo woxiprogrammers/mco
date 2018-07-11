@@ -96,7 +96,13 @@ class ClientController extends Controller
     public function clientListing(Request $request){
         try{
             $user = Auth::user();
-            $clientData = Client::orderBy('id','desc')->get()->toArray();
+            $search_name = null;
+            if($request->has('search_name')) {
+                $search_name = $request->search_name;
+            }
+
+            $clientData = Client::where('company','ilike','%'.$search_name.'%')
+                          ->orderBy('company','asc')->get()->toArray();
             $iTotalRecords = count($clientData);
             $records = array();
             $records['data'] = array();
@@ -140,7 +146,7 @@ class ClientController extends Controller
                     </div>';
                 }
                 $records['data'][$iterator] = [
-                    $clientData[$pagination]['company'],
+                    ucwords($clientData[$pagination]['company']),
                     $clientData[$pagination]['email'],
                     $clientData[$pagination]['mobile'],
                     $client_status,
