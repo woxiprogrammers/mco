@@ -64,6 +64,28 @@
                                                     <th style="width: 30%"> Remark </th>
                                                     <th> Txn Date </th>
                                                     <th> Action </th>
+                                                </tr>
+                                                <tr class="filter">
+                                                    <th> </th>
+                                                    <th> <input type="text" class="form-control form-filter" name="searchFrom" id="searchFrom"> </th>
+                                                    <th> <input type="text" class="form-control form-filter" name="searchTo" id="searchTo"> </th>
+                                                    <th></th>
+                                                    <th>
+                                                        <select class="form-control" id="status_id" name="status_id">
+                                                            <option value="all">ALL</option>
+                                                            <option value="cash">Cash</option>
+                                                            <option value="bank">Bank - Cheque</option>
+                                                        </select>
+                                                        <input type="hidden" class="form-control form-filter" name="status" id="status">
+                                                    </th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th>
+                                                        <input type="hidden" class="form-control form-filter" name="postdata" id="postdata">
+                                                        <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
+                                                        <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
+                                                    </th>
+                                                </tr>
                                                 </thead>
                                                 <tbody>
 
@@ -103,6 +125,34 @@
     $(document).ready(function() {
         masterAccountListing.init();
         $('#masterPeticashTable').DataTable();
+        $("input[name='searchFrom']").on('keyup',function(){
+            $(".filter-submit").trigger('click');
+        });
+
+        $("input[name='searchTo']").on('keyup',function(){
+            $(".filter-submit").trigger('click');
+        });
+
+        $("#status_id").on('change',function(){
+            var status_id = $('#status_id').val();
+            var searchFrom = $('#searchFrom').val();
+            var searchTo = $('#searchTo').val();
+            $("input[name='status']").val(status_id)
+            $("input[name='searchFrom']").val(searchFrom);
+            $("input[name='searchTo']").val(searchTo);
+            $(".filter-submit").trigger('click');
+        });
+
+        $("#search-withfilter").on('click',function(){
+            var status_id = $('#status_id').val();
+            var searchFrom = $('#searchFrom').val();
+            var searchTo = $('#searchTo').val();
+            $("input[name='status']").val(status_id)
+            $("input[name='searchFrom']").val(searchFrom);
+            $("input[name='searchTo']").val(searchTo);
+            $(".filter-submit").trigger('click');
+        });
     });
+
 </script>
 @endsection

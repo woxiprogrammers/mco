@@ -40,7 +40,7 @@
                 @if($quantityIsFixed == true)
                     <input type="text" class="form-control" name="component_data[{{$purchaseOrderComponent['purchase_order_component_id']}}][quantity]" value="1" readonly>
                 @else
-                    <input type="text" class="form-control" name="component_data[{{$purchaseOrderComponent['purchase_order_component_id']}}][quantity]">
+                    <input type="text" class="form-control" name="component_data[{{$purchaseOrderComponent['purchase_order_component_id']}}][quantity]" required="required">
                 @endif
             </td>
         </tr>
