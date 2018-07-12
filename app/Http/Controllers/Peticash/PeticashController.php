@@ -6,6 +6,7 @@ use App\Asset;
 use App\AssetMaintenanceBillPayment;
 use App\AssetType;
 use App\BankInfo;
+use App\BillReconcileTransaction;
 use App\Category;
 use App\CategoryMaterialRelation;
 use App\Client;
@@ -45,6 +46,8 @@ use App\QuotationStatus;
 use App\Role;
 use App\SiteTransferBillPayment;
 use App\SubcontractorAdvancePayment;
+use App\SubcontractorBill;
+use App\SubcontractorBillReconcileTransaction;
 use App\SubcontractorBillTransaction;
 use App\Unit;
 use App\User;
@@ -2082,7 +2085,29 @@ class PeticashController extends Controller
                     ,'subcontractor_structure.project_site_id as project_site_id'
                     ,'subcontractor.company_name as name')->get()->toArray();
 
-            $cashPaymentData = array_merge($purchaseOrderAdvancePayments,$purchaseOrderBillPayments,$subcontractorAdvancePayments,$projectSiteAdvancePayments,$siteTransferPayments,$assetMaintenancePayments,$subcontractorCashBillTransactions);
+            $salesBillReconcileCash = BillReconcileTransaction::join('bills','bills.id','=','bill_reconcile_transactions.bill_id')
+                                            ->join('quotations','quotations.id','=','bills.quotation_id')
+                                            ->join('project_sites','project_sites.id','=','quotations.project_site_id')
+                                            ->where('quotations.project_site_id',$projectSiteId)
+                                            ->where('bill_reconcile_transactions.paid_from_slug','cash')
+                                            ->select('bill_reconcile_transactions.id as payment_id','bill_reconcile_transactions.amount as amount'
+                                                ,'bill_reconcile_transactions.created_at as created_at'
+                                                ,'quotations.project_site_id as project_site_id'
+                                                ,'project_sites.name as name')->get()->toArray();
+
+            $subcontractorBillReconcileCash = SubcontractorBillReconcileTransaction::join('subcontractor_bills','subcontractor_bills.id','=','subcontractor_bill_reconcile_transactions.subcontractor_bill_id')
+                ->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
+                ->where('subcontractor_structure.project_site_id',$projectSiteId)
+                ->where('subcontractor_bill_reconcile_transactions.paid_from_slug','cash')
+                ->join('subcontractor','subcontractor.id','=','subcontractor_structure.subcontractor_id')
+                ->where('subcontractor.company_name','ilike','%'.$search_name.'%')
+                ->select('subcontractor_bill_reconcile_transactions.id as payment_id','subcontractor_bill_reconcile_transactions.amount as amount'
+                    ,'subcontractor_bill_reconcile_transactions.created_at as created_at'
+                    ,'subcontractor_structure.project_site_id as project_site_id'
+                    ,'subcontractor.company_name as name')->get()->toArray();
+
+
+            $cashPaymentData = array_merge($purchaseOrderAdvancePayments,$purchaseOrderBillPayments,$subcontractorAdvancePayments,$projectSiteAdvancePayments,$siteTransferPayments,$assetMaintenancePayments,$subcontractorCashBillTransactions,$salesBillReconcileCash,$subcontractorBillReconcileCash);
             $total = 0;
             if ($request->has('get_total')) {
                 foreach($cashPaymentData as $salarytxn) {
