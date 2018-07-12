@@ -12,6 +12,7 @@ use App\PurchaseOrderAdvancePayment;
 use App\PurchaseOrderPayment;
 use App\SiteTransferBillPayment;
 use App\SubcontractorAdvancePayment;
+use App\SubcontractorBillTransaction;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BankRequest;
@@ -355,6 +356,18 @@ class BankController extends Controller
                     ,'payment_types.name as payment_name'
                     ,'asset_maintenance_bill_payments.reference_number as reference_number')->get()->toArray();
 
+            $subcontractorCashBillTransactions = SubcontractorBillTransaction::join('subcontractor_bills','subcontractor_bills.id','=','subcontractor_bill_transactions.subcontractor_bills_id')
+                ->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
+                ->where('subcontractor_structure.project_site_id',$projectSiteId)
+                ->where('subcontractor_bill_transactions.paid_from_slug','bank')
+                ->where('subcontractor_bill_transactions.bank_id',$request['bank_id'])
+                ->join('subcontractor','subcontractor.id','=','subcontractor_structure.subcontractor_id')
+                ->where('subcontractor.company_name','ilike','%'.$search_name.'%')
+                ->select('subcontractor_bill_transactions.id as payment_id','subcontractor_bill_transactions.subtotal as amount'
+                    ,'subcontractor_bill_transactions.created_at as created_at'
+                    ,'subcontractor_structure.project_site_id as project_site_id'
+                    ,'subcontractor.company_name as name')->get()->toArray();
+
             $bankTransactions = BankInfoTransaction::join('users','users.id','=','bank_info_transactions.user_id')
                                             ->join('payment_types','payment_types.id','=','bank_info_transactions.payment_type_id')
                                             ->where('bank_info_transactions.bank_id',$request['bank_id'])
@@ -364,7 +377,8 @@ class BankController extends Controller
                                                 ,'payment_types.name as payment_name'
                                                 ,DB::raw("CONCAT(users.last_name,' ',users.first_name) AS name")
                                                 ,'bank_info_transactions.reference_number as reference_number')->get()->toArray();
-            $cashPaymentData = array_merge($bankTransactions,$purchaseOrderAdvancePayments,$purchaseOrderBillPayments,$subcontractorAdvancePayments,$projectSiteAdvancePayments,$siteTransferPayments,$assetMaintenancePayments);
+            
+            $cashPaymentData = array_merge($bankTransactions,$purchaseOrderAdvancePayments,$purchaseOrderBillPayments,$subcontractorAdvancePayments,$projectSiteAdvancePayments,$siteTransferPayments,$assetMaintenancePayments,$subcontractorCashBillTransactions);
             usort($cashPaymentData, function($a, $b) {
                 return $a['created_at'] < $b['created_at'];
             });

@@ -45,6 +45,7 @@ use App\QuotationStatus;
 use App\Role;
 use App\SiteTransferBillPayment;
 use App\SubcontractorAdvancePayment;
+use App\SubcontractorBillTransaction;
 use App\Unit;
 use App\User;
 use App\UserProjectSiteRelation;
@@ -2069,7 +2070,19 @@ class PeticashController extends Controller
                                                 ,'asset_maintenance.project_site_id as project_site_id'
                                                 ,'vendors.company as name')->get()->toArray();
 
-            $cashPaymentData = array_merge($purchaseOrderAdvancePayments,$purchaseOrderBillPayments,$subcontractorAdvancePayments,$projectSiteAdvancePayments,$siteTransferPayments,$assetMaintenancePayments);
+
+            $subcontractorCashBillTransactions = SubcontractorBillTransaction::join('subcontractor_bills','subcontractor_bills.id','=','subcontractor_bill_transactions.subcontractor_bills_id')
+                ->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
+                ->where('subcontractor_structure.project_site_id',$projectSiteId)
+                ->where('subcontractor_bill_transactions.paid_from_slug','cash')
+                ->join('subcontractor','subcontractor.id','=','subcontractor_structure.subcontractor_id')
+                ->where('subcontractor.company_name','ilike','%'.$search_name.'%')
+                ->select('subcontractor_bill_transactions.id as payment_id','subcontractor_bill_transactions.subtotal as amount'
+                    ,'subcontractor_bill_transactions.created_at as created_at'
+                    ,'subcontractor_structure.project_site_id as project_site_id'
+                    ,'subcontractor.company_name as name')->get()->toArray();
+
+            $cashPaymentData = array_merge($purchaseOrderAdvancePayments,$purchaseOrderBillPayments,$subcontractorAdvancePayments,$projectSiteAdvancePayments,$siteTransferPayments,$assetMaintenancePayments,$subcontractorCashBillTransactions);
             $total = 0;
             if ($request->has('get_total')) {
                 foreach($cashPaymentData as $salarytxn) {
