@@ -21,6 +21,7 @@ use App\ProjectSiteAdvancePayment;
 use App\PurcahsePeticashTransaction;
 use App\PurchaseOrderAdvancePayment;
 use App\SubcontractorAdvancePayment;
+use App\SubcontractorBillTransaction;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 
@@ -64,7 +65,11 @@ trait PeticashTrait{
 
             $cashSubcontractorAdvancePaymentTotal = SubcontractorAdvancePayment::where('subcontractor_advance_payments.paid_from_slug','cash')
                 ->where('project_site_id',$projectSiteId)->sum('amount');
-            $remainingAmount = ($allocatedAmount + $projectSiteAdvancedAmount + $salesBillCashAmount + $salesBillTransactions) - ($totalSalaryAmount + $totalAdvanceAmount + $totalPurchaseAmount + $cashPurchaseOrderAdvancePaymentTotal + $cashSubcontractorAdvancePaymentTotal);
+            $cashSubcontractorBillTransactionTotal = SubcontractorBillTransaction::join('subcontractor_bills','subcontractor_bills.id','=','subcontractor_bill_transactions.subcontractor_bills_id')
+                ->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
+                ->where('subcontractor_structure.project_site_id',$projectSiteId)
+                ->where('subcontractor_bill_transactions.paid_from_slug','cash')->sum('subcontractor_bill_transactions.subtotal');
+            $remainingAmount = ($allocatedAmount + $projectSiteAdvancedAmount + $salesBillCashAmount + $salesBillTransactions) - ($totalSalaryAmount + $totalAdvanceAmount + $totalPurchaseAmount + $cashPurchaseOrderAdvancePaymentTotal + $cashSubcontractorAdvancePaymentTotal + $cashSubcontractorBillTransactionTotal);
         }catch (\Exception $e){
             $data = [
                 'action' => 'Get Peticash sitewise statistics',
@@ -130,7 +135,11 @@ trait PeticashTrait{
                     ->sum('amount');
                 $cashSubcontractorAdvancePaymentTotal = SubcontractorAdvancePayment::where('subcontractor_advance_payments.paid_from_slug','cash')
                     ->where('project_site_id',$projectSiteId)->sum('amount');
-                $remainingAmount = ($allocatedAmount + $projectSiteAdvancedAmount + $salesBillCashAmount + $salesBillTransactions) - ($totalSalaryAmount + $totalAdvanceAmount + $totalPurchaseAmount + $cashPurchaseOrderAdvancePaymentTotal + $cashSubcontractorAdvancePaymentTotal);
+                $cashSubcontractorBillTransactionTotal = SubcontractorBillTransaction::join('subcontractor_bills','subcontractor_bills.id','=','subcontractor_bill_transactions.subcontractor_bills_id')
+                    ->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
+                    ->where('subcontractor_structure.project_site_id',$projectSiteId)
+                    ->where('subcontractor_bill_transactions.paid_from_slug','cash')->sum('subcontractor_bill_transactions.subtotal');
+                $remainingAmount = ($allocatedAmount + $projectSiteAdvancedAmount + $salesBillCashAmount + $salesBillTransactions) - ($totalSalaryAmount + $totalAdvanceAmount + $totalPurchaseAmount + $cashPurchaseOrderAdvancePaymentTotal + $cashSubcontractorAdvancePaymentTotal + $cashSubcontractorBillTransactionTotal);
                 $allocatedAmount = $allocatedAmount + $salesBillCashAmount + $salesBillTransactions + $projectSiteAdvancedAmount;
                 $projectName = Project::join('project_sites','projects.id','=','project_sites.project_id')
                                         ->where('project_sites.id', $projectSiteId)
