@@ -337,28 +337,28 @@ class SubcontractorController extends Controller
                             $structureSlug = $subcontractorStructure->contractType->slug;
                             if($structureSlug == 'sqft'){
                                 $rate = $subcontractorStructure['rate'];
-                                $subTotal = $subcontractorBill['qty'] * $rate;
+                                $subTotal = round(($subcontractorBill['qty'] * $rate),3);
                                 foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
-                                    $taxTotal += ($subcontractorBillTaxData['percentage'] * $subTotal) / 100;
+                                    $taxTotal += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
                                 }
-                                $finalTotal = $subTotal + $taxTotal;
+                                $finalTotal = round(($subTotal + $taxTotal),3);
                             }else{
-                                $rate = $subcontractorStructure['rate'] * $subcontractorStructure['total_work_area'];
-                                $subTotal = $subcontractorBill['qty'] * $rate;
+                                $rate = round(($subcontractorStructure['rate'] * $subcontractorStructure['total_work_area']),3);
+                                $subTotal = round(($subcontractorBill['qty'] * $rate),3);
                                 foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
-                                    $taxTotal += ($subcontractorBillTaxData['percentage'] * $subTotal) / 100;
+                                    $taxTotal += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
                                 }
-                                $finalTotal = $subTotal + $taxTotal;
+                                $finalTotal = round(($subTotal + $taxTotal),3);
                             }
-                            $billTotals += $finalTotal;
-                            $billPaidAmount += SubcontractorBillTransaction::where('subcontractor_bills_id',$subBillids)->sum('total');
+                            $billTotals += round(($finalTotal),3);
+                            $billPaidAmount += round((SubcontractorBillTransaction::where('subcontractor_bills_id',$subBillids)->sum('total')),3);
                         }
                     }
                 }
-                $records['total'] = $total;
-                $records['billtotal'] = $billTotals;
-                $records['paidtotal'] = $billPaidAmount;
-                $records['balancetotal'] = $billTotals - $billPaidAmount;
+                $records['total'] = round($total,3);
+                $records['billtotal'] = round($billTotals,3);
+                $records['paidtotal'] = round($billPaidAmount,3);
+                $records['balancetotal'] = round(($billTotals - $billPaidAmount),3);
             } else {
                 $iTotalRecords = count($listingData);
                 $records = array();
@@ -376,21 +376,21 @@ class SubcontractorController extends Controller
                         $structureSlug = $subcontractorStructure->contractType->slug;
                         if($structureSlug == 'sqft'){
                             $rate = $subcontractorStructure['rate'];
-                            $subTotal = $subcontractorBill['qty'] * $rate;
+                            $subTotal = round(($subcontractorBill['qty'] * $rate),3);
                             foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
-                                $taxTotal += ($subcontractorBillTaxData['percentage'] * $subTotal) / 100;
+                                $taxTotal += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
                             }
-                            $finalTotal = $subTotal + $taxTotal;
+                            $finalTotal = round(($subTotal + $taxTotal),3);
                         }else{
-                            $rate = $subcontractorStructure['rate'] * $subcontractorStructure['total_work_area'];
-                            $subTotal = $subcontractorBill['qty'] * $rate;
+                            $rate = round(($subcontractorStructure['rate'] * $subcontractorStructure['total_work_area']),3);
+                            $subTotal = round(($subcontractorBill['qty'] * $rate),3);
                             foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
-                                $taxTotal += ($subcontractorBillTaxData['percentage'] * $subTotal) / 100;
+                                $taxTotal += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
                             }
-                            $finalTotal = $subTotal + $taxTotal;
+                            $finalTotal = round(($subTotal + $taxTotal),3);
                         }
-                        $billTotals += $finalTotal;
-                        $billPaidAmount += SubcontractorBillTransaction::where('subcontractor_bills_id',$subcontractorStructureBillId)->sum('total');
+                        $billTotals += round($finalTotal,3);
+                        $billPaidAmount += round((SubcontractorBillTransaction::where('subcontractor_bills_id',$subcontractorStructureBillId)->sum('total')),3);
                     }
                     $action = '';
                     if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-subcontractor-billing') || $user->customHasPermission('edit-subcontractor-billing') || $user->customHasPermission('view-subcontractor-billing') || $user->customHasPermission('approve-subcontractor-billing')){
@@ -403,7 +403,7 @@ class SubcontractorController extends Controller
                                              <i class="icon-docs"></i>View
                                         </a>';
                     }
-                    $total_amount = $listingData[$pagination]['rate'] * $listingData[$pagination]['total_work_area'];
+                    $total_amount = round(($listingData[$pagination]['rate'] * $listingData[$pagination]['total_work_area']),3);
                     $records['data'][$iterator] = [
                         $listingData[$pagination]->subcontractor->subcontractor_name,
                         $listingData[$pagination]->projectSite->project->name,
@@ -414,7 +414,7 @@ class SubcontractorController extends Controller
                         $total_amount,
                         $billTotals,
                         $billPaidAmount,
-                        $billTotals-$billPaidAmount,
+                        round(($billTotals - $billPaidAmount),3),
                         date('d M Y',strtotime($listingData[$pagination]['created_at'])),
                         $action
                     ];
@@ -639,7 +639,7 @@ class SubcontractorController extends Controller
                 }
                 $records['final_amount'] = $finalAmount;
                 $records['paid_amount'] = $paidAmount;
-                $records['pending_amount'] = $finalAmount - $paidAmount;
+                $records['pending_amount'] = round(($finalAmount - $paidAmount),3);
             }else{
                 $iTotalRecords = count($listingData);
                 $records = array();
@@ -676,7 +676,7 @@ class SubcontractorController extends Controller
                         $taxAmount,
                         $finalAmount,
                         $paidAmount,
-                        $finalAmount - $paidAmount,
+                        round(($finalAmount - $paidAmount),3),
                         $billStatus,
                         $action
                     ];
