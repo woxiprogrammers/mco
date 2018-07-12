@@ -2004,8 +2004,6 @@ class PeticashController extends Controller
             if ($request->has('search_name')) {
                 $search_name = $request->search_name;
             }
-
-
             $purchaseOrderAdvancePayments = PurchaseOrderAdvancePayment::join('purchase_orders','purchase_orders.id','purchase_order_advance_payments.purchase_order_id')
                                                                             ->join('vendors','vendors.id','=','purchase_orders.vendor_id')
                                                                             ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
@@ -2037,6 +2035,7 @@ class PeticashController extends Controller
                                                                                 ,'subcontractor.company_name as name')->get()->toArray();
 
             $projectSiteAdvancePayments = ProjectSiteAdvancePayment::join('project_sites','project_sites.id','=','project_site_advance_payments.project_site_id')
+                                                                        ->where('project_site_advance_payments.paid_from_slug','cash')
                                                                         ->where('project_site_advance_payments.project_site_id',$projectSiteId)
                                                                         ->where('project_sites.name','ilike','%'.$search_name.'%')
                                                                         ->select('project_site_advance_payments.id as payment_id'
@@ -2049,6 +2048,7 @@ class PeticashController extends Controller
                                                                 ->join('inventory_component_transfers','inventory_component_transfers.id','=','site_transfer_bills.inventory_component_transfer_id')
                                                                 ->join('vendors','vendors.id','=','inventory_component_transfers.vendor_id')
                                                                 ->join('inventory_components','inventory_components.id','inventory_component_transfers.inventory_component_id')
+                                                                ->where('site_transfer_bill_payments.paid_from_slug','cash')
                                                                 ->where('inventory_components.project_site_id',$projectSiteId)
                                                                 ->where('vendors.company','ilike','%'.$search_name.'%')
                                                                 ->select('site_transfer_bill_payments.id as payment_id','site_transfer_bill_payments.amount as amount'
@@ -2063,6 +2063,7 @@ class PeticashController extends Controller
                                             ->join('vendors','vendors.id','=','asset_maintenance_vendor_relation.vendor_id')
                                             ->where('asset_maintenance.project_site_id',$projectSiteId)
                                             ->where('vendors.company','ilike','%'.$search_name.'%')
+                                            ->where('asset_maintenance_bill_payments.paid_from_slug','cash')
                                             ->select('asset_maintenance_bill_payments.id as payment_id','asset_maintenance_bill_payments.amount as amount'
                                                 ,'asset_maintenance_bill_payments.created_at as created_at'
                                                 ,'asset_maintenance.project_site_id as project_site_id'

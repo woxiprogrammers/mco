@@ -135,13 +135,25 @@
                                                     <div class="table-scrollable">
                                                         <table class="table table-striped table-bordered table-hover table-checkable order-column" id="bankTransactionTable">
                                                             <thead>
-                                                            <tr>
-                                                                <th > Date </th>
-                                                                <th > User </th>
-                                                                <th > Amount </th>
-                                                                <th > Payment Method </th>
-                                                                <th > Reference Number </th>
-                                                            </tr>
+                                                                <tr>
+                                                                    <th > Date </th>
+                                                                    <th > Status </th>
+                                                                    <th > User </th>
+                                                                    <th > Amount </th>
+                                                                    <th > Payment Method </th>
+                                                                    <th > Reference Number </th>
+                                                                </tr>
+                                                                <tr class="filter">
+                                                                    <th> </th>
+                                                                    <th> </th>
+                                                                    <th> <input type="text" class="form-control form-filter" name="search_name" id="search_name"> </th>
+                                                                    <th> </th>
+                                                                    <th> </th>
+                                                                    <th>
+                                                                        <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
+                                                                        <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
+                                                                    </th>
+                                                                </tr>
                                                             </thead>
                                                             <tbody>
 
@@ -255,6 +267,10 @@
         $('#date').val((date.getMonth()+1)+"/"+date.getDate()+"/"+date.getFullYear());
         $("#transactionButton").on('click',function(){
             $("#transactionModal").modal('show');
+        });
+        $('#bankTransactionTable').DataTable();
+        $("input[name='search_name']").on('keyup',function(){
+            $(".filter-submit").trigger('click');
         });
     });
 </script>
