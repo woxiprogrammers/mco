@@ -400,7 +400,7 @@
                                                                             </div>
                                                                         </div>
                                                                     </div>
-                                                                    <button type="submit" class="btn btn-set red pull-right">
+                                                                    <button type="submit" class="btn btn-set red pull-right" id="transactionFormSubmitId">
                                                                         <i class="fa fa-check" style="font-size: large"></i>
                                                                         Save&nbsp; &nbsp; &nbsp;
                                                                     </button>
@@ -538,6 +538,8 @@
     <script>
         $(document).ready(function(){
             EditPurchaseOrder.init();
+            GenerateGRN.init();
+
             $("#componentSelectButton").on('click',function(){
                 if($(".component-select:checkbox:checked").length > 0){
                     var componentIds = [];
