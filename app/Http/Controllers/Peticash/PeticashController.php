@@ -70,7 +70,8 @@ class PeticashController extends Controller
             $masteraccountAmount = PeticashSiteTransfer::where('project_site_id','=',0)->sum('amount');
             $sitewiseaccountAmount = PeticashSiteTransfer::where('project_site_id','!=',0)->sum('amount');
             $balance = $masteraccountAmount - $sitewiseaccountAmount;
-            return view('peticash.master-peticash-account.manage')->with(compact('masteraccountAmount','sitewiseaccountAmount','balance'));
+            return view('peticash.master-peticash-account.manage')
+                ->with(compact('masteraccountAmount','sitewiseaccountAmount','balance'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Peticash Manage view',
@@ -929,11 +930,66 @@ class PeticashController extends Controller
     public function masterAccountListing(Request $request){
         try{
             $user = Auth::user();
-            $masterAccountData = PeticashSiteTransfer::where('project_site_id','=', 0)->orderBy('created_at','desc')->get();
+            $search_from = null;
+            $search_to = null;
+            $status_id = "all";
+            if($request->has('searchFrom')) {
+                $search_from = $request->searchFrom;
+            }
+            if($request->has('searchTo')) {
+                $search_to = $request->searchTo;
+            }
+            if($request->has('status')) {
+                $status_id = $request->status;
+            }
+            $filterFlag = true;
+            $masterAccountData = array();
+            $ids = PeticashSiteTransfer::where('project_site_id','=', 0)->pluck('id')->toArray();
+
+            if ($search_from != null && $search_from != "" && $filterFlag == true) {
+                $ids = PeticashSiteTransfer::join('users','users.id','peticash_site_transfers.received_from_user_id')
+                    ->whereRaw("CONCAT(users.first_name,' ',users.last_name) ilike '%".$search_from."%'")
+                    ->whereIn('peticash_site_transfers.id', $ids)
+                    ->where('peticash_site_transfers.project_site_id','=', 0)
+                    ->pluck('peticash_site_transfers.id')->toArray();
+                if (count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+            if ($search_to != null && $search_to != "" && $filterFlag == true) {
+                $ids = PeticashSiteTransfer::join('users','users.id','peticash_site_transfers.user_id')
+                    ->whereRaw("CONCAT(users.first_name,' ',users.last_name) ilike '%".$search_to."%'")
+                    ->whereIn('peticash_site_transfers.id', $ids)
+                    ->where('peticash_site_transfers.project_site_id','=', 0)
+                    ->pluck('peticash_site_transfers.id')->toArray();
+                if (count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+            if ($status_id != "all" && $status_id != "" && $filterFlag == true) {
+                $ids = PeticashSiteTransfer::where('peticash_site_transfers.paid_from_slug',$status_id)
+                    ->whereIn('peticash_site_transfers.id', $ids)
+                    ->where('peticash_site_transfers.project_site_id','=', 0)
+                    ->pluck('peticash_site_transfers.id')->toArray();
+                if (count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+            if ($filterFlag) {
+                $masterAccountData = PeticashSiteTransfer::
+                    whereIn('peticash_site_transfers.id', $ids)
+                    ->where('project_site_id','=', 0)->orderBy('created_at','desc')->get();
+            }
+            //$masterAccountData = PeticashSiteTransfer::where('project_site_id','=', 0)->orderBy('created_at','desc')->get();
             // Here We are considering (project_site_id = 0) => It's Master Peticash Account
             $total = 0;
             if ($request->has('get_total')) {
-                $total = $masterAccountData->sum('amount');
+                if ($filterFlag) {
+                    $total = $masterAccountData->sum('amount');
+                }
                 $records['total'] = $total;
             } else {
                 $iTotalRecords = count($masterAccountData);

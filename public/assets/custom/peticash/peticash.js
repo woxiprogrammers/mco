@@ -37,6 +37,9 @@ var masterAccountListing = function () {
                                 i : 0;
                     };
 
+                    var status_id = $('#status_id').val()
+                    var searchFrom = $('#searchFrom').val();
+                    var searchTo = $('#searchTo').val();
 
 
                     // Total over all pages
@@ -44,7 +47,11 @@ var masterAccountListing = function () {
                         url: "/peticash/master-peticash-account/listing",
                         type: 'POST',
                         data :{
-                            "get_total" : true
+                            "get_total" : true,
+                            "status" : status_id,
+                            "searchFrom" : searchFrom,
+                            "searchTo" : searchTo,
+
                         },
                         success: function(result){
                             total = result['total'];
