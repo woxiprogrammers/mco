@@ -23,11 +23,7 @@ var BankTransactionListing = function () {
                 ],
                 "pageLength": 50, // default record count per page
                 "ajax": {
-                    "url": "/bank/transaction/listing", // ajax source
-                    "data" :{
-                        '_token' : $("input[name='_token']").val(),
-                        'bank_id' : bank_id
-                    }
+                    "url": "/bank/transaction/listing?_token="+$("input[name='_token']").val()+"&bank_id="+bank_id // ajax source
                 },
                 "order": [
                     [1, "asc"]
