@@ -269,7 +269,7 @@ $(document).ready(function(){
             $('.assetImg').each(function(i, el) {
                 var imageSrc = $(el).attr('src');
                 assets += '<input type="hidden" name="item_list['+iterator+'][images][]" value="'+imageSrc+'">'
-            })
+            });
             assets += asset_name+'</td>'+'<td>'+quantity+'</td>'+'<td>'+unit+'</td>';
             var rows = '<tr>'+assets+'</tr>';
             $('#myModal1').modal('hide');
@@ -278,7 +278,7 @@ $(document).ready(function(){
             var iterator = parseInt(iterator) + 1;
             $('#iterator').val(iterator);
             $('#component_id').val(null);
-            $('#files').val(null);
+            $('#filesAsset').val(null);
         }
     });
 
