@@ -2164,14 +2164,16 @@ class PeticashController extends Controller
                     ,'subcontractor_structure.project_site_id as project_site_id'
                     ,'subcontractor.company_name as name')->get()->toArray();
 
-            $indirectCashPayments = ProjectSiteIndirectExpense::where('project_site_id',$projectSiteId)
-                ->where('paid_from_slug','cash')
-                ->groupBy('id')
-                ->select('id as payment_id'
-                    ,DB::raw("sum(gst + tds) AS amount")
-                    ,'created_at as created_at'
-                    ,'project_site_id as project_site_id'
-                   )->get()->toArray();
+            $indirectCashPayments = ProjectSiteIndirectExpense::join('project_sites','project_sites.id','=','project_site_indirect_expenses.project_site_id')
+                ->where('project_site_indirect_expenses.project_site_id',$projectSiteId)
+                ->where('project_site_indirect_expenses.paid_from_slug','cash')
+                ->groupBy('project_site_indirect_expenses.id')
+                ->groupBy('project_sites.id')
+                ->select('project_site_indirect_expenses.id as payment_id'
+                    ,DB::raw("sum(project_site_indirect_expenses.gst + project_site_indirect_expenses.tds) AS amount")
+                    ,'project_site_indirect_expenses.created_at as created_at'
+                    ,'project_site_indirect_expenses.project_site_id as project_site_id'
+                    ,'project_sites.name as name')->get()->toArray();
 
             $cashPaymentData = array_merge($purchaseOrderAdvancePayments,$purchaseOrderBillPayments,$subcontractorAdvancePayments,$projectSiteAdvancePayments,$siteTransferPayments,$assetMaintenancePayments,$subcontractorCashBillTransactions,$salesBillReconcileCash,$subcontractorBillReconcileCash,$indirectCashPayments);
             $total = 0;
@@ -2182,7 +2184,7 @@ class PeticashController extends Controller
                 $records['total'] = $total;
             } else {
                 usort($cashPaymentData, function($a, $b) {
-                    return $a['created_at'] < $b['created_at'];
+                    return $a['created_at'] > $b['created_at'];
                 });
                 $iTotalRecords = count($cashPaymentData);
                 $records = array();
@@ -2190,9 +2192,9 @@ class PeticashController extends Controller
                 $end = $request->length < 0 ? count($cashPaymentData) : $request->length;
                 for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($cashPaymentData); $iterator++,$pagination++ ){
                     $records['data'][] = [
-                        $iterator+1,
-                        ProjectSite::where('id',$cashPaymentData[$pagination]['project_site_id'])->pluck('name')->first(),
-                        (array_key_exists('name',$cashPaymentData[$pagination])) ? ucwords($cashPaymentData[$pagination]['name']) : ProjectSite::where('id',$cashPaymentData[$pagination]['project_site_id'])->pluck('name')->first(),
+                        ($iterator+1),
+                        Project::join('project_sites','project_sites.project_id','=','projects.id')->where('project_sites.id',$cashPaymentData[$pagination]['project_site_id'])->pluck('projects.name')->first(),
+                        ucwords($cashPaymentData[$pagination]['name']),
                         $cashPaymentData[$pagination]['amount'],
                         date('j M Y',strtotime($cashPaymentData[$pagination]['created_at'])),
                     ];
