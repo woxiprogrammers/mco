@@ -413,8 +413,24 @@ class BankController extends Controller
                                                 ,DB::raw("CONCAT(users.last_name,' ',users.first_name) AS name")
                                                 ,'bank_info_transactions.reference_number as reference_number')->get()->toArray();
 
+            $indirectCashPayments = ProjectSiteIndirectExpense::join('project_sites','project_sites.id','=','project_site_indirect_expenses.project_site_id')
+                ->where('project_site_indirect_expenses.project_site_id',$projectSiteId)
+                ->join('payment_types','payment_types.id','=','project_site_indirect_expenses.payment_type_id')
+                ->where('project_site_indirect_expenses.paid_from_slug','bank')
+                ->where('project_site_indirect_expenses.bank_id',$request['bank_id'])
+                ->groupBy('project_site_indirect_expenses.id')
+                ->groupBy('project_sites.id')
+                ->groupBy('payment_types.id')
+                ->select('project_site_indirect_expenses.id as payment_id'
+                    ,DB::raw("SUM(project_site_indirect_expenses.tds + project_site_indirect_expenses.gst) AS amount")/*'project_site_indirect_expenses.tds as amount'*/
+                    ,'project_site_indirect_expenses.created_at as created_at'
+                    ,'project_site_indirect_expenses.project_site_id as project_site_id'
+                    ,'project_sites.name as name'
+                    ,'payment_types.name as payment_name'
+                    ,'project_site_indirect_expenses.reference_number as reference_number')->get()->toArray();
 
-            $cashPaymentData = array_merge($bankTransactions,$purchaseOrderAdvancePayments,$purchaseOrderBillPayments,$subcontractorAdvancePayments,$projectSiteAdvancePayments,$siteTransferPayments,$assetMaintenancePayments,$subcontractorBillReconcile,$salesBillReconcile,$subcontractorBillTransactions);
+
+            $cashPaymentData = array_merge($bankTransactions,$purchaseOrderAdvancePayments,$purchaseOrderBillPayments,$subcontractorAdvancePayments,$projectSiteAdvancePayments,$siteTransferPayments,$assetMaintenancePayments,$subcontractorBillReconcile,$salesBillReconcile,$subcontractorBillTransactions,$indirectCashPayments);
             usort($cashPaymentData, function($a, $b) {
                 return $a['created_at'] < $b['created_at'];
             });
