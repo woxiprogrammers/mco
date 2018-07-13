@@ -35,6 +35,7 @@ use App\PeticashTransactionType;
 use App\Project;
 use App\ProjectSite;
 use App\ProjectSiteAdvancePayment;
+use App\ProjectSiteIndirectExpense;
 use App\PurcahsePeticashTransaction;
 use App\PurchaseOrderAdvancePayment;
 use App\PurchaseOrderPayment;
@@ -57,6 +58,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
@@ -2162,8 +2164,16 @@ class PeticashController extends Controller
                     ,'subcontractor_structure.project_site_id as project_site_id'
                     ,'subcontractor.company_name as name')->get()->toArray();
 
+            $indirectCashPayments = ProjectSiteIndirectExpense::where('project_site_id',$projectSiteId)
+                ->where('paid_from_slug','cash')
+                ->groupBy('id')
+                ->select('id as payment_id'
+                    ,DB::raw("sum(gst + tds) AS amount")
+                    ,'created_at as created_at'
+                    ,'project_site_id as project_site_id'
+                   )->get()->toArray();
 
-            $cashPaymentData = array_merge($purchaseOrderAdvancePayments,$purchaseOrderBillPayments,$subcontractorAdvancePayments,$projectSiteAdvancePayments,$siteTransferPayments,$assetMaintenancePayments,$subcontractorCashBillTransactions,$salesBillReconcileCash,$subcontractorBillReconcileCash);
+            $cashPaymentData = array_merge($purchaseOrderAdvancePayments,$purchaseOrderBillPayments,$subcontractorAdvancePayments,$projectSiteAdvancePayments,$siteTransferPayments,$assetMaintenancePayments,$subcontractorCashBillTransactions,$salesBillReconcileCash,$subcontractorBillReconcileCash,$indirectCashPayments);
             $total = 0;
             if ($request->has('get_total')) {
                 foreach($cashPaymentData as $salarytxn) {
@@ -2182,7 +2192,7 @@ class PeticashController extends Controller
                     $records['data'][] = [
                         $iterator+1,
                         ProjectSite::where('id',$cashPaymentData[$pagination]['project_site_id'])->pluck('name')->first(),
-                        ucwords($cashPaymentData[$pagination]['name']),
+                        (array_key_exists('name',$cashPaymentData[$pagination])) ? ucwords($cashPaymentData[$pagination]['name']) : ProjectSite::where('id',$cashPaymentData[$pagination]['project_site_id'])->pluck('name')->first(),
                         $cashPaymentData[$pagination]['amount'],
                         date('j M Y',strtotime($cashPaymentData[$pagination]['created_at'])),
                     ];
