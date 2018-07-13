@@ -127,7 +127,7 @@ trait PeticashTrait{
         try{
             if($user->roles[0]->role->slug == 'superadmin' || $user->roles[0]->role->slug == 'admin'){
                 $projectSiteIds = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
-                                        ->where('projects.is_active', true)->where('projects.id',5)
+                                        ->where('projects.is_active', true)
                                         ->pluck('project_sites.id')->toArray();
             }else{
                 $projectSiteIds = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
