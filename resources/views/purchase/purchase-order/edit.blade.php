@@ -336,7 +336,7 @@
                                                                 </div>
                                                                 <div class="row">
                                                                     <div class="col-md-3" id="grnImageUplaodButton" style="margin-top: 1%;" hidden>
-                                                                        <a href="javascript:void(0);" class="btn blue" > Upload Images</a>
+                                                                        <a href="javascript:void(0);" class="btn blue" >Upload Images</a>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -620,6 +620,10 @@
                     url: '/purchase/purchase-order/transaction/upload-pre-grn-images',
                     type: 'POST',
                     data: imageArray,
+                    beforeSend: function() {
+                        $("#imageupload").hide();
+                        $("#grnImageUplaodButton").hide();
+                    },
                     success: function(data, textStatus, xhr){
                         $("#imageupload").hide();
                         $("#grnImageUplaodButton").hide();
