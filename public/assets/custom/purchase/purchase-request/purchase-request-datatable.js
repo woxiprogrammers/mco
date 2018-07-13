@@ -117,6 +117,7 @@ $(document).ready(function(){
 
     $("#myModal").on("hidden.bs.modal", function () {
         $('#qty').val('');
+        $('#files').val(null);
         $('#qty').removeClass('has-error');
         $('#qty').removeClass('has-success');
         $('#materialUnit option[value=""]').prop('selected', true);
@@ -135,6 +136,7 @@ $(document).ready(function(){
         $("#Assetsearchbox").removeClass("assetTypeahead");
         $('#Assetsearchbox').removeClass('has-error').removeClass('has-success');
         $("#myModal1 output").html('');
+        $('#filesAsset').val(null);
     });
 });
 function selectAsset(id) {
@@ -222,6 +224,7 @@ $('#createMaterial').click(function(){
         $('#component_id').val(null);
         $('#searchbox').html('');
         $('#qty').val('');
+        $('#files').val(null);
     }
 });
 $('#createAsset').click(function(){
@@ -255,10 +258,10 @@ $('#createAsset').click(function(){
         var componentTypeId = $('#component_id').val();
         var iterator = $('#iterator').val();
         var assets = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+asset_name+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unitId+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">';
-        $('.img').each(function(i, el) {
+        $('.assetImg').each(function(i, el) {
             var imageSrc = $(el).attr('src');
             assets += '<input type="hidden" name="item_list['+iterator+'][images][]" value="'+imageSrc+'">'
-        })
+        });
         assets += asset_name+'</td>'+'<td>'+quantity+'</td>'+'<td>'+unit+'</td>'+'<td><a class="btn btn-xs green dropdown-toggle" id="deleteRowButton"  onclick="removeTableRow(this)">Remove</a></td>';
         var rows = '<tr>'+assets+'</tr>';
         $('#myModal1').modal('hide');
@@ -268,6 +271,7 @@ $('#createAsset').click(function(){
         $('#iterator').val(iterator);
         $('#deleteAssetRowButton').click(DeleteRow);
         $('#component_id').val(null);
+        $('#filesAsset').val(null);
     }
 });
 

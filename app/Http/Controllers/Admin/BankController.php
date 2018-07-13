@@ -2,14 +2,27 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\AssetMaintenanceBillPayment;
 use App\BankInfo;
 use App\BankInfoTransaction;
+use App\BillReconcileTransaction;
 use App\PaymentType;
+use App\ProjectSite;
+use App\ProjectSiteAdvancePayment;
+use App\ProjectSiteIndirectExpense;
+use App\PurchaseOrderAdvancePayment;
+use App\PurchaseOrderPayment;
+use App\SiteTransferBillPayment;
+use App\SubcontractorAdvancePayment;
+use App\SubcontractorBillReconcileTransaction;
+use App\SubcontractorBillTransaction;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BankRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 
 class BankController extends Controller
 {
@@ -255,8 +268,173 @@ class BankController extends Controller
     public function getBankTransactionListing(Request $request){
         try{
             $status = 200;
-            $bankTransactions = BankInfoTransaction::where('bank_id',$request['bank_id'])->orderBy('created_at','desc')->get();
-            $iTotalRecords = count($bankTransactions);
+            $projectSiteId = Session::get('global_project_site');
+            $search_name = null;
+            if ($request->has('search_name')) {
+                $search_name = $request->search_name;
+            }
+            $purchaseOrderAdvancePayments = PurchaseOrderAdvancePayment::join('purchase_orders','purchase_orders.id','purchase_order_advance_payments.purchase_order_id')
+                ->join('payment_types','payment_types.id','=','purchase_order_advance_payments.payment_id')
+                ->join('vendors','vendors.id','=','purchase_orders.vendor_id')
+                ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
+                ->where('purchase_order_advance_payments.paid_from_slug','bank')
+                ->where('purchase_order_advance_payments.bank_id',$request['bank_id'])
+                ->where('purchase_requests.project_site_id',$projectSiteId)
+                ->where('vendors.company','ilike','%'.$search_name.'%')
+                ->select('purchase_order_advance_payments.id as payment_id','purchase_order_advance_payments.amount as amount'
+                    ,'purchase_order_advance_payments.created_at as created_at','purchase_requests.project_site_id as project_site_id'
+                    ,'vendors.company as name'
+                    ,'payment_types.name as payment_name'
+                    ,'purchase_order_advance_payments.reference_number as reference_number')->get()->toArray();
+
+            $purchaseOrderBillPayments = PurchaseOrderPayment::join('purchase_order_bills','purchase_order_bills.id','=','purchase_order_payments.purchase_order_bill_id')
+                ->join('payment_types','payment_types.id','=','purchase_order_payments.payment_id')
+                ->join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
+                ->join('vendors','vendors.id','=','purchase_orders.vendor_id')
+                ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
+                ->where('purchase_order_payments.paid_from_slug','bank')
+                ->where('purchase_order_payments.bank_id',$request['bank_id'])
+                ->where('vendors.company','ilike','%'.$search_name.'%')
+                ->where('purchase_requests.project_site_id',$projectSiteId)
+                ->select('purchase_order_payments.id as payment_id','purchase_order_payments.amount as amount'
+                    ,'purchase_order_payments.created_at as created_at','purchase_requests.project_site_id as project_site_id'
+                    ,'vendors.company as name','payment_types.name as payment_name'
+                    ,'purchase_order_payments.reference_number as reference_number')->get()->toArray();
+
+            $subcontractorAdvancePayments = SubcontractorAdvancePayment::join('subcontractor','subcontractor.id','=','subcontractor_advance_payments.subcontractor_id')
+                ->join('payment_types','payment_types.id','=','subcontractor_advance_payments.payment_id')
+                ->where('subcontractor_advance_payments.paid_from_slug','bank')
+                ->where('subcontractor_advance_payments.bank_id',$request['bank_id'])
+                ->where('subcontractor_advance_payments.project_site_id',$projectSiteId)
+                ->where('subcontractor.company_name','ilike','%'.$search_name.'%')
+                ->select('subcontractor_advance_payments.id as payment_id','subcontractor_advance_payments.amount as amount'
+                    ,'subcontractor_advance_payments.project_site_id as project_site_id'
+                    ,'subcontractor_advance_payments.created_at as created_at'
+                    ,'subcontractor.company_name as name'
+                    ,'payment_types.name as payment_name'
+                    ,'subcontractor_advance_payments.reference_number as reference_number')->get()->toArray();
+
+            $projectSiteAdvancePayments = ProjectSiteAdvancePayment::join('project_sites','project_sites.id','=','project_site_advance_payments.project_site_id')
+                ->join('payment_types','payment_types.id','=','project_site_advance_payments.payment_id')
+                ->where('project_site_advance_payments.project_site_id',$projectSiteId)
+                ->where('project_site_advance_payments.paid_from_slug','bank')
+                ->where('project_site_advance_payments.bank_id',$request['bank_id'])
+                ->where('project_sites.name','ilike','%'.$search_name.'%')
+                ->select('project_site_advance_payments.id as payment_id'
+                    ,'project_site_advance_payments.amount as amount'
+                    ,'project_site_advance_payments.created_at as created_at'
+                    ,'project_site_advance_payments.project_site_id as project_site_id'
+                    ,'project_sites.name as name'
+                    ,'payment_types.name as payment_name'
+                    ,'project_site_advance_payments.reference_number as reference_number')->get()->toArray();
+
+            $siteTransferPayments = SiteTransferBillPayment::join('site_transfer_bills','site_transfer_bills.id','=','site_transfer_bill_payments.site_transfer_bill_id')
+                ->join('payment_types','payment_types.id','=','site_transfer_bill_payments.payment_type_id')
+                ->join('inventory_component_transfers','inventory_component_transfers.id','=','site_transfer_bills.inventory_component_transfer_id')
+                ->join('vendors','vendors.id','=','inventory_component_transfers.vendor_id')
+                ->join('inventory_components','inventory_components.id','inventory_component_transfers.inventory_component_id')
+                ->where('inventory_components.project_site_id',$projectSiteId)
+                ->where('site_transfer_bill_payments.paid_from_slug','bank')
+                ->where('site_transfer_bill_payments.bank_id',$request['bank_id'])
+                ->where('vendors.company','ilike','%'.$search_name.'%')
+                ->select('site_transfer_bill_payments.id as payment_id','site_transfer_bill_payments.amount as amount'
+                    ,'site_transfer_bill_payments.created_at as created_at'
+                    ,'inventory_components.project_site_id as project_site_id'
+                    ,'vendors.company as name','payment_types.name as payment_name'
+                    ,'site_transfer_bill_payments.reference_number as reference_number')->get()->toArray();
+
+            $assetMaintenancePayments = AssetMaintenanceBillPayment::join('asset_maintenance_bills','asset_maintenance_bills.id','asset_maintenance_bill_payments.asset_maintenance_bill_id')
+                ->join('payment_types','payment_types.id','=','asset_maintenance_bill_payments.payment_id')
+                ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
+                ->join('asset_maintenance_vendor_relation','asset_maintenance_vendor_relation.asset_maintenance_id','=','asset_maintenance.id')
+                ->where('asset_maintenance_vendor_relation.is_approved',true)
+                ->join('vendors','vendors.id','=','asset_maintenance_vendor_relation.vendor_id')
+                ->where('asset_maintenance.project_site_id',$projectSiteId)
+                ->where('vendors.company','ilike','%'.$search_name.'%')
+                ->where('asset_maintenance_bill_payments.paid_from_slug','bank')
+                ->where('asset_maintenance_bill_payments.bank_id',$request['bank_id'])
+                ->select('asset_maintenance_bill_payments.id as payment_id','asset_maintenance_bill_payments.amount as amount'
+                    ,'asset_maintenance_bill_payments.created_at as created_at'
+                    ,'asset_maintenance.project_site_id as project_site_id'
+                    ,'vendors.company as name'
+                    ,'payment_types.name as payment_name'
+                    ,'asset_maintenance_bill_payments.reference_number as reference_number')->get()->toArray();
+
+            $subcontractorBillTransactions = SubcontractorBillTransaction::join('subcontractor_bills','subcontractor_bills.id','=','subcontractor_bill_transactions.subcontractor_bills_id')
+                ->join('payment_types','payment_types.id','=','subcontractor_bill_transactions.payment_type_id')
+                ->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
+                ->where('subcontractor_structure.project_site_id',$projectSiteId)
+                ->where('subcontractor_bill_transactions.paid_from_slug','bank')
+                ->where('subcontractor_bill_transactions.bank_id',$request['bank_id'])
+                ->join('subcontractor','subcontractor.id','=','subcontractor_structure.subcontractor_id')
+                ->where('subcontractor.company_name','ilike','%'.$search_name.'%')
+                ->select('subcontractor_bill_transactions.id as payment_id','subcontractor_bill_transactions.subtotal as amount'
+                    ,'subcontractor_bill_transactions.created_at as created_at'
+                    ,'subcontractor_structure.project_site_id as project_site_id'
+                    ,'subcontractor.company_name as name'
+                    ,'payment_types.name as payment_name')->get()->toArray();
+
+            $salesBillReconcile = BillReconcileTransaction::join('bills','bills.id','=','bill_reconcile_transactions.bill_id')
+                ->join('payment_types','payment_types.id','=','bill_reconcile_transactions.payment_type_id')
+                ->join('quotations','quotations.id','=','bills.quotation_id')
+                ->join('project_sites','project_sites.id','=','quotations.project_site_id')
+                ->where('quotations.project_site_id',$projectSiteId)
+                ->where('bill_reconcile_transactions.paid_from_slug','bank')
+                ->where('bill_reconcile_transactions.bank_id',$request['bank_id'])
+                ->select('bill_reconcile_transactions.id as payment_id','bill_reconcile_transactions.amount as amount'
+                    ,'bill_reconcile_transactions.created_at as created_at'
+                    ,'quotations.project_site_id as project_site_id'
+                    ,'project_sites.name as name'
+                    ,'payment_types.name as payment_name'
+                    ,'bill_reconcile_transactions.reference_number as reference_number')->get()->toArray();
+
+            $subcontractorBillReconcile = SubcontractorBillReconcileTransaction::join('subcontractor_bills','subcontractor_bills.id','=','subcontractor_bill_reconcile_transactions.subcontractor_bill_id')
+                ->join('payment_types','payment_types.id','=','subcontractor_bill_reconcile_transactions.payment_type_id')
+                ->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
+                ->where('subcontractor_structure.project_site_id',$projectSiteId)
+                ->where('subcontractor_bill_reconcile_transactions.paid_from_slug','bank')
+                ->where('subcontractor_bill_reconcile_transactions.bank_id',$request['bank_id'])
+                ->join('subcontractor','subcontractor.id','=','subcontractor_structure.subcontractor_id')
+                ->where('subcontractor.company_name','ilike','%'.$search_name.'%')
+                ->select('subcontractor_bill_reconcile_transactions.id as payment_id','subcontractor_bill_reconcile_transactions.amount as amount'
+                    ,'subcontractor_bill_reconcile_transactions.created_at as created_at'
+                    ,'subcontractor_structure.project_site_id as project_site_id'
+                    ,'subcontractor.company_name as name'
+                    ,'payment_types.name as payment_name'
+                    ,'subcontractor_bill_reconcile_transactions.reference_number as reference_number')->get()->toArray();
+
+            $bankTransactions = BankInfoTransaction::join('users','users.id','=','bank_info_transactions.user_id')
+                                            ->join('payment_types','payment_types.id','=','bank_info_transactions.payment_type_id')
+                                            ->where('bank_info_transactions.bank_id',$request['bank_id'])
+                                            ->whereRaw("CONCAT(users.first_name,' ',users.last_name) ilike '%".$request->search_name."%'")
+                                            ->select('bank_info_transactions.id as payment_id','bank_info_transactions.amount as amount'
+                                                ,'bank_info_transactions.created_at as created_at'
+                                                ,'payment_types.name as payment_name'
+                                                ,DB::raw("CONCAT(users.last_name,' ',users.first_name) AS name")
+                                                ,'bank_info_transactions.reference_number as reference_number')->get()->toArray();
+
+            $indirectCashPayments = ProjectSiteIndirectExpense::join('project_sites','project_sites.id','=','project_site_indirect_expenses.project_site_id')
+                ->where('project_site_indirect_expenses.project_site_id',$projectSiteId)
+                ->join('payment_types','payment_types.id','=','project_site_indirect_expenses.payment_type_id')
+                ->where('project_site_indirect_expenses.paid_from_slug','bank')
+                ->where('project_site_indirect_expenses.bank_id',$request['bank_id'])
+                ->groupBy('project_site_indirect_expenses.id')
+                ->groupBy('project_sites.id')
+                ->groupBy('payment_types.id')
+                ->select('project_site_indirect_expenses.id as payment_id'
+                    ,DB::raw("SUM(project_site_indirect_expenses.tds + project_site_indirect_expenses.gst) AS amount")/*'project_site_indirect_expenses.tds as amount'*/
+                    ,'project_site_indirect_expenses.created_at as created_at'
+                    ,'project_site_indirect_expenses.project_site_id as project_site_id'
+                    ,'project_sites.name as name'
+                    ,'payment_types.name as payment_name'
+                    ,'project_site_indirect_expenses.reference_number as reference_number')->get()->toArray();
+
+
+            $cashPaymentData = array_merge($bankTransactions,$purchaseOrderAdvancePayments,$purchaseOrderBillPayments,$subcontractorAdvancePayments,$projectSiteAdvancePayments,$siteTransferPayments,$assetMaintenancePayments,$subcontractorBillReconcile,$salesBillReconcile,$subcontractorBillTransactions,$indirectCashPayments);
+            usort($cashPaymentData, function($a, $b) {
+                return $a['created_at'] < $b['created_at'];
+            });
+            $iTotalRecords = count($cashPaymentData);
             $records = array();
             $records['data'] = array();
             if($request->length == -1){
@@ -264,13 +442,14 @@ class BankController extends Controller
             }else{
                 $length = $request->length;
             }
-            for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($bankTransactions); $iterator++,$pagination++ ){
+            for($iterator = 0,$pagination = $request->start; $iterator < $length && $pagination < count($cashPaymentData); $iterator++,$pagination++ ){
                 $records['data'][] = [
-                    date('d M Y',strtotime($bankTransactions[$pagination]['created_at'])),
-                    $bankTransactions[$pagination]->user->first_name,
-                    $bankTransactions[$pagination]['amount'],
-                    $bankTransactions[$pagination]->paymentType->name,
-                    $bankTransactions[$pagination]['reference_number']
+                    date('j M Y',strtotime($cashPaymentData[$pagination]['created_at'])),
+                    array_key_exists('project_site_id',$cashPaymentData[$pagination]) ? "Paid" : "Received",
+                    ucwords($cashPaymentData[$pagination]['name']),
+                    $cashPaymentData[$pagination]['amount'],
+                    $cashPaymentData[$pagination]['payment_name'],
+                    array_key_exists('reference_number',$cashPaymentData[$pagination]) ? $cashPaymentData[$pagination]['reference_number'] : '-'
                 ];
             }
             $records["draw"] = intval($request->draw);

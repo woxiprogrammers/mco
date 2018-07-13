@@ -9,6 +9,7 @@
 namespace App\Http\Controllers\CustomTraits;
 
 
+use App\AssetMaintenanceBillPayment;
 use App\BillReconcileTransaction;
 use App\BillTransaction;
 use App\PeticashSalaryTransaction;
@@ -18,9 +19,12 @@ use App\PeticashTransactionType;
 use App\Project;
 use App\ProjectSite;
 use App\ProjectSiteAdvancePayment;
+use App\ProjectSiteIndirectExpense;
 use App\PurcahsePeticashTransaction;
 use App\PurchaseOrderAdvancePayment;
+use App\SiteTransferBillPayment;
 use App\SubcontractorAdvancePayment;
+use App\SubcontractorBillReconcileTransaction;
 use App\SubcontractorBillTransaction;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
@@ -69,7 +73,40 @@ trait PeticashTrait{
                 ->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
                 ->where('subcontractor_structure.project_site_id',$projectSiteId)
                 ->where('subcontractor_bill_transactions.paid_from_slug','cash')->sum('subcontractor_bill_transactions.subtotal');
-            $remainingAmount = ($allocatedAmount + $projectSiteAdvancedAmount + $salesBillCashAmount + $salesBillTransactions) - ($totalSalaryAmount + $totalAdvanceAmount + $totalPurchaseAmount + $cashPurchaseOrderAdvancePaymentTotal + $cashSubcontractorAdvancePaymentTotal + $cashSubcontractorBillTransactionTotal);
+
+            $subcontractorBillReconcile = SubcontractorBillReconcileTransaction::join('subcontractor_bills','subcontractor_bills.id','=','subcontractor_bill_reconcile_transactions.subcontractor_bill_id')
+                ->join('payment_types','payment_types.id','=','subcontractor_bill_reconcile_transactions.payment_type_id')
+                ->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
+                ->where('subcontractor_structure.project_site_id',$projectSiteId)
+                ->where('subcontractor_bill_reconcile_transactions.paid_from_slug','cash')
+                ->sum('amount');
+
+            $siteTransferCashAmount = SiteTransferBillPayment::join('site_transfer_bills','site_transfer_bills.id','=','site_transfer_bill_payments.site_transfer_bill_id')
+                ->join('inventory_component_transfers','inventory_component_transfers.id','=','site_transfer_bills.inventory_component_transfer_id')
+                ->join('inventory_components','inventory_components.id','inventory_component_transfers.inventory_component_id')
+                ->where('site_transfer_bill_payments.paid_from_slug','cash')
+                ->where('inventory_components.project_site_id',$projectSiteId)
+                ->sum('site_transfer_bill_payments.amount');
+
+            $assetMaintenanceCashAmount = AssetMaintenanceBillPayment::join('asset_maintenance_bills','asset_maintenance_bills.id','asset_maintenance_bill_payments.asset_maintenance_bill_id')
+                ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
+                ->where('asset_maintenance.project_site_id',$projectSiteId)
+                ->where('asset_maintenance_bill_payments.paid_from_slug','cash')
+                ->sum('asset_maintenance_bill_payments.amount');
+
+            $indirectGSTCashAmount = ProjectSiteIndirectExpense::where('project_site_id',$projectSiteId)
+                ->where('paid_from_slug','cash')->sum('gst');
+
+            $indirectTDSCashAmount = ProjectSiteIndirectExpense::where('project_site_id',$projectSiteId)
+                ->where('paid_from_slug','cash')->sum('tds');
+
+            $remainingAmount = ($allocatedAmount + $projectSiteAdvancedAmount + $salesBillCashAmount + $salesBillTransactions)
+                                - ($totalSalaryAmount + $totalAdvanceAmount + $totalPurchaseAmount
+                                    + $cashPurchaseOrderAdvancePaymentTotal + $cashSubcontractorAdvancePaymentTotal
+                                    + $cashSubcontractorBillTransactionTotal + $subcontractorBillReconcile
+                                    + $siteTransferCashAmount + $assetMaintenanceCashAmount
+                                    + $indirectGSTCashAmount + $indirectTDSCashAmount);
+
         }catch (\Exception $e){
             $data = [
                 'action' => 'Get Peticash sitewise statistics',
@@ -139,7 +176,31 @@ trait PeticashTrait{
                     ->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
                     ->where('subcontractor_structure.project_site_id',$projectSiteId)
                     ->where('subcontractor_bill_transactions.paid_from_slug','cash')->sum('subcontractor_bill_transactions.subtotal');
-                $remainingAmount = ($allocatedAmount + $projectSiteAdvancedAmount + $salesBillCashAmount + $salesBillTransactions) - ($totalSalaryAmount + $totalAdvanceAmount + $totalPurchaseAmount + $cashPurchaseOrderAdvancePaymentTotal + $cashSubcontractorAdvancePaymentTotal + $cashSubcontractorBillTransactionTotal);
+                $subcontractorBillReconcile = SubcontractorBillReconcileTransaction::join('subcontractor_bills','subcontractor_bills.id','=','subcontractor_bill_reconcile_transactions.subcontractor_bill_id')
+                    ->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
+                    ->where('subcontractor_structure.project_site_id',$projectSiteId)
+                    ->where('subcontractor_bill_reconcile_transactions.paid_from_slug','cash')
+                    ->sum('subcontractor_bill_reconcile_transactions.amount');
+                $siteTransferCashAmount = SiteTransferBillPayment::join('site_transfer_bills','site_transfer_bills.id','=','site_transfer_bill_payments.site_transfer_bill_id')
+                    ->join('inventory_component_transfers','inventory_component_transfers.id','=','site_transfer_bills.inventory_component_transfer_id')
+                    ->join('inventory_components','inventory_components.id','inventory_component_transfers.inventory_component_id')
+                    ->where('site_transfer_bill_payments.paid_from_slug','cash')
+                    ->where('inventory_components.project_site_id',$projectSiteId)
+                    ->sum('site_transfer_bill_payments.amount');
+                $assetMaintenanceCashAmount = AssetMaintenanceBillPayment::join('asset_maintenance_bills','asset_maintenance_bills.id','asset_maintenance_bill_payments.asset_maintenance_bill_id')
+                    ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
+                    ->where('asset_maintenance.project_site_id',$projectSiteId)
+                    ->where('asset_maintenance_bill_payments.paid_from_slug','cash')
+                    ->sum('asset_maintenance_bill_payments.amount');
+                $indirectGSTCashAmount = ProjectSiteIndirectExpense::where('project_site_id',$projectSiteId)
+                    ->where('paid_from_slug','cash')->sum('gst');
+                $indirectTDSCashAmount = ProjectSiteIndirectExpense::where('project_site_id',$projectSiteId)
+                    ->where('paid_from_slug','cash')->sum('tds');
+                $remainingAmount = round((($allocatedAmount + $projectSiteAdvancedAmount + $salesBillCashAmount + $salesBillTransactions) -
+                    ($totalSalaryAmount + $totalAdvanceAmount + $totalPurchaseAmount + $cashPurchaseOrderAdvancePaymentTotal
+                        + $cashSubcontractorAdvancePaymentTotal + $cashSubcontractorBillTransactionTotal
+                        + $subcontractorBillReconcile + $siteTransferCashAmount + $assetMaintenanceCashAmount
+                        + $indirectGSTCashAmount + $indirectTDSCashAmount)),3);
                 $allocatedAmount = $allocatedAmount + $salesBillCashAmount + $salesBillTransactions + $projectSiteAdvancedAmount;
                 $projectName = Project::join('project_sites','projects.id','=','project_sites.project_id')
                                         ->where('project_sites.id', $projectSiteId)

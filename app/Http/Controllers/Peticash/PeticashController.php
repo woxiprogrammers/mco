@@ -6,6 +6,7 @@ use App\Asset;
 use App\AssetMaintenanceBillPayment;
 use App\AssetType;
 use App\BankInfo;
+use App\BillReconcileTransaction;
 use App\Category;
 use App\CategoryMaterialRelation;
 use App\Client;
@@ -34,6 +35,7 @@ use App\PeticashTransactionType;
 use App\Project;
 use App\ProjectSite;
 use App\ProjectSiteAdvancePayment;
+use App\ProjectSiteIndirectExpense;
 use App\PurcahsePeticashTransaction;
 use App\PurchaseOrderAdvancePayment;
 use App\PurchaseOrderPayment;
@@ -45,6 +47,8 @@ use App\QuotationStatus;
 use App\Role;
 use App\SiteTransferBillPayment;
 use App\SubcontractorAdvancePayment;
+use App\SubcontractorBill;
+use App\SubcontractorBillReconcileTransaction;
 use App\SubcontractorBillTransaction;
 use App\Unit;
 use App\User;
@@ -54,6 +58,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
@@ -71,7 +76,8 @@ class PeticashController extends Controller
             $masteraccountAmount = PeticashSiteTransfer::where('project_site_id','=',0)->sum('amount');
             $sitewiseaccountAmount = PeticashSiteTransfer::where('project_site_id','!=',0)->sum('amount');
             $balance = $masteraccountAmount - $sitewiseaccountAmount;
-            return view('peticash.master-peticash-account.manage')->with(compact('masteraccountAmount','sitewiseaccountAmount','balance'));
+            return view('peticash.master-peticash-account.manage')
+                ->with(compact('masteraccountAmount','sitewiseaccountAmount','balance'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Peticash Manage view',
@@ -930,11 +936,66 @@ class PeticashController extends Controller
     public function masterAccountListing(Request $request){
         try{
             $user = Auth::user();
-            $masterAccountData = PeticashSiteTransfer::where('project_site_id','=', 0)->orderBy('created_at','desc')->get();
+            $search_from = null;
+            $search_to = null;
+            $status_id = "all";
+            if($request->has('searchFrom')) {
+                $search_from = $request->searchFrom;
+            }
+            if($request->has('searchTo')) {
+                $search_to = $request->searchTo;
+            }
+            if($request->has('status')) {
+                $status_id = $request->status;
+            }
+            $filterFlag = true;
+            $masterAccountData = array();
+            $ids = PeticashSiteTransfer::where('project_site_id','=', 0)->pluck('id')->toArray();
+
+            if ($search_from != null && $search_from != "" && $filterFlag == true) {
+                $ids = PeticashSiteTransfer::join('users','users.id','peticash_site_transfers.received_from_user_id')
+                    ->whereRaw("CONCAT(users.first_name,' ',users.last_name) ilike '%".$search_from."%'")
+                    ->whereIn('peticash_site_transfers.id', $ids)
+                    ->where('peticash_site_transfers.project_site_id','=', 0)
+                    ->pluck('peticash_site_transfers.id')->toArray();
+                if (count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+            if ($search_to != null && $search_to != "" && $filterFlag == true) {
+                $ids = PeticashSiteTransfer::join('users','users.id','peticash_site_transfers.user_id')
+                    ->whereRaw("CONCAT(users.first_name,' ',users.last_name) ilike '%".$search_to."%'")
+                    ->whereIn('peticash_site_transfers.id', $ids)
+                    ->where('peticash_site_transfers.project_site_id','=', 0)
+                    ->pluck('peticash_site_transfers.id')->toArray();
+                if (count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+            if ($status_id != "all" && $status_id != "" && $filterFlag == true) {
+                $ids = PeticashSiteTransfer::where('peticash_site_transfers.paid_from_slug',$status_id)
+                    ->whereIn('peticash_site_transfers.id', $ids)
+                    ->where('peticash_site_transfers.project_site_id','=', 0)
+                    ->pluck('peticash_site_transfers.id')->toArray();
+                if (count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+            if ($filterFlag) {
+                $masterAccountData = PeticashSiteTransfer::
+                    whereIn('peticash_site_transfers.id', $ids)
+                    ->where('project_site_id','=', 0)->orderBy('created_at','desc')->get();
+            }
+            //$masterAccountData = PeticashSiteTransfer::where('project_site_id','=', 0)->orderBy('created_at','desc')->get();
             // Here We are considering (project_site_id = 0) => It's Master Peticash Account
             $total = 0;
             if ($request->has('get_total')) {
-                $total = $masterAccountData->sum('amount');
+                if ($filterFlag) {
+                    $total = $masterAccountData->sum('amount');
+                }
                 $records['total'] = $total;
             } else {
                 $iTotalRecords = count($masterAccountData);
@@ -2005,8 +2066,6 @@ class PeticashController extends Controller
             if ($request->has('search_name')) {
                 $search_name = $request->search_name;
             }
-
-
             $purchaseOrderAdvancePayments = PurchaseOrderAdvancePayment::join('purchase_orders','purchase_orders.id','purchase_order_advance_payments.purchase_order_id')
                                                                             ->join('vendors','vendors.id','=','purchase_orders.vendor_id')
                                                                             ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
@@ -2038,6 +2097,7 @@ class PeticashController extends Controller
                                                                                 ,'subcontractor.company_name as name')->get()->toArray();
 
             $projectSiteAdvancePayments = ProjectSiteAdvancePayment::join('project_sites','project_sites.id','=','project_site_advance_payments.project_site_id')
+                                                                        ->where('project_site_advance_payments.paid_from_slug','cash')
                                                                         ->where('project_site_advance_payments.project_site_id',$projectSiteId)
                                                                         ->where('project_sites.name','ilike','%'.$search_name.'%')
                                                                         ->select('project_site_advance_payments.id as payment_id'
@@ -2050,6 +2110,7 @@ class PeticashController extends Controller
                                                                 ->join('inventory_component_transfers','inventory_component_transfers.id','=','site_transfer_bills.inventory_component_transfer_id')
                                                                 ->join('vendors','vendors.id','=','inventory_component_transfers.vendor_id')
                                                                 ->join('inventory_components','inventory_components.id','inventory_component_transfers.inventory_component_id')
+                                                                ->where('site_transfer_bill_payments.paid_from_slug','cash')
                                                                 ->where('inventory_components.project_site_id',$projectSiteId)
                                                                 ->where('vendors.company','ilike','%'.$search_name.'%')
                                                                 ->select('site_transfer_bill_payments.id as payment_id','site_transfer_bill_payments.amount as amount'
@@ -2064,6 +2125,7 @@ class PeticashController extends Controller
                                             ->join('vendors','vendors.id','=','asset_maintenance_vendor_relation.vendor_id')
                                             ->where('asset_maintenance.project_site_id',$projectSiteId)
                                             ->where('vendors.company','ilike','%'.$search_name.'%')
+                                            ->where('asset_maintenance_bill_payments.paid_from_slug','cash')
                                             ->select('asset_maintenance_bill_payments.id as payment_id','asset_maintenance_bill_payments.amount as amount'
                                                 ,'asset_maintenance_bill_payments.created_at as created_at'
                                                 ,'asset_maintenance.project_site_id as project_site_id'
@@ -2081,7 +2143,39 @@ class PeticashController extends Controller
                     ,'subcontractor_structure.project_site_id as project_site_id'
                     ,'subcontractor.company_name as name')->get()->toArray();
 
-            $cashPaymentData = array_merge($purchaseOrderAdvancePayments,$purchaseOrderBillPayments,$subcontractorAdvancePayments,$projectSiteAdvancePayments,$siteTransferPayments,$assetMaintenancePayments,$subcontractorCashBillTransactions);
+            $salesBillReconcileCash = BillReconcileTransaction::join('bills','bills.id','=','bill_reconcile_transactions.bill_id')
+                                            ->join('quotations','quotations.id','=','bills.quotation_id')
+                                            ->join('project_sites','project_sites.id','=','quotations.project_site_id')
+                                            ->where('quotations.project_site_id',$projectSiteId)
+                                            ->where('bill_reconcile_transactions.paid_from_slug','cash')
+                                            ->select('bill_reconcile_transactions.id as payment_id','bill_reconcile_transactions.amount as amount'
+                                                ,'bill_reconcile_transactions.created_at as created_at'
+                                                ,'quotations.project_site_id as project_site_id'
+                                                ,'project_sites.name as name')->get()->toArray();
+
+            $subcontractorBillReconcileCash = SubcontractorBillReconcileTransaction::join('subcontractor_bills','subcontractor_bills.id','=','subcontractor_bill_reconcile_transactions.subcontractor_bill_id')
+                ->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
+                ->where('subcontractor_structure.project_site_id',$projectSiteId)
+                ->where('subcontractor_bill_reconcile_transactions.paid_from_slug','cash')
+                ->join('subcontractor','subcontractor.id','=','subcontractor_structure.subcontractor_id')
+                ->where('subcontractor.company_name','ilike','%'.$search_name.'%')
+                ->select('subcontractor_bill_reconcile_transactions.id as payment_id','subcontractor_bill_reconcile_transactions.amount as amount'
+                    ,'subcontractor_bill_reconcile_transactions.created_at as created_at'
+                    ,'subcontractor_structure.project_site_id as project_site_id'
+                    ,'subcontractor.company_name as name')->get()->toArray();
+
+            $indirectCashPayments = ProjectSiteIndirectExpense::join('project_sites','project_sites.id','=','project_site_indirect_expenses.project_site_id')
+                ->where('project_site_indirect_expenses.project_site_id',$projectSiteId)
+                ->where('project_site_indirect_expenses.paid_from_slug','cash')
+                ->groupBy('project_site_indirect_expenses.id')
+                ->groupBy('project_sites.id')
+                ->select('project_site_indirect_expenses.id as payment_id'
+                    ,DB::raw("sum(project_site_indirect_expenses.gst + project_site_indirect_expenses.tds) AS amount")
+                    ,'project_site_indirect_expenses.created_at as created_at'
+                    ,'project_site_indirect_expenses.project_site_id as project_site_id'
+                    ,'project_sites.name as name')->get()->toArray();
+
+            $cashPaymentData = array_merge($purchaseOrderAdvancePayments,$purchaseOrderBillPayments,$subcontractorAdvancePayments,$projectSiteAdvancePayments,$siteTransferPayments,$assetMaintenancePayments,$subcontractorCashBillTransactions,$salesBillReconcileCash,$subcontractorBillReconcileCash,$indirectCashPayments);
             $total = 0;
             if ($request->has('get_total')) {
                 foreach($cashPaymentData as $salarytxn) {
@@ -2090,7 +2184,7 @@ class PeticashController extends Controller
                 $records['total'] = $total;
             } else {
                 usort($cashPaymentData, function($a, $b) {
-                    return $a['created_at'] < $b['created_at'];
+                    return $a['created_at'] > $b['created_at'];
                 });
                 $iTotalRecords = count($cashPaymentData);
                 $records = array();
@@ -2098,8 +2192,8 @@ class PeticashController extends Controller
                 $end = $request->length < 0 ? count($cashPaymentData) : $request->length;
                 for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($cashPaymentData); $iterator++,$pagination++ ){
                     $records['data'][] = [
-                        $iterator+1,
-                        ProjectSite::where('id',$cashPaymentData[$pagination]['project_site_id'])->pluck('name')->first(),
+                        ($iterator+1),
+                        Project::join('project_sites','project_sites.project_id','=','projects.id')->where('project_sites.id',$cashPaymentData[$pagination]['project_site_id'])->pluck('projects.name')->first(),
                         ucwords($cashPaymentData[$pagination]['name']),
                         $cashPaymentData[$pagination]['amount'],
                         date('j M Y',strtotime($cashPaymentData[$pagination]['created_at'])),
