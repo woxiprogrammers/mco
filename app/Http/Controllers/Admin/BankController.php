@@ -285,6 +285,7 @@ class BankController extends Controller
                     ,'vendors.company as name'
                     ,'payment_types.name as payment_name'
                     ,'purchase_order_advance_payments.reference_number as reference_number')->get()->toArray();
+
             $purchaseOrderBillPayments = PurchaseOrderPayment::join('purchase_order_bills','purchase_order_bills.id','=','purchase_order_payments.purchase_order_bill_id')
                 ->join('payment_types','payment_types.id','=','purchase_order_payments.payment_id')
                 ->join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
