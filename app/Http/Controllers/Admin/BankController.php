@@ -9,6 +9,7 @@ use App\BillReconcileTransaction;
 use App\PaymentType;
 use App\ProjectSite;
 use App\ProjectSiteAdvancePayment;
+use App\ProjectSiteIndirectExpense;
 use App\PurchaseOrderAdvancePayment;
 use App\PurchaseOrderPayment;
 use App\SiteTransferBillPayment;
