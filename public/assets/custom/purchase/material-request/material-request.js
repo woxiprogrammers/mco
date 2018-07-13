@@ -204,6 +204,7 @@ $(document).ready(function(){
                         var iterator = parseInt(iterator) + 1;
                         $('#iterator').val(iterator);
                         $('#component_id').val(null);
+                        $('#files').val(null);
                     },
                     error: function(errorData){
 
@@ -228,6 +229,7 @@ $(document).ready(function(){
                 var iterator = parseInt(iterator) + 1;
                 $('#iterator').val(iterator);
                 $('#component_id').val(null);
+                $('#files').val(null);
             }
         }
     });
@@ -276,6 +278,7 @@ $(document).ready(function(){
             var iterator = parseInt(iterator) + 1;
             $('#iterator').val(iterator);
             $('#component_id').val(null);
+            $('#files').val(null);
         }
     });
 

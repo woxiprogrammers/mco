@@ -139,7 +139,7 @@ trait PeticashTrait{
                     ->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
                     ->where('subcontractor_structure.project_site_id',$projectSiteId)
                     ->where('subcontractor_bill_transactions.paid_from_slug','cash')->sum('subcontractor_bill_transactions.subtotal');
-                $remainingAmount = ($allocatedAmount + $projectSiteAdvancedAmount + $salesBillCashAmount + $salesBillTransactions) - ($totalSalaryAmount + $totalAdvanceAmount + $totalPurchaseAmount + $cashPurchaseOrderAdvancePaymentTotal + $cashSubcontractorAdvancePaymentTotal + $cashSubcontractorBillTransactionTotal);
+                $remainingAmount = round((($allocatedAmount + $projectSiteAdvancedAmount + $salesBillCashAmount + $salesBillTransactions) - ($totalSalaryAmount + $totalAdvanceAmount + $totalPurchaseAmount + $cashPurchaseOrderAdvancePaymentTotal + $cashSubcontractorAdvancePaymentTotal + $cashSubcontractorBillTransactionTotal)),3);
                 $allocatedAmount = $allocatedAmount + $salesBillCashAmount + $salesBillTransactions + $projectSiteAdvancedAmount;
                 $projectName = Project::join('project_sites','projects.id','=','project_sites.project_id')
                                         ->where('project_sites.id', $projectSiteId)

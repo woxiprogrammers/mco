@@ -146,30 +146,32 @@
                                             </div>--}}
                                             <table class="table table-striped table-bordered table-hover" id="projectTable">
                                                 <thead>
-                                                <th scope="col" style="width:250px !important">
-                                                    Project
-                                                </th>
-                                                <th>
-                                                    Allocated Amount
-                                                </th>
-                                                <th>
-                                                    Balance Amount
-                                                </th>
+                                                    <tr>
+                                                        <th scope="col" style="width:250px !important">
+                                                            Project
+                                                        </th>
+                                                        <th>
+                                                            Allocated Amount
+                                                        </th>
+                                                        <th>
+                                                            Balance Amount
+                                                        </th>
+                                                    </tr>
                                                 </thead>
                                                 <tbody>
-                                                @foreach($statistics as $statistic)
-                                                    <tr>
-                                                        <td>
-                                                            {{$statistic['project']}}
-                                                        </td>
-                                                        <td>
-                                                            {{$statistic['allocatedAmount']}}
-                                                        </td>
-                                                        <td>
-                                                            {{$statistic['remainingAmount']}}
-                                                        </td>
-                                                    </tr>
-                                                @endforeach
+                                                    @foreach($statistics as $statistic)
+                                                        <tr>
+                                                            <td>
+                                                                {{$statistic['project']}}
+                                                            </td>
+                                                            <td>
+                                                                {{$statistic['allocatedAmount']}}
+                                                            </td>
+                                                            <td>
+                                                                {{$statistic['remainingAmount']}}
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
                                                 </tbody>
                                             </table>
                                         </div>
