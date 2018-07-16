@@ -834,7 +834,7 @@ trait BillTrait{
             $billIterator = 0;
             $cancelBillStatusId = BillStatus::where('slug','cancelled')->pluck('id')->first();
             foreach($allBillIds as $key => $billId){
-                $billStatusId = Bill::where('id',$billId)->pluck('bill_status_id');
+                $billStatusId = Bill::where('id',$billId)->pluck('bill_status_id')->first();
                     if($billStatusId != $cancelBillStatusId){
                         if($billId == $bill['id']){
                             $data['currentBillID'] = $billIterator+1;

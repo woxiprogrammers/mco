@@ -77,7 +77,6 @@ use InventoryTrait;
             $projectSites = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
                                             ->join('clients','clients.id','=','projects.client_id')
                                             ->where('projects.is_active',true)
-                                            ->where('project_sites.name','!=',env('OFFICE_PROJECT_SITE_NAME'))
                                             ->select('project_sites.id','project_sites.name as project_site_name','projects.name as project_name','clients.company')->get()->toArray();
             $iterator = 0;
             foreach($projectSites as $key => $projectSite){

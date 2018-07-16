@@ -478,7 +478,7 @@
                                                                 <label class="control-label pull-right">Rent</label>
                                                             </div>
                                                             <div class="col-md-9">
-                                                                <input type="text" name="rate_per_unit" id="rent_id" class="form-control" placeholder="Enter Rent" value="{!! $amount !!}">
+                                                                <input type="text" name="rate_per_unit" id="rent_id" class="form-control" placeholder="Enter Rent" value="{!! $amount['rate_per_unit'] !!}">
                                                             </div>
                                                         </div>
                                                         <div class="row form-group">
