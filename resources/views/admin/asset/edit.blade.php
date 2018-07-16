@@ -165,22 +165,42 @@
                                                                     <input type="number" class="form-control" id="rent_per_day" name="rent_per_day" value="{!! $asset['rent_per_day'] !!}" onkeyup="assignRent(this)">
                                                                 </div>
                                                             </div>
-                                                            <div class="form-group row" id="maintenancePeriodDiv">
-                                                                <div class="col-md-3" style="text-align: right">
-                                                                    <label for="number" class="control-label">Maintenance Period</label>
-                                                                    <span>*</span>
+                                                            @if($asset->assetTypes->slug == 'other')
+                                                                <div class="form-group row" id="maintenancePeriodDiv" hidden>
+                                                                    <div class="col-md-3" style="text-align: right">
+                                                                        <label for="number" class="control-label">Maintenance Period</label>
+                                                                        <span>*</span>
+                                                                    </div>
+                                                                    <div class="col-md-4">
+                                                                        <input type="number" class="form-control" id="maintenance_period" name="maintenance_period" value="{!! $asset['maintenance_period'] !!}">
+                                                                    </div>
+                                                                    <div class="col-md-2">
+                                                                        <select class="form-control" id="maintenance_period_type" name="maintenance_period_type">
+                                                                            <option value=""> Select type </option>
+                                                                            <option value="day_wise">Day</option>
+                                                                            <option value="hour_wise">Hrs</option>
+                                                                        </select>
+                                                                    </div>
                                                                 </div>
-                                                                <div class="col-md-4">
-                                                                    <input type="number" class="form-control" id="maintenance_period" name="maintenance_period" value="{!! $asset['maintenance_period'] !!}">
+                                                            @else
+                                                                <div class="form-group row" id="maintenancePeriodDiv">
+                                                                    <div class="col-md-3" style="text-align: right">
+                                                                        <label for="number" class="control-label">Maintenance Period</label>
+                                                                        <span>*</span>
+                                                                    </div>
+                                                                    <div class="col-md-4">
+                                                                        <input type="number" class="form-control" id="maintenance_period" name="maintenance_period" value="{!! $asset['maintenance_period'] !!}">
+                                                                    </div>
+                                                                    <div class="col-md-2">
+                                                                        <select class="form-control" id="maintenance_period_type" name="maintenance_period_type">
+                                                                            <option value=""> Select type </option>
+                                                                            <option value="day_wise">Day</option>
+                                                                            <option value="hour_wise">Hrs</option>
+                                                                        </select>
+                                                                    </div>
                                                                 </div>
-                                                                <div class="col-md-2">
-                                                                    <select class="form-control" id="maintenance_period_type" name="maintenance_period_type">
-                                                                        <option value=""> Select type </option>
-                                                                        <option value="day_wise">Day</option>
-                                                                        <option value="hour_wise">Hrs</option>
-                                                                    </select>
-                                                                </div>
-                                                            </div>
+                                                            @endif
+
                                                             <div class="form-group">
                                                                 <div class="row">
                                                                     <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12" style="margin-left: 20%"> </div>
