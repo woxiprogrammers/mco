@@ -450,11 +450,6 @@
             $('#litre_per_unit').rules('remove');
             $('#rent').val($('#rent_per_day').val());
         });
-        if($('#select-type').val() == 4){
-            $('#quantity').prop('readonly',false);
-        }else{
-            $('#quantity').prop('readonly',true);
-        }
     </script>
     <script>
         var date=new Date();
@@ -471,7 +466,9 @@
                 });
                 $('#electricity_per_unit').rules('remove');
                 $('#qty').val(1);
+                $('#qty').prop('readonly',true);
                 $('#quantity').val(1);
+                $('#quantity').prop('readonly',true);
                 $('#exp_date').show();
                 $('#exp_date').rules('add', {
                     required: true   // set a new rule
@@ -484,6 +481,7 @@
                 });
                 $('#litre_per_unit').rules('remove');
                 $('#qty').val(1);
+                $('#qty').prop('readonly',true);
                 $('#quantity').val(1);
                 $('#exp_date').show();
                 $('#exp_date').rules('add', {
@@ -500,15 +498,18 @@
                 $('#lpu').show();
                 $('#exp_date').show();
                 $('#qty').val(1);
+                $('#qty').prop('readonly',true);
                 $('#quantity').val(1);
             }else if(asset_type == 4){
+                $('#qty').val('');
+                $('#qty').prop('readonly',false);
                 $('#espu').hide();
                 $('#electricity_per_unit').rules('remove');
                 $('#litre_per_unit').rules('remove');
                 $('#lpu').hide();
                 $('#exp_date').hide();
                 $('#exp_date').rules('remove');
-                $('#qty').val('');
+
             }else{
                 $('#electricity_per_unit').rules('remove');
                 $('#litre_per_unit').rules('remove');
@@ -516,6 +517,7 @@
                 $('#lpu').hide();
                 $('#exp_date').hide();
                 $('#exp_date').rules('remove');
+                $('#qty').prop('readonly',true);
             }
         });
         var  CreateInventoryComponentTransfer = function () {

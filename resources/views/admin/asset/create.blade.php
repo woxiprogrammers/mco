@@ -236,6 +236,7 @@
                });
                $('#electricity_per_unit').rules('remove');
                $('#qty').val(1);
+               $('#qty').prop('readonly',true);
                $('#exp_date').show();
                $('#exp_date input[name="expiry_date"]').rules('add', {
                    required: true   // set a new rule
@@ -256,6 +257,7 @@
                });
                $('#litre_per_unit').rules('remove');
                $('#qty').val(1);
+               $('#qty').prop('readonly',true);
                $('#exp_date').show();
                $('#exp_date  input[name="expiry_date"]').rules('add', {
                    required: true   // set a new rule
@@ -282,6 +284,7 @@
                    required: true   // set a new rule
                });
                $('#qty').val(1);
+               $('#qty').prop('readonly',true);
                $("#maintenancePeriodDiv").show();
                $("#maintenance_period").rules('add',{
                    required: true
@@ -298,11 +301,13 @@
                $('#exp_date').hide();
                $('#exp_date  input[name="expiry_date"]').rules('remove');
                $('#qty').val('');
+               $('#qty').prop('readonly',false);
                $("#maintenancePeriodDiv").hide();
                $("#maintenance_period").rules('remove');
                $("#maintenance_period_type").rules('remove');
                $("#maintenance_period").val('');
            }else{
+               $('#qty').prop('readonly',false);
                $('#electricity_per_unit').rules('remove');
                $('#litre_per_unit').rules('remove');
                $('#espu').hide();
