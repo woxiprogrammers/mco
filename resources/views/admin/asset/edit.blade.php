@@ -113,16 +113,17 @@
                                                                     <input type="number" class="form-control" id="litre_per_unit" name="litre_per_unit" value="{{$asset['litre_per_unit']}}">
                                                                 </div>
                                                             </div>
-                                                            <div class="form-group row" >
-                                                                <div class="col-md-3" style="text-align: right">
-                                                                    <label for="qty" class="control-label">Quantity</label>
-                                                                    <span>*</span>
-                                                                </div>
-                                                                <div class="col-md-6">
-                                                                    <input type="text" class="form-control" name="qty" id="qty" value="{{$asset['quantity']}}">
-                                                                </div>
-                                                            </div>
+
                                                             @if($asset->assetTypes->slug != 'other')
+                                                                <div class="form-group row" >
+                                                                    <div class="col-md-3" style="text-align: right">
+                                                                        <label for="qty" class="control-label">Quantity</label>
+                                                                        <span>*</span>
+                                                                    </div>
+                                                                    <div class="col-md-6">
+                                                                        <input type="text" class="form-control" name="qty" id="qty" value="{{$asset['quantity']}}" readonly>
+                                                                    </div>
+                                                                </div>
                                                                 <div class="form-group row">
                                                                     <div class="col-md-3" style="text-align: right">
                                                                         <label for="expiry_date" class="control-label ">Expiry Date</label>
@@ -133,6 +134,16 @@
                                                                         <button class="btn btn-sm default" type="button">
                                                                             <i class="fa fa-calendar"></i>
                                                                         </button>
+                                                                    </div>
+                                                                </div>
+                                                            @else
+                                                                <div class="form-group row" >
+                                                                    <div class="col-md-3" style="text-align: right">
+                                                                        <label for="qty" class="control-label">Quantity</label>
+                                                                        <span>*</span>
+                                                                    </div>
+                                                                    <div class="col-md-6">
+                                                                        <input type="text" class="form-control" name="qty" id="qty" value="{{$asset['quantity']}}">
                                                                     </div>
                                                                 </div>
                                                             @endif
@@ -154,7 +165,7 @@
                                                                     <input type="number" class="form-control" id="rent_per_day" name="rent_per_day" value="{!! $asset['rent_per_day'] !!}" onkeyup="assignRent(this)">
                                                                 </div>
                                                             </div>
-                                                            <div class="form-group row">
+                                                            <div class="form-group row" id="maintenancePeriodDiv">
                                                                 <div class="col-md-3" style="text-align: right">
                                                                     <label for="number" class="control-label">Maintenance Period</label>
                                                                     <span>*</span>
@@ -467,6 +478,7 @@
                 $('#electricity_per_unit').rules('remove');
                 $('#qty').val(1);
                 $('#qty').prop('readonly',true);
+                $("#maintenancePeriodDiv").show();
                 $('#quantity').val(1);
                 $('#quantity').prop('readonly',true);
                 $('#exp_date').show();
@@ -482,6 +494,7 @@
                 $('#litre_per_unit').rules('remove');
                 $('#qty').val(1);
                 $('#qty').prop('readonly',true);
+                $("#maintenancePeriodDiv").show();
                 $('#quantity').val(1);
                 $('#exp_date').show();
                 $('#exp_date').rules('add', {
@@ -499,10 +512,13 @@
                 $('#exp_date').show();
                 $('#qty').val(1);
                 $('#qty').prop('readonly',true);
+                $("#maintenancePeriodDiv").show();
                 $('#quantity').val(1);
             }else if(asset_type == 4){
                 $('#qty').val('');
                 $('#qty').prop('readonly',false);
+                $("#maintenancePeriodDiv").hide();
+
                 $('#espu').hide();
                 $('#electricity_per_unit').rules('remove');
                 $('#litre_per_unit').rules('remove');
@@ -518,6 +534,7 @@
                 $('#exp_date').hide();
                 $('#exp_date').rules('remove');
                 $('#qty').prop('readonly',true);
+                $("#maintenancePeriodDiv").show();
             }
         });
         var  CreateInventoryComponentTransfer = function () {
