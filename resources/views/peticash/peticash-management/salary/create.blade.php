@@ -346,6 +346,7 @@
                             $('#salaryExtraFields').show();
                         }else{
                             $('#salaryExtraFields').hide();
+                            calculateAmount();
                         }
                     })
                         .on('typeahead:open', function (obj, datum) {
@@ -427,31 +428,29 @@
             }else{
                 applyValidation($('#amount'));
             }
+        }
 
-            function applyValidation(element){
-                var approved_amount = parseFloat($('#approved_amount').val());
-                if(approved_amount == null || typeof approved_amount == 'undefined' || isNaN(approved_amount)){
-                    approved_amount = 0;
-                }
-                if($('#paid_from').val() == 'bank'){
-                    var selectedBankId = $('#bank_id').val();
-                    if(selectedBankId == ''){
-                        alert('Please select Bank');
-                    }else{
-                        var allowedBankAmount = parseFloat($('#balance_amount_'+selectedBankId).val());
-                        $(element).rules('add',{
-                            max: allowedBankAmount
-                        });
-                    }
+        function applyValidation(element){
+            var approved_amount = parseFloat($('#approved_amount').val());
+            console.log(approved_amount);
+            if(approved_amount == null || typeof approved_amount == 'undefined' || isNaN(approved_amount)){
+                approved_amount = 0;
+            }
+            if($('#paid_from').val() == 'bank'){
+                var selectedBankId = $('#bank_id').val();
+                if(selectedBankId == ''){
+                    alert('Please select Bank');
                 }else{
+                    var allowedBankAmount = parseFloat($('#balance_amount_'+selectedBankId).val());
                     $(element).rules('add',{
-                        max: approved_amount
+                        max: allowedBankAmount
                     });
                 }
+            }else{
+                $(element).rules('add',{
+                    max: approved_amount
+                });
             }
-
-
-
         }
     </script>
 @endsection
