@@ -293,7 +293,7 @@ var SubcontractorStructureListing = function () {
 
                             // Update footer
                             $( api.column( 7 ).footer() ).html(
-                                pageBillTotal.toFixed(3) +' ( '+ billtotal +' total)'
+                                pageBillTotal.toFixed(3) +' ( '+ billtotal.toFixed(3) +' total)'
                             );
 
                             paidtotal = result['paidtotal'];
@@ -308,7 +308,7 @@ var SubcontractorStructureListing = function () {
 
                             // Update footer
                             $( api.column( 8 ).footer() ).html(
-                                pagePaidTotal.toFixed(3) +' ( '+ paidtotal +' total)'
+                                pagePaidTotal.toFixed(3) +' ( '+ paidtotal.toFixed(3) +' total)'
                             );
 
                             balancetotal = result['balancetotal'];
@@ -323,7 +323,7 @@ var SubcontractorStructureListing = function () {
 
                             // Update footer
                             $( api.column( 9 ).footer() ).html(
-                                pageBalanceTotal.toFixed(3) +' ( '+ balancetotal +' total)'
+                                pageBalanceTotal.toFixed(3) +' ( '+ balancetotal.toFixed(3) +' total)'
                             );
 
                         }});

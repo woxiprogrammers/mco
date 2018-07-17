@@ -49,7 +49,7 @@ var BillListing = function () {
 
                             // Update footer
                             $( api.column( 3 ).footer() ).html(
-                                pageTotal.toFixed(3) +' ( '+ final_amount +' total)'
+                                pageTotal.toFixed(3) +' ( '+ final_amount.toFixed(3) +' total)'
                             );
 
                             paid_amount = result['paid_amount'];
@@ -64,7 +64,7 @@ var BillListing = function () {
 
                             // Update footer
                             $( api.column( 4 ).footer() ).html(
-                                pageTotal.toFixed(3) +' ( '+ paid_amount +' total)'
+                                pageTotal.toFixed(3) +' ( '+ paid_amount.toFixed(3) +' total)'
                             );
 
                             pending_amount = result['pending_amount'];
@@ -79,7 +79,7 @@ var BillListing = function () {
 
                             // Update footer
                             $( api.column( 5 ).footer() ).html(
-                                pageTotal.toFixed(3) +' ( '+ pending_amount +' total)'
+                                pageTotal.toFixed(3) +' ( '+ pending_amount.toFixed(3) +' total)'
                             );
                         }
                     });
