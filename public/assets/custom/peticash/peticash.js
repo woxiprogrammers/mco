@@ -66,7 +66,7 @@ var masterAccountListing = function () {
 
                             // Update footer
                             $( api.column( 3 ).footer() ).html(
-                                pageTotal +' ( '+ total +' total)'
+                                pageTotal.toFixed(3) +' ( '+ total.toFixed(3) +' total)'
                             );
                         }});
                 },
@@ -178,7 +178,7 @@ var sitewiseAccountListing = function () {
 
                             // Update footer
                             $( api.column( 4 ).footer() ).html(
-                                pageTotal +' ( '+ total +' total)'
+                                pageTotal.toFixed(3) +' ( '+ total.toFixed(3) +' total)'
                             );
                         }});
                 },
@@ -384,7 +384,7 @@ var peticashSalaryApprovalListing = function () {
 
                             // Update footer
                             $( api.column( 5 ).footer() ).html(
-                                pageTotal +' ( '+ total +' total)'
+                                pageTotal.toFixed(3) +' ( '+ total.toFixed(3) +' total)'
                             );
                         }});
                 },
