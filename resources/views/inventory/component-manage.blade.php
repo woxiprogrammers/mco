@@ -1563,7 +1563,7 @@
             if(typeof quantity == 'undefined' || quantity == '' || isNaN(quantity)){
                 quantity = 0;
             }
-            var subtotal = (parseFloat(rate) * parseFloat(quantity)).toFixed(3);
+            var subtotal = parseFloat(parseFloat(rate) * parseFloat(quantity)).toFixed(3);
             var cgstPercentage = parseFloat($(element).closest('.modal-body').find('.tax-modal-cgst-percentage').val());
             if(typeof cgstPercentage == 'undefined' || cgstPercentage == '' || isNaN(cgstPercentage)){
                 cgstPercentage = 0;
@@ -1582,7 +1582,7 @@
             $(element).closest('.modal-body').find('.tax-modal-cgst-amount').val(cgstAmount);
             $(element).closest('.modal-body').find('.tax-modal-sgst-amount').val(sgstAmount);
             $(element).closest('.modal-body').find('.tax-modal-igst-amount').val(igstAmount);
-            var total = parseFloat((subtotal + cgstAmount + sgstAmount + igstAmount)).toFixed(3);
+            var total = parseFloat((parseFloat(subtotal) + parseFloat(cgstAmount) + parseFloat(sgstAmount) + parseFloat(igstAmount))).toFixed(3);
             $(element).closest('.modal-body').find('.tax-modal-total').val(total);
         }
 

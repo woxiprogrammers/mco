@@ -48,7 +48,7 @@
                                     <div class="portlet light ">
 
                                         <div class="portlet-body form">
-                                            <input type="hidden" id="approved_amount" value="{{$approvedAmount}}">
+                                            <input type="hidden" id="approved_amount">
                                             <form role="form" id="create-salary" class="form-horizontal" method="post" action="/peticash/peticash-management/salary/create">
                                                 {!! csrf_field() !!}
 
@@ -311,7 +311,8 @@
                                         employee_id:data.employee_id,
                                         per_day_wages:data.per_day_wages,
                                         balance:data.balance,
-                                        advance_balance:data.advance_after_last_salary
+                                        advance_balance:data.advance_after_last_salary,
+                                        approved_amount : data.approved_amount
                                     };
                                 });
                             },
@@ -340,6 +341,7 @@
                         $("#balance").val(POData.balance);
                         $("#employee_id").val(POData.employee_id);
                         $("#advance_balance_amount").val(POData.advance_balance);
+                        $("#approved_amount").val(POData.approved_amount);
                         if(transactionType == 'salary'){
                             $('#salaryExtraFields').show();
                         }else{
