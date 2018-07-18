@@ -1112,10 +1112,6 @@ class PeticashController extends Controller
                 $ids = PeticashSiteTransfer::where('project_site_id','!=', 0)
                     ->whereIn('project_site_id',$projectSites)
                     ->pluck('id')->toArray();
-                /*$ids = PeticashSiteTransfer::where('peticash_site_transfers.paid_from_slug',$status_id)
-                    ->whereIn('peticash_site_transfers.id', $ids)
-                    ->where('peticash_site_transfers.project_site_id','!=', 0)
-                    ->pluck('peticash_site_transfers.id')->toArray();*/
                 if (count($ids) <= 0) {
                     $filterFlag = false;
                 }
@@ -1127,7 +1123,7 @@ class PeticashController extends Controller
                     ->orderBy('created_at','desc')->get();
             }
 
-            // Here We are considering (project_site_id = 0) => It's Master Peticash Account
+            // Here We are considering (project_site_id != 0) => It's Non Master Peticash Account
             $total = 0;
             if ($request->has('get_total')) {
                 if ($filterFlag) {
