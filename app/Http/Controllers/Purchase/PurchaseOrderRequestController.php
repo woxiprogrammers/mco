@@ -961,12 +961,14 @@ class PurchaseOrderRequestController extends Controller
                     if($componentData['rate_per_unit'] == '-'){
                         $componentData['rate_per_unit'] = 0;
                     }
+                    $date = explode('/',$componentData['expected_delivery_date']);
+                    $expectedDeliveryDate  = $date[2].'-'.$date[1].'-'.$date[0];
                     $purchaseOrderRequestComponentData = [
                         'rate_per_unit' => $componentData['rate_per_unit'],
                         'quantity' => $componentData['quantity'],
                         'unit_id' => $componentData['unit_id'],
                         'hsn_code' => $componentData['hsn_code'],
-                        'expected_delivery_date' => $componentData['expected_delivery_date'],
+                        'expected_delivery_date' => date('Y-m-d H:i:s',strtotime($expectedDeliveryDate)),
                         'cgst_percentage' => $componentData['cgst_percentage'],
                         'sgst_percentage' => $componentData['sgst_percentage'],
                         'igst_percentage' => $componentData['igst_percentage'],

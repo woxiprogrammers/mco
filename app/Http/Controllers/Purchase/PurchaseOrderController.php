@@ -677,6 +677,18 @@ class PurchaseOrderController extends Controller
                 $inventoryComponentTransferData['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first();
                 $this->createInventoryComponentTransfer($inventoryComponentTransferData);
             }
+            $poClose = false;
+            foreach($purchaseOrder->purchaseOrderComponent as $key => $purchaseOrderComponent){
+                $transactionQuantity = PurchaseOrderTransactionComponent::where('purchase_order_component_id',$purchaseOrderComponent['id'])->sum('quantity');
+                if($transactionQuantity >= $purchaseOrderComponent['quantity']){
+                    $poClose = true;
+                }
+            }
+            if($poClose && $purchaseOrder->purchaseOrderStatus->slug != 'close'){
+                $purchaseOrder->update([
+                    'purchase_order_status_id' => PurchaseOrderStatus::where('slug','close')->pluck('id')->first()
+                ]);
+            }
             $request->session()->flash('success','Transaction added successfully');
             return redirect('/purchase/purchase-order/edit/'.$request->purchase_order_id);
         }catch(\Exception $e){
