@@ -288,6 +288,7 @@ class PurchaseRequestController extends Controller
             $month = 0;
             $year = 0;
             $pr_count = 0;
+            $pr_name = null;
             $postDataArray = array();
             if ($request->has('pr_name')) {
                 if ($request['pr_name'] != "") {
@@ -349,6 +350,14 @@ class PurchaseRequestController extends Controller
             }
             if ($pr_count != 0 && $filterFlag == true) {
                 $ids = PurchaseRequest::whereIn('id',$ids)->where('serial_no', $pr_count)->pluck('id');
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+            if ($pr_name != "" && $pr_name != null && $filterFlag == true) {
+                $ids = PurchaseRequest::whereIn('id',$ids)
+                    ->where('format_id','ilike', '%'.$pr_name.'%')->pluck('id');
                 if(count($ids) <= 0) {
                     $filterFlag = false;
                 }
