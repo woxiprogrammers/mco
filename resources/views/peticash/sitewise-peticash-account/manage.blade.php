@@ -74,11 +74,19 @@
                                                 </tr>
                                                 <tr class="filter">
                                                     <th></th>
+                                                    <th> <input type="text" class="form-control form-filter" name="searchFrom" id="searchFrom"> </th>
+                                                    <th> <input type="text" class="form-control form-filter" name="searchTo" id="searchTo"> </th>
+                                                    <th> <input type="text" class="form-control form-filter" name="search_name" id="search_name"> </th>
                                                     <th></th>
-                                                    <th></th>
-                                                    <th> <input type="text" class="form-control form-filter" name="search_name"> </th>
-                                                    <th></th>
-                                                    <th></th>
+                                                    <th>
+                                                        <select class="form-control" id="status_id" name="status_id">
+                                                            <option value="all">ALL</option>
+                                                            @foreach($payment_types as $type)
+                                                                <option value="{{$type['id']}}">{{$type['name']}}</option>
+                                                            @endforeach
+                                                        </select>
+                                                        <input type="hidden" class="form-control form-filter" name="status" id="status">
+                                                    </th>
                                                     <th></th>
                                                     <th></th>
                                                     <th>
@@ -201,7 +209,39 @@
         });
         sitewiseAccountListing.init();
         $('#sitewisePeticashTable').DataTable();
-        $("input[name='search_name']").on('keyup',function(){
+        $("input[name='search_name'],input[name='searchFrom'],input[name='searchTo']").on('keyup',function(){
+            var status_id = $('#status_id').val();
+            var searchFrom = $('#searchFrom').val();
+            var searchTo = $('#searchTo').val();
+            var search_name = $('#search_name').val();
+            $("input[name='status']").val(status_id)
+            $("input[name='searchFrom']").val(searchFrom);
+            $("input[name='searchTo']").val(searchTo);
+            $("input[name='search_name']").val(search_name);
+            $(".filter-submit").trigger('click');
+        });
+
+        $("#status_id").on('change',function(){
+            var status_id = $('#status_id').val();
+            var searchFrom = $('#searchFrom').val();
+            var searchTo = $('#searchTo').val();
+            var search_name = $('#search_name').val();
+            $("input[name='status']").val(status_id)
+            $("input[name='searchFrom']").val(searchFrom);
+            $("input[name='searchTo']").val(searchTo);
+            $("input[name='search_name']").val(search_name);
+            $(".filter-submit").trigger('click');
+        });
+
+        $("#search-withfilter").on('click',function(){
+            var status_id = $('#status_id').val();
+            var searchFrom = $('#searchFrom').val();
+            var searchTo = $('#searchTo').val();
+            var search_name = $('#search_name').val();
+            $("input[name='status']").val(status_id)
+            $("input[name='searchFrom']").val(searchFrom);
+            $("input[name='searchTo']").val(searchTo);
+            $("input[name='search_name']").val(search_name);
             $(".filter-submit").trigger('click');
         });
     });
