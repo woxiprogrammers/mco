@@ -281,7 +281,7 @@ class UserController extends Controller
                 $userData = array();
             }
             $records['data'] = array();
-            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($userData); $iterator++,$pagination++ ){
+            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $pagination < count($userData); $iterator++,$pagination++ ){
                 if($userData[$pagination]['is_active'] == true){
                     $user_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
                     $status = 'Disable';
