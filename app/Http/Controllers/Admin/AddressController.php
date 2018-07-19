@@ -123,7 +123,7 @@ class AddressController extends Controller{
             $iTotalRecords = count($addressData);
             $records = array();
             $records['data'] = array();
-            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($addressData); $iterator++,$pagination++ ){
+            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $pagination < count($addressData); $iterator++,$pagination++ ){
                 if($addressData[$pagination]['is_active'] == true){
                     $address_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
                     $status = 'Disable';

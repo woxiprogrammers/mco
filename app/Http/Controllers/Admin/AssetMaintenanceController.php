@@ -666,7 +666,7 @@ class AssetMaintenanceController extends Controller{
                 }else{
                     $length = $request->length;
                 }
-                for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($assetMaintenanceBillData); $iterator++,$pagination++ ){
+                for($iterator = 0,$pagination = $request->start; $iterator < $length && $pagination < count($assetMaintenanceBillData); $iterator++,$pagination++ ){
                     $paidAmount = $assetMaintenanceBillData[$pagination]->assetMaintenanceBillPayment->sum('amount');
                     $editButton = '<div id="sample_editable_1_new" class="btn btn-small blue" >
                         <a href="/asset/maintenance/request/bill/view/'.$assetMaintenanceBillData[$pagination]['bill_id'].'" style="color: white"> View
@@ -886,7 +886,7 @@ class AssetMaintenanceController extends Controller{
             $records["draw"] = intval($request->draw);
             $purchaseOrderPaymentData = AssetMaintenanceBillPayment::where('asset_maintenance_bill_id',$assetMaintenanceBillId)->orderBy('created_at','desc')->get();
             $records["recordsFiltered"] = $records["recordsTotal"] = count($purchaseOrderPaymentData);
-            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($purchaseOrderPaymentData); $iterator++,$pagination++ ){
+            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $pagination < count($purchaseOrderPaymentData); $iterator++,$pagination++ ){
                 $records['data'][] = [
                     date('d M Y',strtotime($purchaseOrderPaymentData[$pagination]['created_at'])),
                     $purchaseOrderPaymentData[$pagination]['amount'],
