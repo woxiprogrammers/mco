@@ -82,12 +82,64 @@ class InventoryManageController extends Controller
         try{
             $user = Auth::user();
             $status = 200;
-            if($request->has('search_name')){
-                // Inventory listing search
-            }else{
-                $siteOutTransferTypeID = InventoryTransferTypes::where('slug','site')->where('type','OUT')->pluck('id')->first();
-                $inventoryTransferData = InventoryComponentTransfers::where('transfer_type_id',$siteOutTransferTypeID)->orderBy('created_at','desc')->get();
+            $search_from = null;
+            $search_to = null;
+            $search_name = null;
+
+            if ($request->has('search_from')) {
+                $search_from = $request['search_from'];
             }
+
+            if ($request->has('search_to')) {
+                $search_to = $request['search_to'];
+            }
+
+            if ($request->has('search_name')) {
+                $search_name = $request['search_name'];
+            }
+
+            $filterFlag = true;
+            $siteOutTransferTypeID = InventoryTransferTypes::where('slug','site')->where('type','OUT')->pluck('id')->first();
+            $ids = InventoryComponentTransfers::where('transfer_type_id',$siteOutTransferTypeID)->pluck('id')->toArray();
+
+            if ($search_from != null && $search_from != "" && $filterFlag == true) {
+                $ids = InventoryComponentTransfers::join('inventory_components','inventory_components.id','inventory_component_transfers.inventory_component_id')
+                    ->join('project_sites','project_sites.id','inventory_components.project_site_id')
+                    ->join('projects','projects.id','project_sites.project_id')
+                    ->where('projects.name','ilike','%'.$search_from.'%')
+                    ->whereIn('inventory_component_transfers.id',$ids)
+                    ->pluck('inventory_component_transfers.id')->toArray();
+                if (count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+            if ($search_to != null && $search_to != "" && $filterFlag == true) {
+                $ids = InventoryComponentTransfers::where('source_name','ilike','%'.$search_to.'%')
+                                ->whereIn('id',$ids)
+                                ->pluck('id')->toArray();
+                if (count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+            if ($search_name != null && $search_name != "" && $filterFlag == true) {
+                $ids = InventoryComponentTransfers::join('inventory_components','inventory_components.id','inventory_component_transfers.inventory_component_id')
+                        ->where('inventory_components.name','ilike','%'.$search_name.'%')
+                        ->whereIn('inventory_component_transfers.id',$ids)
+                        ->pluck('inventory_component_transfers.id')->toArray();
+
+                if (count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+            $inventoryTransferData = array();
+            if($filterFlag) {
+                $inventoryTransferData = InventoryComponentTransfers::whereIn('id',$ids)
+                    ->orderBy('created_at','desc')->get();
+            }
+
             $iTotalRecords = count($inventoryTransferData);
             $records = array();
             $records['data'] = array();
@@ -122,9 +174,9 @@ class InventoryManageController extends Controller
                     $actionDropDown = '';
                 }
                 $records['data'][$iterator] = [
-                    $inventoryTransferData[$pagination]->inventoryComponent->projectSite->project->name,
-                    $inventoryTransferData[$pagination]->source_name,
-                    $inventoryTransferData[$pagination]->inventoryComponent->name,
+                    ucwords($inventoryTransferData[$pagination]->inventoryComponent->projectSite->project->name),
+                    ucwords($inventoryTransferData[$pagination]->source_name),
+                    ucwords($inventoryTransferData[$pagination]->inventoryComponent->name),
                     $inventoryTransferData[$pagination]->quantity,
                     $inventoryTransferData[$pagination]->unit->name,
                     $inventoryTransferData[$pagination]->inventoryComponentTransferStatus->name,
@@ -469,6 +521,7 @@ class InventoryManageController extends Controller
                     ($inQuantity + $inventoryData[$iterator]['opening_stock']).' '.$unitName,
                     $outQuantity.' '.$unitName,
                     $availableQuantity.' '.$unitName,
+                    ($inventoryData[$iterator]['is_material'] == true) ? "Material" : "Asset",
                     '<div class="btn btn-xs green">
                         <a href="/inventory/component/manage/'.$inventoryData[$pagination]->id.'" style="color: white">
                              Manage
