@@ -228,23 +228,13 @@ class InventoryManageController extends Controller
                     $isReadingApplicable = false;
                 }
             }
-            if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin'){
-                $clients = Client::join('projects','projects.client_id','=','clients.id')
-                    ->join('project_sites','project_sites.project_id','=','projects.id')
-                    ->join('quotations','quotations.project_site_id','=','project_sites.id')
-                    ->select('clients.company as name','clients.id as id')
-                    ->distinct('name')
-                    ->get();
-            }else{
-                $clients = Client::join('projects','projects.client_id','=','clients.id')
-                    ->join('project_sites','project_sites.project_id','=','projects.id')
-                    ->join('user_project_site_relation','user_project_site_relation.project_site_id','=','project_sites.id')
-                    ->join('quotations','quotations.project_site_id','=','project_sites.id')
-                    ->where('user_project_site_relation.user_id',$user->id)
-                    ->select('clients.company as name','clients.id as id')
-                    ->distinct('name')
-                    ->get();
-            }
+            $clients = Client::join('projects','projects.client_id','=','clients.id')
+                ->join('project_sites','project_sites.project_id','=','projects.id')
+                ->join('quotations','quotations.project_site_id','=','project_sites.id')
+                ->select('clients.company as name','clients.id as id')
+                ->distinct('name')
+                ->get();
+
             if($inventoryComponent->is_material == true){
                 $unit1Array = UnitConversion::join('units', 'units.id', '=', 'unit_conversions.unit_2_id')
                     ->where('unit_conversions.unit_1_id', $inventoryComponent->material->unit_id)
@@ -528,7 +518,7 @@ class InventoryManageController extends Controller
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($inventoryComponentTransfers); $iterator++,$pagination++ ){
 
                 if($inventoryComponentTransfers[$pagination]->transferType->type == 'IN'){
-                    $transferStatus = 'IN - From '.$inventoryComponentTransfers[$pagination]->transferType->name;
+                    $transferStatus = 'IN - From '.$inventoryComponentTransfers[$pagination]->source_name;
                     if($inventoryComponentTransfers[$pagination]->transferType->slug == 'site' && $inventoryComponentTransfers[$pagination]->inventoryComponentTransferStatus->slug == 'grn-generated'){
                         $action = '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="changeStatus('.$inventoryComponentTransfers[$pagination]->id.')">
                                         Update
@@ -553,7 +543,7 @@ class InventoryManageController extends Controller
                                     ';
                     }
                 }else{
-                    $transferStatus = 'OUT - To '.$inventoryComponentTransfers[$pagination]->transferType->name;
+                    $transferStatus = 'OUT - To '.$inventoryComponentTransfers[$pagination]->source_name;
                     $action = '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails('.$inventoryComponentTransfers[$pagination]->id.')">
                                         Details
                                     </a>';
