@@ -1582,7 +1582,7 @@
             $(element).closest('.modal-body').find('.tax-modal-cgst-amount').val(cgstAmount);
             $(element).closest('.modal-body').find('.tax-modal-sgst-amount').val(sgstAmount);
             $(element).closest('.modal-body').find('.tax-modal-igst-amount').val(igstAmount);
-            var total = parseFloat((subtotal + cgstAmount + sgstAmount + igstAmount)).toFixed(3);
+            var total = parseFloat((parseFloat(subtotal) + parseFloat(cgstAmount) + parseFloat(sgstAmount) + parseFloat(igstAmount))).toFixed(3)
             $(element).closest('.modal-body').find('.tax-modal-total').val(total);
         }
 
