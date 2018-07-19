@@ -27,7 +27,7 @@
                             <div class="container">
                                 <!-- BEGIN PAGE TITLE -->
                                 <div class="page-title">
-                                    <h1>{!!  $inventoryComponent->name !!} </h1>
+                                    <h1>{!!  $inventoryComponent->name !!}</h1>
                                     <h5 style="font-size: 15px !important;">{!!  $inventoryComponent->projectSite->project->name.' - '.$inventoryComponent->projectSite->name.' ('.$inventoryComponent->projectSite->project->client->company!!} )</h5>
                                 </div>
                             </div>
@@ -1140,8 +1140,6 @@
     <script src="/assets/custom/inventory/image-upload.js"></script>
     <script>
         $(document).ready(function(){
-
-
             InventoryComponentListing.init();
             changeType();
             $("#transaction").click(function(){
