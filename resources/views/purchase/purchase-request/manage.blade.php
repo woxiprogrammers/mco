@@ -99,7 +99,7 @@
                                                                 <th> Action </th>
                                                             </tr>
                                                             <tr class="filter">
-                                                                <th><input type="text" class="form-control form-filter" name="pr_name" id="pr_name" readonly></th>
+                                                                <th><input type="text" class="form-control form-filter" name="pr_name" id="pr_name"></th>
                                                                 <th> <input type="hidden" class="form-control form-filter" name="postdata" id="postdata"></th>
                                                                 <th> </th>
                                                                 <th> </th>
@@ -213,6 +213,27 @@
             });
             $("#project_id").on('change', function(){
                 getProjectSites($('#project_id').val());
+            });
+
+
+            $("#pr_name").on('keyup',function(){
+                var site_id = $('#globalProjectSite').val();
+                var year = $('#year').val();
+                var month = $('#month').val();
+                var status_id = $('#status_id').val();
+                var pr_name = $('#pr_name').val();
+                var pr_count = $('#pr_count').val();
+
+                var postData =
+                    'site_id=>'+site_id+','+
+                    'year=>'+year+','+
+                    'month=>'+month+','+
+                    'pr_count=>'+pr_count;
+
+                $("input[name='postdata']").val(postData);
+                $("input[name='pr_name']").val(pr_name);
+                $("input[name='status']").val(status_id);
+                $(".filter-submit").trigger('click');
             });
 
             $("#status_id").on('change',function(){
