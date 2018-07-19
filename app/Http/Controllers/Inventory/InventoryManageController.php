@@ -178,19 +178,26 @@ class InventoryManageController extends Controller
 
     public function createInventoryComponent(Request $request){
         try{
-            $projectSiteId = Session::get('global_project_site');
-            $newInventoryComponent = InventoryComponent::where('project_site_id',$projectSiteId)->where('name','ilike',trim($request['name']))->first();
-            if($newInventoryComponent == null){
-                $inventoryComponentData['name'] = $request['name'];
-                $inventoryComponentData['is_material'] = ($request['inventory_type'] == 'material') ? true : false;
-                $inventoryComponentData['project_site_id'] = $projectSiteId;
-                $inventoryComponentData['opening_stock'] = ($request->has('opening_stock')) ? $request['opening_stock'] : 0;
-                $inventoryComponentData['reference_id'] = $request['reference_id'];
-                $inventoryComponent = InventoryComponent::create($inventoryComponentData);
-                InventoryComponentOpeningStockHistory::create([
-                    'inventory_component_id' => $inventoryComponent['id'],
-                    'opening_stock' => $inventoryComponent['opening_stock']
-                ]);
+            if($request['reference_id'] != null){
+                $projectSiteId = Session::get('global_project_site');
+                $newInventoryComponent = InventoryComponent::where('project_site_id',$projectSiteId)->where('name','ilike',trim($request['name']))->first();
+                if($newInventoryComponent == null){
+                    $inventoryComponentData['name'] = $request['name'];
+                    $inventoryComponentData['is_material'] = ($request['inventory_type'] == 'material') ? true : false;
+                    $inventoryComponentData['project_site_id'] = $projectSiteId;
+                    $inventoryComponentData['opening_stock'] = ($request->has('opening_stock')) ? $request['opening_stock'] : 0;
+                    $inventoryComponentData['reference_id'] = $request['reference_id'];
+                    $inventoryComponent = InventoryComponent::create($inventoryComponentData);
+                    InventoryComponentOpeningStockHistory::create([
+                        'inventory_component_id' => $inventoryComponent['id'],
+                        'opening_stock' => $inventoryComponent['opening_stock']
+                    ]);
+                    $request->session()->flash('success','Inventory Component Created Successfully!!');
+                }else{
+                    $request->session()->flash('success','Inventory Component Already exist!!');
+                }
+            }else{
+                $request->session()->flash('success','Please select from drop down');
             }
             return redirect('/inventory/manage');
         }catch (\Exception $e){
@@ -1102,7 +1109,7 @@ class InventoryManageController extends Controller
             $response = array();
             $alreadyExitMaterialsIds = InventoryComponent::where('project_site_id',$projectSiteId)->pluck('reference_id');
             if($type == 'material'){
-                $response = InventoryComponent::where('name','ilike','%'.$keyword.'%')->where('is_material',true)->whereNotIn('reference_id',$alreadyExitMaterialsIds)->distinct('name')->select('name','reference_id')->get();
+                $response = Material::where('name','ilike','%'.$keyword.'%')->whereNotIn('id',$alreadyExitMaterialsIds)->distinct('name')->select('name','id as reference_id')->get();
             }else{
                 $response = InventoryComponent::where('name','ilike','%'.$keyword.'%')->where('is_material',false)->whereNotIn('reference_id',$alreadyExitMaterialsIds)->distinct('name')->select('name','reference_id')->get();
             }
