@@ -49,7 +49,7 @@ var AssetListing = function () {
 
                             // Update footer
                             $( api.column( 5 ).footer() ).html(
-                                pageTotal +' ( '+ total +' total)'
+                                pageTotal.toFixed(3) +' ( '+ total.toFixed(3) +' total)'
                             );
                     }});
                 },
