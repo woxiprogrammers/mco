@@ -85,7 +85,7 @@
                                                 </div>
                                             </div>
                                             <div class="modal-body" style="padding:40px 50px;">
-                                                <form role="form" action="/inventory/component/create" method="POST" id="addTransferForm">
+                                                <form role="form" action="/inventory/component/create" method="POST" id="createComponentForm">
                                                     {!! csrf_field() !!}
                                                     <div class="form-group row">
                                                         <div class="col-md-4" style="text-align: right">
@@ -119,7 +119,7 @@
                                                             <input type="text" class="form-control" id="opening_stock" name="opening_stock">
                                                         </div>
                                                     </div>
-                                                    <button type="submit" class="btn red pull-right" id="createComponentButton" hidden> Create</button>
+                                                    <button type="button" class="btn red pull-right" id="createComponentButton" hidden> Create</button>
                                                 </form>
                                             </div>
                                         </div>
@@ -147,12 +147,22 @@
     <script>
         $(document).ready(function() {
             InventoryListing.init();
+            CreateInventoryComponent.init();
             $("#createInventoryComponent").click(function(){
                 $("#inventoryComponentModal").modal();
             });
 
             $('.search_filter').on('keyup',function(){
                 $(".filter-submit").trigger('click');
+            });
+
+            $('#createComponentButton').click(function(){
+                var referenceId = $("#reference_id").val();
+                if(typeof referenceId != 'undefined' && referenceId != '' && referenceId != null){
+                    $('#createComponentForm').submit();
+                }else{
+                    alert('Please select from drop down');
+                }
             });
 
             $("#inventory_type").on('change',function(){
@@ -172,7 +182,6 @@
                                     $("#header").addClass("fixed");
                                 }
                                 return $.map(x, function (data) {
-                                    console.log(data);
                                     return {
                                         name:data.name,
                                         reference_id:data.reference_id
