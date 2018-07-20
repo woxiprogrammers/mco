@@ -204,12 +204,15 @@
                                         </div>
                                         <div class="modal-body" style="padding:40px 50px;">
                                             <div class="form-group">
+                                                <label for="name" class="control-label">Material Name :</label>
                                                 <input type="text" class="form-control empty typeahead" id="searchbox"  placeholder="Enter material name" >
                                             </div>
                                             <div class="form-group">
+                                                <label for="name" class="control-label">Quantity :</label>
                                                 <input type="number" class="form-control empty" id="qty"  placeholder="Enter quantity">
                                             </div>
                                             <div class="form-group" id="unitDrpdn">
+                                                <label for="name" class="control-label">Unit :</label>
                                                 <select id="materialUnit" class="form-control">
                                                     <option value="">Select Unit</option>
                                                     @foreach($units as $unit)
@@ -240,13 +243,16 @@
                                         </div>
                                         <div class="modal-body" style="padding:40px 50px;">
                                             <div class="form-group">
+                                                <label for="name" class="control-label">Asset Name :</label>
                                                 <input type="text" class="form-control empty" id="Assetsearchbox"  placeholder="Enter asset name" >
                                                 <div id="asset_suggesstion-box"></div>
                                             </div>
                                             <div class="form-group">
+                                                <label for="name" class="control-label">Quantity :</label>
                                                 <input type="number" class="form-control empty" id="Assetqty" value="1" readonly>
                                             </div>
                                             <div class="form-group">
+                                                <label for="name" class="control-label">Unit :</label>
                                                 <input type="hidden" id="AssetUnitId" value="{{$nosUnitId}}">
                                                 <input type="text" class="form-control empty" id="AssetUnitsearchbox"  value="Nos" readonly >
                                             </div>
