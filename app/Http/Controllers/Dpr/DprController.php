@@ -80,7 +80,7 @@ class DprController extends Controller
             $records['data'] = array();
             $end = $request->length < 0 ? count($subCategories) : $request->length;
             $categories = array();
-            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($subCategories); $iterator++,$pagination++ ){
+            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $pagination < count($subCategories); $iterator++,$pagination++ ){
                 $records['data'][$iterator] = [
                     $subCategories[$pagination]['id'],
                     $subCategories[$pagination]['name'],

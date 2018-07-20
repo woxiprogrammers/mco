@@ -133,7 +133,7 @@ class CategoryManagementController extends Controller
             $records['data'] = array();
             $end = $request->length < 0 ? count($subCategories) : $request->length;
             $categories = array();
-            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($subCategories); $iterator++,$pagination++ ){
+            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $pagination < count($subCategories); $iterator++,$pagination++ ){
                 if($subCategories[$pagination]['is_active'] == true){
                     $status = '<span class="label label-sm label-success"> Enabled </span>';;
                     $action = '<li>
@@ -248,7 +248,7 @@ class CategoryManagementController extends Controller
             $records['data'] = array();
             $end = $request->length < 0 ? count($subCategories) : $request->length;
             $categories = array();
-            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($subCategories); $iterator++,$pagination++ ){
+            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $pagination < count($subCategories); $iterator++,$pagination++ ){
                 if($subCategories[$pagination]['is_active'] == true){
                     $status = '<span class="label label-sm label-success"> Enabled </span>';;
                     $action = '<li>
