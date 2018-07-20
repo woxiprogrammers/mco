@@ -2024,7 +2024,9 @@ class PeticashController extends Controller
                 $transactionTypeId = PeticashTransactionType::where('slug',$transactionType)->pluck('id')->first();
                 $lastRequestedSalary = PeticashRequestedSalaryTransaction::where('employee_id',$employeeDetail['id'])
                                                                 ->where('project_site_id',$projectSiteId)
-                                                                ->where('peticash_transaction_type_id',$transactionTypeId)->select('amount','created_at')->get()->last();
+                                                                ->where('peticash_transaction_type_id',$transactionTypeId)
+                                                                ->where('peticash_status_id',PeticashStatus::where('slug','approved')->pluck('id')->first())
+                                                                ->select('amount','created_at')->get()->last();
                 if($lastRequestedSalary != null){
                     $salaryTransactionAmountAfterLastRequest = PeticashSalaryTransaction::where('created_at','>=',$lastRequestedSalary['created_at'])
                                                                     ->where('employee_id',$employeeDetail['id'])
