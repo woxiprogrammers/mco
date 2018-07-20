@@ -462,7 +462,7 @@
 
                                                     @endif
 
-                                                    @if($isReadingApplicable)
+                                                    @if($isReadingApplicable || $inventoryComponent->asset->assetTypes->slug == 'other')
                                                         <div class="row form-group">
                                                             <div class="col-md-3">
                                                                 <label class="control-label pull-right">Unit</label>
