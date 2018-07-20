@@ -198,7 +198,7 @@ $('#createMaterial').click(function(){
     }else{
         $("#qty").closest('.form-group').addClass('has-success').removeClass('has-error');
     }
-    if(typeof unitId == 'undefined' || unitId == ''){
+    if(typeof unitId == 'undefined' || unitId == '' || unitId == 'Select Unit'){
         $("#materialUnit").closest('.form-group').addClass('has-error').removeClass('has-success');
         validFlag = false;
     }else{
@@ -225,6 +225,8 @@ $('#createMaterial').click(function(){
         $('#searchbox').html('');
         $('#qty').val('');
         $('#files').val(null);
+    }else{
+        alert('Please fill all fields');
     }
 });
 $('#createAsset').click(function(){
