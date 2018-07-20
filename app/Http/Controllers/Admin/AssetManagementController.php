@@ -249,6 +249,7 @@ use InventoryTrait;
             $inventoryComponentTransferData = [
                 'inventory_component_id' => $inventoryComponentId,
                 'transfer_type_id' => InventoryTransferTypes::where('type','ilike','IN')->where('slug','office')->pluck('id')->first(),
+                'source_name' => env('OFFICE_PROJECT_SITE_NAME'),
                 'quantity' => $request['quantity'],
                 'unit_id' => Unit::where('slug','nos')->pluck('id')->first(),
                 'user_id' => $user['id'],
