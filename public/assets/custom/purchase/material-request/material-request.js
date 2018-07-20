@@ -58,14 +58,14 @@ $(document).ready(function(){
             $("#materialModalComponentSlug").val(datum.component_type_slug);
         })
             .on('typeahead:open', function (obj, datum) {
-               // $('#component_id').val(4);
+                $('#component_id').val('');
                 $("#materialUnit").html($("#unitOptions").val());
                 $("#materialModalComponentSlug").val('');
             });
         $("#myModal").modal();
     });
     $("#assetBtn").click(function(){
-        //$('#component_id').val(6);
+        $('#component_id').val();
         var search_in = 'asset';
         var site_name = $("#globalProjectSite").val();
         var assetList = new Bloodhound({
@@ -111,7 +111,7 @@ $(document).ready(function(){
             $('#component_id').val(componentTypeId);
         })
             .on('typeahead:open', function (obj, datum) {
-               // $('#component_id').val(6);
+                $('#component_id').val('');
             });
         $("#myModal1").modal();
 
