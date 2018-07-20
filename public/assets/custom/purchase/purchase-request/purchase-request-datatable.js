@@ -55,7 +55,7 @@ $(document).ready(function(){
             $('#component_type_id').val();
         })
             .on('typeahead:open', function (obj, datum) {
-               // $('#component_id').val(4);
+                $('#component_id').val('');
                 var options = $("#unitOptions").val();
                 var str1 = '<select class="form-control" id="materialUnit"><option value="">Select Unit</option>'+options+ '</select>';
                 $('#unitDrpdn').html(str1);
@@ -110,7 +110,7 @@ $(document).ready(function(){
             $('#component_type_id').val();
         })
             .on('typeahead:open', function (obj, datum) {
-                //$('#component_id').val(6);
+                $('#component_id').val('');
             });
         $("#myModal1").modal();
     });
