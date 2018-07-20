@@ -1,9 +1,12 @@
 function componentTaxDetailSubmit(){
     var quantity = $(".tax-modal-quantity").val();
     var rate = $(".tax-modal-rate").val();
+    var expected_delivery = $(".tax-modal-delivery-date").val();
     var componentRelationId = $("#modalComponentID").val();
     if(quantity == 0 || rate == 0){
         alert("Quantity or Rate must not be 0");
+    }else if(expected_delivery == null){
+        alert("Please select Date");
     }else{
         var formData = $("#componentDetailForm").serializeArray();
         $("#componentRow-"+componentRelationId+" #hiddenInputs").remove();
@@ -11,7 +14,7 @@ function componentTaxDetailSubmit(){
         $.each(formData, function(key, value){
             if (value.name != 'vendor_images[]' && value.name != 'client_images[]') {
                 $("#componentRow-" + componentRelationId + " #hiddenInputs").append("<input type='hidden' value='" + value.value + "' name='data[" + componentRelationId + "][" + value.name + "]'>");
-            } else {
+            }else {
                 if (value.name == 'vendor_images[]') {
                     $("#componentRow-" + componentRelationId + " #hiddenInputs").append("<input type='hidden' value='" + value.value + "' name='data[" + componentRelationId + "][vendor_images][]'>");
                 } else {
