@@ -139,12 +139,9 @@
             <div class="col-md-2">
                 <label class="control-label pull-right">Expected Delivery Date</label>
             </div>
-            <div class="col-md-6 date date-picker" data-date-start-date="0d">
+            <div class="col-md-6">
                 <input type="hidden" id="expected_delivery" value="{{$purchaseOrderRequestComponent['expected_delivery_date']}}">
                 <input type="text" style="width: 40%" class="tax-modal-delivery-date  form-control" id="expected_delivery_date" name="expected_delivery_date" value="{{$purchaseOrderRequestComponent['expected_delivery_date']}}"/>
-                <button class="btn btn-sm default" type="button">
-                    <i class="fa fa-calendar"></i>
-                </button>
             </div>
         </div>
         <div class="row form-group">
