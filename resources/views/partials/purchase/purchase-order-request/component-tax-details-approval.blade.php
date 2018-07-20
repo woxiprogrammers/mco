@@ -140,6 +140,7 @@
                 <label class="control-label pull-right">Expected Delivery Date</label>
             </div>
             <div class="col-md-6 date date-picker" data-date-start-date="0d">
+                <input type="hidden" id="expected_delivery" value="{{$purchaseOrderRequestComponent['expected_delivery_date']}}">
                 <input type="text" style="width: 40%" class="tax-modal-delivery-date  form-control" id="expected_delivery_date" name="expected_delivery_date" value="{{$purchaseOrderRequestComponent['expected_delivery_date']}}"/>
                 <button class="btn btn-sm default" type="button">
                     <i class="fa fa-calendar"></i>
@@ -296,3 +297,21 @@
 </div>
 
 </div>
+
+<script src="/assets/global/plugins/plupload/js/plupload.full.min.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/jstree/dist/jstree.min.js" type="text/javascript"></script>
+<script src="/assets/custom/purchase/purchase-order-request/file-datatable.js"></script>
+<script src="/assets/custom/purchase/purchase-order-request/file-upload.js"></script>
+<link href="/assets/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker3.min.css" rel="stylesheet" type="text/css" />
+<link href="/assets/global/plugins/bootstrap-timepicker/css/bootstrap-timepicker.min.css" rel="stylesheet" type="text/css" />
+<link href="/assets/global/plugins/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css" rel="stylesheet" type="text/css" />
+<script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
+<script src="/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script><script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
+<script>
+    $(document).ready(function(){
+        $('#expected_delivery_date').attr("readonly", "readonly");
+        var date = new Date($('#expected_delivery').val());
+        $('#expected_delivery_date').val(date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear());
+    });
+</script>
