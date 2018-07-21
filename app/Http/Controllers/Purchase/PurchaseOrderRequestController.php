@@ -125,7 +125,6 @@ class PurchaseOrderRequestController extends Controller
                     'unit_id' => $componentData['unit_id'],
                     'hsn_code' => $componentData['hsn_code'],
                     'expected_delivery_date' => Carbon::parse($componentData['expected_delivery_date']),
-                    //'expected_delivery_date' => date('Y-m-d H:i:s',strtotime($componentData['expected_delivery_date'])),
                     'cgst_percentage' => $componentData['cgst_percentage'],
                     'sgst_percentage' => $componentData['sgst_percentage'],
                     'igst_percentage' => $componentData['igst_percentage'],

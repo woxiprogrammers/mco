@@ -49,11 +49,13 @@
                                                                     <th> In</th>
                                                                     <th> Out </th>
                                                                     <th> Available  </th>
+                                                                    <th> Type </th>
                                                                     <th> Action </th>
                                                                 </tr>
                                                                 <tr class="filter">
                                                                     <th> </th>
-                                                                    <th> <input type="text" class="form-control form-filter search_filter" name="search_name"> </th>
+                                                                    <th> <input type="text" class="form-control form-filter search_filter" name="search_name" id="search_name"> </th>
+                                                                    <th> </th>
                                                                     <th> </th>
                                                                     <th> </th>
                                                                     <th> </th>
@@ -150,6 +152,10 @@
             CreateInventoryComponent.init();
             $("#createInventoryComponent").click(function(){
                 $("#inventoryComponentModal").modal();
+            });
+
+            $('#search_name').on('keyup',function(){
+                $(".filter-submit").trigger('click');
             });
 
             $('.search_filter').on('keyup',function(){

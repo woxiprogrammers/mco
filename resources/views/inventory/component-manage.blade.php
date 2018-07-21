@@ -27,7 +27,7 @@
                             <div class="container">
                                 <!-- BEGIN PAGE TITLE -->
                                 <div class="page-title">
-                                    <h1>{!!  $inventoryComponent->name !!} </h1>
+                                    <h1>{!!  $inventoryComponent->name !!}</h1>
                                     <h5 style="font-size: 15px !important;">{!!  $inventoryComponent->projectSite->project->name.' - '.$inventoryComponent->projectSite->name.' ('.$inventoryComponent->projectSite->project->client->company!!} )</h5>
                                 </div>
                             </div>
@@ -462,7 +462,7 @@
 
                                                     @endif
 
-                                                    @if($isReadingApplicable)
+                                                    @if($isReadingApplicable || $inventoryComponent->asset->assetTypes->slug == 'other')
                                                         <div class="row form-group">
                                                             <div class="col-md-3">
                                                                 <label class="control-label pull-right">Unit</label>
@@ -1140,8 +1140,6 @@
     <script src="/assets/custom/inventory/image-upload.js"></script>
     <script>
         $(document).ready(function(){
-
-
             InventoryComponentListing.init();
             changeType();
             $("#transaction").click(function(){
@@ -1563,7 +1561,7 @@
             if(typeof quantity == 'undefined' || quantity == '' || isNaN(quantity)){
                 quantity = 0;
             }
-            var subtotal = (parseFloat(rate) * parseFloat(quantity)).toFixed(3);
+            var subtotal = parseFloat(parseFloat(rate) * parseFloat(quantity)).toFixed(3);
             var cgstPercentage = parseFloat($(element).closest('.modal-body').find('.tax-modal-cgst-percentage').val());
             if(typeof cgstPercentage == 'undefined' || cgstPercentage == '' || isNaN(cgstPercentage)){
                 cgstPercentage = 0;
@@ -1618,7 +1616,7 @@
             $(element).closest('.modal-body').find('.transportation-cgst-amount').val(cgstAmount);
             $(element).closest('.modal-body').find('.transportation-sgst-amount').val(sgstAmount);
             $(element).closest('.modal-body').find('.transportation-igst-amount').val(igstAmount);
-            var transportationTotal = parseFloat(parseFloat(transportationAmount) + cgstAmount + sgstAmount + igstAmount).toFixed(3);
+            var transportationTotal = parseFloat(parseFloat(transportationAmount) + parseFloat(cgstAmount) + parseFloat(sgstAmount) + parseFloat(igstAmount)).toFixed(3);
             $(element).closest('.modal-body').find('.transportation-total').val(transportationTotal);
         }
 

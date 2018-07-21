@@ -64,7 +64,7 @@
                                                 <form action="/inventory/transfer/billing/create" method="POST" id="siteTransferBillCreateForm">
                                                     {!! csrf_field() !!}
                                                     <fieldset>
-                                                        <legend> Site Transfer </legend>
+                                                        <legend> Site Transfer (Transportation Bill) </legend>
                                                         <div class="form-group row">
                                                             <div class="col-md-2">
                                                                 <label class="control-label pull-right">

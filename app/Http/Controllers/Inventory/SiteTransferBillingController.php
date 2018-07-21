@@ -53,22 +53,29 @@ class SiteTransferBillingController extends Controller
         try{
             $projectSiteId = Session::get('global_project_site');
             $approvedTransferIds = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
-                                                ->join('inventory_components','inventory_components.id','=','inventory_component_transfers.inventory_component_id')
-                                                ->join('inventory_component_transfer_statuses','inventory_component_transfer_statuses.id','=','inventory_component_transfers.inventory_component_transfer_status_id')
-                                                ->where('inventory_component_transfer_statuses.slug', 'approved')
-                                                ->where('inventory_components.project_site_id', $projectSiteId)
-                                                ->where('inventory_component_transfers.grn','ilike','%'.$request->keyword.'%')
-                                                ->where('inventory_transfer_types.slug','site')
-                                                ->where('inventory_transfer_types.type','ilike','IN')
-                                                ->pluck('inventory_component_transfers.id')->toArray();
+                                    ->join('inventory_components','inventory_components.id','=','inventory_component_transfers.inventory_component_id')
+                                    ->join('inventory_component_transfer_statuses','inventory_component_transfer_statuses.id','=','inventory_component_transfers.inventory_component_transfer_status_id')
+
+                                    ->where('inventory_component_transfer_statuses.slug', 'approved')
+                                    ->where('inventory_components.project_site_id', $projectSiteId)
+                                    ->where('inventory_component_transfers.grn','ilike','%'.$request->keyword.'%')
+                                    ->where('inventory_transfer_types.slug','site')
+                                    ->where('inventory_transfer_types.type','ilike','IN')
+                                    ->pluck('inventory_component_transfers.id')
+                                    ->toArray();
             $billCreatedTransferIds = SiteTransferBill::pluck('inventory_component_transfer_id')->toArray();
             $approvedBillPendingTransferIds = array_diff($approvedTransferIds, $billCreatedTransferIds);
-            $siteTransfersInfo = InventoryComponentTransfers::whereIn('id', $approvedBillPendingTransferIds)->get()->toArray();
+            $siteTransfersInfo = InventoryComponentTransfers::join('vendors','vendors.id','=','inventory_component_transfers.vendor_id')
+                                ->whereIn('inventory_component_transfers.id', $approvedBillPendingTransferIds)
+                                ->whereNotNull('inventory_component_transfers.transportation_amount')
+                                ->where('inventory_component_transfers.transportation_amount','!=',0)
+                                ->get()->toArray();
             $iterator = 0;
             $response = array();
             foreach ($siteTransfersInfo as $transferInfo){
                 $response[$iterator]['inventory_component_transfer_id'] = $transferInfo['id'];
-                $response[$iterator]['grn'] = $transferInfo['grn'];
+                $contact_no = ($transferInfo['mobile'] != "") ? $transferInfo['mobile'] : $transferInfo['alternate_contact'] ;
+                $response[$iterator]['grn'] = $transferInfo['grn']." : ".$transferInfo['company']." : ".$contact_no;
                 if(isset($transferInfo['transportation_amount']) || $transferInfo['transportation_amount'] != null){
                     $response[$iterator]['subtotal'] = round($transferInfo['transportation_amount'],3);
                 }else{
@@ -180,7 +187,7 @@ class SiteTransferBillingController extends Controller
                 } else {
                     $length = $request->length;
                 }
-                for ($iterator = 0, $pagination = $request->start; $iterator < $length && $iterator < count($siteTransferBillData); $iterator++, $pagination++) {
+                for ($iterator = 0, $pagination = $request->start; $iterator < $length && $pagination < count($siteTransferBillData); $iterator++, $pagination++) {
                     $projectName = $siteTransferBillData[$pagination]->inventoryComponentTransfer->inventoryComponent->projectSite->project->name;
                     $paidAmount = SiteTransferBillPayment::where('site_transfer_bill_id', $siteTransferBillData[$pagination]['id'])->sum('amount');
                     $pendingAmount = $siteTransferBillData[$pagination]['total'] - $paidAmount;
@@ -295,7 +302,7 @@ class SiteTransferBillingController extends Controller
             $records["draw"] = intval($request->draw);
             $siteTransferBillPaymentData = SiteTransferBillPayment::where('site_transfer_bill_id', $siteTransferBill->id)->orderBy('id','desc')->get();
             $records["recordsFiltered"] = $records["recordsTotal"] = count($siteTransferBillPaymentData);
-            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($siteTransferBillPaymentData); $iterator++,$pagination++ ){
+            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $pagination < count($siteTransferBillPaymentData); $iterator++,$pagination++ ){
                 if($siteTransferBillPaymentData[$pagination]->paymentType == null){
                     $paymentType = '-';
                 }else{

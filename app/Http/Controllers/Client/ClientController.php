@@ -106,7 +106,7 @@ class ClientController extends Controller
             $iTotalRecords = count($clientData);
             $records = array();
             $records['data'] = array();
-            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $iterator < count($clientData); $iterator++,$pagination++ ){
+            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $pagination < count($clientData); $iterator++,$pagination++ ){
                 if($clientData[$pagination]['is_active'] == true){
                     $client_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
                     $status = 'Disable';
