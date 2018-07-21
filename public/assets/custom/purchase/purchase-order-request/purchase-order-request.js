@@ -65,10 +65,12 @@ function componentTaxDetailSubmit(){
     var formData = $("#componentDetailForm").serializeArray();
     $("#componentRow-"+componentRelationId+" #hiddenInputs").remove();
     $("<div id='hiddenInputs'></div>").insertAfter("#componentRow-"+componentRelationId+" .component-vendor-relation");
-    var rateQuantityValidateflag = false;
+    var rateQuantityValidateflag = dateFlag = false;
     $.each(formData, function(key, value){
         if((value.name == 'quantity' || value.name == "rate_per_unit") && (value.value == 0)){
             rateQuantityValidateflag = true;
+        }else if(value.name == 'expected_delivery_date' && value.value == ''){
+            dateFlag = true;
         }else{
             if(value.name != 'vendor_images[]' && value.name != 'client_images[]'){
                 $("#componentRow-"+componentRelationId+" #hiddenInputs").append("<input type='hidden' value='"+value.value+"' name='data["+componentRelationId+"]["+value.name+"]'>");
@@ -84,6 +86,8 @@ function componentTaxDetailSubmit(){
     });
     if(rateQuantityValidateflag){
         alert("Rate and Quantity must not be 0");
+    }else if (dateFlag){
+        alert('Please select Date');
     }else{
         var rate = parseFloat($("input[name='data["+componentRelationId+"][rate_per_unit]'").val()).toFixed(3);
         if(rate == '-'){
