@@ -61,7 +61,7 @@ class BankController extends Controller
     public function CreateBank(BankRequest $request){
         try{
             $data = $request->except('_token');
-            $data['is_active'] = (boolean)false;
+            $data['is_active'] = false;
             $bank = BankInfo::create($data);
             $request->session()->flash('success', 'Bank created successfully');
             return redirect('/bank/manage');
@@ -92,8 +92,7 @@ class BankController extends Controller
 
             $bankData = array();
             $filterFlag = true;
-            $ids = BankInfo::where('is_active',true)
-                ->pluck('id')->toArray();
+            $ids = BankInfo::GIT pluck('id')->toArray();
 
 
             if($request->has('search_name') && $bank_name != null && $bank_name != "") {
