@@ -64,7 +64,7 @@ use InventoryTrait;
                     $quantityAssigned = $quantityAssigned + $inventoryComponentTransfer['quantity'];
                 }else{
                     $isAssigned = false;
-                    $quantityAssigned = 0;
+                    //$quantityAssigned = 0;
                 }
             }
             if($asset->assetTypes->slug == 'other'){
@@ -235,33 +235,56 @@ use InventoryTrait;
 
     public function assignProjectSite(Request $request,$asset){
         try{
-            $user = Auth::user();
-            $inventoryComponentId = InventoryComponent::where('project_site_id',$request['project_site_id'])->where('reference_id',$asset['id'])->where('is_material',false)->pluck('id')->first();
-            if($inventoryComponentId == null){
-                $inventoryComponentData['name'] = $asset['name'];
-                $inventoryComponentData['is_material'] = false;
-                $inventoryComponentData['project_site_id'] = $request->project_site_id;
-                $inventoryComponentData['opening_stock'] = 0;
-                $inventoryComponentData['reference_id'] = $asset['id'];
-                $inventoryComponent = InventoryComponent::create($inventoryComponentData);
-                $inventoryComponentId = $inventoryComponent['id'];
+            $inventoryComponentTransfers = InventoryComponentTransfers::join('inventory_components','inventory_components.id','=','inventory_component_transfers.inventory_component_id')
+                ->where('inventory_components.reference_id',$asset['id'])
+                ->where('inventory_components.is_material',false)
+                ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
+                ->orderBy('inventory_component_transfers.created_at','asc')->select('inventory_component_transfers.id','inventory_component_transfers.transfer_type_id','inventory_component_transfers.quantity')->get();
+            $quantityAssigned = 0;
+            foreach($inventoryComponentTransfers as $key => $inventoryComponentTransfer){
+                if($inventoryComponentTransfer->transferType->type == 'IN'){
+                    $quantityAssigned = $quantityAssigned + $inventoryComponentTransfer['quantity'];
+                }/*else{
+                    $quantityAssigned = 0;
+                }*/
             }
-            $inventoryComponentTransferData = [
-                'inventory_component_id' => $inventoryComponentId,
-                'transfer_type_id' => InventoryTransferTypes::where('type','ilike','IN')->where('slug','office')->pluck('id')->first(),
-                'source_name' => env('OFFICE_PROJECT_SITE_NAME'),
-                'quantity' => $request['quantity'],
-                'unit_id' => Unit::where('slug','nos')->pluck('id')->first(),
-                'user_id' => $user['id'],
-                'inventory_component_transfer_status_id' => InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first(),
-                'rate_per_unit' => $request['rent_per_day']
-            ];
-            $inventoryComponentTransfer = $this->createInventoryComponentTransfer($inventoryComponentTransferData);
-            if(count($inventoryComponentTransfer) > 0){
-                $request->session()->flash('success', 'Project Site assigned successfully.');
+            if($asset->assetTypes->slug == 'other'){
+                $remainingQuantity = $asset['quantity'] - $quantityAssigned;
             }else{
-                $request->session()->flash('success', 'Something went wrong.');
+                $remainingQuantity = 1;
             }
+            if($remainingQuantity < $request['quantity']){
+                $request->session()->flash('success', 'Allowed Quantity is '.$remainingQuantity);
+            }else{
+                $user = Auth::user();
+                $inventoryComponentId = InventoryComponent::where('project_site_id',$request['project_site_id'])->where('reference_id',$asset['id'])->where('is_material',false)->pluck('id')->first();
+                if($inventoryComponentId == null){
+                    $inventoryComponentData['name'] = $asset['name'];
+                    $inventoryComponentData['is_material'] = false;
+                    $inventoryComponentData['project_site_id'] = $request->project_site_id;
+                    $inventoryComponentData['opening_stock'] = 0;
+                    $inventoryComponentData['reference_id'] = $asset['id'];
+                    $inventoryComponent = InventoryComponent::create($inventoryComponentData);
+                    $inventoryComponentId = $inventoryComponent['id'];
+                }
+                $inventoryComponentTransferData = [
+                    'inventory_component_id' => $inventoryComponentId,
+                    'transfer_type_id' => InventoryTransferTypes::where('type','ilike','IN')->where('slug','office')->pluck('id')->first(),
+                    'source_name' => env('OFFICE_PROJECT_SITE_NAME'),
+                    'quantity' => $request['quantity'],
+                    'unit_id' => Unit::where('slug','nos')->pluck('id')->first(),
+                    'user_id' => $user['id'],
+                    'inventory_component_transfer_status_id' => InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first(),
+                    'rate_per_unit' => $request['rent_per_day']
+                ];
+                $inventoryComponentTransfer = $this->createInventoryComponentTransfer($inventoryComponentTransferData);
+                if(count($inventoryComponentTransfer) > 0){
+                    $request->session()->flash('success', 'Project Site assigned successfully.');
+                }else{
+                    $request->session()->flash('success', 'Something went wrong.');
+                }
+            }
+
             return redirect('/asset/edit/'.$asset->id);
         }catch (Exception $e){
             $data = [
