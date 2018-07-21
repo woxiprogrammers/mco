@@ -442,9 +442,16 @@
                     alert('Please select Bank');
                 }else{
                     var allowedBankAmount = parseFloat($('#balance_amount_'+selectedBankId).val());
-                    $(element).rules('add',{
-                        max: allowedBankAmount
-                    });
+                    if(allowedBankAmount > approved_amount){
+                        $(element).rules('add',{
+                            max: approved_amount
+                        });
+                    }else{
+                        $(element).rules('add',{
+                            max: allowedBankAmount
+                        });
+                    }
+
                 }
             }else{
                 $(element).rules('add',{
