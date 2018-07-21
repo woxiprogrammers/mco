@@ -16,6 +16,7 @@ $(document).ready(function(){
         var materialList = new Bloodhound({
             datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
             queryTokenizer: Bloodhound.tokenizers.whitespace,
+
             remote: {
                 url: '/purchase/material-request/get-items?project_site_id='+site_name+'&search_in='+search_in+'&keyword=%QUERY',
                 filter: function(x) {
@@ -34,6 +35,7 @@ $(document).ready(function(){
                 wildcard: "%QUERY"
             }
         });
+
         $('#searchbox').addClass('typeahead');
         materialList.initialize();
         $('.typeahead').typeahead(null, {
@@ -89,7 +91,6 @@ $(document).ready(function(){
             }
         });
         $('#Assetsearchbox').addClass('assetTypeahead');
-       // $('#component_id').val(6);
         assetList.initialize();
         var unitName = "Nos";
         $('.assetTypeahead').typeahead(null, {

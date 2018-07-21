@@ -74,7 +74,7 @@
                                                         <select class="form-control" id="status_id" name="status_id">
                                                             <option value="all">ALL</option>
                                                             <option value="cash">Cash</option>
-                                                            <option value="bank">Bank - Cheque</option>
+                                                            <option value="bank">Bank</option>
                                                         </select>
                                                         <input type="hidden" class="form-control form-filter" name="status" id="status">
                                                     </th>

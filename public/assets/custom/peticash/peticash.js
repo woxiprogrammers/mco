@@ -66,7 +66,7 @@ var masterAccountListing = function () {
 
                             // Update footer
                             $( api.column( 3 ).footer() ).html(
-                                pageTotal +' ( '+ total +' total)'
+                                pageTotal.toFixed(3) +' ( '+ total.toFixed(3) +' total)'
                             );
                         }});
                 },
@@ -156,6 +156,10 @@ var sitewiseAccountListing = function () {
                                 i : 0;
                     };
 
+                    var status_id = $('#status_id').val()
+                    var searchFrom = $('#searchFrom').val();
+                    var searchTo = $('#searchTo').val();
+                    var search_name = $('#search_name').val();
 
 
                     // Total over all pages
@@ -163,7 +167,11 @@ var sitewiseAccountListing = function () {
                         url: "/peticash/sitewise-peticash-account/listing",
                         type: 'POST',
                         data :{
-                            "get_total" : true
+                            "get_total" : true,
+                            "status" : status_id,
+                            "searchFrom" : searchFrom,
+                            "searchTo" : searchTo,
+                            "search_name" : search_name
                         },
                         success: function(result){
                             total = result['total'];
@@ -178,7 +186,7 @@ var sitewiseAccountListing = function () {
 
                             // Update footer
                             $( api.column( 4 ).footer() ).html(
-                                pageTotal +' ( '+ total +' total)'
+                                pageTotal.toFixed(3) +' ( '+ total.toFixed(3) +' total)'
                             );
                         }});
                 },
@@ -384,7 +392,7 @@ var peticashSalaryApprovalListing = function () {
 
                             // Update footer
                             $( api.column( 5 ).footer() ).html(
-                                pageTotal +' ( '+ total +' total)'
+                                pageTotal.toFixed(3) +' ( '+ total.toFixed(3) +' total)'
                             );
                         }});
                 },

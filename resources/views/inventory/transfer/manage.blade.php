@@ -44,12 +44,12 @@
                                                                 <th> Action </th>
                                                             </tr>
                                                             <tr class="filter">
-                                                                <th> <input type="text" class="form-control form-filter" name="search_project" readonly> </th>
-                                                                <th> <input type="text" class="form-control form-filter" name="search_name" readonly> </th>
-                                                                <th> <input type="text" class="form-control form-filter" name="search_status" readonly> </th>
-                                                                <th> <input type="text" class="form-control form-filter" name="search_created_on" readonly> </th>
-                                                                <th> <input type="text" class="form-control form-filter" name="search_created_on" readonly> </th>
-                                                                <th> <input type="text" class="form-control form-filter" name="search_created_on" readonly> </th>
+                                                                <th> <input type="text" class="form-control form-filter" name="search_from" id="search_from"> </th>
+                                                                <th> <input type="text" class="form-control form-filter" name="search_to" id="search_to"> </th>
+                                                                <th> <input type="text" class="form-control form-filter" name="search_name" id="search_name" > </th>
+                                                                <th>  </th>
+                                                                <th>  </th>
+                                                                <th>  </th>
                                                                 <th>
                                                                     <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                                     <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
@@ -85,6 +85,34 @@
     <script>
         $(document).ready(function() {
             RequestComponentListing.init();
+
+            $("#search_to").on('keyup',function() {
+                var searchName= $('#search_name').val();
+                var searchFrom = $('#search_from').val();
+                var searchTo = $('#search_to').val();
+                $("input[name='search_name']").val(searchName)
+                $("input[name='search_from']").val(searchFrom);
+                $("input[name='search_to']").val(searchTo);
+                $(".filter-submit").trigger('click');
+            });
+            $("#search_from").on('keyup',function() {
+                var searchName= $('#search_name').val();
+                var searchFrom = $('#search_from').val();
+                var searchTo = $('#search_to').val();
+                $("input[name='search_name']").val(searchName)
+                $("input[name='search_from']").val(searchFrom);
+                $("input[name='search_to']").val(searchTo);
+                $(".filter-submit").trigger('click');
+            });
+            $("#search_name").on('keyup',function() {
+                var searchName= $('#search_name').val();
+                var searchFrom = $('#search_from').val();
+                var searchTo = $('#search_to').val();
+                $("input[name='search_name']").val(searchName)
+                $("input[name='search_from']").val(searchFrom);
+                $("input[name='search_to']").val(searchTo);
+                $(".filter-submit").trigger('click');
+            });
         });
 
         function changeStatus(element){

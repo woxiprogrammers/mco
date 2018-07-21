@@ -55,7 +55,7 @@ var SiteTransferBillListing = function () {
 
                             // Update footer
                             $( api.column( 8 ).footer() ).html(
-                                pageTotal +' ( '+ total +' total)'
+                                pageTotal.toFixed(3) +' ( '+ total.toFixed(3) +' total)'
                             );
 
                             billtotal = result['billtotal'];
@@ -70,7 +70,7 @@ var SiteTransferBillListing = function () {
 
                             // Update footer
                             $( api.column( 9 ).footer() ).html(
-                                pageBillTotal +' ( '+ billtotal +' total)'
+                                pageBillTotal.toFixed(3) +' ( '+ billtotal.toFixed(3) +' total)'
                             );
 
                             paidtotal = result['paidtotal'];
@@ -85,7 +85,7 @@ var SiteTransferBillListing = function () {
 
                             // Update footer
                             $( api.column( 10 ).footer() ).html(
-                                pagePaidTotal +' ( '+ paidtotal +' total)'
+                                pagePaidTotal.toFixed(3) +' ( '+ paidtotal.toFixed(3) +' total)'
                             );
                         }});
                 },
