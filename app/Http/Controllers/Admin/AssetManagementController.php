@@ -64,7 +64,7 @@ use InventoryTrait;
                     $quantityAssigned = $quantityAssigned + $inventoryComponentTransfer['quantity'];
                 }else{
                     $isAssigned = false;
-                    $quantityAssigned = 0;
+                    //$quantityAssigned = 0;
                 }
             }
             if($asset->assetTypes->slug == 'other'){
@@ -244,9 +244,9 @@ use InventoryTrait;
             foreach($inventoryComponentTransfers as $key => $inventoryComponentTransfer){
                 if($inventoryComponentTransfer->transferType->type == 'IN'){
                     $quantityAssigned = $quantityAssigned + $inventoryComponentTransfer['quantity'];
-                }else{
+                }/*else{
                     $quantityAssigned = 0;
-                }
+                }*/
             }
             if($asset->assetTypes->slug == 'other'){
                 $remainingQuantity = $asset['quantity'] - $quantityAssigned;
