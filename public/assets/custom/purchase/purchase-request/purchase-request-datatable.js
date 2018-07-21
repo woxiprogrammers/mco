@@ -55,7 +55,7 @@ $(document).ready(function(){
             $('#component_type_id').val();
         })
             .on('typeahead:open', function (obj, datum) {
-               // $('#component_id').val(4);
+                $('#component_id').val('');
                 var options = $("#unitOptions").val();
                 var str1 = '<select class="form-control" id="materialUnit"><option value="">Select Unit</option>'+options+ '</select>';
                 $('#unitDrpdn').html(str1);
@@ -110,7 +110,7 @@ $(document).ready(function(){
             $('#component_type_id').val();
         })
             .on('typeahead:open', function (obj, datum) {
-                //$('#component_id').val(6);
+                $('#component_id').val('');
             });
         $("#myModal1").modal();
     });
@@ -198,7 +198,7 @@ $('#createMaterial').click(function(){
     }else{
         $("#qty").closest('.form-group').addClass('has-success').removeClass('has-error');
     }
-    if(typeof unitId == 'undefined' || unitId == ''){
+    if(typeof unitId == 'undefined' || unitId == '' || unitId == 'Select Unit'){
         $("#materialUnit").closest('.form-group').addClass('has-error').removeClass('has-success');
         validFlag = false;
     }else{
@@ -225,6 +225,8 @@ $('#createMaterial').click(function(){
         $('#searchbox').html('');
         $('#qty').val('');
         $('#files').val(null);
+    }else{
+        alert('Please fill all fields');
     }
 });
 $('#createAsset').click(function(){

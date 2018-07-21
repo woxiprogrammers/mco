@@ -164,7 +164,7 @@ $(document).ready(function(){
         }else{
             $("#qty").closest('.form-group').addClass('has-success').removeClass('has-error');
         }
-        if(typeof unitId == 'undefined' || unitId == ''){
+        if(typeof unitId == 'undefined' || unitId == '' || unitId == 'Select Unit'){
             $("#materialUnit").closest('.form-group').addClass('has-error').removeClass('has-success');
             validFlag = false;
         }else{
