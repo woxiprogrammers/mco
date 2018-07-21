@@ -342,7 +342,7 @@ trait ProjectTrait{
             }else{
                 $length = $request->length;
             }
-            for($iterator = 0,$pagination = $request->start; $iterator < $length && $iterator < count($paymentData); $iterator++,$pagination++ ){
+            for($iterator = 0,$pagination = $request->start; $iterator < $length && $pagination < count($paymentData); $iterator++,$pagination++ ){
                 $records['data'][] = [
                     date('d M Y',strtotime($paymentData[$pagination]['created_at'])),
                     $paymentData[$pagination]['amount'],
