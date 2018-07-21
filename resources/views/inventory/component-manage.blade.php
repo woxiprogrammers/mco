@@ -43,18 +43,18 @@
                                     <input type="hidden" id="outTransferTypes" value="{{$outTransferTypes}}">
                                     <input type="hidden" name="opening_stock" id="openingStock" value="{{$inventoryComponent->opening_stock}}">
                                     <div class="col-md-12">
-                                        <!-- BEGIN VALIDATION STATES-->
+                                    <!-- BEGIN VALIDATION STATES-->
                                         <div class="row">
                                             <div class="col-md-12">
                                                 <div class="portlet light ">
                                                     <div class="portlet-body form">
                                                         <div class="portlet light ">
-                                                            @if($isReadingApplicable)
+                                                        @if($isReadingApplicable)
                                                                 <ul class="nav nav-tabs nav-tabs-lg">
                                                                     <li class="active">
                                                                         <a href="#transferTab" data-toggle="tab"> Transfers </a>
                                                                     </li>
-                                                                    @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-asset-reading')|| $user->customHasPermission('view-asset-reading')|| $user->customHasPermission('edit-asset-reading'))
+                                                                @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-asset-reading')|| $user->customHasPermission('view-asset-reading')|| $user->customHasPermission('edit-asset-reading'))
                                                                         <li>
                                                                             <a href="#readingTab" data-toggle="tab"> Readings </a>
                                                                         </li>
@@ -68,7 +68,8 @@
                                                                             <a href="javascript:void(0);" class="btn yellow" id="stockButton" >
                                                                                 Opening Stock
                                                                             </a>
-                                                                            @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-inventory-in-out-transfer'))
+                                                                        @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-inventory-in-out-transfer'))
+
                                                                                 <a href="javascript:void(0);" class="btn yellow" style="margin: 20px" id="transaction">
                                                                                     <i class="fa fa-plus" style="font-size: large"></i>&nbsp;
                                                                                     Transaction
@@ -144,6 +145,7 @@
                                         </div>
                                     </div>
                                 </div>
+
                                 <div class="modal fade" id="transactionModal" role="dialog">
                                     <div class="modal-dialog" style="width: 90%; ">
                                         <!-- Modal content-->
@@ -371,6 +373,7 @@
                                                         </table>
                                                     </div>
                                                 </div>
+
                                                 <div id="subcontractor_form" hidden>
                                                     <div class="form-group">
                                                         <input type="text" name="source_name" id="sourceName" class="form-control" placeholder="Enter sub-contractor's Name">
@@ -461,8 +464,7 @@
                                                         </div>
 
                                                     @endif
-
-                                                    @if($isReadingApplicable || $inventoryComponent->asset->assetTypes->slug == 'other')
+                                                    @if($isReadingApplicable || (array_key_exists('asset',$inventoryComponent->toArray()) && $inventoryComponent->asset->assetTypes->slug == 'other'))
                                                         <div class="row form-group">
                                                             <div class="col-md-3">
                                                                 <label class="control-label pull-right">Unit</label>
@@ -481,6 +483,7 @@
                                                                 <input type="text" name="rate_per_unit" id="rent_id" class="form-control" placeholder="Enter Rent" value="{!! $amount['rate_per_unit'] !!}">
                                                             </div>
                                                         </div>
+
                                                         <div class="row form-group">
                                                             <div class="col-md-3">
                                                                 <label class="control-label pull-right">Quantity</label>
@@ -509,6 +512,7 @@
                                                                 </select>
                                                             </div>
                                                         </div>
+
                                                         <div class="row form-group">
                                                             <div class="col-md-3">
                                                                 <label class="control-label pull-right">Quantity</label>
@@ -559,6 +563,7 @@
                                                                     <span class="input-group-addon">%</span>
                                                                 </div>
                                                             </div>
+
                                                             <div class="col-md-5">
                                                                 <input type="text" class="form-control tax-modal-sgst-amount" name="sgst_amount" readonly>
                                                             </div>
@@ -1616,7 +1621,7 @@
             $(element).closest('.modal-body').find('.transportation-cgst-amount').val(cgstAmount);
             $(element).closest('.modal-body').find('.transportation-sgst-amount').val(sgstAmount);
             $(element).closest('.modal-body').find('.transportation-igst-amount').val(igstAmount);
-            var transportationTotal = parseFloat(parseFloat(transportationAmount) + cgstAmount + sgstAmount + igstAmount).toFixed(3);
+            var transportationTotal = parseFloat(parseFloat(transportationAmount) + parseFloat(cgstAmount) + parseFloat(sgstAmount) + parseFloat(igstAmount)).toFixed(3);
             $(element).closest('.modal-body').find('.transportation-total').val(transportationTotal);
         }
 

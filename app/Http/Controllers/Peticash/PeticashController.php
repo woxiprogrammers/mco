@@ -2057,6 +2057,7 @@ class PeticashController extends Controller
 
     public function createSalaryCreate(Request $request){
         try{
+            dd($request->all());
             $projectSiteId = Session::get('global_project_site');
             $user = Auth::user();
             $validationAmount = ($request['transaction_type'] == 'salary') ? $request['payable_amount'] : $request['amount'];
