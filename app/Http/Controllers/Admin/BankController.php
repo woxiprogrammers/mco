@@ -92,7 +92,7 @@ class BankController extends Controller
 
             $bankData = array();
             $filterFlag = true;
-            $ids = BankInfo::GIT pluck('id')->toArray();
+            $ids = BankInfo::pluck('id')->toArray();
 
 
             if($request->has('search_name') && $bank_name != null && $bank_name != "") {
