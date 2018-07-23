@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 
 
 class AssetManagementController extends Controller
@@ -51,6 +52,7 @@ use InventoryTrait;
 
     public function getEditView(Request $request,$asset){
         try{
+            $projectSiteId = Session::get('global_project_site');
             $inventoryComponentTransfers = InventoryComponentTransfers::join('inventory_components','inventory_components.id','=','inventory_component_transfers.inventory_component_id')
                 ->where('inventory_components.reference_id',$asset['id'])
                 ->where('inventory_components.is_material',false)
@@ -68,7 +70,7 @@ use InventoryTrait;
                     $isAssigned = false;
                 }
             }
-            $openingStock = InventoryComponent::where('reference_id',$asset['id'])->where('is_material',false)->pluck('opening_stock')->first();
+            $openingStock = InventoryComponent::where('reference_id',$asset['id'])->where('project_site_id',$projectSiteId)->where('is_material',false)->pluck('opening_stock')->first();
             $quantityAssigned = $quantityAssigned + $openingStock;
             if($asset->assetTypes->slug == 'other'){
                 $remainingQuantity = $asset['quantity'] - $quantityAssigned;
