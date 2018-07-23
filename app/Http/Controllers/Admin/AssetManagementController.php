@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 
 
 class AssetManagementController extends Controller
@@ -51,22 +52,26 @@ use InventoryTrait;
 
     public function getEditView(Request $request,$asset){
         try{
+            $projectSiteId = Session::get('global_project_site');
             $inventoryComponentTransfers = InventoryComponentTransfers::join('inventory_components','inventory_components.id','=','inventory_component_transfers.inventory_component_id')
                 ->where('inventory_components.reference_id',$asset['id'])
                 ->where('inventory_components.is_material',false)
                 ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
-                ->orderBy('inventory_component_transfers.created_at','asc')->select('inventory_component_transfers.id','inventory_component_transfers.transfer_type_id','inventory_component_transfers.quantity')->get();
+                ->orderBy('inventory_component_transfers.created_at','asc')->select('inventory_component_transfers.id','inventory_component_transfers.transfer_type_id','inventory_component_transfers.quantity','inventory_component_transfers.related_transfer_id')->get();
             $isAssigned = false;
             $quantityAssigned = $jIterator = 0;
             foreach($inventoryComponentTransfers as $key => $inventoryComponentTransfer){
                 if($inventoryComponentTransfer->transferType->type == 'IN'){
                     $isAssigned = true;
                     $quantityAssigned = $quantityAssigned + $inventoryComponentTransfer['quantity'];
+                }elseif($inventoryComponentTransfer->transferType->type == 'OUT' && $inventoryComponentTransfer->transferType->slug == 'site' && $inventoryComponentTransfer['related_transfer_id'] != null){
+                    $quantityAssigned = $quantityAssigned - $inventoryComponentTransfer['quantity'];
                 }else{
                     $isAssigned = false;
-                    //$quantityAssigned = 0;
                 }
             }
+            $openingStock = InventoryComponent::where('reference_id',$asset['id'])->where('project_site_id',$projectSiteId)->where('is_material',false)->pluck('opening_stock')->first();
+            $quantityAssigned = $quantityAssigned + $openingStock;
             if($asset->assetTypes->slug == 'other'){
                 $remainingQuantity = $asset['quantity'] - $quantityAssigned;
                 $isAssigned = ($remainingQuantity > 0) ? false : true;
@@ -244,10 +249,12 @@ use InventoryTrait;
             foreach($inventoryComponentTransfers as $key => $inventoryComponentTransfer){
                 if($inventoryComponentTransfer->transferType->type == 'IN'){
                     $quantityAssigned = $quantityAssigned + $inventoryComponentTransfer['quantity'];
-                }/*else{
-                    $quantityAssigned = 0;
-                }*/
+                }elseif($inventoryComponentTransfer->transferType->type == 'OUT' && $inventoryComponentTransfer->transferType->slug == 'site' && $inventoryComponentTransfer['related_transfer_id'] != null){
+                    $quantityAssigned = $quantityAssigned - $inventoryComponentTransfer['quantity'];
+                }
             }
+            $openingStock = InventoryComponent::where('reference_id',$asset['id'])->where('is_material',false)->pluck('opening_stock')->first();
+            $quantityAssigned = $quantityAssigned + $openingStock;
             if($asset->assetTypes->slug == 'other'){
                 $remainingQuantity = $asset['quantity'] - $quantityAssigned;
             }else{

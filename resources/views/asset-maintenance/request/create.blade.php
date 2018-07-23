@@ -93,7 +93,7 @@
                                                     </div>
                                                     <div class="form-actions noborder row">
                                                         <div class="col-md-offset-3" style="margin-left: 26%">
-                                                            <button type="submit" class="btn red" style=" padding-left: 6px"><i class="fa fa-check"></i> Submit</button>
+                                                            <button type="button" id="submitButton" class="btn red" style=" padding-left: 6px"><i class="fa fa-check"></i> Submit</button>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -118,8 +118,6 @@
     <script src="/assets/global/plugins/jquery-validation/js/jquery.validate.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/plupload/js/plupload.full.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/jstree/dist/jstree.min.js" type="text/javascript"></script>
-    {{--<script src="/assets/custom/admin/asset/image-datatable.js"></script>
-    <script src="/assets/custom/admin/asset/image-upload.js"></script>--}}
     <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
     <script  src="/assets/global/plugins/datatables/datatables.min.js"></script>
     <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
@@ -129,8 +127,11 @@
     <script src="/assets/custom/admin/asset-maintenance/request/image-datatable.js"></script>
     <script src="/assets/custom/admin/asset-maintenance/request/image-upload.js"></script>
     <script>
-      $('#asset_name').addClass('typeahead');
-      var citiList = new Bloodhound({
+        $(document).ready(function(){
+            CreateAssetMaintenanceRequest.init();
+        });
+          $('#asset_name').addClass('typeahead');
+          var citiList = new Bloodhound({
           datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
           queryTokenizer: Bloodhound.tokenizers.whitespace,
           remote: {
@@ -149,27 +150,99 @@
               wildcard: "%QUERY"
           }
       });
-      citiList.initialize();
-      $('.typeahead').typeahead(null, {
-          displayKey: 'name',
-          engine: Handlebars,
-          source: citiList.ttAdapter(),
-          limit: 30,
-          templates: {
-              empty: [
-                  '<div class="empty-suggest">',
-                  'Unable to find any Result that match the current query',
-                  '</div>'
-              ].join('\n'),
-              suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{asset_name}}</strong></div>')
-          },
-      }).on('typeahead:selected', function (obj, datum) {
-          var POData = $.parseJSON(JSON.stringify(datum));
-          console.log(POData.asset_name);
-          $('.typeahead').typeahead('val',POData.asset_name);
-          $("#asset_id").val(POData.asset_id);
-      }).on('typeahead:open', function (obj, datum) {
+          citiList.initialize();
+          $('.typeahead').typeahead(null, {
+              displayKey: 'name',
+              engine: Handlebars,
+              source: citiList.ttAdapter(),
+              limit: 30,
+              templates: {
+                  empty: [
+                      '<div class="empty-suggest">',
+                      'Unable to find any Result that match the current query',
+                      '</div>'
+                  ].join('\n'),
+                  suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{asset_name}}</strong></div>')
+              },
+          }).on('typeahead:selected', function (obj, datum) {
+              var POData = $.parseJSON(JSON.stringify(datum));
+              $('.typeahead').typeahead('val',POData.asset_name);
+              $("#asset_id").val(POData.asset_id);
+          }).on('typeahead:open', function (obj, datum) {
 
+          });
+
+      $('#submitButton').click(function(){
+         var asset_id = $("#asset_id").val();
+          if(typeof asset_id != 'undefined' && asset_id != '' && asset_id != null){
+              $('#submitButton').submit();
+          }else{
+              alert('Please select asset name from drop down');
+          }
       });
+
+
+      var  CreateAssetMaintenanceRequest = function () {
+          var handleCreate = function() {
+              var form = $('#createRequestMaintenanceForm');
+              var error = $('.alert-danger', form);
+              var success = $('.alert-success', form);
+              form.validate({
+                  errorElement: 'span', //default input error message container
+                  errorClass: 'help-block', // default input error message class
+                  focusInvalid: false, // do not focus the last invalid input
+                  rules: {
+                      asset_name: {
+                          required: true
+                      },
+                      remark: {
+                          required: true
+                      }
+                  },
+
+                  messages: {
+                      asset_name: {
+                          required: "Asset name is required."
+                      },
+                      remark: {
+                          required: "Remark is required."
+                      }
+
+                  },
+
+                  invalidHandler: function (event, validator) { //display error alert on form submit
+                      success.hide();
+                      error.show();
+                  },
+
+                  highlight: function (element) { // hightlight error inputs
+                      $(element)
+                          .closest('.form-group').addClass('has-error'); // set error class to the control group
+                  },
+
+                  unhighlight: function (element) { // revert the change done by hightlight
+                      $(element)
+                          .closest('.form-group').removeClass('has-error'); // set error class to the control group
+                  },
+
+                  success: function (label) {
+                      label
+                          .closest('.form-group').addClass('has-success');
+                  },
+
+                  submitHandler: function (form) {
+                      success.show();
+                      error.hide();
+                      form.submit();
+                  }
+              });
+          };
+
+          return {
+              init: function () {
+                  handleCreate();
+              }
+          };
+      }();
 </script>
 @endsection
