@@ -115,6 +115,7 @@ class AssetMaintenanceController extends Controller{
 
     public function createAssetMaintenanceRequest(Request $request){
         try{
+            
             $projectSiteId = Session::get('global_project_site');
             $user = Auth::user();
             $assetMaintenance = AssetMaintenance::create([
