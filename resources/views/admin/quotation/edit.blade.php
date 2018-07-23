@@ -389,9 +389,9 @@
                                                         <li>
                                                             <a href="#bankassignFormTab" data-toggle="tab"> Assign Bank </a>
                                                         </li>
-                                                        {{--<li>
+                                                        <li>
                                                             <a href="#miscellaneousFormTab" data-toggle="tab"> Miscellaneous Category </a>
-                                                        </li>--}}
+                                                        </li>
                                                         <li>
                                                             <a href="#floorFormTab" data-toggle="tab"> Floors </a>
                                                         </li>
@@ -624,7 +624,7 @@
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        {{--<div class="tab-pane fade in" id="miscellaneousFormTab">
+                                                        <div class="tab-pane fade in" id="miscellaneousFormTab">
                                                             <table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll; " id="createBillTable">
                                                                 <tr>
                                                                     <th style="width: 13%; text-align: center" >
@@ -671,7 +671,7 @@
                                                                     </tr>
                                                                 @endforeach
                                                             </table>
-                                                        </div>--}}
+                                                        </div>
                                                         <div class="tab-pane fade in" id="openingExpensesFormTab">
                                                             <div class="form-group">
                                                                 <div class="col-md-3">
@@ -709,7 +709,11 @@
                                                                                 @for($iterator = 0; $iterator < count($quotation->quotation_floor); $iterator++)
                                                                                     <tr>
                                                                                         <td>{!! $iterator+1 !!}</td>
-                                                                                        <td><div class="form-group" style="width:80%;margin-left: 10%"><input type="text" name="quotation_floor[{{$iterator}}]" class="form-control quotation-floor" value="{{$quotation->quotation_floor[$iterator]->name}}"></div></td>
+                                                                                        <td>
+                                                                                            <div class="form-group" style="width:80%;margin-left: 10%">
+                                                                                                <input type="text" name="quotation_floor[{{$iterator}}]" class="form-control quotation-floor" value="{{$quotation->quotation_floor[$iterator]->name}}">
+                                                                                            </div>
+                                                                                        </td>
                                                                                     </tr>
                                                                                 @endfor
                                                                             </tbody>
