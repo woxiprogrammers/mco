@@ -164,10 +164,12 @@ class AssetMaintenanceController extends Controller{
             if(Session::has('global_project_site')){
                 $projectSiteId = Session::get('global_project_site');
                 $assetIds = InventoryComponent::join('assets','assets.id','=','inventory_components.reference_id')
+                                        ->join('asset_types','asset_types.id','=','assets.asset_types_id')
                                         ->where('inventory_components.project_site_id', $projectSiteId)
                                         ->where('assets.name','ilike','%'.$keyword.'%')
                                         ->where('inventory_components.is_material', false)
                                         ->where('assets.is_active',true)
+                                        ->where('asset_types.slug','!=','other')
                                         ->pluck('inventory_components.id');
             }else{
                 $assetIds = array();
