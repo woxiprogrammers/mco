@@ -174,6 +174,8 @@ function selectUser(name,id) {
 }
 $('#createMaterial').click(function(){
     var material_name = $('#searchbox').val();
+    var materialNameEncoded = material_name.replace(/"/g,'$!@#$');
+    materialNameEncoded = materialNameEncoded.replace(/''/g,'$!@#$');
     var quantity = $('#qty').val();
     var unit = $('#materialUnit option:selected').text();
     var unitId = $('#materialUnit').val();
@@ -231,6 +233,8 @@ $('#createMaterial').click(function(){
 });
 $('#createAsset').click(function(){
     var asset_name = $('#Assetsearchbox').val();
+    var assetNameEncoded = asset_name.replace(/"/g,'$!@#$');
+    assetNameEncoded = assetNameEncoded.replace(/''/g,'$!@#$');
     var quantity = $('#Assetqty').val();
     var unit = $('#AssetUnitsearchbox').val();
     var unitId = $('#AssetUnitId').val();
