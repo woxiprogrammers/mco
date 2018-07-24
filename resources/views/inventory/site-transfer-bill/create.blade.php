@@ -320,7 +320,7 @@
                 if(isNaN(taxAmount)){
                     taxAmount = 0;
                 }
-                var totalAmount = parseFloat(parseFloat(subtotal) + parseFloat(taxAmount) + extraAmount + cgstAmount + sgstAmount + igstAmount).toFixed(3);
+                var totalAmount = parseFloat(parseFloat(subtotal) + parseFloat(taxAmount) + parseFloat(extraAmount) + parseFloat(cgstAmount) + parseFloat(sgstAmount) + parseFloat(igstAmount)).toFixed(3);
                 if(isNaN(totalAmount)){
                     totalAmount = 0;
                 }

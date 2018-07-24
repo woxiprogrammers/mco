@@ -7,6 +7,9 @@
 namespace App\Http\Controllers\CustomTraits;
 use App\Category;
 use App\Http\Requests\CategoryRequest;
+use App\Material;
+use App\MaterialRequestComponentTypes;
+use App\UnitConversion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -29,6 +32,21 @@ trait CategoryTrait{
 
     public function getEditView(Request $request,$category){
         try{
+            $quotationMaterial['unit_id'] = 6;
+            $unitConversionIds1 = UnitConversion::where('unit_1_id',$quotationMaterial['unit_id'])->pluck('unit_2_id')->toArray();
+            $unitConversionIds2 = UnitConversion::where('unit_2_id',$quotationMaterial['unit_id'])->pluck('unit_1_id')->toArray();
+            $units = array_merge(array($quotationMaterial['unit_id']),$unitConversionIds1,$unitConversionIds2);
+            dd($units);
+            $a = '3 way gang box';
+            //dd(strtolower($a));
+           // dd(str_slug($a));'
+           /* $materialComponentTypeIds = MaterialRequestComponentTypes::whereIn('slug',['quotation-material','structure-material','new-material'])->select('id','slug')->get();
+            dd($materialComponentTypeIds->where('slug','quotation-material')->pluck('id')->first());
+            dd($materialComponentTypeIds);
+            $assetComponentTypeIds = MaterialRequestComponentTypes::whereIn('slug',['system-asset','new-asset'])->pluck('id');*/
+            $material = Material::where(strtolower('name'),'ilike',strtolower($a))->select('name','unit_id')->first();
+            dd($material['name']);
+            dd(123);
             $category = $category->toArray();
              return view('admin.category.edit')->with(compact('category'));
         }catch(\Exception $e){

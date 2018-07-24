@@ -60,7 +60,7 @@ $(document).ready(function(){
             $("#materialModalComponentSlug").val(datum.component_type_slug);
         })
             .on('typeahead:open', function (obj, datum) {
-                $('#component_id').val('');
+                //$('#component_id').val('');
                 $("#materialUnit").html($("#unitOptions").val());
                 $("#materialModalComponentSlug").val('');
             });
@@ -145,13 +145,13 @@ $(document).ready(function(){
         var unitName = $('#materialUnit option[value="'+unitId+'"]').text();
         var componentTypeId = $('#component_id').val();
         var validFlag = true;
-        if(typeof componentTypeId == 'undefined' || componentTypeId == ''){
+       /* if(typeof componentTypeId == 'undefined' || componentTypeId == ''){
             $("#searchbox").closest('.form-group').addClass('has-error').removeClass('has-success');
             alert('Please select from dropdown');
             validFlag = false;
         }else{
             $("#searchbox").closest('.form-group').addClass('has-success').removeClass('has-error');
-        }
+        }*/
         if(typeof material_name == 'undefined' || material_name == ''){
             $("#searchbox").closest('.form-group').addClass('has-error').removeClass('has-success');
             validFlag = false;

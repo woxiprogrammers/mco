@@ -572,7 +572,7 @@
                         },
                         quantity: {
                             required: true,
-                            max : $('#remainingQuantity').val()
+                            range: [1,parseFloat($('#remainingQuantity').val())]
                         },
                         rent_per_day: {
                             required: true
