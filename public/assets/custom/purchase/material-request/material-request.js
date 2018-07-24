@@ -10,7 +10,7 @@ $(document).ready(function(){
     var iterator = parseInt(0);
     $('#iterator').val(iterator);
     $("#myBtn").click(function(){
-       // $('#component_id').val(4);
+        $('#component_id').val(4);
         var site_name = $("#globalProjectSite").val();
         var search_in = 'material';
         var materialList = new Bloodhound({
