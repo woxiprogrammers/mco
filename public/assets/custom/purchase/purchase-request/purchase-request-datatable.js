@@ -209,7 +209,7 @@ $('#createMaterial').click(function(){
     if(validFlag == true){
         var componentTypeId = $('#component_id').val();
         var iterator = $('#iterator').val();
-        var materials = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+material_name+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unitId+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">';
+        var materials = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+materialNameEncoded+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unitId+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">';
 
         $('.img').each(function(i, el) {
             var imageSrc = $(el).attr('src');
@@ -263,7 +263,7 @@ $('#createAsset').click(function(){
         $('#searchbox').html('');
         var componentTypeId = $('#component_id').val();
         var iterator = $('#iterator').val();
-        var assets = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+asset_name+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unitId+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">';
+        var assets = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+assetNameEncoded+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unitId+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">';
         $('.assetImg').each(function(i, el) {
             var imageSrc = $(el).attr('src');
             assets += '<input type="hidden" name="item_list['+iterator+'][images][]" value="'+imageSrc+'">'
