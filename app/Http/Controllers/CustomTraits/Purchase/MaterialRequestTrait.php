@@ -61,6 +61,7 @@ trait MaterialRequestTrait{
             $webTokens = array_column($userTokens,'web_fcm_token');
             $mobileTokens = array_column($userTokens,'mobile_fcm_token');
             foreach($data['item_list'] as $key => $itemData){
+                $itemData['name'] = str_replace("$!@#$",'"',$itemData['name']);
                 $materialRequestComponentData = $this->checkComponentType($itemData,$data['project_site_id']);
                 Log::info('$materialRequestComponentData');
                 Log::info($materialRequestComponentData);

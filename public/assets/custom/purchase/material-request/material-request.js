@@ -140,6 +140,8 @@ $(document).ready(function(){
 
     $('#createMaterial').click(function(){
         var material_name = $('#searchbox').val();
+        var materialNameEncoded = material_name.replace(/"/g,'$!@#$');
+        materialNameEncoded = materialNameEncoded.replace(/''/g,'$!@#$');
         var quantity = $('#qty').val();
         var unitId = $('#materialUnit').val();
         var unitName = $('#materialUnit option[value="'+unitId+'"]').text();
@@ -192,7 +194,7 @@ $(document).ready(function(){
                         var componentTypeId = $('#component_id').val();
                         var images = [];
                         var iterator = $('#iterator').val();
-                        var materials = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+material_name+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unitId+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">';
+                        var materials = '<td><input type="hidden" name="item_list['+iterator+'][name]" value=\"'+materialNameEncoded+'\">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unitId+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">';
                         $('.img').each(function(i, el) {
                             var imageSrc = $(el).attr('src');
                             materials += '<input type="hidden" name="item_list['+iterator+'][images][]" value="'+imageSrc+'">'
@@ -217,7 +219,8 @@ $(document).ready(function(){
                 var componentTypeId = $('#component_id').val();
                 var images = [];
                 var iterator = $('#iterator').val();
-                var materials = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+material_name+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unitId+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">';
+
+                var materials = '<td><input type="hidden" name="item_list['+iterator+'][name]" value=\"'+materialNameEncoded+'\">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unitId+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">';
                 $('.img').each(function(i, el) {
                     var imageSrc = $(el).attr('src');
                     materials += '<input type="hidden" name="item_list['+iterator+'][images][]" value="'+imageSrc+'">'
@@ -237,6 +240,8 @@ $(document).ready(function(){
 
     $('#createAsset').click(function(){
         var asset_name = $('#Assetsearchbox').val();
+        var assetNameEncoded = asset_name.replace(/"/g,'$!@#$');
+        assetNameEncoded = assetNameEncoded.replace(/''/g,'$!@#$');
         var quantity = $('#Assetqty').val();
         var unit = $('#AssetUnitsearchbox').val();
         var unitId = $('#nosUnitId').val();
@@ -266,7 +271,7 @@ $(document).ready(function(){
             $('#qty').html('');
             var componentTypeId = $('#component_id').val();
             var iterator = $('#iterator').val();
-            var assets = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+asset_name+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unitId+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">';
+            var assets = '<td><input type="hidden" name="item_list['+iterator+'][name]" value="'+assetNameEncoded+'">'+' <input type="hidden" name="item_list['+iterator+'][quantity_id]" value="'+quantity+'">'+'<input type="hidden" name="item_list['+iterator+'][unit_id]" value="'+unitId+'">'+'<input type="hidden" name="item_list['+iterator+'][component_type_id]" value="'+componentTypeId+'">';
             $('.assetImg').each(function(i, el) {
                 var imageSrc = $(el).attr('src');
                 assets += '<input type="hidden" name="item_list['+iterator+'][images][]" value="'+imageSrc+'">'
