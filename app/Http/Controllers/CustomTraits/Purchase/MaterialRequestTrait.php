@@ -178,31 +178,55 @@ trait MaterialRequestTrait{
                     if(count($quotationMaterial) > 0){
                         $materialRequestComponentData['name'] = $quotationMaterial['name'];
                         $materialRequestComponentData['component_type_id'] = $materialComponentTypes->where('slug','quotation-material')->pluck('id')->first();
+                        $unitConversionIds1 = UnitConversion::where('unit_1_id',$quotationMaterial['unit_id'])->pluck('unit_2_id')->toArray();
+                        $unitConversionIds2 = UnitConversion::where('unit_2_id',$quotationMaterial['unit_id'])->pluck('unit_1_id')->toArray();
+                        $unitIds = array_merge(array($quotationMaterial['unit_id']),$unitConversionIds1,$unitConversionIds2);
+                        if(in_array($componentData['unit_id'],$unitIds)){
+                            $materialRequestComponentData['unit_id'] = $componentData['unit_id'];
+                        }else{
+                            $materialRequestComponentData['unit_id'] = $quotationMaterial['unit_id'];
+                        }
                     }else{
                         $materialName = Material::where(strtolower('name'),'ilike',strtolower($componentData['name']))
                                         ->select('name','unit_id')->first();
                         if(count($materialName) > 0){
                             $materialRequestComponentData['name'] = $materialName['name'];
                             $materialRequestComponentData['component_type_id'] = $materialComponentTypes->where('slug','structure-material')->pluck('id')->first();
+                            $unitConversionIds1 = UnitConversion::where('unit_1_id',$materialName['unit_id'])->pluck('unit_2_id')->toArray();
+                            $unitConversionIds2 = UnitConversion::where('unit_2_id',$materialName['unit_id'])->pluck('unit_1_id')->toArray();
+                            $unitIds = array_merge(array($materialName['unit_id']),$unitConversionIds1,$unitConversionIds2);
+                            if(in_array($componentData['unit_id'],$unitIds)){
+                                $materialRequestComponentData['unit_id'] = $componentData['unit_id'];
+                            }else{
+                                $materialRequestComponentData['unit_id'] = $materialName['unit_id'];
+                            }
                         }else{
                             $materialRequestComponentData['name'] = $componentData['name'];
                             $materialRequestComponentData['component_type_id'] = $materialComponentTypes->where('slug','new-material')->pluck('id')->first();
+                            $materialRequestComponentData['unit_id'] = $componentData['unit_id'];
                         }
                     }
-                    $unitConversionIds1 = UnitConversion::where('unit_1_id',$quotationMaterial['unit_id'])->pluck('unit_2_id')->toArray();
-                    $unitConversionIds2 = UnitConversion::where('unit_2_id',$quotationMaterial['unit_id'])->pluck('unit_1_id')->toArray();
-                    $units = array_merge(array($quotationMaterial['unit_id']),$unitConversionIds1,$unitConversionIds2);
+
                 }else{
                     $materialName = Material::where(strtolower('name'),'ilike',strtolower($componentData['name']))
                                         ->select('name','unit_id')->first();
                     if(count($materialName) > 0){
                         $materialRequestComponentData['name'] = $materialName['name'];
                         $materialRequestComponentData['component_type_id'] = $materialComponentTypes->where('slug','structure-material')->pluck('id')->first();
+                        $unitConversionIds1 = UnitConversion::where('unit_1_id',$materialName['unit_id'])->pluck('unit_2_id')->toArray();
+                        $unitConversionIds2 = UnitConversion::where('unit_2_id',$materialName['unit_id'])->pluck('unit_1_id')->toArray();
+                        $unitIds = array_merge(array($materialName['unit_id']),$unitConversionIds1,$unitConversionIds2);
+                        if(in_array($componentData['unit_id'],$unitIds)){
+                            $materialRequestComponentData['unit_id'] = $componentData['unit_id'];
+                        }else{
+                            $materialRequestComponentData['unit_id'] = $materialName['unit_id'];
+                        }
                     }else{
                         $materialRequestComponentData['name'] = $componentData['name'];
                         $materialRequestComponentData['component_type_id'] = $materialComponentTypes->where('slug','new-material')->pluck('id')->first();
                     }
                 }
+
 
             }else{
                 $assetName = Asset::where(strtolower('name'),'ilike',strtolower($componentData['name']))->pluck('name')->first();
