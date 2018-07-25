@@ -305,7 +305,7 @@ class PurchaseController extends Controller
                     $checkboxComponent,
                     $checkboxComponentMoveToIndent,
                     $materialRequestList[$pagination]['mr_id'],
-                    $materialRequestList[$pagination]['name'],
+                    ucwords($materialRequestList[$pagination]['name']),
                     $materialRequestList[$pagination]['quantity'],
                     Unit::where('id', $materialRequestList[$pagination]['unit_id'])->pluck('name')    ,
                     date('d M Y',strtotime($materialRequestList[$pagination]['created_at'])),
