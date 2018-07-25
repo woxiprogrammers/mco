@@ -90,19 +90,21 @@
                                                         <table class="table table-striped table-bordered table-hover order-column" id="purchaseOrder">
                                                             <thead>
                                                             <tr>
-                                                                <th> PO Id </th>
-                                                                <th> PR Id </th>
-                                                                <th> Vendor Company Name </th>
-                                                                <th> Approved Quantity</th>
-                                                                <th> Received  Quantity</th>
-                                                                <th> Remaining Quantity(10% extra)</th>
-                                                                <th> Status </th>
-                                                                <th> Created At</th>
-                                                                <th> Action </th>
+                                                                <th style="width:10%;"> PO Id </th>
+                                                                <th style="width:10%;"> PR Id </th>
+                                                                <th style="width:5%;"> PO Status </th>
+                                                                <th style="width:15%;"> Vendor Company Name </th>
+                                                                <th style="width:5%;"> Approved Quantity</th>
+                                                                <th style="width:5%;"> Received  Quantity</th>
+                                                                <th style="width:5%;"> Remaining Quantity(10% extra)</th>
+                                                                <th style="width:10%;"> Status </th>
+                                                                <th style="width:10%;"> Created At</th>
+                                                                <th style="width:15%;"> Action </th>
                                                             </tr>
                                                             <tr class="filter">
                                                                 <th><input type="text" class="form-control form-filter" name="po_id"></th>
                                                                 <th><input type="hidden" class="form-control form-filter" name="postdata" id="postdata"></th>
+                                                                <th></th>
                                                                 <th><input type="text" class="form-control form-filter" name="vendor_name"></th>
                                                                 <th></th>
                                                                 <th></th>
