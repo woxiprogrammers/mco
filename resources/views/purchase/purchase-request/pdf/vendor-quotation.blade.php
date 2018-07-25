@@ -173,7 +173,7 @@
                     </td>
                     @if(isset($pdfFlag) && ($pdfFlag == 'after-purchase-order-create' || $pdfFlag == 'purchase-order-listing-download'))
                         <td style="text-align: left;padding-left: 5px" >
-                            {{$vendorInfo['materials'][$iterator]['item_name']}}
+                            {{ucwords($vendorInfo['materials'][$iterator]['item_name'])}}
                             <br>
                             <span style="font-size: 12px"> {{$vendorInfo['materials'][$iterator]['due_date']}} </span>
                         </td>
