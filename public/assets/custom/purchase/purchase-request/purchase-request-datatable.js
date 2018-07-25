@@ -188,6 +188,10 @@ $('#createMaterial').click(function(){
     }else{
         $("#searchbox").closest('.form-group').addClass('has-success').removeClass('has-error');
     }
+    if(/^[^$!@#]*$/.test(material_name) == false) {
+        validFlag = false;
+        alert('Material name must not contain special characters like $ ! @ #');
+    }
     if(typeof material_name == 'undefined' || material_name == ''){
         $("#searchbox").closest('.form-group').addClass('has-error').removeClass('has-success');
         validFlag = false;
@@ -246,6 +250,10 @@ $('#createAsset').click(function(){
         validFlag = false;
     }else{
         $("#Assetsearchbox").closest('.form-group').addClass('has-success').removeClass('has-error');
+    }
+    if(/^[^$!@#]*$/.test(asset_name) == false) {
+        validFlag = false;
+        alert('Asset name must not contain special characters like $ ! @ #');
     }
     if(typeof asset_name == 'undefined' || asset_name == ''){
         $("#Assetsearchbox").closest('.form-group').addClass('has-error').removeClass('has-success');
