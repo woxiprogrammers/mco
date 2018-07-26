@@ -16,6 +16,7 @@ use App\InventoryComponent;
 use App\InventoryComponentTransferStatus;
 use App\InventoryTransferTypes;
 use App\MaterialRequestComponentTypes;
+use App\MaterialRequestComponentVersion;
 use App\MaterialVersion;
 use App\PaymentType;
 use App\Project;
@@ -620,6 +621,8 @@ class PurchaseOrderController extends Controller
             $mainNotificationString = '4-'.$projectInfo.' '.$user->first_name.' '.$user->last_name.' Material Received. ';
             foreach($request->component_data as $purchaseOrderComponentId => $purchaseOrderComponentData){
                 $purchaseOrderComponent = PurchaseOrderComponent::findOrFail($purchaseOrderComponentId);
+                Log::info('$purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->id');
+                Log::info($purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->id);
                 $purchaseOrderTransactionComponentData = [
                     'purchase_order_component_id' => $purchaseOrderComponentId,
                     'quantity' => $purchaseOrderComponentData['quantity'],
@@ -627,6 +630,14 @@ class PurchaseOrderController extends Controller
                     'purchase_order_transaction_id' => $purchaseOrderTransaction->id
                 ];
                 $purchaseOrderTransactionComponent = PurchaseOrderTransactionComponent::create($purchaseOrderTransactionComponentData);
+
+                $materialRequestComponentVersion['material_request_component_id'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->id;
+                $materialRequestComponentVersion['purchase_order_transaction_status_id'] = $purchaseOrderTransactionData['purchase_order_transaction_status_id'];
+                $materialRequestComponentVersion['user_id'] = $user['id'];
+                $materialRequestComponentVersion['quantity'] = $purchaseOrderComponentData['quantity'];
+                $materialRequestComponentVersion['unit_id'] = $purchaseOrderComponentData['unit_id'];
+                $materialRequestComponentVersion['remark'] = $purchaseOrderTransaction['remark'];
+                MaterialRequestComponentVersion::create($materialRequestComponentVersion);
                 $materialRequestUserToken = User::join('material_requests','material_requests.on_behalf_of','=','users.id')
                     ->join('material_request_components','material_request_components.material_request_id','=','material_requests.id')
                     ->join('purchase_request_components','purchase_request_components.material_request_component_id','=','material_request_components.id')

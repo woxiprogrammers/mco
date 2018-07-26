@@ -9,7 +9,7 @@ class MaterialRequestComponentVersion extends Model
     protected $table = 'material_request_component_versions';
 
     protected $fillable = ['material_request_component_id','component_status_id','user_id','quantity','unit_id','remark',
-            'show_p_r_detail'
+            'show_p_r_detail','purchase_order_transaction_status_id'
         ];
 
     public function purchaseRequestComponentStatuses(){
