@@ -532,12 +532,12 @@
                     {!! csrf_field() !!}
                     <input type="hidden" name="bill_id" value="{{$selectedBillId}}">
                     <div class="form-group row" id="paymentSelect">
-                        <div class="col-md-2">
+                        <div class="col-md-4">
                             <label class="pull-right control-label">
                                 Paid By:
                             </label>
                         </div>
-                        <div class="col-md-10">
+                        <div class="col-md-6">
                             <select class="form-control" name="paid_from_advanced" id="paid_from_advanced" onchange="showBankData()">
                                 <option value="bank"> Bank </option>
                                 <option value="advance"> Advance Payments </option>
@@ -547,12 +547,12 @@
                     </div>
                     <div id="bankData">
                         <div class="form-group row" id="bankSelect">
-                            <div class="col-md-2">
+                            <div class="col-md-4">
                                 <label class="pull-right control-label">
                                     Bank:
                                 </label>
                             </div>
-                            <div class="col-md-10">
+                            <div class="col-md-6">
                                 <select class="form-control" id="bank_id" name="bank_id" onchange="checkAmount()">
                                     @foreach($banks as $bank)
                                         <option value="{{$bank['id']}}">{{$bank['bank_name']}}</option>
@@ -561,12 +561,12 @@
                             </div>
                         </div>
                         <div class="form-group row" id="bankSelect">
-                            <div class="col-md-2">
+                            <div class="col-md-4">
                                 <label class="pull-right control-label">
                                     Payment Type:
                                 </label>
                             </div>
-                            <div class="col-md-10">
+                            <div class="col-md-6">
                                 <select class="form-control" name="payment_type_id">
                                     @foreach($paymentTypes as $type)
                                         <option value="{{$type['id']}}">{{$type['name']}}</option>
@@ -574,98 +574,96 @@
                                 </select>
                             </div>
                         </div>
-
                     </div>
-
                     <div class="form-group row">
-                        <div class="col-md-2">
+                        <div class="col-md-4">
                             <label class="pull-right control-label">
                                 Amount:
                             </label>
                         </div>
-                        <div class="col-md-10">
+                        <div class="col-md-6">
                             <input type="number" class="form-control calculatable-field" name="amount" placeholder="Enter Amount">
                         </div>
                     </div>
                     <div class="form-group row">
-                        <div class="col-md-2">
+                        <div class="col-md-4">
                             <label class="pull-right control-label">
                                 Debit:
                             </label>
                         </div>
-                        <div class="col-md-10">
+                        <div class="col-md-6">
                             <input type="number" class="form-control calculatable-field" id="debit" name="debit" placeholder="Enter Debit Amount">
                         </div>
                     </div>
                     <div class="form-group row">
-                        <div class="col-md-2">
+                        <div class="col-md-4">
                             <label class="pull-right control-label">
                                 Hold:
                             </label>
                         </div>
-                        <div class="col-md-10">
+                        <div class="col-md-6">
                             <input type="number" class="form-control calculatable-field" id="hold" name="hold" placeholder="Enter Hold Amount">
                         </div>
                     </div>
                     <div class="form-group row">
-                        <div class="col-md-2">
+                        <div class="col-md-4">
                             <label class="pull-right control-label">
                                 Retention:
                             </label>
                         </div>
-                        <div class="col-md-5">
+                        {{--<div class="col-md-5">
                             <div class="input-group">
                                 <input type="number" class="form-control calculatable-field" id="retention_percent" name="retention_percent" placeholder="Enter Retention Percent">
                                 <span class="input-group-addon" style="font-size: 14px"><b>%</b></span>
                             </div>
-                        </div>
-                        <div class="col-md-5">
-                            <input type="number" class="form-control calculatable-field" name="retention_amount" placeholder="Retention Amount" readonly>
+                        </div>--}}
+                        <div class="col-md-6">
+                            <input type="number" class="form-control calculatable-field" name="retention_amount" placeholder="Retention Amount">
                         </div>
                     </div>
                     <div class="form-group row">
-                        <div class="col-md-2">
+                        <div class="col-md-4">
                             <label class="pull-right control-label">
                                 TDS:
                             </label>
                         </div>
-                        <div class="col-md-5">
+                        {{--<div class="col-md-5">
                             <div class="input-group">
                                 <input type="number" class="form-control calculatable-field" id="tds_percent" name="tds_percent" placeholder="Enter TDS Percent">
                                 <span class="input-group-addon" style="font-size: 14px"><b>%</b></span>
                             </div>
-                        </div>
-                        <div class="col-md-5">
-                            <input type="number" class="form-control calculatable-field" name="tds_amount" placeholder="TDS Amount" readonly>
+                        </div>--}}
+                        <div class="col-md-6">
+                            <input type="number" class="form-control calculatable-field" name="tds_amount" placeholder="TDS Amount">
                         </div>
                     </div>
                     <div class="form-group row">
-                        <div class="col-md-2">
+                        <div class="col-md-4">
                             <label class="pull-right control-label">
                                 Other Recovery Value:
                             </label>
                         </div>
-                        <div class="col-md-10">
+                        <div class="col-md-6">
                             <input type="number" name="other_recovery_value" id="other_recovery_value" class="form-control calculatable-field">
                         </div>
                     </div>
                     <div class="form-group row">
-                        <div class="col-md-2">
+                        <div class="col-md-4">
                             <label class="pull-right control-label">
                                 Total:
                             </label>
                         </div>
-                        <div class="col-md-10">
+                        <div class="col-md-6">
                             <input type="number" name="total" class="form-control calculatable-field" readonly>
                         </div>
                     </div>
                     <div class="form-group row">
-                        <div class="col-md-2">
+                        <div class="col-md-4">
                             <label class="pull-right control-label">
                                 Remark:
                             </label>
                         </div>
-                        <div class="col-md-10">
+                        <div class="col-md-6">
                             <textarea name="remark" class="form-control"></textarea>
                         </div>
                     </div>
