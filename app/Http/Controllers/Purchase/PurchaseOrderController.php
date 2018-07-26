@@ -240,6 +240,7 @@ class PurchaseOrderController extends Controller
                      $purchaseOrderList[$iterator]['purchase_order_format_id'] = $this->getPurchaseIDFormat('purchase-order',$projectSite['id'],$purchaseOrder['created_at'],$purchaseOrder['serial_no']);
                      $purchaseOrderList[$iterator]['purchase_request_id'] = $purchaseOrder['purchase_request_id'];
                      $purchaseOrderList[$iterator]['purchase_request_format_id'] = $this->getPurchaseIDFormat('purchase-request',$projectSite['id'],$purchaseRequest['created_at'],$purchaseRequest['serial_no']);
+                     $purchaseOrderList[$iterator]['purchase_order_status'] = ($purchaseOrder['purchase_order_status_id'] != null) ? $purchaseOrder->purchaseOrderStatus->name : '-';
                      $project = $projectSite->project;
                      $purchaseOrderList[$iterator]['client_name'] = ($purchaseOrder->vendor_id != null) ? $purchaseOrder->vendor->company : $purchaseOrder->client->company;
                      $purchaseOrderList[$iterator]['site_name'] = $projectSite->name;
@@ -251,7 +252,7 @@ class PurchaseOrderController extends Controller
                          $consumedQuantity += $purchaseOrderComponent->purchaseOrderTransactionComponent->sum('quantity');
                      }
                      $purchaseOrderList[$iterator]['received_quantity'] = $consumedQuantity;
-                     $purchaseOrderList[$iterator]['remaining_quantity'] = $quantity - $consumedQuantity;
+                     $purchaseOrderList[$iterator]['remaining_quantity'] = round(($quantity - $consumedQuantity),3);
                      $purchaseOrderList[$iterator]['project'] = $project->name;
                      $purchaseOrderList[$iterator]['chk_status'] = $purchaseOrder['is_approved'];
                      $purchaseOrderList[$iterator]['status'] = ($purchaseOrder['is_approved'] == true) ? '<span class="label label-sm label-success"> Approved </span>' : '<span class="label label-sm label-danger"> Disapproved </span>';
@@ -295,9 +296,11 @@ class PurchaseOrderController extends Controller
                     '<a href="javascript:void(0);" onclick="openPurchaseOrderDetails('.$purchaseOrderList[$pagination]['purchase_order_id'].')">
                         '.$purchaseOrderList[$pagination]['purchase_order_format_id'].'
                     </a>',
+
                     '<a href="javascript:void(0);" onclick="openPurchaseRequestDetails('.$purchaseOrderList[$pagination]['purchase_request_id'].')">
                         '.$purchaseOrderList[$pagination]['purchase_request_format_id'].'
                     </a>',
+                    $purchaseOrderList[$pagination]['purchase_order_status'],
                     $purchaseOrderList[$pagination]['client_name'],
                     $purchaseOrderList[$pagination]['approved_quantity'],
                     $purchaseOrderList[$pagination]['received_quantity'],

@@ -7,6 +7,12 @@ var  CreateMaterialRequest = function () {
         var form = $('#new_material_request');
         var error = $('.alert-danger', form);
         var success = $('.alert-success', form);
+        $.validator.addMethod("regex", function(value, element, regexpr) {
+            return regexpr.test(value);
+        });
+        $.validator.addMethod("customPattern", function(value, element) {
+            return (this.optional(element) ||  /^[^$!@#]*$/ .test(value));
+        }, "The field may not contain special characters like $ ! @ #");
         form.validate({
             errorElement: 'span', //default input error message container
             errorClass: 'help-block', // default input error message class

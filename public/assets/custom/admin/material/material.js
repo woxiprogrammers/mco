@@ -3,13 +3,20 @@ var  CreateMaterial = function () {
         var form = $('#create-material');
         var error = $('.alert-danger', form);
         var success = $('.alert-success', form);
+        $.validator.addMethod("regex", function(value, element, regexpr) {
+            return regexpr.test(value);
+        });
+        $.validator.addMethod("customPattern", function(value, element) {
+            return (this.optional(element) ||  /^[^$!@#]*$/ .test(value));
+        }, "The field may not contain special characters like $ ! @ #");
         form.validate({
             errorElement: 'span', //default input error message container
             errorClass: 'help-block', // default input error message class
             focusInvalid: false, // do not focus the last invalid input
             rules: {
                 name: {
-                    required: true
+                    required: true,
+                    customPattern: true
                 },
                 category_name:{
                     required: true
@@ -71,13 +78,20 @@ var  EditMaterial = function () {
         var form = $('#edit-material');
         var error = $('.alert-danger', form);
         var success = $('.alert-success', form);
+        $.validator.addMethod("regex", function(value, element, regexpr) {
+            return regexpr.test(value);
+        });
+        $.validator.addMethod("customPattern", function(value, element) {
+            return (this.optional(element) ||  /^[^$!@#]*$/ .test(value));
+        }, "The field may not contain special characters like $ ! @ #");
         form.validate({
             errorElement: 'span', //default input error message container
             errorClass: 'help-block', // default input error message class
             focusInvalid: false, // do not focus the last invalid input
             rules: {
                 name: {
-                    required: true
+                    required: true,
+                    customPattern: true
                 },
                 category_name:{
                     required: true

@@ -18,24 +18,31 @@ class   InventoryComponentTransfers extends Model{
     public function inventoryComponent(){
         return $this->belongsTo('App\InventoryComponent','inventory_component_id');
     }
+
     public function unit(){
         return $this->belongsTo('App\Unit','unit_id');
     }
+
     public function transferType(){
         return $this->belongsTo('App\InventoryTransferTypes','transfer_type_id');
     }
+
     public function payment(){
         return $this->belongsTo('App\PaymentType','payment_type_id');
     }
+
     public function user(){
         return $this->belongsTo('App\User','user_id');
     }
+
     public function images(){
         return $this->hasMany('App\InventoryComponentTransferImage','inventory_component_transfer_id');
     }
+
     public function inventoryComponentTransferStatus(){
         return $this->belongsTo('App\InventoryComponentTransferStatus','inventory_component_transfer_status_id');
     }
+
     public function vendor(){
         return $this->belongsTo('App\Vendor','vendor_id');
     }

@@ -3,6 +3,12 @@ var  CreateAsset = function () {
         var form = $('#create-asset');
         var error = $('.alert-danger', form);
         var success = $('.alert-success', form);
+        $.validator.addMethod("regex", function(value, element, regexpr) {
+            return regexpr.test(value);
+        });
+        $.validator.addMethod("customPattern", function(value, element) {
+            return (this.optional(element) ||  /^[^$!@#]*$/ .test(value));
+        }, "The field may not contain special characters like $ ! @ #");
         form.validate({
             errorElement: 'span', //default input error message container
             errorClass: 'help-block', // default input error message class
@@ -12,14 +18,15 @@ var  CreateAsset = function () {
                     required: true
                 },
                 name:{
-                    required: true
+                    required: true,
+                    customPattern: true
                 },
                 expiry_date:{
-                    required: true,
+                    required: true
 
                 },
                 electricity_per_unit:{
-                    required: true,
+                    required: true
 
                 },
                 price:{
@@ -91,6 +98,12 @@ var  EditAsset = function () {
         var form = $('#edit-asset');
         var error = $('.alert-danger', form);
         var success = $('.alert-success', form);
+        $.validator.addMethod("regex", function(value, element, regexpr) {
+            return regexpr.test(value);
+        });
+        $.validator.addMethod("customPattern", function(value, element) {
+            return (this.optional(element) ||  /^[^$!@#]*$/ .test(value));
+        }, "The field may not contain special characters like $ ! @ #");
         form.validate({
             errorElement: 'span', //default input error message container
             errorClass: 'help-block', // default input error message class
@@ -100,10 +113,11 @@ var  EditAsset = function () {
                     required: true
                 },
                 name:{
-                    required: true
+                    required: true,
+                    customPattern: true
                 },
                 expiry_date:{
-                    required: true,
+                    required: true
 
                 },
                 price:{

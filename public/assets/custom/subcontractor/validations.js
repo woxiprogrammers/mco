@@ -7,7 +7,7 @@ var  CreateSubcontractorBill = function () {
         var form = $('#create_bill');
         var error = $('.alert-danger', form);
         var success = $('.alert-success', form);
-        var allowedQuantity = $("#allowedQuantity").val();
+        var allowedQuantity = parseFloat($("#allowedQuantity").val());
         form.validate({
             errorElement: 'span', //default input error message container
             errorClass: 'help-block', // default input error message class
@@ -15,7 +15,7 @@ var  CreateSubcontractorBill = function () {
             rules: {
                 qty:{
                     min: 0.000001,
-                    max:allowedQuantity,
+                    max: allowedQuantity,
                     required: true
                 }
             },

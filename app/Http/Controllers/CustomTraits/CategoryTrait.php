@@ -7,6 +7,9 @@
 namespace App\Http\Controllers\CustomTraits;
 use App\Category;
 use App\Http\Requests\CategoryRequest;
+use App\Material;
+use App\MaterialRequestComponentTypes;
+use App\UnitConversion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
