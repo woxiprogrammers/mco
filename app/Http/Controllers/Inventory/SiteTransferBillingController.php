@@ -9,6 +9,7 @@ use App\PaymentType;
 use App\SiteTransferBill;
 use App\SiteTransferBillImage;
 use App\SiteTransferBillPayment;
+use App\Vendor;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -65,8 +66,7 @@ class SiteTransferBillingController extends Controller
                                     ->toArray();
             $billCreatedTransferIds = SiteTransferBill::pluck('inventory_component_transfer_id')->toArray();
             $approvedBillPendingTransferIds = array_diff($approvedTransferIds, $billCreatedTransferIds);
-            $siteTransfersInfo = InventoryComponentTransfers::join('vendors','vendors.id','=','inventory_component_transfers.vendor_id')
-                                ->whereIn('inventory_component_transfers.id', $approvedBillPendingTransferIds)
+            $siteTransfersInfo = InventoryComponentTransfers::whereIn('inventory_component_transfers.id', $approvedBillPendingTransferIds)
                                 ->whereNotNull('inventory_component_transfers.transportation_amount')
                                 ->where('inventory_component_transfers.transportation_amount','!=',0)
                                 ->get()->toArray();
@@ -74,8 +74,9 @@ class SiteTransferBillingController extends Controller
             $response = array();
             foreach ($siteTransfersInfo as $transferInfo){
                 $response[$iterator]['inventory_component_transfer_id'] = $transferInfo['id'];
-                $contact_no = ($transferInfo['mobile'] != "") ? $transferInfo['mobile'] : $transferInfo['alternate_contact'] ;
-                $response[$iterator]['grn'] = $transferInfo['grn']." : ".$transferInfo['company']." : ".$contact_no;
+                $vendorInfo = Vendor::where('id',$transferInfo['vendor_id'])->first()->toArray();
+                $contact_no = ($vendorInfo['mobile'] != "") ? $vendorInfo['mobile'] : $vendorInfo['alternate_contact'] ;
+                $response[$iterator]['grn'] = $transferInfo['grn']." : ".$vendorInfo['company']." : ".$contact_no;
                 if(isset($transferInfo['transportation_amount']) || $transferInfo['transportation_amount'] != null){
                     $response[$iterator]['subtotal'] = round($transferInfo['transportation_amount'],3);
                 }else{
@@ -167,7 +168,7 @@ class SiteTransferBillingController extends Controller
                     $filterFlag = false;
                 }
             }
-            $siteTransferBillData = SiteTransferBill::whereIn('id', $siteTransferBillId)->get();
+            $siteTransferBillData = SiteTransferBill::whereIn('id', $siteTransferBillId)->orderBy('created_at','desc')->get();
             $total = 0;
             $paidAmount = 0;
             $pendingAmount = 0;
