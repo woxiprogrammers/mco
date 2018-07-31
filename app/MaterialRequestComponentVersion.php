@@ -23,4 +23,8 @@ class MaterialRequestComponentVersion extends Model
     public function user(){
         return $this->belongsTo('App\User','user_id');
     }
+
+    public function purchaseOrderTransactionStatuses(){
+        return $this->belongsTo('App\PurchaseOrderTransactionStatus','purchase_order_transaction_status_id');
+    }
 }
