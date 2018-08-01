@@ -621,8 +621,6 @@ class PurchaseOrderController extends Controller
             $mainNotificationString = '4-'.$projectInfo.' '.$user->first_name.' '.$user->last_name.' Material Received. ';
             foreach($request->component_data as $purchaseOrderComponentId => $purchaseOrderComponentData){
                 $purchaseOrderComponent = PurchaseOrderComponent::findOrFail($purchaseOrderComponentId);
-                Log::info('$purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->id');
-                Log::info($purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->id);
                 $purchaseOrderTransactionComponentData = [
                     'purchase_order_component_id' => $purchaseOrderComponentId,
                     'quantity' => $purchaseOrderComponentData['quantity'],
