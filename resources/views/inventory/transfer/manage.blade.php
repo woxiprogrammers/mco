@@ -35,21 +35,45 @@
                                                         <table class="table table-striped table-bordered table-hover order-column" id="requestComponentListingTable">
                                                             <thead>
                                                             <tr>
-                                                                <th> Project Site From</th>
-                                                                <th> Project Site To</th>
-                                                                <th> Material Name </th>
-                                                                <th> Quantity</th>
-                                                                <th> Unit </th>
-                                                                <th> Status </th>
-                                                                <th> Action </th>
+                                                                <th>Transaction Date</th>
+                                                                <th>Site Out</th>
+                                                                <th>Site In</th>
+                                                                <th>Material Name</th>
+                                                                <th>Quantity</th>
+                                                                <th>Unit</th>
+                                                                <th>Transportation Amount</th>
+                                                                <th>GRN Out</th>
+                                                                <th>GRN In</th>
+                                                                <th>Status</th>
+                                                                <th>Action</th>
                                                             </tr>
                                                             <tr class="filter">
-                                                                <th> <input type="text" class="form-control form-filter" name="search_from" id="search_from"> </th>
-                                                                <th> <input type="text" class="form-control form-filter" name="search_to" id="search_to"> </th>
-                                                                <th> <input type="text" class="form-control form-filter" name="search_name" id="search_name" > </th>
-                                                                <th>  </th>
-                                                                <th>  </th>
-                                                                <th>  </th>
+                                                                <th></th>
+                                                                <th> <input type="text" class="form-control form-filter" name="search_from" id="search_from"></th>
+                                                                <th> <input type="text" class="form-control form-filter" name="search_to" id="search_to"></th>
+                                                                <th> <input type="text" class="form-control form-filter" name="search_name" id="search_name" ></th>
+                                                                <th> <input type="text" class="form-control form-filter" name="search_qty" id="search_qty"></th>
+                                                                <th>
+                                                                    <select class="form-control" id="unit_id" name="unit_id">
+                                                                        <option value="0">ALL</option>
+                                                                        @foreach($units as $unit_status)
+                                                                            <option value="{{$unit_status['id']}}">{{$unit_status['name']}}</option>
+                                                                        @endforeach
+                                                                    </select>
+                                                                    <input type="hidden" class="form-control form-filter" name="unit_status" id="unit_status">
+                                                                </th>
+                                                                <th> <input type="text" class="form-control form-filter" name="search_amt" id="search_amt"></th>
+                                                                <th> <input type="text" class="form-control form-filter" name="search_grn_out" id="search_grn_out"></th>
+                                                                <th> <input type="text" class="form-control form-filter" name="search_grn_out" id="search_grn_in"></th>
+                                                                <th>
+                                                                    <select class="form-control" id="status_id" name="status_id">
+                                                                        <option value="0">ALL</option>
+                                                                        @foreach($statusData as $status)
+                                                                            <option value="{{$status['id']}}">{{$status['name']}}</option>
+                                                                        @endforeach
+                                                                    </select>
+                                                                    <input type="hidden" class="form-control form-filter" name="status" id="status">
+                                                                </th>
                                                                 <th>
                                                                     <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                                     <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>

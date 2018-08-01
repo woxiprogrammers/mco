@@ -67,7 +67,10 @@ class InventoryManageController extends Controller
 
     public function getTransferManageView(Request $request){
         try{
-            return view('inventory/transfer/manage');
+            $statusData = InventoryComponentTransferStatus::whereIn('slug',['approved','disapproved','requested'])
+                ->get(['id','name']);
+            $units = Unit::where('is_active',true)->get(['id','name']);
+            return view('inventory/transfer/manage')->with(compact('statusData','units'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Inventory Request Transfer manage view',
@@ -145,6 +148,13 @@ class InventoryManageController extends Controller
             $records['data'] = array();
             $end = $request->length < 0 ? count($inventoryTransferData) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($inventoryTransferData); $iterator++,$pagination++ ){
+                if ($inventoryTransferData[$pagination]->inventoryComponentTransferStatus->slug == 'approved') {
+                    $actionDropDownStatus = '<i class="fa fa-check-circle" title="Approved" style="font-size:24px;color:green">&nbsp;&nbsp;</i>';
+                } elseif ($inventoryTransferData[$pagination]->inventoryComponentTransferStatus->slug == 'disapproved') {
+                    $actionDropDownStatus = '<i class="fa fa-times-circle" title="Disapproved" style="font-size:24px;color:red">&nbsp;&nbsp;</i>';
+                } else {
+                    $actionDropDownStatus = '<i class="fa fa-circle-o" title="Requested" style="font-size:24px;color:orange">&nbsp;&nbsp;</i>';
+                }
                 if($inventoryTransferData[$pagination]->inventoryComponentTransferStatus->slug == 'approved'){
                     $actionDropDown =  '<div id="sample_editable_1_new" class="btn btn-small blue">
                                             <a href="/inventory/pdf/'.$inventoryTransferData[$pagination]['id'].'" style="color: white"> 
@@ -173,13 +183,43 @@ class InventoryManageController extends Controller
                 }else{
                     $actionDropDown = '';
                 }
+                $transportation_amount = 0;
+                if ($inventoryTransferData[$pagination]->transportation_amount != null && $inventoryTransferData[$pagination]->transportation_amount != "0") {
+                    $transportation_amount = $inventoryTransferData[$pagination]->transportation_amount;
+                }
+
+                if ($inventoryTransferData[$pagination]->transportation_cgst_percent != null && $inventoryTransferData[$pagination]->transportation_cgst_percent != "0") {
+                    $transportation_amount = $transportation_amount + ($transportation_amount*($inventoryTransferData[$pagination]->transportation_cgst_percent/100));
+                }
+
+                if ($inventoryTransferData[$pagination]->transportation_sgst_percent != null && $inventoryTransferData[$pagination]->transportation_sgst_percent != "0") {
+                    $transportation_amount = $transportation_amount + ($transportation_amount*($inventoryTransferData[$pagination]->transportation_sgst_percent/100));
+                }
+
+                if ($inventoryTransferData[$pagination]->transportation_igst_percent != null && $inventoryTransferData[$pagination]->transportation_igst_percent != "0") {
+                    $transportation_amount = $transportation_amount + ($transportation_amount*($inventoryTransferData[$pagination]->transportation_igst_percent/100));
+                }
+
+                $grnOut = '-';
+                $grnIn = "-";
+                if ($inventoryTransferData[$pagination]->grn != null) {
+                    $grnOut = $inventoryTransferData[$pagination]->grn;
+                }
+                if ($inventoryTransferData[$pagination]->related_transfer_id != null) {
+                    $grnIn = InventoryComponentTransfers::where('id', $inventoryTransferData[$pagination]->related_transfer_id)
+                                ->pluck('grn')->first();
+                }
                 $records['data'][$iterator] = [
+                    date('d M Y',strtotime($inventoryTransferData[$pagination]->created_at)),
                     ucwords($inventoryTransferData[$pagination]->inventoryComponent->projectSite->project->name),
-                    ucwords($inventoryTransferData[$pagination]->source_name),
+                    ucwords(explode("-",$inventoryTransferData[$pagination]->source_name)[0]),
                     ucwords($inventoryTransferData[$pagination]->inventoryComponent->name),
                     $inventoryTransferData[$pagination]->quantity,
                     $inventoryTransferData[$pagination]->unit->name,
-                    $inventoryTransferData[$pagination]->inventoryComponentTransferStatus->name,
+                    $transportation_amount,
+                    $grnOut,
+                    $grnIn,
+                    $actionDropDownStatus,
                     $actionDropDown
                 ];
             }
@@ -1227,6 +1267,7 @@ class InventoryManageController extends Controller
             $data['driver_name'] = $inventoryComponentTransfer->driver_name;
             $data['mobile'] = $inventoryComponentTransfer->mobile;
             $data['vehicle_number'] = $inventoryComponentTransfer->vehicle_number;
+            $data['created_at'] = $inventoryComponent['created_at'];
             $data['company_name'] = Vendor::where('id',$inventoryComponentTransfer->vendor_id)->pluck('company')->first();
 
             if($data['is_material'] == true){
