@@ -224,7 +224,7 @@ trait MaterialRequestTrait{
                 if(count($assetName) > 0){
                     $materialRequestComponentData['name'] = $assetName;
                     $materialRequestComponentData['component_type_id'] = $assetComponentTypes->where('slug','system-asset')->pluck('id')->first();
-                    $materialRequestComponentData['unit_id'] = Unit::where('slug','nos')->pluck('name')->first();
+                    $materialRequestComponentData['unit_id'] = Unit::where('slug','nos')->pluck('id')->first();
                 }else{
                     $materialRequestComponentData['name'] = $componentData['name'];
                     $materialRequestComponentData['component_type_id'] = $assetComponentTypes->where('slug','new-asset')->pluck('id')->first();
