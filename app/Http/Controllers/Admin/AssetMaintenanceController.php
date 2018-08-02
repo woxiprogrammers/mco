@@ -233,6 +233,7 @@ class AssetMaintenanceController extends Controller{
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($listingData); $iterator++,$pagination++ ){
                 $records['data'][$iterator] = [
                     $listingData[$pagination]->asset->name,
+                    ($listingData[$pagination]->assetMaintenanceTransaction->count() > 0) ? $listingData[$pagination]->assetMaintenanceTransaction->first()->assetMaintenanceTransactionStatus->name : '-',
                     date('d M Y',strtotime($listingData[$pagination]['created_at'])),
                     '<div class="btn btn-small blue">
                                             <a href="/asset/maintenance/request/view/'.$listingData[$pagination]['id'].'" style="color: white"> 
@@ -272,7 +273,8 @@ class AssetMaintenanceController extends Controller{
                     $iterator++;
                 }
             }
-            return view('asset-maintenance.request.view')->with(compact('assetMaintenance','imageData','vendorApproved'));
+            $assetMaintenanceTransactionCount = $assetMaintenance->assetMaintenanceTransaction->count();
+            return view('asset-maintenance.request.view')->with(compact('assetMaintenance','imageData','vendorApproved','assetMaintenanceTransactionCount'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Asset Maintenance Request View',

@@ -8,6 +8,7 @@ use App\Helper\MaterialProductHelper;
 use App\Helper\UnitHelper;
 use App\Http\Controllers\CustomTraits\PeticashTrait;
 use App\Http\Controllers\CustomTraits\Purchase\MaterialRequestTrait;
+use App\MaterialRequestComponentVersion;
 use App\PaymentType;
 use App\Project;
 use App\ProjectSite;
@@ -375,6 +376,7 @@ class PurchaseOrderBillingController extends Controller
     use MaterialRequestTrait;
     public function createBill(Request $request){
         try{
+            $user = Auth::user();
             $purchaseOrderBillData = $request->except('_token','project_site_id','bill_images','transaction_id','sub_total','transaction_grn','purchase_order_format','is_transportation','transportation_total','transportation_tax_amount','extra_amount');
             $today = Carbon::now();
             $purchaseOrderBillCount = PurchaseOrderBill::whereDate('created_at', $today)->count();
@@ -412,9 +414,20 @@ class PurchaseOrderBillingController extends Controller
             foreach($request->transaction_id as $transactionId){
                 $purchaseOrderBillTransactionRelationData['purchase_order_transaction_id'] = $transactionId;
                 PurchaseOrderBillTransactionRelation::create($purchaseOrderBillTransactionRelationData);
-                PurchaseOrderTransaction::where('id',$transactionId)->update([
-                    'purchase_order_transaction_status_id' => PurchaseOrderTransactionStatus::where('slug','bill-generated')->pluck('id')->first()
+                $purchaseOrderTransaction = PurchaseOrderTransaction::where('id',$transactionId)->first();
+                $billGeneratedStatusId = PurchaseOrderTransactionStatus::where('slug','bill-generated')->pluck('id')->first();
+                $purchaseOrderTransaction->update([
+                    'purchase_order_transaction_status_id' => $billGeneratedStatusId
                 ]);
+                foreach($purchaseOrderTransaction->purchaseOrderTransactionComponents as $key => $purchaseOrderTransactionComponent){
+                    $materialRequestComponentVersion['material_request_component_id'] = $purchaseOrderTransactionComponent->purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->id;
+                    $materialRequestComponentVersion['purchase_order_transaction_status_id'] = $billGeneratedStatusId;
+                    $materialRequestComponentVersion['user_id'] = $user['id'];
+                    $materialRequestComponentVersion['quantity'] = $purchaseOrderTransactionComponent['quantity'];
+                    $materialRequestComponentVersion['unit_id'] = $purchaseOrderTransactionComponent['unit_id'];
+                    $materialRequestComponentVersion['remark'] = $request['remark'];
+                    MaterialRequestComponentVersion::create($materialRequestComponentVersion);
+                }
             }
             $request->session()->flash('success','Purchase Order Bill Created Successfully');
             return redirect('/purchase/purchase-order-bill/manage');

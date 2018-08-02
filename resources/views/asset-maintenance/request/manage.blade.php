@@ -54,6 +54,7 @@
                                                             <thead>
                                                                 <tr>
                                                                     <th> Asset Name </th>
+                                                                    <th> Status </th>
                                                                     <th> Created At </th>
                                                                     <th> Actions </th>
                                                                 </tr>
