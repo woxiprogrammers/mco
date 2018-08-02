@@ -738,27 +738,9 @@ class PurchaseController extends Controller
                         $adminApproveComponentStatusId = PurchaseRequestComponentStatuses::where('slug','admin-approved')->pluck('id')->first();
                         if($materialRequestComponent->purchaseRequestComponentStatuses->slug == 'pending'){
                             if($request->has('quantity')){
-                                if($materialRequestComponent['quantity'] != $request->quantity){
-                                    $materialRequestComponentVersion['material_request_component_id'] = $materialRequestComponent['id'];
-                                    $materialRequestComponentVersion['component_status_id'] = $adminApproveComponentStatusId;
-                                    $materialRequestComponentVersion['user_id'] = $user['id'];
-                                    $materialRequestComponentVersion['quantity'] = $request->quantity;
-                                    $materialRequestComponentVersion['unit_id'] = $materialRequestComponent['unit_id'];
-                                    $materialRequestComponentVersion['remark'] = $request->remark;
-                                    MaterialRequestComponentVersion::create($materialRequestComponentVersion);
-                                }
                                 $materialRequestComponent->update(['quantity' => $request->quantity]);
                             }
                             if($request->has('unit_id')){
-                                if($materialRequestComponent['unit_id'] != $request->unit_id) {
-                                    $materialRequestComponentVersion['material_request_component_id'] = $materialRequestComponent['id'];
-                                    $materialRequestComponentVersion['component_status_id'] = $adminApproveComponentStatusId;
-                                    $materialRequestComponentVersion['user_id'] = $user['id'];
-                                    $materialRequestComponentVersion['quantity'] = $materialRequestComponent['quantity'];
-                                    $materialRequestComponentVersion['unit_id'] = $request->unit_id;
-                                    $materialRequestComponentVersion['remark'] = $request->remark;
-                                    MaterialRequestComponentVersion::create($materialRequestComponentVersion);
-                                }
                                 $materialRequestComponent->update(['unit_id' => $request->unit_id]);
                             }
                             $quotationMaterialType = MaterialRequestComponentTypes::where('slug','quotation-material')->first();
