@@ -566,18 +566,22 @@ trait BillTrait{
             $billTaxes = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
                             ->where('bill_taxes.bill_id','=',$bill['id'])
                             ->where('taxes.is_special','=', false)
-                            ->select('bill_taxes.id as id','bill_taxes.percentage as percentage','taxes.id as tax_id','taxes.name as tax_name','bill_taxes.applied_on as applied_on')
+                            ->select('bill_taxes.id as id','bill_taxes.percentage as percentage','taxes.id as tax_id','taxes.name as tax_name','bill_taxes.applied_on as applied_on','taxes.slug as tax_slug')
                             ->get();
             $taxes = array();
             if($billTaxes != null){
                 $billTaxes = $billTaxes->toArray();
             }
+            $tdsRetentionTaxAmount = 0;
             for($j = 0 ; $j < count($billTaxes) ; $j++){
                 $taxes[$billTaxes[$j]['tax_id']] = $billTaxes[$j];
                 /*$taxes[$billTaxes[$j]['tax_id']]['current_bill_amount'] = MaterialProductHelper::customRound($total['current_bill_amount'] * ($taxes[$billTaxes[$j]['tax_id']]['percentage'] / 100) , 3);
                 $final['current_bill_amount'] = MaterialProductHelper::customRound(($final['current_bill_amount'] + $taxes[$billTaxes[$j]['tax_id']]['current_bill_amount']),3);*/
                 $taxes[$billTaxes[$j]['tax_id']]['current_bill_amount'] = round(($total['current_bill_amount'] * ($taxes[$billTaxes[$j]['tax_id']]['percentage'] / 100)) , 3);
                 $final['current_bill_amount'] = round(($final['current_bill_amount'] + $taxes[$billTaxes[$j]['tax_id']]['current_bill_amount']),3);
+                if($billTaxes[$j]['tax_slug'] == 'retention' || $billTaxes[$j]['tax_slug'] == 'tds'){
+                    $tdsRetentionTaxAmount = $tdsRetentionTaxAmount + round(($total['current_bill_amount'] * ($taxes[$billTaxes[$j]['tax_id']]['percentage'] / 100)) , 3);
+                }
             }
             $specialTaxes= BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
                 ->where('bill_taxes.bill_id','=',$bill['id'])
@@ -606,9 +610,8 @@ trait BillTrait{
             }else{
                 $final['current_bill_gross_total_amount'] = round($final['current_bill_amount'],3);
             }
-
             $BillTransactionTotals = BillTransaction::where('bill_id',$bill->id)->pluck('total')->toArray();
-            $remainingAmount = $final['current_bill_gross_total_amount'] - array_sum($BillTransactionTotals);
+            $remainingAmount = ($final['current_bill_gross_total_amount'] + abs($tdsRetentionTaxAmount)) - array_sum($BillTransactionTotals);
             $paymentTypes = PaymentType::orderBy('id')->whereIn('slug',['cheque','neft','rtgs','internet-banking'])->get();
             $totalBillHoldAmount = BillTransaction::where('bill_id',$selectedBillId)->sum('hold');
             $reconciledHoldAmount = BillReconcileTransaction::where('bill_id',$selectedBillId)->where('transaction_slug','hold')->sum('amount');

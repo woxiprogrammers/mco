@@ -582,7 +582,7 @@
                             </label>
                         </div>
                         <div class="col-md-6">
-                            <input type="number" class="form-control calculatable-field" name="amount" placeholder="Enter Amount">
+                            <input type="number" class="form-control calculatable-field" name="amount" placeholder="Enter Amount"  value="{{$remainingAmount}}">
                         </div>
                     </div>
                     <div class="form-group row">
