@@ -618,7 +618,7 @@
                             </div>
                         </div>--}}
                         <div class="col-md-6">
-                            <input type="number" class="form-control calculatable-field" name="retention_amount" placeholder="Retention Amount">
+                            <input type="number" class="form-control calculatable-field" id='retention_amount' name="retention_amount" placeholder="Retention Amount">
                         </div>
                     </div>
                     <div class="form-group row">
@@ -634,7 +634,7 @@
                             </div>
                         </div>--}}
                         <div class="col-md-6">
-                            <input type="number" class="form-control calculatable-field" name="tds_amount" placeholder="TDS Amount">
+                            <input type="number" class="form-control calculatable-field" id="tds_amount" name="tds_amount" placeholder="TDS Amount">
                         </div>
                     </div>
                     <div class="form-group row">
@@ -788,19 +788,19 @@
 
     function showBankData(){
         var isAdvanceOption = $('#paid_from_advanced').val();
-        if(isAdvanceOption != 'bank'){
+        if(isAdvanceOption == 'advance'){
             $('#bankData').hide();
             $('#debit').prop('readonly',true).val(0);
             $('#hold').prop('readonly',true).val(0);
-            $('#retention_percent').prop('readonly',true).val(0);
-            $('#tds_percent').prop('readonly',true).val(0);
+            $('#retention_amount').prop('readonly',true).val(0);
+            $('#tds_amount').prop('readonly',true).val(0);
             $('#other_recovery_value').prop('readonly',true).val(0);
         }else{
             $('#bankData').show();
             $('#debit').prop('readonly',false);
             $('#hold').prop('readonly',false);
-            $('#retention_percent').prop('readonly',false);
-            $('#tds_percent').prop('readonly',false);
+            $('#retention_amount').prop('readonly',false);
+            $('#tds_amount').prop('readonly',false);
             $('#other_recovery_value').prop('readonly',false);
         }
     }
