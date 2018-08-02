@@ -52,7 +52,7 @@ $(document).ready(function (){
             other_recovery_value = 0;
             $(".calculatable-field:input[name='other_recovery_value']").val(0);
         }
-        var total = (parseFloat(amount)) + (parseFloat(other_recovery_value)) - ((parseFloat(hold)) + (parseFloat(debit)) + (parseFloat(retentionAmount)) + (parseFloat(tdsAmount)));
+        var total = parseFloat(amount) - ((parseFloat(hold)) + (parseFloat(debit)) + (parseFloat(retentionAmount)) + (parseFloat(tdsAmount)) + (parseFloat(other_recovery_value)));
         $(".calculatable-field:input[name='total']").val(total)
     });
 });
