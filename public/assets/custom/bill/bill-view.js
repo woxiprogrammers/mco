@@ -19,26 +19,40 @@ $(document).ready(function (){
             hold = 0;
             $(".calculatable-field:input[name='hold']").val(0);
         }
-        var retention_percent = $(".calculatable-field:input[name='retention_percent']").val();
+        /*var retention_percent = $(".calculatable-field:input[name='retention_percent']").val();
         if(typeof retention_percent == 'undefined' || retention_percent == ''){
             retention_percent = 0;
             $(".calculatable-field:input[name='retention_percent']").val(0);
         }
         var retentionAmount = (parseFloat(amount)) * (parseFloat(retention_percent)/100);
-        $(".calculatable-field:input[name='retention_amount']").val(retentionAmount);
-        var tds_percent = $(".calculatable-field:input[name='tds_percent']").val();
+        $(".calculatable-field:input[name='retention_amount']").val(retentionAmount);*/
+
+        var retentionAmount = $(".calculatable-field:input[name='retention_amount']").val();
+        if(typeof retentionAmount == 'undefined' || retentionAmount == ''){
+            retentionAmount = 0;
+            $(".calculatable-field:input[name='retention_amount']").val(0);
+        }
+
+        /*var tds_percent = $(".calculatable-field:input[name='tds_percent']").val();
         if(typeof tds_percent == 'undefined' || tds_percent == ''){
             tds_percent = 0;
             $(".calculatable-field:input[name='tds_percent']").val(0);
         }
         var tdsAmount = (parseFloat(amount)) * (parseFloat(tds_percent)/100);
-        $(".calculatable-field:input[name='tds_amount']").val(tdsAmount);
+        $(".calculatable-field:input[name='tds_amount']").val(tdsAmount);*/
+
+        var tdsAmount = $(".calculatable-field:input[name='tds_amount']").val();
+        if(typeof tdsAmount == 'undefined' || tdsAmount == ''){
+            tdsAmount = 0;
+            $(".calculatable-field:input[name='tds_amount']").val(0);
+        }
+
         var other_recovery_value = $(".calculatable-field:input[name='other_recovery_value']").val();
         if(typeof other_recovery_value == 'undefined' || other_recovery_value == ''){
             other_recovery_value = 0;
             $(".calculatable-field:input[name='other_recovery_value']").val(0);
         }
-        var total = (parseFloat(amount)) + (parseFloat(other_recovery_value)) - ((parseFloat(hold)) + (parseFloat(debit)) + (parseFloat(retentionAmount)) + (parseFloat(tdsAmount)));
+        var total = parseFloat(amount) - ((parseFloat(hold)) + (parseFloat(debit)) + (parseFloat(retentionAmount)) + (parseFloat(tdsAmount)) + (parseFloat(other_recovery_value)));
         $(".calculatable-field:input[name='total']").val(total)
     });
 });

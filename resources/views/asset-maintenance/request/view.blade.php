@@ -66,7 +66,7 @@
                                             <div class="tab-content">
                                                 <div class="tab-pane fade in active" id="viewInfoTab">
                                                     <div class="form-body">
-                                                        @if($assetMaintenance->assetMaintenanceStatus->slug == 'vendor-approved' && ($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-asset-maintainance')))
+                                                        @if($assetMaintenance->assetMaintenanceStatus->slug == 'vendor-approved' && ($assetMaintenanceTransactionCount < 0) && ($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-asset-maintainance')))
                                                             <div class="row">
                                                                 <div class="col-md-offset-9 col-md-3 ">
                                                                     <a class="btn red pull-right" href="javascript:void(0);" id="transactionButton">
