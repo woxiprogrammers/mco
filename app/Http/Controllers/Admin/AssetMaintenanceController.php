@@ -22,12 +22,15 @@ use App\AssetMaintenanceVendorRelation;
 use App\BankInfo;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\CustomTraits\Inventory\InventoryTrait;
+use App\Http\Controllers\CustomTraits\Notification\NotificationTrait;
 use App\Http\Controllers\CustomTraits\PeticashTrait;
 use App\InventoryComponent;
 use App\InventoryComponentTransfers;
 use App\InventoryComponentTransferStatus;
 use App\InventoryTransferTypes;
 use App\PaymentType;
+use App\ProjectSite;
+use App\User;
 use App\Vendor;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\File;
@@ -39,6 +42,7 @@ use Illuminate\Support\Facades\Session;
 class AssetMaintenanceController extends Controller{
     use InventoryTrait;
     use PeticashTrait;
+    use NotificationTrait;
     public function __construct(){
         $this->middleware('custom.auth');
     }
@@ -147,6 +151,23 @@ class AssetMaintenanceController extends Controller{
                     File::move($oldFilePath, $newFilePath);
                 }
             }
+
+            $userTokens = User::join('user_has_permissions','users.id','=','user_has_permissions.user_id')
+                ->join('permissions','permissions.id','=','user_has_permissions.permission_id')
+                ->join('user_project_site_relation','users.id','=','user_project_site_relation.user_id')
+                ->where('permissions.name','approve-asset-maintenance-approval')
+                ->where('user_project_site_relation.project_site_id',$projectSiteId)
+                ->select('users.web_fcm_token as web_fcm_token')
+                ->get()
+                ->toArray();
+            $projectSite = ProjectSite::where('id',$projectSiteId)->first();
+            $assetName = Asset::where('id',$request['asset_id'])->pluck('name');
+            $webTokens = array_column($userTokens,'web_fcm_token');
+            $mobileTokens = array();
+            $notificationString = '1 -'.$projectSite->project->name.' '.$projectSite->name;
+            $notificationString .= ' '.$user['first_name'].' '.$user['last_name'].'Asset Maintenance Requested for asset';
+            $notificationString .= ' '.$assetName;
+            $this->sendPushNotification('Manisha Construction',$notificationString,$webTokens,$mobileTokens,'a-m-r');
             $request->session()->flash('success','Maintenance Request Created successfully');
             return redirect('/asset/maintenance/request/create');
         }catch(\Exception $e){
