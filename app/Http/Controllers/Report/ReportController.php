@@ -22,6 +22,7 @@ use App\InventoryComponentTransferStatus;
 use App\InventoryTransferTypes;
 use App\Material;
 use App\Helper\MaterialProductHelper;
+use App\MaterialRequestComponents;
 use App\PeticashSalaryTransaction;
 use App\PeticashStatus;
 use App\PeticashTransactionType;
@@ -52,6 +53,7 @@ use App\Tax;
 use App\Unit;
 use App\Vendor;
 use Carbon\Carbon;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -1926,4 +1928,172 @@ class ReportController extends Controller
         }
         return $finalArray;
     }
+
+    public function abc(){
+                    $header = array(
+                        'Sr. No', 'MRID', 'Name', 'Quantity', 'Unit', 'Component Type', 'Component Status',
+                        'Created At', 'Updated At', 'Serial No' , 'Format ID'
+                    );
+                    $data  = array();
+                    $row = 0;
+                    $materialRequestComponents = MaterialRequestComponents::where('id','<','10000')->get();
+                    foreach ($materialRequestComponents as $materialRequestComponent){
+                        $data[$row]['sr_no'] = $materialRequestComponent['sr_no'];
+                        $data[$row]['mrid'] = $materialRequestComponent['created_at'];
+                        $data[$row]['name'] = $materialRequestComponent['name'];
+                        $data[$row]['quantity'] = $materialRequestComponent['quantity'];
+                        $data[$row]['unit_id'] = Unit::where('id',$materialRequestComponent['unit_id'])->pluck('name')->first();
+                        $data[$row]['component_type'] = $materialRequestComponent->materialRequestComponentTypes->name;
+                        $data[$row]['component_status'] = $materialRequestComponent->purchaseRequestComponentStatuses->name;
+                        $data[$row]['created_at'] = $materialRequestComponent['created_at'];
+                        $data[$row]['updated_at'] = $materialRequestComponent['updated_at'];
+                        $data[$row]['serial_no'] = $materialRequestComponent['serial_no'];
+                        $data[$row]['format_id'] = $materialRequestComponent['format_id'];
+                        $row++;
+                    }
+                    $report_type = 'Test';
+                    Excel::create("Test_", function($excel) use($data, $header,$report_type) {
+                        $excel->sheet($report_type, function($sheet) use($data, $header) {
+                            $row = 1;
+                            foreach($data as $key => $rowData){
+                                $next_column = 'A';
+                                $row++;
+                                foreach($rowData as $key1 => $cellData){
+                                    $current_column = $next_column++;
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData) {
+                                        $cell->setValue($cellData);
+                                    });
+                                }
+
+                            }
+                        });
+                        /*$excel->sheet($report_type, function($sheet) use($data, $header) {
+                            $row = 1;
+                            foreach($data as $key => $rowData){
+                                $next_column = 'A';
+                                $row++;
+                                foreach($rowData as $key1 => $cellData){
+                                    $current_column = $next_column++;
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData) {
+                                        $cell->setValue($cellData);
+                                    });
+                                }
+
+                            }
+                        });
+                        $excel->sheet($report_type, function($sheet) use($data, $header) {
+                            $row = 1;
+                            foreach($data as $key => $rowData){
+                                $next_column = 'A';
+                                $row++;
+                                foreach($rowData as $key1 => $cellData){
+                                    $current_column = $next_column++;
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData) {
+                                        $cell->setValue($cellData);
+                                    });
+                                }
+
+                            }
+                        });
+                        $excel->sheet($report_type, function($sheet) use($data, $header) {
+                            $row = 1;
+                            foreach($data as $key => $rowData){
+                                $next_column = 'A';
+                                $row++;
+                                foreach($rowData as $key1 => $cellData){
+                                    $current_column = $next_column++;
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData) {
+                                        $cell->setValue($cellData);
+                                    });
+                                }
+
+                            }
+                        });
+                        $excel->sheet($report_type, function($sheet) use($data, $header) {
+                            $row = 1;
+                            foreach($data as $key => $rowData){
+                                $next_column = 'A';
+                                $row++;
+                                foreach($rowData as $key1 => $cellData){
+                                    $current_column = $next_column++;
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData) {
+                                        $cell->setValue($cellData);
+                                    });
+                                }
+
+                            }
+                        });
+                        $excel->sheet($report_type, function($sheet) use($data, $header) {
+                            $row = 1;
+                            foreach($data as $key => $rowData){
+                                $next_column = 'A';
+                                $row++;
+                                foreach($rowData as $key1 => $cellData){
+                                    $current_column = $next_column++;
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData) {
+                                        $cell->setValue($cellData);
+                                    });
+                                }
+
+                            }
+                        });
+                        $excel->sheet($report_type, function($sheet) use($data, $header) {
+                            $row = 1;
+                            foreach($data as $key => $rowData){
+                                $next_column = 'A';
+                                $row++;
+                                foreach($rowData as $key1 => $cellData){
+                                    $current_column = $next_column++;
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData) {
+                                        $cell->setValue($cellData);
+                                    });
+                                }
+
+                            }
+                        });
+                        $excel->sheet($report_type, function($sheet) use($data, $header) {
+                            $row = 1;
+                            foreach($data as $key => $rowData){
+                                $next_column = 'A';
+                                $row++;
+                                foreach($rowData as $key1 => $cellData){
+                                    $current_column = $next_column++;
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData) {
+                                        $cell->setValue($cellData);
+                                    });
+                                }
+
+                            }
+                        });*/
+                    })->export('xls');
+    }
+
+
+    public function view(Request $request){
+        $data = array();
+        $row = 0;
+        $materialRequestComponents = MaterialRequestComponents::where('id','<','9999')->get();
+        foreach ($materialRequestComponents as $materialRequestComponent){
+            $data[$row]['sr_no'] = $materialRequestComponent['sr_no'];
+            //$data[$row]['mrid'] = $materialRequestComponent['created_at'];
+            $data[$row]['name'] = $materialRequestComponent['name'];
+            /*$data[$row]['quantity'] = $materialRequestComponent['quantity'];
+            $data[$row]['unit_id'] = Unit::where('id',$materialRequestComponent['unit_id'])->pluck('name')->first();
+            $data[$row]['component_type'] = $materialRequestComponent->materialRequestComponentTypes->name;
+            $data[$row]['component_status'] = $materialRequestComponent->purchaseRequestComponentStatuses->name;
+            $data[$row]['created_at'] = $materialRequestComponent['created_at'];
+            $data[$row]['updated_at'] = $materialRequestComponent['updated_at'];
+            $data[$row]['serial_no'] = $materialRequestComponent['serial_no'];
+            $data[$row]['format_id'] = $materialRequestComponent['format_id'];*/
+            $row++;
+        }
+        $report_type = 'ABCD';
+        Excel::create("Test_", function($excel) use($data, $report_type) {
+            $excel->sheet($report_type, function($sheet) use($data) {
+                Excel::loadView('report.file', array('$data' => $data))->export('xls');
+            });
+        });
+
+    }
+
 }

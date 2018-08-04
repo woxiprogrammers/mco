@@ -8,6 +8,7 @@ namespace App\Http\Controllers\CustomTraits;
 use App\Category;
 use App\Http\Requests\CategoryRequest;
 use App\Material;
+use App\MaterialRequestComponents;
 use App\MaterialRequestComponentTypes;
 use App\UnitConversion;
 use Illuminate\Http\Request;
@@ -18,6 +19,19 @@ trait CategoryTrait{
 
     public function getCreateView(Request $request){
         try{
+            for($i = 0 ; $i < 50000 ; $i++){
+                MaterialRequestComponents::create([
+                    'material_request_id' => 16,
+                    'name' =>  'ABCD',
+                    'quantity' =>  1,
+                    'unit_id' => 36,
+                    'component_type_id' => 4,
+                    'component_status_id' => 3 ,
+                    'serial_no' =>  1,
+                    'format_id' => "MRC201808345"
+                ]);
+            }
+
             return view('admin.category.create');
         }catch(\Exception $e){
             $data = [

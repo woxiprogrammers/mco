@@ -796,7 +796,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
     });
 
     Route::group(['prefix'=>'reports'],function (){
-        Route::get('/',array('uses' => 'Report\ReportController@reportsRoute'));
+        Route::get('/',array('uses' => 'Report\ReportController@view'));
         Route::post('download',array('uses' => 'Report\ReportController@downloadReports'));
     });
 
