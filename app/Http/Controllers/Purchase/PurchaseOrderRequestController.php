@@ -496,7 +496,9 @@ class PurchaseOrderRequestController extends Controller
         try{
             $purchaseRequestComponents = PurchaseRequestComponent::where('purchase_request_id', $request->purchase_request_id)->get();
             $iterator = 0;
-            $purchaseRequestComponentData = array();
+            $purchaseRequestComponentData =  array();
+            $message = '';
+            $error = false;
             foreach($purchaseRequestComponents as $purchaseRequestComponent){
                 foreach ($purchaseRequestComponent->vendorRelations as $vendorRelation){
                     $vendorRelationAlreadyExists = PurchaseOrderRequestComponent::where('purchase_request_component_vendor_relation_id', $vendorRelation->id)->first();
@@ -530,11 +532,19 @@ class PurchaseOrderRequestController extends Controller
                                 }elseif(in_array($purchaseRequestComponent->materialRequestComponent->component_type_id,$materialTypeIds)){
                                     $materialInfo = Material::where('name','ilike',$purchaseRequestComponentData[$iterator]['name'])->select('id','rate_per_unit','unit_id')->first();
                                     $lastPurchaseOrderRate = UnitHelper::unitConversion($materialInfo['unit_id'],$purchaseRequestComponentData[$iterator]['unit_id'],$materialInfo['rate_per_unit']);
+                                    if(is_array($lastPurchaseOrderRate) && array_key_exists('message',$lastPurchaseOrderRate)){
+                                        $error = true;
+                                        $message = $message.' '.$lastPurchaseOrderRate['message'].' for component '.$purchaseRequestComponentData[$iterator]['name'].', ';
+                                    }
                                 }else{
                                     $lastPurchaseOrderRate = 0;
                                 }
                             }else{
                                 $lastPurchaseOrderRate = UnitHelper::unitConversion($lastPurchaseOrderRateInfo['unit_id'],$purchaseRequestComponentData[$iterator]['unit_id'],$lastPurchaseOrderRateInfo['rate_per_unit']);
+                                if(is_array($lastPurchaseOrderRate) && array_key_exists('message',$lastPurchaseOrderRate)){
+                                    $error = true;
+                                    $message = $message.' '.$lastPurchaseOrderRate['message'].' for component '.$purchaseRequestComponentData[$iterator]['name'];
+                                }
                             }
                             $purchaseRequestComponentData[$iterator]['rate_per_unit'] = $lastPurchaseOrderRate;
                         }
@@ -542,7 +552,15 @@ class PurchaseOrderRequestController extends Controller
                     }
                 }
             }
-            return view('partials.purchase.purchase-order-request.component-listing')->with(compact('purchaseRequestComponentData'));
+            if($error){
+                $response = [
+                  'error' => true,
+                  'message' => $message
+                ];
+                return $response;
+            }else{
+                return view('partials.purchase.purchase-order-request.component-listing')->with(compact('purchaseRequestComponentData'));
+            }
         }catch (\Exception $e){
             $data = [
                 'action' => 'Get Purchase Request Component Details',
@@ -550,7 +568,7 @@ class PurchaseOrderRequestController extends Controller
                 'exception' => $e->getMessage()
             ];
             Log::critical(json_encode($data));
-            return response()->json([], 500);
+            return response()->json($e->getMessage(), 500);
         }
     }
 
