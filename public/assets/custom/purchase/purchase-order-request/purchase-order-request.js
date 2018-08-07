@@ -49,7 +49,11 @@ $(document).ready(function(){
                 purchase_request_id: purchaseRequestId
             },
             success: function(data, textStatus, xhr){
-                $("#purchaseRequestComponentTable tbody").html(data);
+                if(typeof data.error != 'undefined'){
+                    alert(data.message);
+                }else{
+                    $("#purchaseRequestComponentTable tbody").html(data);
+                }
             },
             error: function(errorData){
 
