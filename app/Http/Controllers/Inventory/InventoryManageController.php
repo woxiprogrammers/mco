@@ -69,7 +69,7 @@ class InventoryManageController extends Controller
         try{
             $statusData = InventoryComponentTransferStatus::whereIn('slug',['approved','disapproved','requested'])
                 ->get(['id','name']);
-            $units = Unit::where('is_active',true)->get(['id','name']);
+            $units = Unit::where('is_active',true)->orderBy('name')->get(['id','name']);
             return view('inventory/transfer/manage')->with(compact('statusData','units'));
         }catch(\Exception $e){
             $data = [
@@ -88,6 +88,12 @@ class InventoryManageController extends Controller
             $search_from = null;
             $search_to = null;
             $search_name = null;
+            $search_qty = null;
+            $search_unit_status = 'all';
+            $search_amt = null;
+            $search_grn_out = null;
+            $search_grn_in = null;
+            $search_status = 'all';
 
             if ($request->has('search_from')) {
                 $search_from = $request['search_from'];
@@ -99,6 +105,30 @@ class InventoryManageController extends Controller
 
             if ($request->has('search_name')) {
                 $search_name = $request['search_name'];
+            }
+
+            if ($request->has('search_qty')) {
+                $search_qty = $request['search_qty'];
+            }
+
+            if ($request->has('unit_status')) {
+                $search_unit_status = $request['unit_status'];
+            }
+
+            if ($request->has('search_amt')) {
+                $search_amt = $request['search_amt'];
+            }
+
+            if ($request->has('search_grn_out')) {
+                $search_grn_out = $request['search_grn_out'];
+            }
+
+            if ($request->has('search_grn_in')) {
+                $search_grn_in = $request['search_grn_in'];
+            }
+
+            if ($request->has('status')) {
+                $search_status = $request['status'];
             }
 
             $filterFlag = true;
@@ -137,10 +167,85 @@ class InventoryManageController extends Controller
                 }
             }
 
+            if ($search_qty != null && $search_qty != "" && $filterFlag == true) {
+                $ids = InventoryComponentTransfers::
+                    where('quantity',$search_qty)
+                    ->whereIn('id',$ids)
+                    ->pluck('id')->toArray();
+
+                if (count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+            if ($search_amt != null && $search_amt != "" && $filterFlag == true) {
+                $ids = InventoryComponentTransfers::
+                where('transportation_amount',$search_amt)
+                    ->whereIn('id',$ids)
+                    ->pluck('id')->toArray();
+
+                if (count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+            if ($search_grn_out != null && $search_grn_out != "" && $filterFlag == true) {
+                $ids = InventoryComponentTransfers::
+                where('grn','ilike','%'.$search_grn_out.'%')
+                    ->whereIn('id',$ids)
+                    ->pluck('id')->toArray();
+
+                if (count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+            if ($search_grn_in != null && $search_grn_in != "" && $filterFlag == true) {
+                      /*$ids = InventoryComponentTransfers::
+                    where('grn','ilike','%'.$search_grn_in.'%')
+                    ->whereIn('id',$ids)
+                    ->pluck('id')->toArray();*/
+                $ids = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
+                    ->where('inventory_transfer_types.slug',"site")
+                    ->where('inventory_transfer_types.type',"IN")
+                    ->whereNotNull('inventory_component_transfers.related_transfer_id')
+                    ->where('inventory_component_transfers.grn','ilike','%'.$search_grn_in.'%')
+                    ->pluck('inventory_component_transfers.related_transfer_id')->toArray();
+
+                if (count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+            if ($search_unit_status != 'all' && $search_unit_status != "" && $filterFlag == true) {
+                $ids = InventoryComponentTransfers::join('units','units.id','inventory_component_transfers.unit_id')
+                    ->where('inventory_component_transfers.unit_id',$search_unit_status)
+                    ->whereIn('inventory_component_transfers.id',$ids)
+                    ->pluck('inventory_component_transfers.id')->toArray();
+
+                if (count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+            if ($search_status != 'all' && $search_status != "" && $filterFlag == true) {
+                $ids = InventoryComponentTransfers::join('inventory_component_transfer_statuses','inventory_component_transfer_statuses.id','inventory_component_transfers.inventory_component_transfer_status_id')
+                    ->where('inventory_component_transfers.inventory_component_transfer_status_id',$search_status)
+                    ->whereIn('inventory_component_transfers.id',$ids)
+                    ->pluck('inventory_component_transfers.id')->toArray();
+
+                if (count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
             $inventoryTransferData = array();
             if($filterFlag) {
-                $inventoryTransferData = InventoryComponentTransfers::whereIn('id',$ids)
-                    ->orderBy('created_at','desc')->get();
+                $inventoryTransferData = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
+                    ->where('inventory_transfer_types.slug',"site")
+                    ->where('inventory_transfer_types.type',"OUT")
+                    ->whereIn('inventory_component_transfers.id',$ids)
+                    ->orderBy('inventory_component_transfers.created_at','desc')->get();
             }
 
             $iTotalRecords = count($inventoryTransferData);
