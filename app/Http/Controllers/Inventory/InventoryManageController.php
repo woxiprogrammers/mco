@@ -241,17 +241,16 @@ class InventoryManageController extends Controller
 
             $inventoryTransferData = array();
             if($filterFlag) {
-                $inventoryTransferData = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
-                    ->where('inventory_transfer_types.slug',"site")
-                    ->where('inventory_transfer_types.type',"OUT")
-                    ->whereIn('inventory_component_transfers.id',$ids)
-                    ->orderBy('inventory_component_transfers.created_at','desc')->get();
+                $SiteOutTransferId = InventoryTransferTypes::where('slug','site')->where('type','OUT')->pluck('id');
+                $inventoryTransferData = InventoryComponentTransfers::where('transfer_type_id',$SiteOutTransferId)
+                    ->whereIn('id',$ids)
+                    ->orderBy('created_at','desc')->get();
             }
-
             $iTotalRecords = count($inventoryTransferData);
             $records = array();
             $records['data'] = array();
             $end = $request->length < 0 ? count($inventoryTransferData) : $request->length;
+
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($inventoryTransferData); $iterator++,$pagination++ ){
                 if ($inventoryTransferData[$pagination]->inventoryComponentTransferStatus->slug == 'approved') {
                     $actionDropDownStatus = '<i class="fa fa-check-circle" title="Approved" style="font-size:24px;color:green">&nbsp;&nbsp;</i>';
