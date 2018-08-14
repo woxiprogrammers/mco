@@ -546,7 +546,7 @@ use InventoryTrait;
 
     public function getVendorAutoSuggest(Request $request,$keyword){
         try{
-            $vendorList = Vendor::where('name','ilike','%'.$keyword.'%')->where('is_active',true)->select('id','name')->get();
+            $vendorList = Vendor::where('company','ilike','%'.$keyword.'%')->where('is_active',true)->select('id','company')->get();
             $response = array();
             if(count($vendorList) > 0){
                 $response = $vendorList->toArray();
@@ -555,7 +555,7 @@ use InventoryTrait;
                     $response[$iterator]['tr_view'] = '<input name="vendors[]" type="hidden" value="'.$vendorList['id'].'">
                                                         <div class="row">
                                                             <div class="col-md-9"  style="text-align: left">
-                                                                <label class="control-label">'.$vendorList['name'].'</label>
+                                                                <label class="control-label">'.$vendorList['company'].'</label>
                                                             </div>
                                                         </div>';
                     $iterator++;

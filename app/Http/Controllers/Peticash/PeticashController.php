@@ -182,19 +182,23 @@ class PeticashController extends Controller
 
     public function editViewMasterPeticashAccount(Request $request, $txnid) {
         try{
-            $accountData = array();
             $txndetail = PeticashSiteTransfer::where('id','=',$txnid)->get()->toArray();
             $data = array();
             foreach ($txndetail as $txn) {
+                $payment_id = "";
+                if ($txn['payment_id'] != null) {
+                    $payment_id =  PaymentType::findOrFail($txn['payment_id'])->toArray()['name'];
+                }
                 $data['from_id'] = User::findOrFail($txn['received_from_user_id'])->toArray()['first_name']." ".User::findOrFail($txn['received_from_user_id'])->toArray()['last_name'];
                 $data['to_id'] = User::findOrFail($txn['user_id'])->toArray()['first_name']." ".User::findOrFail($txn['user_id'])->toArray()['last_name'];
                 $data['amount'] = $txn['amount'];
-                $data['payment_id'] = PaymentType::findOrFail($txn['payment_id'])->toArray()['name'];
+                $data['payment_id'] = $payment_id;
                 $data['date'] = $txn['date'];
                 $data['remark'] = $txn['remark'];
                 $data['created_on'] = $txn['created_at'];
                 $data['txn_id'] = $txn['id'];
             }
+
             return view('peticash/master-peticash-account/edit', $data);
         }catch(\Exception $e){
             $data = [
@@ -1096,7 +1100,7 @@ class PeticashController extends Controller
             }
 
             if ($status_id != "all" && $status_id != "" && $filterFlag == true) {
-                $ids = PeticashSiteTransfer::where('peticash_site_transfers.payment_id',$status_id)
+                $ids = PeticashSiteTransfer::where('peticash_site_transfers.paid_from_slug',$status_id)
                     ->whereIn('peticash_site_transfers.id', $ids)
                     ->where('peticash_site_transfers.project_site_id','!=', 0)
                     ->pluck('peticash_site_transfers.id')->toArray();
@@ -1148,7 +1152,8 @@ class PeticashController extends Controller
                         User::findOrFail($sitewiseAccountData[$pagination]['user_id'])->toArray()['first_name']." ".User::findOrFail($sitewiseAccountData[$pagination]['user_id'])->toArray()['last_name'],
                         Project::join('project_sites','project_sites.project_id','=','projects.id')->where('project_sites.id',$sitewiseAccountData[$pagination]['project_site_id'])->pluck('projects.name')->first(),
                         $sitewiseAccountData[$pagination]['amount'],
-                        PaymentType::findOrFail($sitewiseAccountData[$pagination]['payment_id'])->toArray()['name'],
+                        //PaymentType::findOrFail($sitewiseAccountData[$pagination]['payment_id'])->toArray()['name'],
+                        $sitewiseAccountData[$pagination]['paid_from_slug'],
                         $sitewiseAccountData[$pagination]['remark'],
                         date('d M Y',strtotime($sitewiseAccountData[$pagination]['date'])),
                         '<div class="btn-group">
@@ -1165,7 +1170,6 @@ class PeticashController extends Controller
                 $records["draw"] = intval($request->draw);
                 $records["recordsTotal"] = $iTotalRecords;
                 $records["recordsFiltered"] = $iTotalRecords;}
-
         }catch(\Exception $e){
             $records = array();
             $data = [

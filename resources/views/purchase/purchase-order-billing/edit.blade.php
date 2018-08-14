@@ -109,14 +109,14 @@
                                                                             <label class="control-label pull-right"> Bill Date </label>
                                                                         </div>
                                                                         @if(isset($purchaseOrderBill->bill_date))
-                                                                            <div class="col-md-6 date date-picker" data-date-start-date="0d">
-                                                                                <input type="text" style="width: 40%" class="tax-modal-delivery-date" id="expected_delivery_date" name="bill_date" value="{{date('m/d/y',strtotime($purchaseOrderBill->bill_date))}}" />
+                                                                            <div class="col-md-6 date date-picker" data-date-end-date="+0d">
+                                                                                <input type="text" style="width: 40%" class="tax-modal-delivery-date" id="expected_delivery_date" name="bill_date" value="{{date('m/d/Y',strtotime($purchaseOrderBill->bill_date))}}" />
                                                                                 <button class="btn btn-sm default" type="button">
                                                                                     <i class="fa fa-calendar"></i>
                                                                                 </button>
                                                                             </div>
                                                                         @else
-                                                                            <div class="col-md-6 date date-picker" data-date-start-date="0d">
+                                                                            <div class="col-md-6 date date-picker" data-date-end-date="+0d">
                                                                                 <input type="text" style="width: 40%" class="tax-modal-delivery-date" id="expected_delivery_date" name="bill_date" />
                                                                                 <button class="btn btn-sm default" type="button">
                                                                                     <i class="fa fa-calendar"></i>

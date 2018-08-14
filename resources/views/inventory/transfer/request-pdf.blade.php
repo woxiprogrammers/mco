@@ -139,6 +139,10 @@ table {
                 <td style="padding-left: 5%;width: 50%;"><b>Vehicle number</b></td>
                 <td style="padding-left: 5%;text-align: left;">{!! $vehicle_number !!}</td>
             </tr>
+            <tr>
+                <td style="padding-left: 5%;width: 50%;"><b>Transaction Date</b></td>
+                <td style="padding-left: 5%;text-align: left;">{!! $created_at !!}</td>
+            </tr>
         </table>
 </body>
 </html>

@@ -5,6 +5,7 @@ use App\Asset;
 use App\Client;
 use App\Http\Controllers\CustomTraits\Notification\NotificationTrait;
 use App\Http\Controllers\CustomTraits\Purchase\MaterialRequestTrait;
+use App\Http\Requests\MaterialRequest;
 use App\Material;
 use App\MaterialRequestComponentHistory;
 use App\MaterialRequestComponents;
