@@ -162,7 +162,7 @@
                 }else{
                     var amount = 0;
                 }
-                $(this).closest('tr').find('.employee-amount').val(amount.toFixed(3));
+                $(this).closest('tr').find('.employee-amount').val(amount.toFixed(2));
             });
         });
     </script>
