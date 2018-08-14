@@ -50,7 +50,7 @@
                                                 <table class="table table-striped table-bordered table-hover table-checkable order-column" id="vendorTable">
                                                     <thead>
                                                     <tr>
-                                                        <th style="width: 30%"> Vendor Comapny Name</th>
+                                                        <th style="width: 30%"> Vendor Company Name</th>
                                                         <th > Vendor Name </th>
                                                         <th> Mobile Number </th>
                                                         <th> Alt Mobile Number </th>

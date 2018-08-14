@@ -337,7 +337,7 @@
                                                                                     <input name="vendors[]" type="hidden" value="{{$vendor['vendor_id']}}">
                                                                                     <div class="row">
                                                                                         <div class="col-md-9"  style="text-align: left">
-                                                                                            <label class="control-label">{{$vendor->vendor->name}}</label>
+                                                                                            <label class="control-label">{{$vendor->vendor->company}}</label>
                                                                                         </div>
                                                                                     </div>
                                                                                 </td>
@@ -404,7 +404,7 @@
                     }
                     return $.map(x, function (data) {
                         return {
-                            vendorList:data.name,
+                            vendorList:data.company,
                             tr_view:data.tr_view
                         };
                     });
