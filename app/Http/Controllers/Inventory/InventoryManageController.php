@@ -360,7 +360,7 @@ class InventoryManageController extends Controller
                     $this->sendPushNotification('Manish Construction',$notificationString,$webTokens,$mobileTokens,'c-m-s-t-a');
                 }
             }
-            return view('/inventory/transfer/manage');
+            return redirect('/inventory/transfer/manage');
         }catch(\Exception $e){
             $data = [
                 'action' => 'Change Status',
