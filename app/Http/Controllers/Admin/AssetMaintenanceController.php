@@ -115,7 +115,6 @@ class AssetMaintenanceController extends Controller{
 
     public function createAssetMaintenanceRequest(Request $request){
         try{
-            
             $projectSiteId = Session::get('global_project_site');
             $user = Auth::user();
             $assetMaintenance = AssetMaintenance::create([
@@ -395,7 +394,8 @@ class AssetMaintenanceController extends Controller{
             $vendorList = Vendor::join('asset_vendor_relation','asset_vendor_relation.vendor_id','=','vendors.id')
                             ->where('asset_vendor_relation.asset_id',$assetMaintenance['asset_id'])
                             ->whereNotIn('vendors.id',$alreadyAssignedVendorId)
-                            ->where('vendors.name','ilike','%'.$keyword.'%')->where('vendors.is_active',true)->select('vendors.id','vendors.name')->get();
+                            ->where('vendors.name','ilike','%'.$keyword.'%')->where('vendors.is_active',true)
+                            ->where('vendors.for_transportation',false)->select('vendors.id','vendors.company')->get();
             $response = array();
             if(count($vendorList) > 0){
                 $response = $vendorList->toArray();
@@ -405,7 +405,7 @@ class AssetMaintenanceController extends Controller{
                     $response[$iterator]['tr_view'] = '<input name="vendors[]" type="hidden" value="'.$vendorList['id'].'">
                                                         <div class="row">
                                                             <div class="col-md-9"  style="text-align: left">
-                                                                <label class="control-label">'.$vendorList['name'].'</label>
+                                                                <label class="control-label">'.$vendorList['company'].'</label>
                                                             </div>
                                                         </div>';
                     $iterator++;

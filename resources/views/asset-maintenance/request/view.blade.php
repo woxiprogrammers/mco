@@ -66,7 +66,7 @@
                                             <div class="tab-content">
                                                 <div class="tab-pane fade in active" id="viewInfoTab">
                                                     <div class="form-body">
-                                                        @if($assetMaintenance->assetMaintenanceStatus->slug == 'vendor-approved' && ($assetMaintenanceTransactionCount < 0) && ($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-asset-maintainance')))
+                                                        @if($assetMaintenance->assetMaintenanceStatus->slug == 'vendor-approved' && ($assetMaintenanceTransactionCount <= 0) && ($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-asset-maintainance')))
                                                             <div class="row">
                                                                 <div class="col-md-offset-9 col-md-3 ">
                                                                     <a class="btn red pull-right" href="javascript:void(0);" id="transactionButton">
@@ -183,7 +183,7 @@
                                                                 <table class="table table-striped table-bordered table-hover order-column" id="assetMaintenanceTransaction">
                                                                     <thead>
                                                                     <tr>
-                                                                        <th>Vendor Name</th>
+                                                                        <th>Vendor Company</th>
                                                                         <th style="width: 40%"> GRN</th>
                                                                         <th>Status</th>
                                                                         <th>Action</th>
@@ -346,7 +346,7 @@
                     }
                     return $.map(x, function (data) {
                         return {
-                            vendorList:data.name,
+                            vendorList:data.company,
                             tr_view:data.tr_view,
                             vendor_id:data.vendor_id
                         };
