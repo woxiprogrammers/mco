@@ -115,7 +115,6 @@ class AssetMaintenanceController extends Controller{
 
     public function createAssetMaintenanceRequest(Request $request){
         try{
-            
             $projectSiteId = Session::get('global_project_site');
             $user = Auth::user();
             $assetMaintenance = AssetMaintenance::create([
@@ -395,7 +394,8 @@ class AssetMaintenanceController extends Controller{
             $vendorList = Vendor::join('asset_vendor_relation','asset_vendor_relation.vendor_id','=','vendors.id')
                             ->where('asset_vendor_relation.asset_id',$assetMaintenance['asset_id'])
                             ->whereNotIn('vendors.id',$alreadyAssignedVendorId)
-                            ->where('vendors.name','ilike','%'.$keyword.'%')->where('vendors.is_active',true)->select('vendors.id','vendors.name')->get();
+                            ->where('vendors.name','ilike','%'.$keyword.'%')->where('vendors.is_active',true)
+                            ->where('vendors.for_transportation',false)->select('vendors.id','vendors.company')->get();
             $response = array();
             if(count($vendorList) > 0){
                 $response = $vendorList->toArray();
@@ -405,7 +405,7 @@ class AssetMaintenanceController extends Controller{
                     $response[$iterator]['tr_view'] = '<input name="vendors[]" type="hidden" value="'.$vendorList['id'].'">
                                                         <div class="row">
                                                             <div class="col-md-9"  style="text-align: left">
-                                                                <label class="control-label">'.$vendorList['name'].'</label>
+                                                                <label class="control-label">'.$vendorList['company'].'</label>
                                                             </div>
                                                         </div>';
                     $iterator++;
@@ -649,10 +649,9 @@ class AssetMaintenanceController extends Controller{
             }
                 $assetMaintenanceBillData = AssetMaintenanceBill::join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
                 ->whereIn('asset_maintenance_bills.id',$assetMaintenanceBillIds)
-                ->select('asset_maintenance.id as id','asset_maintenance_bills.id as bill_id','asset_maintenance_bills.bill_number as bill_number','asset_maintenance_bills.amount')
+                ->select('asset_maintenance.id as asset_maintenance_id','asset_maintenance_bills.id as id','asset_maintenance_bills.bill_number as bill_number','asset_maintenance_bills.amount')
                 ->orderBy('id','desc')
                 ->get();
-
             if ($request->has('get_total')) {
                 $total = 0;
                 $paidTotal = 0;
@@ -674,11 +673,11 @@ class AssetMaintenanceController extends Controller{
                 for($iterator = 0,$pagination = $request->start; $iterator < $length && $pagination < count($assetMaintenanceBillData); $iterator++,$pagination++ ){
                     $paidAmount = $assetMaintenanceBillData[$pagination]->assetMaintenanceBillPayment->sum('amount');
                     $editButton = '<div id="sample_editable_1_new" class="btn btn-small blue" >
-                        <a href="/asset/maintenance/request/bill/view/'.$assetMaintenanceBillData[$pagination]['bill_id'].'" style="color: white"> View
+                        <a href="/asset/maintenance/request/bill/view/'.$assetMaintenanceBillData[$pagination]['id'].'" style="color: white"> View
                     </div>';
                     $vendorId = AssetMaintenanceVendorRelation::where('asset_maintenance_id',$assetMaintenanceBillData[$pagination]['id'])->pluck('vendor_id')->first();
                     $records['data'][] = [
-                        $assetMaintenanceBillData[$pagination]['id'],
+                        $assetMaintenanceBillData[$pagination]['asset_maintenance_id'],
                         Vendor::where('id',$vendorId)->pluck('company')->first(),
                         $assetMaintenanceBillData[$pagination]['bill_number'],
                         $assetMaintenanceBillData[$pagination]['amount'],
