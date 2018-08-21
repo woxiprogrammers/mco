@@ -517,6 +517,16 @@ class PurchaseOrderBillingController extends Controller
                     $filterFlag = false;
                 }
             }
+            if($request->has('grn') && $request->grn != '' && $filterFlag == true){
+                $purchaseOrderTransactionBillIds = PurchaseOrderTransaction::join('purchase_order_bill_transaction_relation','purchase_order_transactions.id','=','purchase_order_bill_transaction_relation.purchase_order_transaction_id')
+                                            ->where('purchase_order_transactions.grn',$request['grn'])
+                                            ->whereIn('purchase_order_bill_transaction_relation.purchase_order_bill_id',$purchaseOrderBillIds)->select('purchase_order_bill_transaction_relation.purchase_order_bill_id')->get()->toArray();
+                $purchaseOrderBillIds = PurchaseOrderBill::whereIn('id', $purchaseOrderTransactionBillIds)
+                    ->pluck('id')->toArray();
+                if(count($purchaseOrderBillIds) <= 0){
+                    $filterFlag = false;
+                }
+            }
             if($filterFlag == true){
                 $purchaseOrderBillData = PurchaseOrderBill::join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
                     ->whereIn('purchase_order_bills.id', $purchaseOrderBillIds)
@@ -574,12 +584,15 @@ class PurchaseOrderBillingController extends Controller
                         ->join('purchase_orders','purchase_requests.id','=','purchase_orders.purchase_request_id')
                         ->where('purchase_orders.id',$purchaseOrderBillData[$pagination]['purchase_order_id'])
                         ->pluck('projects.name')->first();
+                    $grns = PurchaseOrderTransaction::whereIn('id',$purchaseOrderBillData[$pagination]->purchaseOrderTransactionRelation->pluck('purchase_order_transaction_id'))
+                                            ->pluck('grn')->toArray();
                     $records['data'][] = [
                         $projectName,
                         $purchaseOrderBillData[$pagination]['serial_number'],
                         date('j M Y',strtotime($purchaseOrderBillData[$pagination]['created_at'])),
                         $entryDate,
                         $purchaseOrderBillData[$pagination]['vendor_bill_number'],
+                        implode(',',$grns),
                         $vendorName,
                         $basicAmount,
                         $taxAmount,
