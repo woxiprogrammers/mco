@@ -306,7 +306,8 @@ class AssetMaintenanceController extends Controller{
             $vendorAssignedAssetMaintenance = AssetMaintenanceVendorRelation::join('asset_maintenance','asset_maintenance_vendor_relation.asset_maintenance_id','=','asset_maintenance.id')
                                                                             ->where('asset_maintenance.project_site_id',$projectSiteId)
                                                                             ->where('asset_maintenance.asset_maintenance_status_id',AssetMaintenanceStatus::where('slug','vendor-assigned')->pluck('id')->first())
-                                                                            ->select('asset_maintenance_vendor_relation.id','asset_maintenance_vendor_relation.asset_maintenance_id','asset_maintenance_vendor_relation.vendor_id','asset_maintenance_vendor_relation.quotation_amount','asset_maintenance_vendor_relation.user_id')
+                                                                            ->select('asset_maintenance_vendor_relation.id','asset_maintenance_vendor_relation.asset_maintenance_id','asset_maintenance_vendor_relation.vendor_id','asset_maintenance_vendor_relation.quotation_amount','asset_maintenance_vendor_relation.user_id','asset_maintenance_vendor_relation.is_approved')
+                                                                            ->orderBy('asset_maintenance_vendor_relation.id', 'DESC')
                                                                             ->get();
             $status = 200;
             $iTotalRecords = count($vendorAssignedAssetMaintenance);
@@ -316,31 +317,26 @@ class AssetMaintenanceController extends Controller{
 
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($vendorAssignedAssetMaintenance); $iterator++,$pagination++ ){
                 if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-asset-maintenance-approval')){
-                    $actionDropDown =  '<button class="btn btn-xs blue"> 
-                                            <form action="/asset/maintenance/request/approval/change-status/approve/'.$vendorAssignedAssetMaintenance[$pagination]->id.'" method="post">
-                                                <a href="javascript:void(0);" onclick="changeStatus(this)" style="color: white">
-                                                     Approve 
-                                                </a>
-                                                <input type="hidden" name="_token">
-                                            </form> 
-                                        </button>
-                                        <button class="btn btn-xs default "> 
-                                            <form action="/asset/maintenance/request/approval/change-status/disapprove/'.$vendorAssignedAssetMaintenance[$pagination]->id.'" method="post">
-                                                <a href="javascript:void(0);" onclick="changeStatus(this)" style="color: grey">
-                                                    Disapprove 
-                                                </a>
-                                                <input type="hidden" name="_token">
-                                            </form>
-                                        </button>';
+                    $actionDropDown =  '
+                                        <form action="/asset/maintenance/request/approval/change-status/approve/'.$vendorAssignedAssetMaintenance[$pagination]->id.'" method="post">
+                                            <input style="color: green" type="submit" onclick="changeStatus(this);" value="Approve">
+                                            <input type="hidden" name="_token">
+                                        </form>
+
+                                        <form action="/asset/maintenance/request/approval/change-status/disapprove/'.$vendorAssignedAssetMaintenance[$pagination]->id.'" method="post">
+                                            <input type="submit" onclick="changeStatus(this);" style="color: red" value="Disapprove">
+                                            <input type="hidden" name="_token">
+                                        </form>';
                 }else{
                     $actionDropDown =  '';
                 }
 
-                $records['data'][$iterator] = [
+               $records['data'][$iterator] = [
                     $vendorAssignedAssetMaintenance[$pagination]->assetMaintenance->asset->name,
-                    date('d M Y',strtotime($vendorAssignedAssetMaintenance[$pagination]->assetMaintenance['created_at'])),
+                    date('d M Y H:i:s',strtotime($vendorAssignedAssetMaintenance[$pagination]->assetMaintenance['created_at'])),
                     $vendorAssignedAssetMaintenance[$pagination]->vendor->name,
                     $vendorAssignedAssetMaintenance[$pagination]->quotation_amount,
+                    $vendorAssignedAssetMaintenance[$pagination]->is_approved,
                     $actionDropDown
                 ];
             }

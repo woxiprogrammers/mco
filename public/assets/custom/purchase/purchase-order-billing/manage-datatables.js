@@ -50,21 +50,6 @@ var PurchaseOrderListing = function () {
 
                             // Total over this page
                             pageTotal = api
-                                .column( 8, { page: 'current'} )
-                                .data()
-                                .reduce( function (a, b) {
-                                    return intVal(a) + intVal(b);
-                                }, 0 );
-
-                            // Update footer
-                            $( api.column( 8 ).footer() ).html(
-                                customRound(pageTotal) +' ( '+ total +' total)'
-                            );
-
-                            billtotal = result['billtotal'];
-
-                            // Total over this page
-                            pageBillTotal = api
                                 .column( 9, { page: 'current'} )
                                 .data()
                                 .reduce( function (a, b) {
@@ -73,13 +58,13 @@ var PurchaseOrderListing = function () {
 
                             // Update footer
                             $( api.column( 9 ).footer() ).html(
-                                customRound(pageBillTotal) +' ( '+ billtotal +' total)'
+                                customRound(pageTotal) +' ( '+ total +' total)'
                             );
 
-                            paidtotal = result['paidtotal'];
+                            billtotal = result['billtotal'];
 
                             // Total over this page
-                            pagePaidTotal = api
+                            pageBillTotal = api
                                 .column( 10, { page: 'current'} )
                                 .data()
                                 .reduce( function (a, b) {
@@ -88,6 +73,21 @@ var PurchaseOrderListing = function () {
 
                             // Update footer
                             $( api.column( 10 ).footer() ).html(
+                                customRound(pageBillTotal) +' ( '+ billtotal +' total)'
+                            );
+
+                            paidtotal = result['paidtotal'];
+
+                            // Total over this page
+                            pagePaidTotal = api
+                                .column( 11, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 11 ).footer() ).html(
                                 customRound(pagePaidTotal) +' ( '+ paidtotal +' total)'
                             );
 
