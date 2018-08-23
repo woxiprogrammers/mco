@@ -55,6 +55,7 @@
                                                                 <th> Created At </th>
                                                                 <th> Vendor name </th>
                                                                 <th> Quotation Amount </th>
+                                                                <th> Status</th>
                                                                 <th> Actions </th>
                                                             </tr>
                                                             </thead>
