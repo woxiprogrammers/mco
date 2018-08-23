@@ -132,15 +132,14 @@
                                                                     <th></th>
                                                                     <th></th>
                                                                     <th></th>
-                                                                    <th></th>
                                                                 </tr>
                                                                 </tfoot>
                                                             </table>
                                                         </div>
 
                                                     </div>
-                                                    </form>
                                                 </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -150,8 +149,6 @@
                 </div>
             </div>
         </div>
-    </div>
-    </div>
 @endsection
 @section('javascript')
     <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
