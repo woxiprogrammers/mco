@@ -292,9 +292,10 @@
                                         </form>
                                     </div>
                                 </div>
-                                <form method="post" action="/peticash/peticash-management/purchase/change-voucher-status" hidden>
+                                <form method="post" action="/peticash/peticash-management/change-voucher-status" hidden>
                                     {!! csrf_field() !!}
                                     <input type="hidden" name="purchase_transaction_id" id="purchase_transaction_id">
+                                    <input type="hidden" name="type" id="type">
                                     <button type="submit" class="btn red voucher-submit" id="submit" style="padding-left: 6px"><i class="fa fa-check"></i> Submit</button>
                                 </form>
                             </div>
@@ -392,6 +393,7 @@
             var value = confirm('Are you sure to receive voucher?');
             if(value){
                 $('#purchase_transaction_id').val(txnId);
+                $('#type').val('purchase');
                 $(".voucher-submit").trigger('click');
             }
         }
