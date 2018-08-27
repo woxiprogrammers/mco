@@ -158,11 +158,11 @@
                 var days = parseFloat($(this).val());
                 var wages = parseFloat($(this).closest('tr').find('.employee-wages').val());
                 if($.isNumeric(days)){
-                    var amount = days*wages;
+                    var amount = days * wages;
                 }else{
                     var amount = 0;
                 }
-                $(this).closest('tr').find('.employee-amount').val(amount);
+                $(this).closest('tr').find('.employee-amount').val(amount.toFixed(2));
             });
         });
     </script>

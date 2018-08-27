@@ -105,7 +105,8 @@
                                                                     <th> Created By  </th>
                                                                     <th> Date  </th>
                                                                     <th> Site  </th>
-                                                                    <th> Action </th>
+                                                                    <th> Voucher Created </th>
+                                                                    <th style="width: 20%"> Action </th>
                                                                 </tr>
                                                                 <tr class="filter">
                                                                     <th> {{--<input type="text" class="form-control form-filter" name="search_id" hidden>--}} </th>
@@ -124,6 +125,7 @@
                                                                     <th> {{--<input type="text" class="form-control form-filter" name="search_created_by" hidden>--}} </th>
                                                                     <th> {{--<input type="text" class="form-control form-filter" name="search_created_on" hidden>--}} </th>
                                                                     <th> {{--<input type="text" class="form-control form-filter" name="search_site" hidden>--}} </th>
+                                                                    <th> {{--<input type="text" class="form-control form-filter" name="search_site" hidden>--}} </th>
                                                                     <th>
                                                                         <input type="hidden" class="form-control form-filter" name="postdata" id="postdata">
                                                                         <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
@@ -137,6 +139,7 @@
                                                             <tfoot>
                                                             <tr>
                                                                 <th colspan="4" style="text-align:right">Total Page Wise: </th>
+                                                                <th></th>
                                                                 <th></th>
                                                                 <th></th>
                                                                 <th colspan="4"></th>
@@ -248,6 +251,12 @@
                                         </form>
                                     </div>
                                 </div>
+                                <form method="post" action="/peticash/peticash-management/change-voucher-status" hidden>
+                                    {!! csrf_field() !!}
+                                    <input type="hidden" name="salary_transaction_id" id="salary_transaction_id">
+                                    <input type="hidden" name="type" id="type">
+                                    <button type="submit" class="btn red voucher-submit" id="submit" style="padding-left: 6px"><i class="fa fa-check"></i> Submit</button>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -314,7 +323,14 @@
             });
         });
 
-
+        function changeVoucherStatus(txnId){
+            var value = confirm('Are you sure to receive voucher?');
+            if(value){
+                $('#salary_transaction_id').val(txnId);
+                $('#type').val('salary');
+                $(".voucher-submit").trigger('click');
+            }
+        }
 
         function detailsSalaryModal(txnId) {
             $.ajax({

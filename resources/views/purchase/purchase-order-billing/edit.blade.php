@@ -109,14 +109,14 @@
                                                                             <label class="control-label pull-right"> Bill Date </label>
                                                                         </div>
                                                                         @if(isset($purchaseOrderBill->bill_date))
-                                                                            <div class="col-md-6 date date-picker" data-date-start-date="0d">
-                                                                                <input type="text" style="width: 40%" class="tax-modal-delivery-date" id="expected_delivery_date" name="bill_date" value="{{date('m/d/y',strtotime($purchaseOrderBill->bill_date))}}" />
+                                                                            <div class="col-md-6 date date-picker" data-date-end-date="+0d">
+                                                                                <input type="text" style="width: 40%" class="tax-modal-delivery-date" id="expected_delivery_date" name="bill_date" value="{{date('m/d/Y',strtotime($purchaseOrderBill->bill_date))}}" />
                                                                                 <button class="btn btn-sm default" type="button">
                                                                                     <i class="fa fa-calendar"></i>
                                                                                 </button>
                                                                             </div>
                                                                         @else
-                                                                            <div class="col-md-6 date date-picker" data-date-start-date="0d">
+                                                                            <div class="col-md-6 date date-picker" data-date-end-date="+0d">
                                                                                 <input type="text" style="width: 40%" class="tax-modal-delivery-date" id="expected_delivery_date" name="bill_date" />
                                                                                 <button class="btn btn-sm default" type="button">
                                                                                     <i class="fa fa-calendar"></i>
@@ -165,7 +165,7 @@
                                                                         </div>
                                                                     </div>
                                                                     <input type="hidden" value="{{$extraTaxPercentage}}" id="extra_tax_percentage">
-                                                                    <div class="form-group row">
+                                                                    <div class="form-group row" id="extra_tax_div">
                                                                         <div class="col-md-2">
                                                                             <label class="control-label pull-right">Extra Tax Amount</label>
                                                                         </div>
@@ -480,6 +480,11 @@
 
     <script>
         $(document).ready(function(){
+            if(parseFloat($('#extra_amount').val()) > 0){
+                $('#extra_tax_div').show();
+            }else{
+                $('#extra_tax_div').hide();
+            }
             CreatePurchaseOrderPayment.init();
             var remainingBillAmount = parseFloat($("#remainingPaymentAmount").val());
             if(remainingBillAmount == null || typeof remainingBillAmount == 'undefined' || isNaN(remainingBillAmount)){
@@ -511,7 +516,14 @@
             var extra_amount  = parseFloat($('#extra_amount').val());
             var extra_tax_amount_percentage = parseFloat($('#extra_tax_percentage').val());
             var extra_tax_amount = (parseFloat((extra_amount * extra_tax_amount_percentage) / 100)).toFixed(3);
-            $('#extra_tax_amount').val(extra_tax_amount);
+            if(parseFloat($('#extra_amount').val()) > 0){
+                $('#extra_tax_div').show();
+                var extra_tax_amount = (parseFloat((extra_amount * extra_tax_amount_percentage) / 100)).toFixed(3);
+                $('#extra_tax_amount').val(extra_tax_amount);
+            }else{
+                $('#extra_tax_div').hide();
+                $('#extra_tax_amount').val(0);
+            }
             $(".calculate-amount").each(function(){
                 var amount = $(this).val();
                 if(typeof amount != 'undefined' && amount != '' && amount != null){

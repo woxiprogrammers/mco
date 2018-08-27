@@ -5,6 +5,7 @@ use App\Asset;
 use App\Client;
 use App\Http\Controllers\CustomTraits\Notification\NotificationTrait;
 use App\Http\Controllers\CustomTraits\Purchase\MaterialRequestTrait;
+use App\Http\Requests\MaterialRequest;
 use App\Material;
 use App\MaterialRequestComponentHistory;
 use App\MaterialRequestComponents;
@@ -113,68 +114,74 @@ class PurchaseController extends Controller
             if($request->has('site_id')){
                 $site_id = $request->site_id;
             }
-            $materialRequests = array();
-            $ids = MaterialRequests::all()->pluck('id');
+            $materialRequestComponentArray = array();
+            $materialRequestComponentIds = MaterialRequestComponents::all()->pluck('id');
             $filterFlag = true;
             if ($site_id != 0 && $filterFlag == true) {
-                $ids = MaterialRequests::whereIn('id',$ids)->where('project_site_id', $site_id)->pluck('id');
-                if(count($ids) <= 0) {
+                $materialRequestComponentIds = MaterialRequestComponents::join('material_requests','material_requests.id','=','material_request_components.material_request_id')
+                    ->whereIn('material_request_components.id',$materialRequestComponentIds)
+                    ->where('material_requests.project_site_id', $site_id)->pluck('material_request_components.id');
+                if(count($materialRequestComponentIds) <= 0) {
                     $filterFlag = false;
                 }
+
             }
             if ($year != 0 && $filterFlag == true) {
-                $ids = MaterialRequests::whereIn('id',$ids)->whereYear('created_at', $year)->pluck('id');
-                if(count($ids) <= 0) {
+                $materialRequestComponentIds = MaterialRequestComponents::join('material_requests','material_requests.id','=','material_request_components.material_request_id')
+                    ->whereIn('material_request_components.id',$materialRequestComponentIds)
+                    ->whereYear('material_requests.created_at', $year)->pluck('material_request_components.id');
+                if(count($materialRequestComponentIds) <= 0) {
                     $filterFlag = false;
                 }
             }
             if ($month != 0 && $filterFlag == true) {
-                $ids = MaterialRequests::whereIn('id',$ids)->whereMonth('created_at', $month)->pluck('id');
-                if(count($ids) <= 0) {
+                $materialRequestComponentIds = MaterialRequestComponents::join('material_requests','material_requests.id','=','material_request_components.material_request_id')
+                    ->whereIn('material_request_components.id',$materialRequestComponentIds)
+                    ->whereMonth('material_requests.created_at', $month)->pluck('material_request_components.id');
+               if(count($materialRequestComponentIds) <= 0) {
                     $filterFlag = false;
                 }
             }
 
             if ($status != 0 && $filterFlag == true) {
-               $ids = MaterialRequests::join('material_request_components','material_request_components.material_request_id','=','material_requests.id')
-                   ->where('material_request_components.component_status_id',$status)
-                   ->whereIn('material_requests.id',$ids)->distinct('material_requests.id')->pluck('material_requests.id');
-                if(count($ids) <= 0) {
+                $materialRequestComponentIds = MaterialRequestComponents::where('component_status_id',$status)->whereIn('id',$materialRequestComponentIds)->pluck('id');
+                if(count($materialRequestComponentIds) <= 0) {
                     $filterFlag = false;
                 }
             }
             if ($m_name != "" && $filterFlag == true) {
-                $ids = MaterialRequests::join('material_request_components','material_request_components.material_request_id','=','material_requests.id')
-                    ->where('material_request_components.name','ilike','%'.$m_name.'%')
-                    ->whereIn('material_requests.id',$ids)->distinct('material_requests.id')->pluck('material_requests.id');
-                if(count($ids) <= 0) {
+                $materialRequestComponentIds = MaterialRequestComponents::where('name','ilike','%'.$m_name.'%')->whereIn('id',$materialRequestComponentIds)->pluck('id');
+                if(count($materialRequestComponentIds) <= 0) {
                     $filterFlag = false;
                 }
             }
 
             if ($m_id != "" && $filterFlag == true) {
-                $ids = MaterialRequests::whereIn('id',$ids)->where('format_id','ilike','%'.$m_id.'%')->pluck('id');
-                if(count($ids) <= 0) {
+                $materialRequestComponentIds = MaterialRequestComponents::join('material_requests','material_requests.id','=','material_request_components.material_request_id')
+                    ->whereIn('material_request_components.id',$materialRequestComponentIds)
+                    ->where('material_requests.format_id','ilike','%'.$m_id.'%')->pluck('material_request_components.id');
+                if(count($materialRequestComponentIds) <= 0) {
                     $filterFlag = false;
                 }
             }
 
             if ($m_count != 0 && $filterFlag == true) {
-                $ids = MaterialRequests::whereIn('id',$ids)->where('serial_no', $m_count)->pluck('id');
-                if(count($ids) <= 0) {
+                $materialRequestComponentIds = MaterialRequestComponents::join('material_requests','material_requests.id','=','material_request_components.material_request_id')
+                    ->whereIn('material_request_components.id',$materialRequestComponentIds)
+                    ->where('material_requests.serial_no',$m_count)->pluck('material_request_components.id');
+                if(count($materialRequestComponentIds) <= 0) {
                     $filterFlag = false;
                 }
             }
 
             if ($filterFlag) {
-                $materialRequests = MaterialRequests::whereIn('id',$ids)->orderBy('id','desc')->get();
+                $materialRequestComponentArray = MaterialRequestComponents::whereIn('id',$materialRequestComponentIds)->orderBy('id','desc')->get();
             }
 
             $materialRequestList = array();
             $iterator = 0;
-            foreach($materialRequests as $key => $materialRequest){
-                $materialRequestComponentArray = MaterialRequestComponents::where('material_request_id',$materialRequest->id)->orderBy('id','desc')->get();
-                foreach($materialRequestComponentArray as $key => $materialRequestComponents){
+            foreach($materialRequestComponentArray as $key => $materialRequestComponents){
+                    $materialRequest = $materialRequestComponents->materialRequest;
                     if($materialRequestComponents->component_status_id == $status || $status == 0) {
                         $materialRequestList[$iterator]['material_request_component_id'] = $materialRequestComponents->id;
                         $materialRequestList[$iterator]['name'] = $materialRequestComponents->name;
@@ -198,7 +205,6 @@ class PurchaseController extends Controller
 
                     }
                 }
-            }
             $iTotalRecords = count($materialRequestList);
             if($request->length == -1){
                 $length = $iTotalRecords;
@@ -214,7 +220,7 @@ class PurchaseController extends Controller
                 switch(strtolower($materialRequestList[$pagination]['component_status'])){
                     case 'pending':
                         if(in_array($materialRequestList[$pagination]['component_type_id'],$assetComponentTypeIds)){
-                          $unitEditable = 'false';
+                            $unitEditable = 'false';
                         }else{
                             $unitEditable = 'true';
                         }
@@ -322,9 +328,9 @@ class PurchaseController extends Controller
             $status = 200;
         }catch(\Exception $e){
             $data = [
-              'action' => 'Material Request listing',
-              'params' => $request->all(),
-              'exception'=> $e->getMessage()
+                'action' => 'Material Request listing',
+                'params' => $request->all(),
+                'exception'=> $e->getMessage()
             ];
             Log::critical(json_encode($data));
             $status = 500;

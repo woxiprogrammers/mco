@@ -10,7 +10,7 @@
             </div>
             <!-- END LOGO -->
             <div class="col-md-3 col-md-offset-2 form-group globalSiteSelect">
-                <select class="bs-select form-control" data-style="btn-info" data-width="100%" id="globalProjectSite">
+                <select data-size="10" class="bs-select form-control" data-style="btn-info" data-width="100%" id="globalProjectSite">
                     @foreach($globalProjectSites as $projectSite)
                         @if($projectSite->project_site_id == $selectGlobalProjectSite)
                             <option value="{{$projectSite->project_site_id}}" selected>{{$projectSite->project_name}}</option>

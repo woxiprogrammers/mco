@@ -67,8 +67,8 @@
                                                     <th> To </th>
                                                     <th> Project Name </th>
                                                     <th> Amount </th>
-                                                    <th> Type </th>
-                                                    <th> Remark </th>
+                                                    <th width="10%"> Type </th>
+                                                    <th width="15%"> Remark </th>
                                                     <th> Txn Date </th>
                                                     <th> Action </th>
                                                 </tr>
@@ -81,9 +81,8 @@
                                                     <th>
                                                         <select class="form-control" id="status_id" name="status_id">
                                                             <option value="all">ALL</option>
-                                                            @foreach($payment_types as $type)
-                                                                <option value="{{$type['id']}}">{{$type['name']}}</option>
-                                                            @endforeach
+                                                            <option value="bank">Bank</option>
+                                                            <option value="cash">Cash</option>
                                                         </select>
                                                         <input type="hidden" class="form-control form-filter" name="status" id="status">
                                                     </th>

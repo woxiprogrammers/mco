@@ -35,21 +35,45 @@
                                                         <table class="table table-striped table-bordered table-hover order-column" id="requestComponentListingTable">
                                                             <thead>
                                                             <tr>
-                                                                <th> Project Site From</th>
-                                                                <th> Project Site To</th>
-                                                                <th> Material Name </th>
-                                                                <th> Quantity</th>
-                                                                <th> Unit </th>
-                                                                <th> Status </th>
-                                                                <th> Action </th>
+                                                                <th>Transaction Date</th>
+                                                                <th>Site Out</th>
+                                                                <th>Site In</th>
+                                                                <th>Material Name</th>
+                                                                <th>Quantity</th>
+                                                                <th>Unit</th>
+                                                                <th>Transportation Amount</th>
+                                                                <th>GRN Out</th>
+                                                                <th>GRN In</th>
+                                                                <th>Status</th>
+                                                                <th>Action</th>
                                                             </tr>
                                                             <tr class="filter">
-                                                                <th> <input type="text" class="form-control form-filter" name="search_from" id="search_from"> </th>
-                                                                <th> <input type="text" class="form-control form-filter" name="search_to" id="search_to"> </th>
-                                                                <th> <input type="text" class="form-control form-filter" name="search_name" id="search_name" > </th>
-                                                                <th>  </th>
-                                                                <th>  </th>
-                                                                <th>  </th>
+                                                                <th></th>
+                                                                <th> <input type="text" class="form-control form-filter" name="search_from" id="search_from"></th>
+                                                                <th> <input type="text" class="form-control form-filter" name="search_to" id="search_to"></th>
+                                                                <th> <input type="text" class="form-control form-filter" name="search_name" id="search_name" ></th>
+                                                                <th> <input type="text" class="form-control form-filter" name="search_qty" id="search_qty"></th>
+                                                                <th>
+                                                                    <select class="form-control" id="unit_id" name="unit_id">
+                                                                        <option value="all">ALL</option>
+                                                                        @foreach($units as $unit_status)
+                                                                            <option value="{{$unit_status['id']}}">{{$unit_status['name']}}</option>
+                                                                        @endforeach
+                                                                    </select>
+                                                                    <input type="hidden" class="form-control form-filter" name="unit_status" id="unit_status">
+                                                                </th>
+                                                                <th> <input type="text" class="form-control form-filter" name="search_amt" id="search_amt"></th>
+                                                                <th> <input type="text" class="form-control form-filter" name="search_grn_out" id="search_grn_out"></th>
+                                                                <th> <input type="text" class="form-control form-filter" name="search_grn_in" id="search_grn_in"></th>
+                                                                <th>
+                                                                    <select class="form-control" id="status_id" name="status_id">
+                                                                        <option value="all">ALL</option>
+                                                                        @foreach($statusData as $status)
+                                                                            <option value="{{$status['id']}}">{{$status['name']}}</option>
+                                                                        @endforeach
+                                                                    </select>
+                                                                    <input type="hidden" class="form-control form-filter" name="status" id="status">
+                                                                </th>
                                                                 <th>
                                                                     <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                                     <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
@@ -86,33 +110,50 @@
         $(document).ready(function() {
             RequestComponentListing.init();
 
-            $("#search_to").on('keyup',function() {
+            $("#search_to, #search_from, #search_name, #search_qty, #search_amt,#search_grn_out, #search_grn_in").on('keyup',function() {
                 var searchName= $('#search_name').val();
                 var searchFrom = $('#search_from').val();
                 var searchTo = $('#search_to').val();
+                var searchQty = $('#search_qty').val();
+                var searchAmt = $('#search_amt').val();
+                var searchGrnOut = $('#search_grn_out').val();
+                var searchGrnIn = $('#search_grn_in').val();
+                var searchUnitStatus = $('#unit_id').val();
+                var searchStatus = $('#status_id').val();
                 $("input[name='search_name']").val(searchName)
                 $("input[name='search_from']").val(searchFrom);
                 $("input[name='search_to']").val(searchTo);
+                $("input[name='search_amt']").val(searchAmt);
+                $("input[name='search_qty']").val(searchQty);
+                $("input[name='search_grn_out']").val(searchGrnOut);
+                $("input[name='search_grn_in']").val(searchGrnIn);
+                $("input[name='unit_status']").val(searchUnitStatus);
+                $("input[name='status']").val(searchStatus);
                 $(".filter-submit").trigger('click');
             });
-            $("#search_from").on('keyup',function() {
+
+            $("#status_id, #unit_id").on('change',function() {
                 var searchName= $('#search_name').val();
                 var searchFrom = $('#search_from').val();
                 var searchTo = $('#search_to').val();
+                var searchQty = $('#search_qty').val();
+                var searchAmt = $('#search_amt').val();
+                var searchGrnOut = $('#search_grn_out').val();
+                var searchGrnIn = $('#search_grn_in').val();
+                var searchUnitStatus = $('#unit_id').val();
+                var searchStatus = $('#status_id').val();
                 $("input[name='search_name']").val(searchName)
                 $("input[name='search_from']").val(searchFrom);
                 $("input[name='search_to']").val(searchTo);
+                $("input[name='search_amt']").val(searchAmt);
+                $("input[name='search_qty']").val(searchQty);
+                $("input[name='search_grn_out']").val(searchGrnOut);
+                $("input[name='search_grn_in']").val(searchGrnIn);
+                $("input[name='unit_status']").val(searchUnitStatus);
+                $("input[name='status']").val(searchStatus);
                 $(".filter-submit").trigger('click');
             });
-            $("#search_name").on('keyup',function() {
-                var searchName= $('#search_name').val();
-                var searchFrom = $('#search_from').val();
-                var searchTo = $('#search_to').val();
-                $("input[name='search_name']").val(searchName)
-                $("input[name='search_from']").val(searchFrom);
-                $("input[name='search_to']").val(searchTo);
-                $(".filter-submit").trigger('click');
-            });
+
         });
 
         function changeStatus(element){

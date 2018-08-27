@@ -6,7 +6,7 @@
  */
 ?>
 @extends('layout.master')
-@section('title','Constro | Manage Purchase Order')
+@section('title','Constro | Manage Purchase Order Bill')
 @include('partials.common.navbar')
 @section('css')
     <!-- BEGIN PAGE LEVEL PLUGINS -->
@@ -81,18 +81,19 @@
                                                             <table class="table table-striped table-bordered table-hover order-column" id="purchaseOrderBillTable">
                                                                 <thead>
                                                                 <tr>
-                                                                    <th style="width: 11%">Project</th>
-                                                                    <th style="width: 11%">Sr.No.</th>
-                                                                    <th style="width: 11%">Entry Date</th>
+                                                                    <th style="width: 10%">Project</th>
+                                                                    <th style="width: 7%">Sr.No.</th>
+                                                                    <th style="width: 8%">Entry Date</th>
                                                                     <th style="width: 11%">Bill Date</th>
-                                                                    <th style="width: 11%">Bill Number</th>
+                                                                    <th style="width: 10%">Bill Number</th>
+                                                                    <th style="width: 11%">GRN</th>
                                                                     <th style="width: 11%">Vendor Name</th>
-                                                                    <th style="width: 11%">Basic Amount</th>
-                                                                    <th style="width: 11%">Tax Amount</th>
-                                                                    <th style="width: 11%">Total</th>
-                                                                    <th style="width: 11%">Pending Amount</th>
-                                                                    <th style="width: 11%">Paid Amount</th>
-                                                                    <th style="width: 11%">Action</th>
+                                                                    <th style="width: 6%">Basic Amount</th>
+                                                                    <th style="width: 6%">Tax Amount</th>
+                                                                    <th style="width: 6%">Total</th>
+                                                                    <th style="width: 6%">Pending Amount</th>
+                                                                    <th style="width: 6%">Paid Amount</th>
+                                                                    <th style="width: 2%">Action</th>
                                                                 </tr>
                                                                 <tr class="filter">
                                                                     <th style="width: 11%"><input style="width: 90%; margin-left: 5%" type="text" name="project_name" id="project_name" class="form-control form-filter search_filter"></th>
@@ -109,6 +110,7 @@
                                                                         </div>
                                                                     </th>
                                                                     <th style="width: 11%"> <input style="width: 90%; margin-left: 5%" type="text" name="bill_number" id="bill_number" class="form-control form-filter search_filter"> </th>
+                                                                    <th style="width: 11%"> <input style="width: 90%; margin-left: 5%" type="text" name="grn" id="grn" class="form-control form-filter search_filter"> </th>
                                                                     <th style="width: 11%"> <input style="width: 90%; margin-left: 5%" type="text" name="vendor_name" id="vendor_name" class="form-control form-filter search_filter"> </th>
                                                                     <th style="width: 11%"> </th>
                                                                     <th style="width: 11%"> </th>
@@ -126,8 +128,7 @@
                                                                 </tbody>
                                                                 <tfoot>
                                                                 <tr>
-                                                                    <th colspan="8" style="text-align:right">Total Page Wise: </th>
-                                                                    <th></th>
+                                                                    <th colspan="9" style="text-align:right">Total Page Wise: </th>
                                                                     <th></th>
                                                                     <th></th>
                                                                     <th></th>
@@ -137,8 +138,8 @@
                                                         </div>
 
                                                     </div>
-                                                    </form>
                                                 </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -148,8 +149,6 @@
                 </div>
             </div>
         </div>
-    </div>
-    </div>
 @endsection
 @section('javascript')
     <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
