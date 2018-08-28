@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\AssetMaintenance;
+use App\AssetMaintenanceStatus;
 use App\InventoryComponentTransfers;
 use App\InventoryComponentTransferStatus;
 use App\InventoryTransferTypes;
@@ -37,6 +39,7 @@ class NavBarProvider extends ServiceProvider
                 $materialSiteOutTransferApproveCount = $checklistAssignedCount = 0;
                 $checklistAssignedCount = $reviewChecklistCount = 0;
                 $peticashSalaryRequestCount = $peticashSalaryApprovedCount = 0;
+                $assetMaintenanceRequestCount = 0;
                 if(Session::has('global_project_site')){
                     $projectSiteId = Session::get('global_project_site');
                     if(!in_array($loggedInUser->roles[0]->role->slug, ['admin','superadmin'])){
@@ -47,6 +50,13 @@ class NavBarProvider extends ServiceProvider
                                 ->where('user_project_site_relation.user_id',$loggedInUser->id)
                                 ->where('purchase_request_component_statuses.slug','pending')
                                 ->where('material_requests.project_site_id', $projectSiteId)
+                                ->count();
+                        }
+                        if($loggedInUser->customHasPermission('approve-asset-maintenance-approval')){
+                            $assetMaintenanceRequestCount = AssetMaintenance::join('user_project_site_relation','user_project_site_relation.project_site_id','=','asset_maintenance.project_site_id')
+                                ->where('asset_maintenance.asset_maintenance_status_id',AssetMaintenanceStatus::where('slug','maintenance-requested')->pluck('id')->first())
+                                ->where('asset_maintenance.project_site_id',$projectSiteId)
+                                ->where('user_project_site_relation.user_id',$loggedInUser->id)
                                 ->count();
                         }
                         if($loggedInUser->customHasPermission('approve-purchase-request')){
@@ -315,8 +325,9 @@ class NavBarProvider extends ServiceProvider
                     $purchaseOrderNotificationCount = $purchaseOrderCreatedCount + $purchaseOrderBillCreateCount;
                     $inventorySiteTransferNotificationCount = $materialSiteOutTransferApproveCount + $materialSiteOutTransferCreateCount;
                     $peticashSalaryRequestApprovalNotificationCount = $peticashSalaryApprovedCount + $peticashSalaryRequestCount;
+                    $assetMaintenanceRequestApprovalNotificationCount = $assetMaintenanceRequestCount;
                 }
-                $view->with(compact('purchaseRequestNotificationCount','materialRequestNotificationCount', 'purchaseOrderRequestNotificationCount','inventorySiteTransferNotificationCount','peticashSalaryRequestApprovalNotificationCount', 'purchaseOrderNotificationCount'));
+                $view->with(compact('purchaseRequestNotificationCount','materialRequestNotificationCount', 'purchaseOrderRequestNotificationCount','inventorySiteTransferNotificationCount','peticashSalaryRequestApprovalNotificationCount', 'purchaseOrderNotificationCount','assetMaintenanceRequestApprovalNotificationCount'));
             }catch(\Exception $e){
                 $data = [
                     'action' => 'Nav bar Service Provider',

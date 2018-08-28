@@ -421,6 +421,9 @@
                                     <li aria-haspopup="true">
                                         <a href="/asset/maintenance/request/approval/manage" class="nav-link nav-toggle ">
                                             <i class="fa fa-check-square"></i> Asset Maintenance Approval
+                                            @if(($assetMaintenanceRequestCount) > 0)
+                                                <span class="badge badge-success">{!! $assetMaintenanceRequestCount !!}</span>
+                                            @endif
                                         </a>
                                     </li>
                                 @endif

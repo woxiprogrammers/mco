@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\AssetMaintenance;
+use App\AssetMaintenanceStatus;
 use App\Category;
 use App\CategoryMaterialRelation;
 use App\Helper\MaterialProductHelper;
@@ -116,6 +118,7 @@ class DashboardController extends Controller
             $materialSiteOutTransferApproveCount = $checklistAssignedCount = 0;
             $checklistAssignedCount = $reviewChecklistCount = 0;
             $peticashSalaryRequestCount = $peticashSalaryApprovedCount = 0;
+            $assetMaintenanceRequestCount = 0;
             $projectSiteId = $projectSite['project_site_id'];
             if(!in_array($user->roles[0]->role->slug, ['admin','superadmin'])){
                 if($user->customHasPermission('approve-material-request')){
@@ -223,6 +226,29 @@ class DashboardController extends Controller
                             ->where('material_requests.project_site_id', $projectSite['project_site_id'])
                             ->count();
                     }
+                }
+
+                if($user->customHasPermission('approve-asset-maintenance-approval')){
+                    $lastLogin = UserLastLogin::join('modules','modules.id','=','user_last_logins.module_id')
+                        ->where('modules.slug','asset-maintenance-approval')
+                        ->where('user_last_logins.user_id',$user->id)
+                        ->pluck('user_last_logins.last_login')
+                        ->first();
+                    if($lastLogin == null){
+                        $assetMaintenanceRequestCount = AssetMaintenance::join('user_project_site_relation','user_project_site_relation.project_site_id','=','asset_maintenance.project_site_id')
+                            ->where('asset_maintenance.asset_maintenance_status_id',AssetMaintenanceStatus::where('slug','maintenance-requested')->pluck('id')->first())
+                            ->where('asset_maintenance.project_site_id',$projectSite['project_site_id'])
+                            ->where('user_project_site_relation.user_id',$user->id)
+                            ->count();
+                    }else{
+                        $assetMaintenanceRequestCount = AssetMaintenance::join('user_project_site_relation','user_project_site_relation.project_site_id','=','asset_maintenance.project_site_id')
+                            ->where('asset_maintenance.asset_maintenance_status_id',AssetMaintenanceStatus::where('slug','maintenance-requested')->pluck('id')->first())
+                            ->where('asset_maintenance.project_site_id',$projectSite['project_site_id'])
+                            ->where('user_project_site_relation.user_id',$user->id)
+                            ->where('asset_maintenance.created_at','>=',$lastLogin)
+                            ->count();
+                    }
+
                 }
             }else{
                 if($user->customHasPermission('approve-material-request')){
@@ -505,6 +531,28 @@ class DashboardController extends Controller
                             ->where('peticash_requested_salary_transactions.updated_at','>=', $lastLogin)
                             ->count();
                     }
+                }
+                if($user->customHasPermission('approve-asset-maintenance-approval')){
+                    $lastLogin = UserLastLogin::join('modules','modules.id','=','user_last_logins.module_id')
+                        ->where('modules.slug','asset-maintenance-approval')
+                        ->where('user_last_logins.user_id',$user->id)
+                        ->pluck('user_last_logins.last_login')
+                        ->first();
+                    if($lastLogin == null){
+                        $assetMaintenanceRequestCount = AssetMaintenance::join('user_project_site_relation','user_project_site_relation.project_site_id','=','asset_maintenance.project_site_id')
+                            ->where('asset_maintenance.asset_maintenance_status_id',AssetMaintenanceStatus::where('slug','maintenance-requested')->pluck('id')->first())
+                            ->where('asset_maintenance.project_site_id',$projectSiteId)
+                            ->where('user_project_site_relation.user_id',$user->id)
+                            ->count();
+                    }else{
+                        $assetMaintenanceRequestCount = AssetMaintenance::join('user_project_site_relation','user_project_site_relation.project_site_id','=','asset_maintenance.project_site_id')
+                            ->where('asset_maintenance.asset_maintenance_status_id',AssetMaintenanceStatus::where('slug','maintenance-requested')->pluck('id')->first())
+                            ->where('asset_maintenance.project_site_id',$projectSiteId)
+                            ->where('user_project_site_relation.user_id',$user->id)
+                            ->where('asset_maintenance.created_at','>=',$lastLogin)
+                            ->count();
+                    }
+
                 }
             }
             $projectSiteData[$iterator]['modules'] = [
