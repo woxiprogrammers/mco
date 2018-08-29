@@ -86,7 +86,7 @@ class ReportController extends Controller
             $employeeTypeId = EmployeeType::whereIn('slug',['labour','staff'])->pluck('id')->toArray();
             $employees = Employee::whereIn('employee_type_id', $employeeTypeId)->get(['id','name','employee_id'])->toArray();
             $vendors = Vendor::get(['id','name','company'])->toArray();
-            return view('report.mainreport')->with(compact('vendors','employees','subcontractors','sites','categories','start_date','end_date','materials','billProjectSites'));
+            return view('report.report')->with(compact('vendors','employees','subcontractors','sites','categories','start_date','end_date','materials','billProjectSites'));
         } catch(\Exception $e) {
             $data = [
                 'action' => 'Get Report View',
@@ -118,6 +118,13 @@ class ReportController extends Controller
             $companyHeader['gstin_number'] = env('GSTIN_NUMBER');
             $date = date('l, d F Y',strtotime($start_date)) .' - '. date('l, d F Y',strtotime($end_date));
             switch($report_type) {
+
+                case 'purchase_report' :
+                    $header = array(
+                        'Sr. No', 'Date', 'Category Name', 'Material Name', 'Quantity', 'Unit', 'Basic Amount', 'Total Tax Amount',
+                        'Total Amount', 'Average Amount'
+                    );
+                    break;
 
                 case 'materialwise_purchase_report':
                     $header = array(
@@ -788,7 +795,7 @@ class ReportController extends Controller
                                                     ->where('purchase_requests.project_site_id',$request['purchase_bill_tax_report_site_id'])
                                                     ->whereBetween('purchase_order_payments.created_at',[$start_date, $end_date])
                                                     ->where('purchase_orders.vendor_id',$request['vendor_id'])
-                        ->select('purchase_order_payments.id as purchase_order_payment_id','purchase_order_payments.purchase_order_bill_id','purchase_order_payments.payment_id'
+                                                    ->select('purchase_order_payments.id as purchase_order_payment_id','purchase_order_payments.purchase_order_bill_id','purchase_order_payments.payment_id'
                                                         ,'purchase_order_payments.amount','purchase_order_payments.reference_number','purchase_order_payments.is_advance'
                                                         ,'purchase_order_payments.created_at','purchase_order_bills.purchase_order_id as purchase_order_id','purchase_order_bills.amount as bill_amount','purchase_order_bills.tax_amount'
                                                         ,'purchase_order_bills.bill_number','purchase_order_bills.extra_amount','purchase_order_bills.transportation_tax_amount','purchase_order_bills.extra_tax_amount','purchase_order_bills.transportation_total_amount')->get()->toArray();

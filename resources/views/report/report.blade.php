@@ -47,12 +47,13 @@
                                                     </div>
                                                     <div class="col-md-4">
                                                         <select class="form-control" id="report_type" name="report_type">
-                                                            <option value="materialwise_purchase_report">Material wise Purchase Report</option>
+                                                            <option value="purchase_report">Sitewise Purchase Report</option>
+                                                            {{--<option value="materialwise_purchase_report">Material wise Purchase Report</option>
                                                             <option value="receiptwise_p_and_l_report">Profit and Loss Report</option>
                                                             <option value="subcontractor_report">Subcontractor Report</option>
                                                             <option value="labour_specific_report">Labour & Staff Report</option>
                                                             <option value="purchase_bill_tax_report">Purchase Bill Report</option>
-                                                            <option value="sales_bill_tax_report">Sales Bill Reports</option>
+                                                            <option value="sales_bill_tax_report">Sales Bill Reports</option>--}}
                                                         </select>
                                                     </div>
                                                 </div>
@@ -68,7 +69,7 @@
                                                     <span class="help-block"> Select date range </span>
                                                 </div>
                                             </div>
-                                            <div class="row" name="materialwise_purchase_report" id="materialwise_purchase_report">
+                                            <div class="row" id="materialwise_purchase_report">
                                                 <div class="row">
                                                     <div class="col-md-12">
                                                         <h3> Material wise Purchase Report</h3>
@@ -126,7 +127,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="row" name="receiptwise_p_and_l_report" id="receiptwise_p_and_l_report">
+                                            <div class="row" id="receiptwise_p_and_l_report">
                                                 <div class="row">
                                                     <div class="col-md-12">
                                                         <h3> Profit and Loss Report </h3>
@@ -152,7 +153,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="row" name="subcontractor_report" id="subcontractor_report">
+                                            <div class="row" id="subcontractor_report">
                                                 <div class="row">
                                                     <div class="col-md-12">
                                                         <h3> Subcontractor Report</h3>
@@ -189,7 +190,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="row" name="labour_specific_report" id="labour_specific_report">
+                                            <div class="row" id="labour_specific_report">
                                                 <div class="row">
                                                     <div class="col-md-12">
                                                         <h3> Labour & Staff Report</h3>
@@ -236,7 +237,7 @@
                                                 </div>
                                             </div>
                                             </div>
-                                            <div class="row" name="purchase_bill_tax_report" id="purchase_bill_tax_report">
+                                            <div class="row" id="purchase_bill_tax_report">
                                                 <div class="row">
                                                     <div class="col-md-12">
                                                         <h3> Purchase Bill Report</h3>
@@ -280,7 +281,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="row" name="sales_bill_tax_report" id="sales_bill_tax_report">
+                                            <div class="row" id="sales_bill_tax_report">
                                                 <div class="row">
                                                     <div class="col-md-12">
                                                         <h3> Sales Bill Report</h3>
@@ -295,6 +296,31 @@
                                                         <select class="form-control" id="sales_bill_tax_report_site_id" name="sales_bill_tax_report_site_id">
                                                             @foreach($billProjectSites as $site)
                                                             <option value="{{$site['id']}}">{{$site['project_name']}}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-actions noborder row">
+                                                    <div class="col-md-offset-3" style="margin-left: 26%">
+                                                        <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row" id="purchase_report">
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <h3> Purchase Report</h3>
+                                                        <hr/>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row">
+                                                    <div class="col-md-3" style="text-align: right">
+                                                        <label>Select Project Site : </label>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <select class="form-control" id="project_site_id" name="sales_bill_tax_report_site_id">
+                                                            @foreach($sites as $site)
+                                                                <option value="{{$site['id']}}">{{$site['project_name']}}</option>
                                                             @endforeach
                                                         </select>
                                                     </div>
