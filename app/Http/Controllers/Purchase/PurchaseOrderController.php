@@ -586,6 +586,7 @@ class PurchaseOrderController extends Controller
 
     public function createTransaction(Request $request){
         try{
+            dd($request->all());
             $purchaseOrderTransactionData = $request->except('_token','pre_grn_image','post_grn_image','component_data','vendor_name','purchase_order_id','purchase_order_transaction_id');
             $purchaseOrderTransactionData['in_time'] = $purchaseOrderTransactionData['out_time'] = Carbon::now();
             $purchaseOrderTransaction = PurchaseOrderTransaction::findOrFail($request->purchase_order_transaction_id);
@@ -1119,6 +1120,9 @@ class PurchaseOrderController extends Controller
                     }
                 }else{
                     $quantityIsFixed = false;
+                    $quantity = ($purchaseOrderComponent['quantity'] + ($purchaseOrderComponent['quantity'] * (10/100)));
+                    $consumedQuantity = $purchaseOrderComponent->purchaseOrderTransactionComponent->sum('quantity');
+                    $remainingQuantity = $quantity - $consumedQuantity;
                     $material = Material::where('name', 'ilike', $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name)->first();
                     $unit1Array = UnitConversion::join('units', 'units.id', '=', 'unit_conversions.unit_2_id')
                         ->where('unit_conversions.unit_1_id', $material->unit_id)
@@ -1132,14 +1136,20 @@ class PurchaseOrderController extends Controller
                         ->get()
                         ->toArray();
                     $purchaseOrderComponentData[$iterator]['units'] = array_merge($unit1Array, $units2Array);
+                    $jIterator = 0;
+                    foreach ($purchaseOrderComponentData[$iterator]['units'] as $unit){
+                        $purchaseOrderComponentData[$iterator]['units'][$jIterator]['quantity'] = UnitHelper::unitQuantityConversion($material->unit->id,$unit['id'],$remainingQuantity);
+                        $jIterator++;
+                    }
                     $purchaseOrderComponentData[$iterator]['units'][] = [
                         'id' => $material->unit->id,
                         'name' => $material->unit->name,
+                        'quantity' => $remainingQuantity
                     ];
                 }
                $iterator++;
             }
-            return view('partials.purchase.purchase-order.transaction-component-listing')->with(compact('purchaseOrderComponentData','quantityIsFixed'));
+            return view('partials.purchase.purchase-order.transaction-component-listing')->with(compact('purchaseOrderComponentData','quantityIsFixed','remainingQuantity'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Purchase Order component Details',
@@ -1663,6 +1673,36 @@ class PurchaseOrderController extends Controller
         }
         $response = [
             'message' => $message,
+        ];
+        return response()->json($response,$status);
+    }
+
+    public function checkTransactionRemainingQuantity(Request $request){
+        try{
+            $purchaseOrderComponent = PurchaseOrderComponent::where('id',$request['purchaseOrderComponentId'])->first();
+            $material = Material::where('name', 'ilike', $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name)->first();
+            $availableQuantity = UnitHelper::unitQuantityConversion($material->unit->id,$request['unitId'],$request['baseRemainingQuantity']);
+            if($availableQuantity > $request['quantity']){
+                $isValid = true;
+            }else{
+                $isValid = false;
+            }
+            $allowedQuantity = $availableQuantity;
+            $status = 200;
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Check Quantity for transaction',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 500;
+            $isValid = true;
+            $allowedQuantity = $request['quantity'];
+        }
+        $response = [
+            'isValid' => $isValid,
+            'allowedQuantity' => $allowedQuantity
         ];
         return response()->json($response,$status);
     }
