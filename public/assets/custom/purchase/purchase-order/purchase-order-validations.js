@@ -66,6 +66,7 @@ var  AddPayment = function () {
             add_payment();
         }
     };
+
     var add_transaction = function() {
         var form = $('#add_transaction_form');
         var error = $('.alert-danger', form);
@@ -210,19 +211,16 @@ var  GenerateGRN = function () {
             errorElement: 'span', //default input error message container
             errorClass: 'help-block', // default input error message class
             focusInvalid: false, // do not focus the last invalid input
-            /*rules: {
-                user_name: {
+            rules: {
+                bill_number: {
                     required: true
-                },
-                user_id:{
-                    requried: true
                 }
             },
             messages: {
-                user_name:{
-                    required: 'Please select the user.'
+                bill_number: {
+                    required: "Bill number is required."
                 }
-            },*/
+            },
             invalidHandler: function (event, validator) { //display error alert on form submit
                 success.hide();
                 error.show();
@@ -246,7 +244,7 @@ var  GenerateGRN = function () {
                     form.submit();
             }
         });
-    }
+    };
     return {
         init: function () {
             handleCreate();

@@ -340,6 +340,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
                 Route::get('check-generated-grn/{purchaseOrder}',array('uses'=> 'Purchase\PurchaseOrderController@checkGeneratedGRN'));
                 Route::get('edit/{purchaseOrderTransaction}',array('uses'=> 'Purchase\PurchaseOrderController@getTransactionEditView'));
                 Route::post('edit/{purchaseOrderTransaction}',array('uses'=> 'Purchase\PurchaseOrderController@transactionEdit'));
+                Route::post('check-quantity',array('uses' => 'Purchase\PurchaseOrderController@checkTransactionRemainingQuantity'));
             });
             Route::group(['prefix' => 'advance-payment'], function(){
                 Route::post('listing',array('uses'=> 'Purchase\PurchaseOrderController@getAdvancePaymentListing'));
