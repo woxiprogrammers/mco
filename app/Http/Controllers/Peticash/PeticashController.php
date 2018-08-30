@@ -1901,10 +1901,10 @@ class PeticashController extends Controller
                 $end = $request->length < 0 ? count($salaryTransactionData) : $request->length;
                 for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($salaryTransactionData); $iterator++,$pagination++ ){
                     if($salaryTransactionData[$pagination]->is_voucher_created == true){
-                        $voucherButtonText = 'Delete V';
+                        $voucherButtonText = 'Delete Voucher';
                         $voucherStatusTest = 'Yes';
                     }else{
-                        $voucherButtonText = 'Create V';
+                        $voucherButtonText = 'Create Voucher';
                         $voucherStatusTest = 'No';
                     }
                     $actionDropDown =  '<button class="btn btn-xs blue">
