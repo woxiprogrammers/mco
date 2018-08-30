@@ -223,7 +223,6 @@
             </div>
         </div>
     </div>
-    </div>
 @endsection
 @section('javascript')
     <script src="/assets/custom/admin/vendor/vendor.js" type="application/javascript"></script>
@@ -233,7 +232,6 @@
 
     <script>
         $(document).ready(function() {
-            CreateVendor.init();
             $("#categoryId").trigger('change');
             var citiList = new Bloodhound({
                 datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
@@ -290,9 +288,10 @@
                 }
 
             })
-                .on('typeahead:open', function (obj, datum) {
+            .on('typeahead:open', function (obj, datum) {
 
                 });
+            EditVendor.init();
         });
     </script>
 @endsection

@@ -71,7 +71,7 @@ var  CreateVendor = function () {
                     error.hide();
                     form.submit();
                 }else{
-                    alert('please select atleast one city');
+                    alert('Please select atleast one city');
                 }
             }
         });
@@ -156,19 +156,17 @@ var  EditVendor = function () {
                 form.submit();
             }
         });
-    }
+    };
     return {
         init: function () {
             handleEdit();
         }
     }
-};
+}();
 
 
 
 
 $(document).ready(function() {
-
-
 });
 
