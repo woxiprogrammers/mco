@@ -20,27 +20,23 @@
         </th>
     </tr>
     @foreach($purchaseOrderComponentData as $purchaseOrderComponent)
-        <tr style="text-align: center" class="hear">
+        <tr style="text-align: center" id="purchaseOrderComponent">
             <td style="width: 40%">
                 <input type="text" class="form-control" readonly name="component_data[{{$purchaseOrderComponent['purchase_order_component_id']}}][name]" value="{{$purchaseOrderComponent['name']}}">
             </td>
             <td>
                 <select class="form-control unit-select-{{$purchaseOrderComponent['purchase_order_component_id']}}" name="component_data[{{$purchaseOrderComponent['purchase_order_component_id']}}][unit_id]" onchange="checkQuantity({{$purchaseOrderComponent['purchase_order_component_id']}})">
                     @foreach($purchaseOrderComponent['units'] as $unit)
-                        @if($purchaseOrderComponent['unit_id'] == $unit['id'])
-                            <option value="{{$unit['id']}}" selected>{{$unit['name']}}</option>
-                        @else
-                            <option value="{{$unit['id']}}">{{$unit['name']}}</option>
-                        @endif
+                        <option value="{{$unit['id']}}">{{$unit['name']}}</option>
                     @endforeach
                 </select>
             </td>
-            <td>
+            <td  class="form-group">
                 @if($quantityIsFixed == true)
                     <input type="text" class="form-control" name="component_data[{{$purchaseOrderComponent['purchase_order_component_id']}}][quantity]" value="1" readonly>
                 @else
-                    <input type="hidden" id="remainingQuantity_{{$purchaseOrderComponent['purchase_order_component_id']}}" value="{{$remainingQuantity}}">
-                    <input type="text" class="form-control quantity_{{$purchaseOrderComponent['purchase_order_component_id']}}" id="quantity_{{$purchaseOrderComponent['purchase_order_component_id']}}" name="component_data[{{$purchaseOrderComponent['purchase_order_component_id']}}][quantity]" required="required" value="{{$remainingQuantity}}" onchange="checkQuantity({{$purchaseOrderComponent['purchase_order_component_id']}})">
+                    <input type="hidden" id="remainingQuantity_{{$purchaseOrderComponent['purchase_order_component_id']}}" value="{{$purchaseOrderComponent['units'][0]['quantity']}}">
+                    <input type="text" class="form-control quantity_{{$purchaseOrderComponent['purchase_order_component_id']}}" id="quantity_{{$purchaseOrderComponent['purchase_order_component_id']}}" name="component_data[{{$purchaseOrderComponent['purchase_order_component_id']}}][quantity]" required="required" value="{{$purchaseOrderComponent['units'][0]['quantity']}}" onkeyup="checkQuantity({{$purchaseOrderComponent['purchase_order_component_id']}})">
                 @endif
             </td>
         </tr>
@@ -49,11 +45,11 @@
 
 
 <script>
-        function checkQuantity(purchaseOrderComponentId){
-            var baseRemainingQuantity = $('#remainingQuantity_'+purchaseOrderComponentId).val();
-            var quantity = $('.quantity_'+purchaseOrderComponentId).val();
-            var unitId = $('.unit-select-'+purchaseOrderComponentId).val();
-            $.ajax({
+    function checkQuantity(purchaseOrderComponentId){
+        var baseRemainingQuantity = $('#remainingQuantity_'+purchaseOrderComponentId).val();
+        var quantity = $('.quantity_'+purchaseOrderComponentId).val();
+        var unitId = $('.unit-select-'+purchaseOrderComponentId).val();
+        $.ajax({
                 url : '/purchase/purchase-order/transaction/check-quantity?_token='+$("input[name='_token']").val(),
                 type : "POST",
                 data : {
@@ -66,18 +62,17 @@
                     GenerateGRN.init();
                     if(!data.isValid){
                         var name = $("input[name='component_data["+purchaseOrderComponentId+"][name]']").val();
-                        alert('Quantity for '+name +' is not valid. Allowed quantity is '+data.allowedQuantity);
                         $('#quantity_'+purchaseOrderComponentId).rules('add',{
                             required: true,
-                            max: data.allowedQuantity
+                            max: data.allowedQuantity,
                         });
+                    }else{
+                        $('#quantity_'+purchaseOrderComponentId).rules('remove');
                     }
                 },
                 error : function(errorData){
                     alert('Something went wrong');
                 }
             });
-console.log(quantity);
-console.log(unitId);
-        }
+    }
 </script>

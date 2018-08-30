@@ -586,7 +586,6 @@ class PurchaseOrderController extends Controller
 
     public function createTransaction(Request $request){
         try{
-            dd($request->all());
             $purchaseOrderTransactionData = $request->except('_token','pre_grn_image','post_grn_image','component_data','vendor_name','purchase_order_id','purchase_order_transaction_id');
             $purchaseOrderTransactionData['in_time'] = $purchaseOrderTransactionData['out_time'] = Carbon::now();
             $purchaseOrderTransaction = PurchaseOrderTransaction::findOrFail($request->purchase_order_transaction_id);
@@ -1135,17 +1134,18 @@ class PurchaseOrderController extends Controller
                         ->select('units.id as id', 'units.name as name')
                         ->get()
                         ->toArray();
-                    $purchaseOrderComponentData[$iterator]['units'] = array_merge($unit1Array, $units2Array);
+                    $unitsArray = array_merge($unit1Array, $units2Array);
                     $jIterator = 0;
-                    foreach ($purchaseOrderComponentData[$iterator]['units'] as $unit){
-                        $purchaseOrderComponentData[$iterator]['units'][$jIterator]['quantity'] = UnitHelper::unitQuantityConversion($material->unit->id,$unit['id'],$remainingQuantity);
+                    foreach ($unitsArray as $unit){
+                        $unitsArray[$jIterator]['quantity'] = UnitHelper::unitQuantityConversion($material->unit->id,$unit['id'],$remainingQuantity);
                         $jIterator++;
                     }
-                    $purchaseOrderComponentData[$iterator]['units'][] = [
+                    $baseArray[0] = [
                         'id' => $material->unit->id,
                         'name' => $material->unit->name,
                         'quantity' => $remainingQuantity
                     ];
+                    $purchaseOrderComponentData[$iterator]['units'] = array_merge($baseArray,$unitsArray);
                 }
                $iterator++;
             }
@@ -1687,7 +1687,7 @@ class PurchaseOrderController extends Controller
             }else{
                 $isValid = false;
             }
-            $allowedQuantity = $availableQuantity;
+            $allowedQuantity = round($availableQuantity,3);
             $status = 200;
         }catch(\Exception $e){
             $data = [
