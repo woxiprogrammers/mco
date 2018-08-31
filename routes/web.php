@@ -340,6 +340,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
                 Route::get('check-generated-grn/{purchaseOrder}',array('uses'=> 'Purchase\PurchaseOrderController@checkGeneratedGRN'));
                 Route::get('edit/{purchaseOrderTransaction}',array('uses'=> 'Purchase\PurchaseOrderController@getTransactionEditView'));
                 Route::post('edit/{purchaseOrderTransaction}',array('uses'=> 'Purchase\PurchaseOrderController@transactionEdit'));
+                Route::post('check-quantity',array('uses' => 'Purchase\PurchaseOrderController@checkTransactionRemainingQuantity'));
             });
             Route::group(['prefix' => 'advance-payment'], function(){
                 Route::post('listing',array('uses'=> 'Purchase\PurchaseOrderController@getAdvancePaymentListing'));
@@ -721,10 +722,10 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
 
 
         Route::group(['prefix' => 'peticash-management'], function(){
+            Route::post('change-voucher-status',array('uses' => 'Peticash\PeticashController@changeVoucherStatus'));
             Route::group(['prefix' => 'purchase'], function(){
                 Route::get('manage',array('uses' => 'Peticash\PeticashController@getPurchaseManageView'));
                 Route::post('listing',array('uses' => 'Peticash\PeticashController@purchaseTransactionListing'));
-                Route::post('change-voucher-status',array('uses' => 'Peticash\PeticashController@changeVoucherStatus'));
             });
             Route::group(['prefix' => 'salary'], function(){
                 Route::get('create',array('uses' => 'Peticash\PeticashController@getSalaryCreateView'));

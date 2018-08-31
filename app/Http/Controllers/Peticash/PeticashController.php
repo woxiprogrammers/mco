@@ -1780,9 +1780,18 @@ class PeticashController extends Controller
 
     public function changeVoucherStatus(Request $request){
         try{
-            $purchasePeticashTransaction = PurcahsePeticashTransaction::where('id',$request['purchase_transaction_id'])->first();
-            $purchasePeticashTransaction->update(['is_voucher_created' => !($purchasePeticashTransaction->is_voucher_created)]);
-            return redirect('/peticash/peticash-management/purchase/manage');
+            if($request['type'] == 'purchase'){
+                $purchasePeticashTransaction = PurcahsePeticashTransaction::where('id',$request['purchase_transaction_id'])->first();
+                $purchasePeticashTransaction->update(['is_voucher_created' => !($purchasePeticashTransaction->is_voucher_created)]);
+                return redirect('/peticash/peticash-management/purchase/manage');
+            }elseif($request['type'] == 'salary'){
+                $salaryPeticashTransaction = PeticashSalaryTransaction::where('id',$request['salary_transaction_id'])->first();
+                $salaryPeticashTransaction->update(['is_voucher_created' => !($salaryPeticashTransaction->is_voucher_created)]);
+                return redirect('/peticash/peticash-management/salary/manage');
+            }else{
+                return redirect()->back();
+            }
+
         }catch(\Exception $e){
             $data = [
                 'action' => 'Change Voucher Status',
@@ -1891,6 +1900,13 @@ class PeticashController extends Controller
                 $records['data'] = array();
                 $end = $request->length < 0 ? count($salaryTransactionData) : $request->length;
                 for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($salaryTransactionData); $iterator++,$pagination++ ){
+                    if($salaryTransactionData[$pagination]->is_voucher_created == true){
+                        $voucherButtonText = 'Delete Voucher';
+                        $voucherStatusTest = 'Yes';
+                    }else{
+                        $voucherButtonText = 'Create Voucher';
+                        $voucherStatusTest = 'No';
+                    }
                     $actionDropDown =  '<button class="btn btn-xs blue">
                                                     <a href="/peticash/peticash-management/salary/payment-voucher-pdf/'.$salaryTransactionData[$pagination]->id.'" style="color: white">
                                                          PDF
@@ -1902,7 +1918,13 @@ class PeticashController extends Controller
                                                         Details
                                                     </a>
                                                     <input type="hidden" name="_token">
+                                            </button>
+                                            <button class="btn btn-xs blue "> 
+                                                <a href="javascript:void(0);" onclick="changeVoucherStatus('.$salaryTransactionData[$pagination]->id.')" style="color: white">
+                                                    '.$voucherButtonText.'
+                                                 </a>
                                             </button>';
+
                     $records['data'][] = [
                         $salaryTransactionData[$pagination]->id,
                         $salaryTransactionData[$pagination]->employee->employee_id,
@@ -1913,6 +1935,7 @@ class PeticashController extends Controller
                         ucwords($salaryTransactionData[$pagination]->referenceUser->first_name.' '.$salaryTransactionData[$pagination]->referenceUser->last_name),
                         date('j M Y',strtotime($salaryTransactionData[$pagination]->date)),
                         $salaryTransactionData[$pagination]->projectSite->project->name,
+                        '<td><span class="label label-sm label-danger"> '.$voucherStatusTest.' </span></td>',
                         $actionDropDown
                     ];
                 }

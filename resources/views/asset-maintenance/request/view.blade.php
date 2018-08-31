@@ -230,6 +230,7 @@
                                                                 <form id="transactionForm" action="/asset/maintenance/request/transaction/create" method="POST">
                                                                     {!! csrf_field() !!}
                                                                     <input type="hidden" name="assetMaintenanceId" value="{{$assetMaintenance->id}}">
+                                                                    <input type="hidden" id="vendor_approved_amount" name="vendor_approved_amount" value="{{$vendorApproved['quotation_amount']}}">
                                                                     <input type="hidden" id="assetMaintenanceTransactionId" name="asset_maintenance_transaction_id">
                                                                     <input type="hidden" id="type" value="upload_bill">
                                                                     <div class="form-body">
@@ -263,7 +264,7 @@
                                                                                     <input type="text" class="form-control" name="bill_number" placeholder="Enter Bill Number">
                                                                                 </div>
                                                                                 <div class="form-group row">
-                                                                                    <input type="text" class="form-control" name="bill_amount" placeholder="Enter Bill Amount">
+                                                                                    <input type="text" class="form-control" id="bill_amount" name="bill_amount" placeholder="Enter Bill Amount">
                                                                                 </div>
                                                                                 <div class="form-group row">
                                                                                     <input type="text" class="form-control" name="remark" placeholder="Enter Remark">
@@ -371,7 +372,6 @@
             },
         }).on('typeahead:selected', function (obj, datum) {
             var POData = $.parseJSON(JSON.stringify(datum));
-            console.log(POData);
             var trString = '<tr>' +
                 '           <th style="width: 10%;"><input type="checkbox" class="vendor-row-checkbox"></th>\n' +
                 '           <th>'+POData.tr_view+'</th>'+
@@ -396,7 +396,6 @@
                     $("#assignVendorTable").hide();
                 }
             });
-
 
             $("#imageupload").on('change', function () {
                 var countFiles = $(this)[0].files.length;
@@ -436,6 +435,7 @@
                         $("#assetMaintenanceTransactionId").val(data.asset_maintenance_transaction_id);
                         $("#transactionForm input[name='grn']").val(data.grn);
                         $("#afterImageUploadDiv").show();
+                        CreateTransaction.init();
                     },
                     error: function(errorData){
 
@@ -474,7 +474,6 @@
                     url:'/asset/maintenance/request/transaction/check-generated-grn/'+assetMaintenanceId+'?_token='+$("input[name='_token']").val(),
                     type: 'GET',
                     success: function(data,textStatus,xhr){
-                        console.log(data);
                         if(xhr.status == 200){
                             $.each(data.images, function(k ,v){
                                 var imagePreview = '<div class="col-md-2"><img src="'+v+'" class="thumbimage" /></div>';
@@ -495,8 +494,8 @@
             });
 
             $(".transaction-view-btn").on('click', function(){
+
                 var transactionId = $(this).closest('tr').find('input[type="hidden"]').val();
-                console.log(transactionId);
                 $.ajax({
                     url:'/asset/maintenance/request/transaction/view/'+transactionId+"?_token="+$('input[name="_token"]').val(),
                     type: 'GET',
@@ -511,6 +510,60 @@
             });
 
         });
+
+        var CreateTransaction = function () {
+            var handleCreate = function() {
+                var form = $('#transactionForm');
+                var error = $('.alert-danger', form);
+                var success = $('.alert-success', form);
+                form.validate({
+                    errorElement: 'span', //default input error message container
+                    errorClass: 'help-block', // default input error message class
+                    focusInvalid: false, // do not focus the last invalid input
+                    rules: {
+                        bill_amount: {
+                            required: true,
+                            max: $('#vendor_approved_amount').val()
+                        }
+                    },
+                    messages: {
+
+                    },
+
+                    invalidHandler: function (event, validator) { //display error alert on form submit
+                        success.hide();
+                        error.show();
+                    },
+
+                    highlight: function (element) { // hightlight error inputs
+                        $(element)
+                            .closest('.form-group').addClass('has-error'); // set error class to the control group
+                    },
+
+                    unhighlight: function (element) { // revert the change done by hightlight
+                        $(element)
+                            .closest('.form-group').removeClass('has-error'); // set error class to the control group
+                    },
+
+                    success: function (label) {
+                        label
+                            .closest('.form-group').addClass('has-success');
+                    },
+
+                    submitHandler: function (form) {
+                        success.show();
+                        error.hide();
+                        form.submit();
+                    }
+                });
+            };
+
+            return {
+                init: function () {
+                    handleCreate();
+                }
+            };
+        }();
 
     </script>
 @endsection

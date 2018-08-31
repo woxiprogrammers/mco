@@ -538,7 +538,7 @@
     <script>
         $(document).ready(function(){
             EditPurchaseOrder.init();
-            GenerateGRN.init();
+
 
             $("#componentSelectButton").on('click',function(){
                 if($(".component-select:checkbox:checked").length > 0){
@@ -553,6 +553,7 @@
                             purchase_order_component_id: componentIds
                         },
                         success:function (data,textStatus,xhr) {
+                            GenerateGRN.init();
                             $("#componentDetailsDiv").html(data);
                             $("#componentDetailsDiv").show();
                             $("#transactionCommonFieldDiv").show();

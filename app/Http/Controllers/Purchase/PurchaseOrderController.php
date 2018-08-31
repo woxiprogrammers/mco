@@ -1119,6 +1119,9 @@ class PurchaseOrderController extends Controller
                     }
                 }else{
                     $quantityIsFixed = false;
+                    $quantity = ($purchaseOrderComponent['quantity'] + ($purchaseOrderComponent['quantity'] * (10/100)));
+                    $consumedQuantity = $purchaseOrderComponent->purchaseOrderTransactionComponent->sum('quantity');
+                    $remainingQuantity = $quantity - $consumedQuantity;
                     $material = Material::where('name', 'ilike', $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name)->first();
                     $unit1Array = UnitConversion::join('units', 'units.id', '=', 'unit_conversions.unit_2_id')
                         ->where('unit_conversions.unit_1_id', $material->unit_id)
@@ -1131,15 +1134,22 @@ class PurchaseOrderController extends Controller
                         ->select('units.id as id', 'units.name as name')
                         ->get()
                         ->toArray();
-                    $purchaseOrderComponentData[$iterator]['units'] = array_merge($unit1Array, $units2Array);
-                    $purchaseOrderComponentData[$iterator]['units'][] = [
+                    $unitsArray = array_merge($unit1Array, $units2Array);
+                    $jIterator = 0;
+                    foreach ($unitsArray as $unit){
+                        $unitsArray[$jIterator]['quantity'] = UnitHelper::unitQuantityConversion($material->unit->id,$unit['id'],$remainingQuantity);
+                        $jIterator++;
+                    }
+                    $baseArray[0] = [
                         'id' => $material->unit->id,
                         'name' => $material->unit->name,
+                        'quantity' => $remainingQuantity
                     ];
+                    $purchaseOrderComponentData[$iterator]['units'] = array_merge($baseArray,$unitsArray);
                 }
                $iterator++;
             }
-            return view('partials.purchase.purchase-order.transaction-component-listing')->with(compact('purchaseOrderComponentData','quantityIsFixed'));
+            return view('partials.purchase.purchase-order.transaction-component-listing')->with(compact('purchaseOrderComponentData','quantityIsFixed','remainingQuantity'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Purchase Order component Details',
@@ -1663,6 +1673,36 @@ class PurchaseOrderController extends Controller
         }
         $response = [
             'message' => $message,
+        ];
+        return response()->json($response,$status);
+    }
+
+    public function checkTransactionRemainingQuantity(Request $request){
+        try{
+            $purchaseOrderComponent = PurchaseOrderComponent::where('id',$request['purchaseOrderComponentId'])->first();
+            $material = Material::where('name', 'ilike', $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name)->first();
+            $availableQuantity = UnitHelper::unitQuantityConversion($material->unit->id,$request['unitId'],$request['baseRemainingQuantity']);
+            if($availableQuantity > $request['quantity']){
+                $isValid = true;
+            }else{
+                $isValid = false;
+            }
+            $allowedQuantity = round($availableQuantity,3);
+            $status = 200;
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Check Quantity for transaction',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 500;
+            $isValid = true;
+            $allowedQuantity = $request['quantity'];
+        }
+        $response = [
+            'isValid' => $isValid,
+            'allowedQuantity' => $allowedQuantity
         ];
         return response()->json($response,$status);
     }
