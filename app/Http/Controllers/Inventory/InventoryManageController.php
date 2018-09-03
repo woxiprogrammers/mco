@@ -376,10 +376,11 @@ class InventoryManageController extends Controller
         try{
             if($request['reference_id'] != null){
                 $projectSiteId = Session::get('global_project_site');
-                $newInventoryComponent = InventoryComponent::where('project_site_id',$projectSiteId)->where('name','ilike',trim($request['name']))->first();
+                $isMaterial = ($request['inventory_type'] == 'material') ? true : false;
+                $newInventoryComponent = InventoryComponent::where('project_site_id',$projectSiteId)->where('is_material',$isMaterial)->where('name','ilike',trim($request['name']))->first();
                 if($newInventoryComponent == null){
                     $inventoryComponentData['name'] = $request['name'];
-                    $inventoryComponentData['is_material'] = ($request['inventory_type'] == 'material') ? true : false;
+                    $inventoryComponentData['is_material'] = $isMaterial;
                     $inventoryComponentData['project_site_id'] = $projectSiteId;
                     $inventoryComponentData['opening_stock'] = ($request->has('opening_stock')) ? $request['opening_stock'] : 0;
                     $inventoryComponentData['reference_id'] = $request['reference_id'];
