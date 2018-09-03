@@ -659,9 +659,14 @@ class PurchaseOrderController extends Controller
                 $notificationString .= ' '.$purchaseOrderTransactionComponent->quantity.' '.$purchaseOrderTransactionComponent->unit->name;
                 $this->sendPushNotification('Manisha Construction',$notificationString,$webTokens,$mobileTokens,'c-p-b');
                 $projectSiteId = $purchaseOrderComponent->purchaseOrder->purchaseRequest->project_site_id;
-                $inventoryComponent = InventoryComponent::where('project_site_id',$projectSiteId)->where('name','ilike',$purchaseOrderComponentData['name'])->first();
+                $assetComponentTypeIds = MaterialRequestComponentTypes::whereIn('slug',['system-asset','new-asset'])->pluck('id')->toArray();
+                if(in_array($purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->component_type_id,$assetComponentTypeIds)){
+                    $isMaterial = false;
+                }else{
+                    $isMaterial = true;
+                }
+                $inventoryComponent = InventoryComponent::where('project_site_id',$projectSiteId)->where('is_material',$isMaterial)->where('name','ilike',$purchaseOrderComponentData['name'])->first();
                 if($inventoryComponent == null){
-                    $assetComponentTypeIds = MaterialRequestComponentTypes::whereIn('slug',['system-asset','new-asset'])->pluck('id')->toArray();
                     $inventoryComponentData = [
                         'name' => $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name,
                         'purchase_order_component_id' => $purchaseOrderComponent->id,
