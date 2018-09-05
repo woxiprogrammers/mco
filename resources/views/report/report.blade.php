@@ -47,6 +47,7 @@
                                                     </div>
                                                     <div class="col-md-4">
                                                         <select class="form-control" id="report_type" name="report_type">
+                                                            <option value="sitewise_purchase_report">Purchase Report</option>
                                                             <option value="materialwise_purchase_report">Material wise Purchase Report</option>
                                                             <option value="receiptwise_p_and_l_report">Profit and Loss Report</option>
                                                             <option value="subcontractor_report">Subcontractor Report</option>
@@ -66,6 +67,11 @@
                                                         <input type="text" class="form-control" name="end_date" id="end_date" value="{{$end_date}}" required="required"> </div>
                                                     <!-- /input-group -->
                                                     <span class="help-block"> Select date range </span>
+                                                </div>
+                                            </div>
+                                            <div class="form-actions noborder row">
+                                                <div class="col-md-offset-3" style="margin-left: 26%">
+                                                    <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit</button>
                                                 </div>
                                             </div>
                                             <div class="row" name="materialwise_purchase_report" id="materialwise_purchase_report">

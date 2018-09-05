@@ -31,6 +31,7 @@ use App\ProjectSite;
 use App\ProjectSiteIndirectExpense;
 use App\PurcahsePeticashTransaction;
 use App\PurchaseOrder;
+use App\PurchaseOrderBill;
 use App\PurchaseOrderBillTransactionRelation;
 use App\PurchaseOrderComponent;
 use App\PurchaseOrderPayment;
@@ -57,6 +58,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ReportController extends Controller
@@ -65,6 +67,7 @@ class ReportController extends Controller
     public function __construct()
     {
         $this->middleware('custom.auth');
+
     }
     public function reportsRoute(Request $request) {
         try {
@@ -86,7 +89,7 @@ class ReportController extends Controller
             $employeeTypeId = EmployeeType::whereIn('slug',['labour','staff'])->pluck('id')->toArray();
             $employees = Employee::whereIn('employee_type_id', $employeeTypeId)->get(['id','name','employee_id'])->toArray();
             $vendors = Vendor::get(['id','name','company'])->toArray();
-            return view('report.mainreport')->with(compact('vendors','employees','subcontractors','sites','categories','start_date','end_date','materials','billProjectSites'));
+            return view('report.report')->with(compact('vendors','employees','subcontractors','sites','categories','start_date','end_date','materials','billProjectSites'));
         } catch(\Exception $e) {
             $data = [
                 'action' => 'Get Report View',
@@ -100,6 +103,7 @@ class ReportController extends Controller
 
     public function downloadReports(Request $request) {
         try{
+            $globalProjectSiteId = Session::get('global_project_site');
             $downloadSheetFlag = true;
             $curr_date = Carbon::now();
             $curr_date = date('d_m_Y_h_i_s',strtotime($curr_date));
@@ -118,6 +122,183 @@ class ReportController extends Controller
             $companyHeader['gstin_number'] = env('GSTIN_NUMBER');
             $date = date('l, d F Y',strtotime($start_date)) .' - '. date('l, d F Y',strtotime($end_date));
             switch($report_type) {
+                case 'sitewise_purchase_report' :
+                    $projectSite = $projectSiteId = new ProjectSite();
+                    $purchaseOrderPayment = new PurchaseOrderPayment();
+                    $purchaseOrderBill = new PurchaseOrderBill();
+                    $data[$row] = array(
+                        'Bill Entry Date', 'Bill Create Date', 'Bill No', 'Vendor Name', 'Basic Amount', 'Tax Amount',
+                        'Bill Amount', 'Monthly Total'
+                    );
+
+                    $projectName = $projectSite->join('projects','projects.id','=','project_sites.project_id')
+                        ->where('project_sites.id',$globalProjectSiteId)->pluck('projects.name')->first();
+
+                    $purchaseOrderBillsData = $purchaseOrderBill
+                                            ->join('purchase_orders','purchase_orders.id','='
+                                                ,'purchase_order_bills.purchase_order_id')
+                                            ->join('purchase_requests','purchase_requests.id','='
+                                                ,'purchase_orders.purchase_request_id')
+                                            ->join('vendors','vendors.id','=','purchase_orders.vendor_id')
+                                            ->where('purchase_requests.project_site_id',$globalProjectSiteId)
+                                            ->whereBetween('purchase_order_bills.created_at',[$start_date,$end_date])
+                                            ->select('purchase_order_bills.amount','purchase_order_bills.transportation_tax_amount'
+                                                ,'purchase_order_bills.tax_amount','purchase_order_bills.extra_tax_amount','purchase_order_bills.bill_date'
+                                                ,'purchase_order_bills.bill_number','purchase_order_bills.created_at','vendors.company')
+                                            ->orderBy('created_at','desc')
+                                            ->get()->toArray();
+                    $row = 1;
+                    foreach($purchaseOrderBillsData as $key => $purchaseOrderBillData){
+                        $thisMonth = (int)date('n',strtotime($purchaseOrderBillData['created_at']));
+
+                        $data[$row]['bill_entry_date'] = $purchaseOrderBillData['bill_date'];
+                        $data[$row]['bill_created_date'] = $purchaseOrderBillData['created_at'];
+                        $data[$row]['bill_number'] = $purchaseOrderBillData['bill_number'];
+                        $data[$row]['company_name'] = $purchaseOrderBillData['company'];
+                        $data[$row]['basic_amount'] = $purchaseOrderBillData['amount'];
+                        $data[$row]['tax_amount'] = $purchaseOrderBillData['transportation_tax_amount'] + $purchaseOrderBillData['tax_amount'] + $purchaseOrderBillData['extra_tax_amount'];
+                        $data[$row]['bill_amount'] = $data[$row]['basic_amount'] + $data[$row]['tax_amount'];
+                        if($row == 1){
+                            $newMonth = $thisMonth;
+                            $newMonthRow = $row;
+                            $data[$row]['monthly_total'] = $data[$row]['bill_amount'];
+                        }else{
+                            if($newMonth == $thisMonth){
+                                $data[$newMonthRow]['monthly_total'] += $data[$row]['bill_amount'];
+                                $data[$row]['monthly_total'] = null;
+                            }else{
+                                $newMonth = $thisMonth;
+                                $newMonthRow = $row;
+                                $data[$row]['monthly_total'] = $data[$row]['bill_amount'];
+                            }
+                        }
+                        $row++;
+                    }
+
+                    $monthlyTotal[0]['month'] = 'Month-Year';
+                    $monthlyTotal[0]['total'] = 'Total';
+                    $monthlyTotal[1]['month'] = 'Jan';
+                    $monthlyTotal[1]['total'] = 345;
+                    $monthlyTotal[2]['month'] = 'Feb';
+                    $monthlyTotal[2]['total'] = 345;
+                    $monthlyTotal[3]['month'] = 'March';
+                    $monthlyTotal[3]['total'] = 345;
+                    $monthlyTotal[4]['month'] = 'April';
+                    $monthlyTotal[4]['total'] = 345;
+                    $monthlyTotal[5]['month'] = 'May';
+                    $monthlyTotal[5]['total'] = 345;
+                    $monthlyTotal[6]['month'] = 'June';
+                    $monthlyTotal[6]['total'] = 345;
+                    $monthlyTotal[7]['month'] = 'July';
+                    $monthlyTotal[7]['total'] = 345;
+                    $monthlyTotal[8]['month'] = 'August';
+                    $monthlyTotal[8]['total'] = 345;
+                    $monthlyTotal[9]['month'] = 'September';
+                    $monthlyTotal[9]['total'] = 345;
+                    $monthlyTotal[10]['month'] = 'October';
+                    $monthlyTotal[10]['total'] = 345;
+                    $monthlyTotal[11]['month'] = 'November';
+                    $monthlyTotal[11]['total'] = 345;
+                    $monthlyTotal[12]['month'] = 'December';
+                    $monthlyTotal[12]['total'] = 345;
+
+                    Excel::create($report_type."_".$curr_date, function($excel) use($monthlyTotal, $data, $report_type, $header, $companyHeader, $date, $projectName) {
+                        $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(12);
+
+                        $excel->sheet($report_type, function($sheet) use($monthlyTotal, $data, $header, $companyHeader, $date, $projectName) {
+                            $objDrawing = new \PHPExcel_Worksheet_Drawing();
+                            $objDrawing->setPath(public_path('/assets/global/img/logo.jpg')); //your image path
+                            $objDrawing->setWidthAndHeight(148,74);
+                            $objDrawing->setResizeProportional(true);
+                            $objDrawing->setCoordinates('A1');
+                            $objDrawing->setWorksheet($sheet);
+                            $sheet->setAutoSize(true);
+                            $sheet->mergeCells('A2:H2');
+                            $sheet->cell('A2', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['company_name']);
+                            });
+
+                            $sheet->mergeCells('A3:H3');
+                            $sheet->cell('A3', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['designation']);
+                            });
+
+                            $sheet->mergeCells('A4:H4');
+                            $sheet->cell('A4', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['address']);
+                            });
+
+                            $sheet->mergeCells('A5:H5');
+                            $sheet->cell('A5', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['contact_no']);
+                            });
+
+                            $sheet->mergeCells('A6:H6');
+                            $sheet->cell('A6', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['gstin_number']);
+                            });
+
+                            $sheet->mergeCells('A7:H7');
+                            $sheet->cell('A7', function($cell) use ($projectName){
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue('Purchase Bill Report - '.$projectName);
+                            });
+
+                            $sheet->mergeCells('A8:H8');
+                            $sheet->cell('A8', function($cell) use($date) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($date);
+                            });
+                            $row = 10;
+                            foreach($monthlyTotal as $key => $rowData){
+                                $next_column = 'A';
+                                $row++;
+                                foreach($rowData as $key1 => $cellData){
+                                    $current_column = $next_column++;
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData,$row) {
+                                        if($row == 11){
+                                            $cell->setFontWeight('bold');
+                                        }
+                                        $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                                        $cell->setAlignment('center')->setValignment('center');
+                                        $cell->setValue($cellData);
+                                    });
+
+                                }
+                            }
+
+                            $row = 25;
+                            foreach($data as $key => $rowData){
+                                $next_column = 'A';
+                                $row++;
+                                foreach($rowData as $key1 => $cellData){
+                                    $current_column = $next_column++;
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData,$row) {
+                                        if($row == 26) {
+                                            $cell->setFontWeight('bold');
+                                        }
+                                            $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                                            $cell->setAlignment('center')->setValignment('center');
+                                            $cell->setValue($cellData);
+
+                                    });
+
+                                }
+                            }
+                        });
+                    })->export('xls');
 
                 case 'materialwise_purchase_report':
                     $header = array(
@@ -921,7 +1102,7 @@ class ReportController extends Controller
                                 }
                             }
                             /*if($row > 2){
-                                $sheet->row($row, array('','Total',$total['basicAmount'],$total['igstAmount'],$total['sgstAmount'],$total['cgstAmount'],$total['amountWithTax'],$total['paidAmount'],$total['balance']));
+                                $sheet->row($row, array('','Total',$total['basicAmount'],$total['igstAmount'],$total['sgstAmount'],$total['cgstAmount'],$total['a
                             }*/
                         });
                     })->export('xls');
