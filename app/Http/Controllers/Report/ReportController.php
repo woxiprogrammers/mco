@@ -108,7 +108,6 @@ class ReportController extends Controller
             $curr_date = Carbon::now();
             $curr_date = date('d_m_Y_h_i_s',strtotime($curr_date));
             $report_type = $request->report_type;
-            //$start_date = $request->start_date;
             $startDate = explode('/',$request->start_date);
             $start_date = $startDate[2].'-'.$startDate[1].'-'.$startDate[0].' 00:00:00';
             $endDate = explode('/',$request->end_date);
@@ -121,10 +120,24 @@ class ReportController extends Controller
             $companyHeader['contact_no'] = env('CONTACT_NO');
             $companyHeader['gstin_number'] = env('GSTIN_NUMBER');
             $date = date('l, d F Y',strtotime($start_date)) .' - '. date('l, d F Y',strtotime($end_date));
+            $startYear = (int)date('Y',strtotime($start_date));
+            $monthlyTotal[0]['month'] = 'Month-Year';
+            $monthlyTotal[1]['month'] = 'January '.$startYear;
+            $monthlyTotal[2]['month'] = 'February '.$startYear;
+            $monthlyTotal[3]['month'] = 'March '.$startYear;
+            $monthlyTotal[4]['month'] = 'April '.$startYear;
+            $monthlyTotal[5]['month'] = 'May '.$startYear;
+            $monthlyTotal[6]['month'] = 'June '.$startYear;
+            $monthlyTotal[7]['month'] = 'July '.$startYear;
+            $monthlyTotal[8]['month'] = 'August '.$startYear;
+            $monthlyTotal[9]['month'] = 'September '.$startYear;
+            $monthlyTotal[10]['month'] = 'October '.$startYear;
+            $monthlyTotal[11]['month'] = 'November '.$startYear;
+            $monthlyTotal[12]['month'] = 'December '.$startYear;
+            $monthlyTotal[0]['total'] = 'Total';
             switch($report_type) {
                 case 'sitewise_purchase_report' :
                     $projectSite = $projectSiteId = new ProjectSite();
-                    $purchaseOrderPayment = new PurchaseOrderPayment();
                     $purchaseOrderBill = new PurchaseOrderBill();
                     $data[$row] = array(
                         'Bill Entry Date', 'Bill Create Date', 'Bill No', 'Vendor Name', 'Basic Amount', 'Tax Amount',
@@ -150,7 +163,6 @@ class ReportController extends Controller
                     $row = 1;
                     foreach($purchaseOrderBillsData as $key => $purchaseOrderBillData){
                         $thisMonth = (int)date('n',strtotime($purchaseOrderBillData['created_at']));
-
                         $data[$row]['bill_entry_date'] = $purchaseOrderBillData['bill_date'];
                         $data[$row]['bill_created_date'] = $purchaseOrderBillData['created_at'];
                         $data[$row]['bill_number'] = $purchaseOrderBillData['bill_number'];
@@ -174,32 +186,17 @@ class ReportController extends Controller
                         }
                         $row++;
                     }
-
-                    $monthlyTotal[0]['month'] = 'Month-Year';
-                    $monthlyTotal[0]['total'] = 'Total';
-                    $monthlyTotal[1]['month'] = 'Jan';
                     $monthlyTotal[1]['total'] = 345;
-                    $monthlyTotal[2]['month'] = 'Feb';
                     $monthlyTotal[2]['total'] = 345;
-                    $monthlyTotal[3]['month'] = 'March';
                     $monthlyTotal[3]['total'] = 345;
-                    $monthlyTotal[4]['month'] = 'April';
                     $monthlyTotal[4]['total'] = 345;
-                    $monthlyTotal[5]['month'] = 'May';
                     $monthlyTotal[5]['total'] = 345;
-                    $monthlyTotal[6]['month'] = 'June';
                     $monthlyTotal[6]['total'] = 345;
-                    $monthlyTotal[7]['month'] = 'July';
                     $monthlyTotal[7]['total'] = 345;
-                    $monthlyTotal[8]['month'] = 'August';
                     $monthlyTotal[8]['total'] = 345;
-                    $monthlyTotal[9]['month'] = 'September';
                     $monthlyTotal[9]['total'] = 345;
-                    $monthlyTotal[10]['month'] = 'October';
                     $monthlyTotal[10]['total'] = 345;
-                    $monthlyTotal[11]['month'] = 'November';
                     $monthlyTotal[11]['total'] = 345;
-                    $monthlyTotal[12]['month'] = 'December';
                     $monthlyTotal[12]['total'] = 345;
 
                     Excel::create($report_type."_".$curr_date, function($excel) use($monthlyTotal, $data, $report_type, $header, $companyHeader, $date, $projectName) {
@@ -212,7 +209,7 @@ class ReportController extends Controller
                             $objDrawing->setResizeProportional(true);
                             $objDrawing->setCoordinates('A1');
                             $objDrawing->setWorksheet($sheet);
-                            $sheet->setAutoSize(true);
+
                             $sheet->mergeCells('A2:H2');
                             $sheet->cell('A2', function($cell) use($companyHeader) {
                                 $cell->setFontWeight('bold');
@@ -267,6 +264,7 @@ class ReportController extends Controller
                                 $row++;
                                 foreach($rowData as $key1 => $cellData){
                                     $current_column = $next_column++;
+                                    $sheet->getRowDimension($row)->setRowHeight(20);
                                     $sheet->cell($current_column.($row), function($cell) use($cellData,$row) {
                                         if($row == 11){
                                             $cell->setFontWeight('bold');
@@ -278,20 +276,20 @@ class ReportController extends Controller
 
                                 }
                             }
-
                             $row = 25;
                             foreach($data as $key => $rowData){
                                 $next_column = 'A';
                                 $row++;
                                 foreach($rowData as $key1 => $cellData){
                                     $current_column = $next_column++;
-                                    $sheet->cell($current_column.($row), function($cell) use($cellData,$row) {
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData,$row,$sheet) {
+                                        $sheet->getRowDimension($row)->setRowHeight(15);
                                         if($row == 26) {
                                             $cell->setFontWeight('bold');
                                         }
-                                            $cell->setBorder('thin', 'thin', 'thin', 'thin');
-                                            $cell->setAlignment('center')->setValignment('center');
-                                            $cell->setValue($cellData);
+                                        $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                                        $cell->setAlignment('center')->setValignment('center');
+                                        $cell->setValue($cellData);
 
                                     });
 
@@ -299,6 +297,7 @@ class ReportController extends Controller
                             }
                         });
                     })->export('xls');
+                    break;
 
                 case 'materialwise_purchase_report':
                     $header = array(
@@ -1102,7 +1101,7 @@ class ReportController extends Controller
                                 }
                             }
                             /*if($row > 2){
-                                $sheet->row($row, array('','Total',$total['basicAmount'],$total['igstAmount'],$total['sgstAmount'],$total['cgstAmount'],$total['a
+                                $sheet->row($row, array('','Total',$total['basicAmount'],$total['igstAmount'],$total['sgstAmount'],$total['cgstAmount'],$total['aamountWithTax'],$total['paidAmount'],$total['balance']));
                             }*/
                         });
                     })->export('xls');

@@ -312,7 +312,7 @@
                                         <div class="modal-header" style="padding-bottom:10px">
                                             <div class="row">
                                                 <div class="col-md-4"></div>
-                                                <div class="col-md-4"><center><h4 class="modal-title" id="exampleModalLongTitle">Purchase Details</h4></center></div>
+                                                <div class="col-md-4"><center><h4 class="modal-title" id="exampleModalLongTitle">Purchase Detailss</h4></center></div>
                                                 <div class="col-md-4"><button type="button" class="close" data-dismiss="modal"><i class="fa fa-close" style="font-size: medium"></i></button></div>
                                             </div>
                                         </div>
