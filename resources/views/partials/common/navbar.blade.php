@@ -648,6 +648,11 @@
                                 <span class="arrow"></span>
                             </a>
                         </li>
+                        <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                            <a href="/reports/manage"> N Reports
+                                <span class="arrow"></span>
+                            </a>
+                        </li>
                     @endif
                 </ul>
             </li>

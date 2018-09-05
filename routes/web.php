@@ -798,7 +798,9 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
 
     Route::group(['prefix'=>'reports'],function (){
         Route::get('/',array('uses' => 'Report\ReportController@reportsRoute'));
+        Route::get('manage',array('uses' => 'Report\ReportManagementController@getView'));
         Route::post('download',array('uses' => 'Report\ReportController@downloadReports'));
+        Route::post('detail',array('uses' => 'Report\ReportManagementController@getDetailReport'));
     });
 
     Route::group(['prefix' => 'notification'], function(){
