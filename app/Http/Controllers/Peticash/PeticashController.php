@@ -2060,7 +2060,7 @@ class PeticashController extends Controller
                         ->where('peticash_transaction_type_id',$transactionTypeId)->sum('amount');
                     $data[$iterator]['approved_amount'] = ($salaryTransactionAmountAfterLastRequest < $requestedSalary) ? ($requestedSalary - $salaryTransactionAmountAfterLastRequest) : 0;
                 }else{
-                    $data[$iterator]['approved_amount'] = '0';
+                    $data[$iterator]['approved_amount'] = 0;
                 }
                 $iterator++;
             }
@@ -2099,7 +2099,7 @@ class PeticashController extends Controller
                     ->where('peticash_transaction_type_id',$transactionTypeId)->sum('amount');
                 $approvedAmount = ($salaryTransactionAmountAfterLastRequest < $requestedSalary) ? ($requestedSalary - $salaryTransactionAmountAfterLastRequest) : 0;
             }else{
-                $approvedAmount = '0';
+                $approvedAmount = 0;
             }
 
             if($validationAmount > $bank['balance_amount'] && $request['paid_from'] == 'bank'){
