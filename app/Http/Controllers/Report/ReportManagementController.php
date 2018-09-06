@@ -49,7 +49,6 @@ class ReportManagementController extends Controller{
 
     public function getDetailReport(Request $request) {
         try{
-
             $year = new Year();
             $month = new Month();
             $currentDate = date('d_m_Y_h_i_s',strtotime(Carbon::now()));
@@ -110,6 +109,7 @@ class ReportManagementController extends Controller{
                             ,'purchase_order_bills.bill_number','purchase_order_bills.created_at','vendors.company')
                         ->orderBy('created_at','desc')
                         ->get()->toArray();
+
                     $row = 1;
                     foreach($purchaseOrderBillsData as $key => $purchaseOrderBillData){
                         $thisMonth = (int)date('n',strtotime($purchaseOrderBillData['created_at']));
@@ -137,7 +137,7 @@ class ReportManagementController extends Controller{
                         $row++;
                     }
                     Excel::create($report_type."_".$currentDate, function($excel) use($monthlyTotal, $data, $report_type, $header, $companyHeader, $date, $projectName) {
-                        $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(12);
+                        $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(10);
 
                         $excel->sheet($report_type, function($sheet) use($monthlyTotal, $data, $header, $companyHeader, $date, $projectName) {
                             $objDrawing = new \PHPExcel_Worksheet_Drawing();
@@ -196,14 +196,15 @@ class ReportManagementController extends Controller{
                                 $cell->setValue($date);
                             });
                             $row = 10;
+                            $monthHeaderRow =  $row+1;
                             foreach($monthlyTotal as $key => $rowData){
                                 $next_column = 'A';
                                 $row++;
                                 foreach($rowData as $key1 => $cellData){
                                     $current_column = $next_column++;
                                     $sheet->getRowDimension($row)->setRowHeight(20);
-                                    $sheet->cell($current_column.($row), function($cell) use($cellData,$row) {
-                                        if($row == 11){
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData,$row,$monthHeaderRow) {
+                                        if($row == $monthHeaderRow){
                                             $cell->setFontWeight('bold');
                                         }
                                         $cell->setBorder('thin', 'thin', 'thin', 'thin');
@@ -213,15 +214,16 @@ class ReportManagementController extends Controller{
 
                                 }
                             }
-                            $row = 25;
+                            $row++; $row++;
+                            $headerRow =  $row+1;
                             foreach($data as $key => $rowData){
                                 $next_column = 'A';
                                 $row++;
                                 foreach($rowData as $key1 => $cellData){
                                     $current_column = $next_column++;
-                                    $sheet->cell($current_column.($row), function($cell) use($cellData,$row,$sheet) {
-                                        $sheet->getRowDimension($row)->setRowHeight(15);
-                                        if($row == 26) {
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData,$row,$sheet,$headerRow) {
+                                        $sheet->getRowDimension($row)->setRowHeight(20);
+                                        if($row == $headerRow) {
                                             $cell->setFontWeight('bold');
                                         }
                                         $cell->setBorder('thin', 'thin', 'thin', 'thin');
@@ -233,7 +235,7 @@ class ReportManagementController extends Controller{
                                 }
                             }
                         });
-                    })->export('xls');
+                    })->download('xls');
                     break;
 
                 default :

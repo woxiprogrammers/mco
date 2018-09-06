@@ -46,8 +46,6 @@
                                         <div class="portlet-body form">
                                             <form role="form" id="reports-download" class="form-horizontal" method="post" action="/reports/detail">
                                                 {!! csrf_field() !!}
-                                                <input type="hidden" value="false" name="is_miscellaneous" id="is_miscellaneous" >
-
                                                 <div class="form-body">
                                                     <div class="form-group row">
                                                         <div class="col-md-3" style="text-align: right">
@@ -87,7 +85,7 @@
                                                 </div>
                                                 <div class="form-actions noborder row">
                                                     <div class="col-md-offset-3" style="margin-left: 26%">
-                                                        <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit</button>
+                                                        <button type="submit" class="btn red" {{--onclick="getData()"--}}><i class="fa fa-check"></i> Submit</button>
                                                     </div>
                                                 </div>
                                             </form>
@@ -114,4 +112,26 @@
 
     <script src="/assets/global/plugins/select2/js/select2.full.min.js" type="text/javascript"></script>
     <script src="/assets/pages/scripts/components-select2.min.js" type="text/javascript"></script>
+    <script>
+        function getData(){
+            $.ajax({
+                type : "POST",
+                url : "/reports/detail",
+                data : {
+                    _token : $('input[name="_token"]').val(),
+                    report_name : $('#report_type').val(),
+                    start_date : $('#start_date').val(),
+                    end_date : $('#end_date').val(),
+                    project_site_id : $('#project_site_id').val()
+                },
+                success : function(data,textStatus,xhr){
+                    alert('inside');
+                },
+                error : function(errorData){
+
+                }
+            });
+        }
+    </script>
+
 @endsection
