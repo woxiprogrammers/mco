@@ -2050,7 +2050,7 @@ class PeticashController extends Controller
                 $data[$iterator]['advance_after_last_salary'] = $advanceAfterLastSalary;
                 $transactionTypeId = PeticashTransactionType::where('slug',$transactionType)->pluck('id')->first();
                 $requestedSalary = PeticashRequestedSalaryTransaction::where('employee_id',$employeeDetail['id'])
-                    ->where('project_site_id',$request['project_site_id'])
+                    ->where('project_site_id',$projectSiteId)
                     ->where('peticash_status_id',PeticashStatus::where('slug','approved')->pluck('id')->first())
                     ->where('peticash_transaction_type_id',$transactionTypeId)
                     ->sum('amount');
