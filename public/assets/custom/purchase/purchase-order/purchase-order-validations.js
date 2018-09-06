@@ -212,14 +212,14 @@ var  GenerateGRN = function () {
             errorClass: 'help-block', // default input error message class
             focusInvalid: false, // do not focus the last invalid input
             rules: {
-                bill_number: {
+               /* bill_number: {
                     required: true
-                }
+                }*/
             },
             messages: {
-                bill_number: {
+                /*bill_number: {
                     required: "Bill number is required."
-                }
+                }*/
             },
             invalidHandler: function (event, validator) { //display error alert on form submit
                 success.hide();
