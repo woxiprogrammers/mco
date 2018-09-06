@@ -10,8 +10,10 @@ namespace App\Http\Controllers\Report;
 
 
 use App\Http\Controllers\Controller;
+use App\Month;
 use App\ProjectSite;
 use App\PurchaseOrderBill;
+use App\Year;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -47,6 +49,9 @@ class ReportManagementController extends Controller{
 
     public function getDetailReport(Request $request) {
         try{
+
+            $year = new Year();
+            $month = new Month();
             $currentDate = date('d_m_Y_h_i_s',strtotime(Carbon::now()));
             $report_type = $request->report_type;
             $startDate = explode('/',$request->start_date);
@@ -65,22 +70,20 @@ class ReportManagementController extends Controller{
 
             $date = date('l, d F Y',strtotime($start_date)) .' - '. date('l, d F Y',strtotime($end_date));
 
-            $startYear = (int)date('Y',strtotime($start_date));
+            $startYearID = $year->where('slug',(int)date('Y',strtotime($start_date)))->pluck('id')->first();
+            $endYearID = $year->where('slug',(int)date('Y',strtotime($end_date)))->pluck('id')->first();
+            $totalYears = $year->whereBetween('id',[$startYearID,$endYearID])->select('id','name')->get();
+            $months = $month->get();
+            $iterator = 1;
             $monthlyTotal[0]['month'] = 'Month-Year';
-            $monthlyTotal[1]['month'] = 'January '.$startYear;
-            $monthlyTotal[2]['month'] = 'February '.$startYear;
-            $monthlyTotal[3]['month'] = 'March '.$startYear;
-            $monthlyTotal[4]['month'] = 'April '.$startYear;
-            $monthlyTotal[5]['month'] = 'May '.$startYear;
-            $monthlyTotal[6]['month'] = 'June '.$startYear;
-            $monthlyTotal[7]['month'] = 'July '.$startYear;
-            $monthlyTotal[8]['month'] = 'August '.$startYear;
-            $monthlyTotal[9]['month'] = 'September '.$startYear;
-            $monthlyTotal[10]['month'] = 'October '.$startYear;
-            $monthlyTotal[11]['month'] = 'November '.$startYear;
-            $monthlyTotal[12]['month'] = 'December '.$startYear;
             $monthlyTotal[0]['total'] = 'Total';
-
+            foreach ($totalYears as $thisYear){
+                foreach ($months as $month){
+                    $monthlyTotal[$iterator]['month'] = $month['name'].'-'.$thisYear['name'];
+                    $monthlyTotal[$iterator]['total'] = '235';
+                    $iterator++;
+                }
+            }
             $globalProjectSiteId = $request['project_site_id'];
             switch($report_type) {
                 case 'sitewise_purchase_report' :
@@ -133,19 +136,6 @@ class ReportManagementController extends Controller{
                         }
                         $row++;
                     }
-                    $monthlyTotal[1]['total'] = 345;
-                    $monthlyTotal[2]['total'] = 345;
-                    $monthlyTotal[3]['total'] = 345;
-                    $monthlyTotal[4]['total'] = 345;
-                    $monthlyTotal[5]['total'] = 345;
-                    $monthlyTotal[6]['total'] = 345;
-                    $monthlyTotal[7]['total'] = 345;
-                    $monthlyTotal[8]['total'] = 345;
-                    $monthlyTotal[9]['total'] = 345;
-                    $monthlyTotal[10]['total'] = 345;
-                    $monthlyTotal[11]['total'] = 345;
-                    $monthlyTotal[12]['total'] = 345;
-
                     Excel::create($report_type."_".$currentDate, function($excel) use($monthlyTotal, $data, $report_type, $header, $companyHeader, $date, $projectName) {
                         $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(12);
 
