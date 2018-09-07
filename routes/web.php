@@ -801,6 +801,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('manage',array('uses' => 'Report\ReportManagementController@getView'));
         Route::post('download',array('uses' => 'Report\ReportController@downloadReports'));
         Route::post('detail',array('uses' => 'Report\ReportManagementController@getDetailReport'));
+        Route::get('get-report/{reportType}/{projectSiteId}/{startDate}/{endDate}',array('uses' => 'Report\ReportManagementController@getReport'));
     });
 
     Route::group(['prefix' => 'notification'], function(){

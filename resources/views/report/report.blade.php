@@ -44,7 +44,7 @@
                                     <!-- BEGIN VALIDATION STATES-->
                                     <div class="portlet light ">
                                         <div class="portlet-body form">
-                                            <form role="form" id="reports-download" class="form-horizontal" method="post" action="/reports/detail">
+                                            {{--<form role="form" id="reports-download" class="form-horizontal" method="post" action="/reports/detail">--}}
                                                 {!! csrf_field() !!}
                                                 <div class="form-body">
                                                     <div class="form-group row">
@@ -85,10 +85,13 @@
                                                 </div>
                                                 <div class="form-actions noborder row">
                                                     <div class="col-md-offset-3" style="margin-left: 26%">
-                                                        <button type="submit" class="btn red" {{--onclick="getData()"--}}><i class="fa fa-check"></i> Submit</button>
+                                                        <button {{--type="submit"--}} class="btn red" onclick="getData()"><i class="fa fa-check"></i> Submit</button>
                                                     </div>
                                                 </div>
-                                            </form>
+                                            {{--</form>--}}
+                                            <div class="downloadButton" id="downloadButton" hidden>
+
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -125,7 +128,9 @@
                     project_site_id : $('#project_site_id').val()
                 },
                 success : function(data,textStatus,xhr){
-                    alert('inside');
+                    $('.submitButton').hide();
+                    $(".downloadButton").html(data);
+                    $('.downloadButton').show();
                 },
                 error : function(errorData){
 
