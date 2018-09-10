@@ -88,7 +88,7 @@
                         <td style="text-align: center;height: 25px;">{!! $iterator+1 !!}</td>
                         <td style="text-align: left; padding-left: 5px">{!! $invoiceData[$iterator]['product_name'] !!} @if($invoiceData[$iterator]['description'] != null) - {!! $invoiceData[$iterator]['description'] !!}@endif</td>
                         <td style="text-align: center;"> {{$hsnCode}}</td>
-                        <td style="text-align: right; padding-right: 10px;">{!! $invoiceData[$iterator]['quantity'] !!}</td>
+                        <td style="text-align: right; padding-right: 10px;">{!! round($invoiceData[$iterator]['quantity'],3) !!}</td>
                         <td style="text-align: right; padding-right: 10px;">{!! $invoiceData[$iterator]['unit'] !!}</td>
                         <td style="text-align: right; padding-right: 10px;">{!! $invoiceData[$iterator]['rate'] !!}</td>
                         <td style="text-align: right; padding-right: 10px;">{!! $invoiceData[$iterator]['amount'] !!}</td>
