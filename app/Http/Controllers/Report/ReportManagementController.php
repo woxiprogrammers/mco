@@ -49,10 +49,6 @@ class ReportManagementController extends Controller{
 
     public function getDetailReport(Request $request) {
         try{
-            $year = new Year();
-            $month = new Month();
-            $currentDate = date('d_m_Y_h_i_s',strtotime(Carbon::now()));
-            $report_type = $request->report_type;
             $startDate = explode('/',$request->start_date);
             $start_date = $startDate[2].'-'.$startDate[1].'-'.$startDate[0].' 00:00:00';
             $endDate = explode('/',$request->end_date);
@@ -67,45 +63,51 @@ class ReportManagementController extends Controller{
                 ->join('vendors','vendors.id','=','purchase_orders.vendor_id')
                 ->where('purchase_requests.project_site_id',$globalProjectSiteId)
                 ->whereBetween('purchase_order_bills.created_at',[$start_date,$end_date])
-                ->select('purchase_order_bills.amount','purchase_order_bills.transportation_tax_amount'
-                    ,'purchase_order_bills.tax_amount','purchase_order_bills.extra_tax_amount','purchase_order_bills.bill_date'
-                    ,'purchase_order_bills.bill_number','purchase_order_bills.created_at','vendors.company')
                 ->orderBy('created_at','desc')
                 ->count();
-            $noOfButtons = $count/12;
-            $reportType = $request->report_type;
-            Log::info($reportType);
-            //$start_date = $start_date;
-            $endDate = $end_date;
-            $project_site_id =$request['project_site_id'];
-            return view('report.manage')->with(compact('noOfButtons','reportType','start_date','endDate','project_site_id'));
+            $reportLimit = env('REPORT_LIMIT['.$request['report_name'].']');
+            $noOfButtons = $count/$reportLimit;
+            $downloadButtonDetails = array();
+            for($iterator = 0; $iterator < $noOfButtons; $iterator++){
+                $totalRecords = $iterator * $reportLimit;
+                $purchaseOrderBillDates = $purchaseOrderBill
+                    ->join('purchase_orders','purchase_orders.id','='
+                        ,'purchase_order_bills.purchase_order_id')
+                    ->join('purchase_requests','purchase_requests.id','='
+                        ,'purchase_orders.purchase_request_id')
+                    ->join('vendors','vendors.id','=','purchase_orders.vendor_id')
+                    ->where('purchase_requests.project_site_id',$globalProjectSiteId)
+                    ->whereBetween('purchase_order_bills.created_at',[$start_date,$end_date])
+                    ->take($reportLimit)->skip($totalRecords)
+                    ->orderBy('purchase_order_bills.created_at','desc')
+                    ->pluck('purchase_order_bills.created_at');
+
+                $downloadButtonDetails[$iterator]['start_date'] = $purchaseOrderBillDates->first();
+                $downloadButtonDetails[$iterator]['end_date'] = $purchaseOrderBillDates->last();
+
+            }
+            $reportType = $request['report_type'];
+            $project_site_id = $request['project_site_id'];
+            return view('report.manage')->with(compact('noOfButtons','reportType','project_site_id','downloadButtonDetails'));
         }catch(\Exception $e){
             $data = [
-                'action' => 'Get Detail Report',
+                'action' => 'Get Button Detail Report',
                 'exception' => $e->getMessage(),
                 'params' => $request->all(),
                 'type' => $request->report_type
             ];
             Log::critical(json_encode($data));
         }
-
-
     }
 
-    public function getReport(Request $request,$reportType,$project_site_id,$start_date,$endDate) {
+    public function getReport(Request $request,$reportType,$project_site_id,$start_date,$end_date) {
         try{
-            $request['start_date'] = $start_date;
-            $request['end_date'] = $endDate;
             $request['project_site_id'] = $project_site_id;
             $request['report_type'] = $reportType;
             $year = new Year();
             $month = new Month();
             $currentDate = date('d_m_Y_h_i_s',strtotime(Carbon::now()));
             $report_type = $request->report_type;
-            $startDate = explode('-',$request->start_date);
-            $start_date = $startDate[2].'-'.$startDate[1].'-'.$startDate[0].' 00:00:00';
-            $endDate = explode('-',$request->end_date);
-            $end_date = $endDate[2].'-'.$endDate[1].'-'.$endDate[0].' 24:00:00';
 
             $row = 0;
             $data = $header = array();
@@ -125,7 +127,6 @@ class ReportManagementController extends Controller{
             $iterator = 1;
             $monthlyTotal[0]['month'] = 'Month-Year';
             $monthlyTotal[0]['total'] = 'Total';
-            Log::info('Inside here1');
             foreach ($totalYears as $thisYear){
                 foreach ($months as $month){
                     $monthlyTotal[$iterator]['month'] = $month['name'].'-'.$thisYear['name'];
@@ -137,7 +138,6 @@ class ReportManagementController extends Controller{
             switch($report_type) {
 
                 case 'sitewise_purchase_report' :
-                    Log::info('Inside here3');
                     $projectSite = $projectSiteId = new ProjectSite();
                     $purchaseOrderBill = new PurchaseOrderBill();
                     $data[$row] = array(
@@ -147,7 +147,6 @@ class ReportManagementController extends Controller{
 
                     $projectName = $projectSite->join('projects','projects.id','=','project_sites.project_id')
                         ->where('project_sites.id',$globalProjectSiteId)->pluck('projects.name')->first();
-
                     $purchaseOrderBillsData = $purchaseOrderBill
                         ->join('purchase_orders','purchase_orders.id','='
                             ,'purchase_order_bills.purchase_order_id')
@@ -155,13 +154,13 @@ class ReportManagementController extends Controller{
                             ,'purchase_orders.purchase_request_id')
                         ->join('vendors','vendors.id','=','purchase_orders.vendor_id')
                         ->where('purchase_requests.project_site_id',$globalProjectSiteId)
-                       // ->whereBetween('purchase_order_bills.created_at',[$start_date,$end_date])
+                        ->where('purchase_order_bills.created_at','<=',$start_date)
+                        ->where('purchase_order_bills.created_at','>=',$end_date)
                         ->select('purchase_order_bills.amount','purchase_order_bills.transportation_tax_amount'
                             ,'purchase_order_bills.tax_amount','purchase_order_bills.extra_tax_amount','purchase_order_bills.bill_date'
                             ,'purchase_order_bills.bill_number','purchase_order_bills.created_at','vendors.company')
                         ->orderBy('created_at','desc')
                         ->get()->toArray();
-
                     $row = 1;
                     foreach($purchaseOrderBillsData as $key => $purchaseOrderBillData){
                         $thisMonth = (int)date('n',strtotime($purchaseOrderBillData['created_at']));
@@ -188,10 +187,8 @@ class ReportManagementController extends Controller{
                         }
                         $row++;
                     }
-                    Log::info('Inside here4');
                     Excel::create($report_type."_".$currentDate, function($excel) use($monthlyTotal, $data, $report_type, $header, $companyHeader, $date, $projectName) {
                         $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(10);
-                        Log::info('Inside here5');
                         $excel->sheet($report_type, function($sheet) use($monthlyTotal, $data, $header, $companyHeader, $date, $projectName) {
                             $objDrawing = new \PHPExcel_Worksheet_Drawing();
                             $objDrawing->setPath(public_path('/assets/global/img/logo.jpg')); //your image path
@@ -288,9 +285,7 @@ class ReportManagementController extends Controller{
                                 }
                             }
                         });
-                        Log::info('Inside here7');
                     })->export('xls');
-                    Log::info('Inside here8');
                     break;
 
                 default :

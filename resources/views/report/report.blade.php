@@ -57,19 +57,20 @@
                                                             </select>
                                                         </div>
                                                     </div>
-                                                </div>
-                                                <div class="row" id="dataDiv">
-                                                    <label class="control-label col-md-3">Date Range : </label>
-                                                    <div class="col-md-9">
-                                                        <div class="input-group input-large date-picker input-daterange" data-date-format="dd/mm/yyyy">
-                                                            <input type="text" class="form-control" name="start_date" id="start_date" value="{{$startDate}}" required="required">
-                                                            <span class="input-group-addon"> to </span>
-                                                            <input type="text" class="form-control" name="end_date" id="end_date" value="{{$endDate}}" required="required">
+
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3" style="text-align: right">
+                                                            <label>Date Range : </label>
                                                         </div>
-                                                        <span class="help-block"> Select date range </span>
+                                                        <div class="col-md-4">
+                                                            <div class="input-group input-large date-picker input-daterange" data-date-format="dd/mm/yyyy">
+                                                                <input type="text" class="form-control" name="start_date" id="start_date" value="{{$startDate}}" required="required">
+                                                                <span class="input-group-addon"> to </span>
+                                                                <input type="text" class="form-control" name="end_date" id="end_date" value="{{$endDate}}" required="required">
+                                                            </div>
+                                                            <span class="help-block"> Select date range </span>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div class="form-body">
                                                     <div class="form-group row">
                                                         <div class="col-md-3" style="text-align: right">
                                                             <label>Select Project Site : </label>
@@ -82,7 +83,6 @@
                                                             </select>
                                                         </div>
                                                     </div>
-                                                </div>
                                                 <div class="form-actions noborder row">
                                                     <div class="col-md-offset-3" style="margin-left: 26%">
                                                         <button {{--type="submit"--}} class="btn red" onclick="getData()"><i class="fa fa-check"></i> Submit</button>

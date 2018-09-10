@@ -40,8 +40,8 @@
         </td>
     </tr>
 @endfor--}}
-
-    @for($iterator = 0 ; $iterator < 2; $iterator++)
+        <?php $iterator = 1;?>
+        @foreach($downloadButtonDetails as $downloadButton)
         {{--<form role="form" id="download-excel" class="form-horizontal" method="post" action="/reports/get-report">--}}
             {!! csrf_field() !!}
             <div class="form-body">
@@ -56,18 +56,19 @@
                     </div>
                     <input type="hidden" name="report_type" id="report_type" value="{{$reportType}}">
                     <input type="hidden" name="project_site_id" id="project_site_id" value="{{$project_site_id}}">
-                    <input type="hidden" name="start_date" id="start_date" value="{{$start_date}}">
-                    <input type="hidden" name="end_date" id="end_date" value="{{$endDate}}">
-                    <a href="javascript:window.open('/reports/get-report/sitewise_purchase_report/{{$project_site_id}}/{{$start_date}}/{{$endDate}}');" >
-                        download
+                    <input type="hidden" name="start_date" id="start_date" value="{{$downloadButton['start_date']}}">
+                    <input type="hidden" name="end_date" id="end_date" value="{{$downloadButton['end_date']}}">
+                    <a href="javascript:window.open('/reports/get-report/sitewise_purchase_report/{{$project_site_id}}/{{$downloadButton['start_date']}}/{{$downloadButton['end_date']}}');" >
+                        Download
                     </a>
-                    <div class="col-md-2" style="text-align: center">
+                   {{-- <div class="col-md-2" style="text-align: center">
                         <button type="button" onclick="downloadReport()" class="btn red"><i class="fa fa-check"></i> Download</button>
-                    </div>
+                    </div>--}}
                 </div>
             </div>
+        <?php $iterator++;?>
         {{--</form>--}}
-    @endfor
+    @endforeach
 
 <script>
     function downloadReport(){
