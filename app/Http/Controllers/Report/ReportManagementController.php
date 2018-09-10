@@ -47,7 +47,7 @@ class ReportManagementController extends Controller{
         }
     }
 
-    public function getDetailReport(Request $request) {
+    public function getButtonDetail(Request $request) {
         try{
             $startDate = explode('/',$request->start_date);
             $start_date = $startDate[2].'-'.$startDate[1].'-'.$startDate[0].' 00:00:00';
@@ -100,7 +100,7 @@ class ReportManagementController extends Controller{
         }
     }
 
-    public function getReport(Request $request,$reportType,$project_site_id,$start_date,$end_date) {
+    public function downloadDetailReport(Request $request,$reportType,$project_site_id,$start_date,$end_date) {
         try{
             $request['project_site_id'] = $project_site_id;
             $request['report_type'] = $reportType;
@@ -293,14 +293,12 @@ class ReportManagementController extends Controller{
             }
         }catch(\Exception $e){
             $data = [
-                'action' => 'Get Detail Report',
+                'action' => 'Download Detail Report',
                 'exception' => $e->getMessage(),
                 'params' => $request->all(),
                 'type' => $request->report_type
             ];
             Log::critical(json_encode($data));
         }
-
-
     }
 }
