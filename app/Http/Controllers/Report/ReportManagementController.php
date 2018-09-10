@@ -68,6 +68,7 @@ class ReportManagementController extends Controller{
             $reportLimit = env('REPORT_LIMIT['.$request['report_name'].']');
             $noOfButtons = $count/$reportLimit;
             $downloadButtonDetails = array();
+            $startLimit = 1; $endLimit = $reportLimit;
             for($iterator = 0; $iterator < $noOfButtons; $iterator++){
                 $totalRecords = $iterator * $reportLimit;
                 $purchaseOrderBillDates = $purchaseOrderBill
@@ -84,9 +85,12 @@ class ReportManagementController extends Controller{
 
                 $downloadButtonDetails[$iterator]['start_date'] = $purchaseOrderBillDates->first();
                 $downloadButtonDetails[$iterator]['end_date'] = $purchaseOrderBillDates->last();
-
+                $downloadButtonDetails[$iterator]['start_limit'] = $startLimit;
+                $downloadButtonDetails[$iterator]['end_limit'] = $endLimit;
+                $startLimit = $endLimit + 1;
+                $endLimit = $endLimit + $reportLimit;
             }
-            $reportType = $request['report_type'];
+            $reportType = $request['report_name'];
             $project_site_id = $request['project_site_id'];
             return view('report.manage')->with(compact('noOfButtons','reportType','project_site_id','downloadButtonDetails'));
         }catch(\Exception $e){
@@ -102,12 +106,9 @@ class ReportManagementController extends Controller{
 
     public function downloadDetailReport(Request $request,$reportType,$project_site_id,$start_date,$end_date) {
         try{
-            $request['project_site_id'] = $project_site_id;
-            $request['report_type'] = $reportType;
             $year = new Year();
             $month = new Month();
             $currentDate = date('d_m_Y_h_i_s',strtotime(Carbon::now()));
-            $report_type = $request->report_type;
 
             $row = 0;
             $data = $header = array();
@@ -134,8 +135,7 @@ class ReportManagementController extends Controller{
                     $iterator++;
                 }
             }
-            $globalProjectSiteId = $request['project_site_id'];
-            switch($report_type) {
+            switch($reportType) {
 
                 case 'sitewise_purchase_report' :
                     $projectSite = $projectSiteId = new ProjectSite();
@@ -146,14 +146,14 @@ class ReportManagementController extends Controller{
                     );
 
                     $projectName = $projectSite->join('projects','projects.id','=','project_sites.project_id')
-                        ->where('project_sites.id',$globalProjectSiteId)->pluck('projects.name')->first();
+                        ->where('project_sites.id',$project_site_id)->pluck('projects.name')->first();
                     $purchaseOrderBillsData = $purchaseOrderBill
                         ->join('purchase_orders','purchase_orders.id','='
                             ,'purchase_order_bills.purchase_order_id')
                         ->join('purchase_requests','purchase_requests.id','='
                             ,'purchase_orders.purchase_request_id')
                         ->join('vendors','vendors.id','=','purchase_orders.vendor_id')
-                        ->where('purchase_requests.project_site_id',$globalProjectSiteId)
+                        ->where('purchase_requests.project_site_id',$project_site_id)
                         ->where('purchase_order_bills.created_at','<=',$start_date)
                         ->where('purchase_order_bills.created_at','>=',$end_date)
                         ->select('purchase_order_bills.amount','purchase_order_bills.transportation_tax_amount'
@@ -187,9 +187,9 @@ class ReportManagementController extends Controller{
                         }
                         $row++;
                     }
-                    Excel::create($report_type."_".$currentDate, function($excel) use($monthlyTotal, $data, $report_type, $header, $companyHeader, $date, $projectName) {
+                    Excel::create($reportType."_".$currentDate, function($excel) use($monthlyTotal, $data, $reportType, $header, $companyHeader, $date, $projectName) {
                         $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(10);
-                        $excel->sheet($report_type, function($sheet) use($monthlyTotal, $data, $header, $companyHeader, $date, $projectName) {
+                        $excel->sheet($reportType, function($sheet) use($monthlyTotal, $data, $header, $companyHeader, $date, $projectName) {
                             $objDrawing = new \PHPExcel_Worksheet_Drawing();
                             $objDrawing->setPath(public_path('/assets/global/img/logo.jpg')); //your image path
                             $objDrawing->setWidthAndHeight(148,74);

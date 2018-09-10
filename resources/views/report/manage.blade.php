@@ -6,88 +6,26 @@
      * Time: 4:15 PM
      */
     ?>
-{{--<tr>
-    <th> Name </th>
-
-</tr>
-@for($iterator = 0 ; $iterator < $noOfButtons; $iterator++)
-    <tr>
-        --}}{{--<td>Excel Sheet</td>
-        <td>From 1 - 1000</td>--}}{{--
-        <td>
-            <form role="form" id="download-excel" class="form-horizontal" method="post" action="/reports/get-report">
-                {!! csrf_field() !!}
-                <div class="form-body">
-                    <div class="form-group row">
-                        <div class="col-md-3" style="text-align: right">
-                            <label for="name" class="control-label">Excel Sheet {{$iterator+1}}</label>
-                            <span>*</span>
-                        </div>
-                        <div class="col-md-2" style="text-align: center">
-                            <label for="name" class="control-label">From 1 - 1000</label>
-                            <span>*</span>
-                        </div>
-                        <input type="hidden" name="report_type" value="{{$reportType}}">
-                        <input type="hidden" name="project_site_id" value="{{$project_site_id}}">
-                        <input type="hidden" name="start_date" value="{{$start_date}}">
-                        <input type="hidden" name="end_date" value="{{$endDate}}">
-                        <div class="col-md-2" style="text-align: center">
-                            <button type="submit" class="btn red"><i class="fa fa-check"></i> Download</button>
-                        </div>
-                    </div>
-                </div>
-            </form>
-        </td>
-    </tr>
-@endfor--}}
         <?php $iterator = 1;?>
         @foreach($downloadButtonDetails as $downloadButton)
-        {{--<form role="form" id="download-excel" class="form-horizontal" method="post" action="/reports/get-report">--}}
             {!! csrf_field() !!}
             <div class="form-body">
                 <div class="form-group row">
                     <div class="col-md-3" style="text-align: right">
-                        <label for="name" class="control-label">Excel Sheet {{$iterator+1}}</label>
+                        <label for="name" class="control-label">Excel Sheet {{$iterator}}</label>
                         <span>*</span>
                     </div>
                     <div class="col-md-2" style="text-align: center">
-                        <label for="name" class="control-label">From 1 - 1000</label>
-                        <span>*</span>
+                        <label for="name" class="control-label">From {{$downloadButton['start_limit']}} - {{$downloadButton['end_limit']}}</label>
                     </div>
-                    <input type="hidden" name="report_type" id="report_type" value="{{$reportType}}">
-                    <input type="hidden" name="project_site_id" id="project_site_id" value="{{$project_site_id}}">
-                    <input type="hidden" name="start_date" id="start_date" value="{{$downloadButton['start_date']}}">
-                    <input type="hidden" name="end_date" id="end_date" value="{{$downloadButton['end_date']}}">
-                    <a href="javascript:window.open('/reports/get-report/sitewise_purchase_report/{{$project_site_id}}/{{$downloadButton['start_date']}}/{{$downloadButton['end_date']}}');" >
-                        Download
-                    </a>
-                   {{-- <div class="col-md-2" style="text-align: center">
-                        <button type="button" onclick="downloadReport()" class="btn red"><i class="fa fa-check"></i> Download</button>
-                    </div>--}}
+                    <div class="btn-group">
+                        <div class="btn blue">
+                            <a href="javascript:window.open('/reports/get-report/{{$reportType}}/{{$project_site_id}}/{{$downloadButton['start_date']}}/{{$downloadButton['end_date']}}');" style="color: white"> Download
+                                <i class="fa fa-download"></i>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         <?php $iterator++;?>
-        {{--</form>--}}
     @endforeach
-
-<script>
-    function downloadReport(){
-        $.ajax({
-            type : "POST",
-            url : "/reports/get-report",
-            data : {
-                _token : $('input[name="_token"]').val(),
-                report_type : $('#report_type').val(),
-                project_site_id : $('#project_site_id').val(),
-                start_date : $('#start_date').val(),
-                end_date : $('#end_date').val()
-            },
-            success : function(data,textStatus,xhr){
-                alert('done');
-            },
-            error : function(errorData){
-
-            }
-        });
-    }
-</script>

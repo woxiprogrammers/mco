@@ -83,7 +83,7 @@
                                                             </select>
                                                         </div>
                                                     </div>
-                                                <div class="form-actions noborder row">
+                                                <div class="form-actions noborder row submitButton">
                                                     <div class="col-md-offset-3" style="margin-left: 26%">
                                                         <button {{--type="submit"--}} class="btn red" onclick="getData()"><i class="fa fa-check"></i> Submit</button>
                                                     </div>
