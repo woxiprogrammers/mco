@@ -82,7 +82,6 @@ class ReportManagementController extends Controller{
                     ->take($reportLimit)->skip($totalRecords)
                     ->orderBy('purchase_order_bills.created_at','desc')
                     ->pluck('purchase_order_bills.created_at');
-
                 $downloadButtonDetails[$iterator]['start_date'] = $purchaseOrderBillDates->first();
                 $downloadButtonDetails[$iterator]['end_date'] = $purchaseOrderBillDates->last();
                 $downloadButtonDetails[$iterator]['start_limit'] = $startLimit;
@@ -296,7 +295,7 @@ class ReportManagementController extends Controller{
                 'action' => 'Download Detail Report',
                 'exception' => $e->getMessage(),
                 'params' => $request->all(),
-                'type' => $request->report_type
+                'type' => $reportType
             ];
             Log::critical(json_encode($data));
         }
