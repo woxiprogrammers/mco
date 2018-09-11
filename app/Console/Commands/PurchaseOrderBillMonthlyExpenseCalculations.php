@@ -76,27 +76,27 @@ class PurchaseOrderBillMonthlyExpenseCalculations extends Command
                         ->whereYear('purchase_order_bills.created_at',$thisYear)
                         ->select('purchase_order_bills.amount as basic_amount','purchase_order_bills.transportation_tax_amount as transportation_tax_amount','purchase_order_bills.tax_amount as tax_amount','purchase_order_bills.extra_tax_amount as extra_tax_amount')
                         ->get();
-                    $basicAmount =  $purchaseOrderBillData
-                        ->sum('basic_amount');
-                    $transportationTaxAmount =  $purchaseOrderBillData
-                        ->sum('transportation_tax_amount');
-                    $taxAmount =  $purchaseOrderBillData
-                        ->sum('tax_amount');
-                    $extraTaxAmount =  $purchaseOrderBillData
-                        ->sum('extra_tax_amount');
+                    $basicAmount =  round($purchaseOrderBillData
+                        ->sum('basic_amount'),3);
+                    $transportationTaxAmount =  round($purchaseOrderBillData
+                        ->sum('transportation_tax_amount'),3);
+                    $taxAmount =  round($purchaseOrderBillData
+                        ->sum('tax_amount'),3);
+                    $extraTaxAmount =  round($purchaseOrderBillData
+                        ->sum('extra_tax_amount'),3);
                     $totalAmount = $basicAmount + $transportationTaxAmount + $taxAmount + $extraTaxAmount;
                     if($totalAmount != 0){
                         $alreadyExist = $purchaseOrderBillMonthlyExpenses->where('project_site_id',$projectSiteId)->where('month_id',$monthId)->where('year_id',$yearId)->first();
                         if($alreadyExist != null){
                             $alreadyExist->update([
-                                'total_expense' => $totalAmount
+                                'total_expense' => round($totalAmount,3)
                             ]);
                         }else{
                             $purchaseOrderBillMonthlyExpenses->create([
                                 'project_site_id' => $projectSiteId,
                                 'month_id' => $monthId,
                                 'year_id' => $yearId,
-                                'total_expense' => $totalAmount
+                                'total_expense' => round($totalAmount,3)
                             ]);
                         }
                     }

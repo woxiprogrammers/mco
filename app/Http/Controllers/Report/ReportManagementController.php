@@ -119,7 +119,7 @@ class ReportManagementController extends Controller{
             $companyHeader['contact_no'] = env('CONTACT_NO');
             $companyHeader['gstin_number'] = env('GSTIN_NUMBER');
 
-            $date = date('l, d F Y',strtotime($start_date)) .' - '. date('l, d F Y',strtotime($end_date));
+            $date = date('l, d F Y',strtotime($end_date)) .' - '. date('l, d F Y',strtotime($start_date));
 
             $startYearID = $year->where('slug',(int)date('Y',strtotime($start_date)))->pluck('id')->first();
             $endYearID = $year->where('slug',(int)date('Y',strtotime($end_date)))->pluck('id')->first();
@@ -175,25 +175,24 @@ class ReportManagementController extends Controller{
                         $data[$row]['bill_created_date'] = $purchaseOrderBillData['created_at'];
                         $data[$row]['bill_number'] = $purchaseOrderBillData['bill_number'];
                         $data[$row]['company_name'] = $purchaseOrderBillData['company'];
-                        $data[$row]['basic_amount'] = $purchaseOrderBillData['amount'];
-                        $data[$row]['tax_amount'] = $purchaseOrderBillData['transportation_tax_amount'] + $purchaseOrderBillData['tax_amount'] + $purchaseOrderBillData['extra_tax_amount'];
-                        $data[$row]['bill_amount'] = $data[$row]['basic_amount'] + $data[$row]['tax_amount'];
+                        $data[$row]['basic_amount'] = round($purchaseOrderBillData['amount'],3);
+                        $data[$row]['tax_amount'] = round($purchaseOrderBillData['transportation_tax_amount'] ,3) + round($purchaseOrderBillData['tax_amount'],3) + round($purchaseOrderBillData['extra_tax_amount'],3);
+                        $data[$row]['bill_amount'] = round($data[$row]['basic_amount'],3) + round($data[$row]['tax_amount'],3);
                         if($row == 1){
                             $newMonth = $thisMonth;
                             $newMonthRow = $row;
-                            $data[$row]['monthly_total'] = $data[$row]['bill_amount'];
+                            $data[$row]['monthly_total'] = round($data[$row]['bill_amount'],3);
                             $data[$row]['set_color'] = true;
                         }else{
                             if($newMonth == $thisMonth){
-                                $data[$newMonthRow]['monthly_total'] += $data[$row]['bill_amount'];
+                                $data[$newMonthRow]['monthly_total'] += round($data[$row]['bill_amount'],3);
                                 $data[$newMonthRow]['set_color'] = true;
-                                $data[$row]['set_color'] = false;
                                 $data[$row]['monthly_total'] = null;
                             }else{
                                 $newMonth = $thisMonth;
                                 $newMonthRow = $row;
                                 $data[$row]['set_color'] = true;
-                                $data[$row]['monthly_total'] = $data[$row]['bill_amount'];
+                                $data[$row]['monthly_total'] = round($data[$row]['bill_amount'],3);
                             }
                         }
                         $row++;
@@ -280,14 +279,22 @@ class ReportManagementController extends Controller{
                             foreach($data as $key => $rowData){
                                 $next_column = 'A';
                                 $row++;
+                                if(array_key_exists('set_color',$rowData)){
+                                    $setColor = true;
+                                    unset($rowData['set_color']);
+                                }else{
+                                    $setColor = false;
+                                }
                                 foreach($rowData as $key1 => $cellData){
                                     $current_column = $next_column++;
-                                    $sheet->cell($current_column.($row), function($cell) use($cellData,$row,$sheet,$headerRow) {
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData,$row,$sheet,$headerRow,$setColor) {
                                         $sheet->getRowDimension($row)->setRowHeight(20);
                                         if($row == $headerRow) {
                                             $cell->setFontWeight('bold');
                                         }
-                                        //$cell->setBackground('#008686');
+                                        if($setColor){
+                                            $cell->setBackground('#d7f442');
+                                        }
                                         $cell->setBorder('thin', 'thin', 'thin', 'thin');
                                         $cell->setAlignment('center')->setValignment('center');
                                         $cell->setValue($cellData);
