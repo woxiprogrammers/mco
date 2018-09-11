@@ -15,8 +15,8 @@
                         <label for="name" class="control-label">Excel Sheet {{$iterator}}</label>
                         <span>*</span>
                     </div>
-                    <div class="col-md-2" style="text-align: center">
-                        <label for="name" class="control-label">From {{$downloadButton['start_limit']}} - {{$downloadButton['end_limit']}}</label>
+                    <div class="col-md-4" style="text-align: center">
+                        <label for="name" class="control-label"><b>Records {{$downloadButton['start_limit']}} - {{$downloadButton['end_limit']}}</b>  ( From <i>{{date('d M Y',strtotime($downloadButton['end_date']))}}</i> - <i>{{date('d M Y',strtotime($downloadButton['start_date']))}}</i> )</label>
                     </div>
                     <div class="btn-group">
                         <div class="btn blue">

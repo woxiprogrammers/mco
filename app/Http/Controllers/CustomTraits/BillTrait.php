@@ -1757,8 +1757,6 @@ trait BillTrait{
                 $final['current_bill_gross_total_amount'] = round($final['current_bill_amount'],3);
             }
             $totalTransactionAmount = BillTransaction::where('bill_id')->sum('amount');
-            Log::info($request->amount);
-            dd($final['current_bill_gross_total_amount']);
             if(($totalTransactionAmount + $request->amount) >= $final['current_bill_gross_total_amount']){
                 $request->session()->flash('error','Total Payment amount is greater than total bill amount');
                 return redirect('/bill/view/'.$request->bill_id);

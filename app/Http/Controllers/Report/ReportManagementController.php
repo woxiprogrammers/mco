@@ -13,6 +13,7 @@ use App\Http\Controllers\Controller;
 use App\Month;
 use App\ProjectSite;
 use App\PurchaseOrderBill;
+use App\PurchaseOrderBillMonthlyExpense;
 use App\Year;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -127,22 +128,29 @@ class ReportManagementController extends Controller{
             $iterator = 1;
             $monthlyTotal[0]['month'] = 'Month-Year';
             $monthlyTotal[0]['total'] = 'Total';
-            foreach ($totalYears as $thisYear){
-                foreach ($months as $month){
-                    $monthlyTotal[$iterator]['month'] = $month['name'].'-'.$thisYear['name'];
-                    $monthlyTotal[$iterator]['total'] = '235';
-                    $iterator++;
-                }
-            }
+
             switch($reportType) {
 
                 case 'sitewise_purchase_report' :
                     $projectSite = $projectSiteId = new ProjectSite();
                     $purchaseOrderBill = new PurchaseOrderBill();
+                    $purchaseOrderBillMonthlyExpense = new PurchaseOrderBillMonthlyExpense();
                     $data[$row] = array(
                         'Bill Entry Date', 'Bill Create Date', 'Bill No', 'Vendor Name', 'Basic Amount', 'Tax Amount',
                         'Bill Amount', 'Monthly Total'
                     );
+
+                    foreach ($totalYears as $thisYear){
+                        foreach ($months as $month){
+                            $monthlyTotal[$iterator]['month'] = $month['name'].'-'.$thisYear['name'];
+                            $total = $purchaseOrderBillMonthlyExpense->where('month_id',$month['id'])
+                                ->where('year_id',$thisYear['id'])
+                                ->where('project_site_id',$project_site_id)
+                                ->pluck('total_expense')->first();
+                            $monthlyTotal[$iterator]['total'] = ($total != null) ? $total : 0;
+                            $iterator++;
+                        }
+                    }
 
                     $projectName = $projectSite->join('projects','projects.id','=','project_sites.project_id')
                         ->where('project_sites.id',$project_site_id)->pluck('projects.name')->first();
