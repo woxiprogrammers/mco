@@ -52,7 +52,7 @@
                                                             <label>Select Report Type : </label>
                                                         </div>
                                                         <div class="col-md-4">
-                                                            <select class="form-control" id="report_type" name="report_type">
+                                                            <select class="form-control" id="report_type" name="report_type" onchange="getData()">
                                                                 <option value="sitewise_purchase_report">Purchase Report</option>
                                                             </select>
                                                         </div>
@@ -65,7 +65,7 @@
                                                         <div class="col-md-4">
                                                             <div class="input-group input-large date-picker input-daterange" data-date-format="dd/mm/yyyy">
                                                                 <input type="text" class="form-control" name="start_date" id="start_date" value="{{$startDate}}" required="required">
-                                                                <span class="input-group-addon"> to </span>
+                                                                    <span class="input-group-addon"> to </span>
                                                                 <input type="text" class="form-control" name="end_date" id="end_date" value="{{$endDate}}" required="required">
                                                             </div>
                                                             <span class="help-block"> Select date range </span>
@@ -76,7 +76,7 @@
                                                             <label>Select Project Site : </label>
                                                         </div>
                                                         <div class="col-md-4">
-                                                            <select class="form-control" id="project_site_id" name="project_site_id">
+                                                            <select class="form-control" id="project_site_id" name="project_site_id" onchange="getData()">
                                                                 @foreach($projectSites as $projectSite)
                                                                     <option value="{{$projectSite['id']}}">{{$projectSite['project_name']}} - {{$projectSite['name']}}</option>
                                                                 @endforeach
@@ -135,6 +135,10 @@
                 error : function(errorData){
 
                 }
+            });
+
+            $('#start_date,#end_date').change(function(){
+                getData();
             });
         }
     </script>

@@ -182,13 +182,17 @@ class ReportManagementController extends Controller{
                             $newMonth = $thisMonth;
                             $newMonthRow = $row;
                             $data[$row]['monthly_total'] = $data[$row]['bill_amount'];
+                            $data[$row]['set_color'] = true;
                         }else{
                             if($newMonth == $thisMonth){
                                 $data[$newMonthRow]['monthly_total'] += $data[$row]['bill_amount'];
+                                $data[$newMonthRow]['set_color'] = true;
+                                $data[$row]['set_color'] = false;
                                 $data[$row]['monthly_total'] = null;
                             }else{
                                 $newMonth = $thisMonth;
                                 $newMonthRow = $row;
+                                $data[$row]['set_color'] = true;
                                 $data[$row]['monthly_total'] = $data[$row]['bill_amount'];
                             }
                         }
@@ -283,12 +287,12 @@ class ReportManagementController extends Controller{
                                         if($row == $headerRow) {
                                             $cell->setFontWeight('bold');
                                         }
+                                        //$cell->setBackground('#008686');
                                         $cell->setBorder('thin', 'thin', 'thin', 'thin');
                                         $cell->setAlignment('center')->setValignment('center');
                                         $cell->setValue($cellData);
 
                                     });
-
                                 }
                             }
                         });
