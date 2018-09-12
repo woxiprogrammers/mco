@@ -68,11 +68,11 @@
                                                     <span class="help-block"> Select date range </span>
                                                 </div>
                                             </div>
-                                            <div class="form-actions noborder row">
+                                            {{--<div class="form-actions noborder row">
                                                 <div class="col-md-offset-3" style="margin-left: 26%">
                                                     <button type="submit" class="btn red"><i class="fa fa-check"></i> Submit</button>
                                                 </div>
-                                            </div>
+                                            </div>--}}
                                             <div class="row" name="materialwise_purchase_report" id="materialwise_purchase_report">
                                                 <div class="row">
                                                     <div class="col-md-12">
