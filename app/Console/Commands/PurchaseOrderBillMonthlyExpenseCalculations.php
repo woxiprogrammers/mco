@@ -20,13 +20,11 @@ class PurchaseOrderBillMonthlyExpenseCalculations extends Command
      * @var string
      */
 
-   //php artisan custom:purchase-order-bill-monthly-expense-calculation  => Executes Case 3 => $thisMonth == 'null' && $thisYear == 'null'
     //php artisan custom:purchase-order-bill-monthly-expense-calculation --month=all --year=all  => Executes Case 1
+    //php artisan custom:purchase-order-bill-monthly-expense-calculation --month=all --year=2018  => Executes Case 2
+    //php artisan custom:purchase-order-bill-monthly-expense-calculation  => Executes Case 3 => $thisMonth == 'null' && $thisYear == 'null'
+    //php artisan custom:purchase-order-bill-monthly-expense-calculation --month=8 --year=2018  => Executes Case 4
 
-
-    //php artisan custom:purchase-order-bill-monthly-expense-calculation 09 2018
-    //php artisan custom:purchase-order-bill-monthly-expense-calculation --month=09 --year=2018
-    //protected $signature = 'custom:purchase-order-bill-monthly-expense-calculation {month} {year}';
     protected $signature = 'custom:purchase-order-bill-monthly-expense-calculation {--month=null} {--year=null}';
 
     /**
@@ -85,11 +83,9 @@ class PurchaseOrderBillMonthlyExpenseCalculations extends Command
                                     ->sum('basic_amount'),3);
                                 $transportationTaxAmount =  round($purchaseOrderBillData
                                     ->sum('transportation_tax_amount'),3);
-                                $taxAmount =  round($purchaseOrderBillData
-                                    ->sum('tax_amount'),3);
                                 $extraTaxAmount =  round($purchaseOrderBillData
                                     ->sum('extra_tax_amount'),3);
-                                $totalAmount = $basicAmount + $transportationTaxAmount + $taxAmount + $extraTaxAmount;
+                                $totalAmount = $basicAmount + $transportationTaxAmount + $extraTaxAmount;
                                 if($totalAmount != 0){
                                     $alreadyExist = $purchaseOrderBillMonthlyExpenses->where('project_site_id',$projectSiteId)->where('month_id',$thisMonth)->where('year_id',$thisYearId)->first();
                                     if($alreadyExist != null){
@@ -112,7 +108,6 @@ class PurchaseOrderBillMonthlyExpenseCalculations extends Command
                     break;
 
                 case ($thisMonth == 'all' && $thisYear != null) :
-                    dd(2);
                     $yearId = $year->where('slug',$thisYear)->pluck('id')->first();
                     if($yearId == null){
                         $this->info("Please enter proper year in 4 digit (Eg. 2018)");
@@ -136,13 +131,11 @@ class PurchaseOrderBillMonthlyExpenseCalculations extends Command
                                         ->sum('basic_amount'),3);
                                     $transportationTaxAmount =  round($purchaseOrderBillData
                                         ->sum('transportation_tax_amount'),3);
-                                    $taxAmount =  round($purchaseOrderBillData
-                                        ->sum('tax_amount'),3);
                                     $extraTaxAmount =  round($purchaseOrderBillData
                                         ->sum('extra_tax_amount'),3);
-                                    $totalAmount = $basicAmount + $transportationTaxAmount + $taxAmount + $extraTaxAmount;
+                                    $totalAmount = $basicAmount + $transportationTaxAmount + $extraTaxAmount;
                                     if($totalAmount != 0){
-                                        $alreadyExist = $purchaseOrderBillMonthlyExpenses->where('project_site_id',$projectSiteId)->where('month_id',$monthId)->where('year_id',$yearId)->first();
+                                        $alreadyExist = $purchaseOrderBillMonthlyExpenses->where('project_site_id',$projectSiteId)->where('month_id',$thisMonth)->where('year_id',$yearId)->first();
                                         if($alreadyExist != null){
                                             $alreadyExist->update([
                                                 'total_expense' => round($totalAmount,3)
@@ -150,7 +143,7 @@ class PurchaseOrderBillMonthlyExpenseCalculations extends Command
                                         }else{
                                             $purchaseOrderBillMonthlyExpenses->create([
                                                 'project_site_id' => $projectSiteId,
-                                                'month_id' => $monthId,
+                                                'month_id' => $thisMonth,
                                                 'year_id' => $yearId,
                                                 'total_expense' => round($totalAmount,3)
                                             ]);
@@ -212,7 +205,6 @@ class PurchaseOrderBillMonthlyExpenseCalculations extends Command
                     break;
 
                 case ($thisMonth != null && $thisYear != null) :
-                    dd(3);
                         $yearId = $year->where('slug',$thisYear)->pluck('id')->first();
                         $monthId = $month->where('id',$thisMonth)->pluck('id')->first();
                         if($yearId == null){
@@ -237,11 +229,9 @@ class PurchaseOrderBillMonthlyExpenseCalculations extends Command
                                     ->sum('basic_amount'),3);
                                 $transportationTaxAmount =  round($purchaseOrderBillData
                                     ->sum('transportation_tax_amount'),3);
-                                $taxAmount =  round($purchaseOrderBillData
-                                    ->sum('tax_amount'),3);
                                 $extraTaxAmount =  round($purchaseOrderBillData
                                     ->sum('extra_tax_amount'),3);
-                                $totalAmount = $basicAmount + $transportationTaxAmount + $taxAmount + $extraTaxAmount;
+                                $totalAmount = $basicAmount + $transportationTaxAmount + $extraTaxAmount;
                                 if($totalAmount != 0){
                                     $alreadyExist = $purchaseOrderBillMonthlyExpenses->where('project_site_id',$projectSiteId)->where('month_id',$monthId)->where('year_id',$yearId)->first();
                                     if($alreadyExist != null){
@@ -261,9 +251,6 @@ class PurchaseOrderBillMonthlyExpenseCalculations extends Command
                             }
                         }
                     break;
-
-
-
             }
         }catch(\Exception $e){
             $data = [

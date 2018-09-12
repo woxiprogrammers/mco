@@ -32,6 +32,7 @@ class Kernel extends ConsoleKernel
         //          ->hourly();
         $schedule->command('custom:send-purchase-order-email')
                 ->everyFiveMinutes();
+        $schedule->command('custom:purchase-order-bill-monthly-expense-calculation')->dailyAt('23:00');
     }
 
     /**

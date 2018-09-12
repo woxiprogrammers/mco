@@ -47,7 +47,6 @@
                                                     </div>
                                                     <div class="col-md-4">
                                                         <select class="form-control" id="report_type" name="report_type">
-                                                            <option value="sitewise_purchase_report">Purchase Report</option>
                                                             <option value="materialwise_purchase_report">Material wise Purchase Report</option>
                                                             <option value="receiptwise_p_and_l_report">Profit and Loss Report</option>
                                                             <option value="subcontractor_report">Subcontractor Report</option>
