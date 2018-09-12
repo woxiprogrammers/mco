@@ -81,10 +81,10 @@ class ReportManagementController extends Controller{
                     ->where('purchase_requests.project_site_id',$globalProjectSiteId)
                     ->whereBetween('purchase_order_bills.created_at',[$start_date,$end_date])
                     ->take($reportLimit)->skip($totalRecords)
-                    ->orderBy('purchase_order_bills.created_at','desc')
+                    ->orderBy('purchase_order_bills.created_at','asc')
                     ->pluck('purchase_order_bills.created_at');
-                $downloadButtonDetails[$iterator]['start_date'] = $purchaseOrderBillDates->first();
-                $downloadButtonDetails[$iterator]['end_date'] = $purchaseOrderBillDates->last();
+                $downloadButtonDetails[$iterator]['start_date'] = $purchaseOrderBillDates->last();
+                $downloadButtonDetails[$iterator]['end_date'] = $purchaseOrderBillDates->first();
                 $downloadButtonDetails[$iterator]['start_limit'] = $startLimit;
                 $downloadButtonDetails[$iterator]['end_limit'] = $endLimit;
                 $startLimit = $endLimit + 1;
@@ -136,7 +136,7 @@ class ReportManagementController extends Controller{
                     $purchaseOrderBill = new PurchaseOrderBill();
                     $purchaseOrderBillMonthlyExpense = new PurchaseOrderBillMonthlyExpense();
                     $data[$row] = array(
-                        'Bill Entry Date', 'Bill Create Date', 'Bill No', 'Vendor Name', 'Basic Amount', 'Tax Amount',
+                        'Bill Date', 'Bill Create Date', 'Bill No', 'Vendor Name', 'Basic Amount', 'Tax Amount',
                         'Bill Amount', 'Monthly Total'
                     );
 
@@ -171,8 +171,8 @@ class ReportManagementController extends Controller{
                     $row = 1;
                     foreach($purchaseOrderBillsData as $key => $purchaseOrderBillData){
                         $thisMonth = (int)date('n',strtotime($purchaseOrderBillData['created_at']));
-                        $data[$row]['bill_entry_date'] = $purchaseOrderBillData['bill_date'];
-                        $data[$row]['bill_created_date'] = $purchaseOrderBillData['created_at'];
+                        $data[$row]['bill_entry_date'] = date('d-m-Y',strtotime($purchaseOrderBillData['bill_date']));
+                        $data[$row]['bill_created_date'] = date('d-m-Y',strtotime($purchaseOrderBillData['created_at']));
                         $data[$row]['bill_number'] = $purchaseOrderBillData['bill_number'];
                         $data[$row]['company_name'] = $purchaseOrderBillData['company'];
                         $data[$row]['basic_amount'] = round($purchaseOrderBillData['amount'],3);
