@@ -2,6 +2,8 @@
 
 namespace App\Console;
 
+use App\Console\Commands\PeticashSalaryTransactionMonthlyExpense;
+use App\Console\Commands\PeticashSalaryTransactionMonthlyExpenseCalculations;
 use App\Console\Commands\PurchaseOrderBillMonthlyExpenseCalculations;
 use App\Console\Commands\SendPurchaseOrderEmails;
 use Illuminate\Console\Scheduling\Schedule;
@@ -16,7 +18,8 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         SendPurchaseOrderEmails::class,
-        PurchaseOrderBillMonthlyExpenseCalculations::class
+        PurchaseOrderBillMonthlyExpenseCalculations::class,
+        PeticashSalaryTransactionMonthlyExpenseCalculations::class
     ];
 
     /**

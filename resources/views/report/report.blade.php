@@ -53,6 +53,7 @@
                                                         </div>
                                                         <div class="col-md-4">
                                                             <select class="form-control" id="report_type" name="report_type" onchange="getData()">
+                                                                <option value="sitewise_salary_report">Salary Report</option>
                                                                 <option value="sitewise_purchase_report">Purchase Report</option>
                                                             </select>
                                                         </div>
