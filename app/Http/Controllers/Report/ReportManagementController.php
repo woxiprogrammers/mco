@@ -549,7 +549,7 @@ class ReportManagementController extends Controller{
                     $peticashPurchaseTransaction = new PurcahsePeticashTransaction();
                     $peticashPurchaseTransactionMonthlyExpense = new PeticashPurchaseTransactionMonthlyExpense();
                     $data[$row] = array(
-                        'Bill Date', 'Bill No.', 'Vendor Name', 'Bill Amount', 'Monthly Total'
+                        'Bill Date', 'Bill No.', 'Vendor Name', 'Item Name', 'Bill Amount', 'Monthly Total'
                     );
                     foreach ($totalYears as $thisYear){
                         foreach ($months as $month){
@@ -576,7 +576,8 @@ class ReportManagementController extends Controller{
                         $thisMonth = (int)date('n',strtotime($peticashPurchaseTransactionData['created_at']));
                         $data[$row]['date'] = date('n/d/Y',strtotime($peticashPurchaseTransactionData['created_at']));
                         $data[$row]['bill_no'] = $peticashPurchaseTransactionData['bill_number'];
-                        $data[$row]['vendor_name'] = ucfirst($peticashPurchaseTransactionData->name);
+                        $data[$row]['vendor_name'] = ucfirst($peticashPurchaseTransactionData->source_name);
+                        $data[$row]['item_name'] = ucfirst($peticashPurchaseTransactionData->name);
                         $data[$row]['bill_amount'] = round($peticashPurchaseTransactionData['bill_amount'],3);
                         if($row == 1){
                             $newMonth = $thisMonth;
