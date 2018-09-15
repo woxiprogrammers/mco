@@ -721,4 +721,5 @@ class ReportManagementController extends Controller{
             Log::critical(json_encode($data));
         }
     }
+
 }
