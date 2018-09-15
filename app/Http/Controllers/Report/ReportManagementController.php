@@ -721,4 +721,16 @@ class ReportManagementController extends Controller{
             Log::critical(json_encode($data));
         }
     }
+
+    public function getPnLView(Request $request){
+        try{
+            return view('report.pnl');
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get PnL View',
+                'exception' => $e->getMessage(),
+                'params' => $request->all()
+            ];
+        }
+    }
 }

@@ -654,6 +654,13 @@
                             </a>
                         </li>
                     @endif
+                    @if(($user->roles[0]->role->slug == 'superadmin'))
+                        <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                            <a href="/pnl/manage"> Manisha Construction
+                                <span class="arrow"></span>
+                            </a>
+                        </li>
+                    @endif
                 </ul>
             </li>
         </div>
