@@ -9,6 +9,7 @@ use App\InventoryComponentTransfers;
 use App\InventoryComponentTransferStatus;
 use App\InventoryTransferTypes;
 use App\MaterialRequests;
+use App\Month;
 use App\PeticashRequestedSalaryTransaction;
 use App\Project;
 use App\ProjectSite;
@@ -21,6 +22,7 @@ use App\PurchaseRequestComponentVendorRelation;
 use App\Quotation;
 use App\Http\Controllers\Controller;
 use App\UserLastLogin;
+use App\Year;
 use ConsoleTVs\Charts\Facades\Charts;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
@@ -531,12 +533,17 @@ class DashboardController extends Controller
             ];
             $iterator++;
         }
+        $month = new Month();
+        $year = new Year();
+
         return view('admin.dashboard', [
                 'quotationStatus' => $quotationStatus,
                 'categorywiseMaterialCount' => $categorywiseMaterialCount,
                 'totalCategory' => $totalCategory,
                 'totalMaterials' => $totalMaterials,
-                'projectSiteData' => $projectSiteData
+                'projectSiteData' => $projectSiteData,
+                'months' => $month->all(),
+                'years' => $year->all()
             ]);
     }
 

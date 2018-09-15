@@ -23,7 +23,7 @@ class MonthsSeeder extends Seeder
             ],
             [
                 'name' => 'Feb',
-                'slug' => 'February',
+                'slug' => 'february',
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
