@@ -709,7 +709,9 @@ class PurchaseOrderRequestController extends Controller
                             }
                         }elseif ($newAssetTypeId == $componentTypeId){
                             $assetName = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name;
+                            Log::info($assetName);
                             $is_present = Asset::where('name','ilike',$assetName)->pluck('id')->toArray();
+                            Log::info($is_present);
                             if($is_present == null){
                                 $asset_type = AssetType::where('slug','other')->pluck('id')->first();
                                 $categoryAssetData = array();

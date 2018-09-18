@@ -489,6 +489,7 @@ use InventoryTrait;
             return response(500);
         }
     }
+
     public function changeAssetStatus(Request $request, $asset){
         try{
             $newStatus = (boolean)!$asset->is_active;
