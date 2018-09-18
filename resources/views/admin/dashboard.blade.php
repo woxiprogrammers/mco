@@ -81,6 +81,36 @@
                                     </fieldset>
                                 </div>--}}
                                 <div class="row">
+                                    <fieldset>
+                                        <legend style="padding-left: 30px"> Selection Criteria </legend>
+                                        <div class="col-md-2 form-group">
+                                            <select class="form-control" id="clientId" name="client_id" style="width: 80%;">
+                                                <option value=""> -- All Year -- </option>
+                                                @foreach($years as $year)
+                                                    <option value="{{$year['slug']}}"> {{$year['slug']}} </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2 form-group">
+                                            <select name="project_id" id="projectId" class="form-control" style="width: 80%;">
+                                                <option value=""> -- All Month -- </option>
+                                                @foreach($months as $month)
+                                                    <option value="{{$month['slug']}}"> {{ucfirst($month['slug'])}} </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4 form-group">
+                                            <select class="form-control input-lg select2-multiple" name="project_site_id" multiple="multiple" style="overflow:hidden" data-placeholder="Select Project Site">
+                                                @foreach($projectSiteData as $projectSite)
+                                                    <option value="{{$projectSite['project_site_id']}}"> {{$projectSite['project_site_name']}} </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+                                    </fieldset>
+
+                                </div>
+                                <div class="row">
                                     <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12" style="width: 29%">
                                         <div class="dashboard-stat2 ">
                                             <div class="display">
@@ -291,6 +321,13 @@
 @endsection
 @section('javascript')
 <script src="/assets/global/plugins/bootstrap-select/js/bootstrap-select.min.js" type="text/javascript"></script>
+
+<link href="/assets/global/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css" />
+<link href="/assets/global/plugins/select2/css/select2-bootstrap.min.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="/assets/global/plugins/bootstrap-multiselect/js/bootstrap-multiselect.js"></script>
+<script src="/assets/global/plugins/select2/js/select2.full.min.js" type="text/javascript"></script>
+<script src="/assets/pages/scripts/components-select2.min.js" type="text/javascript"></script>
+<link rel="stylesheet" href="/assets/global/plugins/bootstrap-multiselect/css/bootstrap-multiselect.css" type="text/css"/>
 <script>
     function switchProjectSiteModule(projectSiteId, moduleSlug){
         var redirectionUrl = '';
