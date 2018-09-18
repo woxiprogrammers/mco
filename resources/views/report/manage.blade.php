@@ -20,9 +20,11 @@
                             <label for="name" class="control-label">Excel Sheet {{$iterator}}</label>
                             <span>*</span>
                         </div>
-                        <div class="col-md-4" style="text-align: center">
-                            <label for="name" class="control-label"><b>Records {{$downloadButton['start_limit']}} - {{$downloadButton['end_limit']}}</b>  ( From <i>{{date('d M Y',strtotime($downloadButton['end_date']))}}</i> - <i>{{date('d M Y',strtotime($downloadButton['start_date']))}}</i> )</label>
-                        </div>
+                        @if(array_key_exists('start_limit',$downloadButton))
+                            <div class="col-md-4" style="text-align: center">
+                                <label for="name" class="control-label"><b>Records {{$downloadButton['start_limit']}} - {{$downloadButton['end_limit']}}</b>  ( From <i>{{date('d M Y',strtotime($downloadButton['end_date']))}}</i> - <i>{{date('d M Y',strtotime($downloadButton['start_date']))}}</i> )</label>
+                            </div>
+                        @endif
                         <div class="btn-group">
                             <div class="btn blue">
                                 <a href="javascript:window.open('/reports/get-report/{{$reportType}}/{{$project_site_id}}/{{$downloadButton['start_date']}}/{{$downloadButton['end_date']}}');" style="color: white"> Download
