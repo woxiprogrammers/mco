@@ -50,7 +50,6 @@ class LoginController extends Controller
         if(Auth::attempt($credentials)){
             $user = Auth::user();
             if($user->is_active == true){
-                $request->session()->flash('success','Logged in Successfully.');
                 return redirect('/dashboard');
             }else{
                 Auth::logout();

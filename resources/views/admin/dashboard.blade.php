@@ -99,7 +99,7 @@
                                                 @endforeach
                                             </select>
                                         </div>
-                                        <div class="col-md-4 form-group">
+                                        <div class="col-md-6 form-group">
                                             <select class="form-control input-lg select2-multiple" name="project_site_id" multiple="multiple" style="overflow:hidden" data-placeholder="Select Project Site">
                                                 @foreach($projectSiteData as $projectSite)
                                                     <option value="{{$projectSite['project_site_id']}}"> {{$projectSite['project_site_name']}} </option>
@@ -165,7 +165,7 @@
                                             <div class="portlet-title">
                                                 <div class="caption font-dark">
                                                     <i class="icon-settings font-dark"></i>
-                                                    <span class="caption-subject bold uppercase"> Sitewise PnL Report</span>
+                                                    <span class="caption-subject bold uppercase"> Salewise PnL Report</span>
                                                 </div>
                                             </div>
                                             <div class="portlet-body">
