@@ -391,7 +391,8 @@ class PeticashController extends Controller
             $projectIds = ProjectSite::whereIn('id',$projectSiteIds)->pluck('project_id')->toArray();
             $clientIds = Project::whereIn('id',$projectIds)->pluck('client_id')->toArray();
             $clients = Client::whereIn('id',$clientIds)->where('is_active',true)->orderBy('id','asc')->get()->toArray();
-            return view('peticash.peticash-approval.manage-salary')->with(compact('clients'));
+            $txnTypes = PeticashTransactionType::whereIn('slug',['salary','advance'])->get(['id','name'])->toArray();
+            return view('peticash.peticash-approval.manage-salary')->with(compact('clients','txnTypes'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Peticash Request Salary Approval view',
@@ -621,6 +622,7 @@ class PeticashController extends Controller
             $emp_id = "";
             $emp_name = null;
             $status = 0;
+            $txnType = 0;
             $site_id = 0;
             $month = 0;
             $year = 0;
@@ -638,6 +640,12 @@ class PeticashController extends Controller
             if ($request->has('status')) {
                 $status = $request['status'];
             }
+
+            if ($request->has('txnType')) {
+                $txnType = $request['txnType'];
+            }
+
+
             if($request->has('postdata')) {
                 $postdata = $request['postdata'];
                 if($postdata != null) {
@@ -702,6 +710,13 @@ class PeticashController extends Controller
 
             if ($status != 0 && $filterFlag == true) {
                 $ids = PeticashRequestedSalaryTransaction::whereIn('id',$ids)->where('peticash_status_id', $status)->pluck('id');
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+            if ($txnType != 0 && $filterFlag == true) {
+                $ids = PeticashRequestedSalaryTransaction::whereIn('id',$ids)
+                        ->where('peticash_transaction_type_id', $txnType)->pluck('id');
                 if(count($ids) <= 0) {
                     $filterFlag = false;
                 }
@@ -785,9 +800,9 @@ class PeticashController extends Controller
                         $salaryTransactionData[$pagination]->employee->name,
                         $salaryTransactionData[$pagination]->paymentType->name,
                         $salaryTransactionData[$pagination]['amount'],
+                        ($salaryTransactionData[$pagination]['days'] != null) ? $salaryTransactionData[$pagination]['days'] : "-",
                         $salaryTransactionData[$pagination]->referenceUser->first_name.' '.$salaryTransactionData[$pagination]->referenceUser->last_name,
                         date('d M Y',strtotime($salaryTransactionData[$pagination]['created_at'])),
-                        $salaryTransactionData[$pagination]->projectSite->project->name,
                         $user_status,
                         $actionDropDown
                     ];
@@ -1580,8 +1595,6 @@ class PeticashController extends Controller
                 $peticashTransactionSlug = PeticashTransactionType::where('id',$request->employee[$employeeId]['payment_type'])->pluck('slug')->first();
                 if($peticashTransactionSlug == 'salary'){
                     $peticashRequestSalaryTransactionData['days'] = $request->employee[$employeeId]['days'];
-                    $peticashRequestSalaryTransactionData['amount'] = $request->employee[$employeeId]['amount'];
-                    $peticashRequestSalaryTransactionData['days'] = null;
                     $peticashRequestSalaryTransactionData['amount'] = $request->employee[$employeeId]['amount'];
                 }elseif($peticashTransactionSlug == 'advance'){
                     $peticashRequestSalaryTransactionData['days'] = null;

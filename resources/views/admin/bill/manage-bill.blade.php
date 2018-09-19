@@ -61,9 +61,8 @@
                                                 <tr>
                                                     <th> Sr no. </th>
                                                     <th> RA Bill number </th>
-                                                    <th> Bill Number </th>
-                                                    <th> Total round amount </th>
-                                                    <th> Total tax </th>
+                                                        <th> Subtotal </th>
+                                                    <th> Total Tax </th>
                                                     {{--@for($iterator = 0 ; $iterator < count($taxes); $iterator++)
                                                         <th> {!! $taxes[$iterator]['name'] !!} </th>
                                                     @endfor--}}
