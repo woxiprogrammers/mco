@@ -807,5 +807,4 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
     Route::group(['prefix' => 'notification'], function(){
         Route::post('store-fcm-token',array('uses' => 'Notification\NotificationController@storeFcmToken'));
     });
-
 });
