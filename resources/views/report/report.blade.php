@@ -53,8 +53,8 @@
                                                         </div>
                                                         <div class="col-md-4">
                                                             <select class="form-control" id="report_type" name="report_type" onchange="getData()">
-                                                                <option value="sitewise_sales_receipt_report">Sales & Receipt Report</option>
                                                                 <option value="sitewise_purchase_report">Purchase Report</option>
+                                                                <option value="sitewise_sales_receipt_report">Sales & Receipt Report</option>
                                                                 <option value="sitewise_salary_report">Salary Report</option>
                                                                 <option value="sitewise_mis_purchase_report">Mis. Purchase Report</option>
                                                             </select>
@@ -74,13 +74,25 @@
                                                             <span class="help-block"> Select date range </span>
                                                         </div>
                                                     </div>
-                                                    <div class="form-group row">
+                                                    <div class="form-group row" id="project_sites">
                                                         <div class="col-md-3" style="text-align: right">
                                                             <label>Select Project Site : </label>
                                                         </div>
                                                         <div class="col-md-4">
                                                             <select class="form-control" id="project_site_id" name="project_site_id" onchange="getData()">
                                                                 @foreach($projectSites as $projectSite)
+                                                                    <option value="{{$projectSite['id']}}">{{$projectSite['project_name']}} - {{$projectSite['name']}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row" id="bill_project_site" hidden>
+                                                        <div class="col-md-3" style="text-align: right">
+                                                            <label>Select Project Site : </label>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <select class="form-control" id="bill_project_site_id" name="bill_project_site_id" onchange="getData()">
+                                                                @foreach($billProjectSites as $projectSite)
                                                                     <option value="{{$projectSite['id']}}">{{$projectSite['project_name']}} - {{$projectSite['name']}}</option>
                                                                 @endforeach
                                                             </select>
@@ -120,6 +132,15 @@
     <script src="/assets/pages/scripts/components-select2.min.js" type="text/javascript"></script>
     <script>
         function getData(){
+            if($('#report_type').val() == 'sitewise_sales_receipt_report'){
+                $('#bill_project_site').show();
+                $('#project_sites').hide();
+                var projectSiteId = $('#bill_project_site_id').val();
+            }else{
+                $('#bill_project_site').hide();
+                $('#project_sites').show();
+                var projectSiteId = $('#project_site_id').val();
+            }
             $.ajax({
                 type : "POST",
                 url : "/reports/detail",
@@ -128,7 +149,7 @@
                     report_name : $('#report_type').val(),
                     start_date : $('#start_date').val(),
                     end_date : $('#end_date').val(),
-                    project_site_id : $('#project_site_id').val()
+                    project_site_id : projectSiteId,
                 },
                 success : function(data,textStatus,xhr){
                     $('.submitButton').hide();
@@ -144,6 +165,7 @@
                 getData();
             });
         }
+
     </script>
 
 @endsection

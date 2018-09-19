@@ -48,12 +48,24 @@ class ReportManagementController extends Controller{
     public function getView(Request $request) {
         try {
             $projectSite = new ProjectSite();
+            $quotation = new Quotation();
+            $bill = new Bill();
+            $billStatus = new BillStatus();
             $startDate = date('d/m/Y',strtotime(Carbon::now()->subDays(30)));
             $endDate = date('d/m/Y',strtotime(Carbon::now()));
             $projectSites = $projectSite->join('projects','projects.id','=','project_sites.project_id')
+                            ->orderBy('projects.name','asc')
                             ->select('project_sites.id','project_sites.name','projects.name as project_name')
                             ->get()->toArray();
-            return view('report.report')->with(compact('startDate','endDate','projectSites'));
+            $billIds = $bill->where('bill_status_id',$billStatus->where('slug','approved')->pluck('id')->first())->pluck('id');
+            $billProjectSites = $quotation->join('bills','quotations.id','=','bills.quotation_id')
+                ->join('project_sites','quotations.project_site_id','=','project_sites.id')
+                ->join('projects','projects.id','=','project_sites.project_id')
+                ->whereIn('bills.id',$billIds)
+                ->distinct('project_sites.id')
+                ->orderBy('projects.name','asc')
+                ->select('project_sites.id','project_sites.name','project_sites.address','projects.name as project_name')->get()->toArray();
+            return view('report.report')->with(compact('startDate','endDate','projectSites','billProjectSites'));
         } catch(\Exception $e) {
             $data = [
                 'action' => 'Get Report Management View',
@@ -168,14 +180,16 @@ class ReportManagementController extends Controller{
                         $iterator = 0;
                         $bill = new Bill();
                         $billStatus = new BillStatus();
-                        $cancelledBillStatusId = $billStatus->where('slug','cancelled')->pluck('id')->first();
+                        $approvedBillStatusId = $billStatus->where('slug','approved')->pluck('id')->first();
                         $billCreatedDate = $bill->join('quotations','quotations.id','=','bills.quotation_id')
                                         ->where('quotations.project_site_id',$globalProjectSiteId)
-                                        ->where('bills.bill_status_id','!=',$cancelledBillStatusId)
+                                        ->where('bills.bill_status_id',$approvedBillStatusId)
                                         ->orderBy('bills.created_at','asc')
                                         ->pluck('bills.created_at');
-                        $downloadButtonDetails[$iterator]['start_date'] = $billCreatedDate->last();
-                        $downloadButtonDetails[$iterator]['end_date'] = $billCreatedDate->first();
+                        if(count($billCreatedDate) > 0){
+                            $downloadButtonDetails[$iterator]['start_date'] = $billCreatedDate->last();
+                            $downloadButtonDetails[$iterator]['end_date'] = $billCreatedDate->first();
+                        }
                     break;
             }
 
@@ -787,8 +801,8 @@ class ReportManagementController extends Controller{
                 $quotation_id = $billInstance->where('id',$billQuotationProducts[$iterator]['bill_id'])->pluck('quotation_id')->first();
                 $discount = $quotationInstance->where('id',$quotation_id)->pluck('discount')->first();
                 $rate_per_unit = $quotationProductInstance->where('id',$billQuotationProducts[$iterator]['quotation_product_id'])->pluck('rate_per_unit')->first();
-                $billQuotationProducts[$iterator]['rate'] = MaterialProductHelper::customRound(($rate_per_unit - ($rate_per_unit * ($discount / 100))),3);
-                $billQuotationProducts[$iterator]['current_bill_subtotal'] = MaterialProductHelper::customRound(($billQuotationProducts[$iterator]['quantity'] * $billQuotationProducts[$iterator]['rate']),3);
+                $billQuotationProducts[$iterator]['rate'] = round(($rate_per_unit - ($rate_per_unit * ($discount / 100))),3);
+                $billQuotationProducts[$iterator]['current_bill_subtotal'] = round(($billQuotationProducts[$iterator]['quantity'] * $billQuotationProducts[$iterator]['rate']),3);
                 $billWithoutCancelStatus = $billInstance->where('id','<',$bill['id'])->where('bill_status_id','!=',$cancelBillStatusId)->pluck('id')->toArray();
                 $previousBills = $billQuotationProductInstance->whereIn('bill_id',$billWithoutCancelStatus)->get();
                 foreach($previousBills as $key => $previousBill){
@@ -796,8 +810,8 @@ class ReportManagementController extends Controller{
                         $billQuotationProducts[$iterator]['previous_quantity'] = $billQuotationProducts[$iterator]['previous_quantity'] +  $previousBill['quantity'];
                     }
                 }
-                $billQuotationProducts[$iterator]['cumulative_quantity'] = MaterialProductHelper::customRound(($billQuotationProducts[$iterator]['quantity'] + $billQuotationProducts[$iterator]['previous_quantity']),3);
-                $total['current_bill_subtotal'] = MaterialProductHelper::customRound(($total['current_bill_subtotal'] + $billQuotationProducts[$iterator]['current_bill_subtotal']),3);
+                $billQuotationProducts[$iterator]['cumulative_quantity'] = round(($billQuotationProducts[$iterator]['quantity'] + $billQuotationProducts[$iterator]['previous_quantity']),3);
+                $total['current_bill_subtotal'] = round(($total['current_bill_subtotal'] + $billQuotationProducts[$iterator]['current_bill_subtotal']),3);
             }
             $extraItems = $billQuotationExtraItemInstance->where('bill_id',$bill->id)->get();
             if(count($extraItems) > 0){
@@ -806,10 +820,10 @@ class ReportManagementController extends Controller{
                     $extraItem['previous_rate'] = $billQuotationExtraItemInstance->whereIn('bill_id',array_column($bills,'id'))->where('bill_id','!=',$bill->id)->where('quotation_extra_item_id',$extraItem->quotation_extra_item_id)->sum('rate');
                     $total_extra_item = $total_extra_item + $extraItem['rate'];
                 }
-                $total['current_bill_subtotal'] = MaterialProductHelper::customRound(($total['current_bill_subtotal'] + $total_extra_item),3);
+                $total['current_bill_subtotal'] = round(($total['current_bill_subtotal'] + $total_extra_item),3);
             }
-            $total_rounded['current_bill_subtotal'] = MaterialProductHelper::customRound($total['current_bill_subtotal']);
-            $final['current_bill_amount'] = $total_rounded['current_bill_amount'] =$total['current_bill_amount'] = MaterialProductHelper::customRound(($total['current_bill_subtotal'] - $bill['discount_amount']),3);
+            $total_rounded['current_bill_subtotal'] = round($total['current_bill_subtotal'],3);
+            $final['current_bill_amount'] = $total_rounded['current_bill_amount'] = $total['current_bill_amount'] = round(($total['current_bill_subtotal'] - $bill['discount_amount']),3);
             $billTaxes = $billTaxInstance->join('taxes','taxes.id','=','bill_taxes.tax_id')
                 ->where('bill_taxes.bill_id','=',$bill['id'])
                 ->where('taxes.is_special','=', false)
@@ -821,8 +835,8 @@ class ReportManagementController extends Controller{
             }
             for($j = 0 ; $j < count($billTaxes) ; $j++){
                 $taxes[$billTaxes[$j]['tax_id']] = $billTaxes[$j];
-                $taxes[$billTaxes[$j]['tax_id']]['current_bill_amount'] = MaterialProductHelper::customRound($total['current_bill_amount'] * ($taxes[$billTaxes[$j]['tax_id']]['percentage'] / 100) , 3);
-                $final['current_bill_amount'] = MaterialProductHelper::customRound(($final['current_bill_amount'] + $taxes[$billTaxes[$j]['tax_id']]['current_bill_amount']),3);
+                $taxes[$billTaxes[$j]['tax_id']]['current_bill_amount'] = round(($total['current_bill_amount'] * ($taxes[$billTaxes[$j]['tax_id']]['percentage'] / 100)) , 3);
+                $final['current_bill_amount'] = round(($final['current_bill_amount'] + $taxes[$billTaxes[$j]['tax_id']]['current_bill_amount']),3);
             }
             $specialTaxes= $billTaxInstance->join('taxes','taxes.id','=','bill_taxes.tax_id')
                 ->where('bill_taxes.bill_id','=',$bill['id'])
@@ -845,12 +859,13 @@ class ReportManagementController extends Controller{
                             $specialTaxAmount = $specialTaxAmount + ($taxes[$appliedOnTaxId]['current_bill_amount'] * ($specialTaxes[$j]['percentage'] / 100));
                         }
                     }
-                    $specialTaxes[$j]['current_bill_amount'] = MaterialProductHelper::customRound($specialTaxAmount , 3);
-                    $final['current_bill_gross_total_amount'] = round(($final['current_bill_amount'] + $specialTaxAmount));
+                    $specialTaxes[$j]['current_bill_amount'] = round($specialTaxAmount , 3);
+                    $final['current_bill_gross_total_amount'] = round(($final['current_bill_amount'] + $specialTaxAmount),3);
                 }
             }else{
-                $final['current_bill_gross_total_amount'] = round($final['current_bill_amount']);
+                $final['current_bill_gross_total_amount'] = round($final['current_bill_amount'],3);
             }
+            $billData['date'] = $bill['created_at'];
             $billData['basic_amount'] = $total_rounded['current_bill_amount'];
             $billData['total_amount_with_tax'] = $final['current_bill_gross_total_amount'];
             $billData['tax_amount'] = $final['current_bill_gross_total_amount'] - $total_rounded['current_bill_amount'];
