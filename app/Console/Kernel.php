@@ -2,6 +2,10 @@
 
 namespace App\Console;
 
+use App\Console\Commands\PeticashPurchaseTransactionMonthlyExpenseCalculations;
+use App\Console\Commands\PeticashSalaryTransactionMonthlyExpense;
+use App\Console\Commands\PeticashSalaryTransactionMonthlyExpenseCalculations;
+use App\Console\Commands\PurchaseOrderBillMonthlyExpenseCalculations;
 use App\Console\Commands\SendPurchaseOrderEmails;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -14,7 +18,10 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        SendPurchaseOrderEmails::class
+        SendPurchaseOrderEmails::class,
+        PurchaseOrderBillMonthlyExpenseCalculations::class,
+        PeticashSalaryTransactionMonthlyExpenseCalculations::class,
+        PeticashPurchaseTransactionMonthlyExpenseCalculations::class
     ];
 
     /**
@@ -25,10 +32,14 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+
         // $schedule->command('inspire')
         //          ->hourly();
         $schedule->command('custom:send-purchase-order-email')
                 ->everyFiveMinutes();
+        $schedule->command('custom:purchase-order-bill-monthly-expense-calculation')->dailyAt('23:00');
+        $schedule->command('custom:peticash-salary-transaction-monthly-expense-calculation')->dailyAt('23:00');
+        $schedule->command('custom:peticash-purchase-transaction-monthly-expense-calculation')->dailyAt('23:00');
     }
 
     /**
