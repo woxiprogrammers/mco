@@ -25,6 +25,7 @@ use App\PeticashTransactionType;
 use App\Product;
 use App\ProductDescription;
 use App\ProjectSite;
+use App\ProjectSiteAdvancePayment;
 use App\PurcahsePeticashTransaction;
 use App\PurchaseOrderBill;
 use App\PurchaseOrderBillMonthlyExpense;
@@ -184,8 +185,8 @@ class ReportManagementController extends Controller{
                         $billCreatedDate = $bill->join('quotations','quotations.id','=','bills.quotation_id')
                                         ->where('quotations.project_site_id',$globalProjectSiteId)
                                         ->where('bills.bill_status_id',$approvedBillStatusId)
-                                        ->orderBy('bills.created_at','asc')
-                                        ->pluck('bills.created_at');
+                                        ->orderBy('bills.date','asc')
+                                        ->pluck('bills.date');
                         if(count($billCreatedDate) > 0){
                             $downloadButtonDetails[$iterator]['start_date'] = $billCreatedDate->last();
                             $downloadButtonDetails[$iterator]['end_date'] = $billCreatedDate->first();
@@ -223,10 +224,9 @@ class ReportManagementController extends Controller{
             $companyHeader['gstin_number'] = env('GSTIN_NUMBER');
 
             $date = date('l, d F Y',strtotime($end_date)) .' - '. date('l, d F Y',strtotime($start_date));
-
             $startYearID = $year->where('slug',(int)date('Y',strtotime($start_date)))->pluck('id')->first();
             $endYearID = $year->where('slug',(int)date('Y',strtotime($end_date)))->pluck('id')->first();
-            $totalYears = $year->whereBetween('id',[$startYearID,$endYearID])->select('id','name')->get();
+            $totalYears = $year->whereBetween('id',[$startYearID,$endYearID])->select('id','name','slug')->get();
             $months = $month->get();
             $iterator = 1;
             $monthlyTotal[0]['month'] = 'Month-Year';
@@ -755,22 +755,10 @@ class ReportManagementController extends Controller{
                     $bill = new Bill();
                     $billStatus = new BillStatus();
                     $billTransaction = new BillTransaction();
-                    $peticashPurchaseTransactionMonthlyExpense = new PeticashPurchaseTransactionMonthlyExpense();
                     $data[$row] = array(
-                        'Bill Date', 'Bill No.', 'Basic Amount', 'GST', 'With Tax Amount', 'Transaction Amount', 'Mobilization', 'TDS', 'Retention',
+                        ' Bill Date : (Created Date)', 'Bill No.', 'Basic Amount', 'GST', 'With Tax Amount', 'Transaction Amount', 'Mobilization', 'TDS', 'Retention',
                         'Hold', 'Debit', 'Other Recovery', 'Payable', 'Receipt', 'Total Paid', 'Remaining', 'Monthly Total'
                     );
-                    foreach ($totalYears as $thisYear){
-                        foreach ($months as $month){
-                            $monthlyTotal[$iterator]['month'] = $month['name'].'-'.$thisYear['name'];
-                            $total = $peticashPurchaseTransactionMonthlyExpense->where('month_id',$month['id'])
-                                ->where('year_id',$thisYear['id'])
-                                ->where('project_site_id',$project_site_id)
-                                ->pluck('total_expense')->first();
-                            $monthlyTotal[$iterator]['total'] = ($total != null) ? $total : 0;
-                            $iterator++;
-                        }
-                    }
 
                     $projectName = $projectSite->join('projects','projects.id','=','project_sites.project_id')
                         ->where('project_sites.id',$project_site_id)->pluck('projects.name')->first();
@@ -779,6 +767,20 @@ class ReportManagementController extends Controller{
                     $totalBillData = $bill->where('quotation_id',$quotationId)
                                     ->whereIn('bill_status_id',array_column($statusId->toArray(),'id'))->orderBy('id')
                                     ->select('id','bill_status_id')->get();
+                    foreach ($totalYears as $thisYear){
+                        foreach ($months as $month){
+                            $monthlyTotal[$iterator]['month'] = $month['name'].'-'.$thisYear['name'];
+                            $billIds = $bill->where('quotation_id',$quotationId)
+                                ->whereIn('bill_status_id',array_column($statusId->toArray(),'id'))->orderBy('id')
+                                ->whereMonth('date',$month['id'])
+                                ->whereYear('date',$thisYear['slug'])
+                                ->pluck('id');
+                            $total = $billTransaction->whereIn('bill_id',$billIds)
+                                ->sum('total');
+                            $monthlyTotal[$iterator]['total'] = ($total != null) ? $total : 0;
+                            $iterator++;
+                        }
+                    }
                     $billNo = 1;
                     $row = 1;
                     $totalBasicAmount = $totalGst = $totalWithTaxAmount = $totalTransactionAmount = $totalMobilization = $totalTds =
@@ -790,7 +792,7 @@ class ReportManagementController extends Controller{
                             $thisMonth = (int)date('n',strtotime($billData['date']));
                             $billRow = $row;
                                 $data[$row]['make_bold'] = true;
-                                $data[$row]['date'] = date('d/n/Y',strtotime($billData['date']));
+                                $data[$row]['date'] = date('d/n/Y',strtotime($billData['date'])) .' : ('. date('d/n/Y',strtotime($billData['created_at'])) .')';
                                 $data[$row]['bill_no'] = $billName;
                                 $data[$row]['basic_amount'] = number_format($billData['basic_amount'], 3);
                                 $data[$row]['gst'] = number_format($billData['tax_amount'], 3);
@@ -801,7 +803,7 @@ class ReportManagementController extends Controller{
                                 $data[$row]['total_paid'] = 0;
                                 $totalBasicAmount += $billData['basic_amount']; $totalGst += $billData['tax_amount'];
                                 $totalWithTaxAmount += $billData['total_amount_with_tax']; $totalReceipt += $data[$row]['total_paid'];
-                                $billTransactionData = $billTransaction->where('bill_id',$thisBill['id'])->get();
+                                $billTransactionData = $billTransaction->where('bill_id',$thisBill['id'])->orderBy('created_at','asc')->get();
                                 if($row == 1){
                                     $newMonth = $thisMonth;
                                     $newMonthRow = $row;
@@ -836,7 +838,7 @@ class ReportManagementController extends Controller{
                                     $data[$row]['debit'] = number_format($billTransaction['debit'], 3);
                                     $data[$row]['other_recovery'] = number_format($billTransaction['other_recovery_value'], 3);
                                     $data[$row]['payable_amount'] = null;
-                                    $receipt = $billTransaction['amount'] - ($billTransaction['tds'] + $billTransaction['retention'] + $billTransaction['hold'] + $billTransaction['debit'] + $billTransaction['other_recovery']);
+                                    $receipt = $billTransaction['total'];
                                     $data[$row]['receipt'] = number_format($receipt, 3);
                                     $data[$row] = array_merge($data[$row],array_fill(14,3,null));
                                     $data[$billRow]['total_paid'] += $receipt;
@@ -868,15 +870,17 @@ class ReportManagementController extends Controller{
                         }
                     $data[$row]['make_bold'] = true;
                     $totalRow = array(
-                        'Total', null, number_format($totalBasicAmount), number_format($totalGst), number_format($totalWithTaxAmount), number_format($totalTransactionAmount)
-                            , number_format($totalMobilization), number_format($totalTds), number_format($totalRetention),number_format($totalHold),
-                        number_format($totalDebit),number_format($totalOtherRecovery), number_format($totalPayable), number_format($totalReceipt),
-                        number_format($totalPaid), number_format($totalRemaining), null
+                        'Total', null, number_format($totalBasicAmount,3), number_format($totalGst,3), number_format($totalWithTaxAmount,3), number_format($totalTransactionAmount,3)
+                            , number_format($totalMobilization,3), number_format($totalTds,3), number_format($totalRetention,3),number_format($totalHold,3),
+                        number_format($totalDebit,3),number_format($totalOtherRecovery,3), number_format($totalPayable,3), number_format($totalReceipt,3),
+                        number_format($totalPaid,3), number_format($totalRemaining,3), null
                     );
                     $data[$row] = array_merge($data[$row],$totalRow);
-                    Excel::create($reportType."_".$currentDate, function($excel) use($monthlyTotal, $data, $reportType, $header, $companyHeader, $date, $projectName) {
+                    $projectSiteAdvancePayment = new ProjectSiteAdvancePayment();
+                    $mobilizeAdvance = $projectSiteAdvancePayment->where('project_site_id',$project_site_id)->sum('amount');
+                    Excel::create($reportType."_".$currentDate, function($excel) use($monthlyTotal, $data, $reportType, $header, $companyHeader, $date, $projectName, $mobilizeAdvance) {
                         $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(10);
-                        $excel->sheet($reportType, function($sheet) use($monthlyTotal, $data, $header, $companyHeader, $date, $projectName) {
+                        $excel->sheet($reportType, function($sheet) use($monthlyTotal, $data, $header, $companyHeader, $date, $projectName, $mobilizeAdvance) {
                             $objDrawing = new \PHPExcel_Worksheet_Drawing();
                             $objDrawing->setPath(public_path('/assets/global/img/logo.jpg')); //your image path
                             $objDrawing->setWidthAndHeight(148,74);
@@ -959,10 +963,10 @@ class ReportManagementController extends Controller{
                                 $cell->setAlignment('center')->setValignment('center');
                                 $cell->setValue('Total Mobilization Given (Advance)')->setFontWeight('bold');
                             });
-                            $sheet->cell('C'.$row, function($cell) use($sheet,$row) {
+                            $sheet->cell('C'.$row, function($cell) use($sheet,$row, $mobilizeAdvance) {
                                 $sheet->getRowDimension($row)->setRowHeight(20);
                                 $cell->setAlignment('center')->setValignment('center');
-                                $cell->setValue(345)->setFontWeight('bold');
+                                $cell->setValue($mobilizeAdvance)->setFontWeight('bold');
                             });
                             $row++;
                             $headerRow = $row+1;
@@ -1092,7 +1096,8 @@ class ReportManagementController extends Controller{
             }else{
                 $final['current_bill_gross_total_amount'] = round($final['current_bill_amount'],3);
             }
-            $billData['date'] = $bill['created_at'];
+            $billData['date'] = $bill['date'];
+            $billData['created_at'] = $bill['created_at'];
             $billData['basic_amount'] = $total_rounded['current_bill_amount'];
             $billData['total_amount_with_tax'] = $final['current_bill_gross_total_amount'];
             $billData['tax_amount'] = $final['current_bill_gross_total_amount'] - $total_rounded['current_bill_amount'];
