@@ -728,6 +728,7 @@ class ReportManagementController extends Controller{
                                 }
                                 foreach($rowData as $key1 => $cellData){
                                     $current_column = $next_column++;
+
                                     $sheet->cell($current_column.($row), function($cell) use($cellData,$row,$sheet,$headerRow,$setColor) {
                                         $sheet->getRowDimension($row)->setRowHeight(20);
                                         if($row == $headerRow) {
@@ -749,23 +750,248 @@ class ReportManagementController extends Controller{
                     break;
 
                 case 'sitewise_sales_receipt_report':
+                    $projectSite = new ProjectSite();
+                    $quotation = new Quotation();
                     $bill = new Bill();
                     $billStatus = new BillStatus();
-                    $quotation = new Quotation();
+                    $billTransaction = new BillTransaction();
+                    $peticashPurchaseTransactionMonthlyExpense = new PeticashPurchaseTransactionMonthlyExpense();
+                    $data[$row] = array(
+                        'Bill Date', 'Bill No.', 'Basic Amount', 'GST', 'With Tax Amount', 'Transaction Amount', 'Mobilization', 'TDS', 'Retention',
+                        'Hold', 'Debit', 'Other Recovery', 'Payable', 'Receipt', 'Total Paid', 'Remaining', 'Monthly Total'
+                    );
+                    foreach ($totalYears as $thisYear){
+                        foreach ($months as $month){
+                            $monthlyTotal[$iterator]['month'] = $month['name'].'-'.$thisYear['name'];
+                            $total = $peticashPurchaseTransactionMonthlyExpense->where('month_id',$month['id'])
+                                ->where('year_id',$thisYear['id'])
+                                ->where('project_site_id',$project_site_id)
+                                ->pluck('total_expense')->first();
+                            $monthlyTotal[$iterator]['total'] = ($total != null) ? $total : 0;
+                            $iterator++;
+                        }
+                    }
+
+                    $projectName = $projectSite->join('projects','projects.id','=','project_sites.project_id')
+                        ->where('project_sites.id',$project_site_id)->pluck('projects.name')->first();
                     $quotationId = $quotation->where('project_site_id',$project_site_id)->pluck('id')->first();
                     $statusId = $billStatus->whereIn('slug',['approved','draft'])->get();
                     $totalBillData = $bill->where('quotation_id',$quotationId)
                                     ->whereIn('bill_status_id',array_column($statusId->toArray(),'id'))->orderBy('id')
                                     ->select('id','bill_status_id')->get();
                     $billNo = 1;
+                    $row = 1;
+                    $totalBasicAmount = $totalGst = $totalWithTaxAmount = $totalTransactionAmount = $totalMobilization = $totalTds =
+                    $totalRetention = $totalHold = $totalDebit = $totalOtherRecovery = $totalPayable = $totalReceipt = $totalPaid = $totalRemaining = 0;
                     foreach ($totalBillData as $thisBill){
-                            $billName = "R.A. ".$billNo;
-                            if($thisBill['bill_status_id'] == $statusId->where('slug','approved')->pluck('id')->first()){
-                                $billData = $this->getBillData($thisBill['id']);
-                                dd($billData);
+                        $billName = "R.A. ".$billNo;
+                        if($thisBill['bill_status_id'] == $statusId->where('slug','approved')->pluck('id')->first()){
+                            $billData = $this->getBillData($thisBill['id']);
+                            $thisMonth = (int)date('n',strtotime($billData['date']));
+                            $billRow = $row;
+                                $data[$row]['make_bold'] = true;
+                                $data[$row]['date'] = date('d/n/Y',strtotime($billData['date']));
+                                $data[$row]['bill_no'] = $billName;
+                                $data[$row]['basic_amount'] = number_format($billData['basic_amount'], 3);
+                                $data[$row]['gst'] = number_format($billData['tax_amount'], 3);
+                                $data[$row]['total_amount'] = number_format($billData['total_amount_with_tax'], 3);
+                                $data[$row] = array_merge($data[$row],array_fill(5,7,null));
+                                $data[$row]['payable'] = $billData['total_amount_with_tax'];
+                                $data[$row]['receipt'] = null;
+                                $data[$row]['total_paid'] = 0;
+                                $totalBasicAmount += $billData['basic_amount']; $totalGst += $billData['tax_amount'];
+                                $totalWithTaxAmount += $billData['total_amount_with_tax']; $totalReceipt += $data[$row]['total_paid'];
+                                $billTransactionData = $billTransaction->where('bill_id',$thisBill['id'])->get();
+                                if($row == 1){
+                                    $newMonth = $thisMonth;
+                                    $newMonthRow = $row;
+                                }else{
+                                    if($newMonth == $thisMonth){
+                                        $setMonthlyTotalData = false;
+                                    }else{
+                                        $newMonth = $thisMonth;
+                                        $newMonthRow = $row;
+                                        $setMonthlyTotalData = true;
+                                    }
+                                }
+                                $row++;
+
+                                $receiptCount = 1;
+                                foreach($billTransactionData as $key => $billTransaction){
+                                    $data[$row]['date'] = null;
+                                    $data[$row]['bill_no'] = 'Receipt '.$receiptCount;
+                                    $data[$row] = array_merge($data[$row],array_fill(2,3,null));
+                                    if($billTransaction['paid_from_advanced'] == true){
+                                        $data[$row]['transaction_amount'] = 0;
+                                        $data[$row]['mobilisation'] = number_format($billTransaction['amount'], 3);
+                                        $totalMobilization += $billTransaction['amount'];
+                                    }else{
+                                        $data[$row]['transaction_amount'] = number_format($billTransaction['amount'], 3);
+                                        $data[$row]['mobilisation'] = 0;
+                                        $totalTransactionAmount += $billTransaction['amount'];
+                                    }
+                                    $data[$row]['tds'] = number_format($billTransaction['tds_amount'], 3);
+                                    $data[$row]['retention'] = number_format($billTransaction['retention_amount'], 3);
+                                    $data[$row]['hold'] = number_format($billTransaction['hold'], 3);
+                                    $data[$row]['debit'] = number_format($billTransaction['debit'], 3);
+                                    $data[$row]['other_recovery'] = number_format($billTransaction['other_recovery_value'], 3);
+                                    $data[$row]['payable_amount'] = null;
+                                    $receipt = $billTransaction['amount'] - ($billTransaction['tds'] + $billTransaction['retention'] + $billTransaction['hold'] + $billTransaction['debit'] + $billTransaction['other_recovery']);
+                                    $data[$row]['receipt'] = number_format($receipt, 3);
+                                    $data[$row] = array_merge($data[$row],array_fill(14,3,null));
+                                    $data[$billRow]['total_paid'] += $receipt;
+                                    $row++;$receiptCount++;
+                                    $totalTds += $billTransaction['tds_amount']; $totalRetention += $billTransaction['retention_amount'];
+                                    $totalHold += $billTransaction['hold']; $totalDebit += $billTransaction['debit'];
+                                    $totalOtherRecovery += $billTransaction['other_recovery_value'];
+                                    $totalReceipt += $receipt;
+                                }
+                                $data[$row] = array_fill(0,17,null);
+                                $row++;
+                                $paidAmount = $data[$billRow ]['total_paid'];
+                                $data[$billRow]['remaining'] = $data[$billRow]['payable'] - $data[$billRow ]['total_paid'];
+                                $totalPaid += $data[$billRow]['total_paid'];
+                                $totalPayable += $data[$billRow]['payable'];
+                                $totalRemaining += $data[$billRow]['remaining'];
+                                $data[$billRow]['remaining'] = number_format($data[$billRow]['remaining'], 3);
+                                $data[$billRow]['payable'] = number_format($data[$billRow]['payable'], 3);
+                                $data[$billRow]['total_paid'] = number_format($data[$billRow]['total_paid'], 3);
+                                if($billRow == 1 || $setMonthlyTotalData){
+                                    $data[$billRow]['monthly_total'] = $paidAmount;
+                                }elseif($setMonthlyTotalData == false){
+                                    $data[$newMonthRow]['monthly_total'] += $paidAmount;
+                                    $data[$billRow]['monthly_total'] = null;
+                                }
                             }
                             $billNo++;
+
                         }
+                    $data[$row]['make_bold'] = true;
+                    $totalRow = array(
+                        'Total', null, number_format($totalBasicAmount), number_format($totalGst), number_format($totalWithTaxAmount), number_format($totalTransactionAmount)
+                            , number_format($totalMobilization), number_format($totalTds), number_format($totalRetention),number_format($totalHold),
+                        number_format($totalDebit),number_format($totalOtherRecovery), number_format($totalPayable), number_format($totalReceipt),
+                        number_format($totalPaid), number_format($totalRemaining), null
+                    );
+                    $data[$row] = array_merge($data[$row],$totalRow);
+                    Excel::create($reportType."_".$currentDate, function($excel) use($monthlyTotal, $data, $reportType, $header, $companyHeader, $date, $projectName) {
+                        $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(10);
+                        $excel->sheet($reportType, function($sheet) use($monthlyTotal, $data, $header, $companyHeader, $date, $projectName) {
+                            $objDrawing = new \PHPExcel_Worksheet_Drawing();
+                            $objDrawing->setPath(public_path('/assets/global/img/logo.jpg')); //your image path
+                            $objDrawing->setWidthAndHeight(148,74);
+                            $objDrawing->setResizeProportional(true);
+                            $objDrawing->setCoordinates('A1');
+                            $objDrawing->setWorksheet($sheet);
+
+                            $sheet->mergeCells('A2:H2');
+                            $sheet->cell('A2', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['company_name']);
+                            });
+
+                            $sheet->mergeCells('A3:H3');
+                            $sheet->cell('A3', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['designation']);
+                            });
+
+                            $sheet->mergeCells('A4:H4');
+                            $sheet->cell('A4', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['address']);
+                            });
+
+                            $sheet->mergeCells('A5:H5');
+                            $sheet->cell('A5', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['contact_no']);
+                            });
+
+                            $sheet->mergeCells('A6:H6');
+                            $sheet->cell('A6', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['gstin_number']);
+                            });
+
+                            $sheet->mergeCells('A7:H7');
+                            $sheet->cell('A7', function($cell) use ($projectName){
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue('Purchase Bill Report - '.$projectName);
+                            });
+
+                            $sheet->mergeCells('A8:H8');
+                            $sheet->cell('A8', function($cell) use($date) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($date);
+                            });
+                            $row = 10;
+                            $monthHeaderRow =  $row+1;
+                            foreach($monthlyTotal as $key => $rowData){
+                                $next_column = 'A';
+                                $row++;
+                                foreach($rowData as $key1 => $cellData){
+                                    $current_column = $next_column++;
+                                    $sheet->getRowDimension($row)->setRowHeight(20);
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData,$row,$monthHeaderRow) {
+                                        if($row == $monthHeaderRow){
+                                            $cell->setFontWeight('bold');
+                                        }
+                                        $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                                        $cell->setAlignment('center')->setValignment('center');
+                                        $cell->setValue($cellData);
+                                    });
+
+                                }
+                            }
+                            $row++; $row++;
+
+                            $sheet->mergeCells('A'.$row.':'.'B'.$row);
+                            $sheet->cell('A'.$row, function($cell) use($sheet,$row) {
+                                $sheet->getRowDimension($row)->setRowHeight(20);
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue('Total Mobilization Given (Advance)')->setFontWeight('bold');
+                            });
+                            $sheet->cell('C'.$row, function($cell) use($sheet,$row) {
+                                $sheet->getRowDimension($row)->setRowHeight(20);
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue(345)->setFontWeight('bold');
+                            });
+                            $row++;
+                            $headerRow = $row+1;
+                            foreach($data as $key => $rowData){
+                                $next_column = 'A';
+                                $row++;
+                                if(array_key_exists('make_bold',$rowData)){
+                                    $setBold = true;
+                                    unset($rowData['make_bold']);
+                                }else{
+                                    $setBold = false;
+                                }
+                                foreach($rowData as $key1 => $cellData){
+                                    $current_column = $next_column++;
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData,$row,$sheet,$headerRow,$setBold,$current_column) {
+                                        $sheet->getRowDimension($row)->setRowHeight(20);
+                                        ($row == $headerRow || $setBold) ? $cell->setFontWeight('bold') : null;
+                                        ($current_column == 'N') ? $cell->setBackground('#d7f442') : null;
+                                        ($current_column == 'P') ? $cell->setFontColor('#d82517') : null;
+                                        $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                                        $cell->setAlignment('center')->setValignment('center');
+                                        $cell->setValue($cellData);
+
+                                    });
+                                }
+                            }
+
+                        });
+                    })->export('xls');
                     break;
 
                 default :

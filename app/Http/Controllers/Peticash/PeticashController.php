@@ -1581,8 +1581,6 @@ class PeticashController extends Controller
                 if($peticashTransactionSlug == 'salary'){
                     $peticashRequestSalaryTransactionData['days'] = $request->employee[$employeeId]['days'];
                     $peticashRequestSalaryTransactionData['amount'] = $request->employee[$employeeId]['amount'];
-                    $peticashRequestSalaryTransactionData['days'] = null;
-                    $peticashRequestSalaryTransactionData['amount'] = $request->employee[$employeeId]['amount'];
                 }elseif($peticashTransactionSlug == 'advance'){
                     $peticashRequestSalaryTransactionData['days'] = null;
                     $peticashRequestSalaryTransactionData['amount'] = $request->employee[$employeeId]['amount'];
