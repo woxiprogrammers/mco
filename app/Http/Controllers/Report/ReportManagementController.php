@@ -19,6 +19,8 @@ use App\ProjectSite;
 use App\PurcahsePeticashTransaction;
 use App\PurchaseOrderBill;
 use App\PurchaseOrderBillMonthlyExpense;
+use App\Subcontractor;
+use App\SubcontractorBillStatus;
 use App\Year;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -36,12 +38,20 @@ class ReportManagementController extends Controller{
     public function getView(Request $request) {
         try {
             $projectSite = new ProjectSite();
+            $subcontractor = new Subcontractor();
+            $subcontractorBillStatus = new SubcontractorBillStatus();
             $startDate = date('d/m/Y',strtotime(Carbon::now()->subDays(30)));
             $endDate = date('d/m/Y',strtotime(Carbon::now()));
             $projectSites = $projectSite->join('projects','projects.id','=','project_sites.project_id')
                             ->select('project_sites.id','project_sites.name','projects.name as project_name')
                             ->get()->toArray();
-            return view('report.report')->with(compact('startDate','endDate','projectSites'));
+            $approvedBillStatusId = $subcontractorBillStatus->where('slug','approved')->pluck('id');
+            $subcontractorData = $subcontractor->join('subcontractor_structure','subcontractor_structure.subcontractor_id','=','subcontractor.id')
+                                ->join('subcontractor_bills','subcontractor_bills.sc_structure_id','=','subcontractor_structure.id')
+                                ->where('subcontractor_bills.subcontractor_bill_status_id',$approvedBillStatusId)
+                                ->distinct('subcontractor.id')
+                                ->select('subcontractor.id','subcontractor.company_name')->get();
+            return view('report.report')->with(compact('startDate','endDate','projectSites','subcontractorData'));
         } catch(\Exception $e) {
             $data = [
                 'action' => 'Get Report Management View',

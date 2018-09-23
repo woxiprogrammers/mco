@@ -85,6 +85,18 @@
                                                             </select>
                                                         </div>
                                                     </div>
+                                                    <div class="form-group row">
+                                                        <div class="col-md-3" style="text-align: right">
+                                                            <label>Select Subcontractors : </label>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <select class="form-control" id="subcontractor" name="subcontractor_id" onchange="getData()">
+                                                                @foreach($subcontractorData as $subcontractor)
+                                                                    <option value="{{$subcontractor['id']}}">{{$subcontractor['company_name']}} - {{$projectSite['name']}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    </div>
                                                 <div class="form-actions noborder row submitButton">
                                                     <div class="col-md-offset-3" style="margin-left: 26%">
                                                         <button {{--type="submit"--}} class="btn red" onclick="getData()"><i class="fa fa-check"></i> Submit</button>
