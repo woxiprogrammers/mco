@@ -30,9 +30,11 @@ use App\PurcahsePeticashTransaction;
 use App\PurchaseOrderBill;
 use App\PurchaseOrderBillMonthlyExpense;
 use App\Subcontractor;
+use App\SubcontractorBill;
 use App\SubcontractorBillStatus;
 use App\Quotation;
 use App\QuotationProduct;
+use App\SubcontractorStructure;
 use App\Unit;
 use App\Year;
 use Carbon\Carbon;
@@ -62,13 +64,6 @@ class ReportManagementController extends Controller{
                             ->orderBy('projects.name','asc')
                             ->select('project_sites.id','project_sites.name','projects.name as project_name')
                             ->get()->toArray();
-            $approvedBillStatusId = $subcontractorBillStatus->where('slug','approved')->pluck('id');
-            $subcontractorData = $subcontractor->join('subcontractor_structure','subcontractor_structure.subcontractor_id','=','subcontractor.id')
-                                ->join('subcontractor_bills','subcontractor_bills.sc_structure_id','=','subcontractor_structure.id')
-                                ->where('subcontractor_bills.subcontractor_bill_status_id',$approvedBillStatusId)
-                                ->distinct('subcontractor.id')
-                                ->select('subcontractor.id','subcontractor.company_name')->get();
-            return view('report.report')->with(compact('startDate','endDate','projectSites','subcontractorData'));
             $billIds = $bill->where('bill_status_id',$billStatus->where('slug','approved')->pluck('id')->first())->pluck('id');
             $billProjectSites = $quotation->join('bills','quotations.id','=','bills.quotation_id')
                 ->join('project_sites','quotations.project_site_id','=','project_sites.id')
@@ -77,7 +72,15 @@ class ReportManagementController extends Controller{
                 ->distinct('project_sites.id')
                 ->orderBy('projects.name','asc')
                 ->select('project_sites.id','project_sites.name','project_sites.address','projects.name as project_name')->get()->toArray();
-            return view('report.report')->with(compact('startDate','endDate','projectSites','billProjectSites'));
+            $approvedBillStatusId = $subcontractorBillStatus->where('slug','approved')->pluck('id');
+            $subcontractorData = $subcontractor->join('subcontractor_structure','subcontractor_structure.subcontractor_id','=','subcontractor.id')
+                                ->join('subcontractor_bills','subcontractor_bills.sc_structure_id','=','subcontractor_structure.id')
+                                ->where('subcontractor_bills.subcontractor_bill_status_id',$approvedBillStatusId)
+                                ->distinct('subcontractor.id')
+                                ->orderBy('subcontractor.subcontractor_name','asc')
+                                ->select('subcontractor.id','subcontractor.subcontractor_name')->get();
+            return view('report.report')->with(compact('startDate','endDate','projectSites','billProjectSites','subcontractorData'));
+
         } catch(\Exception $e) {
             $data = [
                 'action' => 'Get Report Management View',
@@ -203,11 +206,29 @@ class ReportManagementController extends Controller{
                             $downloadButtonDetails[$iterator]['end_date'] = $billCreatedDate->first();
                         }
                     break;
-            }
 
+                case 'sitewise_subcontractor_report' :
+                    $iterator = 0;
+                    $bill = new Bill();
+                    $billStatus = new BillStatus();
+                    $subcontractor = new Subcontractor();
+                    $subcontractorBill = new SubcontractorBill();
+
+                    $billCreatedDate = $subcontractorBill->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
+                            ->where('subcontractor_structure.project_site_id',$globalProjectSiteId)
+                            ->where('subcontractor_structure.subcontractor_id',$request['subcontractor_id'])
+                            ->orderBy('subcontractor_bills.created_at','asc')
+                            ->pluck('subcontractor_bills.created_at');
+                    if(count($billCreatedDate) > 0){
+                        $downloadButtonDetails[$iterator]['start_date'] = $billCreatedDate->last();
+                        $downloadButtonDetails[$iterator]['end_date'] = $billCreatedDate->first();
+                    }
+                    break;
+            }
+            $subcontractorId = $request['subcontractor_id'];
             $reportType = $request['report_name'];
             $project_site_id = $request['project_site_id'];
-            return view('report.manage')->with(compact('noOfButtons','reportType','project_site_id','downloadButtonDetails'));
+            return view('report.manage')->with(compact('noOfButtons','reportType','project_site_id','downloadButtonDetails','subcontractorId'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Button Detail Report',
@@ -219,7 +240,7 @@ class ReportManagementController extends Controller{
         }
     }
 
-    public function downloadDetailReport(Request $request,$reportType,$project_site_id,$start_date,$end_date) {
+    public function downloadDetailReport(Request $request,$reportType,$project_site_id,$start_date,$end_date,$subcontractorId) {
         try{
             $year = new Year();
             $month = new Month();
@@ -1008,6 +1029,147 @@ class ReportManagementController extends Controller{
                         });
                     })->export('xls');
                     break;
+
+                case 'sitewise_subcontractor_report':
+                    $projectSite = new ProjectSite();
+                    $quotation = new Quotation();
+                    $bill = new Bill();
+                    $billStatus = new BillStatus();
+                    $billTransaction = new BillTransaction();
+                    $data[$row] = array(
+                        ' Bill Date : (Created Date)', 'Bill No.', 'Basic Amount', 'GST', 'With Tax Amount', 'Transaction Amount', 'Mobilization', 'TDS', 'Retention',
+                        'Hold', 'Debit', 'Other Recovery', 'Payable', 'Receipt', 'Total Paid', 'Remaining', 'Monthly Total'
+                    );
+                    //$subcontractorId
+                    $projectName = $projectSite->join('projects','projects.id','=','project_sites.project_id')
+                        ->where('project_sites.id',$project_site_id)->pluck('projects.name')->first();
+                    $quotationId = $quotation->where('project_site_id',$project_site_id)->pluck('id')->first();
+                    $statusId = $billStatus->whereIn('slug',['approved','draft'])->get();
+                    $totalBillData = $bill->where('quotation_id',$quotationId)
+                        ->whereIn('bill_status_id',array_column($statusId->toArray(),'id'))->orderBy('id')
+                        ->select('id','bill_status_id')->get();
+                    foreach ($totalYears as $thisYear){
+                        foreach ($months as $month){
+                            $monthlyTotal[$iterator]['month'] = $month['name'].'-'.$thisYear['name'];
+                            $billIds = $bill->where('quotation_id',$quotationId)
+                                ->whereIn('bill_status_id',array_column($statusId->toArray(),'id'))->orderBy('id')
+                                ->whereMonth('date',$month['id'])
+                                ->whereYear('date',$thisYear['slug'])
+                                ->pluck('id');
+                            $total = $billTransaction->whereIn('bill_id',$billIds)
+                                ->sum('total');
+                            $monthlyTotal[$iterator]['total'] = ($total != null) ? $total : 0;
+                            $iterator++;
+                        }
+                    }
+                    $subcontractor = new Subcontractor();
+                    $subcontractorStructure = new SubcontractorStructure();
+                    $subcontractorBill = new SubcontractorBill();
+                    $subcontractorStructureIds = $subcontractorStructure->where('subcontractor_id',$subcontractorId)
+                                                    ->where('project_site_id',$project_site_id)
+                                                    ->pluck('id');
+                    dd($subcontractorStructureIds);
+                    $billNo = 1;
+                    $row = 1;
+                    $totalBasicAmount = $totalGst = $totalWithTaxAmount = $totalTransactionAmount = $totalMobilization = $totalTds =
+                    $totalRetention = $totalHold = $totalDebit = $totalOtherRecovery = $totalPayable = $totalReceipt = $totalPaid = $totalRemaining = 0;
+
+                    foreach ($subcontractorStructureIds as $subcontractorStructureId){
+                        $subcontractorBillData = $subcontractorBill->where('sc_structure_id',$subcontractorStructureId)->get();
+                        //foreach ($sub)
+                    }
+
+                    foreach ($totalBillData as $thisBill){
+                        $billName = "R.A. ".$billNo;
+                        if($thisBill['bill_status_id'] == $statusId->where('slug','approved')->pluck('id')->first()){
+                            $billData = $this->getBillData($thisBill['id']);
+                            $thisMonth = (int)date('n',strtotime($billData['date']));
+                            $billRow = $row;
+                            $data[$row]['make_bold'] = true;
+                            $data[$row]['date'] = date('d/n/Y',strtotime($billData['date'])) .' : ('. date('d/n/Y',strtotime($billData['created_at'])) .')';
+                            $data[$row]['bill_no'] = $billName;
+                            $data[$row]['basic_amount'] = number_format($billData['basic_amount'], 3);
+                            $data[$row]['gst'] = number_format($billData['tax_amount'], 3);
+                            $data[$row]['total_amount'] = number_format($billData['total_amount_with_tax'], 3);
+                            $data[$row] = array_merge($data[$row],array_fill(5,7,null));
+                            $data[$row]['payable'] = $billData['total_amount_with_tax'];
+                            $data[$row]['receipt'] = null;
+                            $data[$row]['total_paid'] = 0;
+                            $totalBasicAmount += $billData['basic_amount']; $totalGst += $billData['tax_amount'];
+                            $totalWithTaxAmount += $billData['total_amount_with_tax']; $totalReceipt += $data[$row]['total_paid'];
+                            $billTransactionData = $billTransaction->where('bill_id',$thisBill['id'])->orderBy('created_at','asc')->get();
+                            if($row == 1){
+                                $newMonth = $thisMonth;
+                                $newMonthRow = $row;
+                            }else{
+                                if($newMonth == $thisMonth){
+                                    $setMonthlyTotalData = false;
+                                }else{
+                                    $newMonth = $thisMonth;
+                                    $newMonthRow = $row;
+                                    $setMonthlyTotalData = true;
+                                }
+                            }
+                            $row++;
+
+                            $receiptCount = 1;
+                            foreach($billTransactionData as $key => $billTransaction){
+                                $data[$row]['date'] = null;
+                                $data[$row]['bill_no'] = 'Receipt '.$receiptCount;
+                                $data[$row] = array_merge($data[$row],array_fill(2,3,null));
+                                if($billTransaction['paid_from_advanced'] == true){
+                                    $data[$row]['transaction_amount'] = 0;
+                                    $data[$row]['mobilisation'] = number_format($billTransaction['amount'], 3);
+                                    $totalMobilization += $billTransaction['amount'];
+                                }else{
+                                    $data[$row]['transaction_amount'] = number_format($billTransaction['amount'], 3);
+                                    $data[$row]['mobilisation'] = 0;
+                                    $totalTransactionAmount += $billTransaction['amount'];
+                                }
+                                $data[$row]['tds'] = number_format($billTransaction['tds_amount'], 3);
+                                $data[$row]['retention'] = number_format($billTransaction['retention_amount'], 3);
+                                $data[$row]['hold'] = number_format($billTransaction['hold'], 3);
+                                $data[$row]['debit'] = number_format($billTransaction['debit'], 3);
+                                $data[$row]['other_recovery'] = number_format($billTransaction['other_recovery_value'], 3);
+                                $data[$row]['payable_amount'] = null;
+                                $receipt = $billTransaction['total'];
+                                $data[$row]['receipt'] = number_format($receipt, 3);
+                                $data[$row] = array_merge($data[$row],array_fill(14,3,null));
+                                $data[$billRow]['total_paid'] += $receipt;
+                                $row++;$receiptCount++;
+                                $totalTds += $billTransaction['tds_amount']; $totalRetention += $billTransaction['retention_amount'];
+                                $totalHold += $billTransaction['hold']; $totalDebit += $billTransaction['debit'];
+                                $totalOtherRecovery += $billTransaction['other_recovery_value'];
+                                $totalReceipt += $receipt;
+                            }
+                            $data[$row] = array_fill(0,17,null);
+                            $row++;
+                            $paidAmount = $data[$billRow ]['total_paid'];
+                            $data[$billRow]['remaining'] = $data[$billRow]['payable'] - $data[$billRow ]['total_paid'];
+                            $totalPaid += $data[$billRow]['total_paid'];
+                            $totalPayable += $data[$billRow]['payable'];
+                            $totalRemaining += $data[$billRow]['remaining'];
+                            $data[$billRow]['remaining'] = number_format($data[$billRow]['remaining'], 3);
+                            $data[$billRow]['payable'] = number_format($data[$billRow]['payable'], 3);
+                            $data[$billRow]['total_paid'] = number_format($data[$billRow]['total_paid'], 3);
+                            if($billRow == 1 || $setMonthlyTotalData){
+                                $data[$billRow]['monthly_total'] = $paidAmount;
+                            }elseif($setMonthlyTotalData == false){
+                                $data[$newMonthRow]['monthly_total'] += $paidAmount;
+                                $data[$billRow]['monthly_total'] = null;
+                            }
+                        }
+                        $billNo++;
+
+                    }
+                    $data[$row]['make_bold'] = true;
+                    $totalRow = array(
+                        'Total', null, number_format($totalBasicAmount,3), number_format($totalGst,3), number_format($totalWithTaxAmount,3), number_format($totalTransactionAmount,3)
+                    , number_format($totalMobilization,3), number_format($totalTds,3), number_format($totalRetention,3),number_format($totalHold,3),
+                        number_format($totalDebit,3),number_format($totalOtherRecovery,3), number_format($totalPayable,3), number_format($totalReceipt,3),
+                        number_format($totalPaid,3), number_format($totalRemaining,3), null
+                    );
+                    $data[$row] = array_merge($data[$row],$totalRow);
 
                 default :
                     break;

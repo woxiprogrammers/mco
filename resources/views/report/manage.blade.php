@@ -27,7 +27,7 @@
                         @endif
                         <div class="btn-group">
                             <div class="btn blue">
-                                <a href="javascript:window.open('/reports/get-report/{{$reportType}}/{{$project_site_id}}/{{$downloadButton['start_date']}}/{{$downloadButton['end_date']}}');" style="color: white"> Download
+                                <a href="javascript:window.open('/reports/get-report/{{$reportType}}/{{$project_site_id}}/{{$downloadButton['start_date']}}/{{$downloadButton['end_date']}}/{{$subcontractorId}}');" style="color: white"> Download
                                     <i class="fa fa-download"></i>
                                 </a>
                             </div>
