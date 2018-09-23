@@ -9,18 +9,31 @@
 namespace App\Http\Controllers\Report;
 
 
+use App\Bill;
+use App\BillQuotationExtraItem;
+use App\BillQuotationProducts;
+use App\BillStatus;
+use App\BillTax;
+use App\BillTransaction;
+use App\Helper\MaterialProductHelper;
 use App\Http\Controllers\Controller;
 use App\Month;
 use App\PeticashPurchaseTransactionMonthlyExpense;
 use App\PeticashSalaryTransaction;
 use App\PeticashSalaryTransactionMonthlyExpense;
 use App\PeticashTransactionType;
+use App\Product;
+use App\ProductDescription;
 use App\ProjectSite;
+use App\ProjectSiteAdvancePayment;
 use App\PurcahsePeticashTransaction;
 use App\PurchaseOrderBill;
 use App\PurchaseOrderBillMonthlyExpense;
 use App\Subcontractor;
 use App\SubcontractorBillStatus;
+use App\Quotation;
+use App\QuotationProduct;
+use App\Unit;
 use App\Year;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -40,9 +53,13 @@ class ReportManagementController extends Controller{
             $projectSite = new ProjectSite();
             $subcontractor = new Subcontractor();
             $subcontractorBillStatus = new SubcontractorBillStatus();
+            $quotation = new Quotation();
+            $bill = new Bill();
+            $billStatus = new BillStatus();
             $startDate = date('d/m/Y',strtotime(Carbon::now()->subDays(30)));
             $endDate = date('d/m/Y',strtotime(Carbon::now()));
             $projectSites = $projectSite->join('projects','projects.id','=','project_sites.project_id')
+                            ->orderBy('projects.name','asc')
                             ->select('project_sites.id','project_sites.name','projects.name as project_name')
                             ->get()->toArray();
             $approvedBillStatusId = $subcontractorBillStatus->where('slug','approved')->pluck('id');
@@ -52,6 +69,15 @@ class ReportManagementController extends Controller{
                                 ->distinct('subcontractor.id')
                                 ->select('subcontractor.id','subcontractor.company_name')->get();
             return view('report.report')->with(compact('startDate','endDate','projectSites','subcontractorData'));
+            $billIds = $bill->where('bill_status_id',$billStatus->where('slug','approved')->pluck('id')->first())->pluck('id');
+            $billProjectSites = $quotation->join('bills','quotations.id','=','bills.quotation_id')
+                ->join('project_sites','quotations.project_site_id','=','project_sites.id')
+                ->join('projects','projects.id','=','project_sites.project_id')
+                ->whereIn('bills.id',$billIds)
+                ->distinct('project_sites.id')
+                ->orderBy('projects.name','asc')
+                ->select('project_sites.id','project_sites.name','project_sites.address','projects.name as project_name')->get()->toArray();
+            return view('report.report')->with(compact('startDate','endDate','projectSites','billProjectSites'));
         } catch(\Exception $e) {
             $data = [
                 'action' => 'Get Report Management View',
@@ -161,6 +187,22 @@ class ReportManagementController extends Controller{
                         $endLimit = $endLimit + $reportLimit;
                     }
                     break;
+
+                case 'sitewise_sales_receipt_report' :
+                        $iterator = 0;
+                        $bill = new Bill();
+                        $billStatus = new BillStatus();
+                        $approvedBillStatusId = $billStatus->where('slug','approved')->pluck('id')->first();
+                        $billCreatedDate = $bill->join('quotations','quotations.id','=','bills.quotation_id')
+                                        ->where('quotations.project_site_id',$globalProjectSiteId)
+                                        ->where('bills.bill_status_id',$approvedBillStatusId)
+                                        ->orderBy('bills.date','asc')
+                                        ->pluck('bills.date');
+                        if(count($billCreatedDate) > 0){
+                            $downloadButtonDetails[$iterator]['start_date'] = $billCreatedDate->last();
+                            $downloadButtonDetails[$iterator]['end_date'] = $billCreatedDate->first();
+                        }
+                    break;
             }
 
             $reportType = $request['report_name'];
@@ -193,10 +235,9 @@ class ReportManagementController extends Controller{
             $companyHeader['gstin_number'] = env('GSTIN_NUMBER');
 
             $date = date('l, d F Y',strtotime($end_date)) .' - '. date('l, d F Y',strtotime($start_date));
-
             $startYearID = $year->where('slug',(int)date('Y',strtotime($start_date)))->pluck('id')->first();
             $endYearID = $year->where('slug',(int)date('Y',strtotime($end_date)))->pluck('id')->first();
-            $totalYears = $year->whereBetween('id',[$startYearID,$endYearID])->select('id','name')->get();
+            $totalYears = $year->whereBetween('id',[$startYearID,$endYearID])->select('id','name','slug')->get();
             $months = $month->get();
             $iterator = 1;
             $monthlyTotal[0]['month'] = 'Month-Year';
@@ -698,6 +739,7 @@ class ReportManagementController extends Controller{
                                 }
                                 foreach($rowData as $key1 => $cellData){
                                     $current_column = $next_column++;
+
                                     $sheet->cell($current_column.($row), function($cell) use($cellData,$row,$sheet,$headerRow,$setColor) {
                                         $sheet->getRowDimension($row)->setRowHeight(20);
                                         if($row == $headerRow) {
@@ -718,6 +760,255 @@ class ReportManagementController extends Controller{
 
                     break;
 
+                case 'sitewise_sales_receipt_report':
+                    $projectSite = new ProjectSite();
+                    $quotation = new Quotation();
+                    $bill = new Bill();
+                    $billStatus = new BillStatus();
+                    $billTransaction = new BillTransaction();
+                    $data[$row] = array(
+                        ' Bill Date : (Created Date)', 'Bill No.', 'Basic Amount', 'GST', 'With Tax Amount', 'Transaction Amount', 'Mobilization', 'TDS', 'Retention',
+                        'Hold', 'Debit', 'Other Recovery', 'Payable', 'Receipt', 'Total Paid', 'Remaining', 'Monthly Total'
+                    );
+
+                    $projectName = $projectSite->join('projects','projects.id','=','project_sites.project_id')
+                        ->where('project_sites.id',$project_site_id)->pluck('projects.name')->first();
+                    $quotationId = $quotation->where('project_site_id',$project_site_id)->pluck('id')->first();
+                    $statusId = $billStatus->whereIn('slug',['approved','draft'])->get();
+                    $totalBillData = $bill->where('quotation_id',$quotationId)
+                                    ->whereIn('bill_status_id',array_column($statusId->toArray(),'id'))->orderBy('id')
+                                    ->select('id','bill_status_id')->get();
+                    foreach ($totalYears as $thisYear){
+                        foreach ($months as $month){
+                            $monthlyTotal[$iterator]['month'] = $month['name'].'-'.$thisYear['name'];
+                            $billIds = $bill->where('quotation_id',$quotationId)
+                                ->whereIn('bill_status_id',array_column($statusId->toArray(),'id'))->orderBy('id')
+                                ->whereMonth('date',$month['id'])
+                                ->whereYear('date',$thisYear['slug'])
+                                ->pluck('id');
+                            $total = $billTransaction->whereIn('bill_id',$billIds)
+                                ->sum('total');
+                            $monthlyTotal[$iterator]['total'] = ($total != null) ? $total : 0;
+                            $iterator++;
+                        }
+                    }
+                    $billNo = 1;
+                    $row = 1;
+                    $totalBasicAmount = $totalGst = $totalWithTaxAmount = $totalTransactionAmount = $totalMobilization = $totalTds =
+                    $totalRetention = $totalHold = $totalDebit = $totalOtherRecovery = $totalPayable = $totalReceipt = $totalPaid = $totalRemaining = 0;
+                    foreach ($totalBillData as $thisBill){
+                        $billName = "R.A. ".$billNo;
+                        if($thisBill['bill_status_id'] == $statusId->where('slug','approved')->pluck('id')->first()){
+                            $billData = $this->getBillData($thisBill['id']);
+                            $thisMonth = (int)date('n',strtotime($billData['date']));
+                            $billRow = $row;
+                                $data[$row]['make_bold'] = true;
+                                $data[$row]['date'] = date('d/n/Y',strtotime($billData['date'])) .' : ('. date('d/n/Y',strtotime($billData['created_at'])) .')';
+                                $data[$row]['bill_no'] = $billName;
+                                $data[$row]['basic_amount'] = number_format($billData['basic_amount'], 3);
+                                $data[$row]['gst'] = number_format($billData['tax_amount'], 3);
+                                $data[$row]['total_amount'] = number_format($billData['total_amount_with_tax'], 3);
+                                $data[$row] = array_merge($data[$row],array_fill(5,7,null));
+                                $data[$row]['payable'] = $billData['total_amount_with_tax'];
+                                $data[$row]['receipt'] = null;
+                                $data[$row]['total_paid'] = 0;
+                                $totalBasicAmount += $billData['basic_amount']; $totalGst += $billData['tax_amount'];
+                                $totalWithTaxAmount += $billData['total_amount_with_tax']; $totalReceipt += $data[$row]['total_paid'];
+                                $billTransactionData = $billTransaction->where('bill_id',$thisBill['id'])->orderBy('created_at','asc')->get();
+                                if($row == 1){
+                                    $newMonth = $thisMonth;
+                                    $newMonthRow = $row;
+                                }else{
+                                    if($newMonth == $thisMonth){
+                                        $setMonthlyTotalData = false;
+                                    }else{
+                                        $newMonth = $thisMonth;
+                                        $newMonthRow = $row;
+                                        $setMonthlyTotalData = true;
+                                    }
+                                }
+                                $row++;
+
+                                $receiptCount = 1;
+                                foreach($billTransactionData as $key => $billTransaction){
+                                    $data[$row]['date'] = null;
+                                    $data[$row]['bill_no'] = 'Receipt '.$receiptCount;
+                                    $data[$row] = array_merge($data[$row],array_fill(2,3,null));
+                                    if($billTransaction['paid_from_advanced'] == true){
+                                        $data[$row]['transaction_amount'] = 0;
+                                        $data[$row]['mobilisation'] = number_format($billTransaction['amount'], 3);
+                                        $totalMobilization += $billTransaction['amount'];
+                                    }else{
+                                        $data[$row]['transaction_amount'] = number_format($billTransaction['amount'], 3);
+                                        $data[$row]['mobilisation'] = 0;
+                                        $totalTransactionAmount += $billTransaction['amount'];
+                                    }
+                                    $data[$row]['tds'] = number_format($billTransaction['tds_amount'], 3);
+                                    $data[$row]['retention'] = number_format($billTransaction['retention_amount'], 3);
+                                    $data[$row]['hold'] = number_format($billTransaction['hold'], 3);
+                                    $data[$row]['debit'] = number_format($billTransaction['debit'], 3);
+                                    $data[$row]['other_recovery'] = number_format($billTransaction['other_recovery_value'], 3);
+                                    $data[$row]['payable_amount'] = null;
+                                    $receipt = $billTransaction['total'];
+                                    $data[$row]['receipt'] = number_format($receipt, 3);
+                                    $data[$row] = array_merge($data[$row],array_fill(14,3,null));
+                                    $data[$billRow]['total_paid'] += $receipt;
+                                    $row++;$receiptCount++;
+                                    $totalTds += $billTransaction['tds_amount']; $totalRetention += $billTransaction['retention_amount'];
+                                    $totalHold += $billTransaction['hold']; $totalDebit += $billTransaction['debit'];
+                                    $totalOtherRecovery += $billTransaction['other_recovery_value'];
+                                    $totalReceipt += $receipt;
+                                }
+                                $data[$row] = array_fill(0,17,null);
+                                $row++;
+                                $paidAmount = $data[$billRow ]['total_paid'];
+                                $data[$billRow]['remaining'] = $data[$billRow]['payable'] - $data[$billRow ]['total_paid'];
+                                $totalPaid += $data[$billRow]['total_paid'];
+                                $totalPayable += $data[$billRow]['payable'];
+                                $totalRemaining += $data[$billRow]['remaining'];
+                                $data[$billRow]['remaining'] = number_format($data[$billRow]['remaining'], 3);
+                                $data[$billRow]['payable'] = number_format($data[$billRow]['payable'], 3);
+                                $data[$billRow]['total_paid'] = number_format($data[$billRow]['total_paid'], 3);
+                                if($billRow == 1 || $setMonthlyTotalData){
+                                    $data[$billRow]['monthly_total'] = $paidAmount;
+                                }elseif($setMonthlyTotalData == false){
+                                    $data[$newMonthRow]['monthly_total'] += $paidAmount;
+                                    $data[$billRow]['monthly_total'] = null;
+                                }
+                            }
+                            $billNo++;
+
+                        }
+                    $data[$row]['make_bold'] = true;
+                    $totalRow = array(
+                        'Total', null, number_format($totalBasicAmount,3), number_format($totalGst,3), number_format($totalWithTaxAmount,3), number_format($totalTransactionAmount,3)
+                            , number_format($totalMobilization,3), number_format($totalTds,3), number_format($totalRetention,3),number_format($totalHold,3),
+                        number_format($totalDebit,3),number_format($totalOtherRecovery,3), number_format($totalPayable,3), number_format($totalReceipt,3),
+                        number_format($totalPaid,3), number_format($totalRemaining,3), null
+                    );
+                    $data[$row] = array_merge($data[$row],$totalRow);
+                    $projectSiteAdvancePayment = new ProjectSiteAdvancePayment();
+                    $mobilizeAdvance = $projectSiteAdvancePayment->where('project_site_id',$project_site_id)->sum('amount');
+                    Excel::create($reportType."_".$currentDate, function($excel) use($monthlyTotal, $data, $reportType, $header, $companyHeader, $date, $projectName, $mobilizeAdvance) {
+                        $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(10);
+                        $excel->sheet($reportType, function($sheet) use($monthlyTotal, $data, $header, $companyHeader, $date, $projectName, $mobilizeAdvance) {
+                            $objDrawing = new \PHPExcel_Worksheet_Drawing();
+                            $objDrawing->setPath(public_path('/assets/global/img/logo.jpg')); //your image path
+                            $objDrawing->setWidthAndHeight(148,74);
+                            $objDrawing->setResizeProportional(true);
+                            $objDrawing->setCoordinates('A1');
+                            $objDrawing->setWorksheet($sheet);
+
+                            $sheet->mergeCells('A2:H2');
+                            $sheet->cell('A2', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['company_name']);
+                            });
+
+                            $sheet->mergeCells('A3:H3');
+                            $sheet->cell('A3', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['designation']);
+                            });
+
+                            $sheet->mergeCells('A4:H4');
+                            $sheet->cell('A4', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['address']);
+                            });
+
+                            $sheet->mergeCells('A5:H5');
+                            $sheet->cell('A5', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['contact_no']);
+                            });
+
+                            $sheet->mergeCells('A6:H6');
+                            $sheet->cell('A6', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['gstin_number']);
+                            });
+
+                            $sheet->mergeCells('A7:H7');
+                            $sheet->cell('A7', function($cell) use ($projectName){
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue('Purchase Bill Report - '.$projectName);
+                            });
+
+                            $sheet->mergeCells('A8:H8');
+                            $sheet->cell('A8', function($cell) use($date) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($date);
+                            });
+                            $row = 10;
+                            $monthHeaderRow =  $row+1;
+                            foreach($monthlyTotal as $key => $rowData){
+                                $next_column = 'A';
+                                $row++;
+                                foreach($rowData as $key1 => $cellData){
+                                    $current_column = $next_column++;
+                                    $sheet->getRowDimension($row)->setRowHeight(20);
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData,$row,$monthHeaderRow) {
+                                        if($row == $monthHeaderRow){
+                                            $cell->setFontWeight('bold');
+                                        }
+                                        $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                                        $cell->setAlignment('center')->setValignment('center');
+                                        $cell->setValue($cellData);
+                                    });
+
+                                }
+                            }
+                            $row++; $row++;
+
+                            $sheet->mergeCells('A'.$row.':'.'B'.$row);
+                            $sheet->cell('A'.$row, function($cell) use($sheet,$row) {
+                                $sheet->getRowDimension($row)->setRowHeight(20);
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue('Total Mobilization Given (Advance)')->setFontWeight('bold');
+                            });
+                            $sheet->cell('C'.$row, function($cell) use($sheet,$row, $mobilizeAdvance) {
+                                $sheet->getRowDimension($row)->setRowHeight(20);
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($mobilizeAdvance)->setFontWeight('bold');
+                            });
+                            $row++;
+                            $headerRow = $row+1;
+                            foreach($data as $key => $rowData){
+                                $next_column = 'A';
+                                $row++;
+                                if(array_key_exists('make_bold',$rowData)){
+                                    $setBold = true;
+                                    unset($rowData['make_bold']);
+                                }else{
+                                    $setBold = false;
+                                }
+                                foreach($rowData as $key1 => $cellData){
+                                    $current_column = $next_column++;
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData,$row,$sheet,$headerRow,$setBold,$current_column) {
+                                        $sheet->getRowDimension($row)->setRowHeight(20);
+                                        ($row == $headerRow || $setBold) ? $cell->setFontWeight('bold') : null;
+                                        ($current_column == 'N') ? $cell->setBackground('#d7f442') : null;
+                                        ($current_column == 'P') ? $cell->setFontColor('#d82517') : null;
+                                        $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                                        $cell->setAlignment('center')->setValignment('center');
+                                        $cell->setValue($cellData);
+
+                                    });
+                                }
+                            }
+
+                        });
+                    })->export('xls');
+                    break;
+
                 default :
                     break;
             }
@@ -732,4 +1023,104 @@ class ReportManagementController extends Controller{
         }
     }
 
+    public function getBillData($billId){
+        try{
+            $billInstance = new Bill();
+            $billStatusInstance = new BillStatus();
+            $billQuotationProductInstance = new BillQuotationProducts();
+            $quotationProductInstance = new QuotationProduct();
+            $quotationInstance = new Quotation();
+            $billQuotationExtraItemInstance = new BillQuotationExtraItem();
+            $billTaxInstance = new BillTax();
+            $bill = $billInstance->where('id',$billId)->first();
+            $cancelBillStatusId = $billStatusInstance->where('slug','cancelled')->pluck('id')->first();
+            $bills = $billInstance->where('quotation_id',$bill['quotation_id'])->where('bill_status_id','!=',$cancelBillStatusId)->orderBy('created_at','asc')->get()->toArray();
+            $billQuotationProducts = $billQuotationProductInstance->where('bill_id',$bill['id'])->get()->toArray();
+            $total['previous_bill_amount'] = $total['current_bill_subtotal'] = $total['cumulative_bill_amount'] = $total_extra_item =  0;
+            for($iterator = 0 ; $iterator < count($billQuotationProducts) ; $iterator++){
+                $billQuotationProducts[$iterator]['previous_quantity'] = 0;
+                $billQuotationProducts[$iterator]['quotationProducts'] = $quotationProductInstance->where('id',$billQuotationProducts[$iterator]['quotation_product_id'])->where('quotation_id',$bill['quotation_id'])->first();
+                $quotation_id = $billInstance->where('id',$billQuotationProducts[$iterator]['bill_id'])->pluck('quotation_id')->first();
+                $discount = $quotationInstance->where('id',$quotation_id)->pluck('discount')->first();
+                $rate_per_unit = $quotationProductInstance->where('id',$billQuotationProducts[$iterator]['quotation_product_id'])->pluck('rate_per_unit')->first();
+                $billQuotationProducts[$iterator]['rate'] = round(($rate_per_unit - ($rate_per_unit * ($discount / 100))),3);
+                $billQuotationProducts[$iterator]['current_bill_subtotal'] = round(($billQuotationProducts[$iterator]['quantity'] * $billQuotationProducts[$iterator]['rate']),3);
+                $billWithoutCancelStatus = $billInstance->where('id','<',$bill['id'])->where('bill_status_id','!=',$cancelBillStatusId)->pluck('id')->toArray();
+                $previousBills = $billQuotationProductInstance->whereIn('bill_id',$billWithoutCancelStatus)->get();
+                foreach($previousBills as $key => $previousBill){
+                    if($billQuotationProducts[$iterator]['quotation_product_id'] == $previousBill['quotation_product_id']){
+                        $billQuotationProducts[$iterator]['previous_quantity'] = $billQuotationProducts[$iterator]['previous_quantity'] +  $previousBill['quantity'];
+                    }
+                }
+                $billQuotationProducts[$iterator]['cumulative_quantity'] = round(($billQuotationProducts[$iterator]['quantity'] + $billQuotationProducts[$iterator]['previous_quantity']),3);
+                $total['current_bill_subtotal'] = round(($total['current_bill_subtotal'] + $billQuotationProducts[$iterator]['current_bill_subtotal']),3);
+            }
+            $extraItems = $billQuotationExtraItemInstance->where('bill_id',$bill->id)->get();
+            if(count($extraItems) > 0){
+                $total_extra_item = 0;
+                foreach($extraItems as $key => $extraItem){
+                    $extraItem['previous_rate'] = $billQuotationExtraItemInstance->whereIn('bill_id',array_column($bills,'id'))->where('bill_id','!=',$bill->id)->where('quotation_extra_item_id',$extraItem->quotation_extra_item_id)->sum('rate');
+                    $total_extra_item = $total_extra_item + $extraItem['rate'];
+                }
+                $total['current_bill_subtotal'] = round(($total['current_bill_subtotal'] + $total_extra_item),3);
+            }
+            $total_rounded['current_bill_subtotal'] = round($total['current_bill_subtotal'],3);
+            $final['current_bill_amount'] = $total_rounded['current_bill_amount'] = $total['current_bill_amount'] = round(($total['current_bill_subtotal'] - $bill['discount_amount']),3);
+            $billTaxes = $billTaxInstance->join('taxes','taxes.id','=','bill_taxes.tax_id')
+                ->where('bill_taxes.bill_id','=',$bill['id'])
+                ->where('taxes.is_special','=', false)
+                ->select('bill_taxes.id as id','bill_taxes.percentage as percentage','taxes.id as tax_id','taxes.name as tax_name','bill_taxes.applied_on as applied_on')
+                ->get();
+            $taxes = array();
+            if($billTaxes != null){
+                $billTaxes = $billTaxes->toArray();
+            }
+            for($j = 0 ; $j < count($billTaxes) ; $j++){
+                $taxes[$billTaxes[$j]['tax_id']] = $billTaxes[$j];
+                $taxes[$billTaxes[$j]['tax_id']]['current_bill_amount'] = round(($total['current_bill_amount'] * ($taxes[$billTaxes[$j]['tax_id']]['percentage'] / 100)) , 3);
+                $final['current_bill_amount'] = round(($final['current_bill_amount'] + $taxes[$billTaxes[$j]['tax_id']]['current_bill_amount']),3);
+            }
+            $specialTaxes= $billTaxInstance->join('taxes','taxes.id','=','bill_taxes.tax_id')
+                ->where('bill_taxes.bill_id','=',$bill['id'])
+                ->where('taxes.is_special','=', true)
+                ->select('bill_taxes.id as id','bill_taxes.percentage as percentage','taxes.id as tax_id','taxes.name as tax_name','bill_taxes.applied_on as applied_on')
+                ->get();
+            if($specialTaxes != null){
+                $specialTaxes = $specialTaxes->toArray();
+            }else{
+                $specialTaxes = array();
+            }
+            if(count($specialTaxes) > 0){
+                for($j = 0 ; $j < count($specialTaxes) ; $j++){
+                    $specialTaxes[$j]['applied_on'] = json_decode($specialTaxes[$j]['applied_on']);
+                    $specialTaxAmount = 0;
+                    foreach($specialTaxes[$j]['applied_on'] as $appliedOnTaxId){
+                        if($appliedOnTaxId == 0){
+                            $specialTaxAmount = $specialTaxAmount + ($total['current_bill_amount'] * ($specialTaxes[$j]['percentage'] / 100));
+                        }else{
+                            $specialTaxAmount = $specialTaxAmount + ($taxes[$appliedOnTaxId]['current_bill_amount'] * ($specialTaxes[$j]['percentage'] / 100));
+                        }
+                    }
+                    $specialTaxes[$j]['current_bill_amount'] = round($specialTaxAmount , 3);
+                    $final['current_bill_gross_total_amount'] = round(($final['current_bill_amount'] + $specialTaxAmount),3);
+                }
+            }else{
+                $final['current_bill_gross_total_amount'] = round($final['current_bill_amount'],3);
+            }
+            $billData['date'] = $bill['date'];
+            $billData['created_at'] = $bill['created_at'];
+            $billData['basic_amount'] = $total_rounded['current_bill_amount'];
+            $billData['total_amount_with_tax'] = $final['current_bill_gross_total_amount'];
+            $billData['tax_amount'] = $final['current_bill_gross_total_amount'] - $total_rounded['current_bill_amount'];
+            return $billData;
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get bill data for report in Report Management',
+                'params' => $billId,
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
 }
