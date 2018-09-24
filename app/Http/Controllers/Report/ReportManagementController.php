@@ -34,6 +34,7 @@ use App\SubcontractorBill;
 use App\SubcontractorBillStatus;
 use App\Quotation;
 use App\QuotationProduct;
+use App\SubcontractorBillTransaction;
 use App\SubcontractorStructure;
 use App\Unit;
 use App\Year;
@@ -73,13 +74,16 @@ class ReportManagementController extends Controller{
                 ->orderBy('projects.name','asc')
                 ->select('project_sites.id','project_sites.name','project_sites.address','projects.name as project_name')->get()->toArray();
             $approvedBillStatusId = $subcontractorBillStatus->where('slug','approved')->pluck('id');
-            $subcontractorData = $subcontractor->join('subcontractor_structure','subcontractor_structure.subcontractor_id','=','subcontractor.id')
+
+            $subcontractorProjectSitesData = $subcontractor->join('subcontractor_structure','subcontractor_structure.subcontractor_id','=','subcontractor.id')
                                 ->join('subcontractor_bills','subcontractor_bills.sc_structure_id','=','subcontractor_structure.id')
+                                ->join('project_sites','subcontractor_structure.project_site_id','=','project_sites.id')
+                                ->join('projects','projects.id','=','project_sites.project_id')
                                 ->where('subcontractor_bills.subcontractor_bill_status_id',$approvedBillStatusId)
-                                ->distinct('subcontractor.id')
-                                ->orderBy('subcontractor.subcontractor_name','asc')
-                                ->select('subcontractor.id','subcontractor.subcontractor_name')->get();
-            return view('report.report')->with(compact('startDate','endDate','projectSites','billProjectSites','subcontractorData'));
+                                ->distinct('project_sites.id')
+                                ->orderBy('projects.name','asc')
+                                ->select('project_sites.id','project_sites.name','project_sites.address','projects.name as project_name')->get()->toArray();
+            return view('report.report')->with(compact('startDate','endDate','projectSites','billProjectSites','subcontractorProjectSitesData'));
 
         } catch(\Exception $e) {
             $data = [
@@ -208,20 +212,20 @@ class ReportManagementController extends Controller{
                     break;
 
                 case 'sitewise_subcontractor_report' :
-                    $iterator = 0;
-                    $bill = new Bill();
-                    $billStatus = new BillStatus();
-                    $subcontractor = new Subcontractor();
                     $subcontractorBill = new SubcontractorBill();
-
-                    $billCreatedDate = $subcontractorBill->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
+                    $subcontractorBillStatus = new SubcontractorBillStatus();
+                    $approvedBillStatusId = $subcontractorBillStatus->where('slug','approved')->pluck('id');
+                    Log::info('123432');
+                    $subcontractorStructureIds = $subcontractorBill->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
                             ->where('subcontractor_structure.project_site_id',$globalProjectSiteId)
                             ->where('subcontractor_structure.subcontractor_id',$request['subcontractor_id'])
-                            ->orderBy('subcontractor_bills.created_at','asc')
-                            ->pluck('subcontractor_bills.created_at');
-                    if(count($billCreatedDate) > 0){
-                        $downloadButtonDetails[$iterator]['start_date'] = $billCreatedDate->last();
-                        $downloadButtonDetails[$iterator]['end_date'] = $billCreatedDate->first();
+                            ->where('subcontractor_bills.subcontractor_bill_status_id',$approvedBillStatusId)
+                            ->orderBy('subcontractor_structure.id','asc')
+                            ->distinct('subcontractor_structure.id')
+                            ->pluck('subcontractor_structure.id');
+                    Log::info($subcontractorStructureIds);
+                    for($iterator = 0; $iterator < count($subcontractorStructureIds); $iterator++){
+                        $downloadButtonDetails[$iterator]['id'] = $subcontractorStructureIds[$iterator];
                     }
                     break;
             }
@@ -240,7 +244,7 @@ class ReportManagementController extends Controller{
         }
     }
 
-    public function downloadDetailReport(Request $request,$reportType,$project_site_id,$start_date,$end_date,$subcontractorId) {
+    public function downloadDetailReport(Request $request,$reportType,$project_site_id,$firstParameter,$secondParameter) {
         try{
             $year = new Year();
             $month = new Month();
@@ -255,10 +259,26 @@ class ReportManagementController extends Controller{
             $companyHeader['contact_no'] = env('CONTACT_NO');
             $companyHeader['gstin_number'] = env('GSTIN_NUMBER');
 
-            $date = date('l, d F Y',strtotime($end_date)) .' - '. date('l, d F Y',strtotime($start_date));
-            $startYearID = $year->where('slug',(int)date('Y',strtotime($start_date)))->pluck('id')->first();
-            $endYearID = $year->where('slug',(int)date('Y',strtotime($end_date)))->pluck('id')->first();
-            $totalYears = $year->whereBetween('id',[$startYearID,$endYearID])->select('id','name','slug')->get();
+            if($reportType == 'sitewise_subcontractor_report'){
+                $subcontractorBill = new SubcontractorBill();
+                $subcontractorStructureId = $firstParameter;
+                $subcontractorBillStatus = new SubcontractorBillStatus();
+                $statusId = $subcontractorBillStatus->whereIn('slug',['approved','draft'])->get();
+                $subcontractorBillData = $subcontractorBill->where('sc_structure_id',$subcontractorStructureId)
+                    ->whereIn('subcontractor_bill_status_id',array_column($statusId->toArray(),'id'))//->orderBy('id')
+                    ->get();
+                $startDate = $subcontractorBillData->pluck('created_at')->first();
+                $endDate = $subcontractorBillData->pluck('created_at')->last();
+                $date = date('l, d F Y',strtotime($startDate)) .' - '. date('l, d F Y',strtotime($endDate));
+                $startYearID = $year->where('slug',(int)date('Y',strtotime($startDate)))->pluck('id')->first();
+                $endYearID = $year->where('slug',(int)date('Y',strtotime($endDate)))->pluck('id')->first();
+                $totalYears = $year->whereBetween('id',[$startYearID,$endYearID])->select('id','name','slug')->get();
+            }else{
+                $date = date('l, d F Y',strtotime($secondParameter)) .' - '. date('l, d F Y',strtotime($firstParameter));
+                $startYearID = $year->where('slug',(int)date('Y',strtotime($firstParameter)))->pluck('id')->first();
+                $endYearID = $year->where('slug',(int)date('Y',strtotime($secondParameter)))->pluck('id')->first();
+                $totalYears = $year->whereBetween('id',[$startYearID,$endYearID])->select('id','name','slug')->get();
+            }
             $months = $month->get();
             $iterator = 1;
             $monthlyTotal[0]['month'] = 'Month-Year';
@@ -296,8 +316,8 @@ class ReportManagementController extends Controller{
                             ,'purchase_orders.purchase_request_id')
                         ->join('vendors','vendors.id','=','purchase_orders.vendor_id')
                         ->where('purchase_requests.project_site_id',$project_site_id)
-                        ->where('purchase_order_bills.created_at','<=',$start_date)
-                        ->where('purchase_order_bills.created_at','>=',$end_date)
+                        ->where('purchase_order_bills.created_at','<=',$firstParameter)
+                        ->where('purchase_order_bills.created_at','>=',$secondParameter)
                         ->select('purchase_order_bills.amount','purchase_order_bills.transportation_tax_amount'
                             ,'purchase_order_bills.tax_amount','purchase_order_bills.extra_tax_amount','purchase_order_bills.bill_date'
                             ,'purchase_order_bills.bill_number','purchase_order_bills.created_at','vendors.company')
@@ -466,8 +486,8 @@ class ReportManagementController extends Controller{
                         ->where('project_sites.id',$project_site_id)->pluck('projects.name')->first();
                     $peticashSalaryTransactionsData = $peticashSalaryTransaction
                         ->where('project_site_id',$project_site_id)
-                        ->where('date','<=',$start_date)
-                        ->where('date','>=',$end_date)
+                        ->where('date','<=',$firstParameter)
+                        ->where('date','>=',$secondParameter)
                         ->orderBy('date','desc')
                         ->get();
                     $row = 1;
@@ -639,8 +659,8 @@ class ReportManagementController extends Controller{
                         ->where('project_sites.id',$project_site_id)->pluck('projects.name')->first();
                     $peticashPurchaseTransactionsData = $peticashPurchaseTransaction
                         ->where('project_site_id',$project_site_id)
-                        ->where('date','<=',$start_date)
-                        ->where('date','>=',$end_date)
+                        ->where('date','<=',$firstParameter)
+                        ->where('date','>=',$secondParameter)
                         ->orderBy('date','desc')
                         ->get();
                     $row = 1;
@@ -1032,72 +1052,74 @@ class ReportManagementController extends Controller{
 
                 case 'sitewise_subcontractor_report':
                     $projectSite = new ProjectSite();
-                    $quotation = new Quotation();
-                    $bill = new Bill();
-                    $billStatus = new BillStatus();
-                    $billTransaction = new BillTransaction();
+                    $subcontractorStructure = new SubcontractorStructure();
+                    $subcontractorBillTransaction = new SubcontractorBillTransaction();
                     $data[$row] = array(
-                        ' Bill Date : (Created Date)', 'Bill No.', 'Basic Amount', 'GST', 'With Tax Amount', 'Transaction Amount', 'Mobilization', 'TDS', 'Retention',
+                        ' Bill Date : (Created Date)', 'Bill No.', 'Basic Amount', 'GST', 'With Tax Amount', 'Transaction Amount', 'TDS', 'Retention',
                         'Hold', 'Debit', 'Other Recovery', 'Payable', 'Receipt', 'Total Paid', 'Remaining', 'Monthly Total'
                     );
-                    //$subcontractorId
                     $projectName = $projectSite->join('projects','projects.id','=','project_sites.project_id')
                         ->where('project_sites.id',$project_site_id)->pluck('projects.name')->first();
-                    $quotationId = $quotation->where('project_site_id',$project_site_id)->pluck('id')->first();
-                    $statusId = $billStatus->whereIn('slug',['approved','draft'])->get();
-                    $totalBillData = $bill->where('quotation_id',$quotationId)
-                        ->whereIn('bill_status_id',array_column($statusId->toArray(),'id'))->orderBy('id')
-                        ->select('id','bill_status_id')->get();
+                    $subcontractorStructureData = $subcontractorStructure->where('id',$subcontractorStructureId)->first();
+                    $subcontractorCompanyName = $subcontractorStructureData->subcontractor->company_name;
+                    if($subcontractorStructureData->contractType->slug == 'sqft'){
+                        $rate = $subcontractorStructureData['rate'];
+                    }else{
+                        $rate = $subcontractorStructureData['rate'] * $subcontractorStructureData['total_work_area'];
+                    }
+                    $subcontractorBillData = $subcontractorBill->where('sc_structure_id',$subcontractorStructureId)
+                        ->whereIn('subcontractor_bill_status_id',array_column($statusId->toArray(),'id'))//->orderBy('id')
+                        ->get();
+                    $startDate = $subcontractorBillData->pluck('created_at')->first();
+                    $endDate = $subcontractorBillData->pluck('created_at')->last();
+                    $startYearID = $year->where('slug',(int)date('Y',strtotime($startDate)))->pluck('id')->first();
+                    $endYearID = $year->where('slug',(int)date('Y',strtotime($endDate)))->pluck('id')->first();
+                    $totalYears = $year->whereBetween('id',[$startYearID,$endYearID])->select('id','name','slug')->get();
                     foreach ($totalYears as $thisYear){
                         foreach ($months as $month){
                             $monthlyTotal[$iterator]['month'] = $month['name'].'-'.$thisYear['name'];
-                            $billIds = $bill->where('quotation_id',$quotationId)
-                                ->whereIn('bill_status_id',array_column($statusId->toArray(),'id'))->orderBy('id')
-                                ->whereMonth('date',$month['id'])
-                                ->whereYear('date',$thisYear['slug'])
+                            $billIds = $subcontractorBill->where('sc_structure_id',$subcontractorStructureId)
+                                ->whereIn('subcontractor_bill_status_id',array_column($statusId->toArray(),'id'))
+                                ->whereMonth('created_at',$month['id'])
+                                ->whereYear('created_at',$thisYear['slug'])
                                 ->pluck('id');
-                            $total = $billTransaction->whereIn('bill_id',$billIds)
-                                ->sum('total');
+                            $total = $subcontractorBillTransaction
+                                    ->whereIn('subcontractor_bills_id',$billIds)
+                                    ->sum('total');
                             $monthlyTotal[$iterator]['total'] = ($total != null) ? $total : 0;
                             $iterator++;
                         }
                     }
-                    $subcontractor = new Subcontractor();
-                    $subcontractorStructure = new SubcontractorStructure();
-                    $subcontractorBill = new SubcontractorBill();
-                    $subcontractorStructureIds = $subcontractorStructure->where('subcontractor_id',$subcontractorId)
-                                                    ->where('project_site_id',$project_site_id)
-                                                    ->pluck('id');
-                    dd($subcontractorStructureIds);
                     $billNo = 1;
                     $row = 1;
-                    $totalBasicAmount = $totalGst = $totalWithTaxAmount = $totalTransactionAmount = $totalMobilization = $totalTds =
+                    $totalBasicAmount = $totalGst = $totalWithTaxAmount = $totalTransactionAmount = $totalTds =
                     $totalRetention = $totalHold = $totalDebit = $totalOtherRecovery = $totalPayable = $totalReceipt = $totalPaid = $totalRemaining = 0;
 
-                    foreach ($subcontractorStructureIds as $subcontractorStructureId){
-                        $subcontractorBillData = $subcontractorBill->where('sc_structure_id',$subcontractorStructureId)->get();
-                        //foreach ($sub)
-                    }
-
-                    foreach ($totalBillData as $thisBill){
+                    foreach ($subcontractorBillData as $subcontractorBill){
                         $billName = "R.A. ".$billNo;
-                        if($thisBill['bill_status_id'] == $statusId->where('slug','approved')->pluck('id')->first()){
-                            $billData = $this->getBillData($thisBill['id']);
-                            $thisMonth = (int)date('n',strtotime($billData['date']));
+                        if($subcontractorBill['subcontractor_bill_status_id'] == $statusId->where('slug','approved')->pluck('id')->first()){
+                            $subcontractorBillTaxes = $subcontractorBill->subcontractorBillTaxes;
+                            $subTotal = $subcontractorBill['qty'] * $rate;
+                            $taxTotal = 0;
+                            foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
+                                $taxTotal += ($subcontractorBillTaxData['percentage'] * $subTotal) / 100;
+                            }
+                            $finalTotal = $subTotal + $taxTotal;
+                            $thisMonth = (int)date('n',strtotime($subcontractorBill['created_at']));
                             $billRow = $row;
                             $data[$row]['make_bold'] = true;
-                            $data[$row]['date'] = date('d/n/Y',strtotime($billData['date'])) .' : ('. date('d/n/Y',strtotime($billData['created_at'])) .')';
+                            $data[$row]['date'] = date('d/n/Y',strtotime($subcontractorBill['created_at']));
                             $data[$row]['bill_no'] = $billName;
-                            $data[$row]['basic_amount'] = number_format($billData['basic_amount'], 3);
-                            $data[$row]['gst'] = number_format($billData['tax_amount'], 3);
-                            $data[$row]['total_amount'] = number_format($billData['total_amount_with_tax'], 3);
-                            $data[$row] = array_merge($data[$row],array_fill(5,7,null));
-                            $data[$row]['payable'] = $billData['total_amount_with_tax'];
+                            $data[$row]['basic_amount'] = number_format($subTotal, 3);
+                            $data[$row]['gst'] = number_format($taxTotal, 3);
+                            $data[$row]['total_amount'] = number_format($finalTotal, 3);
+                            $data[$row] = array_merge($data[$row],array_fill(5,6,null));
+                            $data[$row]['payable'] = $finalTotal;
                             $data[$row]['receipt'] = null;
                             $data[$row]['total_paid'] = 0;
-                            $totalBasicAmount += $billData['basic_amount']; $totalGst += $billData['tax_amount'];
-                            $totalWithTaxAmount += $billData['total_amount_with_tax']; $totalReceipt += $data[$row]['total_paid'];
-                            $billTransactionData = $billTransaction->where('bill_id',$thisBill['id'])->orderBy('created_at','asc')->get();
+                            $totalBasicAmount += $rate; $totalGst += $taxTotal;
+                            $totalWithTaxAmount += $finalTotal; $totalReceipt += $data[$row]['total_paid'];
+                            $billTransactionData = $subcontractorBillTransaction->where('subcontractor_bills_id',$subcontractorBill['id'])->orderBy('created_at','asc')->get();
                             if($row == 1){
                                 $newMonth = $thisMonth;
                                 $newMonthRow = $row;
@@ -1111,26 +1133,18 @@ class ReportManagementController extends Controller{
                                 }
                             }
                             $row++;
-
                             $receiptCount = 1;
                             foreach($billTransactionData as $key => $billTransaction){
                                 $data[$row]['date'] = null;
                                 $data[$row]['bill_no'] = 'Receipt '.$receiptCount;
                                 $data[$row] = array_merge($data[$row],array_fill(2,3,null));
-                                if($billTransaction['paid_from_advanced'] == true){
-                                    $data[$row]['transaction_amount'] = 0;
-                                    $data[$row]['mobilisation'] = number_format($billTransaction['amount'], 3);
-                                    $totalMobilization += $billTransaction['amount'];
-                                }else{
-                                    $data[$row]['transaction_amount'] = number_format($billTransaction['amount'], 3);
-                                    $data[$row]['mobilisation'] = 0;
-                                    $totalTransactionAmount += $billTransaction['amount'];
-                                }
+                                $data[$row]['transaction_amount'] = number_format($billTransaction['subtotal'], 3);
+                                $totalTransactionAmount += $billTransaction['subtotal'];
                                 $data[$row]['tds'] = number_format($billTransaction['tds_amount'], 3);
                                 $data[$row]['retention'] = number_format($billTransaction['retention_amount'], 3);
                                 $data[$row]['hold'] = number_format($billTransaction['hold'], 3);
                                 $data[$row]['debit'] = number_format($billTransaction['debit'], 3);
-                                $data[$row]['other_recovery'] = number_format($billTransaction['other_recovery_value'], 3);
+                                $data[$row]['other_recovery'] = number_format($billTransaction['other_recovery'], 3);
                                 $data[$row]['payable_amount'] = null;
                                 $receipt = $billTransaction['total'];
                                 $data[$row]['receipt'] = number_format($receipt, 3);
@@ -1139,10 +1153,10 @@ class ReportManagementController extends Controller{
                                 $row++;$receiptCount++;
                                 $totalTds += $billTransaction['tds_amount']; $totalRetention += $billTransaction['retention_amount'];
                                 $totalHold += $billTransaction['hold']; $totalDebit += $billTransaction['debit'];
-                                $totalOtherRecovery += $billTransaction['other_recovery_value'];
+                                $totalOtherRecovery += $billTransaction['other_recovery'];
                                 $totalReceipt += $receipt;
                             }
-                            $data[$row] = array_fill(0,17,null);
+                            $data[$row] = array_fill(0,16,null);
                             $row++;
                             $paidAmount = $data[$billRow ]['total_paid'];
                             $data[$billRow]['remaining'] = $data[$billRow]['payable'] - $data[$billRow ]['total_paid'];
@@ -1165,11 +1179,117 @@ class ReportManagementController extends Controller{
                     $data[$row]['make_bold'] = true;
                     $totalRow = array(
                         'Total', null, number_format($totalBasicAmount,3), number_format($totalGst,3), number_format($totalWithTaxAmount,3), number_format($totalTransactionAmount,3)
-                    , number_format($totalMobilization,3), number_format($totalTds,3), number_format($totalRetention,3),number_format($totalHold,3),
+                        , number_format($totalTds,3), number_format($totalRetention,3),number_format($totalHold,3),
                         number_format($totalDebit,3),number_format($totalOtherRecovery,3), number_format($totalPayable,3), number_format($totalReceipt,3),
                         number_format($totalPaid,3), number_format($totalRemaining,3), null
                     );
                     $data[$row] = array_merge($data[$row],$totalRow);
+                    Excel::create($reportType."_".$currentDate, function($excel) use($monthlyTotal, $data, $reportType, $header, $companyHeader, $date, $projectName, $subcontractorCompanyName) {
+                        $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(10);
+                        $excel->sheet($reportType, function($sheet) use($monthlyTotal, $data, $header, $companyHeader, $date, $projectName, $subcontractorCompanyName) {
+                            $objDrawing = new \PHPExcel_Worksheet_Drawing();
+                            $objDrawing->setPath(public_path('/assets/global/img/logo.jpg')); //your image path
+                            $objDrawing->setWidthAndHeight(148,74);
+                            $objDrawing->setResizeProportional(true);
+                            $objDrawing->setCoordinates('A1');
+                            $objDrawing->setWorksheet($sheet);
+
+                            $sheet->mergeCells('A2:H2');
+                            $sheet->cell('A2', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['company_name']);
+                            });
+
+                            $sheet->mergeCells('A3:H3');
+                            $sheet->cell('A3', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['designation']);
+                            });
+
+                            $sheet->mergeCells('A4:H4');
+                            $sheet->cell('A4', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['address']);
+                            });
+
+                            $sheet->mergeCells('A5:H5');
+                            $sheet->cell('A5', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['contact_no']);
+                            });
+
+                            $sheet->mergeCells('A6:H6');
+                            $sheet->cell('A6', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['gstin_number']);
+                            });
+
+                            $sheet->mergeCells('A7:H7');
+                            $sheet->cell('A7', function($cell) use ($projectName,$subcontractorCompanyName){
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue('Subcontractor  '.$subcontractorCompanyName .' - '. $projectName);
+                            });
+
+                            $sheet->mergeCells('A8:H8');
+                            $sheet->cell('A8', function($cell) use($date) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($date);
+                            });
+                            $row = 10;
+                            $monthHeaderRow =  $row+1;
+                            foreach($monthlyTotal as $key => $rowData){
+                                $next_column = 'A';
+                                $row++;
+                                foreach($rowData as $key1 => $cellData){
+                                    $current_column = $next_column++;
+                                    $sheet->getRowDimension($row)->setRowHeight(20);
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData,$row,$monthHeaderRow) {
+                                        if($row == $monthHeaderRow){
+                                            $cell->setFontWeight('bold');
+                                        }
+                                        $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                                        $cell->setAlignment('center')->setValignment('center');
+                                        $cell->setValue($cellData);
+                                    });
+
+                                }
+                            }
+                            $row++; $row++;
+                            $headerRow = $row+1;
+                            foreach($data as $key => $rowData){
+                                $next_column = 'A';
+                                $row++;
+                                if(array_key_exists('make_bold',$rowData)){
+                                    $setBold = true;
+                                    unset($rowData['make_bold']);
+                                }else{
+                                    $setBold = false;
+                                }
+                                foreach($rowData as $key1 => $cellData){
+                                    $current_column = $next_column++;
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData,$row,$sheet,$headerRow,$setBold,$current_column) {
+                                        $sheet->getRowDimension($row)->setRowHeight(20);
+                                        ($row == $headerRow || $setBold) ? $cell->setFontWeight('bold') : null;
+                                        ($current_column == 'M') ? $cell->setBackground('#d7f442') : null;
+                                        ($current_column == 'O') ? $cell->setFontColor('#d82517') : null;
+                                        $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                                        $cell->setAlignment('center')->setValignment('center');
+                                        $cell->setValue($cellData);
+
+                                    });
+                                }
+                            }
+
+                        });
+                    })->export('xls');
+                    break;
 
                 default :
                     break;
@@ -1284,5 +1404,33 @@ class ReportManagementController extends Controller{
             Log::critical(json_encode($data));
             abort(500);
         }
+    }
+
+    public function getSubcontractor(Request $request){
+        $subcontractorOptions = array();
+        try{
+            $subcontractor = new Subcontractor();
+            $subcontractorData = $subcontractor->join('subcontractor_structure','subcontractor_structure.subcontractor_id','=','subcontractor.id')
+                ->join('subcontractor_bills','subcontractor_bills.sc_structure_id','=','subcontractor_structure.id')
+                ->join('project_sites','subcontractor_structure.project_site_id','=','project_sites.id')
+                ->where('subcontractor_structure.project_site_id',$request['project_site_id'])
+                ->distinct('subcontractor.id')
+                ->orderBy('subcontractor.subcontractor_name','asc')
+                ->select('subcontractor.id','subcontractor.subcontractor_name')->get();
+            for($iterator = 0; $iterator < count($subcontractorData); $iterator++){
+                    $subcontractorOptions[] = '<option value="'.$subcontractorData[$iterator]['id'].'">'.$subcontractorData[$iterator]['subcontractor_name'].'</option>';
+                }
+            $status = 200;
+        }catch(\Exception $e){
+            $status = 500;
+            $data = [
+                'action' => 'Get Subcontractor for Report',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return response($subcontractorOptions,$status);
     }
 }

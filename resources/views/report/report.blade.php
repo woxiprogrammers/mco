@@ -44,81 +44,89 @@
                                     <!-- BEGIN VALIDATION STATES-->
                                     <div class="portlet light ">
                                         <div class="portlet-body form">
-                                            {{--<form role="form" id="reports-download" class="form-horizontal" method="post" action="/reports/detail">--}}
-                                                {!! csrf_field() !!}
-                                                <div class="form-body">
-                                                    <div class="form-group row">
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label>Select Report Type : </label>
-                                                        </div>
-                                                        <div class="col-md-4">
-                                                            <select class="form-control" id="report_type" name="report_type" onchange="getData()">
-                                                                <option value="sitewise_purchase_report">Purchase Report</option>
-                                                                <option value="sitewise_subcontractor_report">Subcontractor Report</option>
-                                                                <option value="sitewise_sales_receipt_report">Sales & Receipt Report</option>
-                                                                <option value="sitewise_salary_report">Salary Report</option>
-                                                                <option value="sitewise_mis_purchase_report">Mis. Purchase Report</option>
-                                                            </select>
-                                                        </div>
+                                            {!! csrf_field() !!}
+                                            <div class="form-body">
+                                                <div class="form-group row">
+                                                    <div class="col-md-3" style="text-align: right">
+                                                        <label>Select Report Type : </label>
                                                     </div>
-
-                                                    <div class="form-group row">
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label>Date Range : </label>
-                                                        </div>
-                                                        <div class="col-md-4">
-                                                            <div class="input-group input-large date-picker input-daterange" data-date-format="dd/mm/yyyy">
-                                                                <input type="text" class="form-control" name="start_date" id="start_date" value="{{$startDate}}" required="required">
-                                                                    <span class="input-group-addon"> to </span>
-                                                                <input type="text" class="form-control" name="end_date" id="end_date" value="{{$endDate}}" required="required">
-                                                            </div>
-                                                            <span class="help-block"> Select date range </span>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group row" id="project_sites">
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label>Select Project Site : </label>
-                                                        </div>
-                                                        <div class="col-md-4">
-                                                            <select class="form-control" id="project_site_id" name="project_site_id" onchange="getData()">
-                                                                @foreach($projectSites as $projectSite)
-                                                                    <option value="{{$projectSite['id']}}">{{$projectSite['project_name']}} - {{$projectSite['name']}}</option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group row">
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label>Select Subcontractors : </label>
-                                                        </div>
-                                                        <div class="col-md-4">
-                                                            <select class="form-control" id="subcontractor" name="subcontractor_id" onchange="getData()">
-                                                                @foreach($subcontractorData as $subcontractor)
-                                                                    <option value="{{$subcontractor['id']}}">{{$subcontractor['subcontractor_name']}}</option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group row" id="bill_project_site" hidden>
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label>Select Project Site : </label>
-                                                        </div>
-                                                        <div class="col-md-4">
-                                                            <select class="form-control" id="bill_project_site_id" name="bill_project_site_id" onchange="getData()">
-                                                                @foreach($billProjectSites as $projectSite)
-                                                                    <option value="{{$projectSite['id']}}">{{$projectSite['project_name']}} - {{$projectSite['name']}}</option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                <div class="form-actions noborder row submitButton">
-                                                    <div class="col-md-offset-3" style="margin-left: 26%">
-                                                        <button {{--type="submit"--}} class="btn red" onclick="getData()"><i class="fa fa-check"></i> Submit</button>
+                                                    <div class="col-md-4">
+                                                        <select class="form-control" id="report_type" name="report_type" onchange="getDivData()">
+                                                            <option value="sitewise_purchase_report">Purchase Report</option>
+                                                            <option value="sitewise_subcontractor_report">Subcontractor Report</option>
+                                                            <option value="sitewise_sales_receipt_report">Sales & Receipt Report</option>
+                                                            <option value="sitewise_salary_report">Salary Report</option>
+                                                            <option value="sitewise_mis_purchase_report">Mis. Purchase Report</option>
+                                                        </select>
                                                     </div>
                                                 </div>
-                                            {{--</form>--}}
-                                            <div class="downloadButton" id="downloadButton" hidden>
+                                                <div class="form-group row" id="dateDiv">
+                                                    <div class="col-md-3" style="text-align: right">
+                                                        <label>Date Range : </label>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="input-group input-large date-picker input-daterange" data-date-format="dd/mm/yyyy">
+                                                            <input type="text" class="form-control" name="start_date" id="start_date" value="{{$startDate}}" required="required">
+                                                                <span class="input-group-addon"> to </span>
+                                                            <input type="text" class="form-control" name="end_date" id="end_date" value="{{$endDate}}" required="required">
+                                                        </div>
+                                                        <span class="help-block"> Select date range </span>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row" id="project_sites">
+                                                    <div class="col-md-3" style="text-align: right">
+                                                        <label>Select Project Site : </label>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <select class="form-control" id="project_site_id" name="project_site_id" {{--onchange="getData()"--}}>
+                                                            @foreach($projectSites as $projectSite)
+                                                                <option value="{{$projectSite['id']}}">{{$projectSite['project_name']}} - {{$projectSite['name']}}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row" id="bill_project_site" hidden>
+                                                    <div class="col-md-3" style="text-align: right">
+                                                        <label>Select Project Site : </label>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <select class="form-control" id="bill_project_site_id" name="bill_project_site_id" {{--onchange="getData()"--}}>
+                                                            @foreach($billProjectSites as $projectSite)
+                                                                <option value="{{$projectSite['id']}}">{{$projectSite['project_name']}} - {{$projectSite['name']}}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row" id="subcontractor_project_site" hidden>
+                                                    <div class="col-md-3" style="text-align: right">
+                                                        <label>Select Project Site : </label>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <select class="form-control" id="subcontractor_project_site_id" name="subcontractor_project_site_id" onchange="getSubcontractor()">
+                                                            @foreach($subcontractorProjectSitesData as $projectSite)
+                                                                <option value="{{$projectSite['id']}}">{{$projectSite['project_name']}} - {{$projectSite['name']}}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row" id="subcontractor" hidden>
+                                                    <div class="col-md-3" style="text-align: right">
+                                                        <label>Select Subcontractors : </label>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <select class="form-control" id="subcontractor_id" name="subcontractor_id">
 
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-actions noborder row submitButton">
+                                                    <div class="col-md-offset-3" style="margin-left: 26%">
+                                                        <button class="btn red" onclick="getData()"><i class="fa fa-check"></i> Submit</button>
+                                                    </div>
+                                                </div>
+                                                <div class="downloadButton" id="downloadButton" hidden>
+
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -144,16 +152,32 @@
     <script src="/assets/global/plugins/select2/js/select2.full.min.js" type="text/javascript"></script>
     <script src="/assets/pages/scripts/components-select2.min.js" type="text/javascript"></script>
     <script>
-        function getData(){
+
+        function getDivData(){
             if($('#report_type').val() == 'sitewise_sales_receipt_report'){
                 $('#bill_project_site').show();
                 $('#project_sites').hide();
+                $('#subcontractor').hide();
+                $('#subcontractor_project_site').hide();
                 var projectSiteId = $('#bill_project_site_id').val();
+            }else if($('#report_type').val() == 'sitewise_subcontractor_report'){
+                $('#subcontractor_project_site').show();
+                $('#project_sites').hide();
+                $('#bill_project_site').hide();
+                $('#dateDiv').hide();
+                var projectSiteId = $('#subcontractor_project_site_id').val();
+                getSubcontractor();
             }else{
                 $('#bill_project_site').hide();
+                $('#subcontractor_project_site').hide();
+                $('#subcontractor').hide();
                 $('#project_sites').show();
                 var projectSiteId = $('#project_site_id').val();
             }
+        }
+
+        function getData(){
+            var projectSiteId = $('#subcontractor_project_site_id').val();
             $.ajax({
                 type : "POST",
                 url : "/reports/detail",
@@ -163,7 +187,7 @@
                     start_date : $('#start_date').val(),
                     end_date : $('#end_date').val(),
                     project_site_id : projectSiteId,
-                    subcontractor_id : $('#subcontractor').val()
+                    subcontractor_id : $('#subcontractor_id').val()
                 },
                 success : function(data,textStatus,xhr){
                     $('.submitButton').hide();
@@ -175,8 +199,27 @@
                 }
             });
 
-            $('#start_date,#end_date').change(function(){
+            /*$('#start_date,#end_date').change(function(){
                 getData();
+            });*/
+        }
+
+        function getSubcontractor(){
+            var projectSiteId = $('#subcontractor_project_site_id').val();
+            $.ajax({
+                type : "POST",
+                url : "/reports/subcontractor",
+                data : {
+                    _token : $('input[name="_token"]').val(),
+                    project_site_id : projectSiteId
+                },
+                success : function(data,textStatus,xhr){
+                    $('#subcontractor').show();
+                    $("#subcontractor_id").html(data);
+                },
+                error : function(errorData){
+
+                }
             });
         }
 
