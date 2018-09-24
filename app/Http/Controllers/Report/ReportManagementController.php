@@ -258,27 +258,6 @@ class ReportManagementController extends Controller{
             $companyHeader['address'] = env('ADDRESS');
             $companyHeader['contact_no'] = env('CONTACT_NO');
             $companyHeader['gstin_number'] = env('GSTIN_NUMBER');
-
-            if($reportType == 'sitewise_subcontractor_report'){
-                $subcontractorBill = new SubcontractorBill();
-                $subcontractorStructureId = $firstParameter;
-                $subcontractorBillStatus = new SubcontractorBillStatus();
-                $statusId = $subcontractorBillStatus->whereIn('slug',['approved','draft'])->get();
-                $subcontractorBillData = $subcontractorBill->where('sc_structure_id',$subcontractorStructureId)
-                    ->whereIn('subcontractor_bill_status_id',array_column($statusId->toArray(),'id'))//->orderBy('id')
-                    ->get();
-                $startDate = $subcontractorBillData->pluck('created_at')->first();
-                $endDate = $subcontractorBillData->pluck('created_at')->last();
-                $date = date('l, d F Y',strtotime($startDate)) .' - '. date('l, d F Y',strtotime($endDate));
-                $startYearID = $year->where('slug',(int)date('Y',strtotime($startDate)))->pluck('id')->first();
-                $endYearID = $year->where('slug',(int)date('Y',strtotime($endDate)))->pluck('id')->first();
-                $totalYears = $year->whereBetween('id',[$startYearID,$endYearID])->select('id','name','slug')->get();
-            }else{
-                $date = date('l, d F Y',strtotime($secondParameter)) .' - '. date('l, d F Y',strtotime($firstParameter));
-                $startYearID = $year->where('slug',(int)date('Y',strtotime($firstParameter)))->pluck('id')->first();
-                $endYearID = $year->where('slug',(int)date('Y',strtotime($secondParameter)))->pluck('id')->first();
-                $totalYears = $year->whereBetween('id',[$startYearID,$endYearID])->select('id','name','slug')->get();
-            }
             $months = $month->get();
             $iterator = 1;
             $monthlyTotal[0]['month'] = 'Month-Year';
@@ -294,7 +273,10 @@ class ReportManagementController extends Controller{
                         'Bill Date', 'Bill Create Date', 'Bill No', 'Vendor Name', 'Basic Amount', 'Tax Amount',
                         'Bill Amount', 'Monthly Total'
                     );
-
+                    $date = date('l, d F Y',strtotime($secondParameter)) .' - '. date('l, d F Y',strtotime($firstParameter));
+                    $startYearID = $year->where('slug',(int)date('Y',strtotime($firstParameter)))->pluck('id')->first();
+                    $endYearID = $year->where('slug',(int)date('Y',strtotime($secondParameter)))->pluck('id')->first();
+                    $totalYears = $year->whereBetween('id',[$startYearID,$endYearID])->select('id','name','slug')->get();
                     foreach ($totalYears as $thisYear){
                         foreach ($months as $month){
                             $monthlyTotal[$iterator]['month'] = $month['name'].'-'.$thisYear['name'];
@@ -470,6 +452,10 @@ class ReportManagementController extends Controller{
                     $data[$row] = array(
                         'Month', 'Employee Id', 'Employee Name', 'Type', 'Amount', 'Paid By', 'Monthly Total'
                     );
+                    $date = date('l, d F Y',strtotime($secondParameter)) .' - '. date('l, d F Y',strtotime($firstParameter));
+                    $startYearID = $year->where('slug',(int)date('Y',strtotime($firstParameter)))->pluck('id')->first();
+                    $endYearID = $year->where('slug',(int)date('Y',strtotime($secondParameter)))->pluck('id')->first();
+                    $totalYears = $year->whereBetween('id',[$startYearID,$endYearID])->select('id','name','slug')->get();
                     foreach ($totalYears as $thisYear){
                         foreach ($months as $month){
                             $monthlyTotal[$iterator]['month'] = $month['name'].'-'.$thisYear['name'];
@@ -643,6 +629,10 @@ class ReportManagementController extends Controller{
                     $data[$row] = array(
                         'Bill Date', 'Bill No.', 'Vendor Name', 'Item Name', 'Bill Amount', 'Monthly Total'
                     );
+                    $date = date('l, d F Y',strtotime($secondParameter)) .' - '. date('l, d F Y',strtotime($firstParameter));
+                    $startYearID = $year->where('slug',(int)date('Y',strtotime($firstParameter)))->pluck('id')->first();
+                    $endYearID = $year->where('slug',(int)date('Y',strtotime($secondParameter)))->pluck('id')->first();
+                    $totalYears = $year->whereBetween('id',[$startYearID,$endYearID])->select('id','name','slug')->get();
                     foreach ($totalYears as $thisYear){
                         foreach ($months as $month){
                             $monthlyTotal[$iterator]['month'] = $month['name'].'-'.$thisYear['name'];
@@ -819,6 +809,10 @@ class ReportManagementController extends Controller{
                     $totalBillData = $bill->where('quotation_id',$quotationId)
                                     ->whereIn('bill_status_id',array_column($statusId->toArray(),'id'))->orderBy('id')
                                     ->select('id','bill_status_id')->get();
+                    $date = date('l, d F Y',strtotime($secondParameter)) .' - '. date('l, d F Y',strtotime($firstParameter));
+                    $startYearID = $year->where('slug',(int)date('Y',strtotime($firstParameter)))->pluck('id')->first();
+                    $endYearID = $year->where('slug',(int)date('Y',strtotime($secondParameter)))->pluck('id')->first();
+                    $totalYears = $year->whereBetween('id',[$startYearID,$endYearID])->select('id','name','slug')->get();
                     foreach ($totalYears as $thisYear){
                         foreach ($months as $month){
                             $monthlyTotal[$iterator]['month'] = $month['name'].'-'.$thisYear['name'];
@@ -1054,12 +1048,26 @@ class ReportManagementController extends Controller{
                     $projectSite = new ProjectSite();
                     $subcontractorStructure = new SubcontractorStructure();
                     $subcontractorBillTransaction = new SubcontractorBillTransaction();
+                    $subcontractorBill = new SubcontractorBill();
                     $data[$row] = array(
                         ' Bill Date : (Created Date)', 'Bill No.', 'Basic Amount', 'GST', 'With Tax Amount', 'Transaction Amount', 'TDS', 'Retention',
                         'Hold', 'Debit', 'Other Recovery', 'Payable', 'Receipt', 'Total Paid', 'Remaining', 'Monthly Total'
                     );
                     $projectName = $projectSite->join('projects','projects.id','=','project_sites.project_id')
                         ->where('project_sites.id',$project_site_id)->pluck('projects.name')->first();
+
+                    $subcontractorStructureId = $firstParameter;
+                    $subcontractorBillStatus = new SubcontractorBillStatus();
+                    $statusId = $subcontractorBillStatus->whereIn('slug',['approved','draft'])->get();
+                    $subcontractorBillData = $subcontractorBill->where('sc_structure_id',$subcontractorStructureId)
+                        ->whereIn('subcontractor_bill_status_id',array_column($statusId->toArray(),'id'))//->orderBy('id')
+                        ->get();
+                    $startDate = $subcontractorBillData->pluck('created_at')->first();
+                    $endDate = $subcontractorBillData->pluck('created_at')->last();
+                    $date = date('l, d F Y',strtotime($startDate)) .' - '. date('l, d F Y',strtotime($endDate));
+                    $startYearID = $year->where('slug',(int)date('Y',strtotime($startDate)))->pluck('id')->first();
+                    $endYearID = $year->where('slug',(int)date('Y',strtotime($endDate)))->pluck('id')->first();
+                    $totalYears = $year->whereBetween('id',[$startYearID,$endYearID])->select('id','name','slug')->get();
                     $subcontractorStructureData = $subcontractorStructure->where('id',$subcontractorStructureId)->first();
                     $subcontractorCompanyName = $subcontractorStructureData->subcontractor->company_name;
                     if($subcontractorStructureData->contractType->slug == 'sqft'){

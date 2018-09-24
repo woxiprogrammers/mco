@@ -119,7 +119,7 @@
                                                         </select>
                                                     </div>
                                                 </div>
-                                                <div class="form-actions noborder row submitButton">
+                                                <div class="form-actions noborder row submitButton" id="submitButton">
                                                     <div class="col-md-offset-3" style="margin-left: 26%">
                                                         <button class="btn red" onclick="getData()"><i class="fa fa-check"></i> Submit</button>
                                                     </div>
@@ -155,29 +155,36 @@
 
         function getDivData(){
             if($('#report_type').val() == 'sitewise_sales_receipt_report'){
-                $('#bill_project_site').show();
+                $('#bill_project_site,#submitButton').show();
                 $('#project_sites').hide();
                 $('#subcontractor').hide();
                 $('#subcontractor_project_site').hide();
-                var projectSiteId = $('#bill_project_site_id').val();
+                $('#dateDiv,#downloadButton').hide();
+
             }else if($('#report_type').val() == 'sitewise_subcontractor_report'){
-                $('#subcontractor_project_site').show();
+                $('#subcontractor_project_site,#submitButton').show();
                 $('#project_sites').hide();
                 $('#bill_project_site').hide();
-                $('#dateDiv').hide();
-                var projectSiteId = $('#subcontractor_project_site_id').val();
+                $('#dateDiv,#downloadButton').hide();
+
                 getSubcontractor();
             }else{
                 $('#bill_project_site').hide();
                 $('#subcontractor_project_site').hide();
-                $('#subcontractor').hide();
-                $('#project_sites').show();
-                var projectSiteId = $('#project_site_id').val();
+                $('#subcontractor,#downloadButton').hide();
+                $('#project_sites,#submitButton').show();
+                $('#dateDiv').show();
             }
         }
 
         function getData(){
-            var projectSiteId = $('#subcontractor_project_site_id').val();
+            if($('#report_type').val() == 'sitewise_sales_receipt_report'){
+                var projectSiteId = $('#bill_project_site_id').val();
+            }else if($('#report_type').val() == 'sitewise_subcontractor_report'){
+                var projectSiteId = $('#subcontractor_project_site_id').val();
+            }else{
+                var projectSiteId = $('#project_site_id').val();
+            }
             $.ajax({
                 type : "POST",
                 url : "/reports/detail",
