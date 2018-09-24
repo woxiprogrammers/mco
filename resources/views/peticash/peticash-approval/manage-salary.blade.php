@@ -97,9 +97,9 @@
                                                     <th> Name </th>
                                                     <th> Type </th>
                                                     <th> Amount</th>
+                                                    <th> Attended Days </th>
                                                     <th> Requested By </th>
                                                     <th> Date </th>
-                                                    <th> Site Details </th>
                                                     <th> Status </th>
                                                     <th> Action </th>
 
@@ -110,7 +110,16 @@
                                                     <th></th>
                                                     <th> <input type="text" class="form-filter" name="emp_id" id="emp_id"> </th>
                                                     <th> <input type="text" class="form-control form-filter" name="search_name" id="search_name"> </th>
-                                                    <th> <input type="hidden" class="form-control form-filter" name="postdata" id="postdata"></th>
+                                                    <th>
+                                                        <input type="hidden" class="form-control form-filter" name="postdata" id="postdata">
+                                                        <select class="form-control" id="txn_id" name="txn_id">
+                                                            <option value="0">ALL</option>
+                                                            @foreach($txnTypes as $txn)
+                                                                <option value="{{$txn['id']}}">{{$txn['name']}}</option>
+                                                            @endforeach
+                                                        </select>
+                                                        <input type="hidden" class="form-control form-filter" name="txnType" id="txnType">
+                                                    </th>
                                                     <th></th>
                                                     <th></th>
                                                     <th></th>
@@ -418,6 +427,7 @@
             var year = $('#year').val();
             var month = $('#month').val();
             var status_id = $('#status_id').val();
+            var txn_id = $('#txn_id').val();
             var search_name = $('#search_name').val();
             var emp_id = $('#emp_id').val();
 
@@ -432,6 +442,7 @@
             $("input[name='search_name']").val(search_name);
             $("input[name='emp_id']").val(emp_id);
             $("input[name='status']").val(status_id);
+            $("input[name='txnType']").val(txn_id);
             $(".filter-submit").trigger('click');
         });
 
@@ -442,6 +453,7 @@
             var year = $('#year').val();
             var month = $('#month').val();
             var status_id = $('#status_id').val();
+            var txn_id = $('#txn_id').val();
             var search_name = $('#search_name').val();
             var emp_id = $('#emp_id').val();
 
@@ -456,16 +468,18 @@
             $("input[name='search_name']").val(search_name);
             $("input[name='emp_id']").val(emp_id);
             $("input[name='status']").val(status_id);
+            $("input[name='txnType']").val(txn_id);
             $(".filter-submit").trigger('click');
         });
 
-        $("#status_id").on('change',function(){
+        $("#status_id, #txn_id").on('change',function(){
             var client_id = $('#client_id').val();
             var project_id = $('#project_id').val();
             var site_id = $('#site_id').val();
             var year = $('#year').val();
             var month = $('#month').val();
             var status_id = $('#status_id').val();
+            var txn_id = $('#txn_id').val();
             var search_name = $('#search_name').val();
             var emp_id = $('#emp_id').val();
 
@@ -480,6 +494,7 @@
             $("input[name='search_name']").val(search_name);
             $("input[name='emp_id']").val(emp_id);
             $("input[name='status']").val(status_id);
+            $("input[name='txnType']").val(txn_id);
             $(".filter-submit").trigger('click');
         });
 
@@ -490,6 +505,7 @@
             var year = $('#year').val();
             var month = $('#month').val();
             var status_id = $('#status_id').val();
+            var txn_id = $('#txn_id').val();
             var search_name = $('#search_name').val();
             var emp_id = $('#emp_id').val();
 
@@ -504,6 +520,7 @@
             $("input[name='search_name']").val(search_name);
             $("input[name='emp_id']").val(emp_id);
             $("input[name='status']").val(status_id);
+            $("input[name='txnType']").val(txn_id);
             $(".filter-submit").trigger('click');
         });
 

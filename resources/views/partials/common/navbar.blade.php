@@ -174,15 +174,15 @@
                                                 </a>
                                             </li>
                                         @endif
-                                        @if(($user->roles[0]->role->slug == 'superadmin' || $user->roles[0]->role->slug == 'admin'))
-                                            <li aria-haspopup="true">
-                                                <a href="/address/manage" class="nav-link nav-toggle ">
-                                                    <i class="fa fa-plus"></i> Address
-                                                </a>
-                                            </li>
-                                        @endif
-                                    </ul>
-                                </li>
+                                        @if(($user->roles[0]->role->slug == 'superadmin') || ($user->roles[0]->role->slug == 'admin'))
+                                         <li aria-haspopup="true">
+                                                        <a href="/address/manage" class="nav-link nav-toggle ">
+                                                            <i class="fa fa-plus"></i> Address
+                                                        </a>
+                                                    </li>
+                                                @endif
+                                            </ul>
+                                        </li>
 
                             <?php $hasManageUserPermission = \App\Helper\ACLHelper::checkModuleAcl('manage-user'); ?>
                             @if($hasManageUserPermission)
