@@ -40,6 +40,7 @@ use App\Unit;
 use App\Year;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -1085,11 +1086,6 @@ class ReportManagementController extends Controller{
                     $subcontractorBillData = $subcontractorBill->where('sc_structure_id',$subcontractorStructureId)
                         ->whereIn('subcontractor_bill_status_id',array_column($statusId->toArray(),'id'))//->orderBy('id')
                         ->get();
-                    $startDate = $subcontractorBillData->pluck('created_at')->first();
-                    $endDate = $subcontractorBillData->pluck('created_at')->last();
-                    $startYearID = $year->where('slug',(int)date('Y',strtotime($startDate)))->pluck('id')->first();
-                    $endYearID = $year->where('slug',(int)date('Y',strtotime($endDate)))->pluck('id')->first();
-                    $totalYears = $year->whereBetween('id',[$startYearID,$endYearID])->select('id','name','slug')->get();
                     foreach ($totalYears as $thisYear){
                         foreach ($months as $month){
                             $monthlyTotal[$iterator]['month'] = $month['name'].'-'.$thisYear['name'];
@@ -1307,17 +1303,179 @@ class ReportManagementController extends Controller{
                     break;
 
                 case 'sitewise_subcontractor_summary_report' :
+                    $projectSite = new ProjectSite();
                     $subcontractorStructure = new SubcontractorStructure();
                     $subcontractorBill = new SubcontractorBill();
                     $subcontractorBillStatus = new SubcontractorBillStatus();
+                    $subcontractorBillTransaction = new SubcontractorBillTransaction();
                     $approvedBillStatusId = $subcontractorBillStatus->where('slug','approved')->pluck('id');
-                    $subcontractorStructureIds = $subcontractorBill->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
-                        ->where('subcontractor_structure.project_site_id',$project_site_id)
-                        ->where('subcontractor_bills.subcontractor_bill_status_id',$approvedBillStatusId)
-                        ->orderBy('subcontractor_structure.id','asc')
-                        ->distinct('subcontractor_structure.id')
-                        ->pluck('subcontractor_structure.id');
-                    dd($subcontractorStructureIds);
+                    $subcontractorData = $subcontractorBill->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
+                                            ->join('subcontractor','subcontractor.id','=','subcontractor_structure.subcontractor_id')
+                                            ->where('subcontractor_bills.subcontractor_bill_status_id',$approvedBillStatusId)
+                                            ->where('subcontractor_structure.project_site_id',$project_site_id)
+                                            ->distinct('subcontractor_structure.subcontractor_id')
+                                            ->orderBy('subcontractor.subcontractor_name','asc')
+                                            ->select('subcontractor.id','subcontractor.subcontractor_name')->get();
+                    $data[$row] = array(
+                        ' Subcontractor Name', 'Basic Amount', 'Tax', 'With Tax Amount', 'Transaction Amount', 'TDS', 'Retention',
+                        'Hold', 'Debit', 'Other Recovery', 'Payable', 'Receipt', 'Balance Amount'
+                    );
+                    $row = 1;
+                    $statusId = $subcontractorBillStatus->where('slug','approved')->pluck('id');
+                    $totalBasicAmount = $totalGst = $totalAmount = $totalTransactionAmount = $totalTds = $totalRetention = $totalHold = 0;
+                    $totalDebit = $totalOtherRecovery = $totalReceipt = $totalBalanceRemaining = 0;
+                    foreach($subcontractorData as $subcontractor) {
+                        $data[$row]['subcontractor_name'] = $subcontractor['subcontractor_name'];
+                        $basic_amount = $gst = $finalAmount = $transaction_amount = $tds = $retention = $hold = 0;
+                        $debit = $other_recovery = $receipt = $balanceRemaining = 0;
+
+                        $subcontractorStructureData = $subcontractorStructure->where('subcontractor_id', $subcontractor['id'])->get();
+                        foreach ($subcontractorStructureData as $subcontractorStructure) {
+                            if ($subcontractorStructure->contractType->slug == 'sqft') {
+                                $rate = round($subcontractorStructure['rate'],3);
+                            } else {
+                                $rate = round(($subcontractorStructure['rate'] * $subcontractorStructure['total_work_area']),3);
+                            }
+                            $subcontractorBillData = $subcontractorBill->where('sc_structure_id', $subcontractorStructure['id'])
+                                ->where('subcontractor_bill_status_id', $statusId)
+                                ->get();
+                            foreach ($subcontractorBillData as $subcontractorBill) {
+                                $subcontractorBillTaxes = $subcontractorBill->subcontractorBillTaxes;
+                                $subTotal = round(($subcontractorBill['qty'] * $rate),3);
+                                $taxTotal = 0;
+                                foreach ($subcontractorBillTaxes as $key => $subcontractorBillTaxData) {
+                                    $taxTotal += ($subcontractorBillTaxData['percentage'] * $subTotal) / 100;
+                                }
+                                $basic_amount += $subTotal;
+                                $gst += round($taxTotal,3);
+                                $finalAmount += round(($subTotal + $taxTotal),3);
+                                $billTransactionData = $subcontractorBillTransaction->where('subcontractor_bills_id', $subcontractorBill['id'])->orderBy('created_at', 'asc')->get();
+                                foreach ($billTransactionData as $key => $billTransaction) {
+                                    $transaction_amount += $billTransaction['subtotal'];
+                                    $tds += $billTransaction['tds_amount'];
+                                    $retention += $billTransaction['retention_amount'];
+                                    $hold += $billTransaction['hold'];
+                                    $debit += $billTransaction['debit'];
+                                    $other_recovery += $billTransaction['other_recovery'];
+                                    $receipt += $billTransaction['total'];
+                                }
+                            }
+                        }
+                        $data[$row]['basic_amount'] = number_format($basic_amount,3);
+                        $data[$row]['gst'] = number_format($gst,3);
+                        $data[$row]['total_amount'] = number_format($finalAmount,3);
+                        $data[$row]['transaction_amount'] = number_format($transaction_amount,3);
+                        $data[$row]['tds'] = number_format($tds,3);
+                        $data[$row]['retention'] = number_format($retention,3);
+                        $data[$row]['hold'] = number_format($hold,3);
+                        $data[$row]['debit'] = number_format($debit,3);
+                        $data[$row]['other_recovery'] = number_format($other_recovery,3);
+                        $data[$row]['payable'] = number_format($finalAmount,3);
+                        $data[$row]['receipt'] = number_format($receipt,3);
+                        $data[$row]['balance_remaining'] = number_format($finalAmount - $receipt,3);
+                        $totalBasicAmount += $basic_amount; $totalGst += $gst; $totalAmount += $finalAmount;
+                        $totalTransactionAmount += $transaction_amount; $totalTds += $tds; $totalRetention += $retention;
+                        $totalHold += $hold; $totalDebit += $debit; $totalOtherRecovery += $other_recovery;
+                        $totalReceipt += $receipt; $totalBalanceRemaining += ($finalAmount - $receipt);
+                        $row++;
+                    }
+                    $data[$row]['make_bold'] = true;
+                    $totalRow = array(
+                        'Total', number_format($totalBasicAmount), number_format($totalGst), number_format($totalAmount),
+                        number_format($totalTransactionAmount), number_format($totalTds),
+                        number_format($totalRetention), number_format($totalHold), number_format($totalDebit), number_format($totalOtherRecovery),
+                        number_format($totalAmount), number_format($totalReceipt), number_format($totalBalanceRemaining)
+                    );
+                    $data[$row] = array_merge($data[$row],$totalRow);
+                    $projectName = $projectSite->join('projects','projects.id','=','project_sites.project_id')
+                        ->where('project_sites.id',$project_site_id)->pluck('projects.name')->first();
+                    $date = date('l, d F Y',strtotime(Carbon::now()));
+                    $reportType = 'sitewise_subcontractor_summary';
+                    Excel::create($reportType."_".$currentDate, function($excel) use($monthlyTotal, $data, $reportType, $header, $companyHeader, $date, $projectName) {
+                        $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(10);
+                        $excel->sheet($reportType, function($sheet) use($monthlyTotal, $data, $header, $companyHeader, $date, $projectName) {
+                            $objDrawing = new \PHPExcel_Worksheet_Drawing();
+                            $objDrawing->setPath(public_path('/assets/global/img/logo.jpg')); //your image path
+                            $objDrawing->setWidthAndHeight(148,74);
+                            $objDrawing->setResizeProportional(true);
+                            $objDrawing->setCoordinates('A1');
+                            $objDrawing->setWorksheet($sheet);
+
+                            $sheet->mergeCells('A2:H2');
+                            $sheet->cell('A2', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['company_name']);
+                            });
+
+                            $sheet->mergeCells('A3:H3');
+                            $sheet->cell('A3', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['designation']);
+                            });
+
+                            $sheet->mergeCells('A4:H4');
+                            $sheet->cell('A4', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['address']);
+                            });
+
+                            $sheet->mergeCells('A5:H5');
+                            $sheet->cell('A5', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['contact_no']);
+                            });
+
+                            $sheet->mergeCells('A6:H6');
+                            $sheet->cell('A6', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['gstin_number']);
+                            });
+
+                            $sheet->mergeCells('A7:H7');
+                            $sheet->cell('A7', function($cell) use ($projectName){
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue('Subcontractor Summary Report - '.$projectName);
+                            });
+
+                            $sheet->mergeCells('A8:H8');
+                            $sheet->cell('A8', function($cell) use($date) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($date);
+                            });
+                            $row = 10;
+                            $row++; $row++;
+                            $headerRow =  $row+1;
+                            foreach($data as $key => $rowData){
+                                $next_column = 'A';
+                                $row++;
+                                if(array_key_exists('make_bold',$rowData)){
+                                    $setBold = true;
+                                    unset($rowData['make_bold']);
+                                }else{
+                                    $setBold = false;
+                                }
+                                foreach($rowData as $key1 => $cellData){
+                                    $current_column = $next_column++;
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData,$row,$sheet,$headerRow,$setBold) {
+                                        $sheet->getRowDimension($row)->setRowHeight(20);
+                                        ($row == $headerRow || $setBold) ? $cell->setFontWeight('bold') : null;
+                                        $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                                        $cell->setAlignment('center')->setValignment('center');
+                                        $cell->setValue($cellData);
+
+                                    });
+                                }
+                            }
+                            $row++;
+                        });
+                    })->export('xls');
                     break;
 
                 default :
