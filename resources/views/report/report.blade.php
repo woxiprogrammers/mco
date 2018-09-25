@@ -114,7 +114,7 @@
                                                         <label>Select Subcontractors : </label>
                                                     </div>
                                                     <div class="col-md-4">
-                                                        <select class="form-control" id="subcontractor_id" name="subcontractor_id">
+                                                        <select class="form-control" id="subcontractor_id" name="subcontractor_id" onchange="getData()">
 
                                                         </select>
                                                     </div>
