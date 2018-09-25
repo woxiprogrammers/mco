@@ -57,7 +57,7 @@
                                                             <option value="sitewise_salary_report">Salary Report</option>
                                                             <option value="sitewise_sales_receipt_report">Sales & Receipt Report</option>
                                                             <option value="sitewise_subcontractor_report">Subcontractor Report</option>
-                                                            <option value="sitewise_subcontractor_summary_report">Subcontractor Summary Report</option>
+                                                            {{--<option value="sitewise_subcontractor_summary_report">Subcontractor Summary Report</option>--}}
                                                         </select>
                                                     </div>
                                                 </div>
