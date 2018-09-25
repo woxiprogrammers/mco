@@ -1329,7 +1329,9 @@ class ReportManagementController extends Controller{
                         $basic_amount = $gst = $finalAmount = $transaction_amount = $tds = $retention = $hold = 0;
                         $debit = $other_recovery = $receipt = $balanceRemaining = 0;
 
-                        $subcontractorStructureData = $subcontractorStructure->where('subcontractor_id', $subcontractor['id'])->get();
+                        $subcontractorStructureData = $subcontractorStructure->where('subcontractor_id', $subcontractor['id'])
+                                                        ->where('project_site_id',$project_site_id)
+                                                            ->get();
                         foreach ($subcontractorStructureData as $subcontractorStructure) {
                             if ($subcontractorStructure->contractType->slug == 'sqft') {
                                 $rate = round($subcontractorStructure['rate'],3);

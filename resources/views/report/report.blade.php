@@ -173,7 +173,7 @@
                 $('#subcontractor_project_site,#submitButton').show();
                 $('#project_sites').hide();
                 $('#bill_project_site').hide();
-                $('#dateDiv,#downloadButton').hide();
+                $('#dateDiv,#downloadButton,#subcontractor').hide();
             }else{
                 $('#bill_project_site').hide();
                 $('#subcontractor_project_site').hide();
@@ -235,6 +235,8 @@
 
                     }
                 });
+            }else{
+                getData();
             }
         }
 
