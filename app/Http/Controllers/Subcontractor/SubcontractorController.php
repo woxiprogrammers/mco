@@ -303,7 +303,10 @@ class SubcontractorController extends Controller
 
             if($request->has('project_name') && $filterFlag == true){
                 $projectSites = Project::join('project_sites','project_sites.project_id','=','projects.id')->where('projects.name','ilike','%'.$request['project_name'].'%')->select('project_sites.id')->get()->toArray();
-                $ids = SubcontractorStructure::where('project_site_id','!=', 0)->whereIn('project_site_id',$projectSites)->orderBy('created_at','desc')->pluck('id');
+                $ids = SubcontractorStructure::where('project_site_id','!=', 0)
+                            ->whereIn('id',$ids)
+                            ->whereIn('project_site_id',$projectSites)
+                            ->orderBy('created_at','desc')->pluck('id');
                 if(count($ids) <= 0) {
                     $filterFlag = false;
                 }
@@ -311,7 +314,8 @@ class SubcontractorController extends Controller
 
             if($request->has('subcontractor_name') && $filterFlag == true){
                 $subContractorid = Subcontractor::where('company_name','ilike','%'.$request['subcontractor_name'].'%')->select('id')->get()->toArray();
-                $ids = SubcontractorStructure::whereIn('subcontractor_id',$subContractorid)->orderBy('created_at','desc')->pluck('id');
+                $ids = SubcontractorStructure::whereIn('subcontractor_id',$subContractorid)
+                            ->whereIn('id',$ids)->orderBy('created_at','desc')->pluck('id');
                 if(count($ids) <= 0) {
                     $filterFlag = false;
                 }
@@ -722,19 +726,21 @@ class SubcontractorController extends Controller
                 }
                 $finalTotal = round(($subTotal + $taxTotal),3);
             }
-            $billNo = 1;
+            $billNo = 0;
             foreach($totalBills as $billId){
                 $status = SubcontractorBill::join('subcontractor_bill_status','subcontractor_bill_status.id','=','subcontractor_bills.subcontractor_bill_status_id')
                                 ->where('subcontractor_bills.id',$billId)->pluck('subcontractor_bill_status.slug')->first();
-                if($status != 'disapproved'){
+                if($status == 'disapproved'){
+                    $billName = "-";
+                }else{
+                    ++$billNo;
                     if($billId == $subcontractorStructureBillId){
-                        $billName = "R.A. ".$billNo;
+                        $billName = "R. A. - ".($billNo);
                         break;
                     }
-                }else{
-                    $billName = '-';
+
+
                 }
-                $billNo++;
             }
             $noOfFloors = $totalBills->count();
             $BillTransactionTotals = SubcontractorBillTransaction::where('subcontractor_bills_id',$subcontractorBill->id)->pluck('total')->toArray();
