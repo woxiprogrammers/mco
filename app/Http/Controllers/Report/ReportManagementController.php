@@ -215,18 +215,25 @@ class ReportManagementController extends Controller{
                     $subcontractorBill = new SubcontractorBill();
                     $subcontractorBillStatus = new SubcontractorBillStatus();
                     $approvedBillStatusId = $subcontractorBillStatus->where('slug','approved')->pluck('id');
-                    Log::info('123432');
                     $subcontractorStructureIds = $subcontractorBill->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
+                            ->join('subcontractor_structure_types','subcontractor_structure_types.id','=','subcontractor_structure.sc_structure_type_id')
+                            ->join('summaries','summaries.id','=','subcontractor_structure.summary_id')
                             ->where('subcontractor_structure.project_site_id',$globalProjectSiteId)
                             ->where('subcontractor_structure.subcontractor_id',$request['subcontractor_id'])
                             ->where('subcontractor_bills.subcontractor_bill_status_id',$approvedBillStatusId)
                             ->orderBy('subcontractor_structure.id','asc')
                             ->distinct('subcontractor_structure.id')
-                            ->pluck('subcontractor_structure.id');
-                    Log::info($subcontractorStructureIds);
+                            ->select('subcontractor_structure.id','subcontractor_structure_types.name','summaries.name as summary_name','subcontractor_structure.created_at')->get();
                     for($iterator = 0; $iterator < count($subcontractorStructureIds); $iterator++){
-                        $downloadButtonDetails[$iterator]['id'] = $subcontractorStructureIds[$iterator];
+                        $downloadButtonDetails[$iterator]['id'] = $subcontractorStructureIds[$iterator]['id'];
+                        $downloadButtonDetails[$iterator]['type'] = $subcontractorStructureIds[$iterator]['name'];
+                        $downloadButtonDetails[$iterator]['summary_name'] = $subcontractorStructureIds[$iterator]['summary_name'];
+                        $downloadButtonDetails[$iterator]['created_at'] = $subcontractorStructureIds[$iterator]['created_at'];
                     }
+                    break;
+
+                case 'sitewise_subcontractor_summary_report' :
+                        $downloadButtonDetails[0]['show_button'] = true;
                     break;
             }
             $subcontractorId = $request['subcontractor_id'];
@@ -1297,6 +1304,20 @@ class ReportManagementController extends Controller{
 
                         });
                     })->export('xls');
+                    break;
+
+                case 'sitewise_subcontractor_summary_report' :
+                    $subcontractorStructure = new SubcontractorStructure();
+                    $subcontractorBill = new SubcontractorBill();
+                    $subcontractorBillStatus = new SubcontractorBillStatus();
+                    $approvedBillStatusId = $subcontractorBillStatus->where('slug','approved')->pluck('id');
+                    $subcontractorStructureIds = $subcontractorBill->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
+                        ->where('subcontractor_structure.project_site_id',$project_site_id)
+                        ->where('subcontractor_bills.subcontractor_bill_status_id',$approvedBillStatusId)
+                        ->orderBy('subcontractor_structure.id','asc')
+                        ->distinct('subcontractor_structure.id')
+                        ->pluck('subcontractor_structure.id');
+                    dd($subcontractorStructureIds);
                     break;
 
                 default :
