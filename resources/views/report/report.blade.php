@@ -52,11 +52,12 @@
                                                     </div>
                                                     <div class="col-md-4">
                                                         <select class="form-control" id="report_type" name="report_type" onchange="getDivData()">
-                                                            <option value="sitewise_purchase_report">Purchase Report</option>
-                                                            <option value="sitewise_subcontractor_report">Subcontractor Report</option>
-                                                            <option value="sitewise_sales_receipt_report">Sales & Receipt Report</option>
-                                                            <option value="sitewise_salary_report">Salary Report</option>
                                                             <option value="sitewise_mis_purchase_report">Mis. Purchase Report</option>
+                                                            <option value="sitewise_purchase_report">Purchase Report</option>
+                                                            <option value="sitewise_salary_report">Salary Report</option>
+                                                            <option value="sitewise_sales_receipt_report">Sales & Receipt Report</option>
+                                                            <option value="sitewise_subcontractor_report">Subcontractor Report</option>
+                                                            <option value="sitewise_subcontractor_summary_report">Subcontractor Summary Report</option>
                                                         </select>
                                                     </div>
                                                 </div>
@@ -168,6 +169,11 @@
                 $('#dateDiv,#downloadButton').hide();
 
                 getSubcontractor();
+            }else if($('#report_type').val() == 'sitewise_subcontractor_summary_report'){
+                $('#subcontractor_project_site,#submitButton').show();
+                $('#project_sites').hide();
+                $('#bill_project_site').hide();
+                $('#dateDiv,#downloadButton').hide();
             }else{
                 $('#bill_project_site').hide();
                 $('#subcontractor_project_site').hide();
@@ -212,22 +218,24 @@
         }
 
         function getSubcontractor(){
-            var projectSiteId = $('#subcontractor_project_site_id').val();
-            $.ajax({
-                type : "POST",
-                url : "/reports/subcontractor",
-                data : {
-                    _token : $('input[name="_token"]').val(),
-                    project_site_id : projectSiteId
-                },
-                success : function(data,textStatus,xhr){
-                    $('#subcontractor').show();
-                    $("#subcontractor_id").html(data);
-                },
-                error : function(errorData){
+            if($('#report_type').val() == 'sitewise_subcontractor_report'){
+                var projectSiteId = $('#subcontractor_project_site_id').val();
+                $.ajax({
+                    type : "POST",
+                    url : "/reports/subcontractor",
+                    data : {
+                        _token : $('input[name="_token"]').val(),
+                        project_site_id : projectSiteId
+                    },
+                    success : function(data,textStatus,xhr){
+                        $('#subcontractor').show();
+                        $("#subcontractor_id").html(data);
+                    },
+                    error : function(errorData){
 
-                }
-            });
+                    }
+                });
+            }
         }
 
     </script>

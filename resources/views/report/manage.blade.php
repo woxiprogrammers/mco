@@ -14,32 +14,54 @@
             <?php $iterator = 1;?>
             @foreach($downloadButtonDetails as $downloadButton)
                 {!! csrf_field() !!}
-                <div class="form-body">
-                    <div class="form-group row">
-                        <div class="col-md-3" style="text-align: right">
-                            <label for="name" class="control-label">Excel Sheet {{$iterator}}</label>
-                            <span>*</span>
-                        </div>
-                        @if(array_key_exists('start_limit',$downloadButton))
-                            <div class="col-md-4" style="text-align: center">
-                                <label for="name" class="control-label"><b>Records {{$downloadButton['start_limit']}} - {{$downloadButton['end_limit']}}</b>  ( From <i>{{date('d M Y',strtotime($downloadButton['end_date']))}}</i> - <i>{{date('d M Y',strtotime($downloadButton['start_date']))}}</i> )</label>
+                @if($reportType == 'sitewise_subcontractor_report')
+                    <div class="form-body">
+                        <div class="form-group row">
+                            <div class="col-md-3" style="text-align: right">
+                                <label for="name" class="control-label">Excel Sheet {{$iterator}}</label>
+                                <span>*</span>
                             </div>
-                        @endif
-                        <div class="btn-group">
-                            <div class="btn blue">
-                                @if($reportType == 'sitewise_subcontractor_report')
+                            <div class="col-md-4" style="text-align: center">
+                                <label for="name" class="control-label"><b>Type - {{$downloadButton['type']}} : Summary - {{$downloadButton['summary_name']}}</b>  ( Created On <i>{{date('d M Y',strtotime($downloadButton['created_at']))}}</i> )</label>
+                            </div>
+                            <div class="btn-group">
+                                <div class="btn blue">
                                     <a href="javascript:window.open('/reports/get-report/{{$reportType}}/{{$project_site_id}}/{{$downloadButton['id']}}/null');" style="color: white"> Download
                                         <i class="fa fa-download"></i>
                                     </a>
-                                @else
-                                    <a href="javascript:window.open('/reports/get-report/{{$reportType}}/{{$project_site_id}}/{{$downloadButton['start_date']}}/{{$downloadButton['end_date']}}');" style="color: white"> Download
-                                        <i class="fa fa-download"></i>
-                                    </a>
-                                @endif
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                @else
+                    <div class="form-body">
+                        <div class="form-group row">
+                            <div class="col-md-3" style="text-align: right">
+                                <label for="name" class="control-label">Excel Sheet {{$iterator}}</label>
+                                <span>*</span>
+                            </div>
+                            @if(array_key_exists('start_limit',$downloadButton))
+                                <div class="col-md-4" style="text-align: center">
+                                    <label for="name" class="control-label"><b>Records {{$downloadButton['start_limit']}} - {{$downloadButton['end_limit']}}</b>  ( From <i>{{date('d M Y',strtotime($downloadButton['end_date']))}}</i> - <i>{{date('d M Y',strtotime($downloadButton['start_date']))}}</i> )</label>
+                                </div>
+                            @endif
+                            <div class="btn-group">
+                                <div class="btn blue">
+                                    @if($reportType == 'sitewise_subcontractor_summary_report')
+                                        <a href="javascript:window.open('/reports/get-report/{{$reportType}}/{{$project_site_id}}/null/null');" style="color: white"> Download
+                                            <i class="fa fa-download"></i>
+                                        </a>
+                                    @else
+                                        <a href="javascript:window.open('/reports/get-report/{{$reportType}}/{{$project_site_id}}/{{$downloadButton['start_date']}}/{{$downloadButton['end_date']}}');" style="color: white"> Download
+                                            <i class="fa fa-download"></i>
+                                        </a>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
                 <?php $iterator++;?>
             @endforeach
         @endif
