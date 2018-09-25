@@ -57,7 +57,7 @@
                                                             <option value="sitewise_salary_report">Salary Report</option>
                                                             <option value="sitewise_sales_receipt_report">Sales & Receipt Report</option>
                                                             <option value="sitewise_subcontractor_report">Subcontractor Report</option>
-                                                            {{--<option value="sitewise_subcontractor_summary_report">Subcontractor Summary Report</option>--}}
+                                                            <option value="sitewise_subcontractor_summary_report">Subcontractor Summary Report</option>
                                                         </select>
                                                     </div>
                                                 </div>
@@ -186,7 +186,7 @@
         function getData(){
             if($('#report_type').val() == 'sitewise_sales_receipt_report'){
                 var projectSiteId = $('#bill_project_site_id').val();
-            }else if($('#report_type').val() == 'sitewise_subcontractor_report'){
+            }else if($('#report_type').val() == 'sitewise_subcontractor_report' || $('#report_type').val() == 'sitewise_subcontractor_summary_report'){
                 var projectSiteId = $('#subcontractor_project_site_id').val();
             }else{
                 var projectSiteId = $('#project_site_id').val();
