@@ -60,6 +60,8 @@ class ReportManagementController extends Controller{
             $quotation = new Quotation();
             $bill = new Bill();
             $billStatus = new BillStatus();
+            $month = new Month();
+            $year = new Year();
             $startDate = date('d/m/Y',strtotime(Carbon::now()->subDays(30)));
             $endDate = date('d/m/Y',strtotime(Carbon::now()));
             $projectSites = $projectSite->join('projects','projects.id','=','project_sites.project_id')
@@ -84,7 +86,11 @@ class ReportManagementController extends Controller{
                                 ->distinct('project_sites.id')
                                 ->orderBy('projects.name','asc')
                                 ->select('project_sites.id','project_sites.name','project_sites.address','projects.name as project_name')->get()->toArray();
-            return view('report.report')->with(compact('startDate','endDate','projectSites','billProjectSites','subcontractorProjectSitesData'));
+
+            $monthData = $month->all();
+            $yearData = $year->all();
+
+            return view('report.report')->with(compact('startDate','endDate','projectSites','billProjectSites','subcontractorProjectSitesData','monthData','yearData'));
 
         } catch(\Exception $e) {
             $data = [
@@ -209,6 +215,7 @@ class ReportManagementController extends Controller{
                         if(count($billCreatedDate) > 0){
                             $downloadButtonDetails[$iterator]['start_date'] = $billCreatedDate->last();
                             $downloadButtonDetails[$iterator]['end_date'] = $billCreatedDate->first();
+
                         }
                     break;
 
@@ -236,6 +243,12 @@ class ReportManagementController extends Controller{
                 case 'sitewise_subcontractor_summary_report' :
                         $downloadButtonDetails[0]['show_button'] = true;
                     break;
+
+                case 'sitewise_indirect_expenses_report' :
+                    $downloadButtonDetails[0]['start_month_id'] = $request['start_month_id'];
+                    $downloadButtonDetails[0]['end_month_id'] = $request['end_month_id'];
+                    $downloadButtonDetails[0]['year_id'] = $request['year_id'];
+                    break;
             }
             $subcontractorId = $request['subcontractor_id'];
             $reportType = $request['report_name'];
@@ -252,8 +265,9 @@ class ReportManagementController extends Controller{
         }
     }
 
-    public function downloadDetailReport(Request $request,$reportType,$project_site_id,$firstParameter,$secondParameter) {
+    public function downloadDetailReport(Request $request,$reportType,$project_site_id,$firstParameter,$secondParameter,$thirdParameter) {
         try{
+            //dd($reportType,$project_site_id,$firstParameter,$secondParameter,$thirdParameter);
             $year = new Year();
             $month = new Month();
             $currentDate = date('d_m_Y_h_i_s',strtotime(Carbon::now()));
@@ -1476,6 +1490,170 @@ class ReportManagementController extends Controller{
                                 }
                             }
                             $row++;
+                        });
+                    })->export('xls');
+                    break;
+
+                case 'sitewise_indirect_expenses_report' :
+                    $projectSite = new ProjectSite();
+                    $quotation = new Quotation();
+                    $bill = new Bill();
+                    $billStatus = new BillStatus();
+                    $subcontractorStructure = new SubcontractorStructure();
+                    $subcontractorBill = new SubcontractorBill();
+                    $purchaseOrderBill = new PurchaseOrderBill();
+                    $data[$row] = array(
+                        'Month - Year', 'Sales GST', 'Subcontractor GST', 'Purchase GST', 'GST'
+                    );
+                    $startMonth = $month->where('id',$firstParameter)->first();
+                    $endMonth = $month->where('id',$secondParameter)->first();
+                    $selectedYear = $year->where('id',$thirdParameter)->first();
+                    $date = $startMonth['name'].' '.$selectedYear['slug'].' - '.$endMonth['name'].' '.$selectedYear['slug'];
+                    $totalMonths = $month->whereBetween('id',[$firstParameter,$secondParameter])->select('id','name','slug')->get();
+                    $row = 1;
+                    foreach ($totalMonths as $month){
+                        $data[$row]['month'] = $month['name'].'-'.$selectedYear['slug'];
+                        $data[$row]['gst'] = $data[$row]['purchase_gst'] = $data[$row]['subcontractor_gst'] = $data[$row]['sales_gst'] =
+                        $salesGst = $subcontractorGst = 0;
+                        $quotationId = $quotation->where('project_site_id',$project_site_id)->pluck('id')->first();
+                        $statusId = $billStatus->where('slug','approved')->pluck('id');
+                        $billIds = $bill->where('quotation_id',$quotationId)
+                            ->where('bill_status_id',$statusId)->orderBy('id')
+                            ->whereMonth('date',$month['id'])
+                            ->whereYear('date',$selectedYear['slug'])
+                            ->pluck('id');
+                        if(count($billIds) > 0){
+                            foreach ($billIds as $billId){
+                                $billData = $this->getBillData($billId);
+                                $salesGst +=  round($billData['tax_amount'],3);
+                            }
+                        }
+                        $data[$row]['sales_gst'] = number_format($salesGst,3);
+
+                        $subcontractorBillStatus = new SubcontractorBillStatus();
+                        $approvedBillStatusId = $subcontractorBillStatus->where('slug','approved')->pluck('id');
+                        $subcontractorBillIds = $subcontractorBill->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
+                            ->where('subcontractor_structure.project_site_id',$project_site_id)
+                            ->where('subcontractor_bills.subcontractor_bill_status_id',$approvedBillStatusId)
+                            ->whereMonth('subcontractor_bills.created_at',$month['id'])
+                            ->whereYear('subcontractor_bills.created_at',$selectedYear['slug'])
+                            ->pluck('subcontractor_bills.id');
+                        if(count($subcontractorBillIds) > 0){
+                            foreach ($subcontractorBillIds as $subcontractorBillId){
+                                $subcontractorBillData = $subcontractorBill->where('id',$subcontractorBillId)->first();
+                                $subcontractorStructureData = $subcontractorStructure->where('id',$subcontractorBillData['sc_structure_id'])->first();
+                                if($subcontractorStructureData->contractType->slug == 'sqft'){
+                                    $rate = $subcontractorStructureData['rate'];
+                                }else{
+                                    $rate = $subcontractorStructureData['rate'] * $subcontractorStructureData['total_work_area'];
+                                }
+                                $subcontractorBillTaxes = $subcontractorBillData->subcontractorBillTaxes;
+                                $subTotal = $subcontractorBillData['qty'] * $rate;
+                                foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
+                                    $subcontractorGst += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
+                                }
+                            }
+                        }
+                        $data[$row]['subcontractor_gst'] = number_format($subcontractorGst,3);
+
+                        $purchaseGst = round($purchaseOrderBill
+                            ->join('purchase_orders','purchase_orders.id','='
+                                ,'purchase_order_bills.purchase_order_id')
+                            ->join('purchase_requests','purchase_requests.id','='
+                                ,'purchase_orders.purchase_request_id')
+                            ->join('vendors','vendors.id','=','purchase_orders.vendor_id')
+                            ->where('purchase_requests.project_site_id',$project_site_id)
+                            ->whereMonth('purchase_order_bills.created_at',$month['id'])
+                            ->whereYear('purchase_order_bills.created_at',$selectedYear['slug'])
+                            ->sum(DB::raw('purchase_order_bills.transportation_tax_amount + purchase_order_bills.tax_amount + purchase_order_bills.extra_tax_amount')),3);
+                        $data[$row]['purchase_gst'] = number_format($purchaseGst,3);
+                        $data[$row]['gst'] = $salesGst - $purchaseGst - $subcontractorGst;
+                        $row++;
+                    }
+                    $projectName = $projectSite->join('projects','projects.id','=','project_sites.project_id')
+                        ->where('project_sites.id',$project_site_id)->pluck('projects.name')->first();
+                    $reportType = 'Indirect Expenses';
+                    Excel::create($reportType."_".$currentDate, function($excel) use($monthlyTotal, $data, $reportType, $header, $companyHeader, $date, $projectName) {
+                        $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(10);
+                        $excel->sheet($reportType, function($sheet) use($monthlyTotal, $data, $header, $companyHeader, $date, $projectName) {
+                            $objDrawing = new \PHPExcel_Worksheet_Drawing();
+                            $objDrawing->setPath(public_path('/assets/global/img/logo.jpg')); //your image path
+                            $objDrawing->setWidthAndHeight(148,74);
+                            $objDrawing->setResizeProportional(true);
+                            $objDrawing->setCoordinates('A1');
+                            $objDrawing->setWorksheet($sheet);
+
+                            $sheet->mergeCells('A2:H2');
+                            $sheet->cell('A2', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['company_name']);
+                            });
+
+                            $sheet->mergeCells('A3:H3');
+                            $sheet->cell('A3', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['designation']);
+                            });
+
+                            $sheet->mergeCells('A4:H4');
+                            $sheet->cell('A4', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['address']);
+                            });
+
+                            $sheet->mergeCells('A5:H5');
+                            $sheet->cell('A5', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['contact_no']);
+                            });
+
+                            $sheet->mergeCells('A6:H6');
+                            $sheet->cell('A6', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['gstin_number']);
+                            });
+
+                            $sheet->mergeCells('A7:H7');
+                            $sheet->cell('A7', function($cell) use ($projectName){
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue('Subcontractor Summary Report - '.$projectName);
+                            });
+
+                            $sheet->mergeCells('A8:H8');
+                            $sheet->cell('A8', function($cell) use($date) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($date);
+                            });
+                            $row = 9;
+                            $headerRow =  $row+1;
+                            foreach($data as $key => $rowData){
+                                $next_column = 'A';
+                                $row++;
+                                if(array_key_exists('make_bold',$rowData)){
+                                    $setBold = true;
+                                    unset($rowData['make_bold']);
+                                }else{
+                                    $setBold = false;
+                                }
+                                foreach($rowData as $key1 => $cellData){
+                                    $current_column = $next_column++;
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData,$row,$sheet,$headerRow,$setBold,$key1) {
+                                        $sheet->getRowDimension($row)->setRowHeight(20);
+                                        ($row == $headerRow || $setBold) ? $cell->setFontWeight('bold') : null;
+                                        $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                                        $cell->setAlignment('center')->setValignment('center');
+                                        $cell->setValue($cellData);
+
+                                    });
+                                }
+                            }
                         });
                     })->export('xls');
                     break;
