@@ -117,7 +117,7 @@
                                                         <label>Select Project Site : </label>
                                                     </div>
                                                     <div class="col-md-4">
-                                                        <select class="form-control" id="project_site_id" name="project_site_id" {{--onchange="getData()"--}}>
+                                                        <select class="form-control" id="project_site_id" name="project_site_id" onchange="getData()">
                                                             @foreach($projectSites as $projectSite)
                                                                 <option value="{{$projectSite['id']}}">{{$projectSite['project_name']}} - {{$projectSite['name']}}</option>
                                                             @endforeach
