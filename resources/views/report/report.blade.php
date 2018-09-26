@@ -52,6 +52,7 @@
                                                     </div>
                                                     <div class="col-md-4">
                                                         <select class="form-control" id="report_type" name="report_type" onchange="getDivData()">
+                                                            <option value="sitewise_indirect_expenses_report">Indirect Expenses Report</option>
                                                             <option value="sitewise_mis_purchase_report">Mis. Purchase Report</option>
                                                             <option value="sitewise_purchase_report">Purchase Report</option>
                                                             <option value="sitewise_salary_report">Salary Report</option>
@@ -73,6 +74,43 @@
                                                         </div>
                                                         <span class="help-block"> Select date range </span>
                                                     </div>
+                                                </div>
+                                                <div class="form-group row" id="year" hidden>
+                                                    <div class="col-md-3" style="text-align: right">
+                                                        <label>Select Year : </label>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <select class="form-control" id="year_id" name="year_id" onchange="getData()">
+                                                            @foreach($yearData as $year)
+                                                                <option value="{{$year['id']}}">{{$year['slug']}}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row" id="month" hidden>
+                                                    <div class="col-md-3" style="text-align: right">
+                                                        <label>Select Month Range: </label>
+                                                    </div>
+                                                    <div class="col-md-7">
+                                                        <div class="col-md-2">
+                                                            <select class="form-control" id="month_from_id" name="month_from_id" onchange="getData()">
+                                                                @foreach($monthData as $month)
+                                                                    <option value="{{$month['id']}}">{{ucwords($month['slug'])}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-1" style="text-align: center;padding-top: 0.9%">
+                                                            <p>TO</p>
+                                                        </div>
+                                                        <div class="col-md-2" style="text-align: left">
+                                                            <select class="form-control" id="month_to_id" name="month_to_id" onchange="getData()">
+                                                                @foreach($monthData as $month)
+                                                                    <option value="{{$month['id']}}">{{ucwords($month['slug'])}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    </div>
+
                                                 </div>
                                                 <div class="form-group row" id="project_sites">
                                                     <div class="col-md-3" style="text-align: right">
@@ -153,31 +191,37 @@
     <script src="/assets/global/plugins/select2/js/select2.full.min.js" type="text/javascript"></script>
     <script src="/assets/pages/scripts/components-select2.min.js" type="text/javascript"></script>
     <script>
+        $(document).ready(function(){
+            getDivData();
+        });
 
         function getDivData(){
             if($('#report_type').val() == 'sitewise_sales_receipt_report'){
                 $('#bill_project_site,#submitButton').show();
                 $('#project_sites').hide();
                 $('#subcontractor').hide();
-                $('#subcontractor_project_site').hide();
+                $('#subcontractor_project_site,#month,#year').hide();
                 $('#dateDiv,#downloadButton').hide();
 
             }else if($('#report_type').val() == 'sitewise_subcontractor_report'){
                 $('#subcontractor_project_site,#submitButton').show();
                 $('#project_sites').hide();
-                $('#bill_project_site').hide();
+                $('#bill_project_site,#month,#year').hide();
                 $('#dateDiv,#downloadButton').hide();
 
                 getSubcontractor();
             }else if($('#report_type').val() == 'sitewise_subcontractor_summary_report'){
                 $('#subcontractor_project_site,#submitButton').show();
                 $('#project_sites').hide();
-                $('#bill_project_site').hide();
+                $('#bill_project_site,#month,#year').hide();
                 $('#dateDiv,#downloadButton,#subcontractor').hide();
+            }else if($('#report_type').val() == 'sitewise_indirect_expenses_report'){
+                $('#bill_project_site,#subcontractor_project_site,#subcontractor,#downloadButton,#dateDiv').hide();
+                $('#project_sites,#submitButton,#month,#year').show();
             }else{
                 $('#bill_project_site').hide();
                 $('#subcontractor_project_site').hide();
-                $('#subcontractor,#downloadButton').hide();
+                $('#subcontractor,#downloadButton,#month,#year').hide();
                 $('#project_sites,#submitButton').show();
                 $('#dateDiv').show();
             }
@@ -200,7 +244,10 @@
                     start_date : $('#start_date').val(),
                     end_date : $('#end_date').val(),
                     project_site_id : projectSiteId,
-                    subcontractor_id : $('#subcontractor_id').val()
+                    subcontractor_id : $('#subcontractor_id').val(),
+                    start_month_id : $('#month_from_id').val(),
+                    end_month_id : $('#month_to_id').val(),
+                    year_id : $('#year_id').val()
                 },
                 success : function(data,textStatus,xhr){
                     $('.submitButton').hide();

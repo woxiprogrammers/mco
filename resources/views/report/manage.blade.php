@@ -26,7 +26,19 @@
                             </div>
                             <div class="btn-group">
                                 <div class="btn blue">
-                                    <a href="javascript:window.open('/reports/get-report/{{$reportType}}/{{$project_site_id}}/{{$downloadButton['id']}}/null');" style="color: white"> Download
+                                    <a href="javascript:window.open('/reports/get-report/{{$reportType}}/{{$project_site_id}}/{{$downloadButton['id']}}/null/null');" style="color: white"> Download
+                                        <i class="fa fa-download"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @elseif($reportType == 'sitewise_indirect_expenses_report')
+                    <div class="form-body">
+                        <div class="form-group row">
+                            <div class="btn-group">
+                                <div class="col-md-offset-3 btn blue" style="margin-left: 350%">
+                                    <a href="javascript:window.open('/reports/get-report/{{$reportType}}/{{$project_site_id}}/{{$downloadButton['start_month_id']}}/{{$downloadButton['end_month_id']}}/{{$downloadButton['year_id']}}');" style="color: white"> Download
                                         <i class="fa fa-download"></i>
                                     </a>
                                 </div>
@@ -48,11 +60,11 @@
                             <div class="btn-group">
                                 <div class="btn blue">
                                     @if($reportType == 'sitewise_subcontractor_summary_report')
-                                        <a href="javascript:window.open('/reports/get-report/{{$reportType}}/{{$project_site_id}}/null/null');" style="color: white"> Download
+                                        <a href="javascript:window.open('/reports/get-report/{{$reportType}}/{{$project_site_id}}/null/null/null');" style="color: white"> Download
                                             <i class="fa fa-download"></i>
                                         </a>
                                     @else
-                                        <a href="javascript:window.open('/reports/get-report/{{$reportType}}/{{$project_site_id}}/{{$downloadButton['start_date']}}/{{$downloadButton['end_date']}}');" style="color: white"> Download
+                                        <a href="javascript:window.open('/reports/get-report/{{$reportType}}/{{$project_site_id}}/{{$downloadButton['start_date']}}/{{$downloadButton['end_date']}}/null');" style="color: white"> Download
                                             <i class="fa fa-download"></i>
                                         </a>
                                     @endif
