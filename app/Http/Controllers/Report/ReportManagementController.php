@@ -267,7 +267,6 @@ class ReportManagementController extends Controller{
 
     public function downloadDetailReport(Request $request,$reportType,$project_site_id,$firstParameter,$secondParameter,$thirdParameter) {
         try{
-            //dd($reportType,$project_site_id,$firstParameter,$secondParameter,$thirdParameter);
             $year = new Year();
             $month = new Month();
             $currentDate = date('d_m_Y_h_i_s',strtotime(Carbon::now()));
@@ -1567,7 +1566,8 @@ class ReportManagementController extends Controller{
                             ->whereYear('purchase_order_bills.created_at',$selectedYear['slug'])
                             ->sum(DB::raw('purchase_order_bills.transportation_tax_amount + purchase_order_bills.tax_amount + purchase_order_bills.extra_tax_amount')),3);
                         $data[$row]['purchase_gst'] = number_format($purchaseGst,3);
-                        $data[$row]['gst'] = $salesGst - $purchaseGst - $subcontractorGst;
+                        //$data[$row]['gst'] = $salesGst - $purchaseGst - $subcontractorGst;
+                        $data[$row]['gst'] = number_format(($salesGst - $purchaseGst - $subcontractorGst),3);
                         $row++;
                     }
                     $projectName = $projectSite->join('projects','projects.id','=','project_sites.project_id')
@@ -1622,7 +1622,7 @@ class ReportManagementController extends Controller{
                             $sheet->cell('A7', function($cell) use ($projectName){
                                 $cell->setFontWeight('bold');
                                 $cell->setAlignment('center')->setValignment('center');
-                                $cell->setValue('Subcontractor Summary Report - '.$projectName);
+                                $cell->setValue('Indirect Expenses Report - '.$projectName);
                             });
 
                             $sheet->mergeCells('A8:H8');
