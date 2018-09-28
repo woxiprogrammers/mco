@@ -9,6 +9,7 @@
 namespace App\Http\Controllers\Report;
 
 
+use App\AssetMaintenanceBillPayment;
 use App\Bill;
 use App\BillQuotationExtraItem;
 use App\BillQuotationProducts;
@@ -17,6 +18,10 @@ use App\BillTax;
 use App\BillTransaction;
 use App\Helper\MaterialProductHelper;
 use App\Http\Controllers\Controller;
+use App\InventoryComponent;
+use App\InventoryComponentTransfers;
+use App\InventoryComponentTransferStatus;
+use App\InventoryTransferTypes;
 use App\Month;
 use App\PeticashPurchaseTransactionMonthlyExpense;
 use App\PeticashSalaryTransaction;
@@ -117,7 +122,7 @@ class ReportManagementController extends Controller{
             $startLimit = 1; $endLimit = $reportLimit;
 
             switch ($request['report_name']) {
-                case 'sitewise_purchase_report' :
+                /*case 'sitewise_purchase_report' :
                     $purchaseOrderBill = new PurchaseOrderBill();
                     $count = $purchaseOrderBill
                         ->join('purchase_orders','purchase_orders.id','='
@@ -147,6 +152,51 @@ class ReportManagementController extends Controller{
                         $downloadButtonDetails[$iterator]['end_date'] = $purchaseOrderBillDates->first();
                         $downloadButtonDetails[$iterator]['start_limit'] = $startLimit;
                         $downloadButtonDetails[$iterator]['end_limit'] = $endLimit;
+                        $startLimit = $endLimit + 1;
+                        $endLimit = $endLimit + $reportLimit;
+                    }
+                    break;*/
+
+                case 'sitewise_purchase_report' :
+                    $purchaseOrderBill = new PurchaseOrderBill();
+                    $inventoryComponentTransfer = new InventoryComponentTransfers();
+                    $inventoryTransferTypes = new InventoryTransferTypes();
+                    $inventoryComponentTransferStatus = new InventoryComponentTransferStatus();
+                    $assetMaintenanceBillPayment = new AssetMaintenanceBillPayment();
+                    $purchaseCount = $purchaseOrderBill
+                        ->join('purchase_orders','purchase_orders.id','='
+                            ,'purchase_order_bills.purchase_order_id')
+                        ->join('purchase_requests','purchase_requests.id','='
+                            ,'purchase_orders.purchase_request_id')
+                        ->join('vendors','vendors.id','=','purchase_orders.vendor_id')
+                        ->where('purchase_requests.project_site_id',$globalProjectSiteId)
+                        ->whereBetween('purchase_order_bills.created_at',[$start_date,$end_date])
+                        ->orderBy('created_at','desc')
+                        ->count();
+
+                    $inventoryComponentSiteTransferIds = $inventoryTransferTypes->where('slug','site')->get();
+                    $approvedComponentTransferStatusId = $inventoryComponentTransferStatus->where('slug','approved')->pluck('id');
+                    $inventorySiteTransferCount = $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
+                        ,'=','inventory_component_transfers.inventory_component_id')
+                        ->where('inventory_components.project_site_id',$globalProjectSiteId)
+                        ->whereIn('inventory_component_transfers.transfer_type_id',$inventoryComponentSiteTransferIds->pluck('id'))
+                        ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
+                        ->whereBetween('inventory_component_transfers.created_at',[$start_date,$end_date])
+                        ->count();
+
+                    $assetMaintenanceBillCount = $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
+                        ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
+                        ->where('asset_maintenance.project_site_id',$globalProjectSiteId)
+                        ->whereBetween('asset_maintenance_bill_payments.created_at',[$start_date,$end_date])
+                        ->count();
+                    $count = $purchaseCount + $inventorySiteTransferCount + $assetMaintenanceBillCount;
+                    $noOfButtons = $count/$reportLimit;
+                    for($iterator = 0; $iterator < $noOfButtons; $iterator++){
+                        $downloadButtonDetails[$iterator]['start_date'] = $start_date;
+                        $downloadButtonDetails[$iterator]['end_date'] = $end_date;
+                        $downloadButtonDetails[$iterator]['start_limit'] = $startLimit;
+                        $downloadButtonDetails[$iterator]['end_limit'] = $endLimit;
+                        $downloadButtonDetails[$iterator]['button_no'] = $iterator;
                         $startLimit = $endLimit + 1;
                         $endLimit = $endLimit + $reportLimit;
                     }
@@ -267,6 +317,7 @@ class ReportManagementController extends Controller{
 
     public function downloadDetailReport(Request $request,$reportType,$project_site_id,$firstParameter,$secondParameter,$thirdParameter) {
         try{
+            //dd($reportType,$project_site_id,$firstParameter,$secondParameter,$thirdParameter);
             $year = new Year();
             $month = new Month();
             $currentDate = date('d_m_Y_h_i_s',strtotime(Carbon::now()));
@@ -289,6 +340,10 @@ class ReportManagementController extends Controller{
                 case 'sitewise_purchase_report' :
                     $projectSite = $projectSiteId = new ProjectSite();
                     $purchaseOrderBill = new PurchaseOrderBill();
+                    $inventoryComponentTransfer = new InventoryComponentTransfers();
+                    $inventoryTransferTypes = new InventoryTransferTypes();
+                    $inventoryComponentTransferStatus = new InventoryComponentTransferStatus();
+                    $assetMaintenanceBillPayment = new AssetMaintenanceBillPayment();
                     $purchaseOrderBillMonthlyExpense = new PurchaseOrderBillMonthlyExpense();
                     $data[$row] = array(
                         'Bill Date', 'Bill Create Date', 'Bill No', 'Vendor Name', 'Basic Amount', 'Tax Amount',
@@ -310,6 +365,9 @@ class ReportManagementController extends Controller{
                         }
                     }
 
+                    $reportLimit = env('REPORT_LIMIT['.$reportType.']');
+                    $buttonNo = $thirdParameter;
+                    $totalRecords = $buttonNo * $reportLimit;
                     $projectName = $projectSite->join('projects','projects.id','=','project_sites.project_id')
                         ->where('project_sites.id',$project_site_id)->pluck('projects.name')->first();
                     $purchaseOrderBillsData = $purchaseOrderBill
@@ -319,15 +377,43 @@ class ReportManagementController extends Controller{
                             ,'purchase_orders.purchase_request_id')
                         ->join('vendors','vendors.id','=','purchase_orders.vendor_id')
                         ->where('purchase_requests.project_site_id',$project_site_id)
-                        ->where('purchase_order_bills.created_at','<=',$firstParameter)
-                        ->where('purchase_order_bills.created_at','>=',$secondParameter)
-                        ->select('purchase_order_bills.amount','purchase_order_bills.transportation_tax_amount'
-                            ,'purchase_order_bills.tax_amount','purchase_order_bills.extra_tax_amount','purchase_order_bills.bill_date'
-                            ,'purchase_order_bills.bill_number','purchase_order_bills.created_at','vendors.company')
-                        ->orderBy('created_at','desc')
+                        ->where('purchase_order_bills.created_at','>=',$firstParameter)
+                        ->where('purchase_order_bills.created_at','<=',$secondParameter)
+
+                        ->select('purchase_order_bills.amount as basic_amount','purchase_order_bills.transportation_tax_amount as transportation_tax_amount'
+                            ,'purchase_order_bills.tax_amount as tax_amount','purchase_order_bills.extra_tax_amount as extra_tax_amount','purchase_order_bills.bill_date as bill_date'
+                            ,'purchase_order_bills.bill_number as bill_number','purchase_order_bills.created_at as created_at','vendors.company as company')
+                        ->orderBy('purchase_order_bills.created_at','desc')
                         ->get()->toArray();
+
+
+                    $inventoryComponentSiteTransferIds = $inventoryTransferTypes->where('slug','site')->get();
+                    $approvedComponentTransferStatusId = $inventoryComponentTransferStatus->where('slug','approved')->pluck('id');
+                    $inventorySiteTransfersData = $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
+                        ,'=','inventory_component_transfers.inventory_component_id')
+                        ->where('inventory_components.project_site_id',$project_site_id)
+                        ->whereIn('inventory_component_transfers.transfer_type_id',$inventoryComponentSiteTransferIds->pluck('id'))
+                        ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
+                        ->where('inventory_component_transfers.created_at','>=',$firstParameter)
+                        ->where('inventory_component_transfers.created_at','<=',$secondParameter)
+                        ->select('inventory_component_transfers.id as inventory_component_transfer_id','inventory_component_transfers.created_at as created_at')
+                        ->orderBy('inventory_component_transfers.created_at','desc')
+                        ->get()->toArray();
+
+                    $assetMaintenanceBillsData = $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
+                        ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
+                        ->join('assets','assets.id','=','asset_maintenance.asset_id')
+                        ->where('asset_maintenance.project_site_id',$project_site_id)
+                        ->where('asset_maintenance_bill_payments.created_at','>=',$firstParameter)
+                        ->where('asset_maintenance_bill_payments.created_at','<=',$secondParameter)
+                        ->select('asset_maintenance_bills.amount as total','asset_maintenance_bills.created_at as created_at','assets.name as asset_name')
+                        ->orderBy('asset_maintenance_bills.created_at','desc')
+                        ->get()->toArray();
+                    $array = array_merge($purchaseOrderBillsData,$inventorySiteTransfersData,$assetMaintenanceBillsData);
+                    dd($array->take($reportLimit)->skip($totalRecords));
                     $row = 1;
                     foreach($purchaseOrderBillsData as $key => $purchaseOrderBillData){
+
                         $thisMonth = (int)date('n',strtotime($purchaseOrderBillData['created_at']));
                         $data[$row]['bill_entry_date'] = date('d-m-Y',strtotime($purchaseOrderBillData['bill_date']));
                         $data[$row]['bill_created_date'] = date('d-m-Y',strtotime($purchaseOrderBillData['created_at']));
