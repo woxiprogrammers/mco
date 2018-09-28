@@ -9,6 +9,7 @@
 namespace App\Http\Controllers\Report;
 
 
+use App\AssetMaintenanceBill;
 use App\AssetMaintenanceBillPayment;
 use App\Bill;
 use App\BillQuotationExtraItem;
@@ -71,6 +72,7 @@ class ReportManagementController extends Controller{
             $endDate = date('d/m/Y',strtotime(Carbon::now()));
             $projectSites = $projectSite->join('projects','projects.id','=','project_sites.project_id')
                             ->orderBy('projects.name','asc')
+                            ->where('projects.is_active',true)
                             ->select('project_sites.id','project_sites.name','projects.name as project_name')
                             ->get()->toArray();
             $billIds = $bill->where('bill_status_id',$billStatus->where('slug','approved')->pluck('id')->first())->pluck('id');
@@ -317,7 +319,6 @@ class ReportManagementController extends Controller{
 
     public function downloadDetailReport(Request $request,$reportType,$project_site_id,$firstParameter,$secondParameter,$thirdParameter) {
         try{
-            //dd($reportType,$project_site_id,$firstParameter,$secondParameter,$thirdParameter);
             $year = new Year();
             $month = new Month();
             $currentDate = date('d_m_Y_h_i_s',strtotime(Carbon::now()));
@@ -364,10 +365,12 @@ class ReportManagementController extends Controller{
                             $iterator++;
                         }
                     }
-
+                    $colorData[0]['Purchase'] = '#f2f2f2';
+                    $colorData[1]['Site Transfer'] = '#efd2d5';
+                    $colorData[2]['Asset Maintenance'] = '#b2cdff';
                     $reportLimit = env('REPORT_LIMIT['.$reportType.']');
                     $buttonNo = $thirdParameter;
-                    $totalRecords = $buttonNo * $reportLimit;
+
                     $projectName = $projectSite->join('projects','projects.id','=','project_sites.project_id')
                         ->where('project_sites.id',$project_site_id)->pluck('projects.name')->first();
                     $purchaseOrderBillsData = $purchaseOrderBill
@@ -380,7 +383,7 @@ class ReportManagementController extends Controller{
                         ->where('purchase_order_bills.created_at','>=',$firstParameter)
                         ->where('purchase_order_bills.created_at','<=',$secondParameter)
 
-                        ->select('purchase_order_bills.amount as basic_amount','purchase_order_bills.transportation_tax_amount as transportation_tax_amount'
+                        ->select('purchase_order_bills.amount as amount','purchase_order_bills.transportation_tax_amount as transportation_tax_amount'
                             ,'purchase_order_bills.tax_amount as tax_amount','purchase_order_bills.extra_tax_amount as extra_tax_amount','purchase_order_bills.bill_date as bill_date'
                             ,'purchase_order_bills.bill_number as bill_number','purchase_order_bills.created_at as created_at','vendors.company as company')
                         ->orderBy('purchase_order_bills.created_at','desc')
@@ -406,23 +409,59 @@ class ReportManagementController extends Controller{
                         ->where('asset_maintenance.project_site_id',$project_site_id)
                         ->where('asset_maintenance_bill_payments.created_at','>=',$firstParameter)
                         ->where('asset_maintenance_bill_payments.created_at','<=',$secondParameter)
-                        ->select('asset_maintenance_bills.amount as total','asset_maintenance_bills.created_at as created_at','assets.name as asset_name')
-                        ->orderBy('asset_maintenance_bills.created_at','desc')
+                        ->select('asset_maintenance_bills.id as asset_maintenance_bill_id'
+                            ,'asset_maintenance_bill_payments.amount as total','asset_maintenance_bill_payments.created_at as created_at'
+                            ,'assets.name as asset_name')
+                        ->orderBy('asset_maintenance_bill_payments.created_at','desc')
                         ->get()->toArray();
-                    $array = array_merge($purchaseOrderBillsData,$inventorySiteTransfersData,$assetMaintenanceBillsData);
-                    dd($array->take($reportLimit)->skip($totalRecords));
+                    $totalData = array_merge($purchaseOrderBillsData,$inventorySiteTransfersData,$assetMaintenanceBillsData);
+                    usort($totalData, function ($item1, $item2) {
+                        return $item2['created_at'] > $item1['created_at'];
+                    });
+                    $distributedReportData = array_chunk($totalData,($reportLimit));
+                    $thisReportData = $distributedReportData[$buttonNo];
                     $row = 1;
-                    foreach($purchaseOrderBillsData as $key => $purchaseOrderBillData){
+                    foreach($thisReportData as $key => $reportData){
+                        if(array_key_exists('company',$reportData)){
+                            $data[$row]['background'] = '#f2f2f2';
+                            $thisMonth = (int)date('n',strtotime($reportData['created_at']));
+                            $data[$row]['bill_entry_date'] = date('d-m-Y',strtotime($reportData['bill_date']));
+                            $data[$row]['bill_created_date'] = date('d-m-Y',strtotime($reportData['created_at']));
+                            $data[$row]['bill_number'] = $reportData['bill_number'];
+                            $data[$row]['company_name'] = $reportData['company'];
+                            $taxAmount = round(($reportData['transportation_tax_amount'] + $reportData['extra_tax_amount'] + $reportData['tax_amount']),3);
+                            $data[$row]['basic_amount'] = round(($reportData['amount'] - $taxAmount),3);
+                            $data[$row]['tax_amount'] = $taxAmount;
+                            $data[$row]['bill_amount'] = round($data[$row]['basic_amount'],3) + round($data[$row]['tax_amount'],3);
+                        }elseif(array_key_exists('inventory_component_transfer_id',$reportData)){
+                            $data[$row]['background'] = '#efd2d5';
+                            $inventoryComponentTransferData = $inventoryComponentTransfer->where('id',$reportData['inventory_component_transfer_id'])
+                                        ->first();
+                            $thisMonth = (int)date('n',strtotime($inventoryComponentTransferData['created_at']));
+                            $data[$row]['bill_entry_date'] = date('d-m-Y',strtotime($inventoryComponentTransferData['created_at']));
+                            $data[$row]['bill_created_date'] = date('d-m-Y',strtotime($inventoryComponentTransferData['created_at']));
+                            $data[$row]['bill_number'] = ($inventoryComponentTransferData['bill_number'] != null) ? $inventoryComponentTransferData['bill_number'] : '-';
+                            $data[$row]['source_name'] = $inventoryComponentTransferData['source_name'];
+                            $data[$row]['basic_amount'] = $inventoryComponentTransferData['rate_per_unit'] * $inventoryComponentTransferData['quantity'];
+                            $data[$row]['tax_amount'] = $inventoryComponentTransferData['total'] - ($inventoryComponentTransferData['rate_per_unit'] * $inventoryComponentTransferData['quantity']);
+                            if($inventoryComponentTransferData->transferType->type == 'OUT'){
+                                $data[$row]['bill_amount'] = -round($inventoryComponentTransferData['total'],3);
+                            }else{
+                                $data[$row]['bill_amount'] = round($inventoryComponentTransferData['total'],3);
+                            }
+                        }else{
+                            $data[$row]['background'] = '#b2cdff';
+                            $thisMonth = (int)date('n',strtotime($reportData['created_at']));
+                            $data[$row]['bill_entry_date'] = date('d-m-Y',strtotime($reportData['created_at']));
+                            $data[$row]['bill_created_date'] = date('d-m-Y',strtotime($reportData['created_at']));
+                            $data[$row]['bill_number'] = 1;
+                            $data[$row]['company_name'] = 'asdwe';
+                            $taxAmount = 12;
+                            $data[$row]['basic_amount'] = 1;
+                            $data[$row]['tax_amount'] = $taxAmount;
+                            $data[$row]['bill_amount'] = 0;
+                        }
 
-                        $thisMonth = (int)date('n',strtotime($purchaseOrderBillData['created_at']));
-                        $data[$row]['bill_entry_date'] = date('d-m-Y',strtotime($purchaseOrderBillData['bill_date']));
-                        $data[$row]['bill_created_date'] = date('d-m-Y',strtotime($purchaseOrderBillData['created_at']));
-                        $data[$row]['bill_number'] = $purchaseOrderBillData['bill_number'];
-                        $data[$row]['company_name'] = $purchaseOrderBillData['company'];
-                        $taxAmount = round(($purchaseOrderBillData['transportation_tax_amount'] + $purchaseOrderBillData['extra_tax_amount'] + $purchaseOrderBillData['tax_amount']),3);
-                        $data[$row]['basic_amount'] = round(($purchaseOrderBillData['amount'] - $taxAmount),3);
-                        $data[$row]['tax_amount'] = $taxAmount;
-                        $data[$row]['bill_amount'] = round($data[$row]['basic_amount'],3) + round($data[$row]['tax_amount'],3);
                         if($row == 1){
                             $newMonth = $thisMonth;
                             $newMonthRow = $row;
@@ -442,9 +481,9 @@ class ReportManagementController extends Controller{
                         }
                         $row++;
                     }
-                    Excel::create($reportType."_".$currentDate, function($excel) use($monthlyTotal, $data, $reportType, $header, $companyHeader, $date, $projectName) {
+                    Excel::create($reportType."_".$currentDate, function($excel) use($monthlyTotal, $data, $reportType, $header, $companyHeader, $date, $projectName, $colorData) {
                         $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(10);
-                        $excel->sheet($reportType, function($sheet) use($monthlyTotal, $data, $header, $companyHeader, $date, $projectName) {
+                        $excel->sheet($reportType, function($sheet) use($monthlyTotal, $data, $header, $companyHeader, $date, $projectName, $colorData) {
                             $objDrawing = new \PHPExcel_Worksheet_Drawing();
                             $objDrawing->setPath(public_path('/assets/global/img/logo.jpg')); //your image path
                             $objDrawing->setWidthAndHeight(148,74);
@@ -500,7 +539,23 @@ class ReportManagementController extends Controller{
                                 $cell->setAlignment('center')->setValignment('center');
                                 $cell->setValue($date);
                             });
-                            $row = 10;
+
+                            $colorRow = $row = 10;
+                            foreach($colorData as $key => $rowData){
+                                $next_column = 'D';
+                                $colorRow++;
+                                foreach($rowData as $key1 => $cellData){
+                                    $current_column = $next_column++;
+                                    $sheet->getRowDimension($colorRow)->setRowHeight(20);
+                                    $sheet->cell($current_column.($colorRow), function($cell) use($cellData,$colorRow, $key1) {
+                                            $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                                            $cell->setAlignment('center')->setValignment('center');
+                                            $cell->setBackground($cellData);
+                                            $cell->setValue($key1);
+                                    });
+
+                                }
+                            }
                             $monthHeaderRow =  $row+1;
                             foreach($monthlyTotal as $key => $rowData){
                                 $next_column = 'A';
@@ -530,15 +585,27 @@ class ReportManagementController extends Controller{
                                 }else{
                                     $setColor = false;
                                 }
+                                if(array_key_exists('background',$rowData)){
+                                    $backgroundColor = $rowData['background'];
+                                    unset($rowData['background']);
+                                }else{
+                                    $backgroundColor = null;
+                                }
+
+                                unset($rowData['background']);
                                 foreach($rowData as $key1 => $cellData){
                                     $current_column = $next_column++;
-                                    $sheet->cell($current_column.($row), function($cell) use($cellData,$row,$sheet,$headerRow,$setColor) {
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData,$row,$sheet,$headerRow,$setColor,$backgroundColor,$key1) {
                                         $sheet->getRowDimension($row)->setRowHeight(20);
                                         if($row == $headerRow) {
                                             $cell->setFontWeight('bold');
-                                        }
-                                        if($setColor){
                                             $cell->setBackground('#d7f442');
+                                        }
+                                        if($key1 == 'monthly_total'){
+                                            $cell->setFontWeight('bold');
+                                        }
+                                        if($backgroundColor != null){
+                                            $cell->setBackground($backgroundColor);
                                         }
                                         $cell->setBorder('thin', 'thin', 'thin', 'thin');
                                         $cell->setAlignment('center')->setValignment('center');
