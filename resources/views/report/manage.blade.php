@@ -45,6 +45,27 @@
                             </div>
                         </div>
                     </div>
+                @elseif($reportType == 'sitewise_purchase_report')
+                    <div class="form-body">
+                        <div class="form-group row">
+                            <div class="col-md-3" style="text-align: right">
+                                <label for="name" class="control-label">Excel Sheet {{$iterator}}</label>
+                                <span>*</span>
+                            </div>
+                            @if(array_key_exists('start_limit',$downloadButton))
+                                <div class="col-md-4" style="text-align: center">
+                                    <label for="name" class="control-label"><b>Records {{$downloadButton['start_limit']}} - {{$downloadButton['end_limit']}}</b> </label>
+                                </div>
+                            @endif
+                            <div class="btn-group">
+                                <div class="btn blue">
+                                    <a href="javascript:window.open('/reports/get-report/{{$reportType}}/{{$project_site_id}}/{{$downloadButton['start_date']}}/{{$downloadButton['end_date']}}/{{$downloadButton['button_no']}}');" style="color: white"> Download
+                                        <i class="fa fa-download"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 @else
                     <div class="form-body">
                         <div class="form-group row">

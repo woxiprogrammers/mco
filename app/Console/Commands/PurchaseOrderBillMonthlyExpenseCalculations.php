@@ -2,6 +2,11 @@
 
 namespace App\Console\Commands;
 
+use App\AssetMaintenanceBill;
+use App\AssetMaintenanceBillPayment;
+use App\InventoryComponentTransfers;
+use App\InventoryComponentTransferStatus;
+use App\InventoryTransferTypes;
 use App\Month;
 use App\ProjectSite;
 use App\PurchaseOrderBill;
@@ -57,7 +62,14 @@ class PurchaseOrderBillMonthlyExpenseCalculations extends Command
             $month = new Month();
             $projectSite = new ProjectSite();
             $purchaseOrderBill = new PurchaseOrderBill();
+            $inventoryComponentTransfer = new InventoryComponentTransfers();
+            $inventoryTransferTypes = new InventoryTransferTypes();
+            $inventoryComponentTransferStatus = new InventoryComponentTransferStatus();
+            $assetMaintenanceBillPayment = new AssetMaintenanceBillPayment();
             $purchaseOrderBillMonthlyExpenses = new PurchaseOrderBillMonthlyExpense();
+
+            $inventoryComponentSiteTransferIds = $inventoryTransferTypes->where('slug','site')->get();
+            $approvedComponentTransferStatusId = $inventoryComponentTransferStatus->where('slug','approved')->pluck('id');
             switch (true){
                 case ($thisMonth == 'all' && $thisYear == 'all') :
                     $currentYearId = $year->where('slug',date('Y'))->pluck('id')->first();
@@ -79,17 +91,48 @@ class PurchaseOrderBillMonthlyExpenseCalculations extends Command
                                     ->whereYear('purchase_order_bills.created_at',$thisYear)
                                     ->select('purchase_order_bills.amount as basic_amount','purchase_order_bills.transportation_tax_amount as transportation_tax_amount','purchase_order_bills.tax_amount as tax_amount','purchase_order_bills.extra_tax_amount as extra_tax_amount')
                                     ->get();
-                                $basicAmount =  round($purchaseOrderBillData
+                                $purchaseOrderBillAmount =  round($purchaseOrderBillData
                                     ->sum('basic_amount'),3);
-                                /*$transportationTaxAmount =  round($purchaseOrderBillData
-                                    ->sum('transportation_tax_amount'),3);
-                                $extraTaxAmount =  round($purchaseOrderBillData
-                                    ->sum('extra_tax_amount'),3);*/
-                                $totalAmount = $basicAmount/* + $transportationTaxAmount + $extraTaxAmount*/;
+                                $purchaseOrderBillTotalAmount = $purchaseOrderBillAmount;
+
+                                $inventorySiteTransfersInTotal = $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
+                                    ,'=','inventory_component_transfers.inventory_component_id')
+                                    ->where('inventory_components.project_site_id',$projectSiteId)
+                                    ->where('inventory_component_transfers.transfer_type_id',
+                                        $inventoryComponentSiteTransferIds->where('type','IN')->pluck('id')->first())
+                                    ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
+                                    ->whereMonth('inventory_component_transfers.created_at',$thisMonth)
+                                    ->whereYear('inventory_component_transfers.created_at',$thisYear)
+                                    ->sum('inventory_component_transfers.total');
+
+                                $inventorySiteTransfersOutTotal = $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
+                                    ,'=','inventory_component_transfers.inventory_component_id')
+                                    ->where('inventory_components.project_site_id',$projectSiteId)
+                                    ->where('inventory_component_transfers.transfer_type_id',
+                                        $inventoryComponentSiteTransferIds->where('type','OUT')->pluck('id')->first())
+                                    ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
+                                    ->whereMonth('inventory_component_transfers.created_at',$thisMonth)
+                                    ->whereYear('inventory_component_transfers.created_at',$thisYear)
+                                    ->sum('inventory_component_transfers.total');
+
+                                $inventorySiteTransfersTotal = $inventorySiteTransfersInTotal - $inventorySiteTransfersOutTotal;
+
+                                $assetMaintenanceBillPaymentTotal = $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
+                                    ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
+                                    ->join('assets','assets.id','=','asset_maintenance.asset_id')
+                                    ->where('asset_maintenance.project_site_id',$projectSiteId)
+                                    ->whereMonth('asset_maintenance_bill_payments.created_at',$thisMonth)
+                                    ->whereYear('asset_maintenance_bill_payments.created_at',$thisYear)
+                                    ->sum('asset_maintenance_bill_payments.amount');
+                                $totalAmount = $purchaseOrderBillTotalAmount + $inventorySiteTransfersTotal + $assetMaintenanceBillPaymentTotal;
+
                                 if($totalAmount != 0){
                                     $alreadyExist = $purchaseOrderBillMonthlyExpenses->where('project_site_id',$projectSiteId)->where('month_id',$thisMonth)->where('year_id',$thisYearId)->first();
                                     if($alreadyExist != null){
                                         $alreadyExist->update([
+                                            'purchase_expense' => round($purchaseOrderBillTotalAmount,3),
+                                            'site_transfer_expense' => round($inventorySiteTransfersTotal,3),
+                                            'asset_maintenance_expense' => round($assetMaintenanceBillPaymentTotal,3),
                                             'total_expense' => round($totalAmount,3)
                                         ]);
                                     }else{
@@ -97,6 +140,9 @@ class PurchaseOrderBillMonthlyExpenseCalculations extends Command
                                             'project_site_id' => $projectSiteId,
                                             'month_id' => $thisMonth,
                                             'year_id' => $thisYearId,
+                                            'purchase_expense' => round($purchaseOrderBillTotalAmount,3),
+                                            'site_transfer_expense' => round($inventorySiteTransfersTotal,3),
+                                            'asset_maintenance_expense' => round($assetMaintenanceBillPaymentTotal,3),
                                             'total_expense' => round($totalAmount,3)
                                         ]);
                                     }
@@ -128,17 +174,47 @@ class PurchaseOrderBillMonthlyExpenseCalculations extends Command
                                         ->select('purchase_order_bills.amount as basic_amount','purchase_order_bills.transportation_tax_amount as transportation_tax_amount','purchase_order_bills.tax_amount as tax_amount','purchase_order_bills.extra_tax_amount as extra_tax_amount')
                                         ->get();
 
-                                    $basicAmount =  round($purchaseOrderBillData
+                                    $purchaseOrderBillAmount =  round($purchaseOrderBillData
                                         ->sum('basic_amount'),3);
-                                    /*$transportationTaxAmount =  round($purchaseOrderBillData
-                                        ->sum('transportation_tax_amount'),3);
-                                    $extraTaxAmount =  round($purchaseOrderBillData
-                                        ->sum('extra_tax_amount'),3);*/
-                                    $totalAmount = $basicAmount/* + $transportationTaxAmount + $extraTaxAmount*/;
+                                    $purchaseOrderBillTotalAmount = $purchaseOrderBillAmount;
+
+                                    $inventorySiteTransfersInTotal = $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
+                                        ,'=','inventory_component_transfers.inventory_component_id')
+                                        ->where('inventory_components.project_site_id',$projectSiteId)
+                                        ->where('inventory_component_transfers.transfer_type_id',
+                                            $inventoryComponentSiteTransferIds->where('type','IN')->pluck('id')->first())
+                                        ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
+                                        ->whereMonth('inventory_component_transfers.created_at',$thisMonth)
+                                        ->whereYear('inventory_component_transfers.created_at',$thisYear)
+                                        ->sum('inventory_component_transfers.total');
+
+                                    $inventorySiteTransfersOutTotal = $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
+                                        ,'=','inventory_component_transfers.inventory_component_id')
+                                        ->where('inventory_components.project_site_id',$projectSiteId)
+                                        ->where('inventory_component_transfers.transfer_type_id',
+                                            $inventoryComponentSiteTransferIds->where('type','OUT')->pluck('id')->first())
+                                        ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
+                                        ->whereMonth('inventory_component_transfers.created_at',$thisMonth)
+                                        ->whereYear('inventory_component_transfers.created_at',$thisYear)
+                                        ->sum('inventory_component_transfers.total');
+
+                                    $inventorySiteTransfersTotal = $inventorySiteTransfersInTotal - $inventorySiteTransfersOutTotal;
+
+                                    $assetMaintenanceBillPaymentTotal = $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
+                                        ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
+                                        ->join('assets','assets.id','=','asset_maintenance.asset_id')
+                                        ->where('asset_maintenance.project_site_id',$projectSiteId)
+                                        ->whereMonth('asset_maintenance_bill_payments.created_at',$thisMonth)
+                                        ->whereYear('asset_maintenance_bill_payments.created_at',$thisYear)
+                                        ->sum('asset_maintenance_bill_payments.amount');
+                                    $totalAmount = $purchaseOrderBillTotalAmount + $inventorySiteTransfersTotal + $assetMaintenanceBillPaymentTotal;
                                     if($totalAmount != 0){
                                         $alreadyExist = $purchaseOrderBillMonthlyExpenses->where('project_site_id',$projectSiteId)->where('month_id',$thisMonth)->where('year_id',$yearId)->first();
                                         if($alreadyExist != null){
                                             $alreadyExist->update([
+                                                'purchase_expense' => round($purchaseOrderBillTotalAmount,3),
+                                                'site_transfer_expense' => round($inventorySiteTransfersTotal,3),
+                                                'asset_maintenance_expense' => round($assetMaintenanceBillPaymentTotal,3),
                                                 'total_expense' => round($totalAmount,3)
                                             ]);
                                         }else{
@@ -146,6 +222,9 @@ class PurchaseOrderBillMonthlyExpenseCalculations extends Command
                                                 'project_site_id' => $projectSiteId,
                                                 'month_id' => $thisMonth,
                                                 'year_id' => $yearId,
+                                                'purchase_expense' => round($purchaseOrderBillTotalAmount,3),
+                                                'site_transfer_expense' => round($inventorySiteTransfersTotal,3),
+                                                'asset_maintenance_expense' => round($assetMaintenanceBillPaymentTotal,3),
                                                 'total_expense' => round($totalAmount,3)
                                             ]);
                                         }
@@ -175,21 +254,47 @@ class PurchaseOrderBillMonthlyExpenseCalculations extends Command
                                 ,'purchase_order_bills.tax_amount as tax_amount','purchase_order_bills.extra_tax_amount as extra_tax_amount',
                                 'purchase_order_bills')
                             ->get();
-                        $basicAmount =  round($purchaseOrderBillData
+
+                        $purchaseOrderBillAmount =  round($purchaseOrderBillData
                             ->sum('basic_amount'),3);
-                        /*$transportationTaxAmount =  round($purchaseOrderBillData
-                            ->sum('transportation_tax_amount'),3);
-                        $taxAmount =  round($purchaseOrderBillData
-                            ->sum('tax_amount'),3);
-                        $extraTaxAmount =  round($purchaseOrderBillData
-                            ->sum('extra_tax_amount'),3);*/
-                        $totalAmount = $basicAmount/* + $transportationTaxAmount + $taxAmount + $extraTaxAmount*/;
+                        $purchaseOrderBillTotalAmount = $purchaseOrderBillAmount;
+
+                        $inventorySiteTransfersInTotal = $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
+                            ,'=','inventory_component_transfers.inventory_component_id')
+                            ->where('inventory_components.project_site_id',$projectSiteId)
+                            ->where('inventory_component_transfers.transfer_type_id',
+                                $inventoryComponentSiteTransferIds->where('type','IN')->pluck('id')->first())
+                            ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
+                            ->whereDate('inventory_component_transfers.created_at','=',$todayDate)
+                            ->sum('inventory_component_transfers.total');
+
+                        $inventorySiteTransfersOutTotal = $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
+                            ,'=','inventory_component_transfers.inventory_component_id')
+                            ->where('inventory_components.project_site_id',$projectSiteId)
+                            ->where('inventory_component_transfers.transfer_type_id',
+                                $inventoryComponentSiteTransferIds->where('type','OUT')->pluck('id')->first())
+                            ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
+                            ->whereDate('inventory_component_transfers.created_at','=',$todayDate)
+                            ->sum('inventory_component_transfers.total');
+
+                        $inventorySiteTransfersTotal = $inventorySiteTransfersInTotal - $inventorySiteTransfersOutTotal;
+
+                        $assetMaintenanceBillPaymentTotal = $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
+                            ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
+                            ->join('assets','assets.id','=','asset_maintenance.asset_id')
+                            ->where('asset_maintenance.project_site_id',$projectSiteId)
+                            ->whereDate('asset_maintenance_bill_payments.created_at','=',$todayDate)
+                            ->sum('asset_maintenance_bill_payments.amount');
+                        $totalAmount = $purchaseOrderBillTotalAmount + $inventorySiteTransfersTotal + $assetMaintenanceBillPaymentTotal;
 
                         if($totalAmount != 0){
 
                             $alreadyExist = $purchaseOrderBillMonthlyExpenses->where('project_site_id',$projectSiteId)->where('month_id',$monthId)->where('year_id',$yearId)->first();
                             if($alreadyExist != null){
                                 $alreadyExist->update([
+                                    'purchase_expense' => round($purchaseOrderBillTotalAmount,3),
+                                    'site_transfer_expense' => round($inventorySiteTransfersTotal,3),
+                                    'asset_maintenance_expense' => round($assetMaintenanceBillPaymentTotal,3),
                                     'total_expense' => round($totalAmount,3)
                                 ]);
                             }else{
@@ -197,6 +302,9 @@ class PurchaseOrderBillMonthlyExpenseCalculations extends Command
                                     'project_site_id' => $projectSiteId,
                                     'month_id' => $monthId,
                                     'year_id' => $yearId,
+                                    'purchase_expense' => round($purchaseOrderBillTotalAmount,3),
+                                    'site_transfer_expense' => round($inventorySiteTransfersTotal,3),
+                                    'asset_maintenance_expense' => round($assetMaintenanceBillPaymentTotal,3),
                                     'total_expense' => round($totalAmount,3)
                                 ]);
                             }
@@ -229,17 +337,48 @@ class PurchaseOrderBillMonthlyExpenseCalculations extends Command
                                         ,'purchase_order_bills.created_at')
                                     ->orderBy('created_at','desc')
                                     ->get();
-                                $basicAmount =  round($purchaseOrderBillData
+                                $purchaseOrderBillAmount =  round($purchaseOrderBillData
                                     ->sum('basic_amount'),3);
-                                /*$transportationTaxAmount =  round($purchaseOrderBillData
-                                    ->sum('transportation_tax_amount'),3);
-                                $extraTaxAmount =  round($purchaseOrderBillData
-                                    ->sum('extra_tax_amount'),3);*/
-                                $totalAmount = $basicAmount/* + $transportationTaxAmount + $extraTaxAmount*/;
+                                $purchaseOrderBillTotalAmount = $purchaseOrderBillAmount;
+
+                                $inventorySiteTransfersInTotal = $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
+                                    ,'=','inventory_component_transfers.inventory_component_id')
+                                    ->where('inventory_components.project_site_id',$projectSiteId)
+                                    ->where('inventory_component_transfers.transfer_type_id',
+                                        $inventoryComponentSiteTransferIds->where('type','IN')->pluck('id')->first())
+                                    ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
+                                    ->whereMonth('inventory_component_transfers.created_at',$thisMonth)
+                                    ->whereYear('inventory_component_transfers.created_at',$thisYear)
+                                    ->sum('inventory_component_transfers.total');
+
+                                $inventorySiteTransfersOutTotal = $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
+                                    ,'=','inventory_component_transfers.inventory_component_id')
+                                    ->where('inventory_components.project_site_id',$projectSiteId)
+                                    ->where('inventory_component_transfers.transfer_type_id',
+                                        $inventoryComponentSiteTransferIds->where('type','OUT')->pluck('id')->first())
+                                    ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
+                                    ->whereMonth('inventory_component_transfers.created_at',$thisMonth)
+                                    ->whereYear('inventory_component_transfers.created_at',$thisYear)
+                                    ->sum('inventory_component_transfers.total');
+
+                                $inventorySiteTransfersTotal = $inventorySiteTransfersInTotal - $inventorySiteTransfersOutTotal;
+
+                                $assetMaintenanceBillPaymentTotal = $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
+                                    ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
+                                    ->join('assets','assets.id','=','asset_maintenance.asset_id')
+                                    ->where('asset_maintenance.project_site_id',$projectSiteId)
+                                    ->whereMonth('asset_maintenance_bill_payments.created_at',$thisMonth)
+                                    ->whereYear('asset_maintenance_bill_payments.created_at',$thisYear)
+                                    ->sum('asset_maintenance_bill_payments.amount');
+                                $totalAmount = $purchaseOrderBillTotalAmount + $inventorySiteTransfersTotal + $assetMaintenanceBillPaymentTotal;
+
                                 if($totalAmount != 0){
                                     $alreadyExist = $purchaseOrderBillMonthlyExpenses->where('project_site_id',$projectSiteId)->where('month_id',$monthId)->where('year_id',$yearId)->first();
                                     if($alreadyExist != null){
                                         $alreadyExist->update([
+                                            'purchase_expense' => round($purchaseOrderBillTotalAmount,3),
+                                            'site_transfer_expense' => round($inventorySiteTransfersTotal,3),
+                                            'asset_maintenance_expense' => round($assetMaintenanceBillPaymentTotal,3),
                                             'total_expense' => round($totalAmount,3)
                                         ]);
                                     }else{
@@ -247,6 +386,9 @@ class PurchaseOrderBillMonthlyExpenseCalculations extends Command
                                             'project_site_id' => $projectSiteId,
                                             'month_id' => $monthId,
                                             'year_id' => $yearId,
+                                            'purchase_expense' => round($purchaseOrderBillTotalAmount,3),
+                                            'site_transfer_expense' => round($inventorySiteTransfersTotal,3),
+                                            'asset_maintenance_expense' => round($assetMaintenanceBillPaymentTotal,3),
                                             'total_expense' => round($totalAmount,3)
                                         ]);
                                     }
