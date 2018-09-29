@@ -449,14 +449,15 @@ class ReportManagementController extends Controller{
                             $thisMonth = (int)date('n',strtotime($inventoryComponentTransferData['created_at']));
                             $data[$row]['bill_entry_date'] = date('d-m-Y',strtotime($inventoryComponentTransferData['created_at']));
                             $data[$row]['bill_created_date'] = date('d-m-Y',strtotime($inventoryComponentTransferData['created_at']));
-                            $data[$row]['bill_number'] = ($inventoryComponentTransferData['bill_number'] != null) ? $inventoryComponentTransferData['bill_number'] : '-';
-                            $data[$row]['source_name'] = $inventoryComponentTransferData['source_name'];
+                            $data[$row]['bill_number'] = $inventoryComponentTransferData['grn'];
+                            $data[$row]['source_name'] = $inventoryComponentTransferData['source_name'].' - '.$inventoryComponentTransferData->transferType->type;
                             $data[$row]['basic_amount'] = $inventoryComponentTransferData['rate_per_unit'] * $inventoryComponentTransferData['quantity'];
-                            $data[$row]['tax_amount'] = $inventoryComponentTransferData['total'] - ($inventoryComponentTransferData['rate_per_unit'] * $inventoryComponentTransferData['quantity']);
+                            $data[$row]['tax_amount'] = $inventoryComponentTransferData['cgst_amount'] + $inventoryComponentTransferData['sgst_amount'] + $inventoryComponentTransferData['igst_amount'] ;
+                            $total = $data[$row]['basic_amount'] + $data[$row]['tax_amount'];
                             if($inventoryComponentTransferData->transferType->type == 'OUT'){
-                                $data[$row]['bill_amount'] = -round($inventoryComponentTransferData['total'],3);
+                                $data[$row]['bill_amount'] = -round($total,3);
                             }else{
-                                $data[$row]['bill_amount'] = round($inventoryComponentTransferData['total'],3);
+                                $data[$row]['bill_amount'] = round($total,3);
                             }
                         }else{
                             $data[$row]['background'] = '#b2cdff';
