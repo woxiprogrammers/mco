@@ -11,6 +11,7 @@ namespace App\Http\Controllers\Report;
 
 use App\AssetMaintenanceBill;
 use App\AssetMaintenanceBillPayment;
+use App\AssetMaintenanceVendorRelation;
 use App\Bill;
 use App\BillQuotationExtraItem;
 use App\BillQuotationProducts;
@@ -344,10 +345,11 @@ class ReportManagementController extends Controller{
                     $inventoryComponentTransfer = new InventoryComponentTransfers();
                     $inventoryTransferTypes = new InventoryTransferTypes();
                     $inventoryComponentTransferStatus = new InventoryComponentTransferStatus();
+                    $assetMaintenanceBill = new AssetMaintenanceBill();
                     $assetMaintenanceBillPayment = new AssetMaintenanceBillPayment();
                     $purchaseOrderBillMonthlyExpense = new PurchaseOrderBillMonthlyExpense();
                     $data[$row] = array(
-                        'Bill Date', 'Bill Create Date', 'Bill No', 'Vendor Name', 'Basic Amount', 'Tax Amount',
+                        'Bill Date', 'Bill Create Date', 'Bill No', 'Paritculars', 'Basic Amount', 'Tax Amount',
                         'Bill Amount', 'Monthly Total'
                     );
                     $date = date('l, d F Y',strtotime($secondParameter)) .' - '. date('l, d F Y',strtotime($firstParameter));
@@ -411,7 +413,7 @@ class ReportManagementController extends Controller{
                         ->where('asset_maintenance_bill_payments.created_at','<=',$secondParameter)
                         ->select('asset_maintenance_bills.id as asset_maintenance_bill_id'
                             ,'asset_maintenance_bill_payments.amount as total','asset_maintenance_bill_payments.created_at as created_at'
-                            ,'assets.name as asset_name')
+                            ,'assets.name as asset_name','asset_maintenance.id as asset_maintenance_id')
                         ->orderBy('asset_maintenance_bill_payments.created_at','desc')
                         ->get()->toArray();
                     $totalData = array_merge($purchaseOrderBillsData,$inventorySiteTransfersData,$assetMaintenanceBillsData);
@@ -451,15 +453,16 @@ class ReportManagementController extends Controller{
                             }
                         }else{
                             $data[$row]['background'] = '#b2cdff';
+                            $assetMaintenanceBillData = $assetMaintenanceBill->where('id',$reportData['asset_maintenance_bill_id'])->first();
+                            $vendorCompany = $assetMaintenanceBillData->assetMaintenance->assetMaintenanceVendorRelation->where('is_approved',true)->first()->vendor->company;
                             $thisMonth = (int)date('n',strtotime($reportData['created_at']));
                             $data[$row]['bill_entry_date'] = date('d-m-Y',strtotime($reportData['created_at']));
                             $data[$row]['bill_created_date'] = date('d-m-Y',strtotime($reportData['created_at']));
-                            $data[$row]['bill_number'] = 1;
-                            $data[$row]['company_name'] = 'asdwe';
-                            $taxAmount = 12;
-                            $data[$row]['basic_amount'] = 1;
-                            $data[$row]['tax_amount'] = $taxAmount;
-                            $data[$row]['bill_amount'] = 0;
+                            $data[$row]['bill_number'] = $assetMaintenanceBill['bill_number'];
+                            $data[$row]['company_name'] = $reportData['asset_name'].' - '.$vendorCompany;
+                            $data[$row]['basic_amount'] = $assetMaintenanceBillData['amount'] + $assetMaintenanceBillData['extra_amount'];
+                            $data[$row]['tax_amount'] = $assetMaintenanceBillData['cgst_amount'] + $assetMaintenanceBillData['sgst_amount'] + $assetMaintenanceBillData['igst_amount'];
+                            $data[$row]['bill_amount'] = $reportData['total'];
                         }
 
                         if($row == 1){
