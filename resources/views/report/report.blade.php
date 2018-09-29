@@ -59,6 +59,7 @@
                                                             <option value="sitewise_sales_receipt_report">Sales & Receipt Report</option>
                                                             <option value="sitewise_subcontractor_report">Subcontractor Report</option>
                                                             <option value="sitewise_subcontractor_summary_report">Subcontractor Summary Report</option>
+                                                            <option value="sitewise_pNl_report">PnL Report</option>
                                                         </select>
                                                     </div>
                                                 </div>
@@ -215,7 +216,7 @@
                 $('#project_sites').hide();
                 $('#bill_project_site,#month,#year').hide();
                 $('#dateDiv,#downloadButton,#subcontractor').hide();
-            }else if($('#report_type').val() == 'sitewise_indirect_expenses_report'){
+            }else if($('#report_type').val() == 'sitewise_indirect_expenses_report' || $('#report_type').val() == 'sitewise_pNl_report'){
                 $('#bill_project_site,#subcontractor_project_site,#subcontractor,#downloadButton,#dateDiv').hide();
                 $('#project_sites,#submitButton,#month,#year').show();
             }else{

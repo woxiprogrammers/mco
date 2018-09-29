@@ -302,6 +302,12 @@ class ReportManagementController extends Controller{
                     $downloadButtonDetails[0]['end_month_id'] = $request['end_month_id'];
                     $downloadButtonDetails[0]['year_id'] = $request['year_id'];
                     break;
+
+                case 'sitewise_pNl_report' :
+                    $downloadButtonDetails[0]['start_month_id'] = $request['start_month_id'];
+                    $downloadButtonDetails[0]['end_month_id'] = $request['end_month_id'];
+                    $downloadButtonDetails[0]['year_id'] = $request['year_id'];
+                    break;
             }
             $subcontractorId = $request['subcontractor_id'];
             $reportType = $request['report_name'];
@@ -320,6 +326,7 @@ class ReportManagementController extends Controller{
 
     public function downloadDetailReport(Request $request,$reportType,$project_site_id,$firstParameter,$secondParameter,$thirdParameter) {
         try{
+            dd($reportType,$project_site_id,$firstParameter,$secondParameter,$thirdParameter);
             $year = new Year();
             $month = new Month();
             $currentDate = date('d_m_Y_h_i_s',strtotime(Carbon::now()));
@@ -1812,6 +1819,10 @@ class ReportManagementController extends Controller{
                             }
                         });
                     })->export('xls');
+                    break;
+
+                case 'sitewise_pNl_report' :
+
                     break;
 
                 default :
