@@ -15,6 +15,7 @@ use App\AssetMaintenanceVendorRelation;
 use App\Bill;
 use App\BillQuotationExtraItem;
 use App\BillQuotationProducts;
+use App\BillReconcileTransaction;
 use App\BillStatus;
 use App\BillTax;
 use App\BillTransaction;
@@ -326,7 +327,7 @@ class ReportManagementController extends Controller{
 
     public function downloadDetailReport(Request $request,$reportType,$project_site_id,$firstParameter,$secondParameter,$thirdParameter) {
         try{
-            dd($reportType,$project_site_id,$firstParameter,$secondParameter,$thirdParameter);
+            //dd($reportType,$project_site_id,$firstParameter,$secondParameter,$thirdParameter);
             $year = new Year();
             $month = new Month();
             $currentDate = date('d_m_Y_h_i_s',strtotime(Carbon::now()));
@@ -1823,7 +1824,178 @@ class ReportManagementController extends Controller{
                     break;
 
                 case 'sitewise_pNl_report' :
+                    $projectSite = new ProjectSite();
+                    $quotation = new Quotation();
+                    $bill = new Bill();
+                    $billStatus = new BillStatus();
+                    $billTransaction = new BillTransaction();
+                    $billReconcileTransaction = new BillReconcileTransaction();
+                    $purchaseOrderBillMonthlyExpense = new PurchaseOrderBillMonthlyExpense();
+                    $peticashSalaryTransactionMonthlyExpense = new PeticashSalaryTransactionMonthlyExpense();
+                    $peticashPurchaseTransactionMonthlyExpense = new PeticashPurchaseTransactionMonthlyExpense();
+                    $quotation = $quotation->where('project_site_id',$project_site_id)->first();
+                    $approvedBillStatusId = $billStatus->where('slug','approved')->pluck('id')->first();
+                    $totalBillData = $bill->where('quotation_id',$quotation['id'])
+                        ->where('bill_status_id',$approvedBillStatusId)->orderBy('id')
+                        ->select('id','bill_status_id')->get();
+                    $startMonth = $month->where('id',$firstParameter)->first();
+                    $endMonth = $month->where('id',$secondParameter)->first();
+                    $selectedYear = $year->where('id',$thirdParameter)->first();
+                    $date = $startMonth['name'].' '.$selectedYear['slug'].' - '.$endMonth['name'].' '.$selectedYear['slug'];
+                    $totalMonths = $month->whereBetween('id',[$firstParameter,$secondParameter])->select('id','name','slug')->get();
+                    $sales = $receipt = $total = $totalRetention = $totalHold = $debitAmount = $tdsAmount =
+                    $otherRecoveryAmount = $mobilization = $purchaseAmount = $salaryAmount = $peticashPurchaseAmount = 0;
+                    $projectSiteAdvancePayment = new ProjectSiteAdvancePayment();
+                    $outstandingMobilization = $projectSiteAdvancePayment->where('project_site_id',$project_site_id)->sum('amount');
+                    foreach ($totalMonths as $month){
+                        $billIds = $bill->where('quotation_id',$quotation['id'])
+                            ->where('bill_status_id',$approvedBillStatusId)->orderBy('id')
+                            ->whereMonth('date',$month['id'])
+                            ->whereYear('date',$selectedYear['slug'])
+                            ->pluck('id');
+                        $billTransactionData = $billTransaction->whereIn('bill_id',$billIds)->get();
+                        $billReconcileTransactionData = $billReconcileTransaction->whereIn('bill_id',$billIds)->get();
+                        foreach ($billIds as $billId) {
+                            $billData = $this->getBillData($billId);
+                            $sales += $billData['total_amount_with_tax'];
+                        }
+                        $total += $billTransactionData->sum('total');
+                        $mobilization += $billTransactionData->where('paid_from_slug',true)->sum('amount');
+                        $receipt += ($total != null) ? $total : 0;
+                        $retentionAmount = $billTransactionData->sum('retention_amount');
+                        $reconciledRetentionAmount = $billReconcileTransactionData->where('transaction_slug','retention')->sum('amount');
+                        $totalRetention += $retentionAmount - $reconciledRetentionAmount;
+                        $holdAmount = $billTransactionData->sum('hold');
+                        $reconciledHoldAmount = $billReconcileTransactionData->where('transaction_slug','hold')->sum('amount');
+                        $totalHold += $holdAmount - $reconciledHoldAmount;
+                        $debitAmount += $billTransactionData->sum('debit');
+                        $tdsAmount += $billTransactionData->sum('tds_amount');
+                        $otherRecoveryAmount += $billTransactionData->sum('other_recovery_value');
 
+                        $purchaseAmount += $purchaseOrderBillMonthlyExpense->where('month_id',$month['id'])
+                                            ->where('year_id',$selectedYear['id'])->sum('total_expense');
+                        $salaryAmount += $peticashSalaryTransactionMonthlyExpense->where('month_id',$month['id'])
+                                            ->where('year_id',$selectedYear['id'])->sum('total_expense');
+                        $peticashPurchaseAmount += $peticashPurchaseTransactionMonthlyExpense->where('month_id',$month['id'])
+                                            ->where('year_id',$selectedYear['id'])->sum('total_expense');
+                    }
+                    $openingExpenses = $quotation['opening_expenses'];
+                    $subcontractor = $indirect_direct_expenses = $assetRent = 0;
+                    $outstanding = $sales - $debitAmount - $tdsAmount - $totalRetention - $otherRecoveryAmount - $totalHold - $receipt - $mobilization;
+                    $total = number_format(($purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount + $indirect_direct_expenses + $openingExpenses),3);
+                    $data = array(
+                        array_merge(array('Sales', 'Retention', 'Receipt', 'Mobilization', 'Outstanding', 'Category', 'Amount')),
+                        array_merge(array($sales, $totalRetention, $receipt, $mobilization, $outstanding, 'Purchase', $purchaseAmount)),
+                        array_merge(array('Debit Note', $debitAmount), array_fill(0,3,null) , array('Salary', $salaryAmount)),
+                        array_merge(array('TDS', $tdsAmount) , array_fill(0,3,null) , array('Asset Rent', $assetRent)),
+                        array_merge(array('Hold', $totalHold) , array_fill(0,3,null) , array('Asset Opening Balance', 0)),
+                        array_merge(array('Other Recovery', $otherRecoveryAmount), array_fill(0,3,null) , array('Misc. Purchase', $peticashPurchaseAmount)),
+                        array_merge(array_fill(0,5,null) , array('Indirect expenses', $indirect_direct_expenses)),
+                        array_merge(array_fill(0,5,null) , array('Opening Balance', $openingExpenses)),
+                        array_merge(array_fill(0,4,null) , array($outstanding), array_fill(0,1,null) ,array($total)),
+                    );
+dd($data);
+                    $summaryData = array(
+                        array_merge(array('Sales P/L',number_format($sales - $debitAmount - $tdsAmount) , number_format($total) , number_format($total - $sales - $debitAmount - $tdsAmount))),
+                        //array_merge(array('Receipt P/L',number_format($receipt) , number_format($total) , number_format($total - $receipt))),
+                       // array_merge(array('Outstanding Mobilization P/L',number_format($outstandingMobilization) , number_format($mobilization) , number_format($outstandingMobilization - $mobilization))),
+                    );
+                    dd($summaryData);
+                    $projectName = $projectSite->join('projects','projects.id','=','project_sites.project_id')
+                        ->where('project_sites.id',$project_site_id)->pluck('projects.name')->first();
+                    Excel::create($reportType."_".$currentDate, function($excel) use($monthlyTotal, $data, $reportType, $header, $companyHeader, $date, $projectName, $summaryData) {
+                        $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(10);
+                        $excel->sheet($reportType, function($sheet) use($monthlyTotal, $data, $header, $companyHeader, $date, $projectName, $summaryData) {
+                            $objDrawing = new \PHPExcel_Worksheet_Drawing();
+                            $objDrawing->setPath(public_path('/assets/global/img/logo.jpg')); //your image path
+                            $objDrawing->setWidthAndHeight(148,74);
+                            $objDrawing->setResizeProportional(true);
+                            $objDrawing->setCoordinates('A1');
+                            $objDrawing->setWorksheet($sheet);
+
+                            $sheet->mergeCells('A2:H2');
+                            $sheet->cell('A2', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['company_name']);
+                            });
+
+                            $sheet->mergeCells('A3:H3');
+                            $sheet->cell('A3', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['designation']);
+                            });
+
+                            $sheet->mergeCells('A4:H4');
+                            $sheet->cell('A4', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['address']);
+                            });
+
+                            $sheet->mergeCells('A5:H5');
+                            $sheet->cell('A5', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['contact_no']);
+                            });
+
+                            $sheet->mergeCells('A6:H6');
+                            $sheet->cell('A6', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['gstin_number']);
+                            });
+
+                            $sheet->mergeCells('A7:H7');
+                            $sheet->cell('A7', function($cell) use ($projectName){
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue('Indirect Expenses Report - '.$projectName);
+                            });
+
+                            $sheet->mergeCells('A8:H8');
+                            $sheet->cell('A8', function($cell) use($date) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($date);
+                            });
+                            $row = 9;
+                            $headerRow =  $row+1;
+                            foreach($data as $key => $rowData){
+                                Log::info($key);
+                                $next_column = 'A';
+                                $row++;
+                                foreach($rowData as $key1 => $cellData){
+                                    $current_column = $next_column++;
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData,$row,$sheet,$headerRow,$key1) {
+                                        $sheet->getRowDimension($row)->setRowHeight(20);
+                                        $cell->setFontWeight('bold');
+                                        $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                                        $cell->setAlignment('center')->setValignment('center');
+                                        $cell->setValue($cellData);
+
+                                    });
+                                }
+                            }
+                            foreach($summaryData as $key => $rowData){
+                                $next_column = 'A';
+                                $row++;
+                                foreach($rowData as $key1 => $cellData){
+                                    $current_column = $next_column++;
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData,$row,$sheet,$headerRow,$key1) {
+                                        $sheet->getRowDimension($row)->setRowHeight(20);
+                                        $cell->setFontWeight('bold');
+                                        $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                                        $cell->setAlignment('center')->setValignment('center');
+                                        $cell->setValue($cellData);
+
+                                    });
+                                }
+                            }
+                        });
+                    })->export('xls');
                     break;
 
                 default :
