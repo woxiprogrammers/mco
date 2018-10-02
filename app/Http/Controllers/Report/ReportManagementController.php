@@ -1676,6 +1676,7 @@ class ReportManagementController extends Controller{
                     $date = $startMonth['name'].' '.$selectedYear['slug'].' - '.$endMonth['name'].' '.$selectedYear['slug'];
                     $totalMonths = $month->whereBetween('id',[$firstParameter,$secondParameter])->select('id','name','slug')->get();
                     $row = 1;
+                    $yearlyGst = 0;
                     foreach ($totalMonths as $month){
                         $data[$row]['month'] = $month['name'].'-'.$selectedYear['slug'];
                         $data[$row]['gst'] = $data[$row]['purchase_gst'] = $data[$row]['subcontractor_gst'] = $data[$row]['sales_gst'] =
@@ -1741,9 +1742,13 @@ class ReportManagementController extends Controller{
                             ->sum(DB::raw('asset_maintenance_bills.cgst_amount +asset_maintenance_bills.sgst_amount +asset_maintenance_bills.igst_amount'));
                         $purchaseGst = $purchaseOrderGst + $assetMaintenanceGst;
                         $data[$row]['purchase_gst'] = number_format($purchaseGst,3);
-                        $data[$row]['gst'] = number_format(($salesGst - $purchaseGst - $subcontractorGst),3);
+                        $totalMonthGst = $salesGst - $purchaseGst - $subcontractorGst;
+                        $data[$row]['gst'] = number_format(($totalMonthGst),3);
+                        $yearlyGst += $totalMonthGst;
                         $row++;
                     }
+                    $data[$row]['make_bold'] = true;
+                    $data[$row] = array_merge($data[$row],array('Total',null,null,null,number_format($yearlyGst)));
                     $projectName = $projectSite->join('projects','projects.id','=','project_sites.project_id')
                         ->where('project_sites.id',$project_site_id)->pluck('projects.name')->first();
                     $reportType = 'Indirect Expenses';
