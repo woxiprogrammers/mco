@@ -1830,21 +1830,23 @@ class ReportManagementController extends Controller{
                     $billStatus = new BillStatus();
                     $billTransaction = new BillTransaction();
                     $billReconcileTransaction = new BillReconcileTransaction();
+                    $subcontractorStructure =  new SubcontractorStructure();
+                    $subcontractorBill = new SubcontractorBill();
+                    $subcontractorBillTransaction = new SubcontractorBillTransaction();
                     $purchaseOrderBillMonthlyExpense = new PurchaseOrderBillMonthlyExpense();
                     $peticashSalaryTransactionMonthlyExpense = new PeticashSalaryTransactionMonthlyExpense();
                     $peticashPurchaseTransactionMonthlyExpense = new PeticashPurchaseTransactionMonthlyExpense();
                     $quotation = $quotation->where('project_site_id',$project_site_id)->first();
                     $approvedBillStatusId = $billStatus->where('slug','approved')->pluck('id')->first();
-                    $totalBillData = $bill->where('quotation_id',$quotation['id'])
-                        ->where('bill_status_id',$approvedBillStatusId)->orderBy('id')
-                        ->select('id','bill_status_id')->get();
+                    $subcontractorApprovedBillStatusId = SubcontractorBillStatus::where('slug','approved')->pluck('id')->first();
                     $startMonth = $month->where('id',$firstParameter)->first();
                     $endMonth = $month->where('id',$secondParameter)->first();
                     $selectedYear = $year->where('id',$thirdParameter)->first();
                     $date = $startMonth['name'].' '.$selectedYear['slug'].' - '.$endMonth['name'].' '.$selectedYear['slug'];
                     $totalMonths = $month->whereBetween('id',[$firstParameter,$secondParameter])->select('id','name','slug')->get();
-                    $sales = $receipt = $total = $totalRetention = $totalHold = $debitAmount = $tdsAmount =
+                    $sales = $receipt = $total = $totalRetention = $totalHold = $debitAmount = $tdsAmount = $subcontractorTotal =
                     $otherRecoveryAmount = $mobilization = $purchaseAmount = $salaryAmount = $peticashPurchaseAmount = 0;
+                    $indirect_direct_expenses = $assetRent = 0;
                     $projectSiteAdvancePayment = new ProjectSiteAdvancePayment();
                     $outstandingMobilization = $projectSiteAdvancePayment->where('project_site_id',$project_site_id)->sum('amount');
                     foreach ($totalMonths as $month){
@@ -1878,29 +1880,39 @@ class ReportManagementController extends Controller{
                                             ->where('year_id',$selectedYear['id'])->sum('total_expense');
                         $peticashPurchaseAmount += $peticashPurchaseTransactionMonthlyExpense->where('month_id',$month['id'])
                                             ->where('year_id',$selectedYear['id'])->sum('total_expense');
+
+                        $subcontractorBillIds = $subcontractorBill->join('subcontractor_structure','subcontractor_bills.sc_structure_id',
+                                                    '=','subcontractor_structure.id')
+                                                    ->where('subcontractor_structure.project_site_id',$project_site_id)
+                                                    ->where('subcontractor_bills.subcontractor_bill_status_id',$subcontractorApprovedBillStatusId)
+                                                    ->whereMonth('subcontractor_bills.created_at',$month['id'])
+                                                    ->whereYear('subcontractor_bills.created_at',$selectedYear['slug'])
+                                                    ->pluck('subcontractor_bills.id');
+                        $subcontractorTotal += $subcontractorBillTransaction
+                            ->whereIn('subcontractor_bills_id',$subcontractorBillIds)
+                            ->sum('total');
                     }
                     $openingExpenses = $quotation['opening_expenses'];
-                    $subcontractor = $indirect_direct_expenses = $assetRent = 0;
+
                     $outstanding = $sales - $debitAmount - $tdsAmount - $totalRetention - $otherRecoveryAmount - $totalHold - $receipt - $mobilization;
-                    $total = number_format(($purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount + $indirect_direct_expenses + $openingExpenses),3);
+                    $total = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount + $indirect_direct_expenses + $subcontractorTotal + $openingExpenses;
                     $data = array(
                         array_merge(array('Sales', 'Retention', 'Receipt', 'Mobilization', 'Outstanding', 'Category', 'Amount')),
-                        array_merge(array($sales, $totalRetention, $receipt, $mobilization, $outstanding, 'Purchase', $purchaseAmount)),
-                        array_merge(array('Debit Note', $debitAmount), array_fill(0,3,null) , array('Salary', $salaryAmount)),
-                        array_merge(array('TDS', $tdsAmount) , array_fill(0,3,null) , array('Asset Rent', $assetRent)),
-                        array_merge(array('Hold', $totalHold) , array_fill(0,3,null) , array('Asset Opening Balance', 0)),
-                        array_merge(array('Other Recovery', $otherRecoveryAmount), array_fill(0,3,null) , array('Misc. Purchase', $peticashPurchaseAmount)),
-                        array_merge(array_fill(0,5,null) , array('Indirect expenses', $indirect_direct_expenses)),
-                        array_merge(array_fill(0,5,null) , array('Opening Balance', $openingExpenses)),
-                        array_merge(array_fill(0,4,null) , array($outstanding), array_fill(0,1,null) ,array($total)),
+                        array_merge(array(number_format($sales), number_format($totalRetention), number_format($receipt), number_format($mobilization), number_format($outstanding), 'Purchase', number_format($purchaseAmount))),
+                        array_merge(array('Debit Note', number_format($debitAmount)), array_fill(0,3,null) , array('Salary', number_format($salaryAmount))),
+                        array_merge(array('TDS', number_format($tdsAmount)) , array_fill(0,3,null) , array('Asset Rent', number_format($assetRent))),
+                        array_merge(array('Hold', number_format($totalHold)) , array_fill(0,3,null) , array('Asset Opening Balance', 0)),
+                        array_merge(array('Other Recovery', number_format($otherRecoveryAmount)), array_fill(0,3,null) , array('Misc. Purchase', $peticashPurchaseAmount)),
+                        array_merge(array_fill(0,5,null) , array('Indirect expenses', number_format($indirect_direct_expenses))),
+                        array_merge(array_fill(0,5,null) , array('Opening Balance', number_format($openingExpenses))),
+                        array_merge(array_fill(0,5,null) , array('Subcontractor', number_format($subcontractorTotal))),
+                        array_merge(array_fill(0,4,null) , array(number_format($outstanding)), array_fill(0,1,null) ,array(number_format($total))),
                     );
-dd($data);
                     $summaryData = array(
                         array_merge(array('Sales P/L',number_format($sales - $debitAmount - $tdsAmount) , number_format($total) , number_format($total - $sales - $debitAmount - $tdsAmount))),
-                        //array_merge(array('Receipt P/L',number_format($receipt) , number_format($total) , number_format($total - $receipt))),
-                       // array_merge(array('Outstanding Mobilization P/L',number_format($outstandingMobilization) , number_format($mobilization) , number_format($outstandingMobilization - $mobilization))),
+                        array_merge(array('Receipt P/L',number_format($receipt) , number_format($total) , number_format($total - $receipt))),
+                        array_merge(array('Outstanding Mobilization P/L',number_format($outstandingMobilization) , number_format($mobilization) , number_format($outstandingMobilization - $mobilization))),
                     );
-                    dd($summaryData);
                     $projectName = $projectSite->join('projects','projects.id','=','project_sites.project_id')
                         ->where('project_sites.id',$project_site_id)->pluck('projects.name')->first();
                     Excel::create($reportType."_".$currentDate, function($excel) use($monthlyTotal, $data, $reportType, $header, $companyHeader, $date, $projectName, $summaryData) {
@@ -1979,6 +1991,7 @@ dd($data);
                                     });
                                 }
                             }
+                            $row++;$row++;
                             foreach($summaryData as $key => $rowData){
                                 $next_column = 'A';
                                 $row++;
