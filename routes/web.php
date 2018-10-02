@@ -803,6 +803,10 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('detail',array('uses' => 'Report\ReportManagementController@getButtonDetail'));
         Route::get('get-report/{reportType}/{projectSiteId}/{firstParameter}/{secondParameter}/{thirdParameter}',array('uses' => 'Report\ReportManagementController@downloadDetailReport'));
         Route::post('subcontractor',array('uses' => 'Report\ReportManagementController@getSubcontractor'));
+        Route::group(['prefix' => 'listing'], function(){
+            Route::post('sales',array('uses' => 'Report\ReportManagementController@getSalesListing'));
+            Route::post('expense',array('uses' => 'Report\ReportManagementController@getExpensesListing'));
+        });
     });
 
     Route::group(['prefix' => 'notification'], function(){

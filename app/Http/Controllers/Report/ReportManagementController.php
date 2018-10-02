@@ -2278,4 +2278,67 @@ class ReportManagementController extends Controller{
         }
         return response($subcontractorOptions,$status);
     }
+
+    public function getSalesListing(Request $request){
+        try{
+            if($request->has('search_name')){
+                $unitData = Unit::where('name','ilike','%'.$request->search_name.'%')->orderBy('name','asc')->get()->toArray();
+            }else{
+                $unitData = Unit::orderBy('name','asc')->get()->toArray();
+            }
+            $iTotalRecords = count($unitData);
+            $records = array();
+            $records['data'] = array();
+            $end = $request->length < 0 ? count($unitData) : $request->length;
+            $sr_no = 0;
+            for($iterator = 0 , $pagination = $request->start ; $iterator < $end && $pagination < count($unitData) ; $iterator++ , $pagination++){
+                if($unitData[$pagination]['is_active'] == true){
+                    $unit_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
+                    $status = 'Disable';
+                }else{
+                    $unit_status = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
+                    $status = 'Enable';
+                }
+                $records['data'][$iterator] = [
+                    'Project',
+                    "Sales",
+                    'Recipet',
+                    'Outstanding',
+                    'Total Expense',
+                    'Outstanding Mobilization',
+                    'Sitewise PnL',
+                    'Receipt PnL'
+                ];
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $iTotalRecords;
+            $records["recordsFiltered"] = $iTotalRecords;
+            Log::info('Inside ehere');
+dd(123);
+        }catch(\Exception $e){
+            $records = array();
+            $data = [
+                'action' => 'Get Sales Listing Report',
+                'exception' => $e->getMessage(),
+                'params' => $request->all(),
+            ];
+            Log::critical(json_encode($data));
+        }
+        return response()->json($records,200);
+    }
+
+    public function getExpensesListing(Request $request){
+        try{
+            Log::info('Inside ehdsdere');
+dd(123);
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Expenses Listing Report',
+                'exception' => $e->getMessage(),
+                'params' => $request->all(),
+                'type' => $request->report_type
+            ];
+            Log::critical(json_encode($data));
+        }
+    }
 }

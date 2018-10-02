@@ -170,7 +170,7 @@
                                             </div>
                                             <div class="portlet-body">
                                                 {!! csrf_field() !!}
-                                                <table class="table table-striped table-bordered table-hover table-checkable order-column" id="unitsTable">
+                                                <table class="table table-striped table-bordered table-hover table-checkable order-column" id="salesTable">
                                                     <thead>
                                                     <tr style="background-color: #eaf285">
                                                         <th style="width:10%">Site Name</th>
@@ -231,7 +231,7 @@
                                                 </div>
                                             </div>
                                             {!! csrf_field() !!}
-                                            <table class="table table-striped table-bordered table-hover table-checkable order-column" id="unitConversionTable">
+                                            <table class="table table-striped table-bordered table-hover table-checkable order-column" id="expensesTable">
                                                 <thead>
                                                 <tr style="background-color: #eaf285">
                                                     <th style="width:10%">Site Name</th>
@@ -328,7 +328,19 @@
 <script src="/assets/global/plugins/select2/js/select2.full.min.js" type="text/javascript"></script>
 <script src="/assets/pages/scripts/components-select2.min.js" type="text/javascript"></script>
 <link rel="stylesheet" href="/assets/global/plugins/bootstrap-multiselect/css/bootstrap-multiselect.css" type="text/css"/>
+<script src="/public/assets/global/plugins/jquery.min.js" type="text/javascript"></script>
+<link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
+<script  src="/assets/global/plugins/datatables/datatables.min.js"></script>
+<script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
+<script src="/assets/custom/admin/dashboard/manage-datatable.js" type="text/javascript"></script>
+
 <script>
+    $(document).ready(function(){
+        $('#salesTable').DataTable();
+        $('#expensesTable').DataTable();
+    });
+
     function switchProjectSiteModule(projectSiteId, moduleSlug){
         var redirectionUrl = '';
         switch(moduleSlug){
