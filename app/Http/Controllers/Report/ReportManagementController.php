@@ -1206,7 +1206,7 @@ class ReportManagementController extends Controller{
                             $sheet->cell('A7', function($cell) use ($projectName){
                                 $cell->setFontWeight('bold');
                                 $cell->setAlignment('center')->setValignment('center');
-                                $cell->setValue('Purchase Bill Report - '.$projectName);
+                                $cell->setValue('Sales/Receipt Bill Report - '.$projectName);
                             });
 
                             $sheet->mergeCells('A8:H8');
@@ -1293,7 +1293,7 @@ class ReportManagementController extends Controller{
                     $subcontractorBillTransaction = new SubcontractorBillTransaction();
                     $subcontractorBill = new SubcontractorBill();
                     $data[$row] = array(
-                        ' Bill Date : (Created Date)', 'Bill No.', 'Basic Amount', 'GST', 'With Tax Amount', 'Transaction Amount', 'TDS', 'Retention',
+                        ' Bill Created Date)', 'Bill No.', 'Basic Amount', 'GST', 'With Tax Amount', 'Transaction Amount', 'TDS', 'Retention',
                         'Hold', 'Debit', 'Other Recovery', 'Payable', 'Receipt', 'Total Paid', 'Remaining', 'Monthly Total'
                     );
                     $projectName = $projectSite->join('projects','projects.id','=','project_sites.project_id')
@@ -1321,6 +1321,7 @@ class ReportManagementController extends Controller{
                     $subcontractorBillData = $subcontractorBill->where('sc_structure_id',$subcontractorStructureId)
                         ->whereIn('subcontractor_bill_status_id',array_column($statusId->toArray(),'id'))//->orderBy('id')
                         ->get();
+                    $monthlyTotalAmount = 0;
                     foreach ($totalYears as $thisYear){
                         foreach ($months as $month){
                             $monthlyTotal[$iterator]['month'] = $month['name'].'-'.$thisYear['name'];
@@ -1332,10 +1333,15 @@ class ReportManagementController extends Controller{
                             $total = $subcontractorBillTransaction
                                     ->whereIn('subcontractor_bills_id',$billIds)
                                     ->sum('total');
-                            $monthlyTotal[$iterator]['total'] = ($total != null) ? $total : 0;
+                            $monthlyTotal[$iterator]['total'] = ($total != null) ? number_format($total,3) : 0;
+                            $monthlyTotalAmount += ($total != null) ? $total : 0;
                             $iterator++;
                         }
                     }
+                    $monthlyTotal[$iterator]['make_bold' ] = true;
+                    $monthlyTotal[$iterator]['total' ] = 'Total Purchase';
+                    $monthlyTotal[$iterator]['amount'] = number_format($monthlyTotalAmount,3);
+
                     $billNo = 1;
                     $row = 1;
                     $totalBasicAmount = $totalGst = $totalWithTaxAmount = $totalTransactionAmount = $totalTds =
@@ -1493,11 +1499,17 @@ class ReportManagementController extends Controller{
                             foreach($monthlyTotal as $key => $rowData){
                                 $next_column = 'A';
                                 $row++;
+                                if(array_key_exists('make_bold',$rowData)){
+                                    $setBold = true;
+                                    unset($rowData['make_bold']);
+                                }else{
+                                    $setBold = false;
+                                }
                                 foreach($rowData as $key1 => $cellData){
                                     $current_column = $next_column++;
                                     $sheet->getRowDimension($row)->setRowHeight(20);
-                                    $sheet->cell($current_column.($row), function($cell) use($cellData,$row,$monthHeaderRow) {
-                                        if($row == $monthHeaderRow){
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData,$row,$monthHeaderRow,$setBold) {
+                                        if($row == $monthHeaderRow || $setBold){
                                             $cell->setFontWeight('bold');
                                         }
                                         $cell->setBorder('thin', 'thin', 'thin', 'thin');
