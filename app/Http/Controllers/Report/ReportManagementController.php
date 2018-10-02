@@ -2089,7 +2089,7 @@ class ReportManagementController extends Controller{
                             $sheet->cell('A7', function($cell) use ($projectName){
                                 $cell->setFontWeight('bold');
                                 $cell->setAlignment('center')->setValignment('center');
-                                $cell->setValue('Indirect Expenses Report - '.$projectName);
+                                $cell->setValue('Sitewise PnL Report - '.$projectName);
                             });
 
                             $sheet->mergeCells('A8:H8');
