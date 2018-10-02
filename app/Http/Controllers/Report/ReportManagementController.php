@@ -654,6 +654,7 @@ class ReportManagementController extends Controller{
                     $startYearID = $year->where('slug',(int)date('Y',strtotime($firstParameter)))->pluck('id')->first();
                     $endYearID = $year->where('slug',(int)date('Y',strtotime($secondParameter)))->pluck('id')->first();
                     $totalYears = $year->whereBetween('id',[$startYearID,$endYearID])->select('id','name','slug')->get();
+                    $monthlyTotalAmount = 0;
                     foreach ($totalYears as $thisYear){
                         foreach ($months as $month){
                             $monthlyTotal[$iterator]['month'] = $month['name'].'-'.$thisYear['name'];
@@ -661,10 +662,14 @@ class ReportManagementController extends Controller{
                                 ->where('year_id',$thisYear['id'])
                                 ->where('project_site_id',$project_site_id)
                                 ->pluck('total_expense')->first();
-                            $monthlyTotal[$iterator]['total'] = ($total != null) ? $total : 0;
+                            $monthlyTotal[$iterator]['total'] = ($total != null) ? number_format($total) : 0;
+                            $monthlyTotalAmount += ($total != null) ? $total : 0;
                             $iterator++;
                         }
                     }
+                    $monthlyTotal[$iterator]['make_bold' ] = true;
+                    $monthlyTotal[$iterator]['total' ] = 'Total Purchase';
+                    $monthlyTotal[$iterator]['amount'] = number_format($monthlyTotalAmount);
 
                     $projectName = $projectSite->join('projects','projects.id','=','project_sites.project_id')
                         ->where('project_sites.id',$project_site_id)->pluck('projects.name')->first();
@@ -759,7 +764,7 @@ class ReportManagementController extends Controller{
                             $sheet->cell('A7', function($cell) use ($projectName){
                                 $cell->setFontWeight('bold');
                                 $cell->setAlignment('center')->setValignment('center');
-                                $cell->setValue('Purchase Bill Report - '.$projectName);
+                                $cell->setValue('Salary Report - '.$projectName);
                             });
 
                             $sheet->mergeCells('A8:H8');
@@ -773,11 +778,17 @@ class ReportManagementController extends Controller{
                             foreach($monthlyTotal as $key => $rowData){
                                 $next_column = 'A';
                                 $row++;
+                                if(array_key_exists('make_bold',$rowData)){
+                                    $makeBold = true;
+                                    unset($rowData['make_bold']);
+                                }else{
+                                    $makeBold = false;
+                                }
                                 foreach($rowData as $key1 => $cellData){
                                     $current_column = $next_column++;
                                     $sheet->getRowDimension($row)->setRowHeight(20);
-                                    $sheet->cell($current_column.($row), function($cell) use($cellData,$row,$monthHeaderRow) {
-                                        if($row == $monthHeaderRow){
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData,$row,$monthHeaderRow,$makeBold) {
+                                        if($row == $monthHeaderRow || $makeBold){
                                             $cell->setFontWeight('bold');
                                         }
                                         $cell->setBorder('thin', 'thin', 'thin', 'thin');
@@ -800,7 +811,7 @@ class ReportManagementController extends Controller{
                                 }
                                 foreach($rowData as $key1 => $cellData){
                                     $current_column = $next_column++;
-                                    $sheet->cell($current_column.($row), function($cell) use($cellData,$row,$sheet,$headerRow,$setColor) {
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData,$row,$sheet,$headerRow,$setColor,$key1) {
                                         $sheet->getRowDimension($row)->setRowHeight(20);
                                         if($row == $headerRow) {
                                             $cell->setFontWeight('bold');
@@ -810,8 +821,12 @@ class ReportManagementController extends Controller{
                                         }
                                         $cell->setBorder('thin', 'thin', 'thin', 'thin');
                                         $cell->setAlignment('center')->setValignment('center');
-                                        $cell->setValue($cellData);
+                                        if($key1 === 'amount' || ($key1 === 'monthly_total' && $cellData !== null)){
+                                            $cell->setValue(number_format($cellData));
+                                        }else{
+                                            $cell->setValue($cellData);
 
+                                        }
                                     });
                                 }
                             }
