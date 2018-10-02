@@ -33,7 +33,7 @@
                             </div>
                         </div>
                     </div>
-                @elseif($reportType == 'sitewise_indirect_expenses_report')
+                @elseif($reportType == 'sitewise_indirect_expenses_report' || $reportType == 'sitewise_pNl_report')
                     <div class="form-body">
                         <div class="form-group row">
                             <div class="btn-group">
