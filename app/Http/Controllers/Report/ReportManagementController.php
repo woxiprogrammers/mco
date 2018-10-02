@@ -364,6 +364,7 @@ class ReportManagementController extends Controller{
                     $startYearID = $year->where('slug',(int)date('Y',strtotime($firstParameter)))->pluck('id')->first();
                     $endYearID = $year->where('slug',(int)date('Y',strtotime($secondParameter)))->pluck('id')->first();
                     $totalYears = $year->whereBetween('id',[$startYearID,$endYearID])->select('id','name','slug')->get();
+                    $monthlyTotalAmount = 0;
                     foreach ($totalYears as $thisYear){
                         foreach ($months as $month){
                             $monthlyTotal[$iterator]['month'] = $month['name'].'-'.$thisYear['name'];
@@ -371,10 +372,14 @@ class ReportManagementController extends Controller{
                                 ->where('year_id',$thisYear['id'])
                                 ->where('project_site_id',$project_site_id)
                                 ->pluck('total_expense')->first();
-                            $monthlyTotal[$iterator]['total'] = ($total != null) ? $total : 0;
+                            $monthlyTotal[$iterator]['total'] = ($total != null) ? number_format($total) : 0;
+                            $monthlyTotalAmount += ($total != null) ? $total : 0;
                             $iterator++;
                         }
                     }
+                    $monthlyTotal[$iterator]['make_bold' ] = true;
+                    $monthlyTotal[$iterator]['total' ] = 'Total Purchase';
+                    $monthlyTotal[$iterator]['amount'] = number_format($monthlyTotalAmount);
                     $colorData[0]['Purchase'] = '#f2f2f2';
                     $colorData[1]['Site Transfer'] = '#efd2d5';
                     $colorData[2]['Asset Maintenance'] = '#b2cdff';
@@ -471,7 +476,7 @@ class ReportManagementController extends Controller{
                             $data[$row]['company_name'] = $reportData['asset_name'].' - '.$vendorCompany;
                             $data[$row]['basic_amount'] = $assetMaintenanceBillData['amount'] + $assetMaintenanceBillData['extra_amount'];
                             $data[$row]['tax_amount'] = $assetMaintenanceBillData['cgst_amount'] + $assetMaintenanceBillData['sgst_amount'] + $assetMaintenanceBillData['igst_amount'];
-                            $data[$row]['bill_amount'] = $reportData['total'];
+                            $data[$row]['bill_amount'] = (float)$reportData['total'];
                         }
 
                         if($row == 1){
@@ -571,12 +576,18 @@ class ReportManagementController extends Controller{
                             $monthHeaderRow =  $row+1;
                             foreach($monthlyTotal as $key => $rowData){
                                 $next_column = 'A';
+                                if(array_key_exists('make_bold',$rowData)){
+                                    $makeBold = true;
+                                    unset($rowData['make_bold']);
+                                }else{
+                                    $makeBold = false;
+                                }
                                 $row++;
                                 foreach($rowData as $key1 => $cellData){
                                     $current_column = $next_column++;
                                     $sheet->getRowDimension($row)->setRowHeight(20);
-                                    $sheet->cell($current_column.($row), function($cell) use($cellData,$row,$monthHeaderRow) {
-                                        if($row == $monthHeaderRow){
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData,$row,$monthHeaderRow,$makeBold) {
+                                        if($row == $monthHeaderRow || $makeBold){
                                             $cell->setFontWeight('bold');
                                         }
                                         $cell->setBorder('thin', 'thin', 'thin', 'thin');
@@ -621,7 +632,8 @@ class ReportManagementController extends Controller{
                                         }
                                         $cell->setBorder('thin', 'thin', 'thin', 'thin');
                                         $cell->setAlignment('center')->setValignment('center');
-                                        $cell->setValue($cellData);
+                                        ($key1 === 'basic_amount' ||$key1 === 'tax_amount' || $key1 === 'bill_amount' || ($key1 === 'monthly_total' && $cellData !== null))
+                                            ? $cell->setValue(number_format($cellData)) : $cell->setValue($cellData);
 
                                     });
                                 }
