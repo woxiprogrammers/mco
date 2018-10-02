@@ -372,14 +372,14 @@ class ReportManagementController extends Controller{
                                 ->where('year_id',$thisYear['id'])
                                 ->where('project_site_id',$project_site_id)
                                 ->pluck('total_expense')->first();
-                            $monthlyTotal[$iterator]['total'] = ($total != null) ? number_format($total) : 0;
+                            $monthlyTotal[$iterator]['total'] = ($total != null) ? number_format($total,3) : 0;
                             $monthlyTotalAmount += ($total != null) ? $total : 0;
                             $iterator++;
                         }
                     }
                     $monthlyTotal[$iterator]['make_bold' ] = true;
                     $monthlyTotal[$iterator]['total' ] = 'Total Purchase';
-                    $monthlyTotal[$iterator]['amount'] = number_format($monthlyTotalAmount);
+                    $monthlyTotal[$iterator]['amount'] = number_format($monthlyTotalAmount,3);
                     $colorData[0]['Purchase'] = '#f2f2f2';
                     $colorData[1]['Site Transfer'] = '#efd2d5';
                     $colorData[2]['Asset Maintenance'] = '#b2cdff';
@@ -633,7 +633,7 @@ class ReportManagementController extends Controller{
                                         $cell->setBorder('thin', 'thin', 'thin', 'thin');
                                         $cell->setAlignment('center')->setValignment('center');
                                         ($key1 === 'basic_amount' ||$key1 === 'tax_amount' || $key1 === 'bill_amount' || ($key1 === 'monthly_total' && $cellData !== null))
-                                            ? $cell->setValue(number_format($cellData)) : $cell->setValue($cellData);
+                                            ? $cell->setValue(number_format($cellData,3)) : $cell->setValue($cellData);
 
                                     });
                                 }
@@ -662,14 +662,14 @@ class ReportManagementController extends Controller{
                                 ->where('year_id',$thisYear['id'])
                                 ->where('project_site_id',$project_site_id)
                                 ->pluck('total_expense')->first();
-                            $monthlyTotal[$iterator]['total'] = ($total != null) ? number_format($total) : 0;
+                            $monthlyTotal[$iterator]['total'] = ($total != null) ? number_format($total,3) : 0;
                             $monthlyTotalAmount += ($total != null) ? $total : 0;
                             $iterator++;
                         }
                     }
                     $monthlyTotal[$iterator]['make_bold' ] = true;
                     $monthlyTotal[$iterator]['total' ] = 'Total Purchase';
-                    $monthlyTotal[$iterator]['amount'] = number_format($monthlyTotalAmount);
+                    $monthlyTotal[$iterator]['amount'] = number_format($monthlyTotalAmount,3);
 
                     $projectName = $projectSite->join('projects','projects.id','=','project_sites.project_id')
                         ->where('project_sites.id',$project_site_id)->pluck('projects.name')->first();
@@ -822,7 +822,7 @@ class ReportManagementController extends Controller{
                                         $cell->setBorder('thin', 'thin', 'thin', 'thin');
                                         $cell->setAlignment('center')->setValignment('center');
                                         if($key1 === 'amount' || ($key1 === 'monthly_total' && $cellData !== null)){
-                                            $cell->setValue(number_format($cellData));
+                                            $cell->setValue(number_format($cellData,3));
                                         }else{
                                             $cell->setValue($cellData);
 
@@ -854,14 +854,14 @@ class ReportManagementController extends Controller{
                                 ->where('year_id',$thisYear['id'])
                                 ->where('project_site_id',$project_site_id)
                                 ->pluck('total_expense')->first();
-                            $monthlyTotal[$iterator]['total'] = ($total != null) ? number_format($total) : 0;
+                            $monthlyTotal[$iterator]['total'] = ($total != null) ? number_format($total,3) : 0;
                             $monthlyTotalAmount += ($total != null) ? $total : 0;
                             $iterator++;
                         }
                     }
                     $monthlyTotal[$iterator]['make_bold' ] = true;
                     $monthlyTotal[$iterator]['total' ] = 'Total Purchase';
-                    $monthlyTotal[$iterator]['amount'] = number_format($monthlyTotalAmount);
+                    $monthlyTotal[$iterator]['amount'] = number_format($monthlyTotalAmount,3);
 
                     $projectName = $projectSite->join('projects','projects.id','=','project_sites.project_id')
                         ->where('project_sites.id',$project_site_id)->pluck('projects.name')->first();
@@ -1006,7 +1006,7 @@ class ReportManagementController extends Controller{
                                         $cell->setBorder('thin', 'thin', 'thin', 'thin');
                                         $cell->setAlignment('center')->setValignment('center');
                                         if($key1 === 'bill_amount' || ($key1 === 'monthly_total' && $cellData !== null)){
-                                            $cell->setValue(number_format($cellData));
+                                            $cell->setValue(number_format($cellData,3));
                                         }else{
                                             $cell->setValue($cellData);
                                         }
@@ -1057,8 +1057,9 @@ class ReportManagementController extends Controller{
                             $iterator++;
                         }
                     }
+                    $monthlyTotal[$iterator]['make_bold'] = true;
                     $monthlyTotal[$iterator]['total'] = 'Total';
-                    $monthlyTotal[$iterator]['amount'] = $monthlyTotalAmount;
+                    $monthlyTotal[$iterator]['amount'] = number_format($monthlyTotalAmount,3);
                     $billNo = 1;
                     $row = 1;
                     $totalBasicAmount = $totalGst = $totalWithTaxAmount = $totalTransactionAmount = $totalMobilization = $totalTds =
@@ -1219,11 +1220,17 @@ class ReportManagementController extends Controller{
                             foreach($monthlyTotal as $key => $rowData){
                                 $next_column = 'A';
                                 $row++;
+                                if(array_key_exists('make_bold',$rowData)){
+                                    $setBold = true;
+                                    unset($rowData['make_bold']);
+                                }else{
+                                    $setBold = false;
+                                }
                                 foreach($rowData as $key1 => $cellData){
                                     $current_column = $next_column++;
                                     $sheet->getRowDimension($row)->setRowHeight(20);
-                                    $sheet->cell($current_column.($row), function($cell) use($cellData,$row,$monthHeaderRow) {
-                                        if($row == $monthHeaderRow){
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData,$row,$monthHeaderRow,$setBold) {
+                                        if($row == $monthHeaderRow || $setBold){
                                             $cell->setFontWeight('bold');
                                         }
                                         $cell->setBorder('thin', 'thin', 'thin', 'thin');
@@ -1244,7 +1251,7 @@ class ReportManagementController extends Controller{
                             $sheet->cell('C'.$row, function($cell) use($sheet,$row, $mobilizeAdvance) {
                                 $sheet->getRowDimension($row)->setRowHeight(20);
                                 $cell->setAlignment('center')->setValignment('center');
-                                $cell->setValue($mobilizeAdvance)->setFontWeight('bold');
+                                $cell->setValue(number_format($mobilizeAdvance,3))->setFontWeight('bold');
                             });
                             $row++;
                             $headerRow = $row+1;
@@ -1259,15 +1266,19 @@ class ReportManagementController extends Controller{
                                 }
                                 foreach($rowData as $key1 => $cellData){
                                     $current_column = $next_column++;
-                                    $sheet->cell($current_column.($row), function($cell) use($cellData,$row,$sheet,$headerRow,$setBold,$current_column) {
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData,$row,$sheet,$headerRow,$setBold,$current_column,$key1) {
                                         $sheet->getRowDimension($row)->setRowHeight(20);
                                         ($row == $headerRow || $setBold) ? $cell->setFontWeight('bold') : null;
                                         ($current_column == 'N') ? $cell->setBackground('#d7f442') : null;
                                         ($current_column == 'P') ? $cell->setFontColor('#d82517') : null;
                                         $cell->setBorder('thin', 'thin', 'thin', 'thin');
                                         $cell->setAlignment('center')->setValignment('center');
-                                        $cell->setValue($cellData);
+                                        if($key1 === 'monthly_total' && $cellData !== null){
+                                            $cell->setValue(number_format($cellData,3));
+                                        }else{
+                                            $cell->setValue($cellData);
 
+                                        }
                                     });
                                 }
                             }
@@ -1607,10 +1618,10 @@ class ReportManagementController extends Controller{
                     }
                     $data[$row]['make_bold'] = true;
                     $totalRow = array(
-                        'Total', number_format($totalBasicAmount), number_format($totalGst), number_format($totalAmount),
-                        number_format($totalTransactionAmount), number_format($totalTds),
-                        number_format($totalRetention), number_format($totalHold), number_format($totalDebit), number_format($totalOtherRecovery),
-                        number_format($totalAmount), number_format($totalReceipt), number_format($totalBalanceRemaining)
+                        'Total', number_format($totalBasicAmount,3), number_format($totalGst,3), number_format($totalAmount,3),
+                        number_format($totalTransactionAmount,3), number_format($totalTds,3),
+                        number_format($totalRetention,3), number_format($totalHold,3), number_format($totalDebit,3), number_format($totalOtherRecovery,3),
+                        number_format($totalAmount,3), number_format($totalReceipt,3), number_format($totalBalanceRemaining,3)
                     );
                     $data[$row] = array_merge($data[$row],$totalRow);
                     $projectName = $projectSite->join('projects','projects.id','=','project_sites.project_id')
@@ -1794,7 +1805,7 @@ class ReportManagementController extends Controller{
                         $row++;
                     }
                     $data[$row]['make_bold'] = true;
-                    $data[$row] = array_merge($data[$row],array('Total',null,null,null,number_format($yearlyGst)));
+                    $data[$row] = array_merge($data[$row],array('Total',null,null,null,number_format($yearlyGst,3)));
                     $projectName = $projectSite->join('projects','projects.id','=','project_sites.project_id')
                         ->where('project_sites.id',$project_site_id)->pluck('projects.name')->first();
                     $reportType = 'Indirect Expenses';
@@ -2000,20 +2011,20 @@ class ReportManagementController extends Controller{
                     $total = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount + $indirectExpenses + $subcontractorTotal + $openingExpenses;
                     $data = array(
                         array_merge(array('Sales', 'Retention', 'Receipt', 'Mobilization', 'Outstanding', 'Category', 'Amount')),
-                        array_merge(array(number_format($sales), number_format($totalRetention), number_format($receipt), number_format($mobilization), number_format($outstanding), 'Purchase', number_format($purchaseAmount))),
-                        array_merge(array('Debit Note', number_format($debitAmount)), array_fill(0,3,null) , array('Salary', number_format($salaryAmount))),
-                        array_merge(array('TDS', number_format($tdsAmount)) , array_fill(0,3,null) , array('Asset Rent', number_format($assetRent))),
-                        array_merge(array('Hold', number_format($totalHold)) , array_fill(0,3,null) , array('Asset Opening Balance', 0)),
-                        array_merge(array('Other Recovery', number_format($otherRecoveryAmount)), array_fill(0,3,null) , array('Misc. Purchase', $peticashPurchaseAmount)),
-                        array_merge(array_fill(0,5,null) , array('Indirect expenses', number_format($indirectExpenses))),
-                        array_merge(array_fill(0,5,null) , array('Opening Balance', number_format($openingExpenses))),
-                        array_merge(array_fill(0,5,null) , array('Subcontractor', number_format($subcontractorTotal))),
-                        array_merge(array_fill(0,4,null) , array(number_format($outstanding)), array_fill(0,1,null) ,array(number_format($total))),
+                        array_merge(array(number_format($sales,3), number_format($totalRetention,3), number_format($receipt,3), number_format($mobilization,3), number_format($outstanding,3), 'Purchase', number_format($purchaseAmount,3))),
+                        array_merge(array('Debit Note', number_format($debitAmount,3)), array_fill(0,3,null) , array('Salary', number_format($salaryAmount,3))),
+                        array_merge(array('TDS', number_format($tdsAmount,3)) , array_fill(0,3,null) , array('Asset Rent', number_format($assetRent,3))),
+                        array_merge(array('Hold', number_format($totalHold,3)) , array_fill(0,3,null) , array('Asset Opening Balance', 0)),
+                        array_merge(array('Other Recovery', number_format($otherRecoveryAmount,3)), array_fill(0,3,null) , array('Misc. Purchase', number_format($peticashPurchaseAmount,3))),
+                        array_merge(array_fill(0,5,null) , array('Indirect expenses', number_format($indirectExpenses,3))),
+                        array_merge(array_fill(0,5,null) , array('Opening Balance', number_format($openingExpenses,3))),
+                        array_merge(array_fill(0,5,null) , array('Subcontractor', number_format($subcontractorTotal,3))),
+                        array_merge(array_fill(0,4,null) , array(number_format($outstanding,3)), array_fill(0,1,null) ,array(number_format($total,3))),
                     );
                     $summaryData = array(
-                        array_merge(array('Sales P/L',number_format($sales - $debitAmount - $tdsAmount) , number_format($total) , number_format($total - $sales - $debitAmount - $tdsAmount))),
-                        array_merge(array('Receipt P/L',number_format($receipt) , number_format($total) , number_format($total - $receipt))),
-                        array_merge(array('Outstanding Mobilization P/L',number_format($outstandingMobilization) , number_format($mobilization) , number_format($outstandingMobilization - $mobilization))),
+                        array_merge(array('Sales P/L',number_format(($sales - $debitAmount - $tdsAmount),3) , number_format($total,3) , number_format(($total - $sales - $debitAmount - $tdsAmount),3))),
+                        array_merge(array('Receipt P/L',number_format($receipt,3) , number_format($total,3) , number_format(($total - $receipt),3))),
+                        array_merge(array('Outstanding Mobilization P/L',number_format($outstandingMobilization,3) , number_format($mobilization,3) , number_format(($outstandingMobilization - $mobilization),3))),
                     );
                     $projectName = $projectSite->join('projects','projects.id','=','project_sites.project_id')
                         ->where('project_sites.id',$project_site_id)->pluck('projects.name')->first();
