@@ -126,41 +126,6 @@ class ReportManagementController extends Controller{
             $startLimit = 1; $endLimit = $reportLimit;
 
             switch ($request['report_name']) {
-                /*case 'sitewise_purchase_report' :
-                    $purchaseOrderBill = new PurchaseOrderBill();
-                    $count = $purchaseOrderBill
-                        ->join('purchase_orders','purchase_orders.id','='
-                            ,'purchase_order_bills.purchase_order_id')
-                        ->join('purchase_requests','purchase_requests.id','='
-                            ,'purchase_orders.purchase_request_id')
-                        ->join('vendors','vendors.id','=','purchase_orders.vendor_id')
-                        ->where('purchase_requests.project_site_id',$globalProjectSiteId)
-                        ->whereBetween('purchase_order_bills.created_at',[$start_date,$end_date])
-                        ->orderBy('created_at','desc')
-                        ->count();
-                    $noOfButtons = $count/$reportLimit;
-                    for($iterator = 0; $iterator < $noOfButtons; $iterator++){
-                        $totalRecords = $iterator * $reportLimit;
-                        $purchaseOrderBillDates = $purchaseOrderBill
-                            ->join('purchase_orders','purchase_orders.id','='
-                                ,'purchase_order_bills.purchase_order_id')
-                            ->join('purchase_requests','purchase_requests.id','='
-                                ,'purchase_orders.purchase_request_id')
-                            ->join('vendors','vendors.id','=','purchase_orders.vendor_id')
-                            ->where('purchase_requests.project_site_id',$globalProjectSiteId)
-                            ->whereBetween('purchase_order_bills.created_at',[$start_date,$end_date])
-                            ->take($reportLimit)->skip($totalRecords)
-                            ->orderBy('purchase_order_bills.created_at','asc')
-                            ->pluck('purchase_order_bills.created_at');
-                        $downloadButtonDetails[$iterator]['start_date'] = $purchaseOrderBillDates->last();
-                        $downloadButtonDetails[$iterator]['end_date'] = $purchaseOrderBillDates->first();
-                        $downloadButtonDetails[$iterator]['start_limit'] = $startLimit;
-                        $downloadButtonDetails[$iterator]['end_limit'] = $endLimit;
-                        $startLimit = $endLimit + 1;
-                        $endLimit = $endLimit + $reportLimit;
-                    }
-                    break;*/
-
                 case 'sitewise_purchase_report' :
                     $purchaseOrderBill = new PurchaseOrderBill();
                     $inventoryComponentTransfer = new InventoryComponentTransfers();

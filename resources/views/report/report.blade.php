@@ -59,7 +59,7 @@
                                                             <option value="sitewise_sales_receipt_report">Sales & Receipt Report</option>
                                                             <option value="sitewise_subcontractor_report">Subcontractor Report</option>
                                                             <option value="sitewise_subcontractor_summary_report">Subcontractor Summary Report</option>
-                                                            <option value="sitewise_pNl_report">PnL Report</option>
+                                                            <option value="sitewise_pNl_report">Site wise Profit & Loss Report</option>
                                                         </select>
                                                     </div>
                                                 </div>
