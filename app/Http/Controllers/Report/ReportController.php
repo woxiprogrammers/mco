@@ -1036,6 +1036,7 @@ class ReportController extends Controller
                         });
                     })->export('xls');
                     break;
+                    
 
                 default :
                     $downloadSheetFlag = false;
