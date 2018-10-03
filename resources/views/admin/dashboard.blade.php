@@ -84,7 +84,7 @@
                                     <fieldset>
                                         <legend style="padding-left: 30px"> Selection Criteria </legend>
                                         <div class="col-md-2 form-group">
-                                            <select class="form-control" id="clientId" name="client_id" style="width: 80%;">
+                                            <select class="form-control" id="year_slug" name="year_slug" style="width: 80%;">
                                                 <option value=""> -- All Year -- </option>
                                                 @foreach($years as $year)
                                                     <option value="{{$year['slug']}}"> {{$year['slug']}} </option>
@@ -92,19 +92,29 @@
                                             </select>
                                         </div>
                                         <div class="col-md-2 form-group">
-                                            <select name="project_id" id="projectId" class="form-control" style="width: 80%;">
+                                            <select name="month_slug" id="month_slug" class="form-control" style="width: 80%;">
                                                 <option value=""> -- All Month -- </option>
                                                 @foreach($months as $month)
                                                     <option value="{{$month['slug']}}"> {{ucfirst($month['slug'])}} </option>
                                                 @endforeach
                                             </select>
                                         </div>
-                                        <div class="col-md-6 form-group">
-                                            <select class="form-control input-lg select2-multiple" name="project_site_id" multiple="multiple" style="overflow:hidden" data-placeholder="Select Project Site">
+                                        <div class="col-md-5 form-group">
+                                            <select class="form-control input-lg select2-multiple" id="project_site_id" name="project_site_id" multiple="multiple" style="overflow:hidden" data-placeholder="Select Project Site">
                                                 @foreach($projectSiteData as $projectSite)
                                                     <option value="{{$projectSite['project_site_id']}}"> {{$projectSite['project_site_name']}} </option>
                                                 @endforeach
                                             </select>
+                                        </div>
+                                        <div class="col-md-1 form-group">
+                                            <label>&nbsp;</label>
+                                            <div class="btn-group">
+                                                <div id="search-withfilter" class="btn blue" >
+                                                    <a href="#" style="color: white"> Submit
+                                                       <i class="fa fa-plus"></i>
+                                                   </a>
+                                                </div>
+                                            </div>
                                         </div>
 
                                     </fieldset>
@@ -172,48 +182,32 @@
                                                 {!! csrf_field() !!}
                                                 <table class="table table-striped table-bordered table-hover table-checkable order-column" id="salesTable">
                                                     <thead>
-                                                    <tr style="background-color: #eaf285">
-                                                        <th style="width:10%">Site Name</th>
-                                                        <th style="width:10%">Sales</th>
-                                                        <th style="width:10%"> Receipt </th>
-                                                        <th style="width:10%"> Outstanding </th>
-                                                        <th style="width:10%"> Total Expenses </th>
-                                                        <th style="width:10%"> Outstanding Mobilization </th>
-                                                        <th style="width:10%"> Sitewise P/L </th>
-                                                        <th style="width:10%"> Receipt P/L </th>
-                                                    </tr>
+                                                        <tr style="background-color: #eaf285">
+                                                            <th style="width:10%">Site Name</th>
+                                                            <th style="width:10%">Sales</th>
+                                                            <th style="width:10%"> Receipt </th>
+                                                            <th style="width:10%"> Outstanding </th>
+                                                            <th style="width:10%"> Total Expenses </th>
+                                                            <th style="width:10%"> Outstanding Mobilization </th>
+                                                            <th style="width:10%"> Sitewise P/L </th>
+                                                            <th style="width:10%"> Receipt P/L </th>
+                                                        </tr>
                                                     </thead>
                                                     <tbody>
-                                                    <tr>
-                                                        <th >Tata</th>
-                                                        <th > 49,157,387.76 </th>
-                                                        <th > 41,986,940.43  </th>
-                                                        <th > 1,189,881.39 </th>
-                                                        <th > 41,847,242.56 </th>
-                                                        <th > 1,928,211.00 </th>
-                                                        <th > 7,310,145.20 </th>
-                                                        <th > 139,697.87 </th>
+                                                    <tr class="filter">
+                                                        <th>
+
+                                                        </th>
+                                                        <th hidden>
+                                                            <input type="hidden" class="form-control form-filter" name="sales_post_data" id="sales_post_data">
+                                                        </th>
+
+                                                        <th hidden>
+                                                            <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
+                                                            <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
+                                                        </th>
                                                     </tr>
-                                                    <tr>
-                                                        <th style="width:10%"> MLCP </th>
-                                                        <th style="width:10%">218,047,142.98</th>
-                                                        <th style="width:10%"> 166,917,177.51 </th>
-                                                        <th style="width:10%"> 26,366,044.18 </th>
-                                                        <th style="width:10%"> 155,487,026.89 </th>
-                                                        <th style="width:10%"> 449,323.00 </th>
-                                                        <th style="width:10%"> 62,560,116.10 </th>
-                                                        <th style="width:10%"> 11,430,150.62 </th>
-                                                    </tr>
-                                                    <tr>
-                                                        <th style="width:10%"> TOTAL </th>
-                                                        <th style="width:10%"> 267,204,530.75 </th>
-                                                        <th style="width:10%"> 208,904,117.94  </th>
-                                                        <th style="width:10%">   27,555,925.57  </th>
-                                                        <th style="width:10%">   197,334,269.45  </th>
-                                                        <th style="width:10%">   2,377,534.00  </th>
-                                                        <th style="width:10%">   69,870,261.30  </th>
-                                                        <th style="width:10%">   11,569,848.49  </th>
-                                                    </tr>
+
                                                     </tbody>
                                                 </table>
                                             </div>
@@ -233,7 +227,7 @@
                                             {!! csrf_field() !!}
                                             <table class="table table-striped table-bordered table-hover table-checkable order-column" id="expensesTable">
                                                 <thead>
-                                                <tr style="background-color: #eaf285">
+                                                    <tr style="background-color: #eaf285">
                                                     <th style="width:10%">Site Name</th>
                                                     <th style="width:10%"> Purchase </th>
                                                     <th style="width:10%"> Salary </th>
@@ -243,39 +237,22 @@
                                                     <th style="width:10%"> Indirect Expenses </th>
                                                     <th style="width:10%"> Total Expenses </th>
                                                 </tr>
-
                                                 </thead>
                                                 <tbody>
-                                                <tr>
-                                                    <th style="width:10%"> Tata </th>
-                                                    <th style="width:10%">   17,276,805.98  </th>
-                                                    <th style="width:10%">   75,846.00   </th>
-                                                    <th style="width:10%">   1,132,336.00  </th>
-                                                    <th style="width:10%">   11,834,194.32 </th>
-                                                    <th style="width:10%">   518,678.26  </th>
-                                                    <th style="width:10%">   11,009,382.00  </th>
-                                                    <th style="width:10%">   41,847,242.56  </th>
+                                                <tr class="filter">
+                                                    <th>
+
+                                                    </th>
+                                                    <th hidden>
+                                                        <input type="hidden" class="form-control form-filter" name="expense_post_data" id="expense_post_data">
+                                                    </th>
+
+                                                    <th hidden>
+                                                        <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
+                                                        <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
+                                                    </th>
                                                 </tr>
-                                                <tr>
-                                                    <th style="width:10%"> MLCP </th>
-                                                    <th style="width:10%">  104,022,582.58 </th>
-                                                    <th style="width:10%">   75,846.00   </th>
-                                                    <th style="width:10%">   1,132,336.00  </th>
-                                                    <th style="width:10%">  38,728,202.05  </th>
-                                                    <th style="width:10%">   518,678.26  </th>
-                                                    <th style="width:10%"> 11,009,382.00 </th>
-                                                    <th style="width:10%">   155,487,026.89  </th>
-                                                </tr>
-                                                <tr>
-                                                    <th style="width:10%"> TOTAL </th>
-                                                    <th style="width:10%">   121,299,388.56  </th>
-                                                    <th style="width:10%">   151,692.00   </th>
-                                                    <th style="width:10%">     2,264,672.00   </th>
-                                                    <th style="width:10%">     50,562,396.37   </th>
-                                                    <th style="width:10%">     1,037,356.52   </th>
-                                                    <th style="width:10%">     22,018,764.00   </th>
-                                                    <th style="width:10%">     197,334,269.45   </th>
-                                                </tr>
+
                                                 </tbody>
                                             </table>
                                         </div>
@@ -328,7 +305,6 @@
 <script src="/assets/global/plugins/select2/js/select2.full.min.js" type="text/javascript"></script>
 <script src="/assets/pages/scripts/components-select2.min.js" type="text/javascript"></script>
 <link rel="stylesheet" href="/assets/global/plugins/bootstrap-multiselect/css/bootstrap-multiselect.css" type="text/css"/>
-<script src="/public/assets/global/plugins/jquery.min.js" type="text/javascript"></script>
 <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
 <script  src="/assets/global/plugins/datatables/datatables.min.js"></script>
 <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
@@ -339,6 +315,19 @@
     $(document).ready(function(){
         $('#salesTable').DataTable();
         $('#expensesTable').DataTable();
+
+        $("#search-withfilter").on('click',function(){
+            var year_slug = $('#year_slug').val();
+            var month_slug = $('#month_slug').val();
+            var project_site_id = $('#project_site_id').val();
+            var postData =
+                'year_slug=>'+year_slug+','+
+                'month_slug=>'+month_slug+','+
+                'project_site_id=>'+project_site_id;
+                $("input[name='sales_post_data']").val(postData);
+                $("input[name='expense_post_data']").val(postData);
+                $(".filter-submit").trigger('click');
+            });
     });
 
     function switchProjectSiteModule(projectSiteId, moduleSlug){
