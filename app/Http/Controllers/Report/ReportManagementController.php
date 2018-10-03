@@ -2280,7 +2280,6 @@ class ReportManagementController extends Controller{
 
     public function getSalesListing(Request $request){
         try{
-            Log::info($request->all());
             $projectSite = new ProjectSite();
             $projectSiteData = $projectSite->join('projects','projects.id','=','project_sites.project_id')
                 ->orderBy('projects.name')->select('project_sites.id','projects.name')->get();
@@ -2358,8 +2357,6 @@ class ReportManagementController extends Controller{
         try{
             $salesData = array();
             $month = new Month();
-            $year = new Year();
-            $projectSite = new ProjectSite();
             $quotation = new Quotation();
             $bill = new Bill();
             $billStatus = new BillStatus();
@@ -2379,7 +2376,6 @@ class ReportManagementController extends Controller{
             $approvedBillStatusId = $billStatus->where('slug','approved')->pluck('id')->first();
 
             switch(true){
-                //case ($startMonthId == null && $endMonthId == null && $yearId == null) :
                 case true :
                     $quotation = $quotation->where('project_site_id',$projectSiteId)->first();
                     $subcontractorApprovedBillStatusId = $subcontractorBillStatus->where('slug','approved')->pluck('id')->first();
