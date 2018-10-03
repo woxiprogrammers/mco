@@ -37,6 +37,7 @@ use App\ProjectSiteAdvancePayment;
 use App\PurcahsePeticashTransaction;
 use App\PurchaseOrderBill;
 use App\PurchaseOrderBillMonthlyExpense;
+use App\SiteTransferBill;
 use App\Subcontractor;
 use App\SubcontractorBill;
 use App\SubcontractorBillStatus;
@@ -117,9 +118,8 @@ class ReportManagementController extends Controller{
             $startDate = explode('/',$request->start_date);
             $start_date = $startDate[2].'-'.$startDate[1].'-'.$startDate[0].' 00:00:00';
             $endDate = explode('/',$request->end_date);
-            $end_date = $endDate[2].'-'.$endDate[1].'-'.$endDate[0].' 24:00:00';
+            $end_date = $endDate[2].'-'.$endDate[1].'-'.$endDate[0].' 23:59:59';
             $globalProjectSiteId = $request['project_site_id'];
-
             $reportLimit = env('REPORT_LIMIT['.$request['report_name'].']');
 
             $downloadButtonDetails = array();
@@ -318,6 +318,7 @@ class ReportManagementController extends Controller{
                     $inventoryComponentTransfer = new InventoryComponentTransfers();
                     $inventoryTransferTypes = new InventoryTransferTypes();
                     $inventoryComponentTransferStatus = new InventoryComponentTransferStatus();
+                    $siteTransferBill = new SiteTransferBill();
                     $assetMaintenanceBill = new AssetMaintenanceBill();
                     $assetMaintenanceBillPayment = new AssetMaintenanceBillPayment();
                     $purchaseOrderBillMonthlyExpense = new PurchaseOrderBillMonthlyExpense();
@@ -325,7 +326,8 @@ class ReportManagementController extends Controller{
                         'Bill Date', 'Bill Create Date', 'Bill No', 'Paritculars', 'Basic Amount', 'Tax Amount',
                         'Bill Amount', 'Monthly Total'
                     );
-                    $date = date('l, d F Y',strtotime($secondParameter)) .' - '. date('l, d F Y',strtotime($firstParameter));
+
+                    $date = date('l, d F Y',strtotime($firstParameter)) .' - '. date('l, d F Y',strtotime($secondParameter));
                     $startYearID = $year->where('slug',(int)date('Y',strtotime($firstParameter)))->pluck('id')->first();
                     $endYearID = $year->where('slug',(int)date('Y',strtotime($secondParameter)))->pluck('id')->first();
                     $totalYears = $year->whereBetween('id',[$startYearID,$endYearID])->select('id','name','slug')->get();
@@ -347,6 +349,7 @@ class ReportManagementController extends Controller{
                     $monthlyTotal[$iterator]['amount'] = number_format($monthlyTotalAmount,3);
                     $colorData[0]['Purchase'] = '#f2f2f2';
                     $colorData[1]['Site Transfer'] = '#efd2d5';
+                    $colorData[3]['Site Transfer Bill'] = '#f9d6a2';
                     $colorData[2]['Asset Maintenance'] = '#b2cdff';
                     $reportLimit = env('REPORT_LIMIT['.$reportType.']');
                     $buttonNo = $thirdParameter;
@@ -375,12 +378,24 @@ class ReportManagementController extends Controller{
                     $inventorySiteTransfersData = $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
                         ,'=','inventory_component_transfers.inventory_component_id')
                         ->where('inventory_components.project_site_id',$project_site_id)
+                        ->where('inventory_components.is_material',true)
                         ->whereIn('inventory_component_transfers.transfer_type_id',$inventoryComponentSiteTransferIds->pluck('id'))
                         ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
                         ->where('inventory_component_transfers.created_at','>=',$firstParameter)
                         ->where('inventory_component_transfers.created_at','<=',$secondParameter)
                         ->select('inventory_component_transfers.id as inventory_component_transfer_id','inventory_component_transfers.created_at as created_at')
                         ->orderBy('inventory_component_transfers.created_at','desc')
+                        ->get()->toArray();
+
+                    $siteTransferBillData = $siteTransferBill->join('inventory_component_transfers','inventory_component_transfers.id',
+                        '=','site_transfer_bills.inventory_component_transfer_id')
+                        ->join('inventory_components','inventory_components.id'
+                                ,'=','inventory_component_transfers.inventory_component_id')
+                        ->where('inventory_components.project_site_id',$project_site_id)
+                        ->where('site_transfer_bills.created_at','>=',$firstParameter)
+                        ->where('site_transfer_bills.created_at','<=',$secondParameter)
+                        ->select('site_transfer_bills.id as site_transfer_bill_id','site_transfer_bills.created_at as created_at')
+                        ->orderBy('site_transfer_bills.created_at','desc')
                         ->get()->toArray();
 
                     $assetMaintenanceBillsData = $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
@@ -394,7 +409,7 @@ class ReportManagementController extends Controller{
                             ,'assets.name as asset_name','asset_maintenance.id as asset_maintenance_id')
                         ->orderBy('asset_maintenance_bill_payments.created_at','desc')
                         ->get()->toArray();
-                    $totalData = array_merge($purchaseOrderBillsData,$inventorySiteTransfersData,$assetMaintenanceBillsData);
+                    $totalData = array_merge($purchaseOrderBillsData,$inventorySiteTransfersData,$siteTransferBillData,$assetMaintenanceBillsData);
                     usort($totalData, function ($item1, $item2) {
                         return $item2['created_at'] > $item1['created_at'];
                     });
@@ -430,6 +445,18 @@ class ReportManagementController extends Controller{
                             }else{
                                 $data[$row]['bill_amount'] = round($total,3);
                             }
+                        }elseif(array_key_exists('site_transfer_bill_id',$reportData)){
+                            $data[$row]['background'] = '#f9d6a2';
+                            $siteTransferBillData = $siteTransferBill->where('id',$reportData['site_transfer_bill_id'])
+                                ->first();
+                            $thisMonth = (int)date('n',strtotime($siteTransferBillData['created_at']));
+                            $data[$row]['bill_entry_date'] = date('d-m-Y',strtotime($siteTransferBillData['bill_date']));
+                            $data[$row]['bill_created_date'] = date('d-m-Y',strtotime($siteTransferBillData['created_at']));
+                            $data[$row]['bill_number'] = $siteTransferBillData['bill_number'];
+                            $data[$row]['particular'] = $siteTransferBillData->inventoryComponentTransfer->vendor->company;
+                            $data[$row]['basic_amount'] = round(($siteTransferBillData['subtotal'] + $siteTransferBillData['extra_amount']),3);
+                            $data[$row]['tax_amount'] = round(($siteTransferBillData['tax_amount'] + $siteTransferBillData['extra_amount_cgst_amount'] + $siteTransferBillData['extra_amount_sgst_amount'] + $siteTransferBillData['extra_amount_igst_amount']),3);
+                            $data[$row]['bill_amount'] =  $siteTransferBillData['total'];
                         }else{
                             $data[$row]['background'] = '#b2cdff';
                             $assetMaintenanceBillData = $assetMaintenanceBill->where('id',$reportData['asset_maintenance_bill_id'])->first();
