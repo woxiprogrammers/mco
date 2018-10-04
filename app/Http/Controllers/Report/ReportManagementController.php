@@ -1991,10 +1991,10 @@ class ReportManagementController extends Controller{
                                 $subTotal = $subcontractorBillData['qty'] * $rate;
                                 $taxTotal = 0;
                                 foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
-                                    $taxTotal = round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
-                                    $subcontractorGst += $taxTotal;
+                                    $taxTotal += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
+                                    $subcontractorGst = $taxTotal;
                                 }
-                                $subcontractorTotal += $subTotal + $taxTotal;
+                                $subcontractorTotal += round(($subTotal + $subcontractorGst),3);
                             }
                         }
 
@@ -2292,7 +2292,7 @@ class ReportManagementController extends Controller{
         try{
             $projectSite = new ProjectSite();
             $projectSiteData = $projectSite->join('projects','projects.id','=','project_sites.project_id')
-                ->where('projects.name','!=','25 East')->orderBy('projects.name')->select('project_sites.id','projects.name')->get();
+                ->orderBy('projects.name')->select('project_sites.id','projects.name')->get();
             $iTotalRecords = count($projectSiteData);
             $records = array();
             $records['data'] = array();
@@ -2329,7 +2329,7 @@ class ReportManagementController extends Controller{
         try{
             $projectSite = new ProjectSite();
             $projectSiteData = $projectSite->join('projects','projects.id','=','project_sites.project_id')
-                ->where('projects.name','!=','25 East')->orderBy('projects.name')->select('project_sites.id','projects.name')->get();
+                ->orderBy('projects.name')->select('project_sites.id','projects.name')->get();
             $iTotalRecords = count($projectSiteData);
             $records = array();
             $records['data'] = array();
@@ -2449,10 +2449,10 @@ class ReportManagementController extends Controller{
                             $subTotal = $subcontractorBillData['qty'] * $rate;
                             $taxTotal = 0;
                             foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
-                                $taxTotal = round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
-                                $subcontractorGst += $taxTotal;
+                                $taxTotal += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
+                                $subcontractorGst = $taxTotal;
                             }
-                            $subcontractorTotal += $subTotal + $taxTotal;
+                            $subcontractorTotal += round(($subTotal + $subcontractorGst),3);
                         }
                     }
 
