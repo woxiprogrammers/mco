@@ -1356,7 +1356,7 @@ class ReportManagementController extends Controller{
                             $data[$row]['bill_no'] = $billName;
                             $data[$row]['basic_amount'] = number_format($subTotal, 3);
                             $data[$row]['gst'] = number_format($taxTotal, 3);
-                            $data[$row]['total_amount'] = number_format($finalTotal, 3);
+                            $data[$row]['total_amount'] = $finalTotal;
                             $data[$row] = array_merge($data[$row],array_fill(5,6,null));
                             $data[$row]['payable'] = $finalTotal;
                             $data[$row]['receipt'] = null;
@@ -1382,7 +1382,8 @@ class ReportManagementController extends Controller{
                                 $data[$row]['date'] = null;
                                 $data[$row]['bill_no'] = 'Receipt '.$receiptCount;
                                 $data[$row] = array_merge($data[$row],array_fill(2,3,null));
-                                $data[$row]['transaction_amount'] = number_format($billTransaction['subtotal'], 3);
+                                $receipt = $billTransaction['total'];
+                                $data[$row]['receipt'] = number_format($receipt, 3);
                                 $totalTransactionAmount += $billTransaction['subtotal'];
                                 $data[$row]['tds'] = number_format($billTransaction['tds_amount'], 3);
                                 $data[$row]['retention'] = number_format($billTransaction['retention_amount'], 3);
@@ -1390,8 +1391,7 @@ class ReportManagementController extends Controller{
                                 $data[$row]['debit'] = number_format($billTransaction['debit'], 3);
                                 $data[$row]['other_recovery'] = number_format($billTransaction['other_recovery'], 3);
                                 $data[$row]['payable_amount'] = null;
-                                $receipt = $billTransaction['total'];
-                                $data[$row]['receipt'] = number_format($receipt, 3);
+                                $data[$row]['transaction_amount'] = number_format($billTransaction['subtotal'], 3);
                                 $data[$row] = array_merge($data[$row],array_fill(14,3,null));
                                 $data[$billRow]['total_paid'] += $receipt;
                                 $row++;$receiptCount++;
@@ -1402,7 +1402,7 @@ class ReportManagementController extends Controller{
                             }
                             $data[$row] = array_fill(0,16,null);
                             $row++;
-                            $paidAmount = $data[$billRow ]['total_paid'];
+                            $totalWithTax = $data[$billRow ]['total_amount'];
                             $data[$billRow]['remaining'] = $data[$billRow]['payable'] - $data[$billRow ]['total_paid'];
                             $totalPaid += $data[$billRow]['total_paid'];
                             $totalPayable += $data[$billRow]['payable'];
@@ -1411,9 +1411,9 @@ class ReportManagementController extends Controller{
                             $data[$billRow]['payable'] = number_format($data[$billRow]['payable'], 3);
                             $data[$billRow]['total_paid'] = number_format($data[$billRow]['total_paid'], 3);
                             if($billRow == 1 || $setMonthlyTotalData){
-                                $data[$billRow]['monthly_total'] = $paidAmount;
+                                $data[$billRow]['monthly_total'] = $totalWithTax;
                             }elseif($setMonthlyTotalData == false){
-                                $data[$newMonthRow]['monthly_total'] += $paidAmount;
+                                $data[$newMonthRow]['monthly_total'] += $totalWithTax;
                                 $data[$billRow]['monthly_total'] = null;
                             }
                         }
@@ -1422,9 +1422,9 @@ class ReportManagementController extends Controller{
                     }
                     $data[$row]['make_bold'] = true;
                     $totalRow = array(
-                        'Total', null, number_format($totalBasicAmount,3), number_format($totalGst,3), number_format($totalWithTaxAmount,3), number_format($totalTransactionAmount,3)
+                        'Total', null, number_format($totalBasicAmount,3), number_format($totalGst,3), number_format($totalWithTaxAmount,3), number_format($totalReceipt,3)
                         , number_format($totalTds,3), number_format($totalRetention,3),number_format($totalHold,3),
-                        number_format($totalDebit,3),number_format($totalOtherRecovery,3), number_format($totalPayable,3), number_format($totalReceipt,3),
+                        number_format($totalDebit,3),number_format($totalOtherRecovery,3), number_format($totalPayable,3), number_format($totalTransactionAmount,3),
                         number_format($totalPaid,3), number_format($totalRemaining,3), null
                     );
                     $data[$row] = array_merge($data[$row],$totalRow);
@@ -1605,14 +1605,14 @@ class ReportManagementController extends Controller{
                         $data[$row]['basic_amount'] = number_format($basic_amount,3);
                         $data[$row]['gst'] = number_format($gst,3);
                         $data[$row]['total_amount'] = number_format($finalAmount,3);
-                        $data[$row]['transaction_amount'] = number_format($transaction_amount,3);
+                        $data[$row]['transaction_amount'] = number_format($receipt,3);
                         $data[$row]['tds'] = number_format($tds,3);
                         $data[$row]['retention'] = number_format($retention,3);
                         $data[$row]['hold'] = number_format($hold,3);
                         $data[$row]['debit'] = number_format($debit,3);
                         $data[$row]['other_recovery'] = number_format($other_recovery,3);
                         $data[$row]['payable'] = number_format($finalAmount,3);
-                        $data[$row]['receipt'] = number_format($receipt,3);
+                        $data[$row]['receipt'] = number_format($transaction_amount,3);
                         $data[$row]['balance_remaining'] = number_format($finalAmount - $receipt,3);
                         $totalBasicAmount += $basic_amount; $totalGst += $gst; $totalAmount += $finalAmount;
                         $totalTransactionAmount += $transaction_amount; $totalTds += $tds; $totalRetention += $retention;
@@ -1623,9 +1623,9 @@ class ReportManagementController extends Controller{
                     $data[$row]['make_bold'] = true;
                     $totalRow = array(
                         'Total', number_format($totalBasicAmount,3), number_format($totalGst,3), number_format($totalAmount,3),
-                        number_format($totalTransactionAmount,3), number_format($totalTds,3),
+                        number_format($totalReceipt,3), number_format($totalTds,3),
                         number_format($totalRetention,3), number_format($totalHold,3), number_format($totalDebit,3), number_format($totalOtherRecovery,3),
-                        number_format($totalAmount,3), number_format($totalReceipt,3), number_format($totalBalanceRemaining,3)
+                        number_format($totalAmount,3), number_format($totalTransactionAmount,3), number_format($totalBalanceRemaining,3)
                     );
                     $data[$row] = array_merge($data[$row],$totalRow);
                     $projectName = $projectSite->join('projects','projects.id','=','project_sites.project_id')
