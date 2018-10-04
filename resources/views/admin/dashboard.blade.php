@@ -232,9 +232,11 @@
                                                     <th style="width:10%"> Purchase </th>
                                                     <th style="width:10%"> Salary </th>
                                                     <th style="width:10%"> Asset Rent </th>
+                                                    <th style="width:10%"> Asset Opening Balance </th>
                                                     <th style="width:10%"> Subcontractor </th>
                                                     <th style="width:10%"> Misc. Purchase </th>
                                                     <th style="width:10%"> Indirect Expenses </th>
+                                                    <th style="width:10%"> Opening Balance </th>
                                                     <th style="width:10%"> Total Expenses </th>
                                                 </tr>
                                                 </thead>
