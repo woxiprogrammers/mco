@@ -1917,7 +1917,6 @@ class ReportManagementController extends Controller{
                     $subcontractorStructure = new SubcontractorStructure();
                     $subcontractorBill = new SubcontractorBill();
                     $subcontractorBillStatus = new SubcontractorBillStatus();
-                    $subcontractorBillTransaction = new SubcontractorBillTransaction();
                     $assetMaintenanceBillPayment = new AssetMaintenanceBillPayment();
                     $purchaseOrderBill = new PurchaseOrderBill();
                     $purchaseOrderBillMonthlyExpense = new PurchaseOrderBillMonthlyExpense();
@@ -1950,9 +1949,9 @@ class ReportManagementController extends Controller{
                             $salesTaxAmount += $billData['tax_amount'];
                             $sales += $billData['total_amount_with_tax'];
                         }
-                        $total += $billTransactionData->sum('total');
-                        $mobilization += $billTransactionData->where('paid_from_slug',true)->sum('amount');
-                        $receipt += ($total != null) ? $total : 0;
+                        $transactionTotal = $billTransactionData->sum('total');
+                        $mobilization += $billTransactionData->where('paid_from_advanced',true)->sum('amount');
+                        $receipt += ($transactionTotal != null) ? $transactionTotal : 0;
                         $retentionAmount = $billTransactionData->sum('retention_amount');
                         $reconciledRetentionAmount = $billReconcileTransactionData->where('transaction_slug','retention')->sum('amount');
                         $totalRetention += $retentionAmount - $reconciledRetentionAmount;
@@ -2030,16 +2029,16 @@ class ReportManagementController extends Controller{
                     $salesWisePnL = $total - $sales - $debitAmount - $tdsAmount;
                     $receiptWisePnL = $total - $receipt;
                     $data = array(
-                        array_merge(array('Sales', 'Retention', 'Receipt', 'Mobilization', 'Outstanding', 'Category', 'Amount')),
-                        array_merge(array(number_format($sales,3), number_format($totalRetention,3), number_format($receipt,3), number_format($mobilization,3), number_format($outstanding,3), 'Purchase', number_format($purchaseAmount,3))),
-                        array_merge(array('Debit Note', number_format($debitAmount,3)), array_fill(0,3,null) , array('Salary', number_format($salaryAmount,3))),
-                        array_merge(array('TDS', number_format($tdsAmount,3)) , array_fill(0,3,null) , array('Asset Rent', number_format($assetRent,3))),
-                        array_merge(array('Hold', number_format($totalHold,3)) , array_fill(0,3,null) , array('Asset Opening Balance', 0)),
-                        array_merge(array('Other Recovery', number_format($otherRecoveryAmount,3)), array_fill(0,3,null) , array('Misc. Purchase', number_format($peticashPurchaseAmount,3))),
-                        array_merge(array_fill(0,5,null) , array('Indirect expenses', number_format($indirectExpenses,3))),
-                        array_merge(array_fill(0,5,null) , array('Opening Balance', number_format($openingExpenses,3))),
-                        array_merge(array_fill(0,5,null) , array('Subcontractor', number_format($subcontractorTotal,3))),
-                        array_merge(array_fill(0,4,null) , array(number_format($outstanding,3)), array_fill(0,1,null) ,array(number_format($total,3))),
+                        array_merge(array(null,'Sales', 'Retention', 'Receipt', 'Mobilization', 'Outstanding', 'Category', 'Amount')),
+                        array_merge(array(null, number_format($sales,3), number_format($totalRetention,3), number_format($receipt,3), number_format($mobilization,3), number_format($outstanding,3), 'Purchase', number_format($purchaseAmount,3))),
+                        array_merge(array('Debit Note', number_format($debitAmount,3)), array_fill(0,4,null) , array('Salary', number_format($salaryAmount,3))),
+                        array_merge(array('TDS', number_format($tdsAmount,3)) , array_fill(0,4,null) , array('Asset Rent', number_format($assetRent,3))),
+                        array_merge(array('Hold', number_format($totalHold,3)) , array_fill(0,4,null) , array('Asset Opening Balance', 0)),
+                        array_merge(array('Other Recovery', number_format($otherRecoveryAmount,3)), array_fill(0,4,null) , array('Misc. Purchase', number_format($peticashPurchaseAmount,3))),
+                        array_merge(array_fill(0,6,null) , array('Indirect expenses', number_format($indirectExpenses,3))),
+                        array_merge(array_fill(0,6,null) , array('Opening Balance', number_format($openingExpenses,3))),
+                        array_merge(array_fill(0,6,null) , array('Subcontractor', number_format($subcontractorTotal,3))),
+                        array_merge(array_fill(0,5,null) , array(number_format($outstanding,3)), array_fill(0,1,null) ,array(number_format($total,3))),
                     );
                     $summaryData = array(
                         array_merge(array('Sales P/L',number_format(($salesPnL),3) , number_format($total,3) , number_format(($salesWisePnL),3))),
@@ -2408,9 +2407,9 @@ class ReportManagementController extends Controller{
                             $salesTaxAmount += $billData['tax_amount'];
                             $sales += $billData['total_amount_with_tax'];
                         }
-                        $total += $billTransactionData->sum('total');
-                        $mobilization += $billTransactionData->where('paid_from_slug',true)->sum('amount');
-                        $receipt += ($total != null) ? $total : 0;
+                        $transactionTotal = $billTransactionData->sum('total');
+                        $mobilization += $billTransactionData->where('paid_from_advanced',true)->sum('amount');
+                        $receipt += ($transactionTotal != null) ? $transactionTotal : 0;
                         $retentionAmount = $billTransactionData->sum('retention_amount');
                         $reconciledRetentionAmount = $billReconcileTransactionData->where('transaction_slug','retention')->sum('amount');
                         $totalRetention += $retentionAmount - $reconciledRetentionAmount;
