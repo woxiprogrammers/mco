@@ -85,17 +85,17 @@
                                         <legend style="padding-left: 30px"> Selection Criteria </legend>
                                         <div class="col-md-2 form-group">
                                             <select class="form-control" id="year_slug" name="year_slug" style="width: 80%;">
-                                                <option value=""> -- All Year -- </option>
+                                                <option value="all"> -- All Year -- </option>
                                                 @foreach($years as $year)
-                                                    <option value="{{$year['slug']}}"> {{$year['slug']}} </option>
+                                                    <option value="{{$year['id']}}"> {{$year['slug']}} </option>
                                                 @endforeach
                                             </select>
                                         </div>
                                         <div class="col-md-2 form-group">
                                             <select name="month_slug" id="month_slug" class="form-control" style="width: 80%;">
-                                                <option value=""> -- All Month -- </option>
+                                                <option value="all"> -- All Month -- </option>
                                                 @foreach($months as $month)
-                                                    <option value="{{$month['slug']}}"> {{ucfirst($month['slug'])}} </option>
+                                                    <option value="{{$month['id']}}"> {{ucfirst($month['slug'])}} </option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -111,8 +111,7 @@
                                             <div class="btn-group">
                                                 <div id="search-withfilter" class="btn blue" >
                                                     <a href="#" style="color: white"> Submit
-                                                       <i class="fa fa-plus"></i>
-                                                   </a>
+                                                    </a>
                                                 </div>
                                             </div>
                                         </div>
@@ -192,21 +191,27 @@
                                                             <th style="width:10%"> Sitewise P/L </th>
                                                             <th style="width:10%"> Receipt P/L </th>
                                                         </tr>
+                                                        <tr class="filter">
+                                                            <th></th>
+                                                            <th></th>
+                                                            <th></th>
+                                                            <th></th>
+                                                            <th>
+                                                                <input type="hidden" class="form-control form-filter" name="sales_month_id" id="sales_month_id">
+                                                            </th>
+                                                            <th>
+                                                                <input type="hidden" class="form-control form-filter" name="sales_project_site_id" id="sales_project_site_id"></th>
+                                                            <th>
+                                                                <input type="hidden" class="form-control form-filter" name="sales_year_id" id="sales_year_id">
+                                                            </th>
+                                                            <th >
+                                                                <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
+                                                                <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
+                                                            </th>
+                                                        </tr>
                                                     </thead>
                                                     <tbody>
-                                                    <tr class="filter">
-                                                        <th>
 
-                                                        </th>
-                                                        <th hidden>
-                                                            <input type="hidden" class="form-control form-filter" name="sales_post_data" id="sales_post_data">
-                                                        </th>
-
-                                                        <th hidden>
-                                                            <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
-                                                            <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
-                                                        </th>
-                                                    </tr>
 
                                                     </tbody>
                                                 </table>
@@ -239,21 +244,28 @@
                                                     <th style="width:10%"> Opening Balance </th>
                                                     <th style="width:10%"> Total Expenses </th>
                                                 </tr>
+                                                    <tr class="filter"><th></th>
+                                                        <th></th>
+                                                        <th></th>
+                                                        <th></th>
+                                                        <th></th>
+                                                        <th></th>
+                                                        <th>
+                                                            <input type="hidden" class="form-control form-filter" name="expense_month_slug" id="expense_month_id">
+                                                        </th>
+                                                        <th>
+                                                            <input type="hidden" class="form-control form-filter" name="expense_project_site_id" id="expense_project_site_id"></th>
+                                                        <th>
+                                                            <input type="hidden" class="form-control form-filter" name="expense_year_slug" id="expense_year_id">
+                                                        </th>
+                                                        <th>
+                                                            <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
+                                                            <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
+                                                        </th>
+                                                    </tr>
                                                 </thead>
                                                 <tbody>
-                                                <tr class="filter">
-                                                    <th>
 
-                                                    </th>
-                                                    <th hidden>
-                                                        <input type="hidden" class="form-control form-filter" name="expense_post_data" id="expense_post_data">
-                                                    </th>
-
-                                                    <th hidden>
-                                                        <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
-                                                        <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
-                                                    </th>
-                                                </tr>
 
                                                 </tbody>
                                             </table>
@@ -322,14 +334,17 @@
             var year_slug = $('#year_slug').val();
             var month_slug = $('#month_slug').val();
             var project_site_id = $('#project_site_id').val();
-            var postData =
+            $('#expense_year_id,#sales_year_id').val(year_slug);
+            $('#expense_month_id,#sales_month_id').val(month_slug);
+            $('#expense_project_site_id,#sales_project_site_id').val(project_site_id);
+            /*var postData =
                 'year_slug=>'+year_slug+','+
                 'month_slug=>'+month_slug+','+
                 'project_site_id=>'+project_site_id;
                 $("input[name='sales_post_data']").val(postData);
-                $("input[name='expense_post_data']").val(postData);
+                $("input[name='expense_post_data']").val(postData);*/
                 $(".filter-submit").trigger('click');
-            });
+        });
     });
 
     function switchProjectSiteModule(projectSiteId, moduleSlug){
