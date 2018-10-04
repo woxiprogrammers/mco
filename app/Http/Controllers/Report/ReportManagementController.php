@@ -1735,6 +1735,10 @@ class ReportManagementController extends Controller{
                     $subcontractorBill = new SubcontractorBill();
                     $purchaseOrderBill = new PurchaseOrderBill();
                     $assetMaintenanceBillPayment = new AssetMaintenanceBillPayment();
+                    $inventoryComponentTransfer = new InventoryComponentTransfers();
+                    $inventoryTransferTypes = new InventoryTransferTypes();
+                    $inventoryComponentTransferStatus = new InventoryComponentTransferStatus();
+                    $siteTransferBill = new SiteTransferBill();
                     $data[$row] = array(
                         'Month - Year', 'Sales GST', 'Subcontractor GST', 'Purchase GST', 'GST'
                     );
@@ -1745,6 +1749,8 @@ class ReportManagementController extends Controller{
                     $totalMonths = $month->whereBetween('id',[$firstParameter,$secondParameter])->select('id','name','slug')->get();
                     $row = 1;
                     $yearlyGst = 0;
+                    $inventoryComponentSiteTransferIds = $inventoryTransferTypes->where('slug','site')->get();
+                    $approvedComponentTransferStatusId = $inventoryComponentTransferStatus->where('slug','approved')->pluck('id');
                     foreach ($totalMonths as $month){
                         $data[$row]['month'] = $month['name'].'-'.$selectedYear['slug'];
                         $data[$row]['gst'] = $data[$row]['purchase_gst'] = $data[$row]['subcontractor_gst'] = $data[$row]['sales_gst'] =
@@ -1808,7 +1814,39 @@ class ReportManagementController extends Controller{
                             ->whereMonth('asset_maintenance_bill_payments.created_at',$month['id'])
                             ->whereYear('asset_maintenance_bill_payments.created_at',$selectedYear['slug'])
                             ->sum(DB::raw('asset_maintenance_bills.cgst_amount +asset_maintenance_bills.sgst_amount +asset_maintenance_bills.igst_amount'));
-                        $purchaseGst = $purchaseOrderGst + $assetMaintenanceGst;
+
+                        $inventorySiteTransfersInGst = $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
+                            ,'=','inventory_component_transfers.inventory_component_id')
+                            ->where('inventory_components.project_site_id',$project_site_id)
+                            ->where('inventory_components.is_material',true)
+                            ->where('inventory_component_transfers.transfer_type_id',
+                                $inventoryComponentSiteTransferIds->where('type','IN')->pluck('id')->first())
+                            ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
+                            ->whereMonth('inventory_component_transfers.created_at',$month['id'])
+                            ->whereYear('inventory_component_transfers.created_at',$selectedYear['slug'])
+                            ->sum(DB::raw('inventory_component_transfers.cgst_amount + inventory_component_transfers.sgst_amount + inventory_component_transfers.igst_amount'));
+
+                        $inventorySiteTransfersOutGst = $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
+                            ,'=','inventory_component_transfers.inventory_component_id')
+                            ->where('inventory_components.project_site_id',$project_site_id)
+                            ->where('inventory_components.is_material',true)
+                            ->where('inventory_component_transfers.transfer_type_id',
+                                $inventoryComponentSiteTransferIds->where('type','OUT')->pluck('id')->first())
+                            ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
+                            ->whereMonth('inventory_component_transfers.created_at',$month['id'])
+                            ->whereYear('inventory_component_transfers.created_at',$selectedYear['slug'])
+                            ->sum(DB::raw('inventory_component_transfers.cgst_amount + inventory_component_transfers.sgst_amount + inventory_component_transfers.igst_amount'));
+
+                        $siteTransferBillGst = $siteTransferBill->join('inventory_component_transfers','inventory_component_transfers.id',
+                            '=','site_transfer_bills.inventory_component_transfer_id')
+                            ->join('inventory_components','inventory_components.id'
+                                ,'=','inventory_component_transfers.inventory_component_id')
+                            ->where('inventory_components.project_site_id',$project_site_id)
+                            ->whereMonth('site_transfer_bills.created_at',$month['id'])
+                            ->whereYear('site_transfer_bills.created_at',$selectedYear['slug'])
+                            ->sum(DB::raw('site_transfer_bills.tax_amount + site_transfer_bills.extra_amount_cgst_amount + site_transfer_bills.extra_amount_sgst_amount + site_transfer_bills.extra_amount_igst_amount'));
+
+                        $purchaseGst = $purchaseOrderGst + $assetMaintenanceGst + $inventorySiteTransfersInGst + $siteTransferBillGst - $inventorySiteTransfersOutGst;
                         $data[$row]['purchase_gst'] = round($purchaseGst,3);
                         $totalMonthGst = $salesGst - $purchaseGst - $subcontractorGst;
                         $data[$row]['gst'] = round(($totalMonthGst),3);
@@ -2290,7 +2328,7 @@ class ReportManagementController extends Controller{
 
     public function getSalesListing(Request $request){
         try{
-            //Log::info($request->all());
+            $iTotalRecords = 0;
             $projectSite = new ProjectSite();
             if(!(array_key_exists('sales_month_id',$request->all()))){
                 $request['sales_month_id'] = 'all'; $request['sales_year_id'] = 'all'; $request['sales_project_site_id'] = null;
