@@ -1310,9 +1310,7 @@ class ReportManagementController extends Controller{
                     }else{
                         $rate = $subcontractorStructureData['rate'] * $subcontractorStructureData['total_work_area'];
                     }
-                    $subcontractorBillData = $subcontractorBill->where('sc_structure_id',$subcontractorStructureId)
-                        ->whereIn('subcontractor_bill_status_id',array_column($statusId->toArray(),'id'))//->orderBy('id')
-                        ->get();
+
                     $monthlyTotalAmount = 0;
                     foreach ($totalYears as $thisYear){
                         foreach ($months as $month){
@@ -1322,11 +1320,20 @@ class ReportManagementController extends Controller{
                                 ->whereMonth('created_at',$month['id'])
                                 ->whereYear('created_at',$thisYear['slug'])
                                 ->pluck('id');
-                            $total = $subcontractorBillTransaction
-                                    ->whereIn('subcontractor_bills_id',$billIds)
-                                    ->sum('total');
-                            $monthlyTotal[$iterator]['total'] = ($total != null) ? number_format($total,3) : 0;
-                            $monthlyTotalAmount += ($total != null) ? $total : 0;
+                            $total = 0;
+                            foreach ($billIds as $subcontractorBillId){
+                                $subcontractorBillData = $subcontractorBill->where('id',$subcontractorBillId)
+                                    ->first();
+                                $subcontractorBillTaxes = $subcontractorBillData->subcontractorBillTaxes;
+                                $subTotal = $subcontractorBillData['qty'] * $rate;
+                                $taxTotal = 0;
+                                foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
+                                    $taxTotal += ($subcontractorBillTaxData['percentage'] * $subTotal) / 100;
+                                }
+                                $total += $subTotal + $taxTotal;
+                            }
+                            $monthlyTotal[$iterator]['total'] = number_format($total,3);
+                            $monthlyTotalAmount += $total;
                             $iterator++;
                         }
                     }
@@ -1338,7 +1345,9 @@ class ReportManagementController extends Controller{
                     $row = 1;
                     $totalBasicAmount = $totalGst = $totalWithTaxAmount = $totalTransactionAmount = $totalTds =
                     $totalRetention = $totalHold = $totalDebit = $totalOtherRecovery = $totalPayable = $totalReceipt = $totalPaid = $totalRemaining = 0;
-
+                    $subcontractorBillData = $subcontractorBill->where('sc_structure_id',$subcontractorStructureId)
+                        ->whereIn('subcontractor_bill_status_id',array_column($statusId->toArray(),'id'))//->orderBy('id')
+                        ->get();
                     foreach ($subcontractorBillData as $subcontractorBill){
                         $billName = "R.A. ".$billNo;
                         if($subcontractorBill['subcontractor_bill_status_id'] == $statusId->where('slug','approved')->pluck('id')->first()){
@@ -1971,9 +1980,6 @@ class ReportManagementController extends Controller{
                                                     ->whereMonth('subcontractor_bills.created_at',$month['id'])
                                                     ->whereYear('subcontractor_bills.created_at',$selectedYear['slug'])
                                                     ->pluck('subcontractor_bills.id');
-                        $subcontractorTotal += $subcontractorBillTransaction
-                            ->whereIn('subcontractor_bills_id',$subcontractorBillIds)
-                            ->sum('total');
 
                         if(count($subcontractorBillIds) > 0){
                             foreach ($subcontractorBillIds as $subcontractorBillId){
@@ -1986,9 +1992,12 @@ class ReportManagementController extends Controller{
                                 }
                                 $subcontractorBillTaxes = $subcontractorBillData->subcontractorBillTaxes;
                                 $subTotal = $subcontractorBillData['qty'] * $rate;
+                                $taxTotal = 0;
                                 foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
-                                    $subcontractorGst += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
+                                    $taxTotal = round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
+                                    $subcontractorGst += $taxTotal;
                                 }
+                                $subcontractorTotal += $subTotal + $taxTotal;
                             }
                         }
 
@@ -2365,7 +2374,6 @@ class ReportManagementController extends Controller{
             $subcontractorStructure = new SubcontractorStructure();
             $subcontractorBill = new SubcontractorBill();
             $subcontractorBillStatus = new SubcontractorBillStatus();
-            $subcontractorBillTransaction = new SubcontractorBillTransaction();
             $assetMaintenanceBillPayment = new AssetMaintenanceBillPayment();
             $purchaseOrderBill = new PurchaseOrderBill();
             $purchaseOrderBillMonthlyExpense = new PurchaseOrderBillMonthlyExpense();
@@ -2425,9 +2433,6 @@ class ReportManagementController extends Controller{
                             ->where('subcontractor_structure.project_site_id',$projectSiteId)
                             ->where('subcontractor_bills.subcontractor_bill_status_id',$subcontractorApprovedBillStatusId)
                             ->pluck('subcontractor_bills.id');
-                        $subcontractorTotal += $subcontractorBillTransaction
-                            ->whereIn('subcontractor_bills_id',$subcontractorBillIds)
-                            ->sum('total');
 
                         if(count($subcontractorBillIds) > 0){
                             foreach ($subcontractorBillIds as $subcontractorBillId){
@@ -2440,9 +2445,12 @@ class ReportManagementController extends Controller{
                                 }
                                 $subcontractorBillTaxes = $subcontractorBillData->subcontractorBillTaxes;
                                 $subTotal = $subcontractorBillData['qty'] * $rate;
+                                $taxTotal = 0;
                                 foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
-                                    $subcontractorGst += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
+                                    $taxTotal = round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
+                                    $subcontractorGst += $taxTotal;
                                 }
+                                $subcontractorTotal += $subTotal + $taxTotal;
                             }
                         }
 
