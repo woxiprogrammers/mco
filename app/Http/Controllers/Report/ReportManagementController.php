@@ -37,6 +37,7 @@ use App\ProjectSiteAdvancePayment;
 use App\PurcahsePeticashTransaction;
 use App\PurchaseOrderBill;
 use App\PurchaseOrderBillMonthlyExpense;
+use App\SiteTransferBill;
 use App\Subcontractor;
 use App\SubcontractorBill;
 use App\SubcontractorBillStatus;
@@ -117,9 +118,8 @@ class ReportManagementController extends Controller{
             $startDate = explode('/',$request->start_date);
             $start_date = $startDate[2].'-'.$startDate[1].'-'.$startDate[0].' 00:00:00';
             $endDate = explode('/',$request->end_date);
-            $end_date = $endDate[2].'-'.$endDate[1].'-'.$endDate[0].' 24:00:00';
+            $end_date = $endDate[2].'-'.$endDate[1].'-'.$endDate[0].' 23:59:59';
             $globalProjectSiteId = $request['project_site_id'];
-
             $reportLimit = env('REPORT_LIMIT['.$request['report_name'].']');
 
             $downloadButtonDetails = array();
@@ -318,6 +318,7 @@ class ReportManagementController extends Controller{
                     $inventoryComponentTransfer = new InventoryComponentTransfers();
                     $inventoryTransferTypes = new InventoryTransferTypes();
                     $inventoryComponentTransferStatus = new InventoryComponentTransferStatus();
+                    $siteTransferBill = new SiteTransferBill();
                     $assetMaintenanceBill = new AssetMaintenanceBill();
                     $assetMaintenanceBillPayment = new AssetMaintenanceBillPayment();
                     $purchaseOrderBillMonthlyExpense = new PurchaseOrderBillMonthlyExpense();
@@ -325,7 +326,8 @@ class ReportManagementController extends Controller{
                         'Bill Date', 'Bill Create Date', 'Bill No', 'Paritculars', 'Basic Amount', 'Tax Amount',
                         'Bill Amount', 'Monthly Total'
                     );
-                    $date = date('l, d F Y',strtotime($secondParameter)) .' - '. date('l, d F Y',strtotime($firstParameter));
+
+                    $date = date('l, d F Y',strtotime($firstParameter)) .' - '. date('l, d F Y',strtotime($secondParameter));
                     $startYearID = $year->where('slug',(int)date('Y',strtotime($firstParameter)))->pluck('id')->first();
                     $endYearID = $year->where('slug',(int)date('Y',strtotime($secondParameter)))->pluck('id')->first();
                     $totalYears = $year->whereBetween('id',[$startYearID,$endYearID])->select('id','name','slug')->get();
@@ -347,6 +349,7 @@ class ReportManagementController extends Controller{
                     $monthlyTotal[$iterator]['amount'] = number_format($monthlyTotalAmount,3);
                     $colorData[0]['Purchase'] = '#f2f2f2';
                     $colorData[1]['Site Transfer'] = '#efd2d5';
+                    $colorData[3]['Site Transfer Bill'] = '#f9d6a2';
                     $colorData[2]['Asset Maintenance'] = '#b2cdff';
                     $reportLimit = env('REPORT_LIMIT['.$reportType.']');
                     $buttonNo = $thirdParameter;
@@ -375,12 +378,24 @@ class ReportManagementController extends Controller{
                     $inventorySiteTransfersData = $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
                         ,'=','inventory_component_transfers.inventory_component_id')
                         ->where('inventory_components.project_site_id',$project_site_id)
+                        ->where('inventory_components.is_material',true)
                         ->whereIn('inventory_component_transfers.transfer_type_id',$inventoryComponentSiteTransferIds->pluck('id'))
                         ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
                         ->where('inventory_component_transfers.created_at','>=',$firstParameter)
                         ->where('inventory_component_transfers.created_at','<=',$secondParameter)
                         ->select('inventory_component_transfers.id as inventory_component_transfer_id','inventory_component_transfers.created_at as created_at')
                         ->orderBy('inventory_component_transfers.created_at','desc')
+                        ->get()->toArray();
+
+                    $siteTransferBillData = $siteTransferBill->join('inventory_component_transfers','inventory_component_transfers.id',
+                        '=','site_transfer_bills.inventory_component_transfer_id')
+                        ->join('inventory_components','inventory_components.id'
+                                ,'=','inventory_component_transfers.inventory_component_id')
+                        ->where('inventory_components.project_site_id',$project_site_id)
+                        ->where('site_transfer_bills.created_at','>=',$firstParameter)
+                        ->where('site_transfer_bills.created_at','<=',$secondParameter)
+                        ->select('site_transfer_bills.id as site_transfer_bill_id','site_transfer_bills.created_at as created_at')
+                        ->orderBy('site_transfer_bills.created_at','desc')
                         ->get()->toArray();
 
                     $assetMaintenanceBillsData = $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
@@ -394,7 +409,7 @@ class ReportManagementController extends Controller{
                             ,'assets.name as asset_name','asset_maintenance.id as asset_maintenance_id')
                         ->orderBy('asset_maintenance_bill_payments.created_at','desc')
                         ->get()->toArray();
-                    $totalData = array_merge($purchaseOrderBillsData,$inventorySiteTransfersData,$assetMaintenanceBillsData);
+                    $totalData = array_merge($purchaseOrderBillsData,$inventorySiteTransfersData,$siteTransferBillData,$assetMaintenanceBillsData);
                     usort($totalData, function ($item1, $item2) {
                         return $item2['created_at'] > $item1['created_at'];
                     });
@@ -430,6 +445,18 @@ class ReportManagementController extends Controller{
                             }else{
                                 $data[$row]['bill_amount'] = round($total,3);
                             }
+                        }elseif(array_key_exists('site_transfer_bill_id',$reportData)){
+                            $data[$row]['background'] = '#f9d6a2';
+                            $siteTransferBillData = $siteTransferBill->where('id',$reportData['site_transfer_bill_id'])
+                                ->first();
+                            $thisMonth = (int)date('n',strtotime($siteTransferBillData['created_at']));
+                            $data[$row]['bill_entry_date'] = date('d-m-Y',strtotime($siteTransferBillData['bill_date']));
+                            $data[$row]['bill_created_date'] = date('d-m-Y',strtotime($siteTransferBillData['created_at']));
+                            $data[$row]['bill_number'] = $siteTransferBillData['bill_number'];
+                            $data[$row]['particular'] = $siteTransferBillData->inventoryComponentTransfer->vendor->company;
+                            $data[$row]['basic_amount'] = round(($siteTransferBillData['subtotal'] + $siteTransferBillData['extra_amount']),3);
+                            $data[$row]['tax_amount'] = round(($siteTransferBillData['tax_amount'] + $siteTransferBillData['extra_amount_cgst_amount'] + $siteTransferBillData['extra_amount_sgst_amount'] + $siteTransferBillData['extra_amount_igst_amount']),3);
+                            $data[$row]['bill_amount'] =  $siteTransferBillData['total'];
                         }else{
                             $data[$row]['background'] = '#b2cdff';
                             $assetMaintenanceBillData = $assetMaintenanceBill->where('id',$reportData['asset_maintenance_bill_id'])->first();
@@ -1283,9 +1310,7 @@ class ReportManagementController extends Controller{
                     }else{
                         $rate = $subcontractorStructureData['rate'] * $subcontractorStructureData['total_work_area'];
                     }
-                    $subcontractorBillData = $subcontractorBill->where('sc_structure_id',$subcontractorStructureId)
-                        ->whereIn('subcontractor_bill_status_id',array_column($statusId->toArray(),'id'))//->orderBy('id')
-                        ->get();
+
                     $monthlyTotalAmount = 0;
                     foreach ($totalYears as $thisYear){
                         foreach ($months as $month){
@@ -1295,11 +1320,20 @@ class ReportManagementController extends Controller{
                                 ->whereMonth('created_at',$month['id'])
                                 ->whereYear('created_at',$thisYear['slug'])
                                 ->pluck('id');
-                            $total = $subcontractorBillTransaction
-                                    ->whereIn('subcontractor_bills_id',$billIds)
-                                    ->sum('total');
-                            $monthlyTotal[$iterator]['total'] = ($total != null) ? number_format($total,3) : 0;
-                            $monthlyTotalAmount += ($total != null) ? $total : 0;
+                            $total = 0;
+                            foreach ($billIds as $subcontractorBillId){
+                                $subcontractorBillData = $subcontractorBill->where('id',$subcontractorBillId)
+                                    ->first();
+                                $subcontractorBillTaxes = $subcontractorBillData->subcontractorBillTaxes;
+                                $subTotal = $subcontractorBillData['qty'] * $rate;
+                                $taxTotal = 0;
+                                foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
+                                    $taxTotal += ($subcontractorBillTaxData['percentage'] * $subTotal) / 100;
+                                }
+                                $total += $subTotal + $taxTotal;
+                            }
+                            $monthlyTotal[$iterator]['total'] = number_format($total,3);
+                            $monthlyTotalAmount += $total;
                             $iterator++;
                         }
                     }
@@ -1311,7 +1345,9 @@ class ReportManagementController extends Controller{
                     $row = 1;
                     $totalBasicAmount = $totalGst = $totalWithTaxAmount = $totalTransactionAmount = $totalTds =
                     $totalRetention = $totalHold = $totalDebit = $totalOtherRecovery = $totalPayable = $totalReceipt = $totalPaid = $totalRemaining = 0;
-
+                    $subcontractorBillData = $subcontractorBill->where('sc_structure_id',$subcontractorStructureId)
+                        ->whereIn('subcontractor_bill_status_id',array_column($statusId->toArray(),'id'))//->orderBy('id')
+                        ->get();
                     foreach ($subcontractorBillData as $subcontractorBill){
                         $billName = "R.A. ".$billNo;
                         if($subcontractorBill['subcontractor_bill_status_id'] == $statusId->where('slug','approved')->pluck('id')->first()){
@@ -1329,7 +1365,7 @@ class ReportManagementController extends Controller{
                             $data[$row]['bill_no'] = $billName;
                             $data[$row]['basic_amount'] = number_format($subTotal, 3);
                             $data[$row]['gst'] = number_format($taxTotal, 3);
-                            $data[$row]['total_amount'] = number_format($finalTotal, 3);
+                            $data[$row]['total_amount'] = $finalTotal;
                             $data[$row] = array_merge($data[$row],array_fill(5,6,null));
                             $data[$row]['payable'] = $finalTotal;
                             $data[$row]['receipt'] = null;
@@ -1355,7 +1391,8 @@ class ReportManagementController extends Controller{
                                 $data[$row]['date'] = null;
                                 $data[$row]['bill_no'] = 'Receipt '.$receiptCount;
                                 $data[$row] = array_merge($data[$row],array_fill(2,3,null));
-                                $data[$row]['transaction_amount'] = number_format($billTransaction['subtotal'], 3);
+                                $receipt = $billTransaction['total'];
+                                $data[$row]['receipt'] = number_format($receipt, 3);
                                 $totalTransactionAmount += $billTransaction['subtotal'];
                                 $data[$row]['tds'] = number_format($billTransaction['tds_amount'], 3);
                                 $data[$row]['retention'] = number_format($billTransaction['retention_amount'], 3);
@@ -1363,8 +1400,7 @@ class ReportManagementController extends Controller{
                                 $data[$row]['debit'] = number_format($billTransaction['debit'], 3);
                                 $data[$row]['other_recovery'] = number_format($billTransaction['other_recovery'], 3);
                                 $data[$row]['payable_amount'] = null;
-                                $receipt = $billTransaction['total'];
-                                $data[$row]['receipt'] = number_format($receipt, 3);
+                                $data[$row]['transaction_amount'] = number_format($billTransaction['subtotal'], 3);
                                 $data[$row] = array_merge($data[$row],array_fill(14,3,null));
                                 $data[$billRow]['total_paid'] += $receipt;
                                 $row++;$receiptCount++;
@@ -1375,7 +1411,7 @@ class ReportManagementController extends Controller{
                             }
                             $data[$row] = array_fill(0,16,null);
                             $row++;
-                            $paidAmount = $data[$billRow ]['total_paid'];
+                            $totalWithTax = $data[$billRow ]['total_amount'];
                             $data[$billRow]['remaining'] = $data[$billRow]['payable'] - $data[$billRow ]['total_paid'];
                             $totalPaid += $data[$billRow]['total_paid'];
                             $totalPayable += $data[$billRow]['payable'];
@@ -1384,9 +1420,9 @@ class ReportManagementController extends Controller{
                             $data[$billRow]['payable'] = number_format($data[$billRow]['payable'], 3);
                             $data[$billRow]['total_paid'] = number_format($data[$billRow]['total_paid'], 3);
                             if($billRow == 1 || $setMonthlyTotalData){
-                                $data[$billRow]['monthly_total'] = $paidAmount;
+                                $data[$billRow]['monthly_total'] = $totalWithTax;
                             }elseif($setMonthlyTotalData == false){
-                                $data[$newMonthRow]['monthly_total'] += $paidAmount;
+                                $data[$newMonthRow]['monthly_total'] += $totalWithTax;
                                 $data[$billRow]['monthly_total'] = null;
                             }
                         }
@@ -1395,9 +1431,9 @@ class ReportManagementController extends Controller{
                     }
                     $data[$row]['make_bold'] = true;
                     $totalRow = array(
-                        'Total', null, number_format($totalBasicAmount,3), number_format($totalGst,3), number_format($totalWithTaxAmount,3), number_format($totalTransactionAmount,3)
+                        'Total', null, number_format($totalBasicAmount,3), number_format($totalGst,3), number_format($totalWithTaxAmount,3), number_format($totalReceipt,3)
                         , number_format($totalTds,3), number_format($totalRetention,3),number_format($totalHold,3),
-                        number_format($totalDebit,3),number_format($totalOtherRecovery,3), number_format($totalPayable,3), number_format($totalReceipt,3),
+                        number_format($totalDebit,3),number_format($totalOtherRecovery,3), number_format($totalPayable,3), number_format($totalTransactionAmount,3),
                         number_format($totalPaid,3), number_format($totalRemaining,3), null
                     );
                     $data[$row] = array_merge($data[$row],$totalRow);
@@ -1578,14 +1614,14 @@ class ReportManagementController extends Controller{
                         $data[$row]['basic_amount'] = number_format($basic_amount,3);
                         $data[$row]['gst'] = number_format($gst,3);
                         $data[$row]['total_amount'] = number_format($finalAmount,3);
-                        $data[$row]['transaction_amount'] = number_format($transaction_amount,3);
+                        $data[$row]['transaction_amount'] = number_format($receipt,3);
                         $data[$row]['tds'] = number_format($tds,3);
                         $data[$row]['retention'] = number_format($retention,3);
                         $data[$row]['hold'] = number_format($hold,3);
                         $data[$row]['debit'] = number_format($debit,3);
                         $data[$row]['other_recovery'] = number_format($other_recovery,3);
                         $data[$row]['payable'] = number_format($finalAmount,3);
-                        $data[$row]['receipt'] = number_format($receipt,3);
+                        $data[$row]['receipt'] = number_format($transaction_amount,3);
                         $data[$row]['balance_remaining'] = number_format($finalAmount - $receipt,3);
                         $totalBasicAmount += $basic_amount; $totalGst += $gst; $totalAmount += $finalAmount;
                         $totalTransactionAmount += $transaction_amount; $totalTds += $tds; $totalRetention += $retention;
@@ -1596,9 +1632,9 @@ class ReportManagementController extends Controller{
                     $data[$row]['make_bold'] = true;
                     $totalRow = array(
                         'Total', number_format($totalBasicAmount,3), number_format($totalGst,3), number_format($totalAmount,3),
-                        number_format($totalTransactionAmount,3), number_format($totalTds,3),
+                        number_format($totalReceipt,3), number_format($totalTds,3),
                         number_format($totalRetention,3), number_format($totalHold,3), number_format($totalDebit,3), number_format($totalOtherRecovery,3),
-                        number_format($totalAmount,3), number_format($totalReceipt,3), number_format($totalBalanceRemaining,3)
+                        number_format($totalAmount,3), number_format($totalTransactionAmount,3), number_format($totalBalanceRemaining,3)
                     );
                     $data[$row] = array_merge($data[$row],$totalRow);
                     $projectName = $projectSite->join('projects','projects.id','=','project_sites.project_id')
@@ -1881,7 +1917,6 @@ class ReportManagementController extends Controller{
                     $subcontractorStructure = new SubcontractorStructure();
                     $subcontractorBill = new SubcontractorBill();
                     $subcontractorBillStatus = new SubcontractorBillStatus();
-                    $subcontractorBillTransaction = new SubcontractorBillTransaction();
                     $assetMaintenanceBillPayment = new AssetMaintenanceBillPayment();
                     $purchaseOrderBill = new PurchaseOrderBill();
                     $purchaseOrderBillMonthlyExpense = new PurchaseOrderBillMonthlyExpense();
@@ -1914,9 +1949,9 @@ class ReportManagementController extends Controller{
                             $salesTaxAmount += $billData['tax_amount'];
                             $sales += $billData['total_amount_with_tax'];
                         }
-                        $total += $billTransactionData->sum('total');
-                        $mobilization += $billTransactionData->where('paid_from_slug',true)->sum('amount');
-                        $receipt += ($total != null) ? $total : 0;
+                        $transactionTotal = $billTransactionData->sum('total');
+                        $mobilization += $billTransactionData->where('paid_from_advanced',true)->sum('amount');
+                        $receipt += ($transactionTotal != null) ? $transactionTotal : 0;
                         $retentionAmount = $billTransactionData->sum('retention_amount');
                         $reconciledRetentionAmount = $billReconcileTransactionData->where('transaction_slug','retention')->sum('amount');
                         $totalRetention += $retentionAmount - $reconciledRetentionAmount;
@@ -1944,9 +1979,6 @@ class ReportManagementController extends Controller{
                                                     ->whereMonth('subcontractor_bills.created_at',$month['id'])
                                                     ->whereYear('subcontractor_bills.created_at',$selectedYear['slug'])
                                                     ->pluck('subcontractor_bills.id');
-                        $subcontractorTotal += $subcontractorBillTransaction
-                            ->whereIn('subcontractor_bills_id',$subcontractorBillIds)
-                            ->sum('total');
 
                         if(count($subcontractorBillIds) > 0){
                             foreach ($subcontractorBillIds as $subcontractorBillId){
@@ -1959,9 +1991,12 @@ class ReportManagementController extends Controller{
                                 }
                                 $subcontractorBillTaxes = $subcontractorBillData->subcontractorBillTaxes;
                                 $subTotal = $subcontractorBillData['qty'] * $rate;
+                                $taxTotal = 0;
                                 foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
-                                    $subcontractorGst += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
+                                    $taxTotal = round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
+                                    $subcontractorGst += $taxTotal;
                                 }
+                                $subcontractorTotal += $subTotal + $taxTotal;
                             }
                         }
 
@@ -1994,16 +2029,16 @@ class ReportManagementController extends Controller{
                     $salesWisePnL = $total - $sales - $debitAmount - $tdsAmount;
                     $receiptWisePnL = $total - $receipt;
                     $data = array(
-                        array_merge(array('Sales', 'Retention', 'Receipt', 'Mobilization', 'Outstanding', 'Category', 'Amount')),
-                        array_merge(array(number_format($sales,3), number_format($totalRetention,3), number_format($receipt,3), number_format($mobilization,3), number_format($outstanding,3), 'Purchase', number_format($purchaseAmount,3))),
-                        array_merge(array('Debit Note', number_format($debitAmount,3)), array_fill(0,3,null) , array('Salary', number_format($salaryAmount,3))),
-                        array_merge(array('TDS', number_format($tdsAmount,3)) , array_fill(0,3,null) , array('Asset Rent', number_format($assetRent,3))),
-                        array_merge(array('Hold', number_format($totalHold,3)) , array_fill(0,3,null) , array('Asset Opening Balance', 0)),
-                        array_merge(array('Other Recovery', number_format($otherRecoveryAmount,3)), array_fill(0,3,null) , array('Misc. Purchase', number_format($peticashPurchaseAmount,3))),
-                        array_merge(array_fill(0,5,null) , array('Indirect expenses', number_format($indirectExpenses,3))),
-                        array_merge(array_fill(0,5,null) , array('Opening Balance', number_format($openingExpenses,3))),
-                        array_merge(array_fill(0,5,null) , array('Subcontractor', number_format($subcontractorTotal,3))),
-                        array_merge(array_fill(0,4,null) , array(number_format($outstanding,3)), array_fill(0,1,null) ,array(number_format($total,3))),
+                        array_merge(array(null,'Sales', 'Retention', 'Receipt', 'Mobilization', 'Outstanding', 'Category', 'Amount')),
+                        array_merge(array(null, number_format($sales,3), number_format($totalRetention,3), number_format($receipt,3), number_format($mobilization,3), number_format($outstanding,3), 'Purchase', number_format($purchaseAmount,3))),
+                        array_merge(array('Debit Note', number_format($debitAmount,3)), array_fill(0,4,null) , array('Salary', number_format($salaryAmount,3))),
+                        array_merge(array('TDS', number_format($tdsAmount,3)) , array_fill(0,4,null) , array('Asset Rent', number_format($assetRent,3))),
+                        array_merge(array('Hold', number_format($totalHold,3)) , array_fill(0,4,null) , array('Asset Opening Balance', 0)),
+                        array_merge(array('Other Recovery', number_format($otherRecoveryAmount,3)), array_fill(0,4,null) , array('Misc. Purchase', number_format($peticashPurchaseAmount,3))),
+                        array_merge(array_fill(0,6,null) , array('Indirect expenses', number_format($indirectExpenses,3))),
+                        array_merge(array_fill(0,6,null) , array('Opening Balance', number_format($openingExpenses,3))),
+                        array_merge(array_fill(0,6,null) , array('Subcontractor', number_format($subcontractorTotal,3))),
+                        array_merge(array_fill(0,5,null) , array(number_format($outstanding,3)), array_fill(0,1,null) ,array(number_format($total,3))),
                     );
                     $summaryData = array(
                         array_merge(array('Sales P/L',number_format(($salesPnL),3) , number_format($total,3) , number_format(($salesWisePnL),3))),
@@ -2253,7 +2288,6 @@ class ReportManagementController extends Controller{
 
     public function getSalesListing(Request $request){
         try{
-            Log::info($request->all());
             $projectSite = new ProjectSite();
             $projectSiteData = $projectSite->join('projects','projects.id','=','project_sites.project_id')
                 ->orderBy('projects.name')->select('project_sites.id','projects.name')->get();
@@ -2331,8 +2365,6 @@ class ReportManagementController extends Controller{
         try{
             $salesData = array();
             $month = new Month();
-            $year = new Year();
-            $projectSite = new ProjectSite();
             $quotation = new Quotation();
             $bill = new Bill();
             $billStatus = new BillStatus();
@@ -2341,7 +2373,6 @@ class ReportManagementController extends Controller{
             $subcontractorStructure = new SubcontractorStructure();
             $subcontractorBill = new SubcontractorBill();
             $subcontractorBillStatus = new SubcontractorBillStatus();
-            $subcontractorBillTransaction = new SubcontractorBillTransaction();
             $assetMaintenanceBillPayment = new AssetMaintenanceBillPayment();
             $purchaseOrderBill = new PurchaseOrderBill();
             $purchaseOrderBillMonthlyExpense = new PurchaseOrderBillMonthlyExpense();
@@ -2352,7 +2383,6 @@ class ReportManagementController extends Controller{
             $approvedBillStatusId = $billStatus->where('slug','approved')->pluck('id')->first();
 
             switch(true){
-                //case ($startMonthId == null && $endMonthId == null && $yearId == null) :
                 case true :
                     $quotation = $quotation->where('project_site_id',$projectSiteId)->first();
                     $subcontractorApprovedBillStatusId = $subcontractorBillStatus->where('slug','approved')->pluck('id')->first();
@@ -2377,9 +2407,9 @@ class ReportManagementController extends Controller{
                             $salesTaxAmount += $billData['tax_amount'];
                             $sales += $billData['total_amount_with_tax'];
                         }
-                        $total += $billTransactionData->sum('total');
-                        $mobilization += $billTransactionData->where('paid_from_slug',true)->sum('amount');
-                        $receipt += ($total != null) ? $total : 0;
+                        $transactionTotal = $billTransactionData->sum('total');
+                        $mobilization += $billTransactionData->where('paid_from_advanced',true)->sum('amount');
+                        $receipt += ($transactionTotal != null) ? $transactionTotal : 0;
                         $retentionAmount = $billTransactionData->sum('retention_amount');
                         $reconciledRetentionAmount = $billReconcileTransactionData->where('transaction_slug','retention')->sum('amount');
                         $totalRetention += $retentionAmount - $reconciledRetentionAmount;
@@ -2402,9 +2432,6 @@ class ReportManagementController extends Controller{
                             ->where('subcontractor_structure.project_site_id',$projectSiteId)
                             ->where('subcontractor_bills.subcontractor_bill_status_id',$subcontractorApprovedBillStatusId)
                             ->pluck('subcontractor_bills.id');
-                        $subcontractorTotal += $subcontractorBillTransaction
-                            ->whereIn('subcontractor_bills_id',$subcontractorBillIds)
-                            ->sum('total');
 
                         if(count($subcontractorBillIds) > 0){
                             foreach ($subcontractorBillIds as $subcontractorBillId){
@@ -2417,9 +2444,12 @@ class ReportManagementController extends Controller{
                                 }
                                 $subcontractorBillTaxes = $subcontractorBillData->subcontractorBillTaxes;
                                 $subTotal = $subcontractorBillData['qty'] * $rate;
+                                $taxTotal = 0;
                                 foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
-                                    $subcontractorGst += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
+                                    $taxTotal = round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
+                                    $subcontractorGst += $taxTotal;
                                 }
+                                $subcontractorTotal += $subTotal + $taxTotal;
                             }
                         }
 
