@@ -251,12 +251,12 @@
                                                         <th></th>
                                                         <th></th>
                                                         <th>
-                                                            <input type="hidden" class="form-control form-filter" name="expense_month_slug" id="expense_month_id">
+                                                            <input type="hidden" class="form-control form-filter" name="expense_month_id" id="expense_month_id">
                                                         </th>
                                                         <th>
                                                             <input type="hidden" class="form-control form-filter" name="expense_project_site_id" id="expense_project_site_id"></th>
                                                         <th>
-                                                            <input type="hidden" class="form-control form-filter" name="expense_year_slug" id="expense_year_id">
+                                                            <input type="hidden" class="form-control form-filter" name="expense_year_id" id="expense_year_id">
                                                         </th>
                                                         <th>
                                                             <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
