@@ -2038,7 +2038,7 @@ class ReportManagementController extends Controller{
                                     $taxTotal += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
                                     $subcontractorGst += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
                                 }
-                                $subcontractorTotal += round(($subTotal + $subcontractorGst),3);
+                                $subcontractorTotal += round(($subTotal + $taxTotal),3);
                             }
                         }
                         $assetMaintenanceGst += $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
@@ -2937,7 +2937,7 @@ class ReportManagementController extends Controller{
                                 $taxTotal += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
                                 $subcontractorGst += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
                             }
-                            $subcontractorTotal += round(($subTotal + $subcontractorGst),3);
+                            $subcontractorTotal += round(($subTotal + $taxTotal),3);
                         }
                     }
 
@@ -3042,7 +3042,7 @@ class ReportManagementController extends Controller{
                                     $taxTotal += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
                                     $subcontractorGst += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
                                 }
-                                $subcontractorTotal += round(($subTotal + $subcontractorGst),3);
+                                $subcontractorTotal += round(($subTotal + $taxTotal),3);
                             }
                         }
 
@@ -3160,7 +3160,7 @@ class ReportManagementController extends Controller{
                                     $taxTotal += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
                                     $subcontractorGst += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
                                 }
-                                $subcontractorTotal += round(($subTotal + $subcontractorGst),3);
+                                $subcontractorTotal += round(($subTotal + $taxTotal),3);
                             }
                         }
 
