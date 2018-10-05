@@ -653,7 +653,7 @@ class ReportManagementController extends Controller{
                                 ->where('year_id',$thisYear['id'])
                                 ->where('project_site_id',$project_site_id)
                                 ->pluck('total_expense')->first();
-                            $monthlyTotal[$iterator]['total'] = ($total != null) ? number_format($total,3) : 0;
+                            $monthlyTotal[$iterator]['total'] = ($total != null) ? round($total,3) : 0;
                             $monthlyTotalAmount += ($total != null) ? $total : 0;
                             $iterator++;
                         }
@@ -845,7 +845,7 @@ class ReportManagementController extends Controller{
                                 ->where('year_id',$thisYear['id'])
                                 ->where('project_site_id',$project_site_id)
                                 ->pluck('total_expense')->first();
-                            $monthlyTotal[$iterator]['total'] = ($total != null) ? number_format($total,3) : 0;
+                            $monthlyTotal[$iterator]['total'] = ($total != null) ? round($total,3) : 0;
                             $monthlyTotalAmount += ($total != null) ? $total : 0;
                             $iterator++;
                         }
@@ -997,7 +997,7 @@ class ReportManagementController extends Controller{
                                         $cell->setBorder('thin', 'thin', 'thin', 'thin');
                                         $cell->setAlignment('center')->setValignment('center');
                                         if($key1 === 'bill_amount' || ($key1 === 'monthly_total' && $cellData !== null)){
-                                            $cell->setValue(number_format($cellData,3));
+                                            $cell->setValue(round($cellData,3));
                                         }else{
                                             $cell->setValue($cellData);
                                         }
@@ -1141,7 +1141,7 @@ class ReportManagementController extends Controller{
                     $data[$row]['make_bold'] = true;
                     $totalRow = array(
                         'Total', null, round($totalBasicAmount,3), round($totalGst,3), round($totalWithTaxAmount,3), round($totalTransactionAmount,3)
-                            , number_format($totalMobilization,3), round($totalTds,3), round($totalRetention,3),round($totalHold,3),
+                            , round($totalMobilization,3), round($totalTds,3), round($totalRetention,3),round($totalHold,3),
                         round($totalDebit,3),round($totalOtherRecovery,3), round($totalPayable,3), round($totalReceipt,3),
                         round($totalPaid,3), round($totalRemaining,3), null
                     );
@@ -2816,22 +2816,6 @@ class ReportManagementController extends Controller{
                     break;
 
             }
-
-            /*for($iterator = 0 , $pagination = $request->start ; $iterator < $end && $pagination < count($projectSiteData) ; $iterator++ , $pagination++){
-                $expenseAmount = $this->getSalesExpenseAmount('null','null','null',$projectSiteData[$pagination]['id']);
-                $records['data'][$iterator] = [
-                    $projectName = ucwords($projectSiteData[$pagination]['name']),
-                    number_format($expenseAmount['purchase'],3),
-                    number_format($expenseAmount['salary'],3),
-                    number_format($expenseAmount['asset_rent'],3),
-                    number_format($expenseAmount['asset_opening_balance'],3),
-                    number_format($expenseAmount['subcontractor'],3),
-                    number_format($expenseAmount['misc_purchase'],3),
-                    number_format($expenseAmount['indirect_expense'],3),
-                    number_format($expenseAmount['opening_balance'],3),
-                    number_format($expenseAmount['total_expense'],3),
-                ];
-            }*/
             $records["draw"] = intval($request->draw);
             $records["recordsTotal"] = $iTotalRecords;
             $records["recordsFiltered"] = $iTotalRecords;
