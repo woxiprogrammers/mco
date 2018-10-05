@@ -813,7 +813,7 @@ class ReportManagementController extends Controller{
                                         $cell->setBorder('thin', 'thin', 'thin', 'thin');
                                         $cell->setAlignment('center')->setValignment('center');
                                         if($key1 === 'amount' || ($key1 === 'monthly_total' && $cellData !== null)){
-                                            $cell->setValue(number_format($cellData,3));
+                                            $cell->setValue(round($cellData,3));
                                         }else{
                                             $cell->setValue($cellData);
 
@@ -1391,15 +1391,15 @@ class ReportManagementController extends Controller{
                                 $data[$row]['bill_no'] = 'Receipt '.$receiptCount;
                                 $data[$row] = array_merge($data[$row],array_fill(2,3,null));
                                 $receipt = $billTransaction['total'];
-                                $data[$row]['receipt'] = number_format($receipt, 3);
+                                $data[$row]['receipt'] = round($receipt, 3);
                                 $totalTransactionAmount += $billTransaction['subtotal'];
-                                $data[$row]['tds'] = number_format($billTransaction['tds_amount'], 3);
-                                $data[$row]['retention'] = number_format($billTransaction['retention_amount'], 3);
-                                $data[$row]['hold'] = number_format($billTransaction['hold'], 3);
-                                $data[$row]['debit'] = number_format($billTransaction['debit'], 3);
-                                $data[$row]['other_recovery'] = number_format($billTransaction['other_recovery'], 3);
+                                $data[$row]['tds'] = round($billTransaction['tds_amount'], 3);
+                                $data[$row]['retention'] = round($billTransaction['retention_amount'], 3);
+                                $data[$row]['hold'] = round($billTransaction['hold'], 3);
+                                $data[$row]['debit'] = round($billTransaction['debit'], 3);
+                                $data[$row]['other_recovery'] = round($billTransaction['other_recovery'], 3);
                                 $data[$row]['payable_amount'] = null;
-                                $data[$row]['transaction_amount'] = number_format($billTransaction['subtotal'], 3);
+                                $data[$row]['transaction_amount'] = round($billTransaction['subtotal'], 3);
                                 $data[$row] = array_merge($data[$row],array_fill(14,3,null));
                                 $data[$billRow]['total_paid'] += $receipt;
                                 $row++;$receiptCount++;
