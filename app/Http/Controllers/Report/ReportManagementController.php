@@ -813,7 +813,7 @@ class ReportManagementController extends Controller{
                                         $cell->setBorder('thin', 'thin', 'thin', 'thin');
                                         $cell->setAlignment('center')->setValignment('center');
                                         if($key1 === 'amount' || ($key1 === 'monthly_total' && $cellData !== null)){
-                                            $cell->setValue(number_format($cellData,3));
+                                            $cell->setValue(round($cellData,3));
                                         }else{
                                             $cell->setValue($cellData);
 
@@ -1391,15 +1391,15 @@ class ReportManagementController extends Controller{
                                 $data[$row]['bill_no'] = 'Receipt '.$receiptCount;
                                 $data[$row] = array_merge($data[$row],array_fill(2,3,null));
                                 $receipt = $billTransaction['total'];
-                                $data[$row]['receipt'] = number_format($receipt, 3);
+                                $data[$row]['receipt'] = round($receipt, 3);
                                 $totalTransactionAmount += $billTransaction['subtotal'];
-                                $data[$row]['tds'] = number_format($billTransaction['tds_amount'], 3);
-                                $data[$row]['retention'] = number_format($billTransaction['retention_amount'], 3);
-                                $data[$row]['hold'] = number_format($billTransaction['hold'], 3);
-                                $data[$row]['debit'] = number_format($billTransaction['debit'], 3);
-                                $data[$row]['other_recovery'] = number_format($billTransaction['other_recovery'], 3);
+                                $data[$row]['tds'] = round($billTransaction['tds_amount'], 3);
+                                $data[$row]['retention'] = round($billTransaction['retention_amount'], 3);
+                                $data[$row]['hold'] = round($billTransaction['hold'], 3);
+                                $data[$row]['debit'] = round($billTransaction['debit'], 3);
+                                $data[$row]['other_recovery'] = round($billTransaction['other_recovery'], 3);
                                 $data[$row]['payable_amount'] = null;
-                                $data[$row]['transaction_amount'] = number_format($billTransaction['subtotal'], 3);
+                                $data[$row]['transaction_amount'] = round($billTransaction['subtotal'], 3);
                                 $data[$row] = array_merge($data[$row],array_fill(14,3,null));
                                 $data[$billRow]['total_paid'] += $receipt;
                                 $row++;$receiptCount++;
@@ -1735,6 +1735,10 @@ class ReportManagementController extends Controller{
                     $subcontractorBill = new SubcontractorBill();
                     $purchaseOrderBill = new PurchaseOrderBill();
                     $assetMaintenanceBillPayment = new AssetMaintenanceBillPayment();
+                    $inventoryComponentTransfer = new InventoryComponentTransfers();
+                    $inventoryTransferTypes = new InventoryTransferTypes();
+                    $inventoryComponentTransferStatus = new InventoryComponentTransferStatus();
+                    $siteTransferBill = new SiteTransferBill();
                     $data[$row] = array(
                         'Month - Year', 'Sales GST', 'Subcontractor GST', 'Purchase GST', 'GST'
                     );
@@ -1745,12 +1749,14 @@ class ReportManagementController extends Controller{
                     $totalMonths = $month->whereBetween('id',[$firstParameter,$secondParameter])->select('id','name','slug')->get();
                     $row = 1;
                     $yearlyGst = 0;
+                    $inventoryComponentSiteTransferIds = $inventoryTransferTypes->where('slug','site')->get();
+                    $approvedComponentTransferStatusId = $inventoryComponentTransferStatus->where('slug','approved')->pluck('id');
+                    $statusId = $billStatus->where('slug','approved')->pluck('id');
                     foreach ($totalMonths as $month){
                         $data[$row]['month'] = $month['name'].'-'.$selectedYear['slug'];
                         $data[$row]['gst'] = $data[$row]['purchase_gst'] = $data[$row]['subcontractor_gst'] = $data[$row]['sales_gst'] =
                         $salesGst = $subcontractorGst = 0;
                         $quotationId = $quotation->where('project_site_id',$project_site_id)->pluck('id')->first();
-                        $statusId = $billStatus->where('slug','approved')->pluck('id');
                         $billIds = $bill->where('quotation_id',$quotationId)
                             ->where('bill_status_id',$statusId)->orderBy('id')
                             ->whereMonth('date',$month['id'])
@@ -1800,7 +1806,6 @@ class ReportManagementController extends Controller{
                             ->whereMonth('purchase_order_bills.created_at',$month['id'])
                             ->whereYear('purchase_order_bills.created_at',$selectedYear['slug'])
                             ->sum(DB::raw('purchase_order_bills.transportation_tax_amount + purchase_order_bills.tax_amount + purchase_order_bills.extra_tax_amount')),3);
-
                         $assetMaintenanceGst = $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
                             ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
                             ->join('assets','assets.id','=','asset_maintenance.asset_id')
@@ -1808,7 +1813,39 @@ class ReportManagementController extends Controller{
                             ->whereMonth('asset_maintenance_bill_payments.created_at',$month['id'])
                             ->whereYear('asset_maintenance_bill_payments.created_at',$selectedYear['slug'])
                             ->sum(DB::raw('asset_maintenance_bills.cgst_amount +asset_maintenance_bills.sgst_amount +asset_maintenance_bills.igst_amount'));
-                        $purchaseGst = $purchaseOrderGst + $assetMaintenanceGst;
+
+                        $inventorySiteTransfersInGst = $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
+                            ,'=','inventory_component_transfers.inventory_component_id')
+                            ->where('inventory_components.project_site_id',$project_site_id)
+                            ->where('inventory_components.is_material',true)
+                            ->where('inventory_component_transfers.transfer_type_id',
+                                $inventoryComponentSiteTransferIds->where('type','IN')->pluck('id')->first())
+                            ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
+                            ->whereMonth('inventory_component_transfers.created_at',$month['id'])
+                            ->whereYear('inventory_component_transfers.created_at',$selectedYear['slug'])
+                            ->sum(DB::raw('inventory_component_transfers.cgst_amount + inventory_component_transfers.sgst_amount + inventory_component_transfers.igst_amount'));
+
+                        $inventorySiteTransfersOutGst = $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
+                            ,'=','inventory_component_transfers.inventory_component_id')
+                            ->where('inventory_components.project_site_id',$project_site_id)
+                            ->where('inventory_components.is_material',true)
+                            ->where('inventory_component_transfers.transfer_type_id',
+                                $inventoryComponentSiteTransferIds->where('type','OUT')->pluck('id')->first())
+                            ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
+                            ->whereMonth('inventory_component_transfers.created_at',$month['id'])
+                            ->whereYear('inventory_component_transfers.created_at',$selectedYear['slug'])
+                            ->sum(DB::raw('inventory_component_transfers.cgst_amount + inventory_component_transfers.sgst_amount + inventory_component_transfers.igst_amount'));
+
+                        $siteTransferBillGst = $siteTransferBill->join('inventory_component_transfers','inventory_component_transfers.id',
+                            '=','site_transfer_bills.inventory_component_transfer_id')
+                            ->join('inventory_components','inventory_components.id'
+                                ,'=','inventory_component_transfers.inventory_component_id')
+                            ->where('inventory_components.project_site_id',$project_site_id)
+                            ->whereMonth('site_transfer_bills.created_at',$month['id'])
+                            ->whereYear('site_transfer_bills.created_at',$selectedYear['slug'])
+                            ->sum(DB::raw('site_transfer_bills.tax_amount + site_transfer_bills.extra_amount_cgst_amount + site_transfer_bills.extra_amount_sgst_amount + site_transfer_bills.extra_amount_igst_amount'));
+
+                        $purchaseGst = $purchaseOrderGst + $assetMaintenanceGst + $inventorySiteTransfersInGst + $siteTransferBillGst - $inventorySiteTransfersOutGst;
                         $data[$row]['purchase_gst'] = round($purchaseGst,3);
                         $totalMonthGst = $salesGst - $purchaseGst - $subcontractorGst;
                         $data[$row]['gst'] = round(($totalMonthGst),3);
@@ -1917,6 +1954,10 @@ class ReportManagementController extends Controller{
                     $subcontractorBillStatus = new SubcontractorBillStatus();
                     $assetMaintenanceBillPayment = new AssetMaintenanceBillPayment();
                     $purchaseOrderBill = new PurchaseOrderBill();
+                    $inventoryComponentTransfer = new InventoryComponentTransfers();
+                    $inventoryTransferTypes = new InventoryTransferTypes();
+                    $inventoryComponentTransferStatus = new InventoryComponentTransferStatus();
+                    $siteTransferBill = new SiteTransferBill();
                     $purchaseOrderBillMonthlyExpense = new PurchaseOrderBillMonthlyExpense();
                     $peticashSalaryTransactionMonthlyExpense = new PeticashSalaryTransactionMonthlyExpense();
                     $peticashPurchaseTransactionMonthlyExpense = new PeticashPurchaseTransactionMonthlyExpense();
@@ -1930,10 +1971,13 @@ class ReportManagementController extends Controller{
                     $totalMonths = $month->whereBetween('id',[$firstParameter,$secondParameter])->select('id','name','slug')->get();
                     $sales = $receipt = $total = $totalRetention = $totalHold = $debitAmount = $tdsAmount = $subcontractorTotal =
                     $otherRecoveryAmount = $mobilization = $purchaseAmount = $salaryAmount = $peticashPurchaseAmount =
-                        $salesTaxAmount = $purchaseOrderGst = $assetMaintenanceGst = $subcontractorGst = 0;
+                    $salesTaxAmount = $purchaseOrderGst = $assetMaintenanceGst = $subcontractorGst = $inventorySiteTransfersInGst =
+                    $inventorySiteTransfersOutGst = $siteTransferBillGst = 0;
                     $assetRent = 0;
                     $projectSiteAdvancePayment = new ProjectSiteAdvancePayment();
                     $outstandingMobilization = $projectSiteAdvancePayment->where('project_site_id',$project_site_id)->sum('amount');
+                    $inventoryComponentSiteTransferIds = $inventoryTransferTypes->where('slug','site')->get();
+                    $approvedComponentTransferStatusId = $inventoryComponentTransferStatus->where('slug','approved')->pluck('id');
                     foreach ($totalMonths as $month){
                         $billIds = $bill->where('quotation_id',$quotation['id'])
                             ->where('bill_status_id',$approvedBillStatusId)->orderBy('id')
@@ -1991,13 +2035,12 @@ class ReportManagementController extends Controller{
                                 $subTotal = $subcontractorBillData['qty'] * $rate;
                                 $taxTotal = 0;
                                 foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
-                                    $taxTotal = round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
-                                    $subcontractorGst += $taxTotal;
+                                    $taxTotal += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
+                                    $subcontractorGst += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
                                 }
-                                $subcontractorTotal += $subTotal + $taxTotal;
+                                $subcontractorTotal += round(($subTotal + $taxTotal),3);
                             }
                         }
-
                         $assetMaintenanceGst += $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
                             ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
                             ->join('assets','assets.id','=','asset_maintenance.asset_id')
@@ -2016,9 +2059,40 @@ class ReportManagementController extends Controller{
                             ->whereMonth('purchase_order_bills.created_at',$month['id'])
                             ->whereYear('purchase_order_bills.created_at',$selectedYear['slug'])
                             ->sum(DB::raw('purchase_order_bills.transportation_tax_amount + purchase_order_bills.tax_amount + purchase_order_bills.extra_tax_amount')),3);
+                        $inventorySiteTransfersInGst += $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
+                            ,'=','inventory_component_transfers.inventory_component_id')
+                            ->where('inventory_components.project_site_id',$project_site_id)
+                            ->where('inventory_components.is_material',true)
+                            ->where('inventory_component_transfers.transfer_type_id',
+                                $inventoryComponentSiteTransferIds->where('type','IN')->pluck('id')->first())
+                            ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
+                            ->whereMonth('inventory_component_transfers.created_at',$month['id'])
+                            ->whereYear('inventory_component_transfers.created_at',$selectedYear['slug'])
+                            ->sum(DB::raw('inventory_component_transfers.cgst_amount + inventory_component_transfers.sgst_amount + inventory_component_transfers.igst_amount'));
+
+                        $inventorySiteTransfersOutGst += $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
+                            ,'=','inventory_component_transfers.inventory_component_id')
+                            ->where('inventory_components.project_site_id',$project_site_id)
+                            ->where('inventory_components.is_material',true)
+                            ->where('inventory_component_transfers.transfer_type_id',
+                                $inventoryComponentSiteTransferIds->where('type','OUT')->pluck('id')->first())
+                            ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
+                            ->whereMonth('inventory_component_transfers.created_at',$month['id'])
+                            ->whereYear('inventory_component_transfers.created_at',$selectedYear['slug'])
+                            ->sum(DB::raw('inventory_component_transfers.cgst_amount + inventory_component_transfers.sgst_amount + inventory_component_transfers.igst_amount'));
+
+                        $siteTransferBillGst += $siteTransferBill->join('inventory_component_transfers','inventory_component_transfers.id',
+                            '=','site_transfer_bills.inventory_component_transfer_id')
+                            ->join('inventory_components','inventory_components.id'
+                                ,'=','inventory_component_transfers.inventory_component_id')
+                            ->where('inventory_components.project_site_id',$project_site_id)
+                            ->whereMonth('site_transfer_bills.created_at',$month['id'])
+                            ->whereYear('site_transfer_bills.created_at',$selectedYear['slug'])
+                            ->sum(DB::raw('site_transfer_bills.tax_amount + site_transfer_bills.extra_amount_cgst_amount + site_transfer_bills.extra_amount_sgst_amount + site_transfer_bills.extra_amount_igst_amount'));
+
                     }
-                    $purchaseTaxAmount = $assetMaintenanceGst + $purchaseOrderGst + $subcontractorGst;
-                    $indirectExpenses = $salesTaxAmount - $purchaseTaxAmount;
+                    $purchaseTaxAmount = $assetMaintenanceGst + $purchaseOrderGst + $inventorySiteTransfersInGst + $siteTransferBillGst - $inventorySiteTransfersOutGst;
+                    $indirectExpenses = $salesTaxAmount - $purchaseTaxAmount - $subcontractorGst;
                     $openingExpenses = $quotation['opening_expenses'];
 
                     $outstanding = $sales - $debitAmount - $tdsAmount - $totalRetention - $otherRecoveryAmount - $totalHold - $receipt - $mobilization;
@@ -2110,7 +2184,6 @@ class ReportManagementController extends Controller{
                             $row = 9;
                             $headerRow =  $row+1;
                             foreach($data as $key => $rowData){
-                                Log::info($key);
                                 $next_column = 'A';
                                 $row++;
                                 foreach($rowData as $key1 => $cellData){
@@ -2290,25 +2363,215 @@ class ReportManagementController extends Controller{
 
     public function getSalesListing(Request $request){
         try{
+            $iTotalRecords = 0;
             $projectSite = new ProjectSite();
-            $projectSiteData = $projectSite->join('projects','projects.id','=','project_sites.project_id')
-                ->where('projects.name','!=','25 East')->orderBy('projects.name')->select('project_sites.id','projects.name')->get();
-            $iTotalRecords = count($projectSiteData);
-            $records = array();
-            $records['data'] = array();
-            $end = $request->length < 0 ? count($projectSiteData) : $request->length;
-            for($iterator = 0 , $pagination = $request->start ; $iterator < $end && $pagination < count($projectSiteData) ; $iterator++ , $pagination++){
-                $salesAmount = $this->getSalesExpenseAmount('null','null','null',$projectSiteData[$pagination]['id']);
-                $records['data'][$iterator] = [
-                    $projectName = ucwords($projectSiteData[$pagination]['name']),
-                    number_format($salesAmount['sales'],3),
-                    number_format($salesAmount['receipt'],3),
-                    number_format($salesAmount['outstanding'],3),
-                    number_format($salesAmount['total_expense'],3),
-                    number_format($salesAmount['outstanding_mobilization'],3),
-                    number_format($salesAmount['sitewise_pNl'],3),
-                    number_format($salesAmount['receiptwise_pNl'],3),
-                ];
+            if(!(array_key_exists('sales_month_id',$request->all()))){
+                $request['sales_month_id'] = 'all'; $request['sales_year_id'] = 'all'; $request['sales_project_site_id'] = null;
+            }
+            $month = new Month();
+            $januaryMonthId = $month->where('slug','january')->pluck('id')->first();
+            $decemberMonthId = $month->where('slug','december')->pluck('id')->first();
+            switch(true) {
+                case (($request['sales_month_id'] === 'all' && $request['sales_year_id'] === 'all' && $request['sales_project_site_id'] == null)) :
+                    Log::info('inside sales case 1');
+                    $projectSiteData = $projectSite->join('projects', 'projects.id', '=', 'project_sites.project_id')
+                        ->orderBy('projects.name')->select('project_sites.id', 'projects.name')->get();
+                    $iTotalRecords = count($projectSiteData);
+                    $records = array();
+                    $records['data'] = array();
+                    $end = $request->length < 0 ? count($projectSiteData) : $request->length;
+                    for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($projectSiteData); $iterator++, $pagination++) {
+                        $salesAmount = $this->getSalesExpenseAmount('null', 'null', 'null', $projectSiteData[$pagination]['id'],'sales');
+                        $records['data'][$iterator] = [
+                            $projectName = ucwords($projectSiteData[$pagination]['name']),
+                            number_format($salesAmount['sales'], 3),
+                            number_format($salesAmount['receipt'], 3),
+                            number_format($salesAmount['outstanding'], 3),
+                            number_format($salesAmount['total_expense'], 3),
+                            number_format($salesAmount['outstanding_mobilization'], 3),
+                            number_format($salesAmount['sitewise_pNl'], 3),
+                            number_format($salesAmount['receiptwise_pNl'], 3),
+                        ];
+                    }
+                    break;
+
+                case ($request['sales_month_id'] === 'all' && $request['sales_year_id'] === 'all' && $request['sales_project_site_id'] != null) :
+                    Log::info('inside sales case 2');
+                    $requestedProjectSiteIds = explode(',',$request['sales_project_site_id']);
+                    $projectSiteData = $projectSite->join('projects', 'projects.id', '=', 'project_sites.project_id')
+                        ->whereIn('project_sites.id',$requestedProjectSiteIds)
+                        ->orderBy('projects.name')->select('project_sites.id', 'projects.name')->get();
+                    $iTotalRecords = count($projectSiteData);
+                    $records = array();
+                    $records['data'] = array();
+                    $end = $request->length < 0 ? count($projectSiteData) : $request->length;
+                    for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($projectSiteData); $iterator++, $pagination++) {
+                        $salesAmount = $this->getSalesExpenseAmount('null', 'null', 'null', $projectSiteData[$pagination]['id'],'sales');
+                        $records['data'][$iterator] = [
+                            $projectName = ucwords($projectSiteData[$pagination]['name']),
+                            number_format($salesAmount['sales'], 3),
+                            number_format($salesAmount['receipt'], 3),
+                            number_format($salesAmount['outstanding'], 3),
+                            number_format($salesAmount['total_expense'], 3),
+                            number_format($salesAmount['outstanding_mobilization'], 3),
+                            number_format($salesAmount['sitewise_pNl'], 3),
+                            number_format($salesAmount['receiptwise_pNl'], 3),
+                        ];
+                    }
+                    break;
+
+                case ($request['sales_month_id'] === 'all' && $request['sales_year_id'] !== 'all' && $request['sales_project_site_id'] != null) :
+                        Log::info('inside sales case 3');
+                    $requestedProjectSiteIds = explode(',',$request['sales_project_site_id']);
+                    $projectSiteData = $projectSite->join('projects', 'projects.id', '=', 'project_sites.project_id')
+                        ->whereIn('project_sites.id',$requestedProjectSiteIds)
+                        ->orderBy('projects.name')->select('project_sites.id', 'projects.name')->get();
+                    $iTotalRecords = count($projectSiteData);
+                    $records = array();
+                    $records['data'] = array();
+                    $end = $request->length < 0 ? count($projectSiteData) : $request->length;
+                    for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($projectSiteData); $iterator++, $pagination++) {
+                        $salesAmount = $this->getSalesExpenseAmount($januaryMonthId, $decemberMonthId, $request['sales_year_id'], $projectSiteData[$pagination]['id'],'sales');
+                        $records['data'][$iterator] = [
+                            $projectName = ucwords($projectSiteData[$pagination]['name']),
+                            number_format($salesAmount['sales'], 3),
+                            number_format($salesAmount['receipt'], 3),
+                            number_format($salesAmount['outstanding'], 3),
+                            number_format($salesAmount['total_expense'], 3),
+                            number_format($salesAmount['outstanding_mobilization'], 3),
+                            number_format($salesAmount['sitewise_pNl'], 3),
+                            number_format($salesAmount['receiptwise_pNl'], 3),
+                        ];
+                    }
+                    break;
+
+                case ($request['sales_month_id'] === 'all' && $request['sales_year_id'] !== 'all' && $request['sales_project_site_id'] == null) :
+                    Log::info('inside sales case 4');
+                    $projectSiteData = $projectSite->join('projects', 'projects.id', '=', 'project_sites.project_id')
+                        ->orderBy('projects.name')->select('project_sites.id', 'projects.name')->get();
+                    $iTotalRecords = count($projectSiteData);
+                    $records = array();
+                    $records['data'] = array();
+                    $end = $request->length < 0 ? count($projectSiteData) : $request->length;
+                    for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($projectSiteData); $iterator++, $pagination++) {
+                        $salesAmount = $this->getSalesExpenseAmount($januaryMonthId, $decemberMonthId, $request['sales_year_id'], $projectSiteData[$pagination]['id'],'sales');
+                        $records['data'][$iterator] = [
+                            $projectName = ucwords($projectSiteData[$pagination]['name']),
+                            number_format($salesAmount['sales'], 3),
+                            number_format($salesAmount['receipt'], 3),
+                            number_format($salesAmount['outstanding'], 3),
+                            number_format($salesAmount['total_expense'], 3),
+                            number_format($salesAmount['outstanding_mobilization'], 3),
+                            number_format($salesAmount['sitewise_pNl'], 3),
+                            number_format($salesAmount['receiptwise_pNl'], 3),
+                        ];
+                    }
+                    break;
+
+                case ($request['sales_month_id'] !== 'all' && $request['sales_year_id'] === 'all' && $request['sales_project_site_id'] == null) :
+                    Log::info('inside sales case 5');
+                    $startMonthId = $endMonthId = $month->where('id',$request['sales_month_id'])->pluck('id')->first();
+
+                    $projectSiteData = $projectSite->join('projects', 'projects.id', '=', 'project_sites.project_id')
+                        ->orderBy('projects.name')->select('project_sites.id', 'projects.name')->get();
+                    $iTotalRecords = count($projectSiteData);
+                    $records = array();
+                    $records['data'] = array();
+                    $end = $request->length < 0 ? count($projectSiteData) : $request->length;
+                    for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($projectSiteData); $iterator++, $pagination++) {
+                        $salesAmount = $this->getSalesExpenseAmount($startMonthId, $endMonthId, 'null', $projectSiteData[$pagination]['id'],'sales');
+                        $records['data'][$iterator] = [
+                            $projectName = ucwords($projectSiteData[$pagination]['name']),
+                            number_format($salesAmount['sales'], 3),
+                            number_format($salesAmount['receipt'], 3),
+                            number_format($salesAmount['outstanding'], 3),
+                            number_format($salesAmount['total_expense'], 3),
+                            number_format($salesAmount['outstanding_mobilization'], 3),
+                            number_format($salesAmount['sitewise_pNl'], 3),
+                            number_format($salesAmount['receiptwise_pNl'], 3),
+                        ];
+                    }
+                break;
+
+                case ($request['sales_month_id'] !== 'all' && $request['sales_year_id'] === 'all' && $request['sales_project_site_id'] != null) :
+                    Log::info('inside sales case 6 ');
+                    $startMonthId = $endMonthId = $month->where('id',$request['sales_month_id'])->pluck('id')->first();
+
+                    $requestedProjectSiteIds = explode(',',$request['sales_project_site_id']);
+                    $projectSiteData = $projectSite->join('projects', 'projects.id', '=', 'project_sites.project_id')
+                        ->whereIn('project_sites.id',$requestedProjectSiteIds)
+                        ->orderBy('projects.name')->select('project_sites.id', 'projects.name')->get();
+                    $iTotalRecords = count($projectSiteData);
+                    $records = array();
+                    $records['data'] = array();
+                    $end = $request->length < 0 ? count($projectSiteData) : $request->length;
+                    for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($projectSiteData); $iterator++, $pagination++) {
+                        $salesAmount = $this->getSalesExpenseAmount($startMonthId, $endMonthId, 'null', $projectSiteData[$pagination]['id'],'sales');
+                        $records['data'][$iterator] = [
+                            $projectName = ucwords($projectSiteData[$pagination]['name']),
+                            number_format($salesAmount['sales'], 3),
+                            number_format($salesAmount['receipt'], 3),
+                            number_format($salesAmount['outstanding'], 3),
+                            number_format($salesAmount['total_expense'], 3),
+                            number_format($salesAmount['outstanding_mobilization'], 3),
+                            number_format($salesAmount['sitewise_pNl'], 3),
+                            number_format($salesAmount['receiptwise_pNl'], 3),
+                        ];
+                    }
+                break;
+
+                case ($request['sales_month_id'] !== 'all' && $request['sales_year_id'] !== 'all' && $request['sales_project_site_id'] != null) :
+                    Log::info('inside sales case 7 ');
+                    $startMonthId = $endMonthId = $month->where('id',$request['sales_month_id'])->pluck('id')->first();
+
+                    $requestedProjectSiteIds = explode(',',$request['sales_project_site_id']);
+                    $projectSiteData = $projectSite->join('projects', 'projects.id', '=', 'project_sites.project_id')
+                        ->whereIn('project_sites.id',$requestedProjectSiteIds)
+                        ->orderBy('projects.name')->select('project_sites.id', 'projects.name')->get();
+                    $iTotalRecords = count($projectSiteData);
+                    $records = array();
+                    $records['data'] = array();
+                    $end = $request->length < 0 ? count($projectSiteData) : $request->length;
+                    for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($projectSiteData); $iterator++, $pagination++) {
+                        $salesAmount = $this->getSalesExpenseAmount($startMonthId, $endMonthId, $request['sales_year_id'], $projectSiteData[$pagination]['id'],'sales');
+                        $records['data'][$iterator] = [
+                            $projectName = ucwords($projectSiteData[$pagination]['name']),
+                            number_format($salesAmount['sales'], 3),
+                            number_format($salesAmount['receipt'], 3),
+                            number_format($salesAmount['outstanding'], 3),
+                            number_format($salesAmount['total_expense'], 3),
+                            number_format($salesAmount['outstanding_mobilization'], 3),
+                            number_format($salesAmount['sitewise_pNl'], 3),
+                            number_format($salesAmount['receiptwise_pNl'], 3),
+                        ];
+                    }
+                break;
+
+                case ($request['sales_month_id'] !== 'all' && $request['sales_year_id'] !== 'all' && $request['sales_project_site_id'] == null) :
+                    Log::info('inside sales case 8');
+                    $startMonthId = $endMonthId = $month->where('id',$request['sales_month_id'])->pluck('id')->first();
+
+                    $projectSiteData = $projectSite->join('projects', 'projects.id', '=', 'project_sites.project_id')
+                        ->orderBy('projects.name')->select('project_sites.id', 'projects.name')->get();
+                    $iTotalRecords = count($projectSiteData);
+                    $records = array();
+                    $records['data'] = array();
+                    $end = $request->length < 0 ? count($projectSiteData) : $request->length;
+                    for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($projectSiteData); $iterator++, $pagination++) {
+                        $salesAmount = $this->getSalesExpenseAmount($startMonthId, $endMonthId, $request['sales_year_id'], $projectSiteData[$pagination]['id'],'sales');
+                        $records['data'][$iterator] = [
+                            $projectName = ucwords($projectSiteData[$pagination]['name']),
+                            number_format($salesAmount['sales'], 3),
+                            number_format($salesAmount['receipt'], 3),
+                            number_format($salesAmount['outstanding'], 3),
+                            number_format($salesAmount['total_expense'], 3),
+                            number_format($salesAmount['outstanding_mobilization'], 3),
+                            number_format($salesAmount['sitewise_pNl'], 3),
+                            number_format($salesAmount['receiptwise_pNl'], 3),
+                        ];
+                    }
+                break;
+
             }
             $records["draw"] = intval($request->draw);
             $records["recordsTotal"] = $iTotalRecords;
@@ -2328,13 +2591,233 @@ class ReportManagementController extends Controller{
     public function getExpensesListing(Request $request){
         try{
             $projectSite = new ProjectSite();
-            $projectSiteData = $projectSite->join('projects','projects.id','=','project_sites.project_id')
-                ->where('projects.name','!=','25 East')->orderBy('projects.name')->select('project_sites.id','projects.name')->get();
-            $iTotalRecords = count($projectSiteData);
-            $records = array();
-            $records['data'] = array();
-            $end = $request->length < 0 ? count($projectSiteData) : $request->length;
-            for($iterator = 0 , $pagination = $request->start ; $iterator < $end && $pagination < count($projectSiteData) ; $iterator++ , $pagination++){
+            $iTotalRecords = 0;
+            if(!(array_key_exists('expense_month_id',$request->all()))){
+                $request['expense_month_id'] = 'all'; $request['expense_year_id'] = 'all'; $request['expense_project_site_id'] = null;
+            }
+            $month = new Month();
+            $januaryMonthId = $month->where('slug','january')->pluck('id')->first();
+            $decemberMonthId = $month->where('slug','december')->pluck('id')->first();
+            switch(true) {
+                case (($request['expense_month_id'] === 'all' && $request['expense_year_id'] === 'all' && $request['expense_project_site_id'] == null)) :
+                    Log::info('inside expense case 1');
+                    $projectSiteData = $projectSite->join('projects', 'projects.id', '=', 'project_sites.project_id')
+                        ->orderBy('projects.name')->select('project_sites.id', 'projects.name')->get();
+                    $iTotalRecords = count($projectSiteData);
+                    $records = array();
+                    $records['data'] = array();
+                    $end = $request->length < 0 ? count($projectSiteData) : $request->length;
+                    for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($projectSiteData); $iterator++, $pagination++) {
+                        $expenseAmount = $this->getSalesExpenseAmount('null', 'null', 'null', $projectSiteData[$pagination]['id'],'expense');
+                        $records['data'][$iterator] = [
+                            $projectName = ucwords($projectSiteData[$pagination]['name']),
+                            number_format($expenseAmount['purchase'],3),
+                            number_format($expenseAmount['salary'],3),
+                            number_format($expenseAmount['asset_rent'],3),
+                            number_format($expenseAmount['asset_opening_balance'],3),
+                            number_format($expenseAmount['subcontractor'],3),
+                            number_format($expenseAmount['misc_purchase'],3),
+                            number_format($expenseAmount['indirect_expense'],3),
+                            number_format($expenseAmount['opening_balance'],3),
+                            number_format($expenseAmount['total_expense'],3),
+                        ];
+                    }
+                    break;
+
+                case ($request['expense_month_id'] === 'all' && $request['expense_year_id'] === 'all' && $request['expense_project_site_id'] != null) :
+                    Log::info('inside expense case 2');
+                    $requestedProjectSiteIds = explode(',',$request['expense_project_site_id']);
+                    $projectSiteData = $projectSite->join('projects', 'projects.id', '=', 'project_sites.project_id')
+                        ->whereIn('project_sites.id',$requestedProjectSiteIds)
+                        ->orderBy('projects.name')->select('project_sites.id', 'projects.name')->get();
+                    $iTotalRecords = count($projectSiteData);
+                    $records = array();
+                    $records['data'] = array();
+                    $end = $request->length < 0 ? count($projectSiteData) : $request->length;
+                    for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($projectSiteData); $iterator++, $pagination++) {
+                        $expenseAmount = $this->getSalesExpenseAmount('null', 'null', 'null', $projectSiteData[$pagination]['id'],'expense');
+                        $records['data'][$iterator] = [
+                            $projectName = ucwords($projectSiteData[$pagination]['name']),
+                            number_format($expenseAmount['purchase'],3),
+                            number_format($expenseAmount['salary'],3),
+                            number_format($expenseAmount['asset_rent'],3),
+                            number_format($expenseAmount['asset_opening_balance'],3),
+                            number_format($expenseAmount['subcontractor'],3),
+                            number_format($expenseAmount['misc_purchase'],3),
+                            number_format($expenseAmount['indirect_expense'],3),
+                            number_format($expenseAmount['opening_balance'],3),
+                            number_format($expenseAmount['total_expense'],3),
+                        ];
+                    }
+                    break;
+
+                case ($request['expense_month_id'] === 'all' && $request['expense_year_id'] !== 'all' && $request['expense_project_site_id'] != null) :
+                    Log::info('inside expense case 3');
+                    $requestedProjectSiteIds = explode(',',$request['expense_project_site_id']);
+                    $projectSiteData = $projectSite->join('projects', 'projects.id', '=', 'project_sites.project_id')
+                        ->whereIn('project_sites.id',$requestedProjectSiteIds)
+                        ->orderBy('projects.name')->select('project_sites.id', 'projects.name')->get();
+                    $iTotalRecords = count($projectSiteData);
+                    $records = array();
+                    $records['data'] = array();
+                    $end = $request->length < 0 ? count($projectSiteData) : $request->length;
+                    for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($projectSiteData); $iterator++, $pagination++) {
+                        $expenseAmount = $this->getSalesExpenseAmount($januaryMonthId, $decemberMonthId, $request['expense_year_id'], $projectSiteData[$pagination]['id'],'expense');
+                        $records['data'][$iterator] = [
+                            $projectName = ucwords($projectSiteData[$pagination]['name']),
+                            number_format($expenseAmount['purchase'],3),
+                            number_format($expenseAmount['salary'],3),
+                            number_format($expenseAmount['asset_rent'],3),
+                            number_format($expenseAmount['asset_opening_balance'],3),
+                            number_format($expenseAmount['subcontractor'],3),
+                            number_format($expenseAmount['misc_purchase'],3),
+                            number_format($expenseAmount['indirect_expense'],3),
+                            number_format($expenseAmount['opening_balance'],3),
+                            number_format($expenseAmount['total_expense'],3),
+                        ];
+                    }
+                    break;
+
+                case ($request['expense_month_id'] === 'all' && $request['expense_year_id'] !== 'all' && $request['expense_project_site_id'] == null) :
+                    Log::info('inside expense case 4');
+                    $projectSiteData = $projectSite->join('projects', 'projects.id', '=', 'project_sites.project_id')
+                        ->orderBy('projects.name')->select('project_sites.id', 'projects.name')->get();
+                    $iTotalRecords = count($projectSiteData);
+                    $records = array();
+                    $records['data'] = array();
+                    $end = $request->length < 0 ? count($projectSiteData) : $request->length;
+                    for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($projectSiteData); $iterator++, $pagination++) {
+                        $expenseAmount = $this->getSalesExpenseAmount($januaryMonthId, $decemberMonthId, $request['expense_year_id'], $projectSiteData[$pagination]['id'],'expense');
+                        $records['data'][$iterator] = [
+                            $projectName = ucwords($projectSiteData[$pagination]['name']),
+                            number_format($expenseAmount['purchase'],3),
+                            number_format($expenseAmount['salary'],3),
+                            number_format($expenseAmount['asset_rent'],3),
+                            number_format($expenseAmount['asset_opening_balance'],3),
+                            number_format($expenseAmount['subcontractor'],3),
+                            number_format($expenseAmount['misc_purchase'],3),
+                            number_format($expenseAmount['indirect_expense'],3),
+                            number_format($expenseAmount['opening_balance'],3),
+                            number_format($expenseAmount['total_expense'],3),
+                        ];
+                    }
+                    break;
+
+                case ($request['expense_month_id'] !== 'all' && $request['expense_year_id'] === 'all' && $request['expense_project_site_id'] == null) :
+                    Log::info('inside expense case 5');
+                        $startMonthId = $endMonthId = $month->where('id',$request['expense_month_id'])->pluck('id')->first();
+
+                    $projectSiteData = $projectSite->join('projects', 'projects.id', '=', 'project_sites.project_id')
+                        ->orderBy('projects.name')->select('project_sites.id', 'projects.name')->get();
+                    $iTotalRecords = count($projectSiteData);
+                    $records = array();
+                    $records['data'] = array();
+                    $end = $request->length < 0 ? count($projectSiteData) : $request->length;
+                    for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($projectSiteData); $iterator++, $pagination++) {
+                        $expenseAmount = $this->getSalesExpenseAmount($startMonthId, $endMonthId, 'null', $projectSiteData[$pagination]['id'],'expense');
+                        $records['data'][$iterator] = [
+                            $projectName = ucwords($projectSiteData[$pagination]['name']),
+                            number_format($expenseAmount['purchase'],3),
+                            number_format($expenseAmount['salary'],3),
+                            number_format($expenseAmount['asset_rent'],3),
+                            number_format($expenseAmount['asset_opening_balance'],3),
+                            number_format($expenseAmount['subcontractor'],3),
+                            number_format($expenseAmount['misc_purchase'],3),
+                            number_format($expenseAmount['indirect_expense'],3),
+                            number_format($expenseAmount['opening_balance'],3),
+                            number_format($expenseAmount['total_expense'],3),
+                        ];
+                    }
+                    break;
+
+                case ($request['expense_month_id'] !== 'all' && $request['expense_year_id'] === 'all' && $request['expense_project_site_id'] != null) :
+                    Log::info('inside expense case 6');
+                        $startMonthId = $endMonthId = $month->where('id',$request['expense_month_id'])->pluck('id')->first();
+
+                    $requestedProjectSiteIds = explode(',',$request['expense_project_site_id']);
+                    $projectSiteData = $projectSite->join('projects', 'projects.id', '=', 'project_sites.project_id')
+                        ->whereIn('project_sites.id',$requestedProjectSiteIds)
+                        ->orderBy('projects.name')->select('project_sites.id', 'projects.name')->get();
+                    $iTotalRecords = count($projectSiteData);
+                    $records = array();
+                    $records['data'] = array();
+                    $end = $request->length < 0 ? count($projectSiteData) : $request->length;
+                    for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($projectSiteData); $iterator++, $pagination++) {
+                        $expenseAmount = $this->getSalesExpenseAmount($startMonthId, $endMonthId, 'null', $projectSiteData[$pagination]['id'],'expense');
+                        $records['data'][$iterator] = [
+                            $projectName = ucwords($projectSiteData[$pagination]['name']),
+                            number_format($expenseAmount['purchase'],3),
+                            number_format($expenseAmount['salary'],3),
+                            number_format($expenseAmount['asset_rent'],3),
+                            number_format($expenseAmount['asset_opening_balance'],3),
+                            number_format($expenseAmount['subcontractor'],3),
+                            number_format($expenseAmount['misc_purchase'],3),
+                            number_format($expenseAmount['indirect_expense'],3),
+                            number_format($expenseAmount['opening_balance'],3),
+                            number_format($expenseAmount['total_expense'],3),
+                        ];
+                    }
+                    break;
+
+                case ($request['expense_month_id'] !== 'all' && $request['expense_year_id'] !== 'all' && $request['expense_project_site_id'] != null) :
+                    Log::info('inside expense case 7');
+                        $startMonthId = $endMonthId = $month->where('id',$request['expense_month_id'])->pluck('id')->first();
+
+                    $requestedProjectSiteIds = explode(',',$request['expense_project_site_id']);
+                    $projectSiteData = $projectSite->join('projects', 'projects.id', '=', 'project_sites.project_id')
+                        ->whereIn('project_sites.id',$requestedProjectSiteIds)
+                        ->orderBy('projects.name')->select('project_sites.id', 'projects.name')->get();
+                    $iTotalRecords = count($projectSiteData);
+                    $records = array();
+                    $records['data'] = array();
+                    $end = $request->length < 0 ? count($projectSiteData) : $request->length;
+                    for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($projectSiteData); $iterator++, $pagination++) {
+                        $expenseAmount = $this->getSalesExpenseAmount($startMonthId, $endMonthId, $request['expense_year_id'], $projectSiteData[$pagination]['id'],'expense');
+                        $records['data'][$iterator] = [
+                            $projectName = ucwords($projectSiteData[$pagination]['name']),
+                            number_format($expenseAmount['purchase'],3),
+                            number_format($expenseAmount['salary'],3),
+                            number_format($expenseAmount['asset_rent'],3),
+                            number_format($expenseAmount['asset_opening_balance'],3),
+                            number_format($expenseAmount['subcontractor'],3),
+                            number_format($expenseAmount['misc_purchase'],3),
+                            number_format($expenseAmount['indirect_expense'],3),
+                            number_format($expenseAmount['opening_balance'],3),
+                            number_format($expenseAmount['total_expense'],3),
+                        ];
+                    }
+                    break;
+
+                case ($request['expense_month_id'] !== 'all' && $request['expense_year_id'] !== 'all' && $request['expense_project_site_id'] == null) :
+                    Log::info('inside expense case 8');
+                        $startMonthId = $endMonthId = $month->where('id',$request['expense_month_id'])->pluck('id')->first();
+
+                    $projectSiteData = $projectSite->join('projects', 'projects.id', '=', 'project_sites.project_id')
+                        ->orderBy('projects.name')->select('project_sites.id', 'projects.name')->get();
+                    $iTotalRecords = count($projectSiteData);
+                    $records = array();
+                    $records['data'] = array();
+                    $end = $request->length < 0 ? count($projectSiteData) : $request->length;
+                    for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($projectSiteData); $iterator++, $pagination++) {
+                        $expenseAmount = $this->getSalesExpenseAmount($startMonthId, $endMonthId, $request['expense_year_id'], $projectSiteData[$pagination]['id'],'expense');
+                        $records['data'][$iterator] = [
+                            $projectName = ucwords($projectSiteData[$pagination]['name']),
+                            number_format($expenseAmount['purchase'],3),
+                            number_format($expenseAmount['salary'],3),
+                            number_format($expenseAmount['asset_rent'],3),
+                            number_format($expenseAmount['asset_opening_balance'],3),
+                            number_format($expenseAmount['subcontractor'],3),
+                            number_format($expenseAmount['misc_purchase'],3),
+                            number_format($expenseAmount['indirect_expense'],3),
+                            number_format($expenseAmount['opening_balance'],3),
+                            number_format($expenseAmount['total_expense'],3),
+                        ];
+                    }
+                    break;
+
+            }
+
+            /*for($iterator = 0 , $pagination = $request->start ; $iterator < $end && $pagination < count($projectSiteData) ; $iterator++ , $pagination++){
                 $expenseAmount = $this->getSalesExpenseAmount('null','null','null',$projectSiteData[$pagination]['id']);
                 $records['data'][$iterator] = [
                     $projectName = ucwords($projectSiteData[$pagination]['name']),
@@ -2348,7 +2831,7 @@ class ReportManagementController extends Controller{
                     number_format($expenseAmount['opening_balance'],3),
                     number_format($expenseAmount['total_expense'],3),
                 ];
-            }
+            }*/
             $records["draw"] = intval($request->draw);
             $records["recordsTotal"] = $iTotalRecords;
             $records["recordsFiltered"] = $iTotalRecords;
@@ -2365,10 +2848,11 @@ class ReportManagementController extends Controller{
         return response()->json($records,200);
     }
 
-    public function getSalesExpenseAmount($startMonthId,$endMonthId,$yearId,$projectSiteId){
+    public function getSalesExpenseAmount($startMonthId,$endMonthId,$yearId,$projectSiteId,$slug){
         try{
             $salesData = array();
             $month = new Month();
+            $year = new Year();
             $quotation = new Quotation();
             $bill = new Bill();
             $billStatus = new BillStatus();
@@ -2379,27 +2863,28 @@ class ReportManagementController extends Controller{
             $subcontractorBillStatus = new SubcontractorBillStatus();
             $assetMaintenanceBillPayment = new AssetMaintenanceBillPayment();
             $purchaseOrderBill = new PurchaseOrderBill();
+            $inventoryComponentTransfer = new InventoryComponentTransfers();
+            $inventoryTransferTypes = new InventoryTransferTypes();
+            $inventoryComponentTransferStatus = new InventoryComponentTransferStatus();
+            $siteTransferBill = new SiteTransferBill();
             $purchaseOrderBillMonthlyExpense = new PurchaseOrderBillMonthlyExpense();
             $peticashSalaryTransactionMonthlyExpense = new PeticashSalaryTransactionMonthlyExpense();
             $peticashPurchaseTransactionMonthlyExpense = new PeticashPurchaseTransactionMonthlyExpense();
             $projectSiteAdvancePayment = new ProjectSiteAdvancePayment();
-
+            $outstandingMobilization = $projectSiteAdvancePayment->where('project_site_id',$projectSiteId)->sum('amount');
             $approvedBillStatusId = $billStatus->where('slug','approved')->pluck('id')->first();
-
+            $sales = $receipt = $total = $totalRetention = $totalHold = $debitAmount = $tdsAmount = $subcontractorTotal =
+            $otherRecoveryAmount = $mobilization = $purchaseAmount = $salaryAmount = $peticashPurchaseAmount =
+            $salesTaxAmount = $purchaseOrderGst = $assetMaintenanceGst = $subcontractorGst = $inventorySiteTransfersInGst =
+            $inventorySiteTransfersOutGst = $siteTransferBillGst = 0;
+            $assetRent = 0;
+            $quotation = $quotation->where('project_site_id',$projectSiteId)->first();
+            $subcontractorApprovedBillStatusId = $subcontractorBillStatus->where('slug','approved')->pluck('id')->first();
+            $inventoryComponentSiteTransferIds = $inventoryTransferTypes->where('slug','site')->get();
+            $approvedComponentTransferStatusId = $inventoryComponentTransferStatus->where('slug','approved')->pluck('id');
             switch(true){
-                case true :
-                    $quotation = $quotation->where('project_site_id',$projectSiteId)->first();
-                    $subcontractorApprovedBillStatusId = $subcontractorBillStatus->where('slug','approved')->pluck('id')->first();
-                    $startMonth = $month->where('slug','january')->first();
-                    $endMonth = $month->where('slug','december')->first();
-                    $totalMonths = $month->whereBetween('id',[$startMonth['id'],$endMonth['id']])
-                                    ->select('id','name','slug')->get();
-                    $sales = $receipt = $total = $totalRetention = $totalHold = $debitAmount = $tdsAmount = $subcontractorTotal =
-                    $otherRecoveryAmount = $mobilization = $purchaseAmount = $salaryAmount = $peticashPurchaseAmount =
-                    $salesTaxAmount = $purchaseOrderGst = $assetMaintenanceGst = $subcontractorGst = 0;
-                    $assetRent = 0;
-                    $outstandingMobilization = $projectSiteAdvancePayment->where('project_site_id',$projectSiteId)
-                        ->sum('amount');
+                case ($yearId == 'null' && $startMonthId == 'null')  :
+                    Log::info('Inside CASE 1');
                     $billIds = $bill->where('quotation_id',$quotation['id'])
                             ->where('bill_status_id',$approvedBillStatusId)->orderBy('id')
                             ->pluck('id');
@@ -2449,10 +2934,10 @@ class ReportManagementController extends Controller{
                             $subTotal = $subcontractorBillData['qty'] * $rate;
                             $taxTotal = 0;
                             foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
-                                $taxTotal = round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
-                                $subcontractorGst += $taxTotal;
+                                $taxTotal += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
+                                $subcontractorGst += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
                             }
-                            $subcontractorTotal += $subTotal + $taxTotal;
+                            $subcontractorTotal += round(($subTotal + $taxTotal),3);
                         }
                     }
 
@@ -2470,32 +2955,292 @@ class ReportManagementController extends Controller{
                         ->join('vendors','vendors.id','=','purchase_orders.vendor_id')
                         ->where('purchase_requests.project_site_id',$projectSiteId)
                         ->sum(DB::raw('purchase_order_bills.transportation_tax_amount + purchase_order_bills.tax_amount + purchase_order_bills.extra_tax_amount')),3);
-                    $purchaseTaxAmount = $assetMaintenanceGst + $purchaseOrderGst + $subcontractorGst;
-                    $indirectExpenses = $salesTaxAmount - $purchaseTaxAmount;
-                    $openingExpenses = $quotation['opening_expenses'];
 
-                    $outstanding = $sales - $debitAmount - $tdsAmount - $totalRetention - $otherRecoveryAmount - $totalHold - $receipt - $mobilization;
-                    $totalExpense = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount + $indirectExpenses + $subcontractorTotal + $openingExpenses;
-                    $salesPnL = $sales - $debitAmount - $tdsAmount - $totalHold - $otherRecoveryAmount;
-                    $salesWisePnL = $salesPnL - $totalExpense;
-                    $receiptWisePnL = $receipt - $totalExpense;
-                    $salesData['sales'] = $salesPnL;
-                    $salesData['receipt'] = $receipt;
-                    $salesData['outstanding'] = $outstanding;
-                    $salesData['total_expense'] = $totalExpense;
-                    $salesData['outstanding_mobilization'] = $outstandingMobilization - $mobilization;
-                    $salesData['sitewise_pNl'] = $salesWisePnL;
-                    $salesData['receiptwise_pNl'] = $receiptWisePnL;
-                    $salesData['purchase'] = $purchaseAmount;
-                    $salesData['salary'] = $salaryAmount;
-                    $salesData['asset_rent'] = $assetRent;
-                    $salesData['asset_opening_balance'] = $assetRent;
-                    $salesData['subcontractor'] = $subcontractorTotal;
-                    $salesData['misc_purchase'] = $peticashPurchaseAmount;
-                    $salesData['indirect_expense'] = $indirectExpenses;
-                    $salesData['opening_balance'] = $openingExpenses;
+                    $inventorySiteTransfersInGst += $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
+                        ,'=','inventory_component_transfers.inventory_component_id')
+                        ->where('inventory_components.project_site_id',$projectSiteId)
+                        ->where('inventory_components.is_material',true)
+                        ->where('inventory_component_transfers.transfer_type_id',
+                            $inventoryComponentSiteTransferIds->where('type','IN')->pluck('id')->first())
+                        ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
+                        ->sum(DB::raw('inventory_component_transfers.cgst_amount + inventory_component_transfers.sgst_amount + inventory_component_transfers.igst_amount'));
+
+                    $inventorySiteTransfersOutGst += $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
+                        ,'=','inventory_component_transfers.inventory_component_id')
+                        ->where('inventory_components.project_site_id',$projectSiteId)
+                        ->where('inventory_components.is_material',true)
+                        ->where('inventory_component_transfers.transfer_type_id',
+                            $inventoryComponentSiteTransferIds->where('type','OUT')->pluck('id')->first())
+                        ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
+                        ->sum(DB::raw('inventory_component_transfers.cgst_amount + inventory_component_transfers.sgst_amount + inventory_component_transfers.igst_amount'));
+
+                    $siteTransferBillGst += $siteTransferBill->join('inventory_component_transfers','inventory_component_transfers.id',
+                        '=','site_transfer_bills.inventory_component_transfer_id')
+                        ->join('inventory_components','inventory_components.id'
+                            ,'=','inventory_component_transfers.inventory_component_id')
+                        ->where('inventory_components.project_site_id',$projectSiteId)
+                        ->sum(DB::raw('site_transfer_bills.tax_amount + site_transfer_bills.extra_amount_cgst_amount + site_transfer_bills.extra_amount_sgst_amount + site_transfer_bills.extra_amount_igst_amount'));
+                    break;
+
+                case ($yearId === 'null') :
+                    Log::info('Inside CASE 2');
+                    $totalMonths = $month->whereBetween('id',[$startMonthId,$endMonthId])
+                        ->select('id','name','slug')->get();
+
+                    foreach ($totalMonths as $month){
+                        $billIds = $bill->where('quotation_id',$quotation['id'])
+                            ->where('bill_status_id',$approvedBillStatusId)->orderBy('id')
+                            ->whereMonth('date',$month['id'])
+                            ->pluck('id');
+                        $billTransactionData = $billTransaction->whereIn('bill_id',$billIds)->get();
+                        $billReconcileTransactionData = $billReconcileTransaction->whereIn('bill_id',$billIds)->get();
+                        foreach ($billIds as $billId) {
+                            $billData = $this->getBillData($billId);
+                            $salesTaxAmount += $billData['tax_amount'];
+                            $sales += $billData['total_amount_with_tax'];
+                        }
+                        $transactionTotal = $billTransactionData->sum('total');
+                        $mobilization += $billTransactionData->where('paid_from_advanced',true)->sum('amount');
+                        $receipt += ($transactionTotal != null) ? $transactionTotal : 0;
+                        $retentionAmount = $billTransactionData->sum('retention_amount');
+                        $reconciledRetentionAmount = $billReconcileTransactionData->where('transaction_slug','retention')->sum('amount');
+                        $totalRetention += $retentionAmount - $reconciledRetentionAmount;
+                        $holdAmount = $billTransactionData->sum('hold');
+                        $reconciledHoldAmount = $billReconcileTransactionData->where('transaction_slug','hold')->sum('amount');
+                        $totalHold += $holdAmount - $reconciledHoldAmount;
+                        $debitAmount += $billTransactionData->sum('debit');
+                        $tdsAmount += $billTransactionData->sum('tds_amount');
+                        $otherRecoveryAmount += $billTransactionData->sum('other_recovery_value');
+
+                        $purchaseAmount += $purchaseOrderBillMonthlyExpense->where('month_id',$month['id'])
+                            ->where('project_site_id',$projectSiteId)->sum('total_expense');
+                        $salaryAmount += $peticashSalaryTransactionMonthlyExpense->where('month_id',$month['id'])
+                            ->where('project_site_id',$projectSiteId)->sum('total_expense');
+                        $peticashPurchaseAmount += $peticashPurchaseTransactionMonthlyExpense->where('month_id',$month['id'])
+                            ->where('project_site_id',$projectSiteId)->sum('total_expense');
+
+                        $subcontractorBillIds = $subcontractorBill->join('subcontractor_structure','subcontractor_bills.sc_structure_id',
+                            '=','subcontractor_structure.id')
+                            ->where('subcontractor_structure.project_site_id',$projectSiteId)
+                            ->where('subcontractor_bills.subcontractor_bill_status_id',$subcontractorApprovedBillStatusId)
+                            ->whereMonth('subcontractor_bills.created_at',$month['id'])
+                            ->pluck('subcontractor_bills.id');
+
+                        if(count($subcontractorBillIds) > 0){
+                            foreach ($subcontractorBillIds as $subcontractorBillId){
+                                $subcontractorBillData = $subcontractorBill->where('id',$subcontractorBillId)->first();
+                                $subcontractorStructureData = $subcontractorStructure->where('id',$subcontractorBillData['sc_structure_id'])->first();
+                                if($subcontractorStructureData->contractType->slug == 'sqft'){
+                                    $rate = $subcontractorStructureData['rate'];
+                                }else{
+                                    $rate = $subcontractorStructureData['rate'] * $subcontractorStructureData['total_work_area'];
+                                }
+                                $subcontractorBillTaxes = $subcontractorBillData->subcontractorBillTaxes;
+                                $subTotal = $subcontractorBillData['qty'] * $rate;
+                                $taxTotal = 0;
+                                foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
+                                    $taxTotal += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
+                                    $subcontractorGst += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
+                                }
+                                $subcontractorTotal += round(($subTotal + $taxTotal),3);
+                            }
+                        }
+
+                        $assetMaintenanceGst += $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
+                            ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
+                            ->join('assets','assets.id','=','asset_maintenance.asset_id')
+                            ->where('asset_maintenance.project_site_id',$projectSiteId)
+                            ->whereMonth('asset_maintenance_bill_payments.created_at',$month['id'])
+                            ->sum(DB::raw('asset_maintenance_bills.cgst_amount +asset_maintenance_bills.sgst_amount +asset_maintenance_bills.igst_amount'));
+
+                        $purchaseOrderGst += round($purchaseOrderBill
+                            ->join('purchase_orders','purchase_orders.id','='
+                                ,'purchase_order_bills.purchase_order_id')
+                            ->join('purchase_requests','purchase_requests.id','='
+                                ,'purchase_orders.purchase_request_id')
+                            ->join('vendors','vendors.id','=','purchase_orders.vendor_id')
+                            ->where('purchase_requests.project_site_id',$projectSiteId)
+                            ->whereMonth('purchase_order_bills.created_at',$month['id'])
+                            ->sum(DB::raw('purchase_order_bills.transportation_tax_amount + purchase_order_bills.tax_amount + purchase_order_bills.extra_tax_amount')),3);
+
+                        $inventorySiteTransfersInGst += $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
+                            ,'=','inventory_component_transfers.inventory_component_id')
+                            ->where('inventory_components.project_site_id',$projectSiteId)
+                            ->where('inventory_components.is_material',true)
+                            ->where('inventory_component_transfers.transfer_type_id',
+                                $inventoryComponentSiteTransferIds->where('type','IN')->pluck('id')->first())
+                            ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
+                            ->whereMonth('inventory_component_transfers.created_at',$month['id'])
+                            ->sum(DB::raw('inventory_component_transfers.cgst_amount + inventory_component_transfers.sgst_amount + inventory_component_transfers.igst_amount'));
+
+                        $inventorySiteTransfersOutGst += $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
+                            ,'=','inventory_component_transfers.inventory_component_id')
+                            ->where('inventory_components.project_site_id',$projectSiteId)
+                            ->where('inventory_components.is_material',true)
+                            ->where('inventory_component_transfers.transfer_type_id',
+                                $inventoryComponentSiteTransferIds->where('type','OUT')->pluck('id')->first())
+                            ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
+                            ->whereMonth('inventory_component_transfers.created_at',$month['id'])
+                            ->sum(DB::raw('inventory_component_transfers.cgst_amount + inventory_component_transfers.sgst_amount + inventory_component_transfers.igst_amount'));
+
+                        $siteTransferBillGst += $siteTransferBill->join('inventory_component_transfers','inventory_component_transfers.id',
+                            '=','site_transfer_bills.inventory_component_transfer_id')
+                            ->join('inventory_components','inventory_components.id'
+                                ,'=','inventory_component_transfers.inventory_component_id')
+                            ->where('inventory_components.project_site_id',$projectSiteId)
+                            ->whereMonth('site_transfer_bills.created_at',$month['id'])
+                            ->sum(DB::raw('site_transfer_bills.tax_amount + site_transfer_bills.extra_amount_cgst_amount + site_transfer_bills.extra_amount_sgst_amount + site_transfer_bills.extra_amount_igst_amount'));
+                    }
+
+                    break;
+
+                case ($yearId != 'null') :
+                    Log::info('Inside CASE 3');
+                    $totalMonths = $month->whereBetween('id',[$startMonthId,$endMonthId])
+                        ->select('id','name','slug')->get();
+                    $selectedYear = $year->where('id',$yearId)->first();
+
+                    foreach ($totalMonths as $month){
+                        $billIds = $bill->where('quotation_id',$quotation['id'])
+                            ->where('bill_status_id',$approvedBillStatusId)->orderBy('id')
+                            ->whereMonth('date',$month['id'])
+                            ->whereYear('date',$selectedYear['slug'])
+                            ->pluck('id');
+                        $billTransactionData = $billTransaction->whereIn('bill_id',$billIds)->get();
+                        $billReconcileTransactionData = $billReconcileTransaction->whereIn('bill_id',$billIds)->get();
+                        foreach ($billIds as $billId) {
+                            $billData = $this->getBillData($billId);
+                            $salesTaxAmount += $billData['tax_amount'];
+                            $sales += $billData['total_amount_with_tax'];
+                        }
+                        $transactionTotal = $billTransactionData->sum('total');
+                        $mobilization += $billTransactionData->where('paid_from_advanced',true)->sum('amount');
+                        $receipt += ($transactionTotal != null) ? $transactionTotal : 0;
+                        $retentionAmount = $billTransactionData->sum('retention_amount');
+                        $reconciledRetentionAmount = $billReconcileTransactionData->where('transaction_slug','retention')->sum('amount');
+                        $totalRetention += $retentionAmount - $reconciledRetentionAmount;
+                        $holdAmount = $billTransactionData->sum('hold');
+                        $reconciledHoldAmount = $billReconcileTransactionData->where('transaction_slug','hold')->sum('amount');
+                        $totalHold += $holdAmount - $reconciledHoldAmount;
+                        $debitAmount += $billTransactionData->sum('debit');
+                        $tdsAmount += $billTransactionData->sum('tds_amount');
+                        $otherRecoveryAmount += $billTransactionData->sum('other_recovery_value');
+
+                        $purchaseAmount += $purchaseOrderBillMonthlyExpense->where('month_id',$month['id'])
+                            ->where('year_id',$selectedYear['id'])
+                            ->where('project_site_id',$projectSiteId)->sum('total_expense');
+                        $salaryAmount += $peticashSalaryTransactionMonthlyExpense->where('month_id',$month['id'])
+                            ->where('year_id',$selectedYear['id'])
+                            ->where('project_site_id',$projectSiteId)->sum('total_expense');
+                        $peticashPurchaseAmount += $peticashPurchaseTransactionMonthlyExpense->where('month_id',$month['id'])
+                            ->where('year_id',$selectedYear['id'])
+                            ->where('project_site_id',$projectSiteId)->sum('total_expense');
+
+                        $subcontractorBillIds = $subcontractorBill->join('subcontractor_structure','subcontractor_bills.sc_structure_id',
+                            '=','subcontractor_structure.id')
+                            ->where('subcontractor_structure.project_site_id',$projectSiteId)
+                            ->where('subcontractor_bills.subcontractor_bill_status_id',$subcontractorApprovedBillStatusId)
+                            ->whereMonth('subcontractor_bills.created_at',$month['id'])
+                            ->whereYear('subcontractor_bills.created_at',$selectedYear['slug'])
+                            ->pluck('subcontractor_bills.id');
+
+                        if(count($subcontractorBillIds) > 0){
+                            foreach ($subcontractorBillIds as $subcontractorBillId){
+                                $subcontractorBillData = $subcontractorBill->where('id',$subcontractorBillId)->first();
+                                $subcontractorStructureData = $subcontractorStructure->where('id',$subcontractorBillData['sc_structure_id'])->first();
+                                if($subcontractorStructureData->contractType->slug == 'sqft'){
+                                    $rate = $subcontractorStructureData['rate'];
+                                }else{
+                                    $rate = $subcontractorStructureData['rate'] * $subcontractorStructureData['total_work_area'];
+                                }
+                                $subcontractorBillTaxes = $subcontractorBillData->subcontractorBillTaxes;
+                                $subTotal = $subcontractorBillData['qty'] * $rate;
+                                $taxTotal = 0;
+                                foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
+                                    $taxTotal += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
+                                    $subcontractorGst += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
+                                }
+                                $subcontractorTotal += round(($subTotal + $taxTotal),3);
+                            }
+                        }
+
+                        $assetMaintenanceGst += $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
+                            ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
+                            ->join('assets','assets.id','=','asset_maintenance.asset_id')
+                            ->where('asset_maintenance.project_site_id',$projectSiteId)
+                            ->whereMonth('asset_maintenance_bill_payments.created_at',$month['id'])
+                            ->whereYear('asset_maintenance_bill_payments.created_at',$selectedYear['slug'])
+                            ->sum(DB::raw('asset_maintenance_bills.cgst_amount +asset_maintenance_bills.sgst_amount +asset_maintenance_bills.igst_amount'));
+
+                        $purchaseOrderGst += round($purchaseOrderBill
+                            ->join('purchase_orders','purchase_orders.id','='
+                                ,'purchase_order_bills.purchase_order_id')
+                            ->join('purchase_requests','purchase_requests.id','='
+                                ,'purchase_orders.purchase_request_id')
+                            ->join('vendors','vendors.id','=','purchase_orders.vendor_id')
+                            ->where('purchase_requests.project_site_id',$projectSiteId)
+                            ->whereMonth('purchase_order_bills.created_at',$month['id'])
+                            ->whereYear('purchase_order_bills.created_at',$selectedYear['slug'])
+                            ->sum(DB::raw('purchase_order_bills.transportation_tax_amount + purchase_order_bills.tax_amount + purchase_order_bills.extra_tax_amount')),3);
+
+                        $inventorySiteTransfersInGst += $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
+                            ,'=','inventory_component_transfers.inventory_component_id')
+                            ->where('inventory_components.project_site_id',$projectSiteId)
+                            ->where('inventory_components.is_material',true)
+                            ->where('inventory_component_transfers.transfer_type_id',
+                                $inventoryComponentSiteTransferIds->where('type','IN')->pluck('id')->first())
+                            ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
+                            ->whereMonth('inventory_component_transfers.created_at',$month['id'])
+                            ->whereYear('inventory_component_transfers.created_at',$selectedYear['slug'])
+                            ->sum(DB::raw('inventory_component_transfers.cgst_amount + inventory_component_transfers.sgst_amount + inventory_component_transfers.igst_amount'));
+
+                        $inventorySiteTransfersOutGst += $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
+                            ,'=','inventory_component_transfers.inventory_component_id')
+                            ->where('inventory_components.project_site_id',$projectSiteId)
+                            ->where('inventory_components.is_material',true)
+                            ->where('inventory_component_transfers.transfer_type_id',
+                                $inventoryComponentSiteTransferIds->where('type','OUT')->pluck('id')->first())
+                            ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
+                            ->whereMonth('inventory_component_transfers.created_at',$month['id'])
+                            ->whereYear('inventory_component_transfers.created_at',$selectedYear['slug'])
+                            ->sum(DB::raw('inventory_component_transfers.cgst_amount + inventory_component_transfers.sgst_amount + inventory_component_transfers.igst_amount'));
+
+                        $siteTransferBillGst += $siteTransferBill->join('inventory_component_transfers','inventory_component_transfers.id',
+                            '=','site_transfer_bills.inventory_component_transfer_id')
+                            ->join('inventory_components','inventory_components.id'
+                                ,'=','inventory_component_transfers.inventory_component_id')
+                            ->where('inventory_components.project_site_id',$projectSiteId)
+                            ->whereMonth('site_transfer_bills.created_at',$month['id'])
+                            ->whereYear('site_transfer_bills.created_at',$selectedYear['slug'])
+                            ->sum(DB::raw('site_transfer_bills.tax_amount + site_transfer_bills.extra_amount_cgst_amount + site_transfer_bills.extra_amount_sgst_amount + site_transfer_bills.extra_amount_igst_amount'));
+                    }
+
                     break;
             }
+            $purchaseTaxAmount = $assetMaintenanceGst + $purchaseOrderGst + $inventorySiteTransfersInGst + $siteTransferBillGst - $inventorySiteTransfersOutGst;
+            $indirectExpenses = $salesTaxAmount - $purchaseTaxAmount - $subcontractorGst;
+            $openingExpenses = $quotation['opening_expenses'];
+
+            $outstanding = $sales - $debitAmount - $tdsAmount - $totalRetention - $otherRecoveryAmount - $totalHold - $receipt - $mobilization;
+            $totalExpense = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount + $indirectExpenses + $subcontractorTotal + $openingExpenses;
+            $salesPnL = $sales - $debitAmount - $tdsAmount - $totalHold - $otherRecoveryAmount;
+            $salesWisePnL = $salesPnL - $totalExpense;
+            $receiptWisePnL = $receipt - $totalExpense;
+            $salesData['sales'] = $salesPnL;
+            $salesData['receipt'] = $receipt;
+            $salesData['outstanding'] = $outstanding;
+            $salesData['total_expense'] = $totalExpense;
+            $salesData['outstanding_mobilization'] = $outstandingMobilization - $mobilization;
+            $salesData['sitewise_pNl'] = $salesWisePnL;
+            $salesData['receiptwise_pNl'] = $receiptWisePnL;
+            $salesData['purchase'] = $purchaseAmount;
+            $salesData['salary'] = $salaryAmount;
+            $salesData['asset_rent'] = $assetRent;
+            $salesData['asset_opening_balance'] = $assetRent;
+            $salesData['subcontractor'] = $subcontractorTotal;
+            $salesData['misc_purchase'] = $peticashPurchaseAmount;
+            $salesData['indirect_expense'] = $indirectExpenses;
+            $salesData['opening_balance'] = $openingExpenses;
             return $salesData;
         }catch(\Exception $e){
             $data = [

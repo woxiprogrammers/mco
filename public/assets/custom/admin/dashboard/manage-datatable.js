@@ -18,6 +18,96 @@ var SalesListing = function () {
                 // So when dropdowns used the scrollable div should be removed.
                 //"dom": "<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'<'table-group-actions pull-right'>>r>t<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'>>",
 
+                "footerCallback": function ( row, data, start, end, display ) {
+                    var api = this.api(), data;
+
+                    // Remove the formatting to get integer data for summation
+                    var intVal = function ( i ) {
+                        return typeof i === 'string' ?
+                            i.replace(/[\$,]/g, '')*1 :
+                            typeof i === 'number' ?
+                                i : 0;
+                    };
+
+                    salesTotal = api
+                        .column( 1, { page: 'current'} )
+                        .data()
+                        .reduce( function (a, b) {
+                            return intVal(a) + intVal(b);
+                        }, 0 );
+
+                    // Update footer
+                    $( api.column( 1 ).footer() ).html(
+                        salesTotal.toFixed(3)
+                    );
+                    receiptTotal = api
+                        .column( 2, { page: 'current'} )
+                        .data()
+                        .reduce( function (a, b) {
+                            return intVal(a) + intVal(b);
+                        }, 0 );
+
+                    // Update footer
+                    $( api.column( 2 ).footer() ).html(
+                        receiptTotal.toFixed(3)
+                    );
+                    outstandingTotal = api
+                        .column( 3, { page: 'current'} )
+                        .data()
+                        .reduce( function (a, b) {
+                            return intVal(a) + intVal(b);
+                        }, 0 );
+
+                    // Update footer
+                    $( api.column( 3 ).footer() ).html(
+                        outstandingTotal.toFixed(3)
+                    );
+                    totalExpense = api
+                        .column( 4, { page: 'current'} )
+                        .data()
+                        .reduce( function (a, b) {
+                            return intVal(a) + intVal(b);
+                        }, 0 );
+
+                    // Update footer
+                    $( api.column( 4 ).footer() ).html(
+                        totalExpense.toFixed(3)
+                    );
+                    outstandingMobilization = api
+                        .column( 5, { page: 'current'} )
+                        .data()
+                        .reduce( function (a, b) {
+                            return intVal(a) + intVal(b);
+                        }, 0 );
+
+                    // Update footer
+                    $( api.column( 5 ).footer() ).html(
+                        outstandingMobilization.toFixed(3)
+                    );
+                    sitewisePnL = api
+                        .column( 6, { page: 'current'} )
+                        .data()
+                        .reduce( function (a, b) {
+                            return intVal(a) + intVal(b);
+                        }, 0 );
+
+                    // Update footer
+                    $( api.column( 6 ).footer() ).html(
+                        sitewisePnL.toFixed(3)
+                    );
+                    receiptwisePnL = api
+                        .column( 7, { page: 'current'} )
+                        .data()
+                        .reduce( function (a, b) {
+                            return intVal(a) + intVal(b);
+                        }, 0 );
+
+                    // Update footer
+                    $( api.column( 7 ).footer() ).html(
+                        receiptwisePnL.toFixed(3)
+                    );
+                },
+
                 "lengthMenu": [
                     [5, 100, 150],
                     [5, 100, 150] // change per page values here
@@ -93,6 +183,120 @@ var ExpensesListing = function () {
                 // setup uses scrollable div(table-scrollable) with overflow:auto to enable vertical scroll(see: assets/global/scripts/datatable.js).
                 // So when dropdowns used the scrollable div should be removed.
                 //"dom": "<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'<'table-group-actions pull-right'>>r>t<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'>>",
+
+                "footerCallback": function ( row, data, start, end, display ) {
+                    var api = this.api(), data;
+
+                    // Remove the formatting to get integer data for summation
+                    var intVal = function ( i ) {
+                        return typeof i === 'string' ?
+                            i.replace(/[\$,]/g, '')*1 :
+                            typeof i === 'number' ?
+                                i : 0;
+                    };
+
+                    purchaseTotal = api
+                        .column( 1, { page: 'current'} )
+                        .data()
+                        .reduce( function (a, b) {
+                            return intVal(a) + intVal(b);
+                        }, 0 );
+
+                    // Update footer
+                    $( api.column( 1 ).footer() ).html(
+                        purchaseTotal.toFixed(3)
+                    );
+                    salaryTotal = api
+                        .column( 2, { page: 'current'} )
+                        .data()
+                        .reduce( function (a, b) {
+                            return intVal(a) + intVal(b);
+                        }, 0 );
+
+                    // Update footer
+                    $( api.column( 2 ).footer() ).html(
+                        salaryTotal.toFixed(3)
+                    );
+                    assetRentTotal = api
+                        .column( 3, { page: 'current'} )
+                        .data()
+                        .reduce( function (a, b) {
+                            return intVal(a) + intVal(b);
+                        }, 0 );
+
+                    // Update footer
+                    $( api.column( 3 ).footer() ).html(
+                        assetRentTotal.toFixed(3)
+                    );
+                    assetOpeningBalance = api
+                        .column( 4, { page: 'current'} )
+                        .data()
+                        .reduce( function (a, b) {
+                            return intVal(a) + intVal(b);
+                        }, 0 );
+
+                    // Update footer
+                    $( api.column( 4 ).footer() ).html(
+                        assetOpeningBalance.toFixed(3)
+                    );
+                    subcontractorTotal = api
+                        .column( 5, { page: 'current'} )
+                        .data()
+                        .reduce( function (a, b) {
+                            return intVal(a) + intVal(b);
+                        }, 0 );
+
+                    // Update footer
+                    $( api.column( 5 ).footer() ).html(
+                        subcontractorTotal.toFixed(3)
+                    );
+                    peticashPurchaseTotal = api
+                        .column( 6, { page: 'current'} )
+                        .data()
+                        .reduce( function (a, b) {
+                            return intVal(a) + intVal(b);
+                        }, 0 );
+
+                    // Update footer
+                    $( api.column( 6 ).footer() ).html(
+                        peticashPurchaseTotal.toFixed(3)
+                    );
+                    indirectExpenseTotal = api
+                        .column( 7, { page: 'current'} )
+                        .data()
+                        .reduce( function (a, b) {
+                            return intVal(a) + intVal(b);
+                        }, 0 );
+
+                    // Update footer
+                    $( api.column( 7 ).footer() ).html(
+                        indirectExpenseTotal.toFixed(3)
+                    );
+
+                    openingBalanceTotal = api
+                        .column( 8, { page: 'current'} )
+                        .data()
+                        .reduce( function (a, b) {
+                            return intVal(a) + intVal(b);
+                        }, 0 );
+
+                    // Update footer
+                    $( api.column( 8 ).footer() ).html(
+                        openingBalanceTotal.toFixed(3)
+                    );
+
+                    totalExpense = api
+                        .column( 9, { page: 'current'} )
+                        .data()
+                        .reduce( function (a, b) {
+                            return intVal(a) + intVal(b);
+                        }, 0 );
+
+                    // Update footer
+                    $( api.column( 9 ).footer() ).html(
+                        totalExpense.toFixed(3)
+                    );
+                },
 
                 "lengthMenu": [
                     [5, 100, 150],
