@@ -119,7 +119,7 @@
                                     </fieldset>
 
                                 </div>
-                                <div class="row">
+                                {{--<div class="row">
                                     <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12" style="width: 29%">
                                         <div class="dashboard-stat2 ">
                                             <div class="display">
@@ -165,7 +165,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                </div>--}}
                                 <div class="row">
                                     @include('partials.common.messages')
                                     <div class="col-md-12">
@@ -214,6 +214,18 @@
 
 
                                                     </tbody>
+                                                    <tfoot>
+                                                    <tr >
+                                                        <th>Total Page Wise: </th>
+                                                        <th style="text-align: center"></th>
+                                                        <th style="text-align: center"></th>
+                                                        <th style="text-align: center"></th>
+                                                        <th style="text-align: center"></th>
+                                                        <th style="text-align: center"></th>
+                                                        <th style="text-align: center"></th>
+                                                        <th style="text-align: center"></th>
+                                                    </tr>
+                                                    </tfoot>
                                                 </table>
                                             </div>
                                         </div>
@@ -268,6 +280,20 @@
 
 
                                                 </tbody>
+                                                <tfoot>
+                                                    <tr>
+                                                        <th>Total Page Wise: </th>
+                                                        <th style="text-align: center"></th>
+                                                        <th style="text-align: center"></th>
+                                                        <th style="text-align: center"></th>
+                                                        <th style="text-align: center"></th>
+                                                        <th style="text-align: center"></th>
+                                                        <th style="text-align: center"></th>
+                                                        <th style="text-align: center"></th>
+                                                        <th style="text-align: center"></th>
+                                                        <th style="text-align: center"></th>
+                                                    </tr>
+                                                </tfoot>
                                             </table>
                                         </div>
                                     </div>
