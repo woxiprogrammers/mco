@@ -1806,7 +1806,6 @@ class ReportManagementController extends Controller{
                             ->whereMonth('purchase_order_bills.created_at',$month['id'])
                             ->whereYear('purchase_order_bills.created_at',$selectedYear['slug'])
                             ->sum(DB::raw('purchase_order_bills.transportation_tax_amount + purchase_order_bills.tax_amount + purchase_order_bills.extra_tax_amount')),3);
-
                         $assetMaintenanceGst = $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
                             ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
                             ->join('assets','assets.id','=','asset_maintenance.asset_id')
@@ -2037,12 +2036,11 @@ class ReportManagementController extends Controller{
                                 $taxTotal = 0;
                                 foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
                                     $taxTotal += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
-                                    $subcontractorGst = $taxTotal;
+                                    $subcontractorGst += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
                                 }
                                 $subcontractorTotal += round(($subTotal + $subcontractorGst),3);
                             }
                         }
-
                         $assetMaintenanceGst += $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
                             ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
                             ->join('assets','assets.id','=','asset_maintenance.asset_id')
@@ -2061,7 +2059,6 @@ class ReportManagementController extends Controller{
                             ->whereMonth('purchase_order_bills.created_at',$month['id'])
                             ->whereYear('purchase_order_bills.created_at',$selectedYear['slug'])
                             ->sum(DB::raw('purchase_order_bills.transportation_tax_amount + purchase_order_bills.tax_amount + purchase_order_bills.extra_tax_amount')),3);
-
                         $inventorySiteTransfersInGst += $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
                             ,'=','inventory_component_transfers.inventory_component_id')
                             ->where('inventory_components.project_site_id',$project_site_id)
@@ -2187,7 +2184,6 @@ class ReportManagementController extends Controller{
                             $row = 9;
                             $headerRow =  $row+1;
                             foreach($data as $key => $rowData){
-                                Log::info($key);
                                 $next_column = 'A';
                                 $row++;
                                 foreach($rowData as $key1 => $cellData){
@@ -2435,7 +2431,6 @@ class ReportManagementController extends Controller{
                     $records['data'] = array();
                     $end = $request->length < 0 ? count($projectSiteData) : $request->length;
                     for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($projectSiteData); $iterator++, $pagination++) {
-                        Log::info('$salesAmount');
                         $salesAmount = $this->getSalesExpenseAmount($januaryMonthId, $decemberMonthId, $request['sales_year_id'], $projectSiteData[$pagination]['id'],'sales');
                         $records['data'][$iterator] = [
                             $projectName = ucwords($projectSiteData[$pagination]['name']),
@@ -2667,7 +2662,6 @@ class ReportManagementController extends Controller{
                     $records['data'] = array();
                     $end = $request->length < 0 ? count($projectSiteData) : $request->length;
                     for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($projectSiteData); $iterator++, $pagination++) {
-                        Log::info('$expenseAmount');
                         $expenseAmount = $this->getSalesExpenseAmount($januaryMonthId, $decemberMonthId, $request['expense_year_id'], $projectSiteData[$pagination]['id'],'expense');
                         $records['data'][$iterator] = [
                             $projectName = ucwords($projectSiteData[$pagination]['name']),
@@ -2856,8 +2850,6 @@ class ReportManagementController extends Controller{
 
     public function getSalesExpenseAmount($startMonthId,$endMonthId,$yearId,$projectSiteId,$slug){
         try{
-            Log::info($yearId);
-            Log::info($slug);
             $salesData = array();
             $month = new Month();
             $year = new Year();
@@ -2943,7 +2935,7 @@ class ReportManagementController extends Controller{
                             $taxTotal = 0;
                             foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
                                 $taxTotal += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
-                                $subcontractorGst = $taxTotal;
+                                $subcontractorGst += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
                             }
                             $subcontractorTotal += round(($subTotal + $subcontractorGst),3);
                         }
@@ -3048,7 +3040,7 @@ class ReportManagementController extends Controller{
                                 $taxTotal = 0;
                                 foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
                                     $taxTotal += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
-                                    $subcontractorGst = $taxTotal;
+                                    $subcontractorGst += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
                                 }
                                 $subcontractorTotal += round(($subTotal + $subcontractorGst),3);
                             }
@@ -3166,7 +3158,7 @@ class ReportManagementController extends Controller{
                                 $taxTotal = 0;
                                 foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
                                     $taxTotal += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
-                                    $subcontractorGst = $taxTotal;
+                                    $subcontractorGst += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
                                 }
                                 $subcontractorTotal += round(($subTotal + $subcontractorGst),3);
                             }
