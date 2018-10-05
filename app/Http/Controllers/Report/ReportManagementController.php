@@ -126,6 +126,11 @@ class ReportManagementController extends Controller{
             $startLimit = 1; $endLimit = $reportLimit;
 
             switch ($request['report_name']) {
+                case 'sitewise_asset_rent_report' :
+                    $downloadButtonDetails[0]['show_button'] = true;
+                    $downloadButtonDetails[0]['year'] = $request['year_id'];
+                    break;
+
                 case 'sitewise_purchase_report' :
                     $purchaseOrderBill = new PurchaseOrderBill();
                     $inventoryComponentTransfer = new InventoryComponentTransfers();
@@ -310,6 +315,17 @@ class ReportManagementController extends Controller{
             $monthlyTotal[0]['total'] = 'Total';
 
             switch($reportType) {
+
+                case 'sitewise_asset_rent_report' :
+                    $selectedYear = $year->where('id',$firstParameter)->first();
+                    dd($request->all());
+                    $data[$row] = array(
+                        'Asset Name', 'Bill Create Date', 'Bill No', 'Paritculars', 'Basic Amount', 'Tax Amount',
+                        'Bill Amount', 'Monthly Total'
+                    );
+
+
+                    break;
 
                 case 'sitewise_purchase_report' :
                     $projectSite = $projectSiteId = new ProjectSite();

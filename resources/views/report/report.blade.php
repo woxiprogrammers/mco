@@ -52,6 +52,7 @@
                                                     </div>
                                                     <div class="col-md-4">
                                                         <select class="form-control" id="report_type" name="report_type" onchange="getDivData()">
+                                                            <option value="sitewise_asset_rent_report">Asset Rent Report</option>
                                                             <option value="sitewise_indirect_expenses_report">Indirect Expenses Report</option>
                                                             <option value="sitewise_mis_purchase_report">Mis. Purchase Report</option>
                                                             <option value="sitewise_purchase_report">Purchase Report</option>
@@ -219,6 +220,9 @@
             }else if($('#report_type').val() == 'sitewise_indirect_expenses_report' || $('#report_type').val() == 'sitewise_pNl_report'){
                 $('#bill_project_site,#subcontractor_project_site,#subcontractor,#downloadButton,#dateDiv').hide();
                 $('#project_sites,#submitButton,#month,#year').show();
+            }else if($('#report_type').val() == 'sitewise_asset_rent_report'){
+                $('#bill_project_site,#subcontractor_project_site,#subcontractor,#downloadButton,#dateDiv,#month').hide();
+                $('#project_sites,#submitButton,#year').show();
             }else{
                 $('#bill_project_site').hide();
                 $('#subcontractor_project_site').hide();
