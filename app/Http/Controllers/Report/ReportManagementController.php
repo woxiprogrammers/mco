@@ -1284,7 +1284,7 @@ class ReportManagementController extends Controller{
                     $subcontractorBillTransaction = new SubcontractorBillTransaction();
                     $subcontractorBill = new SubcontractorBill();
                     $data[$row] = array(
-                        ' Bill Created Date)', 'Bill No.', 'Basic Amount', 'GST', 'With Tax Amount'/*, 'Transaction Amount'*/, 'TDS', 'Retention',
+                        ' Bill Created Date', 'Bill No.', 'Basic Amount', 'GST', 'With Tax Amount'/*, 'Transaction Amount'*/, 'TDS', 'Retention',
                         'Hold', 'Debit', 'Other Recovery', 'Payable', 'Paid Amount', 'Total Paid', 'Remaining', 'Monthly Total'
                     );
                     $projectName = $projectSite->join('projects','projects.id','=','project_sites.project_id')
@@ -1356,7 +1356,7 @@ class ReportManagementController extends Controller{
                             foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
                                 $taxTotal += ($subcontractorBillTaxData['percentage'] * $subTotal) / 100;
                             }
-                            $finalTotal = $subTotal + $taxTotal;
+                            $finalTotal = round(($subTotal + $taxTotal),3);
                             $thisMonth = (int)date('n',strtotime($subcontractorBill['created_at']));
                             $billRow = $row;
                             $data[$row]['make_bold'] = true;
@@ -1364,7 +1364,7 @@ class ReportManagementController extends Controller{
                             $data[$row]['bill_no'] = $billName;
                             $data[$row]['basic_amount'] = round($subTotal, 3);
                             $data[$row]['gst'] = round($taxTotal, 3);
-                            $data[$row]['total_amount'] = $finalTotal;
+                            $data[$row]['total_amount'] = round($finalTotal,3);
                             //$data[$row] = array_merge($data[$row],array_fill(5,6,null));
                             $data[$row] = array_merge($data[$row],array_fill(5,5,null));
                             $data[$row]['payable'] = $finalTotal;
@@ -2199,9 +2199,9 @@ class ReportManagementController extends Controller{
                    // $indirectExpenses = $salesTaxAmount - $purchaseTaxAmount - $subcontractorGst;
                     $openingExpenses = $quotation['opening_expenses'];
                     if($officeProjectSiteId == $project_site_id){
-                        $totalAssetRentOpeningExpense = $projectSite->sum('asset_rent_opening_expense');
+                        $allSiteTotalAssetRentOpeningExpense = $projectSite->sum('asset_rent_opening_expense');
                         $assetRent = $salaryAmount = 0;
-                        $sales = $receipt = $totalAssetRent + $totalAssetRentOpeningExpense;
+                        $sales = $receipt = $totalAssetRent + $allSiteTotalAssetRentOpeningExpense;
                     }
                     $totalAssetRentOpeningExpense = $projectSite->where('id',$project_site_id)->pluck('asset_rent_opening_expense')->first();
                     if($totalAssetRentOpeningExpense == null){
@@ -3322,9 +3322,9 @@ class ReportManagementController extends Controller{
             $officeProjectSiteId = $projectSite->where('name',env('OFFICE_PROJECT_SITE_NAME'))->pluck('id')->first();
             $totalAssetRentOpeningExpense = $projectSite->where('id',$projectSiteId)->pluck('asset_rent_opening_expense')->first();
             if($officeProjectSiteId == $projectSiteId){
-                $totalAssetRentOpeningExpense = $projectSite->sum('asset_rent_opening_expense');
+                $allSiteTotalAssetRentOpeningExpense = $projectSite->sum('asset_rent_opening_expense');
                 $assetRent = $salaryAmount = 0;
-                $sales = $receipt = $totalAssetRent + $totalAssetRentOpeningExpense;
+                $sales = $receipt = $totalAssetRent + $allSiteTotalAssetRentOpeningExpense;
             }
             if($totalAssetRentOpeningExpense == null){
                 $totalAssetRentOpeningExpense = 0;
