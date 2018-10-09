@@ -34,6 +34,7 @@ use App\Product;
 use App\ProductDescription;
 use App\ProjectSite;
 use App\ProjectSiteAdvancePayment;
+use App\ProjectSiteSalaryDistribution;
 use App\PurcahsePeticashTransaction;
 use App\PurchaseOrderBill;
 use App\PurchaseOrderBillMonthlyExpense;
@@ -2065,6 +2066,7 @@ class ReportManagementController extends Controller{
                     $purchaseOrderBillMonthlyExpense = new PurchaseOrderBillMonthlyExpense();
                     $peticashSalaryTransactionMonthlyExpense = new PeticashSalaryTransactionMonthlyExpense();
                     $peticashPurchaseTransactionMonthlyExpense = new PeticashPurchaseTransactionMonthlyExpense();
+                    $projectSiteSalaryDistribution = new ProjectSiteSalaryDistribution();
                     $quotation = $quotation->where('project_site_id',$project_site_id)->first();
                     $approvedBillStatusId = $billStatus->where('slug','approved')->pluck('id')->first();
                     $subcontractorApprovedBillStatusId = $subcontractorBillStatus->where('slug','approved')->pluck('id')->first();
@@ -2080,6 +2082,7 @@ class ReportManagementController extends Controller{
                     $assetRent = 0;
                     $projectSiteAdvancePayment = new ProjectSiteAdvancePayment();
                     $outstandingMobilization = $projectSiteAdvancePayment->where('project_site_id',$project_site_id)->sum('amount');
+
                     //$inventoryComponentSiteTransferIds = $inventoryTransferTypes->where('slug','site')->get();
                     //$approvedComponentTransferStatusId = $inventoryComponentTransferStatus->where('slug','approved')->pluck('id');
                     foreach ($totalMonths as $month){
@@ -2198,9 +2201,13 @@ class ReportManagementController extends Controller{
                   //  $purchaseTaxAmount = $assetMaintenanceGst + $purchaseOrderGst + $inventorySiteTransfersInGst + $siteTransferBillGst - $inventorySiteTransfersOutGst;
                    // $indirectExpenses = $salesTaxAmount - $purchaseTaxAmount - $subcontractorGst;
                     $openingExpenses = $quotation['opening_expenses'];
+                    $officeExpense = $projectSiteSalaryDistribution->where('project_site_id',$project_site_id)
+                                            ->where('month_id',$month['id'])
+                                            ->where('year_id',$selectedYear['id'])
+                                            ->pluck('distributed_amount')->first();
                     if($officeProjectSiteId == $project_site_id){
                         $allSiteTotalAssetRentOpeningExpense = $projectSite->sum('asset_rent_opening_expense');
-                        $assetRent = $salaryAmount = 0;
+                        $assetRent = $salaryAmount = $officeExpense = 0;
                         $sales = $receipt = $totalAssetRent + $allSiteTotalAssetRentOpeningExpense;
                     }
                     $totalAssetRentOpeningExpense = $projectSite->where('id',$project_site_id)->pluck('asset_rent_opening_expense')->first();
@@ -2966,6 +2973,7 @@ class ReportManagementController extends Controller{
             $inventoryTransferTypes = new InventoryTransferTypes();
             $inventoryComponentTransferStatus = new InventoryComponentTransferStatus();
             $siteTransferBill = new SiteTransferBill();*/
+            $projectSiteSalaryDistribution = new ProjectSiteSalaryDistribution();
             $purchaseOrderBillMonthlyExpense = new PurchaseOrderBillMonthlyExpense();
             $peticashSalaryTransactionMonthlyExpense = new PeticashSalaryTransactionMonthlyExpense();
             $peticashPurchaseTransactionMonthlyExpense = new PeticashPurchaseTransactionMonthlyExpense();
@@ -3039,6 +3047,8 @@ class ReportManagementController extends Controller{
                             $subcontractorTotal += round(($subTotal + $taxTotal),3);
                         }
                     }
+                    $officeExpense = $projectSiteSalaryDistribution->where('project_site_id',$projectSiteId)
+                        ->sum('distributed_amount');
 
                     /*$assetMaintenanceGst += $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
                         ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
@@ -3144,6 +3154,9 @@ class ReportManagementController extends Controller{
                                 $subcontractorTotal += round(($subTotal + $taxTotal),3);
                             }
                         }
+                        $officeExpense = $projectSiteSalaryDistribution->where('project_site_id',$projectSiteId)
+                            ->where('month_id',$month['id'])
+                            ->sum('distributed_amount');
 
                         /*$assetMaintenanceGst += $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
                             ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
@@ -3262,6 +3275,10 @@ class ReportManagementController extends Controller{
                                 $subcontractorTotal += round(($subTotal + $taxTotal),3);
                             }
                         }
+                        $officeExpense = $projectSiteSalaryDistribution->where('project_site_id',$projectSiteId)
+                            ->where('month_id',$month['id'])
+                            ->where('year_id',$selectedYear['id'])
+                            ->sum('distributed_amount');
 
                         /*$assetMaintenanceGst += $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
                             ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
@@ -3323,7 +3340,7 @@ class ReportManagementController extends Controller{
             $totalAssetRentOpeningExpense = $projectSite->where('id',$projectSiteId)->pluck('asset_rent_opening_expense')->first();
             if($officeProjectSiteId == $projectSiteId){
                 $allSiteTotalAssetRentOpeningExpense = $projectSite->sum('asset_rent_opening_expense');
-                $assetRent = $salaryAmount = 0;
+                $assetRent = $salaryAmount = $officeExpense = 0;
                 $sales = $receipt = $totalAssetRent + $allSiteTotalAssetRentOpeningExpense;
             }
             if($totalAssetRentOpeningExpense == null){
