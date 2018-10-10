@@ -2196,15 +2196,16 @@ class ReportManagementController extends Controller{
                             ->whereMonth('site_transfer_bills.created_at',$month['id'])
                             ->whereYear('site_transfer_bills.created_at',$selectedYear['slug'])
                             ->sum(DB::raw('site_transfer_bills.tax_amount + site_transfer_bills.extra_amount_cgst_amount + site_transfer_bills.extra_amount_sgst_amount + site_transfer_bills.extra_amount_igst_amount'));*/
+                        $officeExpense += $projectSiteSalaryDistribution->where('project_site_id',$project_site_id)
+                            ->where('month_id',$month['id'])
+                            ->where('year_id',$selectedYear['id'])
+                            ->pluck('distributed_amount')->first();
 
                     }
                   //  $purchaseTaxAmount = $assetMaintenanceGst + $purchaseOrderGst + $inventorySiteTransfersInGst + $siteTransferBillGst - $inventorySiteTransfersOutGst;
                    // $indirectExpenses = $salesTaxAmount - $purchaseTaxAmount - $subcontractorGst;
                     $openingExpenses = $quotation['opening_expenses'];
-                    $officeExpense = $projectSiteSalaryDistribution->where('project_site_id',$project_site_id)
-                                            ->where('month_id',$month['id'])
-                                            ->where('year_id',$selectedYear['id'])
-                                            ->pluck('distributed_amount')->first();
+
                     if($officeProjectSiteId == $project_site_id){
                         $allSiteTotalAssetRentOpeningExpense = $projectSite->sum('asset_rent_opening_expense');
                         $assetRent = $salaryAmount = $officeExpense = 0;
@@ -3154,7 +3155,7 @@ class ReportManagementController extends Controller{
                                 $subcontractorTotal += round(($subTotal + $taxTotal),3);
                             }
                         }
-                        $officeExpense = $projectSiteSalaryDistribution->where('project_site_id',$projectSiteId)
+                        $officeExpense += $projectSiteSalaryDistribution->where('project_site_id',$projectSiteId)
                             ->where('month_id',$month['id'])
                             ->sum('distributed_amount');
 
@@ -3275,7 +3276,7 @@ class ReportManagementController extends Controller{
                                 $subcontractorTotal += round(($subTotal + $taxTotal),3);
                             }
                         }
-                        $officeExpense = $projectSiteSalaryDistribution->where('project_site_id',$projectSiteId)
+                        $officeExpense += $projectSiteSalaryDistribution->where('project_site_id',$projectSiteId)
                             ->where('month_id',$month['id'])
                             ->where('year_id',$selectedYear['id'])
                             ->sum('distributed_amount');
