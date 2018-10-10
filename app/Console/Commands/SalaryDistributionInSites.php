@@ -26,13 +26,13 @@ use Illuminate\Support\Facades\Log;
 class SalaryDistributionInSites extends Command
 {
 
-    //php artisan custom:custom:salary-distribution --month=8 --year=2018
+    //php artisan custom:salary-distribution --month=8 --year=2018
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'custom:salary-distribution';
+    protected $signature = 'custom:salary-distribution {--month=null} {--year=null}';
 
     /**
      * The console command description.
@@ -60,8 +60,15 @@ class SalaryDistributionInSites extends Command
         try{
             $year = new Year();
             $month = new Month();
-            $thisYear = $year->where('slug',date('Y', strtotime('last month')))->first();
-            $thisMonth = $month->where('id',date('m', strtotime('last month')))->first();
+            if($this->option('month') != 'null' && $this->option('year') != 'null'){
+                $monthId = $this->option('month');
+                $yearSlug = $this->option('year');
+                $thisMonth = $month->where('id',$monthId)->first();
+                $thisYear = $year->where('slug',$yearSlug)->first();
+            }else{
+                $thisYear = $year->where('slug',date('Y', strtotime('last month')))->first();
+                $thisMonth = $month->where('id',date('m', strtotime('last month')))->first();
+            }
             $projectSite = new ProjectSite();
             $quotation = new Quotation();
             $subcontractorStructure = new SubcontractorStructure();
