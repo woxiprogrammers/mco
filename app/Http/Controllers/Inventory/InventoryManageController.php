@@ -438,6 +438,7 @@ class InventoryManageController extends Controller
                     ->select('units.id as id', 'units.name as name')
                     ->get()
                     ->toArray();
+
                 $units2Array = UnitConversion::join('units', 'units.id', '=', 'unit_conversions.unit_1_id')
                     ->where('unit_conversions.unit_2_id', $inventoryComponent->material->unit_id)
                     ->whereNotIn('unit_conversions.unit_1_id', array_column($unit1Array, 'id'))
@@ -488,7 +489,7 @@ class InventoryManageController extends Controller
             return view('inventory/component-manage')->with(compact('inventoryComponent','inTransferTypes','outTransferTypes','units','clients','isReadingApplicable','nosUnitId','projectInfo','asset_type','amount','transportationVendors','siteOutGrns'));
         }catch(\Exception $e){
             $data = [
-                'action' => 'Inventory manage',
+                'action' => 'Inventory Component manage',
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];
@@ -646,6 +647,7 @@ class InventoryManageController extends Controller
                             $outQuantity += $unitConversionQuantity;
                         }
                     }
+                    $is_material = 'Material';
                 }else{
                     $unitName = Unit::where('slug','nos')->pluck('name')->first();
                     $inQuantity = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
@@ -658,6 +660,7 @@ class InventoryManageController extends Controller
                         ->where('inventory_component_transfers.inventory_component_id',$inventoryData[$pagination]->id)
                         ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
                         ->sum('inventory_component_transfers.quantity');
+                    $is_material = 'Asset';
                 }
                 $availableQuantity = ($inQuantity + $inventoryData[$iterator]['opening_stock']) - $outQuantity;
                 $records['data'][$iterator] = [
@@ -666,7 +669,7 @@ class InventoryManageController extends Controller
                     ($inQuantity + $inventoryData[$iterator]['opening_stock']).' '.$unitName,
                     $outQuantity.' '.$unitName,
                     $availableQuantity.' '.$unitName,
-                    ($inventoryData[$iterator]['is_material'] == true) ? "Material" : "Asset",
+                    $is_material,
                     '<div class="btn btn-xs green">
                         <a href="/inventory/component/manage/'.$inventoryData[$pagination]->id.'" style="color: white">
                              Manage
