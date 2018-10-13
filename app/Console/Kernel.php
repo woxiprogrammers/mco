@@ -6,6 +6,7 @@ use App\Console\Commands\PeticashPurchaseTransactionMonthlyExpenseCalculations;
 use App\Console\Commands\PeticashSalaryTransactionMonthlyExpense;
 use App\Console\Commands\PeticashSalaryTransactionMonthlyExpenseCalculations;
 use App\Console\Commands\PurchaseOrderBillMonthlyExpenseCalculations;
+use App\Console\Commands\SalaryDistributionInSites;
 use App\Console\Commands\SendPurchaseOrderEmails;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -21,7 +22,8 @@ class Kernel extends ConsoleKernel
         SendPurchaseOrderEmails::class,
         PurchaseOrderBillMonthlyExpenseCalculations::class,
         PeticashSalaryTransactionMonthlyExpenseCalculations::class,
-        PeticashPurchaseTransactionMonthlyExpenseCalculations::class
+        PeticashPurchaseTransactionMonthlyExpenseCalculations::class,
+        SalaryDistributionInSites::class
     ];
 
     /**
@@ -40,6 +42,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('custom:purchase-order-bill-monthly-expense-calculation')->dailyAt('23:00');
         $schedule->command('custom:peticash-salary-transaction-monthly-expense-calculation')->dailyAt('23:00');
         $schedule->command('custom:peticash-purchase-transaction-monthly-expense-calculation')->dailyAt('23:00');
+        $schedule->command('custom:salary-distribution')->monthlyOn(1, '1:00');
     }
 
     /**
