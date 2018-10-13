@@ -7,9 +7,16 @@
 namespace App\Http\Controllers\CustomTraits;
 use App\Category;
 use App\Http\Requests\CategoryRequest;
+use App\InventoryComponent;
+use App\InventoryComponentTransfers;
+use App\InventoryTransferTypes;
 use App\Material;
 use App\MaterialRequestComponentTypes;
+use App\Month;
+use App\ProjectSite;
 use App\UnitConversion;
+use App\Year;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -18,6 +25,76 @@ trait CategoryTrait{
 
     public function getCreateView(Request $request){
         try{
+            $year = new Year();
+            $month = new Month();
+            $inventoryComponentTransfer = new InventoryComponentTransfers();
+            $inventoryComponent = new InventoryComponent();
+            $inventoryTransferType = new InventoryTransferTypes();
+            $yearSlug = '2018';
+                $thisYear = $year->where('slug',$yearSlug)->first();
+                $months = $month/*->where('id',6)*/->orderBy('id','asc')->get();
+            $projectSite = new ProjectSite();
+            $projectSites = $projectSite/*->where('id',11)*/->get();
+            $data = array();
+            $inTransferTypeIds = $inventoryTransferType->where('type','IN')->pluck('id')->toArray();
+            foreach($projectSites as $projectSite) {
+                foreach ($months as $thisMonth) {
+                    $a = 0;
+                    $monthFirstDay = date('Y-m-d H:i:s', mktime(0, 0, 0, $thisMonth['id'], 1, $thisYear['slug']));
+                    $monthLastDay = date('Y-m-t H:i:s', mktime(23, 59, 59, $thisMonth['id'], 1, $thisYear['slug']));
+                    $inventoryComponentTransfers = $inventoryComponent->join('inventory_component_transfers', 'inventory_component_transfers.inventory_component_id'
+                        , '=', 'inventory_components.id')
+                        ->where('inventory_components.is_material', false)
+                        ->where('inventory_components.project_site_id', $projectSite['id'])
+                        ->whereMonth('inventory_component_transfers.created_at', $thisMonth['id'])
+                        ->whereYear('inventory_component_transfers.created_at', $thisYear['slug'])
+                        ->orderBy('inventory_component_transfers.created_at', 'asc')
+                        ->get();
+                    $inventoryComponentData = $inventoryComponentTransfers->groupBy(function ($inventoryComponentTransfer) {
+                        return $inventoryComponentTransfer['inventory_component_id'];
+                    });
+                    foreach ($inventoryComponentData as $inventoryComponentId => $inventoryComponentTransferData) {
+                        $highestRentForMonth = $inventoryComponentTransferData->max('rate_per_unit');
+                        $carryForwardQuantity = 0;
+                        $count = count($inventoryComponentTransferData);
+                        for ($iterator = 0; $iterator < $count; $iterator++) {
+                            $carryForwardQuantity += $inventoryComponentTransferData[$iterator]['quantity'];
+                            if (strtotime($inventoryComponentTransferData[$iterator]['created_at']) != strtotime($monthFirstDay)) {
+                                Log::info('inside if');
+                                $noOfDays = date_diff(Carbon::parse($monthFirstDay), $inventoryComponentTransferData[$iterator]['created_at'])->d;
+                                if(in_array($inventoryComponentTransferData[$iterator]['transfer_type_id'],$inTransferTypeIds)){
+                                    $carryForwardQuantity += $inventoryComponentTransferData[$iterator]['quantity'];
+                                }else{
+                                    $carryForwardQuantity = $carryForwardQuantity - $inventoryComponentTransferData[$iterator]['quantity'];
+                                }
+                                $a += ($carryForwardQuantity * $highestRentForMonth * $noOfDays);
+                            } elseif (($iterator + 1) < $count) {
+                                Log::info('inside else if');
+                                $noOfDays = date_diff($inventoryComponentTransferData[$iterator]['created_at'], $inventoryComponentTransferData[$iterator + 1]['created_at'])->d;
+                                if(in_array($inventoryComponentTransferData[$iterator]['transfer_type_id'],$inTransferTypeIds)){
+                                    $carryForwardQuantity += $inventoryComponentTransferData[$iterator]['quantity'];
+                                }else{
+                                    $carryForwardQuantity = $carryForwardQuantity - $inventoryComponentTransferData[$iterator]['quantity'];
+                                }
+                                $a += ($carryForwardQuantity * $highestRentForMonth * $noOfDays);
+                            } else {
+                                Log::info('inside else');
+                                $noOfDays = date_diff($inventoryComponentTransferData[$iterator]['created_at'], Carbon::parse($monthLastDay))->d;
+                                $carryForwardQuantity += $inventoryComponentTransferData[$iterator]['quantity'];
+                                if(in_array($inventoryComponentTransferData[$iterator]['transfer_type_id'],$inTransferTypeIds)){
+                                    $carryForwardQuantity += $inventoryComponentTransferData[$iterator]['quantity'];
+                                }else{
+                                    $carryForwardQuantity = $carryForwardQuantity - $inventoryComponentTransferData[$iterator]['quantity'];
+                                }
+                                $a += ($carryForwardQuantity * $highestRentForMonth * $noOfDays);
+                            }
+                        }
+                        $data[$projectSite['name']][$thisMonth['name']][$inventoryComponentId] = $a;
+                        //save $carryForwardQuantity , $highestRentForMonth, $a
+                    }
+                }
+            }
+            dd($data);
             return view('admin.category.create');
         }catch(\Exception $e){
             $data = [

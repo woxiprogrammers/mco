@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Console\Commands\AssetRentCalculations;
 use App\Console\Commands\PeticashPurchaseTransactionMonthlyExpenseCalculations;
 use App\Console\Commands\PeticashSalaryTransactionMonthlyExpense;
 use App\Console\Commands\PeticashSalaryTransactionMonthlyExpenseCalculations;
@@ -23,7 +24,8 @@ class Kernel extends ConsoleKernel
         PurchaseOrderBillMonthlyExpenseCalculations::class,
         PeticashSalaryTransactionMonthlyExpenseCalculations::class,
         PeticashPurchaseTransactionMonthlyExpenseCalculations::class,
-        SalaryDistributionInSites::class
+        SalaryDistributionInSites::class,
+        AssetRentCalculations::class
     ];
 
     /**
