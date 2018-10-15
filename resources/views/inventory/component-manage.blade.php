@@ -83,6 +83,7 @@
                                                                                 <tr>
                                                                                     <th> GRN </th>
                                                                                     <th> Quantity </th>
+                                                                                    <th> Date </th>
                                                                                     <th> Unit </th>
                                                                                     <th> Status </th>
                                                                                     <th> Status </th>

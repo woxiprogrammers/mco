@@ -34,12 +34,12 @@ trait CategoryTrait{
                 $thisYear = $year->where('slug',$yearSlug)->first();
                 $months = $month/*->where('id',6)*/->orderBy('id','asc')->get();
             $projectSite = new ProjectSite();
-            $projectSites = $projectSite/*->where('id',11)*/->get();
+            $projectSites = $projectSite->where('id',23)->get();
             $data = array();
             $inTransferTypeIds = $inventoryTransferType->where('type','IN')->pluck('id')->toArray();
             foreach($projectSites as $projectSite) {
                 foreach ($months as $thisMonth) {
-                    $a = 0;
+                    $totalRentForMonth = $noofDaysUsedForMonth = 0;
                     $monthFirstDay = date('Y-m-d H:i:s', mktime(0, 0, 0, $thisMonth['id'], 1, $thisYear['slug']));
                     $monthLastDay = date('Y-m-t H:i:s', mktime(23, 59, 59, $thisMonth['id'], 1, $thisYear['slug']));
                     $inventoryComponentTransfers = $inventoryComponent->join('inventory_component_transfers', 'inventory_component_transfers.inventory_component_id'
@@ -48,6 +48,7 @@ trait CategoryTrait{
                         ->where('inventory_components.project_site_id', $projectSite['id'])
                         ->whereMonth('inventory_component_transfers.created_at', $thisMonth['id'])
                         ->whereYear('inventory_component_transfers.created_at', $thisYear['slug'])
+                        ->where('inventory_component_transfers.inventory_component_id',953)
                         ->orderBy('inventory_component_transfers.created_at', 'asc')
                         ->get();
                     $inventoryComponentData = $inventoryComponentTransfers->groupBy(function ($inventoryComponentTransfer) {
@@ -58,39 +59,45 @@ trait CategoryTrait{
                         $carryForwardQuantity = 0;
                         $count = count($inventoryComponentTransferData);
                         for ($iterator = 0; $iterator < $count; $iterator++) {
-                            $carryForwardQuantity += $inventoryComponentTransferData[$iterator]['quantity'];
-                            if (strtotime($inventoryComponentTransferData[$iterator]['created_at']) != strtotime($monthFirstDay)) {
+                            //$carryForwardQuantity += $inventoryComponentTransferData[$iterator]['quantity'];
+                            if ((strtotime($inventoryComponentTransferData[$iterator]['created_at']) != strtotime($monthFirstDay)) && $carryForwardQuantity != 0) {
                                 Log::info('inside if');
                                 $noOfDays = date_diff(Carbon::parse($monthFirstDay), $inventoryComponentTransferData[$iterator]['created_at'])->d;
+                                $noofDaysUsedForMonth += $noOfDays;
                                 if(in_array($inventoryComponentTransferData[$iterator]['transfer_type_id'],$inTransferTypeIds)){
                                     $carryForwardQuantity += $inventoryComponentTransferData[$iterator]['quantity'];
                                 }else{
                                     $carryForwardQuantity = $carryForwardQuantity - $inventoryComponentTransferData[$iterator]['quantity'];
                                 }
-                                $a += ($carryForwardQuantity * $highestRentForMonth * $noOfDays);
+                                $totalRentForMonth += ($carryForwardQuantity * $highestRentForMonth * $noOfDays);
                             } elseif (($iterator + 1) < $count) {
                                 Log::info('inside else if');
                                 $noOfDays = date_diff($inventoryComponentTransferData[$iterator]['created_at'], $inventoryComponentTransferData[$iterator + 1]['created_at'])->d;
+                                $noofDaysUsedForMonth += $noOfDays;
                                 if(in_array($inventoryComponentTransferData[$iterator]['transfer_type_id'],$inTransferTypeIds)){
                                     $carryForwardQuantity += $inventoryComponentTransferData[$iterator]['quantity'];
                                 }else{
                                     $carryForwardQuantity = $carryForwardQuantity - $inventoryComponentTransferData[$iterator]['quantity'];
                                 }
-                                $a += ($carryForwardQuantity * $highestRentForMonth * $noOfDays);
+                                $totalRentForMonth += ($carryForwardQuantity * $highestRentForMonth * $noOfDays);
                             } else {
                                 Log::info('inside else');
                                 $noOfDays = date_diff($inventoryComponentTransferData[$iterator]['created_at'], Carbon::parse($monthLastDay))->d;
+                                $noofDaysUsedForMonth += $noOfDays;
                                 $carryForwardQuantity += $inventoryComponentTransferData[$iterator]['quantity'];
                                 if(in_array($inventoryComponentTransferData[$iterator]['transfer_type_id'],$inTransferTypeIds)){
                                     $carryForwardQuantity += $inventoryComponentTransferData[$iterator]['quantity'];
                                 }else{
                                     $carryForwardQuantity = $carryForwardQuantity - $inventoryComponentTransferData[$iterator]['quantity'];
                                 }
-                                $a += ($carryForwardQuantity * $highestRentForMonth * $noOfDays);
+                                $totalRentForMonth += ($carryForwardQuantity * $highestRentForMonth * $noOfDays);
                             }
                         }
-                        $data[$projectSite['name']][$thisMonth['name']][$inventoryComponentId] = $a;
-                        //save $carryForwardQuantity , $highestRentForMonth, $a
+                        $data[$projectSite['name']][$thisMonth['name']][$inventoryComponentId]['rent_per_month'] = $highestRentForMonth;
+                        $data[$projectSite['name']][$thisMonth['name']][$inventoryComponentId]['days_used'] = $noofDaysUsedForMonth;
+                        $data[$projectSite['name']][$thisMonth['name']][$inventoryComponentId]['rent'] = $totalRentForMonth;
+                        $data[$projectSite['name']][$thisMonth['name']][$inventoryComponentId]['carry_forward_quantity'] = $carryForwardQuantity;
+                        //save $carryForwardQuantity , $highestRentForMonth, $rentPerMonth
                     }
                 }
             }

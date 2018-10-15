@@ -710,7 +710,9 @@ class InventoryManageController extends Controller
 
     public function inventoryComponentListing(Request $request,$inventoryComponent){
         try{
-            $inventoryComponentTransfers = ($inventoryComponent->inventoryComponentTransfers->sortByDesc('id'));
+           // $inventoryComponentTransfers = ($inventoryComponent->inventoryComponentTransfers->sortByDesc('id'));
+            $inventoryComponentTransfers = InventoryComponentTransfers::where('inventory_component_id',$inventoryComponent['id'])
+                                                ->orderBy('created_at','desc')->get();
             $status = 200;
             $iTotalRecords = count($inventoryComponentTransfers);
             $records = array();
@@ -752,7 +754,8 @@ class InventoryManageController extends Controller
                 $records['data'][$iterator] = [
                     $inventoryComponentTransfers[$pagination]['grn'],
                     $inventoryComponentTransfers[$pagination]['quantity'],
-                    $inventoryComponentTransfers[$pagination]->unit->name,
+                    date('d M Y h:i:s',strtotime($inventoryComponentTransfers[$pagination]->created_at)),
+                    $inventoryComponentTransfers[$pagination]->rate_per_unit,
                     $transferStatus,
                     $inventoryComponentTransfers[$pagination]->inventoryComponentTransferStatus->name,
                     $action
