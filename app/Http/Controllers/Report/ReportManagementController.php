@@ -12,6 +12,7 @@ namespace App\Http\Controllers\Report;
 use App\AssetMaintenanceBill;
 use App\AssetMaintenanceBillPayment;
 use App\AssetMaintenanceVendorRelation;
+use App\AssetRentMonthlyExpenses;
 use App\Bill;
 use App\BillQuotationExtraItem;
 use App\BillQuotationProducts;
@@ -116,6 +117,7 @@ class ReportManagementController extends Controller{
 
     public function getButtonDetail(Request $request) {
         try{
+            dd($request->all());
             $startDate = explode('/',$request->start_date);
             $start_date = $startDate[2].'-'.$startDate[1].'-'.$startDate[0].' 00:00:00';
             $endDate = explode('/',$request->end_date);
@@ -128,8 +130,23 @@ class ReportManagementController extends Controller{
 
             switch ($request['report_name']) {
                 case 'sitewise_asset_rent_report' :
+                    $assetRentMonthlyExpense = new AssetRentMonthlyExpenses();
+                    $assetRentMonthlyExpenseData = $assetRentMonthlyExpense->where('project_site_id',$request['project_site_id'])
+                                                    ->where('year_id',$request['year_id'])->count();
+                    /*$count = $assetRentMonthlyExpenseData;
+                    $noOfButtons = $count/$reportLimit;
+                    for($iterator = 0; $iterator < $noOfButtons; $iterator++){
+                        $downloadButtonDetails[$iterator]['start_date'] = $start_date;
+                        $downloadButtonDetails[$iterator]['end_date'] = $end_date;
+                        $downloadButtonDetails[$iterator]['start_limit'] = $startLimit;
+                        $downloadButtonDetails[$iterator]['end_limit'] = $endLimit;
+                        $downloadButtonDetails[$iterator]['button_no'] = $iterator;
+                        $startLimit = $endLimit + 1;
+                        $endLimit = $endLimit + $reportLimit;
+                    }*/
                     $downloadButtonDetails[0]['show_button'] = true;
-                    $downloadButtonDetails[0]['year'] = $request['year_id'];
+                    $downloadButtonDetails[0]['year_id'] = $request['year_id'];
+                    $downloadButtonDetails[0]['project_site_id'] = $request['project_site_id'];
                     break;
 
                 case 'sitewise_purchase_report' :
@@ -327,7 +344,6 @@ class ReportManagementController extends Controller{
 
 
                     break;
-
                 case 'sitewise_purchase_report' :
                     $projectSite = $projectSiteId = new ProjectSite();
                     $purchaseOrderBill = new PurchaseOrderBill();
