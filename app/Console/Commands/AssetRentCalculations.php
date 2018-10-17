@@ -70,7 +70,10 @@ class AssetRentCalculations extends Command
                 $thisYear = $year->where('slug',date('Y', strtotime('last month')))->first();
             }
             $projectSite = new ProjectSite();
-            $projectSites = $projectSite/*->where('id',23)*/->get();
+            $projectSiteIds = $projectSite->pluck('id')->toArray();
+            foreach ($projectSiteIds as $projectSiteId){
+                $projectSites = $projectSite->where('id',$projectSiteId)->get();
+
             $data = array();
             $inTransferTypeIds = $inventoryTransferType->where('type','IN')->pluck('id')->toArray();
             $carryForwardQuantity = 0;
@@ -205,7 +208,7 @@ class AssetRentCalculations extends Command
                                     $asseRentMonthlyExpense->create([
                                         'project_site_id' => $projectSite['id'],
                                         'year_id' => $thisYear['id'],
-                                        'asset_id' => $assetId,
+                                        'asset_id' => $inventoryComponent['asset_id'],
                                         $thisMonth['slug'] => json_encode($jsonData)
                                     ]);
                                 }
@@ -214,6 +217,7 @@ class AssetRentCalculations extends Command
                     }
                 }
 
+            }
             }
         }catch(\Exception $e){
             $data = [

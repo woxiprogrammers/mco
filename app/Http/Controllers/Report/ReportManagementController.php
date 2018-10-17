@@ -364,56 +364,56 @@ class ReportManagementController extends Controller{
                         $data[$row]['asset_rent_per_day'] = $assetData['rent_per_day'];
                         $januaryData = json_decode($assetRentMonthlyExpense['january']);
                         $data[$row]['jan_no_of_days_used'] = $januaryData->days_used;
-                        $data[$row]['jan_quantity'] = $januaryData->quantity_used.' / '.$januaryData->rent;
-                        $data[$row]['jan_amount'] = $januaryData->rent_per_month;
+                        $data[$row]['jan_quantity'] = $januaryData->quantity_used.' / '.$januaryData->rent_per_month;
+                        $data[$row]['jan_amount'] = $januaryData->rent;
                             $januaryTotalAmount += $data[$row]['jan_amount'];
 
                         $februaryData = json_decode($assetRentMonthlyExpense['february']);
                         $data[$row]['feb_no_of_days_used'] = $februaryData->days_used;
-                        $data[$row]['feb_quantity'] =  $februaryData->quantity_used.' / '.$februaryData->rent;
-                        $data[$row]['feb_amount'] = $februaryData->rent_per_month;
+                        $data[$row]['feb_quantity'] =  $februaryData->quantity_used.' / '.$februaryData->rent_per_month;
+                        $data[$row]['feb_amount'] = $februaryData->rent;
                             $februaryTotalAmount += $data[$row]['feb_amount'];
 
                         $marchData = json_decode($assetRentMonthlyExpense['march']);
                         $data[$row]['march_no_of_days_used'] = $marchData->days_used;
-                        $data[$row]['march_quantity'] = $marchData->quantity_used.' / '.$marchData->rent;
-                        $data[$row]['march_amount'] = $marchData->rent_per_month;
+                        $data[$row]['march_quantity'] = $marchData->quantity_used.' / '.$marchData->rent_per_month;
+                        $data[$row]['march_amount'] = $marchData->rent;
                             $marchTotalAmount += $data[$row]['march_amount'];
 
                         $aprilData = json_decode($assetRentMonthlyExpense['april']);
                         $data[$row]['april_no_of_days_used'] = $aprilData->days_used;
-                        $data[$row]['april_quantity'] = $aprilData->quantity_used.' / '.$aprilData->rent;
-                        $data[$row]['april_amount'] = $aprilData->rent_per_month;
+                        $data[$row]['april_quantity'] = $aprilData->quantity_used.' / '.$aprilData->rent_per_month;
+                        $data[$row]['april_amount'] = $aprilData->rent;
                             $aprilTotalAmount += $data[$row]['april_amount'];
 
                         $mayData = json_decode($assetRentMonthlyExpense['may']);
                         $data[$row]['may_no_of_days_used'] = $mayData->days_used;
-                        $data[$row]['may_quantity'] = $mayData->quantity_used.' / '.$mayData->rent;
-                        $data[$row]['may_amount'] = $mayData->rent_per_month;
+                        $data[$row]['may_quantity'] = $mayData->quantity_used.' / '.$mayData->rent_per_month;
+                        $data[$row]['may_amount'] = $mayData->rent;
                             $mayTotalAmount += $data[$row]['may_amount'];
 
                         $juneData = json_decode($assetRentMonthlyExpense['june']);
                         $data[$row]['june_no_of_days_used'] = $juneData->days_used;
-                        $data[$row]['june_quantity'] = $juneData->quantity_used.' / '.$juneData->rent;
-                        $data[$row]['june_amount'] = $juneData->rent_per_month;
+                        $data[$row]['june_quantity'] = $juneData->quantity_used.' / '.$juneData->rent_per_month;
+                        $data[$row]['june_amount'] = $juneData->rent;
                             $juneTotalAmount += $data[$row]['june_amount'];
 
                         $julyData = json_decode($assetRentMonthlyExpense['july']);
                         $data[$row]['july_no_of_days_used'] = $julyData->days_used;
-                        $data[$row]['july_quantity'] = $julyData->quantity_used.' / '.$julyData->rent;
-                        $data[$row]['july_amount'] = $julyData->rent_per_month;
+                        $data[$row]['july_quantity'] = $julyData->quantity_used.' / '.$julyData->rent_per_month;
+                        $data[$row]['july_amount'] = $julyData->rent;
                             $julyTotalAmount += $data[$row]['july_amount'];
 
                         $augustData = json_decode($assetRentMonthlyExpense['august']);
                         $data[$row]['august_no_of_days_used'] = $augustData->days_used;
-                        $data[$row]['august_quantity'] = $augustData->quantity_used.' / '.$augustData->rent;
-                        $data[$row]['august_amount'] = $augustData->rent_per_month;
+                        $data[$row]['august_quantity'] = $augustData->quantity_used.' / '.$augustData->rent_per_month;
+                        $data[$row]['august_amount'] = $augustData->rent;
                             $augustTotalAmount += $data[$row]['august_amount'];
 
                         $septData = json_decode($assetRentMonthlyExpense['september']);
                         $data[$row]['sept_no_of_days_used'] = $septData->days_used;
-                        $data[$row]['sept_quantity'] = $septData->quantity_used.' / '.$septData->rent;
-                        $data[$row]['sept_amount'] = $septData->rent_per_month;
+                        $data[$row]['sept_quantity'] = $septData->quantity_used.' / '.$septData->rent_per_month;
+                        $data[$row]['sept_amount'] = $septData->rent;
                             $septTotalAmount += $data[$row]['sept_amount'];
 
                         $octData = json_decode($assetRentMonthlyExpense['october']);
@@ -421,8 +421,8 @@ class ReportManagementController extends Controller{
                             $data[$row]['oct_no_of_days_used'] = $data[$row]['oct_quantity'] = $data[$row]['oct_amount'] = 0;
                         }else{
                             $data[$row]['oct_no_of_days_used'] = $octData->days_used;
-                            $data[$row]['oct_quantity'] = $octData->quantity_used.' / '.$octData->rent;
-                            $data[$row]['oct_amount'] = $octData->rent_per_month;
+                            $data[$row]['oct_quantity'] = $octData->quantity_used.' / '.$octData->rent_per_month;
+                            $data[$row]['oct_amount'] = $octData->rent;
                         }
                         $octTotalAmount += $data[$row]['oct_amount'];
 
@@ -431,8 +431,8 @@ class ReportManagementController extends Controller{
                             $data[$row]['nov_no_of_days_used'] = $data[$row]['nov_quantity'] = $data[$row]['nov_amount'] = 0;
                         }else{
                             $data[$row]['nov_no_of_days_used'] = $novData->days_used;
-                            $data[$row]['nov_quantity'] = $novData->quantity_used.' / '.$novData->rent;
-                            $data[$row]['nov_amount'] = $novData->rent_per_month;
+                            $data[$row]['nov_quantity'] = $novData->quantity_used.' / '.$novData->rent_per_month;
+                            $data[$row]['nov_amount'] = $novData->rent;
                         }
                             $novTotalAmount += $data[$row]['nov_amount'];
 
@@ -441,8 +441,8 @@ class ReportManagementController extends Controller{
                             $data[$row]['dec_no_of_days_used'] = $data[$row]['dec_quantity'] = $data[$row]['dec_amount'] = 0;
                         }else{
                             $data[$row]['dec_no_of_days_used'] = $decData->days_used;
-                            $data[$row]['dec_quantity'] = $decData->quantity_used.' / '.$decData->rent;
-                            $data[$row]['dec_amount'] = $decData->rent_per_month;
+                            $data[$row]['dec_quantity'] = $decData->quantity_used.' / '.$decData->rent_per_month;
+                            $data[$row]['dec_amount'] = $decData->rent;
                         }
                             $decTotalAmount += $data[$row]['dec_amount'];
 
@@ -629,6 +629,7 @@ class ReportManagementController extends Controller{
                     })->export('xls');
 
                     break;
+
                 case 'sitewise_purchase_report' :
                     $projectSite = $projectSiteId = new ProjectSite();
                     $purchaseOrderBill = new PurchaseOrderBill();
@@ -2374,12 +2375,13 @@ class ReportManagementController extends Controller{
                     $subcontractorStructure = new SubcontractorStructure();
                     $subcontractorBill = new SubcontractorBill();
                     $subcontractorBillStatus = new SubcontractorBillStatus();
-                   /* $assetMaintenanceBillPayment = new AssetMaintenanceBillPayment();
-                    $purchaseOrderBill = new PurchaseOrderBill();
-                    $inventoryComponentTransfer = new InventoryComponentTransfers();
-                    $inventoryTransferTypes = new InventoryTransferTypes();
-                    $inventoryComponentTransferStatus = new InventoryComponentTransferStatus();
-                    $siteTransferBill = new SiteTransferBill();*/
+                    $assetRentMonthlyExpense = new AssetRentMonthlyExpenses();
+                    /* $assetMaintenanceBillPayment = new AssetMaintenanceBillPayment();
+                     $purchaseOrderBill = new PurchaseOrderBill();
+                     $inventoryComponentTransfer = new InventoryComponentTransfers();
+                     $inventoryTransferTypes = new InventoryTransferTypes();
+                     $inventoryComponentTransferStatus = new InventoryComponentTransferStatus();
+                     $siteTransferBill = new SiteTransferBill();*/
                     $purchaseOrderBillMonthlyExpense = new PurchaseOrderBillMonthlyExpense();
                     $peticashSalaryTransactionMonthlyExpense = new PeticashSalaryTransactionMonthlyExpense();
                     $peticashPurchaseTransactionMonthlyExpense = new PeticashPurchaseTransactionMonthlyExpense();
@@ -2402,6 +2404,8 @@ class ReportManagementController extends Controller{
 
                     //$inventoryComponentSiteTransferIds = $inventoryTransferTypes->where('slug','site')->get();
                     //$approvedComponentTransferStatusId = $inventoryComponentTransferStatus->where('slug','approved')->pluck('id');
+                    $assetRentMonthlyExpenseData = $assetRentMonthlyExpense->where('year_id',$selectedYear['id'])
+                                                    ->where('project_site_id',$project_site_id)->get();
                     foreach ($totalMonths as $month){
                         $billIds = $bill->where('quotation_id',$quotation['id'])
                             ->where('bill_status_id',$approvedBillStatusId)->orderBy('id')
@@ -2517,7 +2521,9 @@ class ReportManagementController extends Controller{
                             ->where('month_id',$month['id'])
                             ->where('year_id',$selectedYear['id'])
                             ->pluck('distributed_amount')->first();
-
+                        foreach ($assetRentMonthlyExpenseData as $assetRentMonthlyExpense){
+                            $assetRent += (json_decode($assetRentMonthlyExpense[$month['slug']]) == null) ? 0 : json_decode($assetRentMonthlyExpense[$month['slug']])->rent;
+                        }
                     }
                   //  $purchaseTaxAmount = $assetMaintenanceGst + $purchaseOrderGst + $inventorySiteTransfersInGst + $siteTransferBillGst - $inventorySiteTransfersOutGst;
                    // $indirectExpenses = $salesTaxAmount - $purchaseTaxAmount - $subcontractorGst;
@@ -3296,6 +3302,7 @@ class ReportManagementController extends Controller{
             $peticashSalaryTransactionMonthlyExpense = new PeticashSalaryTransactionMonthlyExpense();
             $peticashPurchaseTransactionMonthlyExpense = new PeticashPurchaseTransactionMonthlyExpense();
             $projectSiteAdvancePayment = new ProjectSiteAdvancePayment();
+            $assetRentMonthlyExpense = new AssetRentMonthlyExpenses();
             $outstandingMobilization = $projectSiteAdvancePayment->where('project_site_id',$projectSiteId)->sum('amount');
             $approvedBillStatusId = $billStatus->where('slug','approved')->pluck('id')->first();
             $sales = $receipt = $total = $totalRetention = $totalHold = $debitAmount = $tdsAmount = $subcontractorTotal =
@@ -3367,6 +3374,9 @@ class ReportManagementController extends Controller{
                     }
                     $officeExpense = $projectSiteSalaryDistribution->where('project_site_id',$projectSiteId)
                         ->sum('distributed_amount');
+
+                    $assetRentMonthlyExpenseData = $assetRentMonthlyExpense->where('year_id',$selectedYear['id'])
+                        ->where('project_site_id',$project_site_id)->get();
 
                     /*$assetMaintenanceGst += $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
                         ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
