@@ -3302,7 +3302,6 @@ class ReportManagementController extends Controller{
             $peticashSalaryTransactionMonthlyExpense = new PeticashSalaryTransactionMonthlyExpense();
             $peticashPurchaseTransactionMonthlyExpense = new PeticashPurchaseTransactionMonthlyExpense();
             $projectSiteAdvancePayment = new ProjectSiteAdvancePayment();
-            $assetRentMonthlyExpense = new AssetRentMonthlyExpenses();
             $outstandingMobilization = $projectSiteAdvancePayment->where('project_site_id',$projectSiteId)->sum('amount');
             $approvedBillStatusId = $billStatus->where('slug','approved')->pluck('id')->first();
             $sales = $receipt = $total = $totalRetention = $totalHold = $debitAmount = $tdsAmount = $subcontractorTotal =
@@ -3375,8 +3374,6 @@ class ReportManagementController extends Controller{
                     $officeExpense = $projectSiteSalaryDistribution->where('project_site_id',$projectSiteId)
                         ->sum('distributed_amount');
 
-                    $assetRentMonthlyExpenseData = $assetRentMonthlyExpense->where('year_id',$selectedYear['id'])
-                        ->where('project_site_id',$project_site_id)->get();
 
                     /*$assetMaintenanceGst += $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
                         ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
