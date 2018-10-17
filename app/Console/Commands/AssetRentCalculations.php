@@ -70,7 +70,7 @@ class AssetRentCalculations extends Command
                 $thisYear = $year->where('slug',date('Y', strtotime('last month')))->first();
             }
             $projectSite = new ProjectSite();
-            $projectSites = $projectSite/*->where('id',23)*/->get();
+            $projectSites = $projectSite->where('id',23)->get();
             $data = array();
             $inTransferTypeIds = $inventoryTransferType->where('type','IN')->pluck('id')->toArray();
             $carryForwardQuantity = 0;
@@ -132,10 +132,12 @@ class AssetRentCalculations extends Command
                                 $lastMonthId = $thisMonth['id']-2;
                                 $noOfDaysInMonth = cal_days_in_month(CAL_GREGORIAN, $thisMonth['id'], $thisYear['slug']);
                                 $lastMonthData = json_decode($asseRentMonthlyExpenseData[$months[$lastMonthId]['slug']]);
+
                                 $jsonData['rent_per_month'] = $lastMonthData->rent_per_month;
-                                $jsonData['days_used'] = $noOfDaysInMonth;
+                                //$jsonData['days_used'] = $noOfDaysInMonth;
+                                $jsonData['days_used'] = ($lastMonthData->carry_forward_quantity == 0) ? 0 : $noOfDaysInMonth;
                                 $jsonData['quantity_used'] = $lastMonthData->carry_forward_quantity;
-                                $jsonData['rent'] = ($lastMonthData->rent_per_month * $noOfDaysInMonth * $lastMonthData->carry_forward_quantity);
+                                $jsonData['rent'] = ($lastMonthData->rent_per_month * $jsonData['days_used'] * $lastMonthData->carry_forward_quantity);
                                 $jsonData['carry_forward_quantity'] = $lastMonthData->carry_forward_quantity;
                                 $asseRentMonthlyExpenseData->update([
                                     $thisMonth['slug'] => json_encode($jsonData)
