@@ -54,7 +54,7 @@ class AssetRentCalculations extends Command
             $inventoryComponentTransfer = new InventoryComponentTransfers();
             $inventoryComponent = new InventoryComponent();
             $inventoryTransferType = new InventoryTransferTypes();
-            $asseRentMonthlyExpense = new AssetRentMonthlyExpenses();
+            $assetRentMonthlyExpense = new AssetRentMonthlyExpenses();
             if($this->option('year') != 'null'){
                 $yearSlug = $this->option('year');
                 $currentYear = date('Y');
@@ -70,10 +70,7 @@ class AssetRentCalculations extends Command
                 $thisYear = $year->where('slug',date('Y', strtotime('last month')))->first();
             }
             $projectSite = new ProjectSite();
-            $projectSiteIds = $projectSite->pluck('id')->toArray();
-            foreach ($projectSiteIds as $projectSiteId){
-                $projectSites = $projectSite->where('id',$projectSiteId)->get();
-
+            $projectSites = $projectSite->get();
             $data = array();
             $inTransferTypeIds = $inventoryTransferType->where('type','IN')->pluck('id')->toArray();
             $carryForwardQuantity = 0;
@@ -93,35 +90,35 @@ class AssetRentCalculations extends Command
                             ->where('inventory_component_id',$inventoryComponent['inventory_component_id'])
                             ->orderBy('created_at', 'asc')
                             ->get();
-                        $asseRentMonthlyExpenseData = $asseRentMonthlyExpense->where('project_site_id',$projectSite['id'])
+                        $assetRentMonthlyExpenseData = $assetRentMonthlyExpense->where('project_site_id',$projectSite['id'])
                             ->where('year_id',$thisYear['id'])
                             ->where('asset_id',$inventoryComponent['asset_id'])
                             ->first();
                         if(count($inventoryComponentTransfers) == 0){
                             if($thisMonth['slug'] == 'january'){
-                                $lastYearAsseRentMonthlyExpenseData = $asseRentMonthlyExpense->where('project_site_id',$projectSite['id'])
+                                $lastYearAssetRentMonthlyExpenseData = $assetRentMonthlyExpense->where('project_site_id',$projectSite['id'])
                                     ->where('year_id',$thisYear['slug']-1)
                                     ->where('asset_id',$inventoryComponent['asset_id'])
                                     ->first();
-                                if($lastYearAsseRentMonthlyExpenseData != null){
+                                if($lastYearAssetRentMonthlyExpenseData != null){
                                     $noOfDaysInMonth = cal_days_in_month(CAL_GREGORIAN, 1, $thisYear['slug']);
-                                    $lastMonthData = json_decode($lastYearAsseRentMonthlyExpenseData['december']);
+                                    $lastMonthData = json_decode($lastYearAssetRentMonthlyExpenseData['december']);
                                     $jsonData['rent_per_month'] = $lastMonthData->rent_per_month;
                                     $jsonData['days_used'] = $noOfDaysInMonth;
                                     $jsonData['quantity_used'] = $lastMonthData->carry_forward_quantity;
                                     $jsonData['rent'] = ($lastMonthData->rent_per_month * $noOfDaysInMonth * $lastMonthData->carry_forward_quantity);
                                     $jsonData['carry_forward_quantity'] = $lastMonthData->carry_forward_quantity;
-                                    $asseRentMonthlyExpenseData->update([
+                                    $assetRentMonthlyExpenseData->update([
                                         $thisMonth['slug'] => json_encode($jsonData)
                                     ]);
                                 }else{
                                     $jsonData['rent_per_month'] = $jsonData['days_used'] = $jsonData['quantity_used'] = $jsonData['rent'] = $jsonData['carry_forward_quantity'] = 0;
-                                    if($asseRentMonthlyExpenseData != null){
-                                        $asseRentMonthlyExpenseData->update([
+                                    if($assetRentMonthlyExpenseData != null){
+                                        $assetRentMonthlyExpenseData->update([
                                             $thisMonth['slug'] => json_encode($jsonData)
                                         ]);
                                     }else{
-                                        $asseRentMonthlyExpense->create([
+                                        $assetRentMonthlyExpense->create([
                                             'project_site_id' => $projectSite['id'],
                                             'year_id' => $thisYear['id'],
                                             'asset_id' => $inventoryComponent['asset_id'],
@@ -134,7 +131,7 @@ class AssetRentCalculations extends Command
                             }else{
                                 $lastMonthId = $thisMonth['id']-2;
                                 $noOfDaysInMonth = cal_days_in_month(CAL_GREGORIAN, $thisMonth['id'], $thisYear['slug']);
-                                $lastMonthData = json_decode($asseRentMonthlyExpenseData[$months[$lastMonthId]['slug']]);
+                                $lastMonthData = json_decode($assetRentMonthlyExpenseData[$months[$lastMonthId]['slug']]);
 
                                 $jsonData['rent_per_month'] = $lastMonthData->rent_per_month;
                                 //$jsonData['days_used'] = $noOfDaysInMonth;
@@ -142,7 +139,7 @@ class AssetRentCalculations extends Command
                                 $jsonData['quantity_used'] = $lastMonthData->carry_forward_quantity;
                                 $jsonData['rent'] = ($lastMonthData->rent_per_month * $jsonData['days_used'] * $lastMonthData->carry_forward_quantity);
                                 $jsonData['carry_forward_quantity'] = $lastMonthData->carry_forward_quantity;
-                                $asseRentMonthlyExpenseData->update([
+                                $assetRentMonthlyExpenseData->update([
                                     $thisMonth['slug'] => json_encode($jsonData)
                                 ]);
                             }
@@ -199,13 +196,13 @@ class AssetRentCalculations extends Command
                                 $jsonData['rent'] = $totalRentForMonth;
                                 $jsonData['carry_forward_quantity'] = $carryForwardQuantity;
 
-                                if($asseRentMonthlyExpenseData != null){
-                                    $asseRentMonthlyExpenseData->update([
+                                if($assetRentMonthlyExpenseData != null){
+                                    $assetRentMonthlyExpenseData->update([
                                         $thisMonth['slug'] => json_encode($jsonData)
                                     ]);
 
                                 }else{
-                                    $asseRentMonthlyExpense->create([
+                                    $assetRentMonthlyExpense->create([
                                         'project_site_id' => $projectSite['id'],
                                         'year_id' => $thisYear['id'],
                                         'asset_id' => $inventoryComponent['asset_id'],
@@ -217,7 +214,6 @@ class AssetRentCalculations extends Command
                     }
                 }
 
-            }
             }
         }catch(\Exception $e){
             $data = [
