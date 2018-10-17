@@ -70,7 +70,7 @@ class AssetRentCalculations extends Command
                 $thisYear = $year->where('slug',date('Y', strtotime('last month')))->first();
             }
             $projectSite = new ProjectSite();
-            $projectSites = $projectSite->where('id',23)->get();
+            $projectSites = $projectSite/*->where('id',23)*/->get();
             $data = array();
             $inTransferTypeIds = $inventoryTransferType->where('type','IN')->pluck('id')->toArray();
             $carryForwardQuantity = 0;
