@@ -59,14 +59,13 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('get-cities',array('uses' => 'Admin\AddressController@getCities'));
         Route::get('change-status/{address}',array('uses' => 'Admin\AddressController@changeAddressStatus'));
     });
-
+    Route::get('script',array('uses' => 'Admin\CategoryController@getData'));
     Route::group(['prefix' => 'category'],function(){
         Route::get('create',array('uses' => 'Admin\CategoryController@getCreateView'));
         Route::post('create',array('uses' => 'Admin\CategoryController@createCategory'));
         Route::get('edit/{category}',array('uses' => 'Admin\CategoryController@getEditView'));
         Route::post('edit/{category}',array('uses' => 'Admin\CategoryController@editCategory'));
         Route::get('manage',array('uses' => 'Admin\CategoryController@getManageView'));
-        Route::get('manage',array('uses' => 'Admin\CategoryController@getData'));
         Route::post('listing',array('uses' => 'Admin\CategoryController@categoryListing'));
         Route::get('change-status/{category}',array('uses' => 'Admin\CategoryController@changeCategoryStatus'));
         Route::post('check-name',array('uses' => 'Admin\CategoryController@checkCategoryName'));
