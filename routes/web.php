@@ -66,6 +66,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('edit/{category}',array('uses' => 'Admin\CategoryController@getEditView'));
         Route::post('edit/{category}',array('uses' => 'Admin\CategoryController@editCategory'));
         Route::get('manage',array('uses' => 'Admin\CategoryController@getManageView'));
+        Route::get('manage',array('uses' => 'Admin\CategoryController@getData'));
         Route::post('listing',array('uses' => 'Admin\CategoryController@categoryListing'));
         Route::get('change-status/{category}',array('uses' => 'Admin\CategoryController@changeCategoryStatus'));
         Route::post('check-name',array('uses' => 'Admin\CategoryController@checkCategoryName'));

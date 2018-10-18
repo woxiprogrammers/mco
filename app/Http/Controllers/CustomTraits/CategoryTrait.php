@@ -5,13 +5,131 @@
  */
 
 namespace App\Http\Controllers\CustomTraits;
+use App\AssetRentMonthlyExpenses;
 use App\Category;
 use App\Http\Requests\CategoryRequest;
+use App\InventoryComponent;
+use App\InventoryComponentTransfers;
+use App\InventoryTransferTypes;
+use App\Month;
+use App\ProjectSite;
+use App\Year;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 trait CategoryTrait{
+
+    public function getData(Request $request){
+        try{
+            $year = new Year();
+            $month = new Month();
+            $projectSite = new ProjectSite();
+            $inventoryComponentTransfer = new InventoryComponentTransfers();
+            $inventoryComponent = new InventoryComponent();
+            $inventoryTransferType = new InventoryTransferTypes();
+            $assetRentMonthlyExpense = new AssetRentMonthlyExpenses();
+                $yearSlug = '2018';
+                $currentYear = date('Y');
+                $thisYear = $year->where('slug',$yearSlug)->first();
+                if($currentYear == $thisYear['slug']){
+                    $months = $month->where('id','<',date('m'))->orderBy('id','asc')->get();
+                }else{
+                    $months = $month->orderBy('id','asc')->get();
+                }
+                $totalMonths = $month->orderBy('id','asc')->get();
+            $allProjectSiteIds = $projectSite->pluck('id');
+            $inTransferTypeIds = $inventoryTransferType->where('type','IN')->pluck('id')->toArray();
+            foreach($allProjectSiteIds as $projectSiteId){
+                $inventoryComponentData = $inventoryComponent->where('project_site_id',$projectSiteId)
+                                            ->where('is_material',false)
+                                            ->where('id',953)
+                                            ->select('id','reference_id')->get();
+                foreach ($inventoryComponentData as $thisInventoryComponent){
+                    $assetId = $thisInventoryComponent['reference_id'];
+                    $alreadyExistAssetRentMonthlyExpense = $assetRentMonthlyExpense
+                                        ->where('year_id',$thisYear['id'])
+                                        ->where('project_site_id',$projectSiteId)
+                                        ->where('asset_id',$assetId)
+                                        ->first();
+                    //dd($months->toArray());
+                    foreach ($months as $thisMonth){
+                        $firstDayOfThisMonth = date('Y-m-d H:i:s', mktime(0, 0, 0, $thisMonth['id'], 1, $thisYear['slug']));
+                        $lastDayOfThisMonth = date('Y-m-t H:i:s', mktime(23, 59, 59, $thisMonth['id'], 1, $thisYear['slug']));
+                        $lastMonthData = array();
+                        $thisMonthAssetRentMonthlyExpenseData = array();
+                        if($thisMonth['slug'] == 'january'){
+                            $lastYearAssetRentMonthlyExpenseData = $assetRentMonthlyExpense->where('project_site_id',$projectSite['id'])
+                                                            ->where('year_id',$thisYear['slug']-1)
+                                                            ->where('asset_id',$inventoryComponent['asset_id'])
+                                                            ->first();
+                            if($lastYearAssetRentMonthlyExpenseData != null){
+                                $noOfDaysInJanuaryMonth = cal_days_in_month(CAL_GREGORIAN, 1, $thisYear['slug']);
+                                $lastYearDecemberMonthData = json_decode($lastYearAssetRentMonthlyExpenseData['december']);
+                                $lastMonthData['rent_per_day_per_quantity'] = $lastYearDecemberMonthData->rent_per_day_per_quantity;
+                                $lastMonthData['days_used'] = ($lastYearDecemberMonthData->carry_forward_quantity == 0) ? 0 : $noOfDaysInJanuaryMonth;
+                                $lastMonthData['quantity_used'] = $lastYearDecemberMonthData->carry_forward_quantity;
+                                $lastMonthData['rent_for_month'] = ($lastMonthData['rent_per_day_per_quantity'] * $lastMonthData['days_used'] * $lastMonthData['quantity_used']);
+                                $lastMonthData['carry_forward_quantity'] = $lastYearDecemberMonthData->carry_forward_quantity;
+                            }else{
+                                $lastMonthData['rent_per_day_per_quantity'] = 0;
+                                $lastMonthData['quantity_used'] = 0;
+                                $lastMonthData['days_used'] = 0;
+                                $lastMonthData['rent_for_month'] = 0;
+                                $lastMonthData['carry_forward_quantity'] = 0;
+                            }
+                        }else{
+                            if($alreadyExistAssetRentMonthlyExpense != null){
+                                $lastMonthId = $thisMonth['id']-1;
+                                $lastMonthName = $totalMonths->where('id',$lastMonthId)->pluck('slug')->first();
+                                $noOfDaysInThisMonth = cal_days_in_month(CAL_GREGORIAN, $thisMonth['id'], $thisYear['slug']);
+                                $lastMonthData = json_decode($alreadyExistAssetRentMonthlyExpense[$lastMonthName]);
+                                $lastMonthData['rent_per_day_per_quantity'] = $lastMonthData->rent_per_day_per_quantity;
+                                $lastMonthData['days_used'] = ($lastMonthData->carry_forward_quantity == 0) ? 0 : $noOfDaysInThisMonth;
+                                $lastMonthData['quantity_used'] = $lastMonthData->carry_forward_quantity;
+                                $lastMonthData['rent_for_month'] = ($lastMonthData['rent_per_day_per_quantity'] * $lastMonthData['days_used'] * $lastMonthData['quantity_used']);
+                                $lastMonthData['carry_forward_quantity'] = $lastMonthData->carry_forward_quantity;
+                            }else{
+                                $lastMonthData['rent_per_day_per_quantity'] = 0;
+                                $lastMonthData['quantity_used'] = 0;
+                                $lastMonthData['days_used'] = 0;
+                                $lastMonthData['rent_for_month'] = 0;
+                                $lastMonthData['carry_forward_quantity'] = 0;
+                            }
+                        }
+                        $inventoryComponentTransfers = $inventoryComponentTransfer
+                            ->where('inventory_component_id',$thisInventoryComponent['id'])
+                            ->whereMonth('created_at', $thisMonth['id'])
+                            ->whereYear('created_at', $thisYear['slug'])
+                            ->orderBy('created_at', 'asc')
+                            ->get();
+                        if(count($inventoryComponentTransfers) > 0){
+                            //foreach ($inventoryComponentTransfers as $thisTransfer){
+                            for($iterator = 0; $iterator < count($inventoryComponentTransfers); $iterator++){
+                                if(date('d-m-y',strtotime($firstDayOfThisMonth)) != date('d-m-y',strtotime($inventoryComponentTransfers[$iterator]['created_at']))){
+                                        
+                                }
+
+
+                            } // Transfer loop end
+                        }else{
+                            $thisMonthAssetRentMonthlyExpenseData = $lastMonthData;
+
+                        }
+                        //create or update
+                    } //Month for loop end
+                } // Asset Loop end
+            } //Project Site Loop End
+        }catch(\Exception $e){
+            $data = [
+                'action' => "Get asset Rent Data",
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
 
     public function getCreateView(Request $request){
         try{
