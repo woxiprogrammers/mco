@@ -362,97 +362,156 @@ class ReportManagementController extends Controller{
                         $data[$row]['asset_name'] = ($assetData['model_number'] == null) ? $assetData['name'] : $assetData['name'].' ('.$assetData['model_number'].' )';
                         $data[$row]['asset_quantity'] = $assetData['quantity'];
                         $data[$row]['asset_rent_per_day'] = $assetData['rent_per_day'];
+
                         $januaryData = json_decode($assetRentMonthlyExpense['january']);
-                        $data[$row]['jan_no_of_days_used'] = $januaryData->days_used;
-                        $data[$row]['jan_quantity'] = $januaryData->quantity_used.' / '.$januaryData->rent_per_month;
-                        $data[$row]['jan_amount'] = $januaryData->rent;
+                        if($januaryData == null){
+                            $data[$row]['jan_no_of_days_used'] = $data[$row]['jan_quantity'] = $data[$row]['jan_amount'] = '-';
+                            $januaryTotalAmount += 0;
+                        }else {
+                            $data[$row]['jan_no_of_days_used'] = $januaryData->days_used;
+                            $data[$row]['jan_quantity'] = $januaryData->carry_forward_quantity.' / '.$januaryData->rent_per_day_per_quantity;
+                            $data[$row]['jan_amount'] = $januaryData->rent_for_month;
                             $januaryTotalAmount += $data[$row]['jan_amount'];
+                        }
+
 
                         $februaryData = json_decode($assetRentMonthlyExpense['february']);
-                        $data[$row]['feb_no_of_days_used'] = $februaryData->days_used;
-                        $data[$row]['feb_quantity'] =  $februaryData->quantity_used.' / '.$februaryData->rent_per_month;
-                        $data[$row]['feb_amount'] = $februaryData->rent;
+                        if($februaryData == null){
+                            $data[$row]['feb_no_of_days_used'] = $data[$row]['feb_quantity'] = $data[$row]['feb_amount'] = '-';
+                            $februaryTotalAmount += 0;
+                        }else {
+                            $data[$row]['feb_no_of_days_used'] = $februaryData->days_used;
+                            $data[$row]['feb_quantity'] =  $februaryData->carry_forward_quantity.' / '.$februaryData->rent_per_day_per_quantity;
+                            $data[$row]['feb_amount'] = $februaryData->rent_for_month;
                             $februaryTotalAmount += $data[$row]['feb_amount'];
 
+                        }
+
                         $marchData = json_decode($assetRentMonthlyExpense['march']);
-                        $data[$row]['march_no_of_days_used'] = $marchData->days_used;
-                        $data[$row]['march_quantity'] = $marchData->quantity_used.' / '.$marchData->rent_per_month;
-                        $data[$row]['march_amount'] = $marchData->rent;
+                        if($marchData == null){
+                            $data[$row]['march_no_of_days_used'] = $data[$row]['march_quantity'] = $data[$row]['march_amount'] = '-';
+                            $marchTotalAmount += 0;
+                        }else {
+                            $data[$row]['march_no_of_days_used'] = $marchData->days_used;
+                            $data[$row]['march_quantity'] = $marchData->carry_forward_quantity.' / '.$marchData->rent_per_day_per_quantity;
+                            $data[$row]['march_amount'] = $marchData->rent_for_month;
                             $marchTotalAmount += $data[$row]['march_amount'];
+                        }
+
 
                         $aprilData = json_decode($assetRentMonthlyExpense['april']);
-                        $data[$row]['april_no_of_days_used'] = $aprilData->days_used;
-                        $data[$row]['april_quantity'] = $aprilData->quantity_used.' / '.$aprilData->rent_per_month;
-                        $data[$row]['april_amount'] = $aprilData->rent;
+                        if($aprilData == null){
+                            $data[$row]['april_no_of_days_used'] = $data[$row]['april_quantity'] = $data[$row]['april_amount'] = '-';
+                            $aprilTotalAmount += 0;
+                        }else {
+                            $data[$row]['april_no_of_days_used'] = $aprilData->days_used;
+                            $data[$row]['april_quantity'] = $aprilData->carry_forward_quantity . ' / ' . $aprilData->rent_per_day_per_quantity;
+                            $data[$row]['april_amount'] = $aprilData->rent_for_month;
                             $aprilTotalAmount += $data[$row]['april_amount'];
+                        }
 
                         $mayData = json_decode($assetRentMonthlyExpense['may']);
-                        $data[$row]['may_no_of_days_used'] = $mayData->days_used;
-                        $data[$row]['may_quantity'] = $mayData->quantity_used.' / '.$mayData->rent_per_month;
-                        $data[$row]['may_amount'] = $mayData->rent;
+                        if($mayData == null){
+                            $data[$row]['may_no_of_days_used'] = $data[$row]['may_quantity'] = $data[$row]['may_amount'] = '-';
+                            $mayTotalAmount += 0;
+                        }else{
+                            $data[$row]['may_no_of_days_used'] = $mayData->days_used;
+                            $data[$row]['may_quantity'] = $mayData->carry_forward_quantity.' / '.$mayData->rent_per_day_per_quantity;
+                            $data[$row]['may_amount'] = $mayData->rent_for_month;
                             $mayTotalAmount += $data[$row]['may_amount'];
+                        }
+
 
                         $juneData = json_decode($assetRentMonthlyExpense['june']);
-                        $data[$row]['june_no_of_days_used'] = $juneData->days_used;
-                        $data[$row]['june_quantity'] = $juneData->quantity_used.' / '.$juneData->rent_per_month;
-                        $data[$row]['june_amount'] = $juneData->rent;
+                        if($juneData == null){
+                            $data[$row]['june_no_of_days_used'] = $data[$row]['june_quantity'] = $data[$row]['june_amount'] = '-';
+                            $juneTotalAmount += 0;
+                        }else{
+                            $data[$row]['june_no_of_days_used'] = $juneData->days_used;
+                            $data[$row]['june_quantity'] = $juneData->carry_forward_quantity.' / '.$juneData->rent_per_day_per_quantity;
+                            $data[$row]['june_amount'] = $juneData->rent_for_month;
                             $juneTotalAmount += $data[$row]['june_amount'];
+                        }
+
 
                         $julyData = json_decode($assetRentMonthlyExpense['july']);
-                        $data[$row]['july_no_of_days_used'] = $julyData->days_used;
-                        $data[$row]['july_quantity'] = $julyData->quantity_used.' / '.$julyData->rent_per_month;
-                        $data[$row]['july_amount'] = $julyData->rent;
+                        if($julyData == null){
+                            $data[$row]['july_no_of_days_used'] = $data[$row]['july_quantity'] = $data[$row]['july_amount'] = '-';
+                            $julyTotalAmount += 0;
+                        }else{
+                            $data[$row]['july_no_of_days_used'] = $julyData->days_used;
+                            $data[$row]['july_quantity'] = $julyData->carry_forward_quantity.' / '.$julyData->rent_per_day_per_quantity;
+                            $data[$row]['july_amount'] = $julyData->rent_for_month;
                             $julyTotalAmount += $data[$row]['july_amount'];
+                        }
+
 
                         $augustData = json_decode($assetRentMonthlyExpense['august']);
-                        $data[$row]['august_no_of_days_used'] = $augustData->days_used;
-                        $data[$row]['august_quantity'] = $augustData->quantity_used.' / '.$augustData->rent_per_month;
-                        $data[$row]['august_amount'] = $augustData->rent;
+                        if($augustData == null){
+                            $data[$row]['august_no_of_days_used'] = $data[$row]['august_quantity'] = $data[$row]['august_amount'] = '-';
+                            $augustTotalAmount += 0;
+                        }else{
+                            $data[$row]['august_no_of_days_used'] = $augustData->days_used;
+                            $data[$row]['august_quantity'] = $augustData->carry_forward_quantity.' / '.$augustData->rent_per_day_per_quantity;
+                            $data[$row]['august_amount'] = $augustData->rent_for_month;
                             $augustTotalAmount += $data[$row]['august_amount'];
 
+                        }
+
                         $septData = json_decode($assetRentMonthlyExpense['september']);
-                        $data[$row]['sept_no_of_days_used'] = $septData->days_used;
-                        $data[$row]['sept_quantity'] = $septData->quantity_used.' / '.$septData->rent_per_month;
-                        $data[$row]['sept_amount'] = $septData->rent;
+                        if($septData == null){
+                            $data[$row]['sept_no_of_days_used'] = $data[$row]['sept_quantity'] = $data[$row]['sept_amount'] = '-';
+                            $septTotalAmount += 0;
+                        }else{
+                            $data[$row]['sept_no_of_days_used'] = $septData->days_used;
+                            $data[$row]['sept_quantity'] = $septData->carry_forward_quantity.' / '.$septData->rent_per_day_per_quantity;
+                            $data[$row]['sept_amount'] = $septData->rent_for_month;
                             $septTotalAmount += $data[$row]['sept_amount'];
+                        }
+
 
                         $octData = json_decode($assetRentMonthlyExpense['october']);
                         if($octData == null){
-                            $data[$row]['oct_no_of_days_used'] = $data[$row]['oct_quantity'] = $data[$row]['oct_amount'] = 0;
+                            $data[$row]['oct_no_of_days_used'] = $data[$row]['oct_quantity'] = $data[$row]['oct_amount'] = '-';
+                            $octTotalAmount += 0;
                         }else{
                             $data[$row]['oct_no_of_days_used'] = $octData->days_used;
-                            $data[$row]['oct_quantity'] = $octData->quantity_used.' / '.$octData->rent_per_month;
-                            $data[$row]['oct_amount'] = $octData->rent;
+                            $data[$row]['oct_quantity'] = $octData->carry_forward_quantity.' / '.$octData->rent_per_day_per_quantity;
+                            $data[$row]['oct_amount'] = $octData->rent_for_month;
+                            $octTotalAmount += $data[$row]['oct_amount'];
                         }
-                        $octTotalAmount += $data[$row]['oct_amount'];
 
                         $novData = json_decode($assetRentMonthlyExpense['november']);
                         if($novData == null){
-                            $data[$row]['nov_no_of_days_used'] = $data[$row]['nov_quantity'] = $data[$row]['nov_amount'] = 0;
+                            $data[$row]['nov_no_of_days_used'] = $data[$row]['nov_quantity'] = $data[$row]['nov_amount'] = '-';
+                            $novTotalAmount += 0;
                         }else{
                             $data[$row]['nov_no_of_days_used'] = $novData->days_used;
-                            $data[$row]['nov_quantity'] = $novData->quantity_used.' / '.$novData->rent_per_month;
-                            $data[$row]['nov_amount'] = $novData->rent;
-                        }
+                            $data[$row]['nov_quantity'] = $novData->carry_forward_quantity.' / '.$novData->rent_per_month;
+                            $data[$row]['nov_amount'] = $novData->rent_for_month;
                             $novTotalAmount += $data[$row]['nov_amount'];
+                        }
 
                         $decData = json_decode($assetRentMonthlyExpense['december']);
                         if($decData == null){
-                            $data[$row]['dec_no_of_days_used'] = $data[$row]['dec_quantity'] = $data[$row]['dec_amount'] = 0;
+                            $data[$row]['dec_no_of_days_used'] = $data[$row]['dec_quantity'] = $data[$row]['dec_amount'] = '-';
+                            $decTotalAmount += 0;
                         }else{
                             $data[$row]['dec_no_of_days_used'] = $decData->days_used;
-                            $data[$row]['dec_quantity'] = $decData->quantity_used.' / '.$decData->rent_per_month;
-                            $data[$row]['dec_amount'] = $decData->rent;
-                        }
+                            $data[$row]['dec_quantity'] = $decData->carry_forward_quantity.' / '.$decData->rent_per_month;
+                            $data[$row]['dec_amount'] = $decData->rent_for_month;
                             $decTotalAmount += $data[$row]['dec_amount'];
+                        }
 
                         $row++;
                     }
+                    $total = $januaryTotalAmount + $februaryTotalAmount + $marchTotalAmount + $aprilTotalAmount + $mayTotalAmount + $juneTotalAmount
+                            + $julyTotalAmount + $augustTotalAmount + $septTotalAmount + $octTotalAmount + $novTotalAmount + $decTotalAmount;
                     $data[$row]['make_bold'] = true;
                     $data[$row] = array_merge($data[$row],array('Total',null,null,null,null,$januaryTotalAmount ,null,null, $februaryTotalAmount ,null,null, $marchTotalAmount
                     ,null,null, $aprilTotalAmount ,null,null, $mayTotalAmount ,null,null, $juneTotalAmount ,null,null,
                     $julyTotalAmount ,null,null, $augustTotalAmount ,null,null, $septTotalAmount ,null,null, $octTotalAmount
-                    ,null,null, $novTotalAmount ,null,null, $decTotalAmount));
+                    ,null,null, $novTotalAmount ,null,null, $decTotalAmount, $total));
                     $projectName = $projectSite->join('projects','projects.id','=','project_sites.project_id')
                         ->where('project_sites.id',$project_site_id)->pluck('projects.name')->first();
                     $date = date($selectedYear['slug']);
@@ -2522,7 +2581,7 @@ class ReportManagementController extends Controller{
                             ->where('year_id',$selectedYear['id'])
                             ->pluck('distributed_amount')->first();
                         foreach ($assetRentMonthlyExpenseData as $assetRentMonthlyExpense){
-                            $assetRent += (json_decode($assetRentMonthlyExpense[$month['slug']]) == null) ? 0 : json_decode($assetRentMonthlyExpense[$month['slug']])->rent;
+                            $assetRent += (json_decode($assetRentMonthlyExpense[$month['slug']]) == null) ? 0 : json_decode($assetRentMonthlyExpense[$month['slug']])->rent_for_month;
                         }
                     }
                   //  $purchaseTaxAmount = $assetMaintenanceGst + $purchaseOrderGst + $inventorySiteTransfersInGst + $siteTransferBillGst - $inventorySiteTransfersOutGst;
@@ -3291,6 +3350,7 @@ class ReportManagementController extends Controller{
             $subcontractorStructure = new SubcontractorStructure();
             $subcontractorBill = new SubcontractorBill();
             $subcontractorBillStatus = new SubcontractorBillStatus();
+            $assetRentMonthlyExpense = new AssetRentMonthlyExpenses();
             /*$assetMaintenanceBillPayment = new AssetMaintenanceBillPayment();
             $purchaseOrderBill = new PurchaseOrderBill();
             $inventoryComponentTransfer = new InventoryComponentTransfers();
@@ -3373,8 +3433,14 @@ class ReportManagementController extends Controller{
                     }
                     $officeExpense = $projectSiteSalaryDistribution->where('project_site_id',$projectSiteId)
                         ->sum('distributed_amount');
-
-
+                    $assetRentMonthlyExpenseData = $assetRentMonthlyExpense
+                        ->where('project_site_id',$projectSiteId)->get();
+                    $totalMonths = $month->orderBy('id','asc')->get();
+                    foreach ($assetRentMonthlyExpenseData as $assetRentMonthlyExpense){
+                        foreach($totalMonths as $month){
+                            $assetRent += (json_decode($assetRentMonthlyExpense[$month['slug']]) == null) ? 0 : json_decode($assetRentMonthlyExpense[$month['slug']])->rent_for_month;
+                        }
+                    }
                     /*$assetMaintenanceGst += $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
                         ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
                         ->join('assets','assets.id','=','asset_maintenance.asset_id')
@@ -3420,7 +3486,8 @@ class ReportManagementController extends Controller{
                     Log::info('Inside CASE 2');
                     $totalMonths = $month->whereBetween('id',[$startMonthId,$endMonthId])
                         ->select('id','name','slug')->get();
-
+                    $assetRentMonthlyExpenseData = $assetRentMonthlyExpense
+                        ->where('project_site_id',$projectSiteId)->get();
                     foreach ($totalMonths as $month){
                         $billIds = $bill->where('quotation_id',$quotation['id'])
                             ->where('bill_status_id',$approvedBillStatusId)->orderBy('id')
@@ -3483,6 +3550,9 @@ class ReportManagementController extends Controller{
                             ->where('month_id',$month['id'])
                             ->sum('distributed_amount');
 
+                        foreach ($assetRentMonthlyExpenseData as $assetRentMonthlyExpense){
+                                $assetRent += (json_decode($assetRentMonthlyExpense[$month['slug']]) == null) ? 0 : json_decode($assetRentMonthlyExpense[$month['slug']])->rent_for_month;
+                        }
                         /*$assetMaintenanceGst += $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
                             ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
                             ->join('assets','assets.id','=','asset_maintenance.asset_id')
@@ -3536,7 +3606,9 @@ class ReportManagementController extends Controller{
                     $totalMonths = $month->whereBetween('id',[$startMonthId,$endMonthId])
                         ->select('id','name','slug')->get();
                     $selectedYear = $year->where('id',$yearId)->first();
-
+                    $assetRentMonthlyExpenseData = $assetRentMonthlyExpense
+                        ->where('year_id',$selectedYear['id'])
+                        ->where('project_site_id',$projectSiteId)->get();
                     foreach ($totalMonths as $month){
                         $billIds = $bill->where('quotation_id',$quotation['id'])
                             ->where('bill_status_id',$approvedBillStatusId)->orderBy('id')
@@ -3605,6 +3677,9 @@ class ReportManagementController extends Controller{
                             ->where('year_id',$selectedYear['id'])
                             ->sum('distributed_amount');
 
+                        foreach ($assetRentMonthlyExpenseData as $assetRentMonthlyExpense){
+                            $assetRent += (json_decode($assetRentMonthlyExpense[$month['slug']]) == null) ? 0 : json_decode($assetRentMonthlyExpense[$month['slug']])->rent_for_month;
+                        }
                         /*$assetMaintenanceGst += $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
                             ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
                             ->join('assets','assets.id','=','asset_maintenance.asset_id')

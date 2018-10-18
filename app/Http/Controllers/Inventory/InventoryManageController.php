@@ -754,8 +754,9 @@ class InventoryManageController extends Controller
                 $records['data'][$iterator] = [
                     $inventoryComponentTransfers[$pagination]['grn'],
                     $inventoryComponentTransfers[$pagination]['quantity'],
-                    date('d M Y h:i:s',strtotime($inventoryComponentTransfers[$pagination]->created_at)),
+                    $inventoryComponentTransfers[$pagination]->unit->name,
                     $inventoryComponentTransfers[$pagination]->rate_per_unit,
+                    date('d M Y h:i:s',strtotime($inventoryComponentTransfers[$pagination]->created_at)),
                     $transferStatus,
                     $inventoryComponentTransfers[$pagination]->inventoryComponentTransferStatus->name,
                     $action

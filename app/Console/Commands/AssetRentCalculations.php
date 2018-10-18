@@ -30,7 +30,10 @@ class AssetRentCalculations extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'For Asset rent calculation. Two ways to run this command.
+        1. Run the command to calculate rent of assets for all project sites for specified month Eg. php artisan custom:asset-rent-calculate --year=2018
+        2. Through Scheduler that will run first day of every month where it will calculate the asset rent for all project sites of last month.
+        ';
 
     /**
      * Create a new command instance.
@@ -188,7 +191,6 @@ class AssetRentCalculations extends Command
                             $alreadyExistAssetRentMonthlyExpense->update([
                                 $thisMonth['slug'] => json_encode($thisMonthAssetRentMonthlyExpenseData)
                             ]);
-                            //update
                         }else{
                             $assetRentMonthlyExpense->create([
                                 'project_site_id' => $projectSiteId,
@@ -196,9 +198,7 @@ class AssetRentCalculations extends Command
                                 'asset_id' => $assetId,
                                 $thisMonth['slug'] => json_encode($thisMonthAssetRentMonthlyExpenseData)
                             ]);
-                            //create
                         }
-                        //create or update
                     } //Month for loop end
                 } // Asset Loop end
             } //Project Site Loop End
