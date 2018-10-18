@@ -205,7 +205,7 @@ class AssetRentCalculations extends Command
 
         }catch(\Exception $e){
             $data = [
-                'action' => 'Salary Distribution among sites',
+                'action' => 'Asset Rent Calculations',
                 'exception' => $e->getMessage()
             ];
             Log::critical(json_encode($data));
