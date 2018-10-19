@@ -84,6 +84,10 @@
                                         <a href="javascript:window.open('/reports/get-report/{{$reportType}}/{{$project_site_id}}/null/null/null');" style="color: white"> Download
                                             <i class="fa fa-download"></i>
                                         </a>
+                                    @elseif($reportType == 'sitewise_asset_rent_report' )
+                                        <a href="javascript:window.open('/reports/get-report/{{$reportType}}/{{$project_site_id}}/{{$downloadButton['year_id']}}/null/null');" style="color: white"> Download
+                                            <i class="fa fa-download"></i>
+                                        </a>
                                     @else
                                         <a href="javascript:window.open('/reports/get-report/{{$reportType}}/{{$project_site_id}}/{{$downloadButton['start_date']}}/{{$downloadButton['end_date']}}/null');" style="color: white"> Download
                                             <i class="fa fa-download"></i>

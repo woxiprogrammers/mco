@@ -9,9 +9,11 @@
 namespace App\Http\Controllers\Report;
 
 
+use App\Asset;
 use App\AssetMaintenanceBill;
 use App\AssetMaintenanceBillPayment;
 use App\AssetMaintenanceVendorRelation;
+use App\AssetRentMonthlyExpenses;
 use App\Bill;
 use App\BillQuotationExtraItem;
 use App\BillQuotationProducts;
@@ -78,7 +80,9 @@ class ReportManagementController extends Controller{
                             ->orderBy('projects.name','asc')
                             ->where('projects.is_active',true)
                             ->select('project_sites.id','project_sites.name','projects.name as project_name')
-                            ->get()->toArray();
+                            ->get();
+            $officeProjectSiteId = $projectSite->where('name',env('OFFICE_PROJECT_SITE_NAME'))->pluck('id')->first();
+            $assetRentProjectSites = $projectSites->where('id','!=',$officeProjectSiteId);
             $billIds = $bill->where('bill_status_id',$billStatus->where('slug','approved')->pluck('id')->first())->pluck('id');
             $billProjectSites = $quotation->join('bills','quotations.id','=','bills.quotation_id')
                 ->join('project_sites','quotations.project_site_id','=','project_sites.id')
@@ -101,7 +105,7 @@ class ReportManagementController extends Controller{
             $monthData = $month->all();
             $yearData = $year->all();
 
-            return view('report.report')->with(compact('startDate','endDate','projectSites','billProjectSites','subcontractorProjectSitesData','monthData','yearData'));
+            return view('report.report')->with(compact('startDate','endDate','projectSites','billProjectSites','subcontractorProjectSitesData','monthData','yearData','assetRentProjectSites'));
 
         } catch(\Exception $e) {
             $data = [
@@ -127,6 +131,26 @@ class ReportManagementController extends Controller{
             $startLimit = 1; $endLimit = $reportLimit;
 
             switch ($request['report_name']) {
+                case 'sitewise_asset_rent_report' :
+                    $assetRentMonthlyExpense = new AssetRentMonthlyExpenses();
+                    $assetRentMonthlyExpenseData = $assetRentMonthlyExpense->where('project_site_id',$request['project_site_id'])
+                                                    ->where('year_id',$request['year_id'])->count();
+                    /*$count = $assetRentMonthlyExpenseData;
+                    $noOfButtons = $count/$reportLimit;
+                    for($iterator = 0; $iterator < $noOfButtons; $iterator++){
+                        $downloadButtonDetails[$iterator]['start_date'] = $start_date;
+                        $downloadButtonDetails[$iterator]['end_date'] = $end_date;
+                        $downloadButtonDetails[$iterator]['start_limit'] = $startLimit;
+                        $downloadButtonDetails[$iterator]['end_limit'] = $endLimit;
+                        $downloadButtonDetails[$iterator]['button_no'] = $iterator;
+                        $startLimit = $endLimit + 1;
+                        $endLimit = $endLimit + $reportLimit;
+                    }*/
+                    $downloadButtonDetails[0]['show_button'] = true;
+                    $downloadButtonDetails[0]['year_id'] = $request['year_id'];
+                    $downloadButtonDetails[0]['project_site_id'] = $request['project_site_id'];
+                    break;
+
                 case 'sitewise_purchase_report' :
                     $purchaseOrderBill = new PurchaseOrderBill();
                     $inventoryComponentTransfer = new InventoryComponentTransfers();
@@ -311,6 +335,428 @@ class ReportManagementController extends Controller{
             $monthlyTotal[0]['total'] = 'Total';
 
             switch($reportType) {
+
+                case 'sitewise_asset_rent_report' :
+                    $selectedYear = $year->where('id',$firstParameter)->first();
+                    $assetRentMonthlyExpense = new AssetRentMonthlyExpenses();
+                    $projectSite = new ProjectSite();
+                    $asset = new Asset();
+                    $assetRentMonthlyExpenseData = $assetRentMonthlyExpense->join('assets','assets.id','=','asset_rent_monthly_expenses.asset_id')
+                        ->where('asset_rent_monthly_expenses.project_site_id',$project_site_id)
+                        ->where('asset_rent_monthly_expenses.year_id',$selectedYear['id'])
+                        ->orderby('assets.name','asc')
+                        ->get();
+                    $data[$row] = array(
+                        null, null, null,
+                        'No of Days Used', 'Cumulative Qty/Highest Rate', 'Month Rent Amt', 'No of Days Used', 'Cumulative Qty/Highest Rate', 'Month Rent Amt',
+                        'No of Days Used', 'Cumulative Qty/Highest Rate', 'Month Rent Amt', 'No of Days Used', 'Cumulative Qty/Highest Rate', 'Month Rent Amt',
+                        'No of Days Used', 'Cumulative Qty/Highest Rate', 'Month Rent Amt', 'No of Days Used', 'Cumulative Qty/Highest Rate', 'Month Rent Amt',
+                        'No of Days Used', 'Cumulative Qty/Highest Rate', 'Month Rent Amt', 'No of Days Used', 'Cumulative Qty/Highest Rate', 'Month Rent Amt',
+                        'No of Days Used', 'Cumulative Qty/Highest Rate', 'Month Rent Amt', 'No of Days Used', 'Cumulative Qty/Highest Rate', 'Month Rent Amt',
+                        'No of Days Used', 'Cumulative Qty/Highest Rate', 'Month Rent Amt', 'No of Days Used', 'Cumulative Qty/Highest Rate', 'Month Rent Amt'
+                    );
+                    $row = 1;
+                    $monthlyTotal = array();
+                    $monthlyTotal[1]['january'] = $monthlyTotal[2]['february'] = $monthlyTotal[3]['march'] = $monthlyTotal[4]['april'] =
+                    $monthlyTotal[5]['may'] = $monthlyTotal[6]['june'] = $monthlyTotal[7]['july'] = $monthlyTotal[8]['august'] =
+                    $monthlyTotal[9]['september'] = $monthlyTotal[10]['october'] = $monthlyTotal[11]['november'] = $monthlyTotal[12]['december'] = 0;
+                    $monthlyTotal[0]['Month-Year'] = 'Total';
+                    foreach ($assetRentMonthlyExpenseData as $key => $assetRentMonthlyExpense){
+                        $assetData = $asset->where('id',$assetRentMonthlyExpense['asset_id'])->first();
+
+                        $data[$row]['asset_name'] = ($assetData['model_number'] == null) ? $assetData['name'] : $assetData['name'].' ('.$assetData['model_number'].' )';
+                        $data[$row]['asset_quantity'] = $assetData['quantity'];
+                        $data[$row]['asset_rent_per_day'] = $assetData['rent_per_day'];
+
+                        $januaryData = json_decode($assetRentMonthlyExpense['january']);
+                        if($januaryData == null){
+                            $data[$row]['jan_no_of_days_used'] = $data[$row]['jan_quantity'] = $data[$row]['jan_amount'] = '-';
+                            $monthlyTotal[1]['january'] += 0;
+                        }else {
+                            $data[$row]['jan_no_of_days_used'] = $januaryData->days_used;
+                            $data[$row]['jan_quantity'] = $januaryData->carry_forward_quantity.' / '.$januaryData->rent_per_day_per_quantity;
+                            $data[$row]['jan_amount'] = $januaryData->rent_for_month;
+                            $monthlyTotal[1]['january'] += $data[$row]['jan_amount'];
+                        }
+
+
+                        $februaryData = json_decode($assetRentMonthlyExpense['february']);
+                        if($februaryData == null){
+                            $data[$row]['feb_no_of_days_used'] = $data[$row]['feb_quantity'] = $data[$row]['feb_amount'] = '-';
+                            $monthlyTotal[2]['february'] += 0;
+                        }else {
+                            $data[$row]['feb_no_of_days_used'] = $februaryData->days_used;
+                            $data[$row]['feb_quantity'] =  $februaryData->carry_forward_quantity.' / '.$februaryData->rent_per_day_per_quantity;
+                            $data[$row]['feb_amount'] = $februaryData->rent_for_month;
+                            $monthlyTotal[2]['february'] += $data[$row]['feb_amount'];
+
+                        }
+
+                        $marchData = json_decode($assetRentMonthlyExpense['march']);
+                        if($marchData == null){
+                            $data[$row]['march_no_of_days_used'] = $data[$row]['march_quantity'] = $data[$row]['march_amount'] = '-';
+                            $monthlyTotal[3]['march'] += 0;
+                        }else {
+                            $data[$row]['march_no_of_days_used'] = $marchData->days_used;
+                            $data[$row]['march_quantity'] = $marchData->carry_forward_quantity.' / '.$marchData->rent_per_day_per_quantity;
+                            $data[$row]['march_amount'] = $marchData->rent_for_month;
+                            $monthlyTotal[3]['march'] += $data[$row]['march_amount'];
+                        }
+
+
+                        $aprilData = json_decode($assetRentMonthlyExpense['april']);
+                        if($aprilData == null){
+                            $data[$row]['april_no_of_days_used'] = $data[$row]['april_quantity'] = $data[$row]['april_amount'] = '-';
+                            $monthlyTotal[4]['april'] += 0;
+                        }else {
+                            $data[$row]['april_no_of_days_used'] = $aprilData->days_used;
+                            $data[$row]['april_quantity'] = $aprilData->carry_forward_quantity . ' / ' . $aprilData->rent_per_day_per_quantity;
+                            $data[$row]['april_amount'] = $aprilData->rent_for_month;
+                            $monthlyTotal[4]['april'] += $data[$row]['april_amount'];
+                        }
+
+                        $mayData = json_decode($assetRentMonthlyExpense['may']);
+                        if($mayData == null){
+                            $data[$row]['may_no_of_days_used'] = $data[$row]['may_quantity'] = $data[$row]['may_amount'] = '-';
+                            $monthlyTotal[5]['may'] += 0;
+                        }else{
+                            $data[$row]['may_no_of_days_used'] = $mayData->days_used;
+                            $data[$row]['may_quantity'] = $mayData->carry_forward_quantity.' / '.$mayData->rent_per_day_per_quantity;
+                            $data[$row]['may_amount'] = $mayData->rent_for_month;
+                            $monthlyTotal[5]['may'] += $data[$row]['may_amount'];
+                        }
+
+
+                        $juneData = json_decode($assetRentMonthlyExpense['june']);
+                        if($juneData == null){
+                            $data[$row]['june_no_of_days_used'] = $data[$row]['june_quantity'] = $data[$row]['june_amount'] = '-';
+                            $monthlyTotal[6]['june'] += 0;
+                        }else{
+                            $data[$row]['june_no_of_days_used'] = $juneData->days_used;
+                            $data[$row]['june_quantity'] = $juneData->carry_forward_quantity.' / '.$juneData->rent_per_day_per_quantity;
+                            $data[$row]['june_amount'] = $juneData->rent_for_month;
+                            $monthlyTotal[6]['june'] += $data[$row]['june_amount'];
+                        }
+
+
+                        $julyData = json_decode($assetRentMonthlyExpense['july']);
+                        if($julyData == null){
+                            $data[$row]['july_no_of_days_used'] = $data[$row]['july_quantity'] = $data[$row]['july_amount'] = '-';
+                            $monthlyTotal[7]['july'] += 0;
+                        }else{
+                            $data[$row]['july_no_of_days_used'] = $julyData->days_used;
+                            $data[$row]['july_quantity'] = $julyData->carry_forward_quantity.' / '.$julyData->rent_per_day_per_quantity;
+                            $data[$row]['july_amount'] = $julyData->rent_for_month;
+                            $monthlyTotal[7]['july'] += $data[$row]['july_amount'];
+                        }
+
+
+                        $augustData = json_decode($assetRentMonthlyExpense['august']);
+                        if($augustData == null){
+                            $data[$row]['august_no_of_days_used'] = $data[$row]['august_quantity'] = $data[$row]['august_amount'] = '-';
+                            $monthlyTotal[8]['august'] += 0;
+                        }else{
+                            $data[$row]['august_no_of_days_used'] = $augustData->days_used;
+                            $data[$row]['august_quantity'] = $augustData->carry_forward_quantity.' / '.$augustData->rent_per_day_per_quantity;
+                            $data[$row]['august_amount'] = $augustData->rent_for_month;
+                            $monthlyTotal[8]['august'] += $data[$row]['august_amount'];
+
+                        }
+
+                        $septData = json_decode($assetRentMonthlyExpense['september']);
+                        if($septData == null){
+                            $data[$row]['sept_no_of_days_used'] = $data[$row]['sept_quantity'] = $data[$row]['sept_amount'] = '-';
+                            $monthlyTotal[9]['september'] += 0;
+                        }else{
+                            $data[$row]['sept_no_of_days_used'] = $septData->days_used;
+                            $data[$row]['sept_quantity'] = $septData->carry_forward_quantity.' / '.$septData->rent_per_day_per_quantity;
+                            $data[$row]['sept_amount'] = $septData->rent_for_month;
+                            $monthlyTotal[9]['september'] += $data[$row]['sept_amount'];
+                        }
+
+
+                        $octData = json_decode($assetRentMonthlyExpense['october']);
+                        if($octData == null){
+                            $data[$row]['oct_no_of_days_used'] = $data[$row]['oct_quantity'] = $data[$row]['oct_amount'] = '-';
+                            $monthlyTotal[10]['october'] += 0;
+                        }else{
+                            $data[$row]['oct_no_of_days_used'] = $octData->days_used;
+                            $data[$row]['oct_quantity'] = $octData->carry_forward_quantity.' / '.$octData->rent_per_day_per_quantity;
+                            $data[$row]['oct_amount'] = $octData->rent_for_month;
+                            $monthlyTotal[10]['october'] += $data[$row]['oct_amount'];
+                        }
+
+                        $novData = json_decode($assetRentMonthlyExpense['november']);
+                        if($novData == null){
+                            $data[$row]['nov_no_of_days_used'] = $data[$row]['nov_quantity'] = $data[$row]['nov_amount'] = '-';
+                            $monthlyTotal[11]['november'] += 0;
+                        }else{
+                            $data[$row]['nov_no_of_days_used'] = $novData->days_used;
+                            $data[$row]['nov_quantity'] = $novData->carry_forward_quantity.' / '.$novData->rent_per_month;
+                            $data[$row]['nov_amount'] = $novData->rent_for_month;
+                            $monthlyTotal[11]['november'] += $data[$row]['nov_amount'];
+                        }
+
+                        $decData = json_decode($assetRentMonthlyExpense['december']);
+                        if($decData == null){
+                            $data[$row]['dec_no_of_days_used'] = $data[$row]['dec_quantity'] = $data[$row]['dec_amount'] = '-';
+                            $monthlyTotal[12]['december'] += 0;
+                        }else{
+                            $data[$row]['dec_no_of_days_used'] = $decData->days_used;
+                            $data[$row]['dec_quantity'] = $decData->carry_forward_quantity.' / '.$decData->rent_per_month;
+                            $data[$row]['dec_amount'] = $decData->rent_for_month;
+                            $monthlyTotal[12]['december'] += $data[$row]['dec_amount'];
+                        }
+
+                        $row++;
+                    }
+                    $total = $monthlyTotal[1]['january'] + $monthlyTotal[2]['february'] + $monthlyTotal[3]['march'] + $monthlyTotal[4]['april'] +
+                        $monthlyTotal[5]['may'] + $monthlyTotal[6]['june'] + $monthlyTotal[7]['july'] + $monthlyTotal[8]['august']
+                        + $monthlyTotal[9]['september'] + $monthlyTotal[10]['october'] + $monthlyTotal[11]['november'] + $monthlyTotal[12]['december'];
+
+                    $monthlyTotal[13]['Total Rent' ] = round($total,3);
+                    ksort($monthlyTotal);
+
+                    $data[$row]['make_bold'] = true;
+                    $data[$row] = array_merge($data[$row],array('Total',null,null,null,null,$monthlyTotal[1]['january'] ,null,null, $monthlyTotal[2]['february'] ,null,null, $monthlyTotal[3]['march']
+                    ,null,null, $monthlyTotal[4]['april'] ,null,null, $monthlyTotal[5]['may'] ,null,null, $monthlyTotal[6]['june'] ,null,null,
+                    $monthlyTotal[7]['july'] ,null,null, $monthlyTotal[8]['august'] ,null,null, $monthlyTotal[9]['september'] ,null,null, $monthlyTotal[10]['october']
+                    ,null,null, $monthlyTotal[11]['november'] ,null,null, $monthlyTotal[12]['december'], $total));
+
+                    $projectName = $projectSite->join('projects','projects.id','=','project_sites.project_id')
+                        ->where('project_sites.id',$project_site_id)->pluck('projects.name')->first();
+
+                    $date = date($selectedYear['slug']);
+
+                    Excel::create($reportType."_".$currentDate, function($excel) use($monthlyTotal, $data, $reportType, $header, $companyHeader, $date, $projectName, $selectedYear) {
+                        $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(10);
+                        $excel->sheet($reportType, function($sheet) use($monthlyTotal, $data, $header, $companyHeader, $date, $projectName, $selectedYear) {
+                            $objDrawing = new \PHPExcel_Worksheet_Drawing();
+                            $objDrawing->setPath(public_path('/assets/global/img/logo.jpg')); //your image path
+                            $objDrawing->setWidthAndHeight(148,74);
+                            $objDrawing->setResizeProportional(true);
+                            $objDrawing->setCoordinates('A1');
+                            $objDrawing->setWorksheet($sheet);
+
+                            $sheet->mergeCells('A2:H2');
+                            $sheet->cell('A2', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['company_name']);
+                            });
+
+                            $sheet->mergeCells('A3:H3');
+                            $sheet->cell('A3', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['designation']);
+                            });
+
+                            $sheet->mergeCells('A4:H4');
+                            $sheet->cell('A4', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['address']);
+                            });
+
+                            $sheet->mergeCells('A5:H5');
+                            $sheet->cell('A5', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['contact_no']);
+                            });
+
+                            $sheet->mergeCells('A6:H6');
+                            $sheet->cell('A6', function($cell) use($companyHeader) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($companyHeader['gstin_number']);
+                            });
+
+                            $sheet->mergeCells('A7:H7');
+                            $sheet->cell('A7', function($cell) use ($projectName){
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue('Asset Rent Report - '.$projectName);
+                            });
+
+                            $sheet->mergeCells('A8:H8');
+                            $sheet->cell('A8', function($cell) use($date) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue($date);
+                            });
+
+                            $row = 9;
+                            $monthHeaderRow =  $row+1;
+                            foreach($monthlyTotal as $key => $rowData){
+                                $next_column = 'A';
+                                if(array_key_exists('make_bold',$rowData)){
+                                    $makeBold = true;
+                                    unset($rowData['make_bold']);
+                                }else{
+                                    $makeBold = false;
+                                }
+                                $row++;
+                                foreach($rowData as $key1 => $cellData){
+                                    $current_column = $next_column++;
+                                    $sheet->getRowDimension($row)->setRowHeight(20);
+                                    $sheet->cell($current_column.($row), function($cell) use($key1,$cellData,$row,$monthHeaderRow,$makeBold,$current_column) {
+                                        if($row == $monthHeaderRow || $row == 23){
+                                            $cell->setFontWeight('bold');
+                                        }
+                                        $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                                        $cell->setAlignment('center')->setValignment('center');
+                                       if($current_column == 'A'){
+                                           $cell->setValue(ucwords($key1));
+                                       }elseif($current_column == 'B'){
+                                           $cell->setValue($cellData);
+                                       }
+
+                                    });
+                                }
+                            }
+
+                            $row = 9;
+                            $monthHeaderRow =  $row+1;
+                            foreach($monthlyTotal as $key => $rowData){
+                                $next_column = 'B';
+                                if(array_key_exists('make_bold',$rowData)){
+                                    $makeBold = true;
+                                    unset($rowData['make_bold']);
+                                }else{
+                                    $makeBold = false;
+                                }
+                                $row++;
+                                foreach($rowData as $key1 => $cellData){
+                                    $current_column = $next_column++;
+                                    $sheet->getRowDimension($row)->setRowHeight(20);
+                                    $sheet->cell($current_column.($row), function($cell) use($key1,$cellData,$row,$monthHeaderRow,$makeBold,$current_column) {
+                                        if($row == $monthHeaderRow || $row == 23){
+                                            $cell->setFontWeight('bold');
+                                        }
+                                        $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                                        $cell->setAlignment('center')->setValignment('center');
+
+                                            $cell->setValue($cellData);
+                                    });
+                                }
+                            }
+
+
+                            $sheet->cell('A27', function($cell) use($date) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue('Asset Name (Model No.)')->setFontWeight('bold')->setBackground('#d7f442')->setBorder('thin', 'thin', 'thin', 'thin');
+                            });
+                            $sheet->cell('B27', function($cell) use($date) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue('Total Quantity')->setFontWeight('bold')->setBackground('#d7f442')->setBorder('thin', 'thin', 'thin', 'thin');
+                            });
+                            $sheet->cell('C27', function($cell) use($date) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue('Rent Per Day')->setFontWeight('bold')->setBackground('#d7f442')->setBorder('thin', 'thin', 'thin', 'thin');
+                            });
+                            $sheet->mergeCells('D27:F27');
+                            $sheet->cell('D27', function($cell) use($selectedYear) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue('January '.$selectedYear['slug'])->setFontWeight('bold')->setBackground('#d7f442')->setBorder('thin', 'thin', 'thin', 'thin');
+                            });
+                            $sheet->mergeCells('G27:I27');
+                            $sheet->cell('G27', function($cell) use($selectedYear) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue('February '.$selectedYear['slug'])->setFontWeight('bold')->setBackground('#d7f442')->setBorder('thin', 'thin', 'thin', 'thin');
+                            });
+                            $sheet->mergeCells('J27:L27');
+                            $sheet->cell('J27', function($cell) use($selectedYear) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue('March'.$selectedYear['slug'])->setFontWeight('bold')->setBackground('#d7f442')->setBorder('thin', 'thin', 'thin', 'thin');
+                            });
+                            $sheet->mergeCells('M27:O27');
+                            $sheet->cell('M27', function($cell) use($selectedYear) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue('April'.$selectedYear['slug'])->setFontWeight('bold')->setBackground('#d7f442')->setBorder('thin', 'thin', 'thin', 'thin');
+                            });
+                            $sheet->mergeCells('P27:R27');
+                            $sheet->cell('P27', function($cell) use($selectedYear) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue('May '.$selectedYear['slug'])->setFontWeight('bold')->setBackground('#d7f442')->setBorder('thin', 'thin', 'thin', 'thin');
+                            });
+                            $sheet->mergeCells('S27:U27');
+                            $sheet->cell('S27', function($cell) use($selectedYear) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue('June '.$selectedYear['slug'])->setFontWeight('bold')->setBackground('#d7f442')->setBorder('thin', 'thin', 'thin', 'thin');
+                            });
+                            $sheet->mergeCells('V27:X27');
+                            $sheet->cell('V27', function($cell) use($selectedYear) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue('July '.$selectedYear['slug'])->setFontWeight('bold')->setBackground('#d7f442')->setBorder('thin', 'thin', 'thin', 'thin');
+                            });
+                            $sheet->mergeCells('Y27:AA27');
+                            $sheet->cell('Y27', function($cell) use($selectedYear) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue('Aug '.$selectedYear['slug'])->setFontWeight('bold')->setBackground('#d7f442')->setBorder('thin', 'thin', 'thin', 'thin');
+                            });
+                            $sheet->mergeCells('AB27:AD27');
+                            $sheet->cell('AB27', function($cell) use($selectedYear) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue('Sept '.$selectedYear['slug'])->setFontWeight('bold')->setBackground('#d7f442')->setBorder('thin', 'thin', 'thin', 'thin');
+                            });
+                            $sheet->mergeCells('AE27:AG27');
+                            $sheet->cell('AE27', function($cell) use($selectedYear) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue('Oct '.$selectedYear['slug'])->setFontWeight('bold')->setBackground('#d7f442')->setBorder('thin', 'thin', 'thin', 'thin');
+                            });
+                            $sheet->mergeCells('AH27:AJ27');
+                            $sheet->cell('AH27', function($cell) use($selectedYear) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue('Nov '.$selectedYear['slug'])->setFontWeight('bold')->setBackground('#d7f442')->setBorder('thin', 'thin', 'thin', 'thin');
+                            });
+                            $sheet->mergeCells('AK27:AM27');
+                            $sheet->cell('AK27', function($cell) use($selectedYear) {
+                                $cell->setFontWeight('bold');
+                                $cell->setAlignment('center')->setValignment('center');
+                                $cell->setValue('Dec '.$selectedYear['slug'])->setFontWeight('bold')->setBackground('#d7f442')->setBorder('thin', 'thin', 'thin', 'thin');
+                            });
+                            $row = 27;
+                            $headerRow =  $row+1;
+                            foreach($data as $key => $rowData){
+                                $next_column = 'A';
+                                $row++;
+                                if(array_key_exists('make_bold',$rowData)){
+                                    $setBold = true;
+                                    unset($rowData['make_bold']);
+                                }else{
+                                    $setBold = false;
+                                }
+                                foreach($rowData as $key1 => $cellData){
+                                    $current_column = $next_column++;
+                                    $sheet->cell($current_column.($row), function($cell) use($cellData,$row,$sheet,$headerRow,$setBold) {
+                                        $sheet->getRowDimension($row)->setRowHeight(20);
+                                        ($row == $headerRow || $setBold) ? $cell->setFontWeight('bold') : null;
+                                        $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                                        $cell->setAlignment('center')->setValignment('center');
+                                        $cell->setValue($cellData);
+                                    });
+                                }
+                            }
+                        });
+                    })->export('xls');
+
+                    break;
 
                 case 'sitewise_purchase_report' :
                     $projectSite = $projectSiteId = new ProjectSite();
@@ -2057,12 +2503,13 @@ class ReportManagementController extends Controller{
                     $subcontractorStructure = new SubcontractorStructure();
                     $subcontractorBill = new SubcontractorBill();
                     $subcontractorBillStatus = new SubcontractorBillStatus();
-                   /* $assetMaintenanceBillPayment = new AssetMaintenanceBillPayment();
-                    $purchaseOrderBill = new PurchaseOrderBill();
-                    $inventoryComponentTransfer = new InventoryComponentTransfers();
-                    $inventoryTransferTypes = new InventoryTransferTypes();
-                    $inventoryComponentTransferStatus = new InventoryComponentTransferStatus();
-                    $siteTransferBill = new SiteTransferBill();*/
+                    $assetRentMonthlyExpense = new AssetRentMonthlyExpenses();
+                    /* $assetMaintenanceBillPayment = new AssetMaintenanceBillPayment();
+                     $purchaseOrderBill = new PurchaseOrderBill();
+                     $inventoryComponentTransfer = new InventoryComponentTransfers();
+                     $inventoryTransferTypes = new InventoryTransferTypes();
+                     $inventoryComponentTransferStatus = new InventoryComponentTransferStatus();
+                     $siteTransferBill = new SiteTransferBill();*/
                     $purchaseOrderBillMonthlyExpense = new PurchaseOrderBillMonthlyExpense();
                     $peticashSalaryTransactionMonthlyExpense = new PeticashSalaryTransactionMonthlyExpense();
                     $peticashPurchaseTransactionMonthlyExpense = new PeticashPurchaseTransactionMonthlyExpense();
@@ -2085,6 +2532,10 @@ class ReportManagementController extends Controller{
 
                     //$inventoryComponentSiteTransferIds = $inventoryTransferTypes->where('slug','site')->get();
                     //$approvedComponentTransferStatusId = $inventoryComponentTransferStatus->where('slug','approved')->pluck('id');
+                    $assetRentMonthlyExpenseData = $assetRentMonthlyExpense->where('year_id',$selectedYear['id'])
+                                                    ->where('project_site_id',$project_site_id)->get();
+                    $officeProjectSiteId = $projectSite->where('name',env('OFFICE_PROJECT_SITE_NAME'))->pluck('id')->first();
+                    $otherThanOfficeProjectSiteIds = $projectSite->where('id','!=',$officeProjectSiteId)->pluck('id')->toArray();
                     foreach ($totalMonths as $month){
                         $billIds = $bill->where('quotation_id',$quotation['id'])
                             ->where('bill_status_id',$approvedBillStatusId)->orderBy('id')
@@ -2143,67 +2594,27 @@ class ReportManagementController extends Controller{
                                 $taxTotal = 0;
                                 foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
                                     $taxTotal += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
-                                   // $subcontractorGst += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
                                 }
                                 $subcontractorTotal += round(($subTotal + $taxTotal),3);
                             }
                         }
-                        /*$assetMaintenanceGst += $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
-                            ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
-                            ->join('assets','assets.id','=','asset_maintenance.asset_id')
-                            ->where('asset_maintenance.project_site_id',$project_site_id)
-                            ->whereMonth('asset_maintenance_bill_payments.created_at',$month['id'])
-                            ->whereYear('asset_maintenance_bill_payments.created_at',$selectedYear['slug'])
-                            ->sum(DB::raw('asset_maintenance_bills.cgst_amount +asset_maintenance_bills.sgst_amount +asset_maintenance_bills.igst_amount'));
-
-                        $purchaseOrderGst += round($purchaseOrderBill
-                            ->join('purchase_orders','purchase_orders.id','='
-                                ,'purchase_order_bills.purchase_order_id')
-                            ->join('purchase_requests','purchase_requests.id','='
-                                ,'purchase_orders.purchase_request_id')
-                            ->join('vendors','vendors.id','=','purchase_orders.vendor_id')
-                            ->where('purchase_requests.project_site_id',$project_site_id)
-                            ->whereMonth('purchase_order_bills.created_at',$month['id'])
-                            ->whereYear('purchase_order_bills.created_at',$selectedYear['slug'])
-                            ->sum(DB::raw('purchase_order_bills.transportation_tax_amount + purchase_order_bills.tax_amount + purchase_order_bills.extra_tax_amount')),3);
-                        $inventorySiteTransfersInGst += $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
-                            ,'=','inventory_component_transfers.inventory_component_id')
-                            ->where('inventory_components.project_site_id',$project_site_id)
-                            ->where('inventory_components.is_material',true)
-                            ->where('inventory_component_transfers.transfer_type_id',
-                                $inventoryComponentSiteTransferIds->where('type','IN')->pluck('id')->first())
-                            ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
-                            ->whereMonth('inventory_component_transfers.created_at',$month['id'])
-                            ->whereYear('inventory_component_transfers.created_at',$selectedYear['slug'])
-                            ->sum(DB::raw('inventory_component_transfers.cgst_amount + inventory_component_transfers.sgst_amount + inventory_component_transfers.igst_amount'));
-
-                        $inventorySiteTransfersOutGst += $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
-                            ,'=','inventory_component_transfers.inventory_component_id')
-                            ->where('inventory_components.project_site_id',$project_site_id)
-                            ->where('inventory_components.is_material',true)
-                            ->where('inventory_component_transfers.transfer_type_id',
-                                $inventoryComponentSiteTransferIds->where('type','OUT')->pluck('id')->first())
-                            ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
-                            ->whereMonth('inventory_component_transfers.created_at',$month['id'])
-                            ->whereYear('inventory_component_transfers.created_at',$selectedYear['slug'])
-                            ->sum(DB::raw('inventory_component_transfers.cgst_amount + inventory_component_transfers.sgst_amount + inventory_component_transfers.igst_amount'));
-
-                        $siteTransferBillGst += $siteTransferBill->join('inventory_component_transfers','inventory_component_transfers.id',
-                            '=','site_transfer_bills.inventory_component_transfer_id')
-                            ->join('inventory_components','inventory_components.id'
-                                ,'=','inventory_component_transfers.inventory_component_id')
-                            ->where('inventory_components.project_site_id',$project_site_id)
-                            ->whereMonth('site_transfer_bills.created_at',$month['id'])
-                            ->whereYear('site_transfer_bills.created_at',$selectedYear['slug'])
-                            ->sum(DB::raw('site_transfer_bills.tax_amount + site_transfer_bills.extra_amount_cgst_amount + site_transfer_bills.extra_amount_sgst_amount + site_transfer_bills.extra_amount_igst_amount'));*/
                         $officeExpense += $projectSiteSalaryDistribution->where('project_site_id',$project_site_id)
                             ->where('month_id',$month['id'])
                             ->where('year_id',$selectedYear['id'])
                             ->pluck('distributed_amount')->first();
-
+                        foreach ($assetRentMonthlyExpenseData as $assetRentMonthlyExpense){
+                            $assetRent += (json_decode($assetRentMonthlyExpense[$month['slug']]) == null) ? 0 : json_decode($assetRentMonthlyExpense[$month['slug']])->rent_for_month;
+                        }
+                        if($officeProjectSiteId == $project_site_id){
+                            $allSiteTotalAssetRentExpense = $assetRentMonthlyExpense
+                                ->where('year_id',$selectedYear['id'])
+                                ->whereIn('project_site_id',$otherThanOfficeProjectSiteIds)
+                                ->get();
+                            foreach ($allSiteTotalAssetRentExpense as $thisAssetRentExpense){
+                                $totalAssetRent += (json_decode($thisAssetRentExpense[$month['slug']]) == null) ? 0 : json_decode($thisAssetRentExpense[$month['slug']])->rent_for_month;
+                            }
+                        }
                     }
-                  //  $purchaseTaxAmount = $assetMaintenanceGst + $purchaseOrderGst + $inventorySiteTransfersInGst + $siteTransferBillGst - $inventorySiteTransfersOutGst;
-                   // $indirectExpenses = $salesTaxAmount - $purchaseTaxAmount - $subcontractorGst;
                     $openingExpenses = $quotation['opening_expenses'];
 
                     if($officeProjectSiteId == $project_site_id){
@@ -2216,7 +2627,6 @@ class ReportManagementController extends Controller{
                         $totalAssetRentOpeningExpense = 0;
                     }
                     $outstanding = $sales - $debitAmount - $tdsAmount - $totalRetention - $otherRecoveryAmount - $totalHold - $receipt - $mobilization;
-                    //$total = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount + $indirectExpenses + $subcontractorTotal + $openingExpenses;
                     $total = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount + $officeExpense + $subcontractorTotal + $openingExpenses;
                     $salesPnL = $sales - $debitAmount - $tdsAmount - $totalHold - $otherRecoveryAmount;
                     $salesWisePnL = $salesPnL - $total;
@@ -2968,6 +3378,7 @@ class ReportManagementController extends Controller{
             $subcontractorStructure = new SubcontractorStructure();
             $subcontractorBill = new SubcontractorBill();
             $subcontractorBillStatus = new SubcontractorBillStatus();
+            $assetRentMonthlyExpense = new AssetRentMonthlyExpenses();
             /*$assetMaintenanceBillPayment = new AssetMaintenanceBillPayment();
             $purchaseOrderBill = new PurchaseOrderBill();
             $inventoryComponentTransfer = new InventoryComponentTransfers();
@@ -2988,7 +3399,9 @@ class ReportManagementController extends Controller{
             $assetRent = 0;
             $quotation = $quotation->where('project_site_id',$projectSiteId)->first();
             $subcontractorApprovedBillStatusId = $subcontractorBillStatus->where('slug','approved')->pluck('id')->first();
-           // $inventoryComponentSiteTransferIds = $inventoryTransferTypes->where('slug','site')->get();
+            $officeProjectSiteId = $projectSite->where('name',env('OFFICE_PROJECT_SITE_NAME'))->pluck('id')->first();
+            $otherThanOfficeProjectSiteIds = $projectSite->where('id','!=',$officeProjectSiteId)->pluck('id')->toArray();
+            // $inventoryComponentSiteTransferIds = $inventoryTransferTypes->where('slug','site')->get();
           //  $approvedComponentTransferStatusId = $inventoryComponentTransferStatus->where('slug','approved')->pluck('id');
             switch(true){
                 case ($yearId == 'null' && $startMonthId == 'null')  :
@@ -3050,7 +3463,29 @@ class ReportManagementController extends Controller{
                     }
                     $officeExpense = $projectSiteSalaryDistribution->where('project_site_id',$projectSiteId)
                         ->sum('distributed_amount');
-
+                    $assetRentMonthlyExpenseData = $assetRentMonthlyExpense
+                        ->where('project_site_id',$projectSiteId)->get();
+                    $totalMonths = $month->orderBy('id','asc')->get();
+                    foreach ($assetRentMonthlyExpenseData as $assetRentMonthlyExpense){
+                        foreach($totalMonths as $month){
+                            $assetRent += (json_decode($assetRentMonthlyExpense[$month['slug']]) == null) ? 0 : json_decode($assetRentMonthlyExpense[$month['slug']])->rent_for_month;
+                        }
+                    }
+                    if($officeProjectSiteId == $projectSiteId){
+                        $allSiteTotalAssetRentOpeningExpense = $projectSite->sum('asset_rent_opening_expense');
+                        $allSiteTotalAssetRentExpense = $assetRentMonthlyExpense
+                            ->whereIn('project_site_id',$otherThanOfficeProjectSiteIds)
+                            ->get();
+                        $totalAssetRent = 0;
+                        foreach ($allSiteTotalAssetRentExpense as $thisAssetRentExpense){
+                            foreach($totalMonths as $month){
+                            $totalAssetRent += (json_decode($thisAssetRentExpense[$month['slug']]) == null) ? 0 : json_decode($thisAssetRentExpense[$month['slug']])->rent_for_month;
+                            }
+                        }
+                        Log::info($totalAssetRent);
+                        $assetRent = $salaryAmount = $officeExpense = 0;
+                        $sales = $receipt = $totalAssetRent + $allSiteTotalAssetRentOpeningExpense;
+                    }
                     /*$assetMaintenanceGst += $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
                         ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
                         ->join('assets','assets.id','=','asset_maintenance.asset_id')
@@ -3096,7 +3531,8 @@ class ReportManagementController extends Controller{
                     Log::info('Inside CASE 2');
                     $totalMonths = $month->whereBetween('id',[$startMonthId,$endMonthId])
                         ->select('id','name','slug')->get();
-
+                    $assetRentMonthlyExpenseData = $assetRentMonthlyExpense
+                        ->where('project_site_id',$projectSiteId)->get();
                     foreach ($totalMonths as $month){
                         $billIds = $bill->where('quotation_id',$quotation['id'])
                             ->where('bill_status_id',$approvedBillStatusId)->orderBy('id')
@@ -3159,6 +3595,22 @@ class ReportManagementController extends Controller{
                             ->where('month_id',$month['id'])
                             ->sum('distributed_amount');
 
+                        foreach ($assetRentMonthlyExpenseData as $assetRentMonthlyExpense){
+                                $assetRent += (json_decode($assetRentMonthlyExpense[$month['slug']]) == null) ? 0 : json_decode($assetRentMonthlyExpense[$month['slug']])->rent_for_month;
+                        }
+                        if($officeProjectSiteId == $projectSiteId){
+                            $allSiteTotalAssetRentOpeningExpense = $projectSite->sum('asset_rent_opening_expense');
+                            $allSiteTotalAssetRentExpense = $assetRentMonthlyExpense
+                                ->whereIn('project_site_id',$otherThanOfficeProjectSiteIds)
+                                ->get();
+                            foreach ($allSiteTotalAssetRentExpense as $thisAssetRentExpense){
+                                foreach($totalMonths as $month){
+                                    $totalAssetRent += (json_decode($thisAssetRentExpense[$month['slug']]) == null) ? 0 : json_decode($thisAssetRentExpense[$month['slug']])->rent_for_month;
+                                }
+                            }
+                            $assetRent = $salaryAmount = $officeExpense = 0;
+                            $sales = $receipt = $totalAssetRent + $allSiteTotalAssetRentOpeningExpense;
+                        }
                         /*$assetMaintenanceGst += $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
                             ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
                             ->join('assets','assets.id','=','asset_maintenance.asset_id')
@@ -3212,7 +3664,9 @@ class ReportManagementController extends Controller{
                     $totalMonths = $month->whereBetween('id',[$startMonthId,$endMonthId])
                         ->select('id','name','slug')->get();
                     $selectedYear = $year->where('id',$yearId)->first();
-
+                    $assetRentMonthlyExpenseData = $assetRentMonthlyExpense
+                        ->where('year_id',$selectedYear['id'])
+                        ->where('project_site_id',$projectSiteId)->get();
                     foreach ($totalMonths as $month){
                         $billIds = $bill->where('quotation_id',$quotation['id'])
                             ->where('bill_status_id',$approvedBillStatusId)->orderBy('id')
@@ -3281,6 +3735,26 @@ class ReportManagementController extends Controller{
                             ->where('year_id',$selectedYear['id'])
                             ->sum('distributed_amount');
 
+                        foreach ($assetRentMonthlyExpenseData as $assetRentMonthlyExpense){
+                            $assetRent += (json_decode($assetRentMonthlyExpense[$month['slug']]) == null) ? 0 : json_decode($assetRentMonthlyExpense[$month['slug']])->rent_for_month;
+                        }
+
+                        if($officeProjectSiteId == $projectSiteId){
+                            $allSiteTotalAssetRentOpeningExpense = $projectSite->sum('asset_rent_opening_expense');
+                            $allSiteTotalAssetRentExpense = $assetRentMonthlyExpense
+                                ->whereIn('project_site_id',$otherThanOfficeProjectSiteIds)
+                                ->where('year_id',$selectedYear['id'])
+                                ->get();
+                            //dd($allSiteTotalAssetRentExpense->toArray());
+                            foreach ($allSiteTotalAssetRentExpense as $thisAssetRentExpense){
+                                foreach($totalMonths as $month){
+                                    $totalAssetRent += (json_decode($thisAssetRentExpense[$month['slug']]) == null) ? 0 : json_decode($thisAssetRentExpense[$month['slug']])->rent_for_month;
+                                }
+                            }
+                            dd($totalAssetRent);
+                            $assetRent = $salaryAmount = $officeExpense = 0;
+                            $sales = $receipt = $totalAssetRent + $allSiteTotalAssetRentOpeningExpense;
+                        }
                         /*$assetMaintenanceGst += $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
                             ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
                             ->join('assets','assets.id','=','asset_maintenance.asset_id')
@@ -3337,13 +3811,9 @@ class ReportManagementController extends Controller{
            /* $purchaseTaxAmount = $assetMaintenanceGst + $purchaseOrderGst + $inventorySiteTransfersInGst + $siteTransferBillGst - $inventorySiteTransfersOutGst;
             $indirectExpenses = $salesTaxAmount - $purchaseTaxAmount - $subcontractorGst;*/
             $openingExpenses = $quotation['opening_expenses'];
-            $officeProjectSiteId = $projectSite->where('name',env('OFFICE_PROJECT_SITE_NAME'))->pluck('id')->first();
+
             $totalAssetRentOpeningExpense = $projectSite->where('id',$projectSiteId)->pluck('asset_rent_opening_expense')->first();
-            if($officeProjectSiteId == $projectSiteId){
-                $allSiteTotalAssetRentOpeningExpense = $projectSite->sum('asset_rent_opening_expense');
-                $assetRent = $salaryAmount = $officeExpense = 0;
-                $sales = $receipt = $totalAssetRent + $allSiteTotalAssetRentOpeningExpense;
-            }
+
             if($totalAssetRentOpeningExpense == null){
                 $totalAssetRentOpeningExpense = 0;
             }

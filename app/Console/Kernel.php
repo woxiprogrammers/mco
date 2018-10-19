@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Console\Commands\AssetRentCalculations;
 use App\Console\Commands\PeticashPurchaseTransactionMonthlyExpenseCalculations;
 use App\Console\Commands\PeticashSalaryTransactionMonthlyExpense;
 use App\Console\Commands\PeticashSalaryTransactionMonthlyExpenseCalculations;
@@ -23,7 +24,8 @@ class Kernel extends ConsoleKernel
         PurchaseOrderBillMonthlyExpenseCalculations::class,
         PeticashSalaryTransactionMonthlyExpenseCalculations::class,
         PeticashPurchaseTransactionMonthlyExpenseCalculations::class,
-        SalaryDistributionInSites::class
+        SalaryDistributionInSites::class,
+        AssetRentCalculations::class
     ];
 
     /**
@@ -43,6 +45,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('custom:peticash-salary-transaction-monthly-expense-calculation')->dailyAt('23:00');
         $schedule->command('custom:peticash-purchase-transaction-monthly-expense-calculation')->dailyAt('23:00');
         $schedule->command('custom:salary-distribution')->monthlyOn(1, '1:00');
+        $schedule->command('custom:asset-rent-calculate')->monthlyOn(1, '1:00');
     }
 
     /**
