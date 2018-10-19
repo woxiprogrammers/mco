@@ -600,7 +600,7 @@ class ReportManagementController extends Controller{
                                     $current_column = $next_column++;
                                     $sheet->getRowDimension($row)->setRowHeight(20);
                                     $sheet->cell($current_column.($row), function($cell) use($key1,$cellData,$row,$monthHeaderRow,$makeBold,$current_column) {
-                                        if($row == $monthHeaderRow || $makeBold){
+                                        if($row == $monthHeaderRow || $row == 23){
                                             $cell->setFontWeight('bold');
                                         }
                                         $cell->setBorder('thin', 'thin', 'thin', 'thin');
@@ -630,7 +630,7 @@ class ReportManagementController extends Controller{
                                     $current_column = $next_column++;
                                     $sheet->getRowDimension($row)->setRowHeight(20);
                                     $sheet->cell($current_column.($row), function($cell) use($key1,$cellData,$row,$monthHeaderRow,$makeBold,$current_column) {
-                                        if($row == $monthHeaderRow || $makeBold){
+                                        if($row == $monthHeaderRow || $row == 23){
                                             $cell->setFontWeight('bold');
                                         }
                                         $cell->setBorder('thin', 'thin', 'thin', 'thin');
