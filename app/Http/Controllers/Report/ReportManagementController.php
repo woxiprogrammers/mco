@@ -354,8 +354,11 @@ class ReportManagementController extends Controller{
                         'No of Days Used', 'Cumulative Qty/Highest Rate', 'Month Rent Amt', 'No of Days Used', 'Cumulative Qty/Highest Rate', 'Month Rent Amt'
                     );
                     $row = 1;
-                    $januaryTotalAmount = $februaryTotalAmount = $marchTotalAmount = $aprilTotalAmount = $mayTotalAmount = $juneTotalAmount =
-                    $julyTotalAmount = $augustTotalAmount = $septTotalAmount = $octTotalAmount = $novTotalAmount = $decTotalAmount = 0;
+                    $monthlyTotal = array();
+                    $monthlyTotal[1]['january'] = $monthlyTotal[2]['february'] = $monthlyTotal[3]['march'] = $monthlyTotal[4]['april'] =
+                    $monthlyTotal[5]['may'] = $monthlyTotal[6]['june'] = $monthlyTotal[7]['july'] = $monthlyTotal[8]['august'] =
+                    $monthlyTotal[9]['september'] = $monthlyTotal[10]['october'] = $monthlyTotal[11]['november'] = $monthlyTotal[12]['december'] = 0;
+                    $monthlyTotal[0]['Month-Year'] = 'Total';
                     foreach ($assetRentMonthlyExpenseData as $key => $assetRentMonthlyExpense){
                         $assetData = $asset->where('id',$assetRentMonthlyExpense['asset_id'])->first();
 
@@ -366,155 +369,163 @@ class ReportManagementController extends Controller{
                         $januaryData = json_decode($assetRentMonthlyExpense['january']);
                         if($januaryData == null){
                             $data[$row]['jan_no_of_days_used'] = $data[$row]['jan_quantity'] = $data[$row]['jan_amount'] = '-';
-                            $januaryTotalAmount += 0;
+                            $monthlyTotal[1]['january'] += 0;
                         }else {
                             $data[$row]['jan_no_of_days_used'] = $januaryData->days_used;
                             $data[$row]['jan_quantity'] = $januaryData->carry_forward_quantity.' / '.$januaryData->rent_per_day_per_quantity;
                             $data[$row]['jan_amount'] = $januaryData->rent_for_month;
-                            $januaryTotalAmount += $data[$row]['jan_amount'];
+                            $monthlyTotal[1]['january'] += $data[$row]['jan_amount'];
                         }
 
 
                         $februaryData = json_decode($assetRentMonthlyExpense['february']);
                         if($februaryData == null){
                             $data[$row]['feb_no_of_days_used'] = $data[$row]['feb_quantity'] = $data[$row]['feb_amount'] = '-';
-                            $februaryTotalAmount += 0;
+                            $monthlyTotal[2]['february'] += 0;
                         }else {
                             $data[$row]['feb_no_of_days_used'] = $februaryData->days_used;
                             $data[$row]['feb_quantity'] =  $februaryData->carry_forward_quantity.' / '.$februaryData->rent_per_day_per_quantity;
                             $data[$row]['feb_amount'] = $februaryData->rent_for_month;
-                            $februaryTotalAmount += $data[$row]['feb_amount'];
+                            $monthlyTotal[2]['february'] += $data[$row]['feb_amount'];
 
                         }
 
                         $marchData = json_decode($assetRentMonthlyExpense['march']);
                         if($marchData == null){
                             $data[$row]['march_no_of_days_used'] = $data[$row]['march_quantity'] = $data[$row]['march_amount'] = '-';
-                            $marchTotalAmount += 0;
+                            $monthlyTotal[3]['march'] += 0;
                         }else {
                             $data[$row]['march_no_of_days_used'] = $marchData->days_used;
                             $data[$row]['march_quantity'] = $marchData->carry_forward_quantity.' / '.$marchData->rent_per_day_per_quantity;
                             $data[$row]['march_amount'] = $marchData->rent_for_month;
-                            $marchTotalAmount += $data[$row]['march_amount'];
+                            $monthlyTotal[3]['march'] += $data[$row]['march_amount'];
                         }
 
 
                         $aprilData = json_decode($assetRentMonthlyExpense['april']);
                         if($aprilData == null){
                             $data[$row]['april_no_of_days_used'] = $data[$row]['april_quantity'] = $data[$row]['april_amount'] = '-';
-                            $aprilTotalAmount += 0;
+                            $monthlyTotal[4]['april'] += 0;
                         }else {
                             $data[$row]['april_no_of_days_used'] = $aprilData->days_used;
                             $data[$row]['april_quantity'] = $aprilData->carry_forward_quantity . ' / ' . $aprilData->rent_per_day_per_quantity;
                             $data[$row]['april_amount'] = $aprilData->rent_for_month;
-                            $aprilTotalAmount += $data[$row]['april_amount'];
+                            $monthlyTotal[4]['april'] += $data[$row]['april_amount'];
                         }
 
                         $mayData = json_decode($assetRentMonthlyExpense['may']);
                         if($mayData == null){
                             $data[$row]['may_no_of_days_used'] = $data[$row]['may_quantity'] = $data[$row]['may_amount'] = '-';
-                            $mayTotalAmount += 0;
+                            $monthlyTotal[5]['may'] += 0;
                         }else{
                             $data[$row]['may_no_of_days_used'] = $mayData->days_used;
                             $data[$row]['may_quantity'] = $mayData->carry_forward_quantity.' / '.$mayData->rent_per_day_per_quantity;
                             $data[$row]['may_amount'] = $mayData->rent_for_month;
-                            $mayTotalAmount += $data[$row]['may_amount'];
+                            $monthlyTotal[5]['may'] += $data[$row]['may_amount'];
                         }
 
 
                         $juneData = json_decode($assetRentMonthlyExpense['june']);
                         if($juneData == null){
                             $data[$row]['june_no_of_days_used'] = $data[$row]['june_quantity'] = $data[$row]['june_amount'] = '-';
-                            $juneTotalAmount += 0;
+                            $monthlyTotal[6]['june'] += 0;
                         }else{
                             $data[$row]['june_no_of_days_used'] = $juneData->days_used;
                             $data[$row]['june_quantity'] = $juneData->carry_forward_quantity.' / '.$juneData->rent_per_day_per_quantity;
                             $data[$row]['june_amount'] = $juneData->rent_for_month;
-                            $juneTotalAmount += $data[$row]['june_amount'];
+                            $monthlyTotal[6]['june'] += $data[$row]['june_amount'];
                         }
 
 
                         $julyData = json_decode($assetRentMonthlyExpense['july']);
                         if($julyData == null){
                             $data[$row]['july_no_of_days_used'] = $data[$row]['july_quantity'] = $data[$row]['july_amount'] = '-';
-                            $julyTotalAmount += 0;
+                            $monthlyTotal[7]['july'] += 0;
                         }else{
                             $data[$row]['july_no_of_days_used'] = $julyData->days_used;
                             $data[$row]['july_quantity'] = $julyData->carry_forward_quantity.' / '.$julyData->rent_per_day_per_quantity;
                             $data[$row]['july_amount'] = $julyData->rent_for_month;
-                            $julyTotalAmount += $data[$row]['july_amount'];
+                            $monthlyTotal[7]['july'] += $data[$row]['july_amount'];
                         }
 
 
                         $augustData = json_decode($assetRentMonthlyExpense['august']);
                         if($augustData == null){
                             $data[$row]['august_no_of_days_used'] = $data[$row]['august_quantity'] = $data[$row]['august_amount'] = '-';
-                            $augustTotalAmount += 0;
+                            $monthlyTotal[8]['august'] += 0;
                         }else{
                             $data[$row]['august_no_of_days_used'] = $augustData->days_used;
                             $data[$row]['august_quantity'] = $augustData->carry_forward_quantity.' / '.$augustData->rent_per_day_per_quantity;
                             $data[$row]['august_amount'] = $augustData->rent_for_month;
-                            $augustTotalAmount += $data[$row]['august_amount'];
+                            $monthlyTotal[8]['august'] += $data[$row]['august_amount'];
 
                         }
 
                         $septData = json_decode($assetRentMonthlyExpense['september']);
                         if($septData == null){
                             $data[$row]['sept_no_of_days_used'] = $data[$row]['sept_quantity'] = $data[$row]['sept_amount'] = '-';
-                            $septTotalAmount += 0;
+                            $monthlyTotal[9]['september'] += 0;
                         }else{
                             $data[$row]['sept_no_of_days_used'] = $septData->days_used;
                             $data[$row]['sept_quantity'] = $septData->carry_forward_quantity.' / '.$septData->rent_per_day_per_quantity;
                             $data[$row]['sept_amount'] = $septData->rent_for_month;
-                            $septTotalAmount += $data[$row]['sept_amount'];
+                            $monthlyTotal[9]['september'] += $data[$row]['sept_amount'];
                         }
 
 
                         $octData = json_decode($assetRentMonthlyExpense['october']);
                         if($octData == null){
                             $data[$row]['oct_no_of_days_used'] = $data[$row]['oct_quantity'] = $data[$row]['oct_amount'] = '-';
-                            $octTotalAmount += 0;
+                            $monthlyTotal[10]['october'] += 0;
                         }else{
                             $data[$row]['oct_no_of_days_used'] = $octData->days_used;
                             $data[$row]['oct_quantity'] = $octData->carry_forward_quantity.' / '.$octData->rent_per_day_per_quantity;
                             $data[$row]['oct_amount'] = $octData->rent_for_month;
-                            $octTotalAmount += $data[$row]['oct_amount'];
+                            $monthlyTotal[10]['october'] += $data[$row]['oct_amount'];
                         }
 
                         $novData = json_decode($assetRentMonthlyExpense['november']);
                         if($novData == null){
                             $data[$row]['nov_no_of_days_used'] = $data[$row]['nov_quantity'] = $data[$row]['nov_amount'] = '-';
-                            $novTotalAmount += 0;
+                            $monthlyTotal[11]['november'] += 0;
                         }else{
                             $data[$row]['nov_no_of_days_used'] = $novData->days_used;
                             $data[$row]['nov_quantity'] = $novData->carry_forward_quantity.' / '.$novData->rent_per_month;
                             $data[$row]['nov_amount'] = $novData->rent_for_month;
-                            $novTotalAmount += $data[$row]['nov_amount'];
+                            $monthlyTotal[11]['november'] += $data[$row]['nov_amount'];
                         }
 
                         $decData = json_decode($assetRentMonthlyExpense['december']);
                         if($decData == null){
                             $data[$row]['dec_no_of_days_used'] = $data[$row]['dec_quantity'] = $data[$row]['dec_amount'] = '-';
-                            $decTotalAmount += 0;
+                            $monthlyTotal[12]['december'] += 0;
                         }else{
                             $data[$row]['dec_no_of_days_used'] = $decData->days_used;
                             $data[$row]['dec_quantity'] = $decData->carry_forward_quantity.' / '.$decData->rent_per_month;
                             $data[$row]['dec_amount'] = $decData->rent_for_month;
-                            $decTotalAmount += $data[$row]['dec_amount'];
+                            $monthlyTotal[12]['december'] += $data[$row]['dec_amount'];
                         }
 
                         $row++;
                     }
-                    $total = $januaryTotalAmount + $februaryTotalAmount + $marchTotalAmount + $aprilTotalAmount + $mayTotalAmount + $juneTotalAmount
-                            + $julyTotalAmount + $augustTotalAmount + $septTotalAmount + $octTotalAmount + $novTotalAmount + $decTotalAmount;
+                    $total = $monthlyTotal[1]['january'] + $monthlyTotal[2]['february'] + $monthlyTotal[3]['march'] + $monthlyTotal[4]['april'] +
+                        $monthlyTotal[5]['may'] + $monthlyTotal[6]['june'] + $monthlyTotal[7]['july'] + $monthlyTotal[8]['august']
+                        + $monthlyTotal[9]['september'] + $monthlyTotal[10]['october'] + $monthlyTotal[11]['november'] + $monthlyTotal[12]['december'];
+
+                    $monthlyTotal[13]['Total Rent' ] = round($total,3);
+                    ksort($monthlyTotal);
+
                     $data[$row]['make_bold'] = true;
-                    $data[$row] = array_merge($data[$row],array('Total',null,null,null,null,$januaryTotalAmount ,null,null, $februaryTotalAmount ,null,null, $marchTotalAmount
-                    ,null,null, $aprilTotalAmount ,null,null, $mayTotalAmount ,null,null, $juneTotalAmount ,null,null,
-                    $julyTotalAmount ,null,null, $augustTotalAmount ,null,null, $septTotalAmount ,null,null, $octTotalAmount
-                    ,null,null, $novTotalAmount ,null,null, $decTotalAmount, $total));
+                    $data[$row] = array_merge($data[$row],array('Total',null,null,null,null,$monthlyTotal[1]['january'] ,null,null, $monthlyTotal[2]['february'] ,null,null, $monthlyTotal[3]['march']
+                    ,null,null, $monthlyTotal[4]['april'] ,null,null, $monthlyTotal[5]['may'] ,null,null, $monthlyTotal[6]['june'] ,null,null,
+                    $monthlyTotal[7]['july'] ,null,null, $monthlyTotal[8]['august'] ,null,null, $monthlyTotal[9]['september'] ,null,null, $monthlyTotal[10]['october']
+                    ,null,null, $monthlyTotal[11]['november'] ,null,null, $monthlyTotal[12]['december'], $total));
+
                     $projectName = $projectSite->join('projects','projects.id','=','project_sites.project_id')
                         ->where('project_sites.id',$project_site_id)->pluck('projects.name')->first();
+
                     $date = date($selectedYear['slug']);
+
                     Excel::create($reportType."_".$currentDate, function($excel) use($monthlyTotal, $data, $reportType, $header, $companyHeader, $date, $projectName, $selectedYear) {
                         $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(10);
                         $excel->sheet($reportType, function($sheet) use($monthlyTotal, $data, $header, $companyHeader, $date, $projectName, $selectedYear) {
@@ -574,95 +585,151 @@ class ReportManagementController extends Controller{
                                 $cell->setValue($date);
                             });
 
-                            $sheet->cell('A10', function($cell) use($date) {
+                            $row = 9;
+                            $monthHeaderRow =  $row+1;
+                            foreach($monthlyTotal as $key => $rowData){
+                                $next_column = 'A';
+                                if(array_key_exists('make_bold',$rowData)){
+                                    $makeBold = true;
+                                    unset($rowData['make_bold']);
+                                }else{
+                                    $makeBold = false;
+                                }
+                                $row++;
+                                foreach($rowData as $key1 => $cellData){
+                                    $current_column = $next_column++;
+                                    $sheet->getRowDimension($row)->setRowHeight(20);
+                                    $sheet->cell($current_column.($row), function($cell) use($key1,$cellData,$row,$monthHeaderRow,$makeBold,$current_column) {
+                                        if($row == $monthHeaderRow || $makeBold){
+                                            $cell->setFontWeight('bold');
+                                        }
+                                        $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                                        $cell->setAlignment('center')->setValignment('center');
+                                       if($current_column == 'A'){
+                                           $cell->setValue(ucwords($key1));
+                                       }elseif($current_column == 'B'){
+                                           $cell->setValue($cellData);
+                                       }
+
+                                    });
+                                }
+                            }
+
+                            $row = 9;
+                            $monthHeaderRow =  $row+1;
+                            foreach($monthlyTotal as $key => $rowData){
+                                $next_column = 'B';
+                                if(array_key_exists('make_bold',$rowData)){
+                                    $makeBold = true;
+                                    unset($rowData['make_bold']);
+                                }else{
+                                    $makeBold = false;
+                                }
+                                $row++;
+                                foreach($rowData as $key1 => $cellData){
+                                    $current_column = $next_column++;
+                                    $sheet->getRowDimension($row)->setRowHeight(20);
+                                    $sheet->cell($current_column.($row), function($cell) use($key1,$cellData,$row,$monthHeaderRow,$makeBold,$current_column) {
+                                        if($row == $monthHeaderRow || $makeBold){
+                                            $cell->setFontWeight('bold');
+                                        }
+                                        $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                                        $cell->setAlignment('center')->setValignment('center');
+
+                                            $cell->setValue($cellData);
+                                    });
+                                }
+                            }
+
+
+                            $sheet->cell('A27', function($cell) use($date) {
                                 $cell->setFontWeight('bold');
                                 $cell->setAlignment('center')->setValignment('center');
                                 $cell->setValue('Asset Name (Model No.)')->setFontWeight('bold')->setBackground('#d7f442')->setBorder('thin', 'thin', 'thin', 'thin');
                             });
-                            $sheet->cell('B10', function($cell) use($date) {
+                            $sheet->cell('B27', function($cell) use($date) {
                                 $cell->setFontWeight('bold');
                                 $cell->setAlignment('center')->setValignment('center');
                                 $cell->setValue('Total Quantity')->setFontWeight('bold')->setBackground('#d7f442')->setBorder('thin', 'thin', 'thin', 'thin');
                             });
-                            $sheet->cell('C10', function($cell) use($date) {
+                            $sheet->cell('C27', function($cell) use($date) {
                                 $cell->setFontWeight('bold');
                                 $cell->setAlignment('center')->setValignment('center');
                                 $cell->setValue('Rent Per Day')->setFontWeight('bold')->setBackground('#d7f442')->setBorder('thin', 'thin', 'thin', 'thin');
                             });
-                            $sheet->mergeCells('D10:F10');
-                            $sheet->cell('D10', function($cell) use($selectedYear) {
+                            $sheet->mergeCells('D27:F27');
+                            $sheet->cell('D27', function($cell) use($selectedYear) {
                                 $cell->setFontWeight('bold');
                                 $cell->setAlignment('center')->setValignment('center');
                                 $cell->setValue('January '.$selectedYear['slug'])->setFontWeight('bold')->setBackground('#d7f442')->setBorder('thin', 'thin', 'thin', 'thin');
                             });
-                            $sheet->mergeCells('G10:I10');
-                            $sheet->cell('G10', function($cell) use($selectedYear) {
+                            $sheet->mergeCells('G27:I27');
+                            $sheet->cell('G27', function($cell) use($selectedYear) {
                                 $cell->setFontWeight('bold');
                                 $cell->setAlignment('center')->setValignment('center');
                                 $cell->setValue('February '.$selectedYear['slug'])->setFontWeight('bold')->setBackground('#d7f442')->setBorder('thin', 'thin', 'thin', 'thin');
                             });
-                            $sheet->mergeCells('J10:L10');
-                            $sheet->cell('J10', function($cell) use($selectedYear) {
+                            $sheet->mergeCells('J27:L27');
+                            $sheet->cell('J27', function($cell) use($selectedYear) {
                                 $cell->setFontWeight('bold');
                                 $cell->setAlignment('center')->setValignment('center');
                                 $cell->setValue('March'.$selectedYear['slug'])->setFontWeight('bold')->setBackground('#d7f442')->setBorder('thin', 'thin', 'thin', 'thin');
                             });
-                            $sheet->mergeCells('M10:O10');
-                            $sheet->cell('M10', function($cell) use($selectedYear) {
+                            $sheet->mergeCells('M27:O27');
+                            $sheet->cell('M27', function($cell) use($selectedYear) {
                                 $cell->setFontWeight('bold');
                                 $cell->setAlignment('center')->setValignment('center');
                                 $cell->setValue('April'.$selectedYear['slug'])->setFontWeight('bold')->setBackground('#d7f442')->setBorder('thin', 'thin', 'thin', 'thin');
                             });
-                            $sheet->mergeCells('P10:R10');
-                            $sheet->cell('P10', function($cell) use($selectedYear) {
+                            $sheet->mergeCells('P27:R27');
+                            $sheet->cell('P27', function($cell) use($selectedYear) {
                                 $cell->setFontWeight('bold');
                                 $cell->setAlignment('center')->setValignment('center');
                                 $cell->setValue('May '.$selectedYear['slug'])->setFontWeight('bold')->setBackground('#d7f442')->setBorder('thin', 'thin', 'thin', 'thin');
                             });
-                            $sheet->mergeCells('S10:U10');
-                            $sheet->cell('S10', function($cell) use($selectedYear) {
+                            $sheet->mergeCells('S27:U27');
+                            $sheet->cell('S27', function($cell) use($selectedYear) {
                                 $cell->setFontWeight('bold');
                                 $cell->setAlignment('center')->setValignment('center');
                                 $cell->setValue('June '.$selectedYear['slug'])->setFontWeight('bold')->setBackground('#d7f442')->setBorder('thin', 'thin', 'thin', 'thin');
                             });
-                            $sheet->mergeCells('V10:X10');
-                            $sheet->cell('V10', function($cell) use($selectedYear) {
+                            $sheet->mergeCells('V27:X27');
+                            $sheet->cell('V27', function($cell) use($selectedYear) {
                                 $cell->setFontWeight('bold');
                                 $cell->setAlignment('center')->setValignment('center');
                                 $cell->setValue('July '.$selectedYear['slug'])->setFontWeight('bold')->setBackground('#d7f442')->setBorder('thin', 'thin', 'thin', 'thin');
                             });
-                            $sheet->mergeCells('Y10:AA10');
-                            $sheet->cell('Y10', function($cell) use($selectedYear) {
+                            $sheet->mergeCells('Y27:AA27');
+                            $sheet->cell('Y27', function($cell) use($selectedYear) {
                                 $cell->setFontWeight('bold');
                                 $cell->setAlignment('center')->setValignment('center');
                                 $cell->setValue('Aug '.$selectedYear['slug'])->setFontWeight('bold')->setBackground('#d7f442')->setBorder('thin', 'thin', 'thin', 'thin');
                             });
-                            $sheet->mergeCells('AB10:AD10');
-                            $sheet->cell('AB10', function($cell) use($selectedYear) {
+                            $sheet->mergeCells('AB27:AD27');
+                            $sheet->cell('AB27', function($cell) use($selectedYear) {
                                 $cell->setFontWeight('bold');
                                 $cell->setAlignment('center')->setValignment('center');
                                 $cell->setValue('Sept '.$selectedYear['slug'])->setFontWeight('bold')->setBackground('#d7f442')->setBorder('thin', 'thin', 'thin', 'thin');
                             });
-                            $sheet->mergeCells('AE10:AG10');
-                            $sheet->cell('AE10', function($cell) use($selectedYear) {
+                            $sheet->mergeCells('AE27:AG27');
+                            $sheet->cell('AE27', function($cell) use($selectedYear) {
                                 $cell->setFontWeight('bold');
                                 $cell->setAlignment('center')->setValignment('center');
                                 $cell->setValue('Oct '.$selectedYear['slug'])->setFontWeight('bold')->setBackground('#d7f442')->setBorder('thin', 'thin', 'thin', 'thin');
                             });
-                            $sheet->mergeCells('AH10:AJ10');
-                            $sheet->cell('AH10', function($cell) use($selectedYear) {
+                            $sheet->mergeCells('AH27:AJ27');
+                            $sheet->cell('AH27', function($cell) use($selectedYear) {
                                 $cell->setFontWeight('bold');
                                 $cell->setAlignment('center')->setValignment('center');
                                 $cell->setValue('Nov '.$selectedYear['slug'])->setFontWeight('bold')->setBackground('#d7f442')->setBorder('thin', 'thin', 'thin', 'thin');
                             });
-                            $sheet->mergeCells('AK10:AM10');
-                            $sheet->cell('AK10', function($cell) use($selectedYear) {
+                            $sheet->mergeCells('AK27:AM27');
+                            $sheet->cell('AK27', function($cell) use($selectedYear) {
                                 $cell->setFontWeight('bold');
                                 $cell->setAlignment('center')->setValignment('center');
                                 $cell->setValue('Dec '.$selectedYear['slug'])->setFontWeight('bold')->setBackground('#d7f442')->setBorder('thin', 'thin', 'thin', 'thin');
                             });
-
-                            $row= 10;
+                            $row = 27;
                             $headerRow =  $row+1;
                             foreach($data as $key => $rowData){
                                 $next_column = 'A';
