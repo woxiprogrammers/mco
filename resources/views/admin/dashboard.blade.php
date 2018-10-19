@@ -119,13 +119,13 @@
                                     </fieldset>
 
                                 </div>
-                                {{--<div class="row">
+                                <div class="row">
                                     <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12" style="width: 29%">
                                         <div class="dashboard-stat2 ">
                                             <div class="display">
                                                 <div class="number">
                                                     <h3 class="font-green-sharp">
-                                                        <span data-counter="counterup" data-value="7800">  69,870,261.30 </span>
+                                                        <span data-counter="counterup" id="salesValue"> 0.000 </span>
                                                         <small class="font-green-sharp"> ₹ </small>
                                                     </h3>
                                                     <hr>
@@ -139,7 +139,7 @@
                                             <div class="display">
                                                 <div class="number">
                                                     <h3 class="font-red-haze">
-                                                        <span data-counter="counterup" data-value="1349">  11,569,848.49 </span>
+                                                        <span data-counter="counterup" id="receiptValue">  0.000 </span>
                                                         <small class="font-red-haze"> ₹ </small>
 
                                                     </h3>
@@ -155,7 +155,7 @@
                                             <div class="display">
                                                 <div class="number">
                                                     <h3 class="font-blue-sharp">
-                                                        <span data-counter="counterup" data-value="1349">  2,377,534.00 </span>
+                                                        <span data-counter="counterup" id="outstandingMobilization">  0.000 </span>
                                                         <small class="font-blue-sharp"> ₹ </small>
 
                                                     </h3>
@@ -165,7 +165,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                </div>--}}
+                                </div>
                                 <div class="row">
                                     @include('partials.common.messages')
                                     <div class="col-md-12">

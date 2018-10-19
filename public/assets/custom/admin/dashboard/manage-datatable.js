@@ -84,6 +84,8 @@ var SalesListing = function () {
                     $( api.column( 5 ).footer() ).html(
                         outstandingMobilization.toFixed(3)
                     );
+                    $("#outstandingMobilization").text(outstandingMobilization.toFixed(3)).digits();
+
                     sitewisePnL = api
                         .column( 6, { page: 'current'} )
                         .data()
@@ -95,6 +97,8 @@ var SalesListing = function () {
                     $( api.column( 6 ).footer() ).html(
                         sitewisePnL.toFixed(3)
                     );
+                    $("#salesValue").text(sitewisePnL.toFixed(3)).digits();
+
                     receiptwisePnL = api
                         .column( 7, { page: 'current'} )
                         .data()
@@ -106,8 +110,9 @@ var SalesListing = function () {
                     $( api.column( 7 ).footer() ).html(
                         receiptwisePnL.toFixed(3)
                     );
-                },
+                    $("#receiptValue").text((receiptwisePnL.toFixed(3))).digits();
 
+                },
                 "lengthMenu": [
                     [5, 100, 150],
                     [5, 100, 150] // change per page values here
@@ -358,3 +363,9 @@ jQuery(document).ready(function() {
     SalesListing.init();
     ExpensesListing.init();
 });
+
+$.fn.digits = function(){
+    return this.each(function(){
+        $(this).text( $(this).text().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,") );
+    })
+}
