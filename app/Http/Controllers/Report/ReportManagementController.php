@@ -2650,6 +2650,7 @@ class ReportManagementController extends Controller{
                         foreach ($assetRentMonthlyExpenseData as $assetRentMonthlyExpense){
                             $assetRent += (json_decode($assetRentMonthlyExpense[$month['slug']]) == null) ? 0 : json_decode($assetRentMonthlyExpense[$month['slug']])->rent_for_month;
                         }
+                        $totalAssetRent += $assetRent;
                     }
                   //  $purchaseTaxAmount = $assetMaintenanceGst + $purchaseOrderGst + $inventorySiteTransfersInGst + $siteTransferBillGst - $inventorySiteTransfersOutGst;
                    // $indirectExpenses = $salesTaxAmount - $purchaseTaxAmount - $subcontractorGst;
@@ -2657,6 +2658,13 @@ class ReportManagementController extends Controller{
 
                     if($officeProjectSiteId == $project_site_id){
                         $allSiteTotalAssetRentOpeningExpense = $projectSite->sum('asset_rent_opening_expense');
+                        $allSiteTotalAssetRentExpense = $assetRentMonthlyExpense
+                            ->where('year_id',$selectedYear['id'])
+                            ->whereIn('project_site_id',$projectSite->pluck('id'))
+                            ->get();
+                        foreach ($allSiteTotalAssetRentExpense as $thisAssetRentExpense){
+                            $totalAssetRent += (json_decode($thisAssetRentExpense[$month['slug']]) == null) ? 0 : json_decode($thisAssetRentExpense[$month['slug']])->rent_for_month;
+                        }
                         $assetRent = $salaryAmount = $officeExpense = 0;
                         $sales = $receipt = $totalAssetRent + $allSiteTotalAssetRentOpeningExpense;
                     }
@@ -2949,9 +2957,10 @@ class ReportManagementController extends Controller{
                     $iTotalRecords = count($projectSiteData);
                     $records = array();
                     $records['data'] = array();
+                    $projectSiteIds = $projectSiteData->pluck('id')->toArray();
                     $end = $request->length < 0 ? count($projectSiteData) : $request->length;
                     for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($projectSiteData); $iterator++, $pagination++) {
-                        $salesAmount = $this->getSalesExpenseAmount('null', 'null', 'null', $projectSiteData[$pagination]['id'],'sales');
+                        $salesAmount = $this->getSalesExpenseAmount('null', 'null', 'null', $projectSiteData[$pagination]['id'],'sales',$projectSiteIds);
                         $records['data'][$iterator] = [
                             $projectName = ucwords($projectSiteData[$pagination]['name']),
                             number_format($salesAmount['sales'], 3),
@@ -2974,9 +2983,10 @@ class ReportManagementController extends Controller{
                     $iTotalRecords = count($projectSiteData);
                     $records = array();
                     $records['data'] = array();
+                    $projectSiteIds = $projectSiteData->pluck('id')->toArray();
                     $end = $request->length < 0 ? count($projectSiteData) : $request->length;
                     for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($projectSiteData); $iterator++, $pagination++) {
-                        $salesAmount = $this->getSalesExpenseAmount('null', 'null', 'null', $projectSiteData[$pagination]['id'],'sales');
+                        $salesAmount = $this->getSalesExpenseAmount('null', 'null', 'null', $projectSiteData[$pagination]['id'],'sales',$projectSiteIds);
                         $records['data'][$iterator] = [
                             $projectName = ucwords($projectSiteData[$pagination]['name']),
                             number_format($salesAmount['sales'], 3),
@@ -2999,9 +3009,10 @@ class ReportManagementController extends Controller{
                     $iTotalRecords = count($projectSiteData);
                     $records = array();
                     $records['data'] = array();
+                    $projectSiteIds = $projectSiteData->pluck('id')->toArray();
                     $end = $request->length < 0 ? count($projectSiteData) : $request->length;
                     for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($projectSiteData); $iterator++, $pagination++) {
-                        $salesAmount = $this->getSalesExpenseAmount($januaryMonthId, $decemberMonthId, $request['sales_year_id'], $projectSiteData[$pagination]['id'],'sales');
+                        $salesAmount = $this->getSalesExpenseAmount($januaryMonthId, $decemberMonthId, $request['sales_year_id'], $projectSiteData[$pagination]['id'],'sales',$projectSiteIds);
                         $records['data'][$iterator] = [
                             $projectName = ucwords($projectSiteData[$pagination]['name']),
                             number_format($salesAmount['sales'], 3),
@@ -3022,9 +3033,10 @@ class ReportManagementController extends Controller{
                     $iTotalRecords = count($projectSiteData);
                     $records = array();
                     $records['data'] = array();
+                    $projectSiteIds = $projectSiteData->pluck('id')->toArray();
                     $end = $request->length < 0 ? count($projectSiteData) : $request->length;
                     for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($projectSiteData); $iterator++, $pagination++) {
-                        $salesAmount = $this->getSalesExpenseAmount($januaryMonthId, $decemberMonthId, $request['sales_year_id'], $projectSiteData[$pagination]['id'],'sales');
+                        $salesAmount = $this->getSalesExpenseAmount($januaryMonthId, $decemberMonthId, $request['sales_year_id'], $projectSiteData[$pagination]['id'],'sales',$projectSiteIds);
                         $records['data'][$iterator] = [
                             $projectName = ucwords($projectSiteData[$pagination]['name']),
                             number_format($salesAmount['sales'], 3),
@@ -3047,9 +3059,10 @@ class ReportManagementController extends Controller{
                     $iTotalRecords = count($projectSiteData);
                     $records = array();
                     $records['data'] = array();
+                    $projectSiteIds = $projectSiteData->pluck('id')->toArray();
                     $end = $request->length < 0 ? count($projectSiteData) : $request->length;
                     for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($projectSiteData); $iterator++, $pagination++) {
-                        $salesAmount = $this->getSalesExpenseAmount($startMonthId, $endMonthId, 'null', $projectSiteData[$pagination]['id'],'sales');
+                        $salesAmount = $this->getSalesExpenseAmount($startMonthId, $endMonthId, 'null', $projectSiteData[$pagination]['id'],'sales',$projectSiteIds);
                         $records['data'][$iterator] = [
                             $projectName = ucwords($projectSiteData[$pagination]['name']),
                             number_format($salesAmount['sales'], 3),
@@ -3074,9 +3087,10 @@ class ReportManagementController extends Controller{
                     $iTotalRecords = count($projectSiteData);
                     $records = array();
                     $records['data'] = array();
+                    $projectSiteIds = $projectSiteData->pluck('id')->toArray();
                     $end = $request->length < 0 ? count($projectSiteData) : $request->length;
                     for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($projectSiteData); $iterator++, $pagination++) {
-                        $salesAmount = $this->getSalesExpenseAmount($startMonthId, $endMonthId, 'null', $projectSiteData[$pagination]['id'],'sales');
+                        $salesAmount = $this->getSalesExpenseAmount($startMonthId, $endMonthId, 'null', $projectSiteData[$pagination]['id'],'sales',$projectSiteIds);
                         $records['data'][$iterator] = [
                             $projectName = ucwords($projectSiteData[$pagination]['name']),
                             number_format($salesAmount['sales'], 3),
@@ -3101,9 +3115,10 @@ class ReportManagementController extends Controller{
                     $iTotalRecords = count($projectSiteData);
                     $records = array();
                     $records['data'] = array();
+                    $projectSiteIds = $projectSiteData->pluck('id')->toArray();
                     $end = $request->length < 0 ? count($projectSiteData) : $request->length;
                     for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($projectSiteData); $iterator++, $pagination++) {
-                        $salesAmount = $this->getSalesExpenseAmount($startMonthId, $endMonthId, $request['sales_year_id'], $projectSiteData[$pagination]['id'],'sales');
+                        $salesAmount = $this->getSalesExpenseAmount($startMonthId, $endMonthId, $request['sales_year_id'], $projectSiteData[$pagination]['id'],'sales',$projectSiteIds);
                         $records['data'][$iterator] = [
                             $projectName = ucwords($projectSiteData[$pagination]['name']),
                             number_format($salesAmount['sales'], 3),
@@ -3126,9 +3141,10 @@ class ReportManagementController extends Controller{
                     $iTotalRecords = count($projectSiteData);
                     $records = array();
                     $records['data'] = array();
+                    $projectSiteIds = $projectSiteData->pluck('id')->toArray();
                     $end = $request->length < 0 ? count($projectSiteData) : $request->length;
                     for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($projectSiteData); $iterator++, $pagination++) {
-                        $salesAmount = $this->getSalesExpenseAmount($startMonthId, $endMonthId, $request['sales_year_id'], $projectSiteData[$pagination]['id'],'sales');
+                        $salesAmount = $this->getSalesExpenseAmount($startMonthId, $endMonthId, $request['sales_year_id'], $projectSiteData[$pagination]['id'],'sales',$projectSiteIds);
                         $records['data'][$iterator] = [
                             $projectName = ucwords($projectSiteData[$pagination]['name']),
                             number_format($salesAmount['sales'], 3),
@@ -3176,9 +3192,10 @@ class ReportManagementController extends Controller{
                     $iTotalRecords = count($projectSiteData);
                     $records = array();
                     $records['data'] = array();
+                    $projectSiteIds = $projectSiteData->pluck('id')->toArray();
                     $end = $request->length < 0 ? count($projectSiteData) : $request->length;
                     for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($projectSiteData); $iterator++, $pagination++) {
-                        $expenseAmount = $this->getSalesExpenseAmount('null', 'null', 'null', $projectSiteData[$pagination]['id'],'expense');
+                        $expenseAmount = $this->getSalesExpenseAmount('null', 'null', 'null', $projectSiteData[$pagination]['id'],'expense',$projectSiteIds);
                         $records['data'][$iterator] = [
                             $projectName = ucwords($projectSiteData[$pagination]['name']),
                             number_format($expenseAmount['purchase'],3),
@@ -3203,9 +3220,10 @@ class ReportManagementController extends Controller{
                     $iTotalRecords = count($projectSiteData);
                     $records = array();
                     $records['data'] = array();
+                    $projectSiteIds = $projectSiteData->pluck('id')->toArray();
                     $end = $request->length < 0 ? count($projectSiteData) : $request->length;
                     for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($projectSiteData); $iterator++, $pagination++) {
-                        $expenseAmount = $this->getSalesExpenseAmount('null', 'null', 'null', $projectSiteData[$pagination]['id'],'expense');
+                        $expenseAmount = $this->getSalesExpenseAmount('null', 'null', 'null', $projectSiteData[$pagination]['id'],'expense',$projectSiteIds);
                         $records['data'][$iterator] = [
                             $projectName = ucwords($projectSiteData[$pagination]['name']),
                             number_format($expenseAmount['purchase'],3),
@@ -3230,9 +3248,10 @@ class ReportManagementController extends Controller{
                     $iTotalRecords = count($projectSiteData);
                     $records = array();
                     $records['data'] = array();
+                    $projectSiteIds = $projectSiteData->pluck('id')->toArray();
                     $end = $request->length < 0 ? count($projectSiteData) : $request->length;
                     for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($projectSiteData); $iterator++, $pagination++) {
-                        $expenseAmount = $this->getSalesExpenseAmount($januaryMonthId, $decemberMonthId, $request['expense_year_id'], $projectSiteData[$pagination]['id'],'expense');
+                        $expenseAmount = $this->getSalesExpenseAmount($januaryMonthId, $decemberMonthId, $request['expense_year_id'], $projectSiteData[$pagination]['id'],'expense',$projectSiteIds);
                         $records['data'][$iterator] = [
                             $projectName = ucwords($projectSiteData[$pagination]['name']),
                             number_format($expenseAmount['purchase'],3),
@@ -3255,9 +3274,10 @@ class ReportManagementController extends Controller{
                     $iTotalRecords = count($projectSiteData);
                     $records = array();
                     $records['data'] = array();
+                    $projectSiteIds = $projectSiteData->pluck('id')->toArray();
                     $end = $request->length < 0 ? count($projectSiteData) : $request->length;
                     for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($projectSiteData); $iterator++, $pagination++) {
-                        $expenseAmount = $this->getSalesExpenseAmount($januaryMonthId, $decemberMonthId, $request['expense_year_id'], $projectSiteData[$pagination]['id'],'expense');
+                        $expenseAmount = $this->getSalesExpenseAmount($januaryMonthId, $decemberMonthId, $request['expense_year_id'], $projectSiteData[$pagination]['id'],'expense',$projectSiteIds);
                         $records['data'][$iterator] = [
                             $projectName = ucwords($projectSiteData[$pagination]['name']),
                             number_format($expenseAmount['purchase'],3),
@@ -3282,9 +3302,10 @@ class ReportManagementController extends Controller{
                     $iTotalRecords = count($projectSiteData);
                     $records = array();
                     $records['data'] = array();
+                    $projectSiteIds = $projectSiteData->pluck('id')->toArray();
                     $end = $request->length < 0 ? count($projectSiteData) : $request->length;
                     for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($projectSiteData); $iterator++, $pagination++) {
-                        $expenseAmount = $this->getSalesExpenseAmount($startMonthId, $endMonthId, 'null', $projectSiteData[$pagination]['id'],'expense');
+                        $expenseAmount = $this->getSalesExpenseAmount($startMonthId, $endMonthId, 'null', $projectSiteData[$pagination]['id'],'expense',$projectSiteIds);
                         $records['data'][$iterator] = [
                             $projectName = ucwords($projectSiteData[$pagination]['name']),
                             number_format($expenseAmount['purchase'],3),
@@ -3311,9 +3332,10 @@ class ReportManagementController extends Controller{
                     $iTotalRecords = count($projectSiteData);
                     $records = array();
                     $records['data'] = array();
+                    $projectSiteIds = $projectSiteData->pluck('id')->toArray();
                     $end = $request->length < 0 ? count($projectSiteData) : $request->length;
                     for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($projectSiteData); $iterator++, $pagination++) {
-                        $expenseAmount = $this->getSalesExpenseAmount($startMonthId, $endMonthId, 'null', $projectSiteData[$pagination]['id'],'expense');
+                        $expenseAmount = $this->getSalesExpenseAmount($startMonthId, $endMonthId, 'null', $projectSiteData[$pagination]['id'],'expense',$projectSiteIds);
                         $records['data'][$iterator] = [
                             $projectName = ucwords($projectSiteData[$pagination]['name']),
                             number_format($expenseAmount['purchase'],3),
@@ -3340,9 +3362,10 @@ class ReportManagementController extends Controller{
                     $iTotalRecords = count($projectSiteData);
                     $records = array();
                     $records['data'] = array();
+                    $projectSiteIds = $projectSiteData->pluck('id')->toArray();
                     $end = $request->length < 0 ? count($projectSiteData) : $request->length;
                     for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($projectSiteData); $iterator++, $pagination++) {
-                        $expenseAmount = $this->getSalesExpenseAmount($startMonthId, $endMonthId, $request['expense_year_id'], $projectSiteData[$pagination]['id'],'expense');
+                        $expenseAmount = $this->getSalesExpenseAmount($startMonthId, $endMonthId, $request['expense_year_id'], $projectSiteData[$pagination]['id'],'expense',$projectSiteIds);
                         $records['data'][$iterator] = [
                             $projectName = ucwords($projectSiteData[$pagination]['name']),
                             number_format($expenseAmount['purchase'],3),
@@ -3367,9 +3390,10 @@ class ReportManagementController extends Controller{
                     $iTotalRecords = count($projectSiteData);
                     $records = array();
                     $records['data'] = array();
+                    $projectSiteIds = $projectSiteData->pluck('id')->toArray();
                     $end = $request->length < 0 ? count($projectSiteData) : $request->length;
                     for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($projectSiteData); $iterator++, $pagination++) {
-                        $expenseAmount = $this->getSalesExpenseAmount($startMonthId, $endMonthId, $request['expense_year_id'], $projectSiteData[$pagination]['id'],'expense');
+                        $expenseAmount = $this->getSalesExpenseAmount($startMonthId, $endMonthId, $request['expense_year_id'], $projectSiteData[$pagination]['id'],'expense',$projectSiteIds);
                         $records['data'][$iterator] = [
                             $projectName = ucwords($projectSiteData[$pagination]['name']),
                             number_format($expenseAmount['purchase'],3),
@@ -3402,7 +3426,7 @@ class ReportManagementController extends Controller{
         return response()->json($records,200);
     }
 
-    public function getSalesExpenseAmount($startMonthId,$endMonthId,$yearId,$projectSiteId,$slug){
+    public function getSalesExpenseAmount($startMonthId,$endMonthId,$yearId,$projectSiteId,$slug,$projectSiteIds){
         try{
             $totalAssetRent = $totalAssetRentOpeningExpense = 0;
             $salesData = array();
@@ -3438,7 +3462,8 @@ class ReportManagementController extends Controller{
             $assetRent = 0;
             $quotation = $quotation->where('project_site_id',$projectSiteId)->first();
             $subcontractorApprovedBillStatusId = $subcontractorBillStatus->where('slug','approved')->pluck('id')->first();
-           // $inventoryComponentSiteTransferIds = $inventoryTransferTypes->where('slug','site')->get();
+            $officeProjectSiteId = $projectSite->where('name',env('OFFICE_PROJECT_SITE_NAME'))->pluck('id')->first();
+            // $inventoryComponentSiteTransferIds = $inventoryTransferTypes->where('slug','site')->get();
           //  $approvedComponentTransferStatusId = $inventoryComponentTransferStatus->where('slug','approved')->pluck('id');
             switch(true){
                 case ($yearId == 'null' && $startMonthId == 'null')  :
@@ -3507,6 +3532,21 @@ class ReportManagementController extends Controller{
                         foreach($totalMonths as $month){
                             $assetRent += (json_decode($assetRentMonthlyExpense[$month['slug']]) == null) ? 0 : json_decode($assetRentMonthlyExpense[$month['slug']])->rent_for_month;
                         }
+                    }
+                    if($officeProjectSiteId == $projectSiteId){
+                        $allSiteTotalAssetRentOpeningExpense = $projectSite->sum('asset_rent_opening_expense');
+                        $allSiteTotalAssetRentExpense = $assetRentMonthlyExpense
+                            ->whereIn('project_site_id',$projectSiteIds)
+                            ->get();
+                        $totalAssetRent = 0;
+                        foreach ($allSiteTotalAssetRentExpense as $thisAssetRentExpense){
+                            foreach($totalMonths as $month){
+                            $totalAssetRent += (json_decode($thisAssetRentExpense[$month['slug']]) == null) ? 0 : json_decode($thisAssetRentExpense[$month['slug']])->rent_for_month;
+                            }
+                        }
+                        Log::info($totalAssetRent);
+                        $assetRent = $salaryAmount = $officeExpense = 0;
+                        $sales = $receipt = $totalAssetRent + $allSiteTotalAssetRentOpeningExpense;
                     }
                     /*$assetMaintenanceGst += $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
                         ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
@@ -3619,6 +3659,19 @@ class ReportManagementController extends Controller{
 
                         foreach ($assetRentMonthlyExpenseData as $assetRentMonthlyExpense){
                                 $assetRent += (json_decode($assetRentMonthlyExpense[$month['slug']]) == null) ? 0 : json_decode($assetRentMonthlyExpense[$month['slug']])->rent_for_month;
+                        }
+                        if($officeProjectSiteId == $projectSiteId){
+                            $allSiteTotalAssetRentOpeningExpense = $projectSite->sum('asset_rent_opening_expense');
+                            $allSiteTotalAssetRentExpense = $assetRentMonthlyExpense
+                                ->whereIn('project_site_id',$projectSiteIds)
+                                ->get();
+                            foreach ($allSiteTotalAssetRentExpense as $thisAssetRentExpense){
+                                foreach($totalMonths as $month){
+                                    $totalAssetRent += (json_decode($thisAssetRentExpense[$month['slug']]) == null) ? 0 : json_decode($thisAssetRentExpense[$month['slug']])->rent_for_month;
+                                }
+                            }
+                            $assetRent = $salaryAmount = $officeExpense = 0;
+                            $sales = $receipt = $totalAssetRent + $allSiteTotalAssetRentOpeningExpense;
                         }
                         /*$assetMaintenanceGst += $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
                             ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
@@ -3747,6 +3800,21 @@ class ReportManagementController extends Controller{
                         foreach ($assetRentMonthlyExpenseData as $assetRentMonthlyExpense){
                             $assetRent += (json_decode($assetRentMonthlyExpense[$month['slug']]) == null) ? 0 : json_decode($assetRentMonthlyExpense[$month['slug']])->rent_for_month;
                         }
+
+                        if($officeProjectSiteId == $projectSiteId){
+                            $allSiteTotalAssetRentOpeningExpense = $projectSite->sum('asset_rent_opening_expense');
+                            $allSiteTotalAssetRentExpense = $assetRentMonthlyExpense
+                                ->whereIn('project_site_id',$projectSiteIds)
+                                ->where('year_id',$selectedYear['id'])
+                                ->get();
+                            foreach ($allSiteTotalAssetRentExpense as $thisAssetRentExpense){
+                                foreach($totalMonths as $month){
+                                    $totalAssetRent += (json_decode($thisAssetRentExpense[$month['slug']]) == null) ? 0 : json_decode($thisAssetRentExpense[$month['slug']])->rent_for_month;
+                                }
+                            }
+                            $assetRent = $salaryAmount = $officeExpense = 0;
+                            $sales = $receipt = $totalAssetRent + $allSiteTotalAssetRentOpeningExpense;
+                        }
                         /*$assetMaintenanceGst += $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
                             ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
                             ->join('assets','assets.id','=','asset_maintenance.asset_id')
@@ -3803,13 +3871,9 @@ class ReportManagementController extends Controller{
            /* $purchaseTaxAmount = $assetMaintenanceGst + $purchaseOrderGst + $inventorySiteTransfersInGst + $siteTransferBillGst - $inventorySiteTransfersOutGst;
             $indirectExpenses = $salesTaxAmount - $purchaseTaxAmount - $subcontractorGst;*/
             $openingExpenses = $quotation['opening_expenses'];
-            $officeProjectSiteId = $projectSite->where('name',env('OFFICE_PROJECT_SITE_NAME'))->pluck('id')->first();
+
             $totalAssetRentOpeningExpense = $projectSite->where('id',$projectSiteId)->pluck('asset_rent_opening_expense')->first();
-            if($officeProjectSiteId == $projectSiteId){
-                $allSiteTotalAssetRentOpeningExpense = $projectSite->sum('asset_rent_opening_expense');
-                $assetRent = $salaryAmount = $officeExpense = 0;
-                $sales = $receipt = $totalAssetRent + $allSiteTotalAssetRentOpeningExpense;
-            }
+
             if($totalAssetRentOpeningExpense == null){
                 $totalAssetRentOpeningExpense = 0;
             }
