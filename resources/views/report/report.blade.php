@@ -52,6 +52,7 @@
                                                     </div>
                                                     <div class="col-md-4">
                                                         <select class="form-control" id="report_type" name="report_type" onchange="getDivData()">
+                                                            <option value="sitewise_asset_rent_report">Asset Rent Report</option>
                                                             <option value="sitewise_indirect_expenses_report">Indirect Expenses Report</option>
                                                             <option value="sitewise_mis_purchase_report">Mis. Purchase Report</option>
                                                             <option value="sitewise_purchase_report">Purchase Report</option>
@@ -125,6 +126,20 @@
                                                         </select>
                                                     </div>
                                                 </div>
+
+                                                <div class="form-group row" id="asset_rent_project_sites">
+                                                    <div class="col-md-3" style="text-align: right">
+                                                        <label>Select Project Site : </label>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <select class="form-control" id="asset_rent_project_site_id" name="asset_rent_project_site_id" onchange="getData()">
+                                                            @foreach($assetRentProjectSites as $projectSite)
+                                                                <option value="{{$projectSite['id']}}">{{$projectSite['project_name']}} - {{$projectSite['name']}}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                </div>
+
                                                 <div class="form-group row" id="indirect_expense_project_site" hidden>
                                                     <div class="col-md-3" style="text-align: right">
                                                         <label>Select Project Site : </label>
@@ -214,33 +229,42 @@
                 $('#bill_project_site,#submitButton').show();
                 $('#project_sites').hide();
                 $('#subcontractor').hide();
-                $('#subcontractor_project_site,#month,#year,#indirect_expense_project_site').hide();
+                $('#subcontractor_project_site,#month,#year,#indirect_expense_project_site,#asset_rent_project_sites').hide();
                 $('#dateDiv,#downloadButton').hide();
 
             }else if($('#report_type').val() == 'sitewise_subcontractor_report'){
                 $('#subcontractor_project_site,#submitButton').show();
                 $('#project_sites').hide();
-                $('#bill_project_site,#month,#year,#indirect_expense_project_site').hide();
+                $('#bill_project_site,#month,#year,#indirect_expense_project_site,#asset_rent_project_sites').hide();
                 $('#dateDiv,#downloadButton').hide();
 
                 getSubcontractor();
+
             }else if($('#report_type').val() == 'sitewise_subcontractor_summary_report'){
                 $('#subcontractor_project_site,#submitButton').show();
                 $('#project_sites').hide();
-                $('#bill_project_site,#month,#year,#indirect_expense_project_site').hide();
+                $('#bill_project_site,#month,#year,#indirect_expense_project_site,#asset_rent_project_sites').hide();
                 $('#dateDiv,#downloadButton,#subcontractor').hide();
+
             }else if($('#report_type').val() == 'sitewise_indirect_expenses_report'){
-                $('#bill_project_site,#subcontractor_project_site,#subcontractor,#downloadButton,#dateDiv,#project_sites,#indirect_expense_project_site').hide();
+                $('#bill_project_site,#subcontractor_project_site,#subcontractor,#downloadButton,#dateDiv,#project_sites,#indirect_expense_project_site,#asset_rent_project_sites').hide();
                 $('#indirect_expense_project_site,#submitButton,#month,#year').show();
+
             }else if($('#report_type').val() == 'sitewise_pNl_report'){
-                $('#bill_project_site,#subcontractor_project_site,#subcontractor,#downloadButton,#dateDiv,#indirect_expense_project_site').hide();
+                $('#bill_project_site,#subcontractor_project_site,#subcontractor,#downloadButton,#dateDiv,#indirect_expense_project_site,#asset_rent_project_sites').hide();
                 $('#project_sites,#submitButton,#month,#year').show();
+
+            }else if($('#report_type').val() == 'sitewise_asset_rent_report'){
+                $('#bill_project_site,#subcontractor_project_site,#subcontractor,#downloadButton,#dateDiv,#month,#project_sites,#indirect_expense_project_site').hide();
+                $('#asset_rent_project_sites,#submitButton,#year').show();
+
             }else{
-                $('#bill_project_site,#indirect_expense_project_site').hide();
+                $('#bill_project_site,#indirect_expense_project_site,#asset_rent_project_sites').hide();
                 $('#subcontractor_project_site').hide();
                 $('#subcontractor,#downloadButton,#month,#year').hide();
                 $('#project_sites,#submitButton').show();
                 $('#dateDiv').show();
+
             }
         }
 
@@ -251,6 +275,8 @@
                 var projectSiteId = $('#subcontractor_project_site_id').val();
             }else if( $('#report_type').val() == 'sitewise_indirect_expenses_report'){
                 var projectSiteId = $('#indirect_expense_project_site_id').val();
+            }else if($('#report_type').val() == 'sitewise_asset_rent_report'){
+                var projectSiteId = $('#asset_rent_project_site_id').val()
             }else{
                 var projectSiteId = $('#project_site_id').val();
             }

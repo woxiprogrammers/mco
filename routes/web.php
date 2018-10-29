@@ -59,7 +59,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('get-cities',array('uses' => 'Admin\AddressController@getCities'));
         Route::get('change-status/{address}',array('uses' => 'Admin\AddressController@changeAddressStatus'));
     });
-
+    Route::get('script',array('uses' => 'Admin\CategoryController@getData'));
     Route::group(['prefix' => 'category'],function(){
         Route::get('create',array('uses' => 'Admin\CategoryController@getCreateView'));
         Route::post('create',array('uses' => 'Admin\CategoryController@createCategory'));
