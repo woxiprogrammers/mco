@@ -37,60 +37,70 @@ trait BillTrait{
 
     public function getCreateView(Request $request,$project_site){
         try{
-            $quotation = Quotation::where('project_site_id',$project_site['id'])->first()->toArray();
-            $cancelBillStatusId = BillStatus::where('slug','cancelled')->pluck('id')->first();
-            $bills = Bill::where('quotation_id',$quotation['id'])->where('bill_status_id','!=',$cancelBillStatusId)->orderBy('created_at','asc')->get()->toArray();
-            $quotationProducts = QuotationProduct::where('quotation_id',$quotation['id'])->get()->toArray();
-            $extraItems = QuotationExtraItem::where('quotation_id',$quotation['id'])->get();
-            if($bills != null){
-                foreach ($extraItems as $key => $extraItem){
-                    $extraItem['previous_rate'] = BillQuotationExtraItem::whereIn('bill_id',array_column($bills,'id'))->where('quotation_extra_item_id',$extraItem->id)->sum('rate');
-                }
-                for($i = 0 ; $i < count($quotationProducts) ; $i++){
-                    $quotationProducts[$i]['previous_quantity'] = 0;
-                    for($j = 0; $j < count($bills) ; $j++ ){
-                        $quotationProducts[$i]['product_detail'] = Product::where('id',$quotationProducts[$i]['product_id'])->first()->toArray();
-                        $quotationProducts[$i]['category_name'] = Category::where('id',$quotationProducts[$i]['product_detail']['category_id'])->pluck('name')->first();
-                        $quotationProducts[$i]['unit'] = Unit::where('id',$quotationProducts[$i]['product_detail']['unit_id'])->pluck('name')->first();
-                        if($quotation['discount'] != 0){
-                            $quotationProducts[$i]['rate'] = round(($quotationProducts[$i]['rate_per_unit'] - ($quotationProducts[$i]['rate_per_unit'] * ($quotation['discount'] / 100))),3);
-                            //$quotationProducts[$i]['rate'] = MaterialProductHelper::customRound(($quotationProducts[$i]['rate_per_unit'] - ($quotationProducts[$i]['rate_per_unit'] * ($quotation['discount'] / 100))),3);
-                        }else{
-                            $quotationProducts[$i]['rate'] = round(($quotationProducts[$i]['rate_per_unit']),3);
-                            //$quotationProducts[$i]['rate'] = MaterialProductHelper::customRound(($quotationProducts[$i]['rate_per_unit']),3);
-                        }
-                        $bill_products = BillQuotationProducts::where('bill_id',$bills[$j]['id'])->where('quotation_product_id',$quotationProducts[$i]['id'])->get()->toArray();
-                        for($k = 0 ; $k < count($bill_products) ; $k++ ){
-                            if($bill_products[$k]['quotation_product_id'] == $quotationProducts[$i]['id']){
-                                $quotationProducts[$i]['previous_quantity'] = $quotationProducts[$i]['previous_quantity'] + $bill_products[$k]['quantity'];
+            $quotationModel = new Quotation();
+            $billStatusModel = new BillStatus();
+            $billModel = new Bill();
+            $quotationExtraItemModel = new QuotationExtraItem();
+            $quotationProductModel = new QuotationProduct();
+            $billQuotationExtraItem = new BillQuotationExtraItem();
+            $quotation = $quotationModel->where('project_site_id',$project_site['id'])->first();
+            $cancelBillStatusId = $billStatusModel->where('slug','cancelled')->pluck('id')->first();
+            $bills = $billModel->where('quotation_id',$quotation['id'])->where('bill_status_id','!=',$cancelBillStatusId)->orderBy('created_at','asc')->get()->toArray();
+            $extraItems = $quotationExtraItemModel->where('quotation_id',$quotation['id'])->get();
+            if($quotation->billType->slug == 'itemwise'){
+                $quotationProducts = $quotationProductModel->where('quotation_id',$quotation['id'])->get()->toArray();
+                if($bills != null){
+                    foreach ($extraItems as $key => $extraItem){
+                        $extraItem['previous_rate'] = $billQuotationExtraItem->whereIn('bill_id',array_column($bills,'id'))->where('quotation_extra_item_id',$extraItem->id)->sum('rate');
+                    }
+                    for($i = 0 ; $i < count($quotationProducts) ; $i++){
+                        $quotationProducts[$i]['previous_quantity'] = 0;
+                        for($j = 0; $j < count($bills) ; $j++ ){
+                            $quotationProducts[$i]['product_detail'] = Product::where('id',$quotationProducts[$i]['product_id'])->first()->toArray();
+                            $quotationProducts[$i]['category_name'] = Category::where('id',$quotationProducts[$i]['product_detail']['category_id'])->pluck('name')->first();
+                            $quotationProducts[$i]['unit'] = Unit::where('id',$quotationProducts[$i]['product_detail']['unit_id'])->pluck('name')->first();
+                            if($quotation['discount'] != 0){
+                                $quotationProducts[$i]['rate'] = round(($quotationProducts[$i]['rate_per_unit'] - ($quotationProducts[$i]['rate_per_unit'] * ($quotation['discount'] / 100))),3);
+                            }else{
+                                $quotationProducts[$i]['rate'] = round(($quotationProducts[$i]['rate_per_unit']),3);
+                            }
+                            $bill_products = BillQuotationProducts::where('bill_id',$bills[$j]['id'])->where('quotation_product_id',$quotationProducts[$i]['id'])->get()->toArray();
+                            for($k = 0 ; $k < count($bill_products) ; $k++ ){
+                                if($bill_products[$k]['quotation_product_id'] == $quotationProducts[$i]['id']){
+                                    $quotationProducts[$i]['previous_quantity'] = $quotationProducts[$i]['previous_quantity'] + $bill_products[$k]['quantity'];
+                                }
                             }
                         }
                     }
-                }
-            }else{
-                foreach ($extraItems as $key => $extraItem){
-                    $extraItem['previous_rate'] = 0;
-                }
-                for($i=0 ; $i < count($quotationProducts) ; $i++){
-                    $quotationProducts[$i]['product_detail'] = Product::where('id',$quotationProducts[$i]['product_id'])->first()->toArray();
-                    $quotationProducts[$i]['category_name'] = Category::where('id',$quotationProducts[$i]['product_detail']['category_id'])->pluck('name')->first();
-                    $quotationProducts[$i]['unit'] = Unit::where('id',$quotationProducts[$i]['product_detail']['unit_id'])->pluck('name')->first();
-                    $quotationProducts[$i]['previous_quantity'] = 0;
-                    if($quotation['discount'] != 0){
-                        $quotationProducts[$i]['rate'] = round(($quotationProducts[$i]['rate_per_unit'] - ($quotationProducts[$i]['rate_per_unit'] * ($quotation['discount'] / 100))),3);
-                        //$quotationProducts[$i]['rate'] = MaterialProductHelper::customRound(($quotationProducts[$i]['rate_per_unit'] - ($quotationProducts[$i]['rate_per_unit'] * ($quotation['discount'] / 100))),3);
-                    }else{
-                        $quotationProducts[$i]['rate'] = round(($quotationProducts[$i]['rate_per_unit']),3);
-                        //$quotationProducts[$i]['rate'] = MaterialProductHelper::customRound(($quotationProducts[$i]['rate_per_unit']),3);
+                }else{
+                    foreach ($extraItems as $key => $extraItem){
+                        $extraItem['previous_rate'] = 0;
+                    }
+                    for($i=0 ; $i < count($quotationProducts) ; $i++){
+                        $quotationProducts[$i]['product_detail'] = Product::where('id',$quotationProducts[$i]['product_id'])->first()->toArray();
+                        $quotationProducts[$i]['category_name'] = Category::where('id',$quotationProducts[$i]['product_detail']['category_id'])->pluck('name')->first();
+                        $quotationProducts[$i]['unit'] = Unit::where('id',$quotationProducts[$i]['product_detail']['unit_id'])->pluck('name')->first();
+                        $quotationProducts[$i]['previous_quantity'] = 0;
+                        if($quotation['discount'] != 0){
+                            $quotationProducts[$i]['rate'] = round(($quotationProducts[$i]['rate_per_unit'] - ($quotationProducts[$i]['rate_per_unit'] * ($quotation['discount'] / 100))),3);
+                        }else{
+                            $quotationProducts[$i]['rate'] = round(($quotationProducts[$i]['rate_per_unit']),3);
+                        }
                     }
                 }
+                $banksAssigned = QuotationBankInfo::where('quotation_id',$quotation['id'])->select('bank_info_id')->get();
+
+                $taxes = Tax::where('is_active',true)->where('is_special',false)->get()->toArray();
+                $specialTaxes = Tax::where('is_active', true)->where('is_special',true)->get();
+                return view('admin.bill.create-itemwise')->with(compact('banksAssigned','extraItems','quotation','bills','project_site','quotationProducts','taxes','specialTaxes'));
+            }else{
+                $summaryIds = $quotationProductModel->where('quotation_id',$quotation['id'])->distinct('summary_id')->pluck('summary_id')->toArray();
+                foreach($summaryIds as $summaryId){
+                    dd($summaryId);
+                }
             }
-            $banksAssigned = QuotationBankInfo::where('quotation_id',$quotation['id'])->select('bank_info_id')->get();
 
-            $taxes = Tax::where('is_active',true)->where('is_special',false)->get()->toArray();
-            $specialTaxes = Tax::where('is_active', true)->where('is_special',true)->get();
 
-            return view('admin.bill.create')->with(compact('banksAssigned','extraItems','quotation','bills','project_site','quotationProducts','taxes','specialTaxes'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get existing bill create view',
