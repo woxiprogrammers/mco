@@ -16,7 +16,6 @@ class AddTransactionStatusPaymentModeColumnsIntoSubcontractorBillTransactionsTab
         Schema::table('subcontractor_bill_transactions', function (Blueprint $table) {
             $table->unsignedInteger('transaction_status_id')->nullable();
             $table->foreign('transaction_status_id')->references('id')->on('transaction_statuses')->onUpdate('cascade')->onDelete('cascade');
-            $table->string('payment_mode_slug', 255)->nullable();
         });
     }
 
@@ -30,7 +29,6 @@ class AddTransactionStatusPaymentModeColumnsIntoSubcontractorBillTransactionsTab
         Schema::table('subcontractor_bill_transactions', function (Blueprint $table) {
             $table->dropForeign('subcontractor_bill_transactions_transaction_status_id_foreign');
             $table->dropColumn('transaction_status_id');
-            $table->dropColumn('payment_mode_slug');
         });
     }
 }
