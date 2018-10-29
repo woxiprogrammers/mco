@@ -680,6 +680,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::group(['prefix' => 'structure'], function(){
             Route::get('manage', array('uses' => 'Subcontractor\SubcontractorStructureController@getManageView'));
             Route::get('create', array('uses' => 'Subcontractor\SubcontractorStructureController@getCreateView'));
+            Route::post('create', array('uses' => 'Subcontractor\SubcontractorStructureController@createStructure'));
         });
 
         /* -------- End of New Bill related Changes -------- */

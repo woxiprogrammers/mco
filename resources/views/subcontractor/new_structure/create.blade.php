@@ -45,72 +45,124 @@
                                             <form id="createSubcontractorStructure" class="form-horizontal" action="/subcontractor/structure/create" method="post">
                                                 {!! csrf_field() !!}
                                                 <div class="form-body">
-                                                    <div class="row form-group">
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label for="description" class="control-label">Select Subcontractor : </label>
-                                                            <span>*</span>
-                                                        </div>
-                                                        <div class="col-md-3">
-                                                            <select class="form-control" id="subcontractor_id" name="subcontractor_id">
-                                                                @foreach($subcontractors as $subcontractor)
-                                                                    <option value="{{$subcontractor['id']}}">{{$subcontractor['subcontractor_name']}}</option>
-                                                                @endforeach
-                                                            </select>
+                                                    <div class="row">
+                                                        <div class="col-md-offset-9 col-md-3">
+                                                            <button type="submit" class="btn red pull-right" id="labour_submit"><i class="fa fa-check"></i> Create Structure</button>
                                                         </div>
                                                     </div>
-                                                    <div class="form-group row">
-                                                        <div class="col-md-3" style="text-align: right">
-                                                            <label for="structure_type" class="control-label">Structure Type :</label>
-                                                            <span>*</span>
+
+                                                    <ul class="nav nav-tabs nav-tabs-lg">
+                                                        <li class="active">
+                                                            <a href="#generalTab" data-toggle="tab">General</a>
+                                                        </li>
+                                                        <li>
+                                                            <a href="#extraItemsTab" data-toggle="tab">Extra Items</a>
+                                                        </li>
+                                                    </ul>
+                                                    <div class="tab-content">
+                                                        <div class="tab-pane fade in active" id="generalTab">
+                                                            <div class="row form-group">
+                                                                <div class="col-md-3" style="text-align: right">
+                                                                    <label for="description" class="control-label">Select Subcontractor : </label>
+                                                                    <span>*</span>
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <select class="form-control" id="subcontractor_id" name="subcontractor_id">
+                                                                        <option value="">Please select subcontractor</option>
+                                                                        @foreach($subcontractors as $subcontractor)
+                                                                            <option value="{{$subcontractor['id']}}">{{$subcontractor['subcontractor_name']}}</option>
+                                                                        @endforeach
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row">
+                                                                <div class="col-md-3" style="text-align: right">
+                                                                    <label for="structure_type" class="control-label">Structure Type :</label>
+                                                                    <span>*</span>
+                                                                </div>                                                        &nbsp;&nbsp;&nbsp;
+                                                                <div class="col-md-6 mt-radio-inline">
+                                                                    @foreach($ScStrutureTypes as $type)
+                                                                        <label class="mt-radio" style="margin-left: 13px">
+                                                                            <input type="radio" name="structure_type" id="{{$type['id']}}" value="{{$type['slug']}}" onchange="structureTypeChange()"> {{$type['name']}}
+                                                                            <span></span>
+                                                                        </label>
+                                                                    @endforeach
+                                                                </div>
+                                                            </div>
+                                                            <fieldset id="summariesFieldset" hidden>
+                                                                <legend>
+                                                                    Summaries
+                                                                    <a class="btn yellow btn-md col-md-offset-8" href="javascript:void(0);" id="addSummaryBtn" onclick="addSummary()">
+                                                                        <i class="fa fa-plus"></i>
+                                                                        Summary
+                                                                    </a>
+                                                                </legend>
+                                                                <div class="row">
+                                                                    <div class="col-md-12">
+                                                                        <table class="table table-striped table-bordered table-hover" id="summaryTable">
+                                                                            <thead>
+                                                                            <tr>
+                                                                                <th style="width: 25%"> Summary </th>
+                                                                                <th style="width: 15%"> Rate </th>
+                                                                                <th style="width: 15%"> Work Area (Sq.ft.)</th>
+                                                                                <th style="width: 15%"> Total Amount </th>
+                                                                                <th style="width: 25%"> Total Amount (Words)</th>
+                                                                                <th style="width: 5%"> Action </th>
+                                                                            </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                            <tr>
+                                                                                <td>
+                                                                                    <select class="summary form-control" onchange="onSummaryChange(this)" name="summaries[]">
+                                                                                        @foreach($summaries as $summary)
+                                                                                            <option value="{{$summary['id']}}"> {{$summary['name']}} </option>
+                                                                                        @endforeach
+                                                                                    </select>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <div class="form-group" style="width: 90%; margin-left: 5%">
+                                                                                        <input type="text" class="form-control rate" onkeyup="rateKeyUp(this)">
+                                                                                    </div>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <div class="form-group"  style="width: 90%; margin-left: 5%">
+                                                                                        <input type="text" class="form-control total_work_area" onkeyup="workAreaKeyUp(this)">
+                                                                                    </div>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <div class="form-group"  style="width: 90%; margin-left: 5%">
+                                                                                        <input type="text" class="form-control total_amount" readonly>
+                                                                                    </div>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <div class="form-group"  style="width: 90%; margin-left: 5%">
+                                                                                        <textarea class="form-control total_amount_inwords" readonly rows="3"></textarea>
+                                                                                    </div>
+                                                                                </td>
+                                                                                <td>
+
+                                                                                </td>
+                                                                            </tr>
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            </fieldset>
                                                         </div>
-                                                        &nbsp;&nbsp;&nbsp;
-                                                        <div class="col-md-6 mt-radio-inline">
-                                                            @foreach($ScStrutureTypes as $type)
-                                                                <label class="mt-radio" style="margin-left: 13px">
-                                                                    <input type="radio" name="structure_type" id="{{$type['id']}}" value="{{$type['slug']}}" onchange="structureTypeChange()"> {{$type['name']}}
-                                                                    <span></span>
-                                                                </label>
-                                                            @endforeach
+                                                        <div class="tab-pane fade in" id="extraItemsTab">
+                                                           @foreach($extraItems as $extraItem)
+                                                               <div class="form-group">
+                                                                   <div class="col-md-3">
+                                                                        <label class="control-label pull-right">
+                                                                            {{$extraItem['name']}}
+                                                                        </label>
+                                                                   </div>
+                                                                   <div class="col-md-6">
+                                                                       <input type="text" class="form-control extra_items" name="extra_items[{{$extraItem['id']}}]" value="{{$extraItem['rate']}}">
+                                                                   </div>
+                                                               </div>
+                                                           @endforeach
                                                         </div>
-                                                    </div>
-                                                    <div class="form-group row">
-                                                        <div class="col-md-12">
-                                                            <table class="table table-striped table-bordered table-hover">
-                                                                <thead>
-                                                                    <tr>
-                                                                        <th style="width: 5%">  </th>
-                                                                        <th style="width: 25%"> Summary </th>
-                                                                        <th style="width: 15%"> Rate </th>
-                                                                        <th style="width: 15%"> Work Area (Sq.ft.)</th>
-                                                                        <th style="width: 15%"> Total Amount </th>
-                                                                        <th style="width: 25%"> Total Amount (Words)</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    <tr>
-                                                                        <td> x </td>
-                                                                        <td> Brickwork </td>
-                                                                        <td> <input type="text" name="rate[0]" class="form-control rate"> </td>
-                                                                        <td> <input type="text" name="total_work_area[0]" class="form-control total_work_area"> </td>
-                                                                        <td> <input type="text" class="form-control total_amount" readonly> </td>
-                                                                        <td> <textarea class="form-control total_amount_inwords" readonly rows="3"></textarea> </td>
-                                                                    </tr>
-                                                                    <tr>
-                                                                        <td> x </td>
-                                                                        <td> Plaster </td>
-                                                                        <td> <input type="text" name="rate[0]" class="form-control rate"> </td>
-                                                                        <td> <input type="text" name="total_work_area[0]" class="form-control total_work_area"> </td>
-                                                                        <td> <input type="text" class="form-control total_amount" readonly> </td>
-                                                                        <td> <textarea class="form-control total_amount_inwords" readonly rows="3"></textarea> </td>
-                                                                    </tr>
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="form-actions noborder row">
-                                                    <div class="col-md-offset-3" style="margin-left: 26%">
-                                                        <button type="submit" class="btn red" id="labour_submit"><i class="fa fa-check"></i> Create Structure</button>
                                                     </div>
                                                 </div>
                                             </form>
@@ -126,42 +178,47 @@
     </div>
 @endsection
 @section('javascript')
-    <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
-    <script  src="/assets/global/plugins/datatables/datatables.min.js"></script>
-    <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
-    <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
-    <script src="/assets/custom/subcontractor/subcontractor.js" type="application/javascript"></script>
-    <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
-    <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
-    <script src="/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script>
-    <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
+    <script src="/assets/custom/subcontractor/validations.js"></script>
     <script>
         $(document).ready(function() {
-            $(".rate").on('keyup', function(){
-                var rate = $(this).val();
-                var total_work_area = $(this).closest('tr').find('.total_work_area').val();
-                var total_amount = parseFloat(rate)*parseFloat(total_work_area);
-                $(this).closest('tr').find('.total_amount').val(parseFloat(total_amount).toFixed(3));
-                $(this).closest('tr').find('.total_amount_inwords').val(number2text(total_amount));
+            CreateSubcontractorStructure.init();
+            $(".extra_items").each(function(){
+                $(this).rules('add', {
+                    required: true
+                });
             });
-
-            $(".total_work_area").on('keyup', function(){
-                var rate = $(this).closest('tr').find('.rate').val();
-                var total_work_area = $(this).val();
-                var total_amount = parseFloat(rate)*parseFloat(total_work_area);
-                $(this).closest('tr').find('.total_amount').val(parseFloat(total_amount).toFixed(3));
-                $(this).closest('tr').find('.total_amount_inwords').val(number2text(total_amount));
-            });
+            onSummaryChange($('#summaryTable tbody .summary'));
         });
+
+        function rateKeyUp(element){
+            var rate = $(element).val();
+            var total_work_area = $(element).closest('tr').find('.total_work_area').val();
+            var total_amount = parseFloat(rate)*parseFloat(total_work_area);
+            $(element).closest('tr').find('.total_amount').val(parseFloat(total_amount).toFixed(3));
+            $(element).closest('tr').find('.total_amount_inwords').val(number2text(total_amount));
+        }
+
+        function workAreaKeyUp(element){
+            var rate = $(element).closest('tr').find('.rate').val();
+            var total_work_area = $(element).val();
+            var total_amount = parseFloat(rate)*parseFloat(total_work_area);
+            $(element).closest('tr').find('.total_amount').val(parseFloat(total_amount).toFixed(3));
+            $(element).closest('tr').find('.total_amount_inwords').val(number2text(total_amount));
+        }
+
         function structureTypeChange(){
-            console.log(1234);
+            $("#summariesFieldset").show();
             var structureTypeSlug = $("input[name='structure_type']:checked").val();
             if(structureTypeSlug == 'itemwise'){
-
+                $("#addSummaryBtn").show();
             }else{
-
+                $("#addSummaryBtn").hide();
+                $("#summaryTable tbody tr:not(:first)").each(function(key, element){
+                    $(element).remove()
+                });
             }
         }
+
         function number2text(value) {
             var fraction = Math.round(frac(value)*100);
             var f_text  = "";
@@ -234,6 +291,38 @@
                 res = "zero";
             }
             return res;
+        }
+
+        function addSummary(){
+            var newRow = $("#summaryTable tbody").children("tr:first").clone();
+
+            newRow.find('td:last').html('<a class="btn red btn-xs" href="javascript:void(0);" onclick="removeSummary(this)">\n' +
+                                            '<i class="fa fa-times"></i>\n' +
+                                        '</a>\n');
+            $("#summaryTable tbody").append(newRow);
+            onSummaryChange(newRow.find('.summary'));
+        }
+
+        function onSummaryChange(element){
+            var summaryId = $(element).val();
+            $(element).closest('tr').find('.rate').attr('name', 'rate['+summaryId+']');
+            $(element).closest('tr').find('.rate').val('');
+            $(element).closest('tr').find('.rate').rules('add',{
+                required: true
+            });
+            $(element).closest('tr').find('.total_work_area').attr('name', 'total_work_area['+summaryId+']');
+            $(element).closest('tr').find('.total_work_area').val('');
+            $(element).closest('tr').find('.total_work_area').rules('add',{
+                required: true
+            });
+            $(element).closest('tr').find('.total_amount').attr('name', 'total_amount['+summaryId+']');
+            $(element).closest('tr').find('.total_amount').val('');
+            $(element).closest('tr').find('.total_amount_inwords').attr('name', 'total_amount_inwords['+summaryId+']');
+            $(element).closest('tr').find('.total_amount_inwords').val('');
+        }
+
+        function removeSummary(element){
+            $(element).closest('tr').remove();
         }
     </script>
 @endsection
