@@ -226,10 +226,9 @@ function calculateTax(){
     var final_total_current_bill = total_rounded_current_bill;
     $(".tax").each(function(){
         var tax_amount_current_bill = total_rounded_current_bill * ($(this).val() / 100);
-        final_total_current_bill = final_total_current_bill + tax_amount_current_bill;
+        final_total_current_bill = parseFloat(final_total_current_bill) + parseFloat(tax_amount_current_bill);
         $(this).parent().next().find('span').text(tax_amount_current_bill.toFixed(3));
     });
-    //$("#final_current_bill_total").text(customRound(final_total_current_bill));
     $("#final_current_bill_total").text(parseFloat(final_total_current_bill).toFixed(3));
     calculateSpecialTax()
 }
