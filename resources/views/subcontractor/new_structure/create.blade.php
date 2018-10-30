@@ -102,7 +102,9 @@
                                                                         <table class="table table-striped table-bordered table-hover" id="summaryTable">
                                                                             <thead>
                                                                             <tr>
-                                                                                <th style="width: 25%"> Summary </th>
+                                                                                <th style="width: 20%"> Summary </th>
+                                                                                <th style="width: 20%"> Description </th>
+
                                                                                 <th style="width: 15%"> Rate </th>
                                                                                 <th style="width: 15%"> Work Area (Sq.ft.)</th>
                                                                                 <th style="width: 15%"> Total Amount </th>
@@ -118,6 +120,11 @@
                                                                                             <option value="{{$summary['id']}}"> {{$summary['name']}} </option>
                                                                                         @endforeach
                                                                                     </select>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <div class="form-group" style="width: 90%; margin-left: 5%">
+                                                                                        <textarea class="form-control description" rows="3"></textarea>
+                                                                                    </div>
                                                                                 </td>
                                                                                 <td>
                                                                                     <div class="form-group" style="width: 90%; margin-left: 5%">
@@ -191,17 +198,29 @@
         });
 
         function rateKeyUp(element){
-            var rate = $(element).val();
-            var total_work_area = $(element).closest('tr').find('.total_work_area').val();
-            var total_amount = parseFloat(rate)*parseFloat(total_work_area);
+            var rate = parseInt($(element).val());
+            var total_work_area = parseInt($(element).closest('tr').find('.total_work_area').val());
+            if (isNaN(rate)){
+                rate = 0;
+            }
+            if(isNaN(total_work_area)){
+                total_work_area = 0;
+            }
+            var total_amount = (rate)*(total_work_area);
             $(element).closest('tr').find('.total_amount').val(parseFloat(total_amount).toFixed(3));
             $(element).closest('tr').find('.total_amount_inwords').val(number2text(total_amount));
         }
 
         function workAreaKeyUp(element){
-            var rate = $(element).closest('tr').find('.rate').val();
-            var total_work_area = $(element).val();
-            var total_amount = parseFloat(rate)*parseFloat(total_work_area);
+            var rate = parseFloat($(element).closest('tr').find('.rate').val());
+            var total_work_area = parseFloat($(element).val());
+            if (isNaN(rate)){
+                rate = 0;
+            }
+            if( isNaN(total_work_area)){
+                total_work_area = 0;
+            }
+            var total_amount = (rate)*(total_work_area);
             $(element).closest('tr').find('.total_amount').val(parseFloat(total_amount).toFixed(3));
             $(element).closest('tr').find('.total_amount_inwords').val(number2text(total_amount));
         }
@@ -319,6 +338,9 @@
             $(element).closest('tr').find('.total_amount').val('');
             $(element).closest('tr').find('.total_amount_inwords').attr('name', 'total_amount_inwords['+summaryId+']');
             $(element).closest('tr').find('.total_amount_inwords').val('');
+            $(element).closest('tr').find('.description').attr('name', 'description['+summaryId+']');
+            $(element).closest('tr').find('.description').val('');
+
         }
 
         function removeSummary(element){
