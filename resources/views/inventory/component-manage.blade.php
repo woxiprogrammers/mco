@@ -84,6 +84,8 @@
                                                                                     <th> GRN </th>
                                                                                     <th> Quantity </th>
                                                                                     <th> Unit </th>
+                                                                                    <th> Rate per Unit </th>
+                                                                                    <th> Date </th>
                                                                                     <th> Status </th>
                                                                                     <th> Status </th>
                                                                                     <th> Action </th>

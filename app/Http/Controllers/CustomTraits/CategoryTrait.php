@@ -5,16 +5,185 @@
  */
 
 namespace App\Http\Controllers\CustomTraits;
+use App\AssetRentMonthlyExpenses;
 use App\Category;
 use App\Http\Requests\CategoryRequest;
-use App\Material;
-use App\MaterialRequestComponentTypes;
-use App\UnitConversion;
+use App\InventoryComponent;
+use App\InventoryComponentTransfers;
+use App\InventoryTransferTypes;
+use App\Month;
+use App\ProjectSite;
+use App\Year;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 trait CategoryTrait{
+
+    public function getData(Request $request){
+        try{
+            $year = new Year();
+            $month = new Month();
+            $projectSite = new ProjectSite();
+            $inventoryComponentTransfer = new InventoryComponentTransfers();
+            $inventoryComponent = new InventoryComponent();
+            $inventoryTransferType = new InventoryTransferTypes();
+            $assetRentMonthlyExpense = new AssetRentMonthlyExpenses();
+            dd($assetRentMonthlyExpense->where('project_site_id',23)->where('asset_id',11)
+                ->where('year_id',3)->first());
+            $yearSlug = '2018';
+            $currentYear = date('Y');
+            $thisYear = $year->where('slug',$yearSlug)->first();
+            if($currentYear == $thisYear['slug']){
+                $months = $month->where('id','<',date('m'))->orderBy('id','asc')->get();
+            }else{
+                $months = $month->orderBy('id','asc')->get();
+            }
+            $totalMonths = $month->orderBy('id','asc')->get();
+            $allProjectSiteIds = $projectSite->pluck('id');
+            $inTransferTypeIds = $inventoryTransferType->where('type','IN')->pluck('id')->toArray();
+            $outTransferTypeIds = $inventoryTransferType->where('type','OUT')->pluck('id')->toArray();
+            $data = array();
+            foreach($allProjectSiteIds as $projectSiteId){
+                $inventoryComponentData = $inventoryComponent->where('project_site_id',$projectSiteId)
+                                            ->where('is_material',false)
+                                            ->where('id',953)
+                                            ->select('id','reference_id')->get();
+
+                foreach ($inventoryComponentData as $thisInventoryComponent){
+                    $assetId = $thisInventoryComponent['reference_id'];
+                    foreach ($months as $thisMonth){
+                        $alreadyExistAssetRentMonthlyExpense = $assetRentMonthlyExpense
+                            ->where('year_id',$thisYear['id'])
+                            ->where('project_site_id',$projectSiteId)
+                            ->where('asset_id',$assetId)
+                            ->first();
+                        $firstDayOfThisMonth = date('Y-m-d H:i:s', mktime(0, 0, 0, $thisMonth['id'], 1, $thisYear['slug']));
+                        $lastDayOfThisMonth = date('Y-m-t H:i:s', mktime(23, 59, 59, $thisMonth['id'], 1, $thisYear['slug']));
+                        $lastMonthData = array();
+                        $thisMonthAssetRentMonthlyExpenseData = array();
+                        if($thisMonth['slug'] == 'january'){
+                            $lastYearAssetRentMonthlyExpenseData = $assetRentMonthlyExpense->where('project_site_id',$projectSite['id'])
+                                                            ->where('year_id',$thisYear['slug']-1)
+                                                            ->where('asset_id',$inventoryComponent['asset_id'])
+                                                            ->first();
+                            if($lastYearAssetRentMonthlyExpenseData != null){
+                                $noOfDaysInJanuaryMonth = cal_days_in_month(CAL_GREGORIAN, 1, $thisYear['slug']);
+                                $lastYearDecemberMonthData = json_decode($lastYearAssetRentMonthlyExpenseData['december']);
+                                $lastMonthData['rent_per_day_per_quantity'] = $lastYearDecemberMonthData->rent_per_day_per_quantity;
+                                $lastMonthData['days_used'] = ($lastYearDecemberMonthData->carry_forward_quantity == 0) ? 0 : $noOfDaysInJanuaryMonth;
+                                $lastMonthData['quantity_used'] = $lastYearDecemberMonthData->carry_forward_quantity;
+                                $lastMonthData['rent_for_month'] = ($lastMonthData['rent_per_day_per_quantity'] * $lastMonthData['days_used'] * $lastMonthData['quantity_used']);
+                                $lastMonthData['carry_forward_quantity'] = $lastYearDecemberMonthData->carry_forward_quantity;
+                            }else{
+                                $lastMonthData['rent_per_day_per_quantity'] = 0;
+                                $lastMonthData['quantity_used'] = 0;
+                                $lastMonthData['days_used'] = 0;
+                                $lastMonthData['rent_for_month'] = 0;
+                                $lastMonthData['carry_forward_quantity'] = 0;
+                            }
+                        }else{
+                            if($alreadyExistAssetRentMonthlyExpense != null){
+                                $lastMonthId = $thisMonth['id']-1;
+                                $lastMonthName = $totalMonths->where('id',$lastMonthId)->pluck('slug')->first();
+                                $noOfDaysInThisMonth = cal_days_in_month(CAL_GREGORIAN, $thisMonth['id'], $thisYear['slug']);
+                                $lastMonthDataa = json_decode($alreadyExistAssetRentMonthlyExpense[$lastMonthName]);
+
+                                $lastMonthData['rent_per_day_per_quantity'] = $lastMonthDataa->rent_per_day_per_quantity;
+                                $lastMonthData['days_used'] = ($lastMonthDataa->carry_forward_quantity == 0) ? 0 : $noOfDaysInThisMonth;
+                                $lastMonthData['quantity_used'] = $lastMonthDataa->carry_forward_quantity;
+                                $lastMonthData['rent_for_month'] = ($lastMonthData['rent_per_day_per_quantity'] * $lastMonthData['days_used'] * $lastMonthData['quantity_used']);
+                                $lastMonthData['carry_forward_quantity'] = $lastMonthDataa->carry_forward_quantity;
+                            }else{
+                                $lastMonthData['rent_per_day_per_quantity'] = 0;
+                                $lastMonthData['quantity_used'] = 0;
+                                $lastMonthData['days_used'] = 0;
+                                $lastMonthData['rent_for_month'] = 0;
+                                $lastMonthData['carry_forward_quantity'] = 0;
+                            }
+                        }
+                        $inventoryComponentTransfers = $inventoryComponentTransfer
+                            ->where('inventory_component_id',$thisInventoryComponent['id'])
+                            ->whereMonth('created_at', $thisMonth['id'])
+                            ->whereYear('created_at', $thisYear['slug'])
+                            ->orderBy('created_at','asc')
+                            ->get();
+                        $inventoryComponentTransferGroupByDateData = $inventoryComponentTransfers->sortBy('created_at')->groupBy(function($transactionsData) {
+                            return Carbon::parse($transactionsData->created_at)->format('Y-m-d');
+                        });
+                        $thisMonthAssetRentMonthlyExpenseData['rent_per_day_per_quantity'] = $thisMonthAssetRentMonthlyExpenseData['quantity_used'] = 0;
+                        $thisMonthAssetRentMonthlyExpenseData['days_used'] = 0;
+                        $thisMonthAssetRentMonthlyExpenseData['rent_for_month'] = 0;
+                        $thisMonthAssetRentMonthlyExpenseData['carry_forward_quantity'] = 0;
+
+                        if(count($inventoryComponentTransferGroupByDateData) > 0){
+                            $iterator = 0;
+                            $carryForwardQuantity = $lastMonthData['carry_forward_quantity'];
+                            $highestRentForMonth = $inventoryComponentTransfers->max('rate_per_unit');
+                            $thisMonthAssetRentMonthlyExpenseData['rent_per_day_per_quantity'] = $highestRentForMonth;
+                            $dates = $inventoryComponentTransferGroupByDateData->keys()->toArray();
+                            foreach ($inventoryComponentTransferGroupByDateData as $date => $thisTransfer){
+                                $parsedData = Carbon::parse($date);
+                                if($iterator == 0 && (date('d-m-y',strtotime($firstDayOfThisMonth)) != date('d-m-y',strtotime($parsedData))) && $lastMonthData['carry_forward_quantity'] != 0){
+                                    $noOfDays = ceil(abs(strtotime($firstDayOfThisMonth) - strtotime($parsedData))/86400);
+                                    $thisMonthAssetRentMonthlyExpenseData['quantity_used'] += $carryForwardQuantity * $noOfDays;
+                                    $thisMonthAssetRentMonthlyExpenseData['days_used'] += $noOfDays;
+                                    $thisMonthAssetRentMonthlyExpenseData['carry_forward_quantity'] += $carryForwardQuantity;
+                                }
+                                if(($iterator+1) < count($dates)){
+                                    $nextTransactionDate = Carbon::parse($dates[$iterator+1]);
+                                    $noOfDays = ceil(abs(strtotime($nextTransactionDate) - strtotime($parsedData))/86400);
+                                }else{
+                                    if((date('d-m-y',strtotime($lastDayOfThisMonth)) != date('d-m-y',strtotime($parsedData)))){
+                                        $noOfDays = ceil(abs(strtotime($lastDayOfThisMonth) - strtotime($parsedData))/86400);
+                                    }else{
+                                        $noOfDays = 1;
+                                    }
+                                }
+                                $inQuantities = $thisTransfer->whereIn('transfer_type_id',$inTransferTypeIds)->sum('quantity');
+                                $outQuantities = $thisTransfer->whereIn('transfer_type_id',$outTransferTypeIds)->sum('quantity');
+                                $carryForwardQuantity = $carryForwardQuantity + $inQuantities - $outQuantities;
+                                $thisMonthAssetRentMonthlyExpenseData['quantity_used'] += $carryForwardQuantity * $noOfDays;
+                                $thisMonthAssetRentMonthlyExpenseData['days_used'] += $noOfDays;
+                                $thisMonthAssetRentMonthlyExpenseData['carry_forward_quantity'] = $carryForwardQuantity;
+                                $iterator++;
+                            } // Transfer loop end
+                        }else{
+                            $thisMonthAssetRentMonthlyExpenseData = $lastMonthData;
+                        }
+                        $thisMonthAssetRentMonthlyExpenseData['rent_for_month'] += $thisMonthAssetRentMonthlyExpenseData['rent_per_day_per_quantity'] * $thisMonthAssetRentMonthlyExpenseData['quantity_used'];
+                        $data[$projectSite['name']][$thisMonth['name']][$assetId] = $thisMonthAssetRentMonthlyExpenseData;
+                        if($alreadyExistAssetRentMonthlyExpense != null){
+                            $alreadyExistAssetRentMonthlyExpense->update([
+                                $thisMonth['slug'] => json_encode($thisMonthAssetRentMonthlyExpenseData)
+                            ]);
+                                //update
+                        }else{
+                            $assetRentMonthlyExpense->create([
+                                'project_site_id' => $projectSiteId,
+                                'year_id' => $thisYear['id'],
+                                'asset_id' => $assetId,
+                                $thisMonth['slug'] => json_encode($thisMonthAssetRentMonthlyExpenseData)
+                            ]);
+                            //create
+                        }
+                        //create or update
+                    } //Month for loop end
+                } // Asset Loop end
+            } //Project Site Loop End
+            dd($assetRentMonthlyExpense->where('project_site_id',23)->where('asset_id',11)
+            ->where('year_id',2018)->first());
+        }catch(\Exception $e){
+            $data = [
+                'action' => "Get asset Rent Data",
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
 
     public function getCreateView(Request $request){
         try{
