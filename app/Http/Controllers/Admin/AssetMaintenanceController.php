@@ -671,7 +671,7 @@ class AssetMaintenanceController extends Controller{
                     $editButton = '<div id="sample_editable_1_new" class="btn btn-small blue" >
                         <a href="/asset/maintenance/request/bill/view/'.$assetMaintenanceBillData[$pagination]['id'].'" style="color: white"> View
                     </div>';
-                    $vendorId = AssetMaintenanceVendorRelation::where('asset_maintenance_id',$assetMaintenanceBillData[$pagination]['id'])->pluck('vendor_id')->first();
+                    $vendorId = AssetMaintenanceVendorRelation::where('asset_maintenance_id',$assetMaintenanceBillData[$pagination]['asset_maintenance_id'])->pluck('vendor_id')->first();
                     $records['data'][] = [
                         $assetMaintenanceBillData[$pagination]['asset_maintenance_id'],
                         Vendor::where('id',$vendorId)->pluck('company')->first(),
