@@ -188,7 +188,7 @@
                                                             <th style="width:10%"> Outstanding </th>
                                                             <th style="width:10%"> Total Expenses </th>
                                                             <th style="width:10%"> Outstanding Mobilization </th>
-                                                            <th style="width:10%"> Sitewise P/L </th>
+                                                            <th style="width:10%"> Saleswise P/L </th>
                                                             <th style="width:10%"> Receipt P/L </th>
                                                         </tr>
                                                         <tr class="filter">
