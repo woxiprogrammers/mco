@@ -159,7 +159,7 @@ $(document).ready(function (){
         calculateTax();
     });
 
-    $('#discountAmount','#roundAmountBy').on('keyup', function () {
+    $('#discountAmount,#roundAmountBy').on('keyup', function () {
         clearTimeout(typingTimer);
         typingTimer = setTimeout(calculateDiscount, doneTypingInterval);
     });
@@ -246,11 +246,11 @@ function calculateSpecialTax(){
         $(".special-tax-amount").each(function(){
             grossTotal = grossTotal + parseFloat($(this).text());
         });
-       // grossTotal = grossTotal + parseFloat($('#roundAmountBy').val());
+        grossTotal = grossTotal + parseFloat($('#roundAmountBy').val());
         $("#grand_current_bill_total").text((grossTotal).toFixed(3));
     }else{
         var grossTotal = parseFloat($("#final_current_bill_total").text());
-       // grossTotal = grossTotal + parseFloat($('#roundAmountBy').val());
+        grossTotal = grossTotal + parseFloat($('#roundAmountBy').val());
         $("#grand_current_bill_total").text((grossTotal).toFixed(3));
     }
 }

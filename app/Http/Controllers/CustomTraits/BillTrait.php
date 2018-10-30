@@ -502,10 +502,14 @@ trait BillTrait{
                 for($j = 0 ; $j < count($projectData) ; $j++){
                     $clientData = Client::where('id',$projectData[$j]['client_id'])->get()->toArray();
                     for($k = 0 ; $k < count($clientData); $k++){
+                        $billType = Quotation::join('subcontractor_structure_types','subcontractor_structure_types.id','=','quotations.bill_type_id')
+                                        ->where('quotations.project_site_id',$projectSiteData[$i]['id'])
+                                        ->pluck('subcontractor_structure_types.name')->first();
                         $listingData[$iterator]['company'] = $clientData[$j]['company'];
                         $listingData[$iterator]['project_name'] = $projectData[$j]['name'];
                         $listingData[$iterator]['project_site_id'] = $projectSiteData[$i]['id'];
                         $listingData[$iterator]['project_site_name'] = $projectSiteData[$i]['name'];
+                        $listingData[$iterator]['bill_type'] = $billType;
                         $iterator++;
                     }
                 }
@@ -550,6 +554,7 @@ trait BillTrait{
                     $listingData[$pagination]['company'],
                     $listingData[$pagination]['project_name'],
                     $listingData[$pagination]['project_site_name'],
+                    $listingData[$pagination]['bill_type'],
                     $button
                 ];
 

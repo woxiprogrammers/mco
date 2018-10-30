@@ -267,7 +267,7 @@
                                                     <tr>
                                                         <td colspan="10" style="text-align: right; padding-right: 30px;"><b> Round Amount By</b></td>
                                                         <td>
-                                                            <input name="round_amount_by" id="roundAmountBy" class="form-control" type="text">
+                                                            <input name="round_amount_by" id="roundAmountBy" class="form-control" type="text" value="0">
                                                         </td>
                                                     </tr>
                                                     <tr>
