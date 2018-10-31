@@ -111,7 +111,7 @@
                                                     @for($iterator = 0; $iterator < count($quotationSummaryProducts); $iterator++)
                                                         <tr id="id_{{$quotationSummaryProducts[$iterator]['id']}}">
                                                             <td>
-                                                                <input type="checkbox" id="id_{{$quotationSummaryProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationSummaryProducts[$iterator]['id']}}]" value="{{$quotationSummaryProducts[$iterator]['id']}}" class="product-checkbox">
+                                                                <input type="checkbox" id="id_{{$quotationSummaryProducts[$iterator]['id']}}" name="summary_id[{{$quotationSummaryProducts[$iterator]['id']}}]" value="{{$quotationSummaryProducts[$iterator]['id']}}" class="product-checkbox">
                                                             </td>
                                                             <td>
                                                                 <span>{{$iterator + 1}}</span>
@@ -119,8 +119,8 @@
                                                             <td>
                                                                 <span>{{$quotationSummaryProducts[$iterator]['summary_name']}}</span>
                                                                 <div class="input-group form-group" id="inputGroup" style="padding-left: 10%; padding-right: 10%">
-                                                                    <input type="hidden" class="product-description-id" name="quotation_product_id[{{$quotationSummaryProducts[$iterator]['id']}}][product_description_id]" id="product_description_id_{{$quotationSummaryProducts[$iterator]['id']}}" disabled>
-                                                                    <input class="product_description form-control" type="text" id="product_description_{{$quotationSummaryProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationSummaryProducts[$iterator]['id']}}][product_description]" disabled>
+                                                                    <input type="hidden" class="product-description-id" name="summary_id[{{$quotationSummaryProducts[$iterator]['id']}}][product_description_id]" id="product_description_id_{{$quotationSummaryProducts[$iterator]['id']}}" disabled>
+                                                                    <input class="product_description form-control" type="text" id="product_description_{{$quotationSummaryProducts[$iterator]['id']}}" name="summary_id[{{$quotationSummaryProducts[$iterator]['id']}}][product_description]" disabled>
                                                                     <span class="input-group-addon product_description_create" style="font-size: 12px">C</span>
                                                                     <span class="input-group-addon product_description_update" style="font-size: 12px">U</span>
                                                                     <span class="input-group-addon product_description_delete" style="font-size: 12px">D</span>
@@ -143,7 +143,7 @@
                                                                 <span id="previous_quantity_{{$quotationSummaryProducts[$iterator]['id']}}">{{$quotationSummaryProducts[$iterator]['previous_quantity']}}</span>
                                                             </td>
                                                             <td class="form-group">
-                                                                <input class="form-control current_quantity" type="text" id="current_quantity_{{$quotationSummaryProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationSummaryProducts[$iterator]['id']}}][current_quantity]" disabled>
+                                                                <input class="form-control current_quantity" type="text" id="current_quantity_{{$quotationSummaryProducts[$iterator]['id']}}" name="summary_id[{{$quotationSummaryProducts[$iterator]['id']}}][current_quantity]" disabled>
                                                             </td>
                                                             <td>
                                                                 <span id="cumulative_quantity_{{$quotationSummaryProducts[$iterator]['id']}}"></span>

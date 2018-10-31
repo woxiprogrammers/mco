@@ -619,6 +619,7 @@ trait QuotationTrait{
 
                 $quotationMaterialIds[$materialId] = $quotationMaterial->id;
             }
+            
             if($request->ajax()){
                 $status = 200;
                 return response()->json($response,$status);

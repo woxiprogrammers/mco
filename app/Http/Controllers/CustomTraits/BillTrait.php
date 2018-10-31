@@ -692,6 +692,7 @@ trait BillTrait{
 
     public function createBill(Request $request){
         try{
+            dd($request->all());
             $projectSiteId = $request['project_site_id'];
             $bill_quotation_product = array();
             $bill['quotation_id'] = $request['quotation_id'];
