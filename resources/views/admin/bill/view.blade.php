@@ -156,19 +156,19 @@
                                                             </td>
 
                                                             <td>
-                                                                <span id="previous_quantity_{{$billQuotationSummaries[$iterator]['quotationProducts']['id']}}">{{$billQuotationSummaries[$iterator]['previous_quantity']}}</span>
+                                                                <span id="previous_quantity_{{$billQuotationSummaries[$iterator]['id']}}">{{$billQuotationSummaries[$iterator]['previous_quantity']}}</span>
                                                             </td>
 
                                                             <td>
-                                                                <span id="current_quantity_{{$billQuotationSummaries[$iterator]['quotationProducts']['id']}}">{{$billQuotationSummaries[$iterator]['quantity']}}</span>
+                                                                <span id="current_quantity_{{$billQuotationSummaries[$iterator]['id']}}">{{$billQuotationSummaries[$iterator]['quantity']}}</span>
                                                             </td>
 
                                                             <td>
-                                                                <span id="cumulative_quantity_{{$billQuotationSummaries[$iterator]['quotationProducts']['id']}}">{{$billQuotationSummaries[$iterator]['cumulative_quantity']}}</span>
+                                                                <span id="cumulative_quantity_{{$billQuotationSummaries[$iterator]['id']}}">{{$billQuotationSummaries[$iterator]['cumulative_quantity']}}</span>
                                                             </td>
 
                                                             <td>
-                                                                <span class="current_bill_amount" id="current_bill_amount_{{$billQuotationSummaries[$iterator]['quotationProducts']['id']}}">{{$billQuotationSummaries[$iterator]['current_bill_subtotal']}}</span>
+                                                                <span class="current_bill_amount" id="current_bill_amount_{{$billQuotationSummaries[$iterator]['id']}}">{{$billQuotationSummaries[$iterator]['current_bill_subtotal']}}</span>
                                                             </td>
 
                                                         </tr>
@@ -248,6 +248,11 @@
                                                             </td>
                                                         </tr>
                                                     @endfor
+                                                @endif
+                                                @if($bill->quotation->billType->slug == 'sqft')
+
+                                                @else
+
                                                 @endif
                                                 <tr>
                                                     <td colspan="9" style="text-align: right; padding-right: 30px;"><b>Sub Total</b></td>

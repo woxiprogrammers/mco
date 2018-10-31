@@ -139,7 +139,7 @@
                                                                 {{--<span id="rate_per_unit_{{$quotationSummaries[$iterator]['id']}}">{{$quotationSummaries[$iterator]['rate_per_sqft']}}</span>--}}
                                                             </td>
                                                             <td>
-                                                                <span>{{round(($quotationSummaries[$iterator]['rate'] * $quotationSummaries[$iterator]['quantity']),3)}}</span>
+                                                                <span>{{round(($quotationSummaries[$iterator]['rate_per_sqft'] * $quotationSummaries[$iterator]['quantity']),3)}}</span>
                                                             </td>
                                                             <td>
                                                                 <span id="previous_quantity_{{$quotationSummaries[$iterator]['id']}}">{{$quotationSummaries[$iterator]['previous_quantity']}}</span>

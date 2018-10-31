@@ -25,9 +25,6 @@ class BillQuotationSummariesTable extends Migration
             $table->boolean('is_deleted');
             $table->unsignedInteger('product_description_id');
             $table->foreign('product_description_id')->references('id')->on('product_description')->onUpdate('cascade')->onDelete('cascade');
-            $table->double('sub_total');
-            $table->double('with_tax_amount');
-            $table->double('rounded_amount_by');
             $table->timestamps();
         });
     }

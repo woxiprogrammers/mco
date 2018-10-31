@@ -8,7 +8,8 @@ class Bill extends Model
 {
     protected $table = 'bills';
 
-    protected $fillable = ['quotation_id','bill_status_id','remark','date','performa_invoice_date','discount_amount','discount_description','bank_info_id'];
+    protected $fillable = ['quotation_id','bill_status_id','remark','date','performa_invoice_date','discount_amount'
+        ,'discount_description','bank_info_id','sub_total','with_tax_amount','rounded_amount_by'];
 
     public function quotation(){
         return $this->belongsTo('App\Quotation','quotation_id');
