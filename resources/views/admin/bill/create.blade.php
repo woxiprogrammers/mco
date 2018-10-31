@@ -91,6 +91,7 @@
                                                 </div>
                                                 <input type="hidden" id="project_site_id" name="project_site_id" value="{{$project_site['id']}}">
                                                 <input type="hidden" id="quotation_id" name="quotation_id" value="{{$quotation['id']}}">
+                                                <input type="hidden" id="bill_type_id" name="bill_type_id" value="{{$quotation->billType->slug}}">
 
                                                 <table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll; " id="createBillTable">
                                                     <tr>
@@ -108,19 +109,19 @@
                                                         <th width="8%" class="numeric" style="text-align: center"> Cumulative Quantity </th>
                                                         <th width="8%" class="numeric" style="text-align: center"> Current Bill Amount </th>
                                                     </tr>
-                                                    @for($iterator = 0; $iterator < count($quotationSummaryProducts); $iterator++)
-                                                        <tr id="id_{{$quotationSummaryProducts[$iterator]['id']}}">
+                                                    @for($iterator = 0; $iterator < count($quotationSummaries); $iterator++)
+                                                        <tr id="id_{{$quotationSummaries[$iterator]['id']}}">
                                                             <td>
-                                                                <input type="checkbox" id="id_{{$quotationSummaryProducts[$iterator]['id']}}" name="summary_id[{{$quotationSummaryProducts[$iterator]['id']}}]" value="{{$quotationSummaryProducts[$iterator]['id']}}" class="product-checkbox">
+                                                                <input type="checkbox" id="id_{{$quotationSummaries[$iterator]['id']}}" name="quotation_summary_id[{{$quotationSummaries[$iterator]['id']}}]" value="{{$quotationSummaries[$iterator]['id']}}" class="product-checkbox">
                                                             </td>
                                                             <td>
                                                                 <span>{{$iterator + 1}}</span>
                                                             </td>
                                                             <td>
-                                                                <span>{{$quotationSummaryProducts[$iterator]['summary_name']}}</span>
+                                                                <span>{{$quotationSummaries[$iterator]['summary_name']}}</span>
                                                                 <div class="input-group form-group" id="inputGroup" style="padding-left: 10%; padding-right: 10%">
-                                                                    <input type="hidden" class="product-description-id" name="summary_id[{{$quotationSummaryProducts[$iterator]['id']}}][product_description_id]" id="product_description_id_{{$quotationSummaryProducts[$iterator]['id']}}" disabled>
-                                                                    <input class="product_description form-control" type="text" id="product_description_{{$quotationSummaryProducts[$iterator]['id']}}" name="summary_id[{{$quotationSummaryProducts[$iterator]['id']}}][product_description]" disabled>
+                                                                    <input type="hidden" class="product-description-id" name="quotation_summary_id[{{$quotationSummaries[$iterator]['id']}}][product_description_id]" id="product_description_id_{{$quotationSummaries[$iterator]['id']}}" disabled>
+                                                                    <input class="product_description form-control" type="text" id="product_description_{{$quotationSummaries[$iterator]['id']}}" name="quotation_summary_id[{{$quotationSummaries[$iterator]['id']}}][product_description]" disabled>
                                                                     <span class="input-group-addon product_description_create" style="font-size: 12px">C</span>
                                                                     <span class="input-group-addon product_description_update" style="font-size: 12px">U</span>
                                                                     <span class="input-group-addon product_description_delete" style="font-size: 12px">D</span>
@@ -128,29 +129,30 @@
 
                                                             </td>
                                                             <td>
-                                                                <span>{{$quotationSummaryProducts[$iterator]['unit']}}</span>
+                                                                <span>{{$quotationSummaries[$iterator]['unit']}}</span>
                                                             </td>
                                                             <td>
-                                                                <span id="boq_quantity_{{$quotationSummaryProducts[$iterator]['id']}}">{{$quotationSummaryProducts[$iterator]['quantity']}}</span>
+                                                                <span id="boq_quantity_{{$quotationSummaries[$iterator]['id']}}">{{$quotationSummaries[$iterator]['quantity']}}</span>
                                                             </td>
                                                             <td>
-                                                                <span id="rate_per_unit_{{$quotationSummaryProducts[$iterator]['id']}}">{{$quotationSummaryProducts[$iterator]['rate']}}</span>
+                                                                <input class="form-control" type="text" id="rate_per_unit_{{$quotationSummaries[$iterator]['id']}}" name="quotation_summary_id[{{$quotationSummaries[$iterator]['id']}}][rate]" value="{{$quotationSummaries[$iterator]['rate_per_sqft']}}" disabled>
+                                                                {{--<span id="rate_per_unit_{{$quotationSummaries[$iterator]['id']}}">{{$quotationSummaries[$iterator]['rate_per_sqft']}}</span>--}}
                                                             </td>
                                                             <td>
-                                                                <span>{{round(($quotationSummaryProducts[$iterator]['rate'] * $quotationSummaryProducts[$iterator]['quantity']),3)}}</span>
+                                                                <span>{{round(($quotationSummaries[$iterator]['rate'] * $quotationSummaries[$iterator]['quantity']),3)}}</span>
                                                             </td>
                                                             <td>
-                                                                <span id="previous_quantity_{{$quotationSummaryProducts[$iterator]['id']}}">{{$quotationSummaryProducts[$iterator]['previous_quantity']}}</span>
+                                                                <span id="previous_quantity_{{$quotationSummaries[$iterator]['id']}}">{{$quotationSummaries[$iterator]['previous_quantity']}}</span>
                                                             </td>
                                                             <td class="form-group">
-                                                                <input class="form-control current_quantity" type="text" id="current_quantity_{{$quotationSummaryProducts[$iterator]['id']}}" name="summary_id[{{$quotationSummaryProducts[$iterator]['id']}}][current_quantity]" disabled>
+                                                                <input class="form-control current_quantity" type="text" id="current_quantity_{{$quotationSummaries[$iterator]['id']}}" name="quotation_summary_id[{{$quotationSummaries[$iterator]['id']}}][current_quantity]" disabled>
                                                             </td>
                                                             <td>
-                                                                <span id="cumulative_quantity_{{$quotationSummaryProducts[$iterator]['id']}}"></span>
+                                                                <span id="cumulative_quantity_{{$quotationSummaries[$iterator]['id']}}"></span>
                                                             </td>
 
                                                             <td>
-                                                                <span id="current_bill_amount_{{$quotationSummaryProducts[$iterator]['id']}}"></span>
+                                                                <span id="current_bill_amount_{{$quotationSummaries[$iterator]['id']}}"></span>
                                                             </td>
 
                                                         </tr>
@@ -213,7 +215,8 @@
                                                     <tr>
                                                         <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Total Round</b></td>
                                                         <td>
-                                                            <span id="rounded_off_current_bill_amount"></span>
+                                                            <input name="sub_total" id="rounded_off_current_bill_amount" class="form-control" readonly>
+                                                            {{--<span id="rounded_off_current_bill_amount"></span>--}}
                                                         </td>
                                                     </tr>
                                                     @if($taxes != null)
@@ -235,7 +238,8 @@
                                                     <tr>
                                                         <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Final Total</b></td>
                                                         <td>
-                                                            <span id="final_current_bill_total"></span>
+                                                            <input name="with_tax_amount" id="final_current_bill_total" class="form-control" readonly>
+                                                            {{--<span id="final_current_bill_total"></span>--}}
                                                         </td>
                                                     </tr>
                                                     @if(!empty($specialTaxes))
@@ -273,7 +277,8 @@
                                                     <tr>
                                                         <td colspan="10" style="text-align: right; padding-right: 30px;"><b> Grand Total</b></td>
                                                         <td>
-                                                            <span id="grand_current_bill_total"></span>
+                                                            <input name="grand_total" id="grand_current_bill_total" class="form-control" readonly>
+                                                            {{--<span id="grand_current_bill_total"></span>--}}
                                                         </td>
                                                     </tr>
 
@@ -300,7 +305,7 @@
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
     <script src="/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script><script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
-    <script src="/assets/custom/bill/bill.js" type="text/javascript"></script>
+    <script src="/assets/custom/bill/new-bill.js" type="text/javascript"></script>
     <script src="/assets/custom/bill/validation.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
     <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>

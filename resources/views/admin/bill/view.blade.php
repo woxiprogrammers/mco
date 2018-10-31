@@ -128,50 +128,98 @@
                                                     <th width="10%" class="numeric" style="text-align: center"> Cumulative Quantity </th>
                                                     <th width="10%" class="numeric" style="text-align: center"> Current Bill Amount </th>
                                                 </tr>
-                                                @for($iterator = 0; $iterator < count($billQuotationProducts); $iterator++)
-                                                <tr>
-                                                    <td>
-                                                        <span id="quotation_product_id">{{$iterator + 1}}</span>
-                                                    </td>
+                                                @if($bill->quotation->billType->slug == 'sqft')
+                                                    @for($iterator = 0; $iterator < count($billQuotationSummaries); $iterator++)
+                                                        <tr>
+                                                            <td>
+                                                                <span id="quotation_product_id">{{$iterator + 1}}</span>
+                                                            </td>
 
-                                                    <td>
-                                                        <span>{{$billQuotationProducts[$iterator]['productDetail']['name']}} - {{$billQuotationProducts[$iterator]['product_description']['description']}}</span>
-                                                    </td>
+                                                            <td>
+                                                                <span>{{$billQuotationProducts[$iterator]['productDetail']['name']}} - {{$billQuotationProducts[$iterator]['product_description']['description']}}</span>
+                                                            </td>
 
-                                                    <td>
-                                                        <span>{{$billQuotationProducts[$iterator]['unit']}}</span>
-                                                    </td>
+                                                            <td>
+                                                                <span>{{$billQuotationSummaries[$iterator]['unit']}}</span>
+                                                            </td>
 
-                                                    <td>
-                                                        <span>{{$billQuotationProducts[$iterator]['quotationProducts']['quantity']}}</span>
-                                                    </td>
+                                                            <td>
+                                                                <span>{{$billQuotationSummaries[$iterator]['quantity']}}</span>
+                                                            </td>
 
-                                                    <td>
-                                                        <span id="rate_per_unit_{{$billQuotationProducts[$iterator]['quotationProducts']['id']}}">{{$billQuotationProducts[$iterator]['rate']}}</span>
-                                                    </td>
+                                                            <td>
+                                                                <span id="rate_per_unit_{{$billQuotationSummaries[$iterator]['id']}}">{{$billQuotationSummaries[$iterator]['rate_per_sqft']}}</span>
+                                                            </td>
 
-                                                    <td>
-                                                        <span>{!! round(($billQuotationProducts[$iterator]['rate'] * $billQuotationProducts[$iterator]['quotationProducts']['quantity']),3) !!}</span>
-                                                    </td>
+                                                            <td>
+                                                                <span>{!! round(($billQuotationSummaries[$iterator]['rate_per_sqft'] * $billQuotationSummaries[$iterator]['quantity']),3) !!}</span>
+                                                            </td>
 
-                                                    <td>
-                                                        <span id="previous_quantity_{{$billQuotationProducts[$iterator]['quotationProducts']['id']}}">{{$billQuotationProducts[$iterator]['previous_quantity']}}</span>
-                                                    </td>
+                                                            <td>
+                                                                <span id="previous_quantity_{{$billQuotationSummaries[$iterator]['quotationProducts']['id']}}">{{$billQuotationSummaries[$iterator]['previous_quantity']}}</span>
+                                                            </td>
 
-                                                    <td>
-                                                        <span id="current_quantity_{{$billQuotationProducts[$iterator]['quotationProducts']['id']}}">{{$billQuotationProducts[$iterator]['quantity']}}</span>
-                                                    </td>
+                                                            <td>
+                                                                <span id="current_quantity_{{$billQuotationSummaries[$iterator]['quotationProducts']['id']}}">{{$billQuotationSummaries[$iterator]['quantity']}}</span>
+                                                            </td>
 
-                                                    <td>
-                                                        <span id="cumulative_quantity_{{$billQuotationProducts[$iterator]['quotationProducts']['id']}}">{{$billQuotationProducts[$iterator]['cumulative_quantity']}}</span>
-                                                    </td>
+                                                            <td>
+                                                                <span id="cumulative_quantity_{{$billQuotationSummaries[$iterator]['quotationProducts']['id']}}">{{$billQuotationSummaries[$iterator]['cumulative_quantity']}}</span>
+                                                            </td>
 
-                                                    <td>
-                                                        <span class="current_bill_amount" id="current_bill_amount_{{$billQuotationProducts[$iterator]['quotationProducts']['id']}}">{{$billQuotationProducts[$iterator]['current_bill_subtotal']}}</span>
-                                                    </td>
+                                                            <td>
+                                                                <span class="current_bill_amount" id="current_bill_amount_{{$billQuotationSummaries[$iterator]['quotationProducts']['id']}}">{{$billQuotationSummaries[$iterator]['current_bill_subtotal']}}</span>
+                                                            </td>
 
-                                                </tr>
-                                                @endfor
+                                                        </tr>
+                                                    @endfor
+                                                @else
+                                                    @for($iterator = 0; $iterator < count($billQuotationProducts); $iterator++)
+                                                        <tr>
+                                                            <td>
+                                                                <span id="quotation_product_id">{{$iterator + 1}}</span>
+                                                            </td>
+
+                                                            <td>
+                                                                <span>{{$billQuotationProducts[$iterator]['productDetail']['name']}} - {{$billQuotationProducts[$iterator]['product_description']['description']}}</span>
+                                                            </td>
+
+                                                            <td>
+                                                                <span>{{$billQuotationProducts[$iterator]['unit']}}</span>
+                                                            </td>
+
+                                                            <td>
+                                                                <span>{{$billQuotationProducts[$iterator]['quotationProducts']['quantity']}}</span>
+                                                            </td>
+
+                                                            <td>
+                                                                <span id="rate_per_unit_{{$billQuotationProducts[$iterator]['quotationProducts']['id']}}">{{$billQuotationProducts[$iterator]['rate']}}</span>
+                                                            </td>
+
+                                                            <td>
+                                                                <span>{!! round(($billQuotationProducts[$iterator]['rate'] * $billQuotationProducts[$iterator]['quotationProducts']['quantity']),3) !!}</span>
+                                                            </td>
+
+                                                            <td>
+                                                                <span id="previous_quantity_{{$billQuotationProducts[$iterator]['quotationProducts']['id']}}">{{$billQuotationProducts[$iterator]['previous_quantity']}}</span>
+                                                            </td>
+
+                                                            <td>
+                                                                <span id="current_quantity_{{$billQuotationProducts[$iterator]['quotationProducts']['id']}}">{{$billQuotationProducts[$iterator]['quantity']}}</span>
+                                                            </td>
+
+                                                            <td>
+                                                                <span id="cumulative_quantity_{{$billQuotationProducts[$iterator]['quotationProducts']['id']}}">{{$billQuotationProducts[$iterator]['cumulative_quantity']}}</span>
+                                                            </td>
+
+                                                            <td>
+                                                                <span class="current_bill_amount" id="current_bill_amount_{{$billQuotationProducts[$iterator]['quotationProducts']['id']}}">{{$billQuotationProducts[$iterator]['current_bill_subtotal']}}</span>
+                                                            </td>
+
+                                                        </tr>
+                                                    @endfor
+                                                @endif
+
                                                 <tr>
                                                     <td colspan="11" style="background-color: #F5F5F5">&nbsp; </td>
                                                 </tr>
