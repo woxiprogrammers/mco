@@ -47,11 +47,7 @@
                                                 <tr>
                                                     <th data-width="15%"> Subcontractor Name </th>
                                                     <th data-width="15%"> Project Name </th>
-                                                    <th> Summary Name </th>
                                                     <th> Contract type </th>
-                                                    <th> Rate </th>
-                                                    <th> Total Work Area </th>
-                                                    <th> Total Amount </th>
                                                     <th> Bill Amount </th>
                                                     <th> Paid Amount </th>
                                                     <th> Balance Amount</th>
@@ -61,10 +57,6 @@
                                                 <tr class="filter">
                                                     <th> <input type="text" class="form-control form-filter" name="subcontractor_name" id="subcontractor_name"> </th>
                                                     <th> <input type="text" class="form-control form-filter" name="project_name" id="project_name"></th>
-                                                    <th></th>
-                                                    <th></th>
-                                                    <th></th>
-                                                    <th></th>
                                                     <th></th>
                                                     <th></th>
                                                     <th></th>
@@ -81,8 +73,7 @@
                                                 </tbody>
                                                 <tfoot>
                                                 <tr>
-                                                    <th colspan="6" style="text-align:right">Total Page Wise: </th>
-                                                    <th></th>
+                                                    <th colspan="3" style="text-align:right">Total Page Wise: </th>
                                                     <th></th>
                                                     <th></th>
                                                     <th></th>
@@ -102,12 +93,51 @@
         </div>
     </div>
 </div>
+<div id="summaryModal" class="modal fade" role="dialog">
+    <div class="modal-dialog" style="width: 70%;">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title" style="text-align: center"> <b>Subcontractor Structure </b> </h4>
+            </div>
+            <div class="modal-body form">
+
+            </div>
+        </div>
+
+    </div>
+</div>
 @endsection
 
 @section('javascript')
-<script  src="/assets/global/plugins/datatables/datatables.min.js"></script>
-<script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
-<script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
-<script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
-<script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
+    <script  src="/assets/global/plugins/datatables/datatables.min.js"></script>
+    <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
+    <script src="/assets/custom/subcontractor/structure-manage.js" type="text/javascript"></script>
+    <script>
+        $(document).ready(function(){
+            SubcontractorStructureListing.init();
+        });
+
+        function getSummaries(structureId){
+            $.ajax({
+                url:'/subcontractor/structure/details',
+                type: "GET",
+                async: false,
+                data: {
+                    _token: $('input[name="_token"]').val(),
+                    subcontractor_structure_id: structureId
+                },
+                success: function(data, textStatus, xhr){
+                    $("#summaryModal .modal-body").html(data);
+                    $("#summaryModal").modal('show');
+                },
+                error: function(){
+
+                }
+            });
+        }
+    </script>
 @endsection
