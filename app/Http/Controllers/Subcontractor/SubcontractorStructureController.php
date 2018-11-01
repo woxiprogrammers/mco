@@ -208,7 +208,7 @@ class SubcontractorStructureController extends Controller
                             <ul class="dropdown-menu pull-left" role="menu">';
                     if ($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-subcontractor-structure') || $user->customHasPermission('view-subcontractor-structure')) {
                         $action .= '<li>
-                                        <a href="javascript:void(0);">
+                                        <a href="/subcontractor/structure/edit/'.$listingData[$pagination]->id.'">
                                              <i class="icon-docs"></i>Edit
                                         </a>
                                      </li>
@@ -264,6 +264,21 @@ class SubcontractorStructureController extends Controller
             ];
             Log::critical(json_encode($data));
             return response()->json(['message' => 'Something went wrong.'], 500);
+        }
+    }
+
+    public function getEditView(Request $request, $subcontractorStructure){
+        try{
+            $summaries = Summary::where('is_active', true)->select('id', 'name')->get()->toArray();
+            return view('subcontractor.new_structure.edit')->with(compact('subcontractorStructure', 'summaries'));
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Get subcontractor structure Detail view',
+                'subcontractor_structure' => $subcontractorStructure,
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
         }
     }
 }
