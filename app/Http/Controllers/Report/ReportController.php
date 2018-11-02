@@ -31,6 +31,7 @@ use App\ProjectSite;
 use App\ProjectSiteIndirectExpense;
 use App\PurcahsePeticashTransaction;
 use App\PurchaseOrder;
+use App\PurchaseOrderBill;
 use App\PurchaseOrderBillTransactionRelation;
 use App\PurchaseOrderComponent;
 use App\PurchaseOrderPayment;
@@ -57,6 +58,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ReportController extends Controller
@@ -118,7 +120,6 @@ class ReportController extends Controller
             $companyHeader['gstin_number'] = env('GSTIN_NUMBER');
             $date = date('l, d F Y',strtotime($start_date)) .' - '. date('l, d F Y',strtotime($end_date));
             switch($report_type) {
-
                 case 'materialwise_purchase_report':
                     $header = array(
                         'Sr. No', 'Date', 'Category Name', 'Material Name', 'Quantity', 'Unit', 'Basic Amount', 'Total Tax Amount',
@@ -1035,6 +1036,7 @@ class ReportController extends Controller
                         });
                     })->export('xls');
                     break;
+                    
 
                 default :
                     $downloadSheetFlag = false;

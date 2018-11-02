@@ -241,6 +241,7 @@ trait ProjectTrait{
             $projectData['project_site'] = $project->project_site[0]['name'];
             $projectData['project_site_address'] = $project->project_site[0]['address'];
             $projectData['project_city_id'] = $project->project_site[0]['city_id'];
+            $projectData['asset_rent_opening_expense'] = $project->project_site[0]['asset_rent_opening_expense'];
             $hsnCodes = HsnCode::select('id','code','description')->get();
             $cities = City::get();
             $cityArray = Array();
@@ -275,7 +276,8 @@ trait ProjectTrait{
             ProjectSite::where('project_id',$project->id)->update([
                 'name' => $request->project_site_name,
                 'address' => $request->address,
-                'city_id' => $request->city_id
+                'city_id' => $request->city_id,
+                'asset_rent_opening_expense' => $request['asset_rent_opening_expense']
             ]);
             $request->session()->flash('success', 'Project edited successfully.');
             return redirect('/project/manage');

@@ -9,7 +9,7 @@ class ProjectSite extends Model
     protected $table = 'project_sites';
 
     protected $fillable = ['name','project_id','address','city_id','advanced_amount','advanced_balance',
-        'distributed_salary_amount','distributed_purchase_peticash_amount'
+        'distributed_salary_amount','distributed_purchase_peticash_amount','asset_rent_opening_expense'
     ];
 
     public function project(){
