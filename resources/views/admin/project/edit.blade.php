@@ -91,6 +91,7 @@
                                                                 <input type="text" id="projectSiteName" name="project_site_name" class="form-control" value="{{$projectData['project_site']}}">
                                                             </div>
                                                         </div>
+
                                                         <div class="form-group row">
                                                             <div class="col-md-3" style="text-align: right">
                                                                 <label for="name" class="control-label">Location address</label>
@@ -145,6 +146,15 @@
 
 
                                                                 </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group row">
+                                                            <div class="col-md-3" style="text-align: right">
+                                                                <label for="name" class="control-label">Asset Rent Opening Expense</label>
+                                                                <span>*</span>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <input class="form-control" type="text" id="assetRentOpeningExpense" name="asset_rent_opening_expense" value="{{$projectData['asset_rent_opening_expense']}}">
                                                             </div>
                                                         </div>
                                                         @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('edit-manage-sites'))

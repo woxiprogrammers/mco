@@ -59,7 +59,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('get-cities',array('uses' => 'Admin\AddressController@getCities'));
         Route::get('change-status/{address}',array('uses' => 'Admin\AddressController@changeAddressStatus'));
     });
-
+    Route::get('script',array('uses' => 'Admin\CategoryController@getData'));
     Route::group(['prefix' => 'category'],function(){
         Route::get('create',array('uses' => 'Admin\CategoryController@getCreateView'));
         Route::post('create',array('uses' => 'Admin\CategoryController@createCategory'));
@@ -798,11 +798,19 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
 
     Route::group(['prefix'=>'reports'],function (){
         Route::get('/',array('uses' => 'Report\ReportController@reportsRoute'));
+        Route::get('manage',array('uses' => 'Report\ReportManagementController@getView'));
         Route::post('download',array('uses' => 'Report\ReportController@downloadReports'));
+        Route::post('detail',array('uses' => 'Report\ReportManagementController@getButtonDetail'));
+        Route::get('get-report/{reportType}/{projectSiteId}/{firstParameter}/{secondParameter}/{thirdParameter}',array('uses' => 'Report\ReportManagementController@downloadDetailReport'));
+        Route::post('subcontractor',array('uses' => 'Report\ReportManagementController@getSubcontractor'));
+        Route::get('demo',array('uses' => 'Report\ReportManagementController@getSalesAmount'));
+        Route::group(['prefix' => 'listing'], function(){
+            Route::post('sales',array('uses' => 'Report\ReportManagementController@getSalesListing'));
+            Route::post('expense',array('uses' => 'Report\ReportManagementController@getExpensesListing'));
+        });
     });
 
     Route::group(['prefix' => 'notification'], function(){
         Route::post('store-fcm-token',array('uses' => 'Notification\NotificationController@storeFcmToken'));
     });
-
 });

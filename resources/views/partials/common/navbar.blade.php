@@ -175,14 +175,14 @@
                                             </li>
                                         @endif
                                         @if(($user->roles[0]->role->slug == 'superadmin') || ($user->roles[0]->role->slug == 'admin'))
-                                            <li aria-haspopup="true">
-                                                <a href="/address/manage" class="nav-link nav-toggle ">
-                                                    <i class="fa fa-plus"></i> Address
-                                                </a>
-                                            </li>
-                                        @endif
-                                    </ul>
-                                </li>
+                                         <li aria-haspopup="true">
+                                                        <a href="/address/manage" class="nav-link nav-toggle ">
+                                                            <i class="fa fa-plus"></i> Address
+                                                        </a>
+                                                    </li>
+                                                @endif
+                                            </ul>
+                                        </li>
 
                             <?php $hasManageUserPermission = \App\Helper\ACLHelper::checkModuleAcl('manage-user'); ?>
                             @if($hasManageUserPermission)
@@ -643,8 +643,13 @@
                     @endif
 
                     @if(($user->roles[0]->role->slug == 'superadmin'))
-                        <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                       {{-- <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                             <a href="/reports"> Reports
+                                <span class="arrow"></span>
+                            </a>
+                        </li>--}}
+                        <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                            <a href="/reports/manage"> Reports
                                 <span class="arrow"></span>
                             </a>
                         </li>
