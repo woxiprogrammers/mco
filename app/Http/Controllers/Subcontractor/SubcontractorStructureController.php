@@ -136,7 +136,15 @@ class SubcontractorStructureController extends Controller
             $billPaidAmount = 0;
             if ($request->has('get_total')) {
                 if ($filterFlag) {
+                    $totalRate = 0;
+                    $totalWorkArea = 0;
+                    $totalAmount = 0;
                     foreach($listingData as $subcontractorStruct) {
+                        $totalRate += array_sum(array_column($subcontractorStruct->summaries->toArray(),'rate'));
+                        $totalWorkArea += array_sum(array_column($subcontractorStruct->summaries->toArray(),'rate'));;
+                        $totalAmount += $subcontractorStruct->summaries->sum(function($summary){
+                            return $summary->rate * $summary->total_work_area;
+                        });
                         $subcontractorBillIdsArray = $subcontractorStruct->subcontractorBill->where('subcontractor_bill_status_id',SubcontractorBillStatus::where('slug','approved')->pluck('id')->first())->pluck('id');
                         foreach ($subcontractorBillIdsArray as $subBillids) {
                             $subcontractorBill = SubcontractorBill::where('id',$subBillids)->first();
@@ -164,6 +172,9 @@ class SubcontractorStructureController extends Controller
                         }
                     }
                 }
+                $records['totalRate'] = round($totalRate,3);
+                $records['totalWorkArea'] = round($totalWorkArea,3);
+                $records['totalAmount'] = round($totalAmount,3);
                 $records['billtotal'] = round($billTotals,3);
                 $records['paidtotal'] = round($billPaidAmount,3);
                 $records['balancetotal'] = round(($billTotals - $billPaidAmount),3);
@@ -225,10 +236,18 @@ class SubcontractorStructureController extends Controller
                     }
                     $action .= '</ul>
                         </div>';
+                    $totalRate = array_sum(array_column($listingData[$pagination]->summaries->toArray(),'rate'));
+                    $totalWorkArea = array_sum(array_column($listingData[$pagination]->summaries->toArray(),'total_work_area'));;
+                    $totalAmount = $listingData[$pagination]->summaries->sum(function($summary){
+                        return $summary->rate * $summary->total_work_area;
+                    });
                     $records['data'][$iterator] = [
                         $listingData[$pagination]->subcontractor->subcontractor_name,
                         $listingData[$pagination]->projectSite->project->name,
                         $listingData[$pagination]->contractType->name,
+                        $totalRate,
+                        $totalWorkArea,
+                        $totalAmount,
                         $billTotals,
                         $billPaidAmount,
                         round(($billTotals - $billPaidAmount), 3),
