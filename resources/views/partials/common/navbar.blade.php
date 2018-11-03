@@ -642,7 +642,7 @@
                         </li>
                     @endif
 
-                    @if(($user->roles[0]->role->slug == 'superadmin'))
+                    @if(($user->roles[0]->role->slug == 'superadmin') || ($user->roles[0]->role->slug == 'admin'))
                        {{-- <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                             <a href="/reports"> Reports
                                 <span class="arrow"></span>
