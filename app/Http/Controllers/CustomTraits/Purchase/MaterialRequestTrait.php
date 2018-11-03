@@ -216,6 +216,7 @@ trait MaterialRequestTrait{
                         }
                     } else {
                         $materialRequestComponentData['name'] = $componentData['name'];
+                        $materialRequestComponentData['unit_id'] = $componentData['unit_id'];
                         $materialRequestComponentData['component_type_id'] = $materialComponentTypes->where('slug', 'new-material')->pluck('id')->first();
                     }
                 }
