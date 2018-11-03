@@ -48,6 +48,9 @@
                                                     <th data-width="15%"> Subcontractor Name </th>
                                                     <th data-width="15%"> Project Name </th>
                                                     <th> Contract type </th>
+                                                    <th> Rate </th>
+                                                    <th> Total Work Area </th>
+                                                    <th> Total Amount </th>
                                                     <th> Bill Amount </th>
                                                     <th> Paid Amount </th>
                                                     <th> Balance Amount</th>
@@ -57,6 +60,9 @@
                                                 <tr class="filter">
                                                     <th> <input type="text" class="form-control form-filter" name="subcontractor_name" id="subcontractor_name"> </th>
                                                     <th> <input type="text" class="form-control form-filter" name="project_name" id="project_name"></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
                                                     <th></th>
                                                     <th></th>
                                                     <th></th>
@@ -74,6 +80,9 @@
                                                 <tfoot>
                                                 <tr>
                                                     <th colspan="3" style="text-align:right">Total Page Wise: </th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
                                                     <th></th>
                                                     <th></th>
                                                     <th></th>

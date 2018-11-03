@@ -57,19 +57,51 @@ var SubcontractorStructureListing = function () {
                             // $( api.column( 6 ).footer() ).html(
                             //     pageTotal.toFixed(3) +' ( '+ total +' total)'
                             // );
-
-                            billtotal = result['billtotal'];
-
-                            // Total over this page
-                            pageBillTotal = api
+                            totalRate = result['totalRate'];
+                            pageTotalRate = api
                                 .column( 3, { page: 'current'} )
                                 .data()
                                 .reduce( function (a, b) {
                                     return intVal(a) + intVal(b);
                                 }, 0 );
 
-                            // Update footer
                             $( api.column( 3 ).footer() ).html(
+                                pageTotalRate.toFixed(3) +' ( '+ totalRate.toFixed(3) +' total)'
+                            );
+                            totalWorkArea = result['totalWorkArea'];
+                            pageTotalWorkArea = api
+                                .column( 4, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            $( api.column( 4 ).footer() ).html(
+                                pageTotalWorkArea.toFixed(3) +' ( '+ totalWorkArea.toFixed(3) +' total)'
+                            );
+                            totalAmount = result['totalAmount'];
+                            pageTotalAmount = api
+                                .column( 5, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            $( api.column( 5 ).footer() ).html(
+                                pageTotalAmount.toFixed(3) +' ( '+ totalAmount.toFixed(3) +' total)'
+                            );
+                            billtotal = result['billtotal'];
+
+                            // Total over this page
+                            pageBillTotal = api
+                                .column( 6, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 6 ).footer() ).html(
                                 pageBillTotal.toFixed(3) +' ( '+ billtotal.toFixed(3) +' total)'
                             );
 
@@ -77,14 +109,14 @@ var SubcontractorStructureListing = function () {
 
                             // Total over this page
                             pagePaidTotal = api
-                                .column( 4, { page: 'current'} )
+                                .column( 7, { page: 'current'} )
                                 .data()
                                 .reduce( function (a, b) {
                                     return intVal(a) + intVal(b);
                                 }, 0 );
 
                             // Update footer
-                            $( api.column( 4 ).footer() ).html(
+                            $( api.column( 7 ).footer() ).html(
                                 pagePaidTotal.toFixed(3) +' ( '+ paidtotal.toFixed(3) +' total)'
                             );
 
@@ -92,14 +124,14 @@ var SubcontractorStructureListing = function () {
 
                             // Total over this page
                             pageBalanceTotal = api
-                                .column( 5, { page: 'current'} )
+                                .column( 8, { page: 'current'} )
                                 .data()
                                 .reduce( function (a, b) {
                                     return intVal(a) + intVal(b);
                                 }, 0 );
 
                             // Update footer
-                            $( api.column( 5 ).footer() ).html(
+                            $( api.column( 8 ).footer() ).html(
                                 pageBalanceTotal.toFixed(3) +' ( '+ balancetotal.toFixed(3) +' total)'
                             );
 
