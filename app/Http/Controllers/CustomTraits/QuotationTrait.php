@@ -1533,7 +1533,11 @@ trait QuotationTrait{
 
     public function editWorkOrder(Request $request, $workOrder){
         try{
-            Quotation::where('id',$request['quotation_id'])->update(['opening_expenses' => $request['open_expenses']]);
+            $quotationModel = new Quotation();
+            $quotationModel->where('id',$request['quotation_id'])
+                ->update([
+                    'opening_expenses' => $request['open_expenses'],
+                    'bill_type_id' => $request['bill_type_id']]);
             $workOrder->quotation->update(['remark' => $request->remark,'bill_type_id'=>$request['bill_type_id']]);
             $workOrderData = $request->except('_token','work_order_images');
             $workOrder->update($workOrderData);

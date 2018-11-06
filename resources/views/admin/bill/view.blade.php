@@ -120,7 +120,11 @@
                                                     <th width="3%" style="text-align: center"> Item no </th>
                                                     <th width="15%" style="text-align: center"> Item Description </th>
                                                     <th width="6%" class="numeric" style="text-align: center"> UOM </th>
-                                                    <th width="7%" class="numeric" style="text-align: center"> BOQ Quantity </th>
+                                                    @if($bill->quotation->billType->slug == 'sqft')
+                                                        <th width="7%" class="numeric" style="text-align: center"> Slab Area </th>
+                                                    @else
+                                                        <th width="7%" class="numeric" style="text-align: center"> BOQ Quantity </th>
+                                                    @endif
                                                     <th width="6%" class="numeric" style="text-align: center"> Rate </th>
                                                     <th width="10%" class="numeric" style="text-align: center"> W.O Amount </th>
                                                     <th width="7%" class="numeric" style="text-align: center"> Previous Quantity </th>
@@ -136,7 +140,7 @@
                                                             </td>
 
                                                             <td>
-                                                                <span>{{$billQuotationProducts[$iterator]['productDetail']['name']}} - {{$billQuotationProducts[$iterator]['product_description']['description']}}</span>
+                                                                <span>{{$billQuotationSummaries[$iterator]['summaryDetail']['name']}} - {{$billQuotationSummaries[$iterator]['product_description']['description']}}</span>
                                                             </td>
 
                                                             <td>
@@ -144,7 +148,7 @@
                                                             </td>
 
                                                             <td>
-                                                                <span>{{$billQuotationSummaries[$iterator]['quantity']}}</span>
+                                                                <span>{{$quotation['built_up_area']}}</span>
                                                             </td>
 
                                                             <td>
@@ -152,7 +156,7 @@
                                                             </td>
 
                                                             <td>
-                                                                <span>{!! round(($billQuotationSummaries[$iterator]['rate_per_sqft'] * $billQuotationSummaries[$iterator]['quantity']),3) !!}</span>
+                                                                <span>{!! round(($billQuotationSummaries[$iterator]['rate_per_sqft'] * $quotation['built_up_area']),3) !!}</span>
                                                             </td>
 
                                                             <td>
@@ -249,11 +253,7 @@
                                                         </tr>
                                                     @endfor
                                                 @endif
-                                                @if($bill->quotation->billType->slug == 'sqft')
 
-                                                @else
-
-                                                @endif
                                                 <tr>
                                                     <td colspan="9" style="text-align: right; padding-right: 30px;"><b>Sub Total</b></td>
                                                     <td>
@@ -319,7 +319,7 @@
                                                     </td>
                                                 </tr>
                                                 @if(!empty($specialTaxes))
-                                                @foreach($specialTaxes as $specialTax)
+                                                    @foreach($specialTaxes as $specialTax)
                                                 <tr>
                                                     <td colspan="7" style="text-align: right; padding-right: 30px;"><b>{{$specialTax['tax_name']}}<i class="fa fa-at"></i>{{$specialTax['percentage']}}%</b><input type="hidden" class="special-tax" name="special_tax[]" value="{{$specialTax['id']}}"> </td>
                                                     <td colspan="2">
@@ -353,9 +353,15 @@
                                                 @endforeach
                                                 @endif
                                                 <tr>
+                                                    <td colspan="9" style="text-align: right; padding-right: 30px;"><b> Rounded Amount By</b></td>
+                                                    <td>
+                                                        <span id="rounded_amount_by">{{$bill['rounded_amount_by']}}</span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
                                                     <td colspan="9" style="text-align: right; padding-right: 30px;"><b> Grand Total</b></td>
                                                     <td>
-                                                        <span id="grand_current_bill_total">{{$final['current_bill_gross_total_amount']}}</span>
+                                                        <span id="grand_current_bill_total">{{$final['current_bill_gross_total_amount'] + $bill['rounded_amount_by']}}</span>
                                                     </td>
                                                 </tr>
                                             </table>

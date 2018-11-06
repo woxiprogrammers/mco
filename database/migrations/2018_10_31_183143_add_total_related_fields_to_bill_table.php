@@ -14,8 +14,7 @@ class AddTotalRelatedFieldsToBillTable extends Migration
     public function up()
     {
         Schema::table('bills', function (Blueprint $table) {
-            $table->double('sub_total')->nullable();
-            $table->double('with_tax_amount')->nullable();
+            $table->double('gross_total')->nullable();
             $table->double('rounded_amount_by')->nullable();
         });
     }
@@ -28,8 +27,7 @@ class AddTotalRelatedFieldsToBillTable extends Migration
     public function down()
     {
         Schema::table('bills', function (Blueprint $table) {
-            $table->dropColumn('sub_total');
-            $table->dropColumn('with_tax_amount');
+            $table->dropColumn('gross_total');
             $table->dropColumn('rounded_amount_by');
         });
     }
