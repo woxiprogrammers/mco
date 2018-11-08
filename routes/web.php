@@ -675,6 +675,17 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             });
 
         });
+
+        /* -------- New Bill related Changes -------- */
+        Route::group(['prefix' => 'structure'], function(){
+            Route::get('manage', array('uses' => 'Subcontractor\SubcontractorStructureController@getManageView'));
+            Route::get('create', array('uses' => 'Subcontractor\SubcontractorStructureController@getCreateView'));
+            Route::post('create', array('uses' => 'Subcontractor\SubcontractorStructureController@createStructure'));
+            Route::post('listing', array('uses' => 'Subcontractor\SubcontractorStructureController@structureListing'));
+            Route::get('details', array('uses' => 'Subcontractor\SubcontractorStructureController@getStructureDetails'));
+        });
+
+        /* -------- End of New Bill related Changes -------- */
     });
 
     Route::group(['prefix'=>'peticash'],function (){

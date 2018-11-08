@@ -299,7 +299,7 @@ class SubcontractorController extends Controller
             if ($request->has('subcontractor_name')) {
                 $subcontractor_name = $request['subcontractor_name'];
             }
-            $ids = SubcontractorStructure::pluck('id');
+            $ids = SubcontractorStructure::whereNotNull('summary_id')->pluck('id');
 
             if($request->has('project_name') && $filterFlag == true){
                 $projectSites = Project::join('project_sites','project_sites.project_id','=','projects.id')->where('projects.name','ilike','%'.$request['project_name'].'%')->select('project_sites.id')->get()->toArray();
