@@ -113,8 +113,8 @@
                         </tr>
                     @endfor
                 @endif
-                @if((count($invoiceData) + count($extraItems)) < 11)
-                    @for($i = 0 ; $i < (11 - (count($invoiceData) + count($extraItems))) ; $i++)
+                @if((count($invoiceData) + count($extraItems)) < 5)
+                    @for($i = 0 ; $i < (5 - (count($invoiceData) + count($extraItems))) ; $i++)
                         <tr>
                             <td style="height: 25px;"> </td>
                             <td>&nbsp;</td>
@@ -144,6 +144,14 @@
                         <td style="text-align: right; padding-right: 10px;">{!! $taxData[$iterator]['tax_amount'] !!}</td>
                     </tr>
                 @endfor
+                <tr>
+                    <td colspan="6" style="text-align: right; padding-right: 10px;"><b>Total After tax</b></td>
+                    <td style="text-align: right; padding-right: 10px;">{!! $totalAfterTax !!}</td>
+                </tr>
+                <tr>
+                    <td colspan="6" style="text-align: right; padding-right: 10px;"><b>Rounded By</b></td>
+                    <td style="text-align: right; padding-right: 10px;">{!! $roundedBy !!}</td>
+                </tr>
                 <tr>
                     <td colspan="6" style="text-align: right; padding-right: 10px;"><b>Net Payable</b></td>
                     <td style="text-align: right; padding-right: 10px;">{!! $grossTotal !!}</td>

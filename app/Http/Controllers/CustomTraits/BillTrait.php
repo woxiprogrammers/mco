@@ -993,61 +993,75 @@ trait BillTrait{
                         }
                         $billIterator++;
                     }
-             }
-             if($slug == "performa-invoice"){
+            }
+            if($slug == "performa-invoice"){
                  $data['billDate'] = date('d/m/Y',strtotime($bill['performa_invoice_date']));
-             }else{
+            }else{
                  $data['billDate'] = date('d/m/Y',strtotime($bill['date']));
-             }
-            $projectSiteData = ProjectSite::where('id',$bill->quotation->project_site_id)->first();
+            }
+            $quotation = $bill->quotation;
+            $projectSiteData = ProjectSite::where('id',$quotation->project_site_id)->first();
             $data['projectSiteName'] = $projectSiteData->name;
             $data['projectSiteAddress'] = $projectSiteData->address;
             $data['clientCompany'] = Client::where('id',$bill->quotation->project_site->project->client_id)->pluck('company')->first();
-            $billQuotationProducts = BillQuotationProducts::where('bill_id',$bill['id'])->get();
+
             $i = $j = $data['productSubTotal'] = $data['grossTotal'] = 0;
-            foreach($billQuotationProducts as $key => $billQuotationProduct){
+            if($quotation->billType->slug == 'sqft'){
+                $unitModel = new Unit();
+                $billQuotationSummaryModel = new BillQuotationSummary();
+                $billQuotationSummaries = $billQuotationSummaryModel->where('bill_id',$bill['id'])
+                                            ->where('is_deleted',false)->get();
+                $sQFTUnitName = $unitModel->where('slug','sqft')->pluck('name')->first();
+                foreach($billQuotationSummaries as $key => $billQuotationSummary){
+                    $invoiceData[$i]['product_name'] = $billQuotationSummary->quotationSummary->summary->name;
+                    $invoiceData[$i]['description'] = $billQuotationSummary->productDescription->description;
+                    $invoiceData[$i]['quantity'] = $billQuotationSummary->quantity;
+                    $invoiceData[$i]['unit'] = $sQFTUnitName;
+                    $invoiceData[$i]['rate'] = $billQuotationSummary->rate_per_sqft;
+                    $invoiceData[$i]['amount'] = round(($invoiceData[$i]['quantity'] * $invoiceData[$i]['rate']), 3);
+                    $data['productSubTotal'] = round(($data['productSubTotal'] + $invoiceData[$i]['amount']),3);
+                    $i++;
+                }
+            }else{
+                $billQuotationProducts = BillQuotationProducts::where('bill_id',$bill['id'])->get();
+                foreach($billQuotationProducts as $key => $billQuotationProduct){
                     $invoiceData[$i]['product_name'] = $billQuotationProduct->quotation_products->product->name;
                     $invoiceData[$i]['description'] = $billQuotationProduct->product_description->description;
                     $invoiceData[$i]['quantity'] = (($billQuotationProduct->quantity));
                     $invoiceData[$i]['unit'] = $billQuotationProduct->quotation_products->product->unit->name;
-                    /*$invoiceData[$i]['rate'] = MaterialProductHelper::customRound(($billQuotationProduct->quotation_products->rate_per_unit - ($billQuotationProduct->quotation_products->rate_per_unit * ($billQuotationProduct->quotation_products->quotation->discount / 100))),3);
-                    $invoiceData[$i]['amount'] = MaterialProductHelper::customRound(($invoiceData[$i]['quantity'] * $invoiceData[$i]['rate']), 3);
-                    $data['productSubTotal'] = MaterialProductHelper::customRound(($data['productSubTotal'] + $invoiceData[$i]['amount']),3);*/
                     $invoiceData[$i]['rate'] = round(($billQuotationProduct->quotation_products->rate_per_unit - ($billQuotationProduct->quotation_products->rate_per_unit * ($billQuotationProduct->quotation_products->quotation->discount / 100))),3);
                     $invoiceData[$i]['amount'] = round(($invoiceData[$i]['quantity'] * $invoiceData[$i]['rate']), 3);
                     $data['productSubTotal'] = round(($data['productSubTotal'] + $invoiceData[$i]['amount']),3);
-                $i++;
+                    $i++;
+                }
             }
+
             $data['extraItems'] = BillQuotationExtraItem::where('bill_id',$bill->id)->get();
             if(count($data['extraItems']) > 0){
                 $total['extra_item'] = 0;
                 foreach($data['extraItems'] as $key => $extraItem){
                     $extraItem['previous_rate'] = BillQuotationExtraItem::whereIn('bill_id',$allBillIds)->where('bill_id','!=',$bill->id)->where('quotation_extra_item_id',$extraItem->quotation_extra_item_id)->sum('rate');
-                    //$total['extra_item'] = $total['extra_item'] + $extraItem['rate'];
                     $total['extra_item'] = round(($total['extra_item'] + $extraItem['rate']),3);
                 }
             }else{
                 $total['extra_item'] = 0;
             }
-            //$data['sub_total_before_discount'] = $data['productSubTotal'] + $total['extra_item'];
             $data['sub_total_before_discount'] = round(($data['productSubTotal'] + $total['extra_item']),3);
             $data['discount_amount'] = $bill['discount_amount'];
-           // $data['subTotal'] = $data['sub_total_before_discount'] - $data['discount_amount'];
             $data['subTotal'] = round(($data['sub_total_before_discount'] - $data['discount_amount']),3);
             $data['invoiceData'] = $invoiceData;
             $taxes = BillTax::where('bill_id',$bill['id'])->get();
             foreach($taxes as $key => $tax){
                 $taxData[$j]['name'] = $tax->taxes->name;
                 $taxData[$j]['percentage'] = abs($tax->percentage);
-                /*$taxData[$j]['tax_amount'] = MaterialProductHelper::customRound($data['subTotal'] * ($tax->percentage / 100) , 3);
-                $data['grossTotal'] = $data['grossTotal'] + $taxData[$j]['tax_amount'];*/
                 $taxData[$j]['tax_amount'] = round($data['subTotal'] * ($tax->percentage / 100) , 3);
                 $data['grossTotal'] = round(($data['grossTotal'] + $taxData[$j]['tax_amount']),3);
                 $j++;
             }
             $data['taxData'] = $taxData;
-            //$data['grossTotal'] = MaterialProductHelper::customRound($data['grossTotal'] + $data['subTotal']);
-            $data['grossTotal'] = round(($data['grossTotal'] + $data['subTotal']),3);
+            $data['totalAfterTax'] = round(($data['grossTotal'] + $data['subTotal']),3);
+            $data['roundedBy'] = $bill['rounded_amount_by'];
+            $data['grossTotal'] = $data['totalAfterTax'] + $data['roundedBy'];
             $data['amountInWords'] = ucwords(NumberHelper::getIndianCurrency($data['grossTotal']));
             $data['invoice_no'] = "B-".strtoupper(date('M',strtotime($bill['created_at'])))."-".$bill->id."/".date('y',strtotime($bill['created_at']));
             $pdf = App::make('dompdf.wrapper');
