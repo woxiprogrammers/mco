@@ -1,4 +1,5 @@
 $(document).ready(function () {
+    getTotals();
     EditBill.init();
     $('#roundAmountBy').on('change',function () {
         getTotals();
@@ -258,7 +259,7 @@ function calculateQuantityAmount(current_quantity,id){
 
 function getTotals(){
     var total_extra_item_rate = 0;
-    var total_product_current_bill_amount = 0.0;
+    var total_product_current_bill_amount = 0;
 
     var selected_product_length = $('input:checked.product-checkbox').length;
     if(selected_product_length > 0){
@@ -277,7 +278,6 @@ function getTotals(){
             total_extra_item_rate = total_extra_item_rate + parseFloat(enteredRate);
         })
     }
-
     var total_current_bill_amount = total_extra_item_rate + total_product_current_bill_amount;
     $('#sub_total_current_bill_amount').text((total_current_bill_amount).toFixed(3));
     $('#rounded_off_current_bill_sub_total').text((total_current_bill_amount).toFixed(3));
