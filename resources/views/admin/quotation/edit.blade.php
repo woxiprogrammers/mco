@@ -472,6 +472,31 @@
                                                                             </div>
                                                                         </div>
                                                                         <div class="form-group">
+                                                                            <div class="col-md-3">
+                                                                                <label for="bill_type" class="control-form pull-right">
+                                                                                    Bill Type:
+                                                                                </label>
+                                                                            </div>
+                                                                            @if($billCount == 0)
+                                                                                <div class="col-md-3">
+                                                                                    <select class="form-control" name="bill_type_id">
+                                                                                        <option value="">Select Bill Type</option>
+                                                                                        @foreach($billTypes as $billType)
+                                                                                            @if($quotation['bill_type_id'] != null && $billType['id'] == $quotation['bill_type_id'])
+                                                                                                <option value="{{$billType['id']}}" selected>{{$billType['name']}}</option>
+                                                                                            @else
+                                                                                                <option value="{{$billType['id']}}">{{$billType['name']}}</option>
+                                                                                            @endif
+                                                                                        @endforeach
+                                                                                    </select>
+                                                                                </div>
+                                                                            @else
+                                                                                <div class="col-md-3">
+                                                                                    <input type="text" class="form-control" name="bill_type_id" value="{{$quotation->billType->name}}" readonly>
+                                                                                </div>
+                                                                            @endif
+                                                                        </div>
+                                                                        <div class="form-group">
                                                                             <div class="row">
                                                                                 <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12"> </div>
                                                                             </div>

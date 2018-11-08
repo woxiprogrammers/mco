@@ -52,6 +52,7 @@
                                                     <th> Company Name </th>
                                                     <th style="width: 30%"> Project Name </th>
                                                     <th> Site Name </th>
+                                                    <th> Type </th>
                                                     <th> Actions </th>
                                                 </tr>
                                                 </thead>
