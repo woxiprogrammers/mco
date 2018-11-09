@@ -568,8 +568,8 @@ trait BillTrait{
             if($bill->quotation->billType->slug == 'sqft'){
                 $billQuotationSummaryModel = new BillQuotationSummary();
                 $unitModel = new Unit();
-                $billQuotationSummaries = $billQuotationSummaryModel->where('is_deleted',false)->where('bill_id',$bill['id'])->get();
                 $sQFTUnitName = $unitModel->where('slug','sqft')->pluck('name')->first();
+                $billQuotationSummaries = $billQuotationSummaryModel->where('is_deleted',false)->where('bill_id',$bill['id'])->get();
 
                 for($iterator = 0 ; $iterator < count($billQuotationSummaries) ; $iterator++){
                     $summaryData = $billQuotationSummaries[$iterator]->quotationSummary->summary;
@@ -585,7 +585,8 @@ trait BillTrait{
                                                                 ->pluck('id')->toArray();
                     if(count($previousBillIdsWithoutCancelStatus) > 0){
                         $billQuotationSummaries[$iterator]['previous_quantity'] = $billQuotationSummaryModel->whereIn('bill_id',$previousBillIdsWithoutCancelStatus)
-                                            ->where('quotation_summary_id',$billQuotationSummaries[$iterator]['quotation_summary_id'])->sum('quantity');
+                                            ->where('quotation_summary_id',$billQuotationSummaries[$iterator]['quotation_summary_id'])
+                                            ->where('is_deleted',false)->sum('quantity');
                     }else{
                         $billQuotationSummaries[$iterator]['previous_quantity'] = 0;
                     }
@@ -1080,58 +1081,116 @@ trait BillTrait{
 
     public function generateCumulativeInvoice(Request $request,$bill){
         try{
+            $projectSiteModel = new ProjectSite();
+            $clientModel = new Client();
+            $billStatusModel = new BillStatus();
+            $billModel = new Bill();
+
             $data = array();
             $data['currentBillID'] = 1;
-            $data['projectSiteName'] = ProjectSite::where('id',$bill->quotation->project_site_id)->pluck('name')->first();
-            $data['clientCompany'] = Client::where('id',$bill->quotation->project_site->project->client_id)->pluck('company')->first();
-            $cancelBillStatusId = BillStatus::where('slug','cancelled')->pluck('id')->first();
-            $previousBillIds = Bill::where('quotation_id',$bill['quotation_id'])->where('bill_status_id','!=',$cancelBillStatusId)->where('id','<',$bill['id'])->pluck('id');
-            $billProducts = BillQuotationProducts::whereIn('bill_id',$previousBillIds)->get()->toArray();
-            $currentBillProducts = BillQuotationProducts::where('bill_id',$bill['id'])->get()->toArray();
-            $allBillIds = Bill::where('quotation_id',$bill['quotation_id'])->where('bill_status_id','!=',$cancelBillStatusId)->where('id','<=',$bill['id'])->pluck('id');
-            foreach($allBillIds as $key => $billId){
-                if($billId == $bill['id']){
-                    $data['currentBillID'] = $key+1;
-                    break;
-                }
-            }
-            $distinctProducts = BillQuotationProducts::whereIn('bill_id',$allBillIds)->distinct('quotation_product_id')->orderBy('quotation_product_id')->select('quotation_product_id')->get();
-            $invoiceData = $total = array();
-            $i = $total['previous_quantity'] = $total['current_quantity'] = $total['cumulative_quantity'] = $total['rate'] = $total['product_previous_bill_amount'] = $total['product_current_bill_amount'] = $total['product_cumulative_bill_amount'] = 0;
-            foreach($distinctProducts as $key => $distinctProduct){
-                $invoiceData[$i]['product_name'] = $distinctProduct->quotation_products->product->name;
-                $invoiceData[$i]['unit'] = $distinctProduct->quotation_products->product->unit->name;
-                $invoiceData[$i]['rate'] = round(($distinctProduct->quotation_products->rate_per_unit - ($distinctProduct->quotation_products->rate_per_unit * ($bill->quotation->discount / 100))),3);
-                $invoiceData[$i]['quotation_product_id'] = $distinctProduct['quotation_product_id'];
-                $invoiceData[$i]['previous_quantity'] = 0;
-                foreach($billProducts as $k => $billProduct){
-                    if($distinctProduct['quotation_product_id'] == $billProduct['quotation_product_id']){
-                        $invoiceData[$i]['previous_quantity'] = (($invoiceData[$i]['previous_quantity'] + $billProduct['quantity']));
-                        $invoiceData[$i]['current_quantity'] = 0;
+            $data['projectSiteName'] = $projectSiteModel->where('id',$bill->quotation->project_site_id)->pluck('name')->first();
+            $data['clientCompany'] = $clientModel->where('id',$bill->quotation->project_site->project->client_id)->pluck('company')->first();
+            $cancelBillStatusId = $billStatusModel->where('slug','cancelled')->pluck('id')->first();
+            $previousBillIds = $billModel->where('quotation_id',$bill['quotation_id'])->where('bill_status_id','!=',$cancelBillStatusId)->where('id','<',$bill['id'])->pluck('id');
+            if($bill->quotation->billType->slug == 'sqft'){
+                $billQuotationSummaryModel = new BillQuotationSummary();
+                $quotationSummaryModel = new QuotationSummary();
+                $allBillIds = $billModel->where('quotation_id',$bill['quotation_id'])->where('bill_status_id','!=',$cancelBillStatusId)->where('id','<=',$bill['id'])->pluck('id');
+                foreach($allBillIds as $key => $billId){
+                    if($billId == $bill['id']){
+                        $data['currentBillID'] = $key+1;
+                        break;
                     }
                 }
-                foreach($currentBillProducts as $j => $currentBillProduct){
-                    if($distinctProduct['quotation_product_id'] == $currentBillProduct['quotation_product_id']){
-                        $invoiceData[$i]['current_quantity'] = (($currentBillProduct['quantity']));
+                $distinctQuotationSummaryIds = $billQuotationSummaryModel->whereIn('bill_id',$allBillIds)
+                                        ->distinct('quotation_summary_id')->orderBy('quotation_summary_id')
+                                        ->pluck('quotation_summary_id');
+                $invoiceData = $total = array();
+                $i = $total['previous_quantity'] = $total['current_quantity'] = $total['cumulative_quantity'] = $total['rate'] = $total['product_previous_bill_amount'] = $total['product_current_bill_amount'] = $total['product_cumulative_bill_amount'] = 0;
+                $unitModel = new Unit();
+                $sQFTUnitName = $unitModel->where('slug','sqft')->pluck('name')->first();
+                foreach($distinctQuotationSummaryIds as $key => $quotationSummaryId){
+                    $quotationSummary = $quotationSummaryModel->where('id',$quotationSummaryId)->first();
+                    $invoiceData[$i]['product_name'] = $quotationSummary->summary->name;
+                    $invoiceData[$i]['unit'] = $sQFTUnitName;
+                    $invoiceData[$i]['rate'] = $quotationSummary['rate_per_sqft'];
+                    $invoiceData[$i]['quotation_product_id'] = $quotationSummaryId;
+                    $invoiceData[$i]['previous_quantity'] = $invoiceData[$i]['previous_bill_amount'] = 0;
+                    $invoiceData[$i]['current_quantity'] = $invoiceData[$i]['current_bill_amount'] = 0;
+                    if(count($previousBillIds) > 0){
+                        $previousBillQuotationSummaryData = $billQuotationSummaryModel->whereIn('bill_id',$previousBillIds)
+                            ->where('quotation_summary_id',$quotationSummaryId)
+                            ->where('is_deleted',false)->get();
+                        $invoiceData[$i]['previous_quantity'] = $previousBillQuotationSummaryData->sum('quantity');
+                        $invoiceData[$i]['previous_bill_amount'] += $previousBillQuotationSummaryData->sum(function($previousBillQuotationSummary){
+                            return round(($previousBillQuotationSummary['quantity'] * $previousBillQuotationSummary['rate_per_sqft']),3);
+                        });
+                    }
+                    $currentBillSummaryData = $billQuotationSummaryModel->where('bill_id',$bill['id'])
+                        ->where('quotation_summary_id',$quotationSummaryId)
+                        ->where('is_deleted',false)->first();
+                    if($currentBillSummaryData != null){
+                        $invoiceData[$i]['current_quantity'] = $currentBillSummaryData['quantity'];
+                        $invoiceData[$i]['current_bill_amount'] = round(($currentBillSummaryData['quantity'] * $currentBillSummaryData['rate_per_sqft']),3);
+                    }
+                    $invoiceData[$i]['cumulative_quantity'] = (($invoiceData[$i]['previous_quantity'] + $invoiceData[$i]['current_quantity']));
+
+                    $invoiceData[$i]['cumulative_bill_amount'] = $invoiceData[$i]['current_bill_amount'] + $invoiceData[$i]['previous_bill_amount'];
+                    $total['previous_quantity'] = (($total['previous_quantity'] + $invoiceData[$i]['previous_quantity']));
+                    $total['current_quantity'] = (($total['current_quantity'] + $invoiceData[$i]['current_quantity']));
+                    $total['cumulative_quantity'] = (($total['cumulative_quantity'] + $invoiceData[$i]['cumulative_quantity']));
+                    $total['rate'] = round(($total['rate'] + $invoiceData[$i]['rate']),3);
+                    $total['product_previous_bill_amount'] = round(($total['product_previous_bill_amount'] + $invoiceData[$i]['previous_bill_amount']),3);
+                    $total['product_current_bill_amount'] = round(($total['product_current_bill_amount'] + $invoiceData[$i]['current_bill_amount']),3);
+                    $total['product_cumulative_bill_amount'] = round(($total['product_cumulative_bill_amount']  + $invoiceData[$i]['cumulative_bill_amount']),3);
+                    $i++;
+                }
+            }else{
+                $billQuotationProductModel = new BillQuotationProducts();
+                $billProducts = $billQuotationProductModel->whereIn('bill_id',$previousBillIds)->get()->toArray();
+                $currentBillProducts = $billQuotationProductModel->where('bill_id',$bill['id'])->get()->toArray();
+                $allBillIds = $billModel->where('quotation_id',$bill['quotation_id'])->where('bill_status_id','!=',$cancelBillStatusId)->where('id','<=',$bill['id'])->pluck('id');
+                foreach($allBillIds as $key => $billId){
+                    if($billId == $bill['id']){
+                        $data['currentBillID'] = $key+1;
+                        break;
                     }
                 }
-                $invoiceData[$i]['cumulative_quantity'] = (($invoiceData[$i]['previous_quantity'] + $invoiceData[$i]['current_quantity']));
-                $invoiceData[$i]['previous_bill_amount'] = round(($invoiceData[$i]['previous_quantity'] * $invoiceData[$i]['rate']),3);
-                $invoiceData[$i]['current_bill_amount'] = round(($invoiceData[$i]['current_quantity'] * $invoiceData[$i]['rate']),3);
-                $invoiceData[$i]['cumulative_bill_amount'] = round(($invoiceData[$i]['cumulative_quantity'] * $invoiceData[$i]['rate']),3);
-                $total['previous_quantity'] = (($total['previous_quantity'] + $invoiceData[$i]['previous_quantity']));
-                $total['current_quantity'] = (($total['current_quantity'] + $invoiceData[$i]['current_quantity']));
-                $total['cumulative_quantity'] = (($total['cumulative_quantity'] + $invoiceData[$i]['cumulative_quantity']));
-                //$total['rate'] = MaterialProductHelper::customRound(($total['rate'] + $invoiceData[$i]['rate']),3);
-                $total['rate'] = round(($total['rate'] + $invoiceData[$i]['rate']),3);
-                /*$total['product_previous_bill_amount'] = MaterialProductHelper::customRound(($total['product_previous_bill_amount'] + $invoiceData[$i]['previous_bill_amount']),3);
-                $total['product_current_bill_amount'] = MaterialProductHelper::customRound(($total['product_current_bill_amount'] + $invoiceData[$i]['current_bill_amount']),3);
-                $total['product_cumulative_bill_amount'] = MaterialProductHelper::customRound(($total['product_cumulative_bill_amount']  + $invoiceData[$i]['cumulative_bill_amount']),*/
-                $total['product_previous_bill_amount'] = round(($total['product_previous_bill_amount'] + $invoiceData[$i]['previous_bill_amount']),3);
-                $total['product_current_bill_amount'] = round(($total['product_current_bill_amount'] + $invoiceData[$i]['current_bill_amount']),3);
-                $total['product_cumulative_bill_amount'] = round(($total['product_cumulative_bill_amount']  + $invoiceData[$i]['cumulative_bill_amount']),3);
-                $i++;
+                $distinctProducts = $billQuotationProductModel->whereIn('bill_id',$allBillIds)->distinct('quotation_product_id')->orderBy('quotation_product_id')->select('quotation_product_id')->get();
+                $invoiceData = $total = array();
+                $i = $total['previous_quantity'] = $total['current_quantity'] = $total['cumulative_quantity'] = $total['rate'] = $total['product_previous_bill_amount'] = $total['product_current_bill_amount'] = $total['product_cumulative_bill_amount'] = 0;
+                foreach($distinctProducts as $key => $distinctProduct){
+                    $invoiceData[$i]['product_name'] = $distinctProduct->quotation_products->product->name;
+                    $invoiceData[$i]['unit'] = $distinctProduct->quotation_products->product->unit->name;
+                    $invoiceData[$i]['rate'] = round(($distinctProduct->quotation_products->rate_per_unit - ($distinctProduct->quotation_products->rate_per_unit * ($bill->quotation->discount / 100))),3);
+                    $invoiceData[$i]['quotation_product_id'] = $distinctProduct['quotation_product_id'];
+                    $invoiceData[$i]['previous_quantity'] = 0;
+                    foreach($billProducts as $k => $billProduct){
+                        if($distinctProduct['quotation_product_id'] == $billProduct['quotation_product_id']){
+                            $invoiceData[$i]['previous_quantity'] = (($invoiceData[$i]['previous_quantity'] + $billProduct['quantity']));
+                            $invoiceData[$i]['current_quantity'] = 0;
+                        }
+                    }
+                    foreach($currentBillProducts as $j => $currentBillProduct){
+                        if($distinctProduct['quotation_product_id'] == $currentBillProduct['quotation_product_id']){
+                            $invoiceData[$i]['current_quantity'] = (($currentBillProduct['quantity']));
+                        }
+                    }
+                    $invoiceData[$i]['cumulative_quantity'] = (($invoiceData[$i]['previous_quantity'] + $invoiceData[$i]['current_quantity']));
+                    $invoiceData[$i]['previous_bill_amount'] = round(($invoiceData[$i]['previous_quantity'] * $invoiceData[$i]['rate']),3);
+                    $invoiceData[$i]['current_bill_amount'] = round(($invoiceData[$i]['current_quantity'] * $invoiceData[$i]['rate']),3);
+                    $invoiceData[$i]['cumulative_bill_amount'] = round(($invoiceData[$i]['cumulative_quantity'] * $invoiceData[$i]['rate']),3);
+                    $total['previous_quantity'] = (($total['previous_quantity'] + $invoiceData[$i]['previous_quantity']));
+                    $total['current_quantity'] = (($total['current_quantity'] + $invoiceData[$i]['current_quantity']));
+                    $total['cumulative_quantity'] = (($total['cumulative_quantity'] + $invoiceData[$i]['cumulative_quantity']));
+                    $total['rate'] = round(($total['rate'] + $invoiceData[$i]['rate']),3);
+                    $total['product_previous_bill_amount'] = round(($total['product_previous_bill_amount'] + $invoiceData[$i]['previous_bill_amount']),3);
+                    $total['product_current_bill_amount'] = round(($total['product_current_bill_amount'] + $invoiceData[$i]['current_bill_amount']),3);
+                    $total['product_cumulative_bill_amount'] = round(($total['product_cumulative_bill_amount']  + $invoiceData[$i]['cumulative_bill_amount']),3);
+                    $i++;
+                }
             }
+
             $extraItems = BillQuotationExtraItem::whereIn('bill_id',$allBillIds)->get();
             $data['extraItems'] = array();
             if(count($extraItems) > 0){
