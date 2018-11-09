@@ -42,4 +42,8 @@ class Bill extends Model
     public function billReconcileTransaction(){
         return $this->hasMany('App\BillReconcileTransaction','bill_id');
     }
+
+    public function billQuotationSummary(){
+        return $this->hasMany('App\BillQuotationSummary','bill_id');
+    }
 }

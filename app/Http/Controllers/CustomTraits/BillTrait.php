@@ -283,9 +283,17 @@ trait BillTrait{
                 }
                 $listingData[$iterator]['bill_no_format'] = "B-".strtoupper(date('M',strtotime($bill['created_at'])))."-".$bill->id."/".date('y',strtotime($bill['created_at']));
                 $total_amount = 0;
-                foreach($bill->bill_quotation_product as $key1 => $product){
-                    $rate = round(($product->quotation_products->rate_per_unit - ($product->quotation_products->rate_per_unit * ($product->quotation_products->quotation->discount / 100))),3);
-                    $total_amount = round(($total_amount + ($product->quantity * $rate)),3) ;
+                if($bill->quotation->billType->slug == 'sqft'){
+                    $billQuotationSummaryData = $bill->billQuotationSummary->where('is_deleted',false);
+                    foreach($billQuotationSummaryData as $key1 => $billQuotationSummary){
+                        $rate = $billQuotationSummary['rate_per_sqft'];
+                        $total_amount = round(($total_amount + ($billQuotationSummary['quantity'] * $rate)),3) ;
+                    }
+                }else{
+                    foreach($bill->bill_quotation_product as $key1 => $product){
+                        $rate = round(($product->quotation_products->rate_per_unit - ($product->quotation_products->rate_per_unit * ($product->quotation_products->quotation->discount / 100))),3);
+                        $total_amount = round(($total_amount + ($product->quantity * $rate)),3) ;
+                    }
                 }
                 if(count($bill->bill_quotation_extraItems) > 0){
                     $extraItemsTotal = round($bill->bill_quotation_extraItems->sum('rate'),3);
@@ -376,6 +384,7 @@ trait BillTrait{
                     $listingData[$iterator]['tax'][$tax['tax_id']] = $taxAmount;
                     $listingData[$iterator]['final_total'] = round(($listingData[$iterator]['final_total'] + $listingData[$iterator]['tax'][$tax['tax_id']]),3);
                 }
+                $listingData[$iterator]['final_total'] = $listingData[$iterator]['final_total'] + $bill['rounded_amount_by'];
                 $listingData[$iterator]['paid_amount'] = BillTransaction::where('bill_id',$bill->id)->sum('total');
                 $listingData[$iterator]['balance_amount'] = $listingData[$iterator]['final_total'] - $listingData[$iterator]['paid_amount'];
                 $iterator++;
@@ -1095,7 +1104,7 @@ trait BillTrait{
             if($bill->quotation->billType->slug == 'sqft'){
                 $billQuotationSummaryModel = new BillQuotationSummary();
                 $quotationSummaryModel = new QuotationSummary();
-                $allBillIds = $billModel->where('quotation_id',$bill['quotation_id'])->where('bill_status_id','!=',$cancelBillStatusId)->where('id','<=',$bill['id'])->pluck('id');
+            $allBillIds = $billModel->where('quotation_id',$bill['quotation_id'])->where('bill_status_id','!=',$cancelBillStatusId)->where('id','<=',$bill['id'])->pluck('id');
                 foreach($allBillIds as $key => $billId){
                     if($billId == $bill['id']){
                         $data['currentBillID'] = $key+1;
