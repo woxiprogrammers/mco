@@ -683,6 +683,8 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('create', array('uses' => 'Subcontractor\SubcontractorStructureController@createStructure'));
             Route::post('listing', array('uses' => 'Subcontractor\SubcontractorStructureController@structureListing'));
             Route::get('details', array('uses' => 'Subcontractor\SubcontractorStructureController@getStructureDetails'));
+            Route::get('edit/{subcontractorStructure}', array('uses' => 'Subcontractor\SubcontractorStructureController@getEditView'));
+            Route::post('edit/{subcontractorStructure}', array('uses' => 'Subcontractor\SubcontractorStructureController@editStructure'));
         });
 
         /* -------- End of New Bill related Changes -------- */

@@ -106,6 +106,7 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('subcontractorStructure',SubcontractorStructure::class);
         Route::model('siteTransferBill',SiteTransferBill::class);
         Route::model('address',Address::class);
+        Route::model('subcontractorStructure', SubcontractorStructure::class);
     }
 
     /**

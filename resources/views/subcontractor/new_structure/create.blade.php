@@ -128,12 +128,12 @@
                                                                                 </td>
                                                                                 <td>
                                                                                     <div class="form-group" style="width: 90%; margin-left: 5%">
-                                                                                        <input type="text" class="form-control rate" onkeyup="rateKeyUp(this)">
+                                                                                        <input type="text" class="form-control rate" onkeyup="rateKeyUp(this)" min="1" required>
                                                                                     </div>
                                                                                 </td>
                                                                                 <td>
                                                                                     <div class="form-group"  style="width: 90%; margin-left: 5%">
-                                                                                        <input type="text" class="form-control total_work_area" onkeyup="workAreaKeyUp(this)">
+                                                                                        <input type="text" class="form-control total_work_area" onkeyup="workAreaKeyUp(this)"  min="1" required>
                                                                                     </div>
                                                                                 </td>
                                                                                 <td>
