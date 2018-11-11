@@ -123,29 +123,30 @@
                                                                                 </tr>
                                                                             </thead>
                                                                             <tbody>
-                                                                                @foreach($subcontractorStructure->summaries as $subcontractorStructureSummary)
+                                                                                @foreach($structureSummaries as $subcontractorStructureSummary)
                                                                                     <tr>
                                                                                         <td>
-                                                                                            <label class="control-label"> {!! $subcontractorStructureSummary->summary->name !!}</label>
+                                                                                            <input type="hidden" name="summaries[]" value="{{$subcontractorStructureSummary['summary_id']}}">
+                                                                                            <label class="control-label"> {!! $subcontractorStructureSummary['summary_name'] !!}</label>
                                                                                         </td>
                                                                                         <td>
                                                                                             <div class="form-group" style="width: 90%; margin-left: 5%">
-                                                                                                <textarea class="form-control description" rows="3">{{$subcontractorStructureSummary->description}}</textarea>
+                                                                                                <textarea class="form-control description" rows="3" name="description[{{$subcontractorStructureSummary['summary_id']}}]">{{$subcontractorStructureSummary['description']}}</textarea>
                                                                                             </div>
                                                                                         </td>
                                                                                         <td>
                                                                                             <div class="form-group" style="width: 90%; margin-left: 5%">
-                                                                                                <input type="text" class="form-control rate" onkeyup="rateKeyUp(this)" value="{{$subcontractorStructureSummary->rate}}">
+                                                                                                <input type="text" class="form-control rate" onkeyup="rateKeyUp(this)" value="{{$subcontractorStructureSummary['rate']}}" name="rate[{{$subcontractorStructureSummary['summary_id']}}]"  min="{{$subcontractorStructureSummary['min_rate']}}" required>
                                                                                             </div>
                                                                                         </td>
                                                                                         <td>
                                                                                             <div class="form-group"  style="width: 90%; margin-left: 5%">
-                                                                                                <input type="text" class="form-control total_work_area" onkeyup="workAreaKeyUp(this)" value="{{$subcontractorStructureSummary->total_work_area}}">
+                                                                                                <input type="text" class="form-control total_work_area" onkeyup="workAreaKeyUp(this)" value="{{$subcontractorStructureSummary['total_work_area']}}" name="total_work_area[{{$subcontractorStructureSummary['summary_id']}}]" min="{{$subcontractorStructureSummary['min_total_work_area']}}" required>
                                                                                             </div>
                                                                                         </td>
                                                                                         <td>
                                                                                             <div class="form-group"  style="width: 90%; margin-left: 5%">
-                                                                                                <input type="text" class="form-control total_amount" value="{!! $subcontractorStructureSummary->rate * $subcontractorStructureSummary->total_work_area !!}" readonly>
+                                                                                                <input type="text" class="form-control total_amount" value="{!! $subcontractorStructureSummary['rate'] * $subcontractorStructureSummary['total_work_area'] !!}" readonly>
                                                                                             </div>
                                                                                         </td>
                                                                                         <td>
@@ -154,7 +155,11 @@
                                                                                             </div>
                                                                                         </td>
                                                                                         <td>
-
+                                                                                            @if($subcontractorStructureSummary['can_remove'])
+                                                                                                <a class="btn red btn-xs" href="javascript:void(0);" onclick="removeSummary(this)">
+                                                                                                    <i class="fa fa-times"></i>
+                                                                                                </a>
+                                                                                            @endif
                                                                                         </td>
                                                                                     </tr>
                                                                                 @endforeach
@@ -174,6 +179,18 @@
                                                                     </div>
                                                                     <div class="col-md-6">
                                                                         <input type="text" class="form-control extra_items" name="extra_items[{{$subcontractorStructureExtraItem->extraItem['id']}}]" value="{{$subcontractorStructureExtraItem['rate']}}">
+                                                                    </div>
+                                                                </div>
+                                                            @endforeach
+                                                            @foreach( $newExtraItems as $extraItem)
+                                                                <div class="form-group">
+                                                                    <div class="col-md-3">
+                                                                        <label class="control-label pull-right">
+                                                                            {{$extraItem['name']}}
+                                                                        </label>
+                                                                    </div>
+                                                                    <div class="col-md-6">
+                                                                        <input type="text" class="form-control extra_items" name="extra_items[{{$extraItem['id']}}]" value="{{$extraItem['rate']}}">
                                                                     </div>
                                                                 </div>
                                                             @endforeach
@@ -208,12 +225,12 @@
                 </td>
                 <td>
                     <div class="form-group" style="width: 90%; margin-left: 5%">
-                        <input type="text" class="form-control rate" onkeyup="rateKeyUp(this)">
+                        <input type="text" class="form-control rate" onkeyup="rateKeyUp(this)" min="1" required>
                     </div>
                 </td>
                 <td>
                     <div class="form-group"  style="width: 90%; margin-left: 5%">
-                        <input type="text" class="form-control total_work_area" onkeyup="workAreaKeyUp(this)">
+                        <input type="text" class="form-control total_work_area" onkeyup="workAreaKeyUp(this)"  min="1" required>
                     </div>
                 </td>
                 <td>
@@ -378,16 +395,25 @@
 
         function onSummaryChange(element){
             var summaryId = $(element).val();
-
             $(element).closest('tr').find('.rate').attr('name', 'rate['+summaryId+']');
             $(element).closest('tr').find('.rate').val('');
+            var minRate = $(element).closest('tr').find('.rate').attr('min');
+            if(typeof  minRate == 'undefined'){
+                minRate = 1;
+            }
             $(element).closest('tr').find('.rate').rules('add',{
-                required: true
+                required: true,
+                min: minRate
             });
             $(element).closest('tr').find('.total_work_area').attr('name', 'total_work_area['+summaryId+']');
             $(element).closest('tr').find('.total_work_area').val('');
+            var minTotalWorkArea = $(element).closest('tr').find('.total_work_area').attr('min');
+            if (typeof minTotalWorkArea == 'undefined'){
+                minTotalWorkArea = 1;
+            }
             $(element).closest('tr').find('.total_work_area').rules('add',{
-                required: true
+                required: true,
+                min: minTotalWorkArea
             });
             $(element).closest('tr').find('.total_amount').attr('name', 'total_amount['+summaryId+']');
             $(element).closest('tr').find('.total_amount').val('');
@@ -395,7 +421,6 @@
             $(element).closest('tr').find('.total_amount_inwords').val('');
             $(element).closest('tr').find('.description').attr('name', 'description['+summaryId+']');
             $(element).closest('tr').find('.description').val('');
-
         }
 
         function removeSummary(element){
