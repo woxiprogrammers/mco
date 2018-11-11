@@ -57,4 +57,19 @@ class SubcontractorBillController extends Controller
             abort(500);
         }
     }
+
+    public function createBill(Request $request, $subcontractorStructure){
+        try{
+            dd($request->all());
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'subcontractor bill create',
+                'subcontractor_structure' => $subcontractorStructure,
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
 }
