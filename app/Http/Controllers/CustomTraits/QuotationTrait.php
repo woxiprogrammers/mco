@@ -33,8 +33,10 @@ use App\QuotationMaterial;
 use App\QuotationProduct;
 use App\QuotationProfitMarginVersion;
 use App\QuotationStatus;
+use App\QuotationSummary;
 use App\QuotationTaxVersion;
 use App\QuotationWorkOrder;
+use App\SubcontractorStructureType;
 use App\Summary;
 use App\Tax;
 use App\Unit;
@@ -618,6 +620,31 @@ trait QuotationTrait{
 
                 $quotationMaterialIds[$materialId] = $quotationMaterial->id;
             }
+            $quotationProductModel = new QuotationProduct();
+            $summaryIds = $quotationProductModel->where('quotation_id',$quotation['id'])->distinct('summary_id')->pluck('summary_id')->toArray();
+            if(count($summaryIds) > 0){
+                $quotationSummaryModel = new QuotationSummary();
+                foreach($summaryIds as $summaryId){
+                    $quotationSummaryProductData = $quotationProductModel->where('quotation_id',$quotation['id'])
+                        ->where('summary_id',$summaryId)->get();
+                    if((!empty($quotation['built_up_area']))){
+                        $summaryAmount = $quotationSummaryProductData->sum(function($quotationSummaryProduct) {
+                            $discounted_price_per_product = round(($quotationSummaryProduct->rate_per_unit - ($quotationSummaryProduct->rate_per_unit * ($quotationSummaryProduct->quotation->discount / 100))),3);
+                            $discounted_price = $quotationSummaryProduct->quantity * $discounted_price_per_product;
+                            return $discounted_price;
+                        });
+                        $ratePerSQFT = round(($summaryAmount / $quotation['built_up_area']),3);
+                    }else{
+                        $ratePerSQFT = 0.000;
+                    }
+                    $quotationSummaryModel->create([
+                        'quotation_id' => $quotation['id'],
+                        'summary_id' => $summaryId,
+                        'rate_per_sqft' => $ratePerSQFT
+                    ]);
+                }
+            }
+
             if($request->ajax()){
                 $status = 200;
                 return response()->json($response,$status);
@@ -696,6 +723,7 @@ trait QuotationTrait{
 
     public function getEditView(Request $request, $quotation){
         try{
+            $subcontractorStructureType = new SubcontractorStructureType();
             $user = Auth::user();
             $userRole = $user->roles[0]->role->slug;
             $orderValue = QuotationProduct::where('quotation_id',$quotation->id)->select(DB::raw('sum(rate_per_unit * quantity)'))->first();
@@ -791,7 +819,9 @@ trait QuotationTrait{
             }
             $id = $quotation->id;
             $checkBank = QuotationBankInfo::where('quotation_id',$id)->pluck('bank_info_id')->toArray();
-            return view('admin.quotation.edit')->with(compact('quotationMiscellaneousMaterials','quotation','summaries','taxes','orderValue','user','quotationProducts','extraItems','userRole','beforeTaxOrderValue','bankInfo','checkBank'));
+            $billCount = $quotation->bill->count();
+            $billTypes = $subcontractorStructureType->select('id','name')->get();
+            return view('admin.quotation.edit')->with(compact('quotationMiscellaneousMaterials','quotation','summaries','taxes','orderValue','user','quotationProducts','extraItems','userRole','beforeTaxOrderValue','bankInfo','checkBank','billTypes','billCount'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Quotation Edit View',
@@ -1141,6 +1171,45 @@ trait QuotationTrait{
                 }
                 QuotationProduct::where('id',$quotationProduct->id)->update(['rate_per_unit' => round($productAmount,3)]);
             }
+
+            $quotationProductModel = new QuotationProduct();
+            $summaryIds = $quotationProductModel->where('quotation_id',$quotation['id'])/*->distinct('summary_id')*/->pluck('summary_id')->toArray();
+            if(count($summaryIds) > 0){
+                $quotationSummaryModel = new QuotationSummary();
+                foreach($summaryIds as $summaryId){
+                    $quotationSummaryProductData = $quotationProductModel->where('quotation_id',$quotation['id'])
+                        ->where('summary_id',$summaryId)->get();
+                    if((!empty($quotation['built_up_area']))){
+                        $summaryAmount = $quotationSummaryProductData->sum(function($quotationSummaryProduct) {
+                            $discounted_price_per_product = round(($quotationSummaryProduct->rate_per_unit - ($quotationSummaryProduct->rate_per_unit * ($quotationSummaryProduct->quotation->discount / 100))),3);
+                            $discounted_price = $quotationSummaryProduct->quantity * $discounted_price_per_product;
+                            return $discounted_price;
+                        });
+                        $ratePerSQFT = round(($summaryAmount / $quotation['built_up_area']),3);
+                    }else{
+                        $ratePerSQFT = 0.000;
+                    }
+                    $alreadyPresentSummary = $quotationSummaryModel->where('quotation_id',$quotation['id'])
+                        ->where('summary_id',$summaryId)->first();
+                    if($alreadyPresentSummary == null){
+                        $quotationSummaryModel->create([
+                            'quotation_id' => $quotation['id'],
+                            'summary_id' => $summaryId,
+                            'rate_per_sqft' => $ratePerSQFT
+                        ]);
+                    }else{
+                        $alreadyPresentSummary->update([
+                            'rate_per_sqft' => $ratePerSQFT
+                        ]);
+                    }
+                }
+                $quotationSummaries =  $quotationSummaryModel->where('quotation_id',$quotation['id'])->pluck('summary_id')->toArray();
+                $removedSummaryIds = array_diff($quotationSummaries,$summaryIds);
+                foreach ($removedSummaryIds as $summaryId){
+                    $quotationSummaryModel->where('quotation_id',$quotation['id'])->where('summary_id',$summaryId)->delete();
+                }
+            }
+
             $request->session()->flash('success','Quotation Edited Successfully');
             return redirect('/quotation/edit/'.$quotation->id);
         }catch(\Exception $e){
@@ -1371,7 +1440,6 @@ trait QuotationTrait{
                 $summary_amount = 0;
                 foreach($quotationProducts as $j => $quotationProduct){
                     if($quotationProduct->summary_id == $summary['summary_id']){
-                        //$discounted_price_per_product = MaterialProductHelper::customRound(($quotationProduct->rate_per_unit - ($quotationProduct->rate_per_unit * ($quotationProduct->quotation->discount / 100))));
                         $discounted_price_per_product = round(($quotationProduct->rate_per_unit - ($quotationProduct->rate_per_unit * ($quotationProduct->quotation->discount / 100))),3);
                         $discounted_price = $quotationProduct->quantity * $discounted_price_per_product;
                         $summary_amount = $summary_amount + $discounted_price;
@@ -1380,7 +1448,6 @@ trait QuotationTrait{
                 $data['quotation'] = $quotation;
                 $summaryData[$i]['description'] = $summary->summary->name;
                 if(!empty($quotation['built_up_area'])){
-                    //$summaryData[$i]['rate_per_sft'] = MaterialProductHelper::customRound(($summary_amount / $quotation['built_up_area']));
                     $summaryData[$i]['rate_per_sft'] = round(($summary_amount / $quotation['built_up_area']),3);
                 }else{
                     $summaryData[$i]['rate_per_sft'] = 0.000;
@@ -1466,8 +1533,12 @@ trait QuotationTrait{
 
     public function editWorkOrder(Request $request, $workOrder){
         try{
-            Quotation::where('id',$request['quotation_id'])->update(['opening_expenses' => $request['open_expenses']]);
-            $workOrder->quotation->update(['remark' => $request->remark]);
+            $quotationModel = new Quotation();
+            $quotationModel->where('id',$request['quotation_id'])
+                ->update([
+                    'opening_expenses' => $request['open_expenses'],
+                    'bill_type_id' => $request['bill_type_id']]);
+            $workOrder->quotation->update(['remark' => $request->remark,'bill_type_id'=>$request['bill_type_id']]);
             $workOrderData = $request->except('_token','work_order_images');
             $workOrder->update($workOrderData);
             foreach($workOrder->images as $image){
