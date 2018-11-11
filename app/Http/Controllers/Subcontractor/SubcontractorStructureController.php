@@ -231,7 +231,7 @@ class SubcontractorStructureController extends Controller
                                      </li>';
                     }
                     if ($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-subcontractor-billing') || $user->customHasPermission('edit-subcontractor-billing') || $user->customHasPermission('view-subcontractor-billing') || $user->customHasPermission('approve-subcontractor-billing')) {
-                        $action .= '<li><a href="javascript:void(0);">
+                        $action .= '<li><a href="/subcontractor/bill/manage/'.$listingData[$pagination]->id.'">
                                             <i class="icon-docs"></i> Manage
                                         </a></li>';
                     }

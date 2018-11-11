@@ -687,6 +687,11 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('edit/{subcontractorStructure}', array('uses' => 'Subcontractor\SubcontractorStructureController@editStructure'));
         });
 
+        Route::group(['prefix' => 'bill'], function (){
+            Route::get('manage/{subcontractorStructure}', array('uses' => 'Subcontractor\SubcontractorBillController@getManageView'));
+            Route::get('create/{subcontractorStructure}', array('uses' => 'Subcontractor\SubcontractorBillController@getCreateView'));
+        });
+
         /* -------- End of New Bill related Changes -------- */
     });
 
