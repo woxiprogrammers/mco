@@ -320,7 +320,6 @@ class SubcontractorStructureController extends Controller
 
     public function editStructure(Request $request, $subcontractorStructure){
         try{
-            dd($request->all());
             foreach ($request->summaries as $summaryId){
                 $structureSummaryData = [
                     'subcontractor_structure_id' => $subcontractorStructure->id,
