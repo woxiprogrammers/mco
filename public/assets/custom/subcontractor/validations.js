@@ -268,13 +268,21 @@ var  CreateSubcontractorBills = function () {
             },
 
             submitHandler: function (form) {
-                if ($(".structure-summary:checked").length > 0){
+                var structureTypeSlug = $("#subcontractorStructureSlug").val();
+                if (structureTypeSlug == 'itemwise'){
+                    if ($(".structure-summary:checked").length > 0){
+                        $("button[type='submit']").prop('disabled', true);
+                        success.show();
+                        error.hide();
+                        form.submit();
+                    }else{
+                        alert('Select atleast one structure summary.');
+                    }
+                }else{
                     $("button[type='submit']").prop('disabled', true);
                     success.show();
                     error.hide();
                     form.submit();
-                }else{
-                    alert('Select atleast one structure summary.');
                 }
             }
         });

@@ -24,6 +24,7 @@
                             </div>
                         </div>
                         <div class="page-content">
+                            @include('partials.common.messages')
                             <div class="container">
                                 <ul class="page-breadcrumb breadcrumb">
                                     <li>
@@ -99,10 +100,10 @@
 @endsection
 
 @section('javascript')
-    <!--<script src="/assets/custom/bill/bill.js" type="application/javascript"></script>-->
     <script  src="/assets/global/plugins/datatables/datatables.min.js"></script>
     <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
+    <script src="/assets/custom/subcontractor/bill-manage.js" type="text/javascript"></script>
 @endsection

@@ -8,7 +8,10 @@ class SubcontractorBill extends Model
 {
     protected $table = 'subcontractor_bills';
 
-    protected $fillable = ['sc_structure_id','subcontractor_bill_status_id','qty','description','number_of_floors'];
+    protected $fillable = ['sc_structure_id','subcontractor_bill_status_id','qty','description',
+        'number_of_floors', 'discount', 'discount_description', 'subtotal', 'round_off_amount',
+        'grand_total'
+    ];
 
     public function subcontractorBillStatus(){
         return $this->belongsTo('App\SubcontractorBillStatus','subcontractor_bill_status_id');
