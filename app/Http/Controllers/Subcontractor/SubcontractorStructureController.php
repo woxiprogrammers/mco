@@ -42,7 +42,7 @@ class SubcontractorStructureController extends Controller
     public function getCreateView(Request $request){
         try{
             $subcontractors = Subcontractor::where('is_active',true)->orderBy('id','asc')->get(['id','subcontractor_name'])->toArray();
-            $ScStrutureTypes = SubcontractorStructureType::/*whereIn('slug', ['itemwise'])->*/orderBy('id','asc')->get(['id','name','slug'])->toArray();
+            $ScStrutureTypes = SubcontractorStructureType::whereIn('slug', ['itemwise'])->orderBy('id','asc')->get(['id','name','slug'])->toArray();
             $summaries = Summary::where('is_active', true)->select('id', 'name')->get()->toArray();
             $extraItems = ExtraItem::where('is_active', true)->select('id','name','rate')->orderBy('name','asc')->get();
             return view('subcontractor.new_structure.create')->with(compact('subcontractors', 'ScStrutureTypes', 'summaries', 'extraItems'));
@@ -231,7 +231,7 @@ class SubcontractorStructureController extends Controller
                                      </li>';
                     }
                     if ($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-subcontractor-billing') || $user->customHasPermission('edit-subcontractor-billing') || $user->customHasPermission('view-subcontractor-billing') || $user->customHasPermission('approve-subcontractor-billing')) {
-                        $action .= '<li><a href="javascript:void(0);">
+                        $action .= '<li><a href="/subcontractor/bill/manage/'.$listingData[$pagination]->id.'">
                                             <i class="icon-docs"></i> Manage
                                         </a></li>';
                     }
