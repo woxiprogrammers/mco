@@ -304,6 +304,13 @@ class SubcontractorStructureController extends Controller
                         $structureSummaries[$iterator]['can_remove'] = false;
                     }
                 } else {
+                    $structureSummaries[$iterator]['min_rate'] = 1;
+                    $structureSummaries[$iterator]['min_total_work_area'] = 1;
+                    if ($subcontractorStructure->contractType->slug == 'itemwise'){
+                        $structureSummaries[$iterator]['can_remove'] = true;
+                    }else{
+                        $structureSummaries[$iterator]['can_remove'] = false;
+                    }
                   // Logic to restrict minimum rate and work area if bills and approved transactions are created.
                 }
                 $iterator += 1;
