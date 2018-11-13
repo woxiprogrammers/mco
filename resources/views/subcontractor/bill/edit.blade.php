@@ -1,3 +1,12 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: ameya
+ * Date: 14/11/18
+ * Time: 1:20 AM
+ */
+?>
+
 @extends('layout.master')
 @section('title','Constro | Create Subcontractor Structure Bill')
 @include('partials.common.navbar')
@@ -10,7 +19,7 @@
     <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
-    <input type="hidden" id="subcontractorStructureSlug" value="{{$subcontractorStructure->contractType->slug}}">
+    <input type="hidden" id="subcontractorStructureSlug" value="{{$subcontractorBill->subcontractorStructure->contractType->slug}}">
     <div class="page-wrapper">
         <div class="page-wrapper-row full-height">
             <div class="page-wrapper-middle">
@@ -31,11 +40,11 @@
                             <div class="container" style="width: 100%">
                                 <ul class="page-breadcrumb breadcrumb">
                                     <li>
-                                        <a href="/subcontractor/bill/manage/{!! $subcontractorStructure['id'] !!}">Manage Subcontractor Bills</a>
+                                        <a href="/subcontractor/bill/manage/{!! $subcontractorBill['subcontractor_structure_id'] !!}">Manage Subcontractor Bills</a>
                                         <i class="fa fa-circle"></i>
                                     </li>
                                     <li>
-                                        <a href="javascript:void(0);">Create Subcontractor Structure Bill</a>
+                                        <a href="javascript:void(0);">Edit Subcontractor Structure Bill</a>
                                         <i class="fa fa-circle"></i>
                                     </li>
                                 </ul>
@@ -44,13 +53,13 @@
                                     <div class="portlet light ">
                                         <div class="portlet-body form">
                                             <div class="form-body">
-                                                <form role="form" id="createStructureBill" class="form-horizontal" action="/subcontractor/bill/create/{!! $subcontractorStructure['id'] !!}" method="post">
+                                                <form role="form" id="editStructureBill" class="form-horizontal" action="/subcontractor/bill/edit/{!! $subcontractorBill->id !!}" method="post">
                                                     {!! csrf_field() !!}
                                                     <table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll;align-content: center; " id="parentBillTable">
                                                         <thead>
                                                         <tr id="tableHeader">
                                                             <th width="10%" style="text-align: center"><b> Bill No  </b></th>
-                                                            @if($subcontractorStructure->contractType->slug == 'itemwise')
+                                                            @if($subcontractorBill->subcontractorStructure->contractType->slug == 'itemwise')
                                                                 <th width="5%">
                                                                     <b>Select</b>
                                                                 </th>
@@ -72,21 +81,27 @@
                                                         @foreach($subcontractorStructureSummaries as $index => $structureSummary)
                                                             <tr>
                                                                 @if ($index == 0)
-                                                                    <td rowspan="{!! count($subcontractorStructure->summaries) !!}"> {{ $billName }}</td>
+                                                                    <td rowspan="{!! count($subcontractorBill->subcontractorStructure->summaries) !!}"> {{ $billName }}</td>
                                                                 @endif
-                                                                @if($subcontractorStructure->contractType->slug == 'itemwise')
+                                                                @if($subcontractorBill->subcontractorStructure->contractType->slug == 'itemwise')
                                                                     <td>
-                                                                        <div class="form-group" > <input type="checkbox" class="checkbox-inline structure-summary" name="structure_summaries[]" value="{{$structureSummary['id']}}" onclick="structureSummarySelected(this)"></div>
+                                                                        <div class="form-group" >
+                                                                            @if($structureSummary['is_bill_created'])
+                                                                                <input type="checkbox" class="checkbox-inline structure-summary" name="structure_summaries[]" value="{{$structureSummary['id']}}" onclick="structureSummarySelected(this)" checked>
+                                                                            @else
+                                                                                <input type="checkbox" class="checkbox-inline structure-summary" name="structure_summaries[]" value="{{$structureSummary['id']}}" onclick="structureSummarySelected(this)">
+                                                                            @endif
+                                                                        </div>
                                                                     </td>
                                                                     <td>
                                                                         <label class="control-label"> {{$structureSummary['summary_name']}}</label>
                                                                     </td>
-                                                                    <td ><div class="form-group" style="margin-left: 1%; margin-right: 1%"><textarea class="form-control description" readonly></textarea></div></td>
+                                                                    <td ><div class="form-group" style="margin-left: 1%; margin-right: 1%"><textarea class="form-control description" readonly>{{$structureSummary['description']}}</textarea></div></td>
                                                                     <td >{{$structureSummary['total_work_area']}} <input type="hidden" name="total_work_area[{{$structureSummary['id']}}]" value="{{$structureSummary['total_work_area']}}"></td>
                                                                     <td ><label class="control-label rate">{{$structureSummary['rate']}}</label></td>
                                                                     <td >{!! $structureSummary['total_work_area'] * $structureSummary['rate'] !!}</td>
                                                                     <td >{{$structureSummary['prev_quantity']}}</td>
-                                                                    <td ><div class="form-group" style="margin-left: 1%; margin-right: 1%"><input type="text" class="form-control quantity" max="{{$structureSummary['allowed_quantity']}}" onkeyup="calculateAmount(this)" readonly> </div></td>
+                                                                    <td ><div class="form-group" style="margin-left: 1%; margin-right: 1%"><input type="text" class="form-control quantity" max="{{$structureSummary['allowed_quantity']}}" value="{{$structureSummary['quantity']}}" onkeyup="calculateAmount(this)" readonly> </div></td>
                                                                     <td >{{$structureSummary['prev_quantity']}}</td>
                                                                     <td > <label class="control-label bill-amount"> 0 </label> </td>
                                                                 @else
@@ -94,12 +109,12 @@
                                                                         <label class="control-label"> {{$structureSummary['summary_name']}}</label>
                                                                         <input type="hidden" name="structure_summaries[]" value="{{$structureSummary['id']}}">
                                                                     </td>
-                                                                    <td ><div class="form-group" style="margin-left: 1%; margin-right: 1%"><textarea class="form-control description" name="description[{{$structureSummary['id']}}]"></textarea></div></td>
+                                                                    <td ><div class="form-group" style="margin-left: 1%; margin-right: 1%"><textarea class="form-control description" name="description[{{$structureSummary['id']}}]">{{$structureSummary['description']}}</textarea></div></td>
                                                                     <td >{{$structureSummary['total_work_area']}} <input type="hidden" name="total_work_area[{{$structureSummary['id']}}]" value="{{$structureSummary['total_work_area']}}"></td>
                                                                     <td ><label class="control-label rate">{{$structureSummary['rate']}}</label></td>
                                                                     <td >{!! $structureSummary['total_work_area'] * $structureSummary['rate'] !!}</td>
                                                                     <td >{{$structureSummary['prev_quantity']}}</td>
-                                                                    <td ><div class="form-group" style="margin-left: 1%; margin-right: 1%"><input type="text" class="form-control quantity" max="{{$structureSummary['allowed_quantity']}}" min="0.000001" onkeyup="calculateAmount(this)" name="quantity[{{$structureSummary['id']}}]" required> </div></td>
+                                                                    <td ><div class="form-group" style="margin-left: 1%; margin-right: 1%"><input type="text" class="form-control quantity" max="{{$structureSummary['allowed_quantity']}}" min="0.000001" value="{{$structureSummary['quantity']}}" onkeyup="calculateAmount(this)" name="quantity[{{$structureSummary['id']}}]" required> </div></td>
                                                                     <td >{{$structureSummary['prev_quantity']}}</td>
                                                                     <td > <label class="control-label bill-amount"> 0 </label> </td>
                                                                 @endif
@@ -108,68 +123,73 @@
                                                         @endforeach
 
                                                         <tr>
-                                                            @if($subcontractorStructure->contractType->slug == 'itemwise')
+                                                            @if($subcontractorBill->subcontractorStructure->contractType->slug == 'itemwise')
                                                                 <td colspan="11">
                                                             @else
                                                                 <td colspan="10">
-                                                            @endif
+                                                                    @endif
                                                                     <label class="control-label"> <b> Extra Items</b></label>
                                                                 </td>
                                                         </tr>
                                                         <tr>
-                                                            @if($subcontractorStructure->contractType->slug == 'itemwise')
+                                                            @if($subcontractorBill->subcontractorStructure->contractType->slug == 'itemwise')
                                                                 <th colspan="3" style="text-align: center;">
                                                             @else
                                                                 <th colspan="2" style="text-align: center;">
-                                                            @endif
-                                                            </th>
-                                                            <th colspan="1" style="text-align: center;">
-                                                                Action
-                                                            </th>
-                                                            <th colspan="3" style="text-align: center;">
-                                                                Name
-                                                            </th>
-                                                            <th colspan="2" style="text-align: center;">
-                                                                Rate
-                                                            </th>
-                                                            <th colspan="3" style="text-align: center;">
-                                                                Current rate
-                                                            </th>
+                                                                    @endif
+                                                                </th>
+                                                                <th colspan="1" style="text-align: center;">
+                                                                    Action
+                                                                </th>
+                                                                <th colspan="3" style="text-align: center;">
+                                                                    Name
+                                                                </th>
+                                                                <th colspan="2" style="text-align: center;">
+                                                                    Rate
+                                                                </th>
+                                                                <th colspan="3" style="text-align: center;">
+                                                                    Current rate
+                                                                </th>
                                                         </tr>
                                                         @foreach($structureExtraItems as $structureExtraItem)
                                                             <tr>
-                                                                @if($subcontractorStructure->contractType->slug == 'itemwise')
+                                                                @if($subcontractorBill->subcontractorStructure->contractType->slug == 'itemwise')
                                                                     <td colspan="3">
 
                                                                 @else
                                                                     <td colspan="2">
-
                                                                 @endif
-
-
-                                                                </td>
-                                                                <td colspan="1">
-                                                                    <input type="checkbox" name="structure_extra_item_ids[]" value="{{$structureExtraItem['subcontractor_structure_extra_item_id']}}" onclick="extraItemClick(this)">
-                                                                </td>
-                                                                <td colspan="3">
-                                                                    {{$structureExtraItem['name']}}
-                                                                </td>
-                                                                <td colspan="2">
-                                                                    {{$structureExtraItem['rate']}}
-                                                                </td>
-                                                                <td colspan="3">
-                                                                    <div class="form-group" style="margin: 1%;">
-                                                                        <input type="text" class="form-control extra-item"  value="0" onkeyup="calculateSubtotal()" readonly>
-                                                                    </div>
-                                                                </td>
+                                                                    </td>
+                                                                    <td colspan="1">
+                                                                        @if(in_array($structureExtraItem['subcontractor_structure_extra_item_id'], array_column($subcontractorBill->subcontractorBillExtraItems->toArray(),'subcontractor_structure_extra_item_id')))
+                                                                            <input type="checkbox" class="extra-item-checkbox" name="structure_extra_item_ids[]" value="{{$structureExtraItem['subcontractor_structure_extra_item_id']}}" onclick="extraItemClick(this)" checked>
+                                                                        @else
+                                                                            <input type="checkbox" class="extra-item-checkbox" name="structure_extra_item_ids[]" value="{{$structureExtraItem['subcontractor_structure_extra_item_id']}}" onclick="extraItemClick(this)">
+                                                                        @endif
+                                                                    </td>
+                                                                    <td colspan="3">
+                                                                        {{$structureExtraItem['name']}}
+                                                                    </td>
+                                                                    <td colspan="2">
+                                                                        {{$structureExtraItem['rate']}}
+                                                                    </td>
+                                                                    <td colspan="3">
+                                                                        <div class="form-group" style="margin: 1%;">
+                                                                            @if(in_array($structureExtraItem['subcontractor_structure_extra_item_id'], array_column($subcontractorBill->subcontractorBillExtraItems->toArray(),'subcontractor_structure_extra_item_id')))
+                                                                                <input type="text" class="form-control extra-item"  value="{!! $subcontractorBill->subcontractorBillExtraItems->where('subcontractor_structure_extra_item_id', $structureExtraItem['subcontractor_structure_extra_item_id'])->pluck('rate')->first() !!}" onkeyup="calculateSubtotal()" readonly>
+                                                                            @else
+                                                                                <input type="text" class="form-control extra-item"  value="0" onkeyup="calculateSubtotal()" readonly>
+                                                                            @endif
+                                                                        </div>
+                                                                    </td>
                                                             </tr>
                                                         @endforeach
                                                         <tr>
-                                                            @if($subcontractorStructure->contractType->slug == 'itemwise')
+                                                            @if($subcontractorBill->subcontractorStructure->contractType->slug == 'itemwise')
                                                                 <td colspan="9">
                                                             @else
                                                                 <td colspan="8">
-                                                            @endif
+                                                                    @endif
                                                                     <label class="control-label pull-right" style="margin-right: 3%; margin-bottom: 1%;"> <b>Subtotal</b> </label>
                                                                 </td>
                                                                 <td colspan="2">
@@ -178,42 +198,42 @@
                                                                 </td>
                                                         </tr>
                                                         <tr>
-                                                            @if($subcontractorStructure->contractType->slug == 'itemwise')
+                                                            @if($subcontractorBill->subcontractorStructure->contractType->slug == 'itemwise')
                                                                 <td colspan="5">
                                                             @else
                                                                 <td colspan="4">
-                                                            @endif
+                                                                    @endif
                                                                     <b>Discount</b>
-                                                            </td>
+                                                                </td>
                                                                 <td colspan="2">
                                                                     <div class="form-group" style="margin: 1%">
-                                                                        <textarea class="form-control" name="discount_description" placeholder="Discount Description"></textarea>
+                                                                        <textarea class="form-control" name="discount_description" placeholder="Discount Description">{{$subcontractorBill->discount_description}}</textarea>
                                                                     </div>
                                                                 </td>
-                                                            <td colspan="2">
-                                                                <div class="form-group" style="margin: 1%">
-                                                                    <input type="text" class="form-control" name="discount" placeholder="Discount Percentage" id="discount" onkeyup="calculateDiscount()">
-                                                                </div>
-                                                            </td>
-                                                            <td colspan="2">
-                                                                <label class="control-label" id="discountAmount"></label>
-                                                            </td>
+                                                                <td colspan="2">
+                                                                    <div class="form-group" style="margin: 1%">
+                                                                        <input type="text" class="form-control" name="discount" placeholder="Discount Percentage" id="discount" onkeyup="calculateDiscount()" value="{{$subcontractorBill->discount}}">
+                                                                    </div>
+                                                                </td>
+                                                                <td colspan="2">
+                                                                    <label class="control-label" id="discountAmount"></label>
+                                                                </td>
                                                         </tr>
                                                         <tr>
-                                                            @if($subcontractorStructure->contractType->slug == 'itemwise')
+                                                            @if($subcontractorBill->subcontractorStructure->contractType->slug == 'itemwise')
                                                                 <td colspan="9">
                                                             @else
                                                                 <td colspan="8">
-                                                            @endif
-                                                                <label class="control-label pull-right" style="margin-right: 3%; margin-bottom: 1%;"> <b>Discounted Amount</b> </label>
-                                                            </td>
-                                                            <td colspan="2">
-                                                                <label class="control-label" id="discountedTotal" style="margin-right: 3%; margin-bottom: 1%;">  </label>
-                                                            </td>
+                                                                    @endif
+                                                                    <label class="control-label pull-right" style="margin-right: 3%; margin-bottom: 1%;"> <b>Discounted Amount</b> </label>
+                                                                </td>
+                                                                <td colspan="2">
+                                                                    <label class="control-label" id="discountedTotal" style="margin-right: 3%; margin-bottom: 1%;">  </label>
+                                                                </td>
                                                         </tr>
                                                         @if(count($taxes) > 0)
                                                             <tr>
-                                                                @if($subcontractorStructure->contractType->slug == 'itemwise')
+                                                                @if($subcontractorBill->subcontractorStructure->contractType->slug == 'itemwise')
                                                                     <td colspan="11">
                                                                 @else
                                                                     <td colspan="10">
@@ -222,76 +242,76 @@
                                                                     </td>
                                                             </tr>
                                                             <tr>
-                                                                @if($subcontractorStructure->contractType->slug == 'itemwise')
+                                                                @if($subcontractorBill->subcontractorStructure->contractType->slug == 'itemwise')
                                                                     <td colspan="5">
                                                                 @else
                                                                     <td colspan="4">
-                                                                @endif
-                                                                    <b>Tax Name</b>
-                                                                </td>
-                                                                <td colspan="4">
-                                                                    <b>Tax Rate (%)</b>
-                                                                </td>
-                                                                <td colspan="2">
+                                                                        @endif
+                                                                        <b>Tax Name</b>
+                                                                    </td>
+                                                                    <td colspan="4">
+                                                                        <b>Tax Rate (%)</b>
+                                                                    </td>
+                                                                    <td colspan="2">
 
-                                                                </td>
+                                                                    </td>
                                                             </tr>
                                                             @foreach($taxes as $key => $taxData)
                                                                 <tr>
-                                                                    @if($subcontractorStructure->contractType->slug == 'itemwise')
+                                                                    @if($subcontractorBill->subcontractorStructure->contractType->slug == 'itemwise')
                                                                         <td colspan="5">
                                                                     @else
                                                                         <td colspan="4">
-                                                                    @endif
-                                                                        {!! $taxData->name !!}
-                                                                    </td>
-                                                                    <td colspan="4">
-                                                                        <input type="text" class="form-control percentage" name="taxes[{!! $taxData->id !!}]" id="percentage_{!! $taxData->id !!}" value="{!! $taxData->base_percentage !!}" onkeyup="calculateTaxAmount(this)">
-                                                                    </td>
-                                                                    <td colspan="2">
-                                                                        <label class="control-label tax-amount"></label>
-                                                                    </td>
+                                                                            @endif
+                                                                            {!! $taxData['name'] !!}
+                                                                        </td>
+                                                                        <td colspan="4">
+                                                                            <input type="text" class="form-control percentage" name="taxes[{!! $taxData['id'] !!}]" id="percentage_{!! $taxData['id'] !!}" value="{!! $taxData['percentage'] !!}" onkeyup="calculateTaxAmount(this)">
+                                                                        </td>
+                                                                        <td colspan="2">
+                                                                            <label class="control-label tax-amount"></label>
+                                                                        </td>
                                                                 </tr>
                                                             @endforeach
                                                         @endif
                                                         <tr>
-                                                            @if($subcontractorStructure->contractType->slug == 'itemwise')
+                                                            @if($subcontractorBill->subcontractorStructure->contractType->slug == 'itemwise')
                                                                 <td colspan="9">
                                                             @else
                                                                 <td colspan="8">
-                                                            @endif
+                                                                    @endif
                                                                     <label class="control-label pull-right"> <b>Final Total</b></label>
-                                                            </td>
-                                                            <td colspan="2">
-                                                                <label class="control-label" id="finalTotal"></label>
-                                                            </td>
+                                                                </td>
+                                                                <td colspan="2">
+                                                                    <label class="control-label" id="finalTotal"></label>
+                                                                </td>
                                                         </tr>
                                                         <tr>
-                                                            @if($subcontractorStructure->contractType->slug == 'itemwise')
+                                                            @if($subcontractorBill->subcontractorStructure->contractType->slug == 'itemwise')
                                                                 <td colspan="9">
                                                             @else
                                                                 <td colspan="8">
-                                                            @endif
+                                                                    @endif
                                                                     <label class="control-label pull-right"> <b>Round off amount</b></label>
-                                                            </td>
-                                                            <td colspan="2">
-                                                                <div class="form-group" style="margin: 1%">
-                                                                    <input type="text" class="form-control" name="round_off_amount" id="roundOffAmount" onkeyup="calculateGrandTotal()">
-                                                                </div>
-                                                            </td>
+                                                                </td>
+                                                                <td colspan="2">
+                                                                    <div class="form-group" style="margin: 1%">
+                                                                        <input type="text" class="form-control" name="round_off_amount" id="roundOffAmount" onkeyup="calculateGrandTotal()" value="{{$subcontractorBill->round_off_amount}}">
+                                                                    </div>
+                                                                </td>
                                                         </tr>
                                                         <tr>
-                                                            @if($subcontractorStructure->contractType->slug == 'itemwise')
+                                                            @if($subcontractorBill->subcontractorStructure->contractType->slug == 'itemwise')
                                                                 <td colspan="9">
                                                             @else
                                                                 <td colspan="8">
-                                                            @endif
+                                                                    @endif
                                                                     <label class="control-label pull-right"> <b>Grand Total</b></label>
-                                                            </td>
-                                                            <td colspan="2">
-                                                                <label class="control-label" id="grandTotal" ></label>
-                                                                <input type="hidden" name="grand_total">
-                                                            </td>
+                                                                </td>
+                                                                <td colspan="2">
+                                                                    <label class="control-label" id="grandTotal" >{{$subcontractorBill->grand_total}}</label>
+                                                                    <input type="hidden" name="grand_total" value="{{$subcontractorBill->grand_total}}">
+                                                                </td>
                                                         </tr>
                                                         </tbody>
                                                     </table>
@@ -324,6 +344,17 @@
     <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
     <script src="/assets/custom/subcontractor/validations.js"></script>
     <script>
+        $(document).ready(function(){
+            EditSubcontractorBills.init();
+            $(".structure-summary:checkbox:checked").each(function(){
+                structureSummarySelected(this);
+                calculateAmount($(this).closest('tr').find('.quantity'));
+            });
+            $(".extra-item-checkbox").each(function(){
+                extraItemClick(this);
+
+            });
+        });
         function structureSummarySelected(element){
             var structureSummaryId = $(element).val();
             if ($(element).prop("checked")){
@@ -344,6 +375,7 @@
                 $(element).closest('tr').find('.quantity').val(0);
                 calculateAmount($(element).closest('tr').find('.quantity'));
             }
+
         }
 
         function calculateAmount(element){
@@ -445,8 +477,7 @@
             }
         }
 
-        $(document).ready(function(){
-            CreateSubcontractorBills.init();
-        });
+
     </script>
 @endsection
+
