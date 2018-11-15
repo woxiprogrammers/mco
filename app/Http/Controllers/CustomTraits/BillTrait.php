@@ -249,6 +249,7 @@ trait BillTrait{
             $iterator = $i = 0;
             $array_no = 1;
             $quotation = Quotation::where('project_site_id',$project_site->id)->first();
+            $itemWiseBill = ($quotation->billType->slug == 'itemwise') ? true : false;
             $allBills = Bill::where('quotation_id',$quotation->id)->get();
             if($status == "cancelled"){
                 $statusId = BillStatus::where('slug',$status)->pluck('id')->first();
@@ -283,10 +284,18 @@ trait BillTrait{
                 }
                 $listingData[$iterator]['bill_no_format'] = "B-".strtoupper(date('M',strtotime($bill['created_at'])))."-".$bill->id."/".date('y',strtotime($bill['created_at']));
                 $total_amount = 0;
-                foreach($bill->bill_quotation_product as $key1 => $product){
-                    $rate = round(($product->quotation_products->rate_per_unit - ($product->quotation_products->rate_per_unit * ($product->quotation_products->quotation->discount / 100))),3);
-                    $total_amount = round(($total_amount + ($product->quantity * $rate)),3) ;
+                if($itemWiseBill){
+                    foreach($bill->bill_quotation_product as $key1 => $product){
+                        $rate = round(($product->quotation_products->rate_per_unit - ($product->quotation_products->rate_per_unit * ($product->quotation_products->quotation->discount / 100))),3);
+                        $total_amount = round(($total_amount + ($product->quantity * $rate)),3) ;
+                    }
+                }else{
+                    foreach($bill->billQuotationSummary as $key1 => $summary){
+                        $rate = round(($product->quotation_products->rate_per_unit - ($product->quotation_products->rate_per_unit * ($product->quotation_products->quotation->discount / 100))),3);
+                        $total_amount = round(($total_amount + ($product->quantity * $rate)),3) ;
+                    }
                 }
+
                 if(count($bill->bill_quotation_extraItems) > 0){
                     $extraItemsTotal = round($bill->bill_quotation_extraItems->sum('rate'),3);
                 }else{
