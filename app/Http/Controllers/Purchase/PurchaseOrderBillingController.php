@@ -592,7 +592,7 @@ class PurchaseOrderBillingController extends Controller
                         date('j M Y',strtotime($purchaseOrderBillData[$pagination]['created_at'])),
                         $entryDate,
                         $purchaseOrderBillData[$pagination]['vendor_bill_number'],
-                        implode(',',$grns),
+                        implode(',\n',$grns),
                         $vendorName,
                         $basicAmount,
                         $taxAmount,
