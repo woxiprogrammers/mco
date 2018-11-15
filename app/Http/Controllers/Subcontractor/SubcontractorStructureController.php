@@ -7,6 +7,7 @@ use App\Project;
 use App\Subcontractor;
 use App\SubcontractorBill;
 use App\SubcontractorBillStatus;
+use App\SubcontractorBillSummary;
 use App\SubcontractorBillTransaction;
 use App\SubcontractorStructure;
 use App\SubcontractorStructureExtraItem;
@@ -41,7 +42,7 @@ class SubcontractorStructureController extends Controller
     public function getCreateView(Request $request){
         try{
             $subcontractors = Subcontractor::where('is_active',true)->orderBy('id','asc')->get(['id','subcontractor_name'])->toArray();
-            $ScStrutureTypes = SubcontractorStructureType::/*whereIn('slug', ['itemwise'])->*/orderBy('id','asc')->get(['id','name','slug'])->toArray();
+            $ScStrutureTypes = SubcontractorStructureType::whereIn('slug', ['itemwise'])->orderBy('id','asc')->get(['id','name','slug'])->toArray();
             $summaries = Summary::where('is_active', true)->select('id', 'name')->get()->toArray();
             $extraItems = ExtraItem::where('is_active', true)->select('id','name','rate')->orderBy('name','asc')->get();
             return view('subcontractor.new_structure.create')->with(compact('subcontractors', 'ScStrutureTypes', 'summaries', 'extraItems'));
@@ -219,7 +220,7 @@ class SubcontractorStructureController extends Controller
                             <ul class="dropdown-menu pull-left" role="menu">';
                     if ($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-subcontractor-structure') || $user->customHasPermission('view-subcontractor-structure')) {
                         $action .= '<li>
-                                        <a href="javascript:void(0);">
+                                        <a href="/subcontractor/structure/edit/'.$listingData[$pagination]->id.'">
                                              <i class="icon-docs"></i>Edit
                                         </a>
                                      </li>
@@ -230,7 +231,7 @@ class SubcontractorStructureController extends Controller
                                      </li>';
                     }
                     if ($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-subcontractor-billing') || $user->customHasPermission('edit-subcontractor-billing') || $user->customHasPermission('view-subcontractor-billing') || $user->customHasPermission('approve-subcontractor-billing')) {
-                        $action .= '<li><a href="javascript:void(0);">
+                        $action .= '<li><a href="/subcontractor/bill/manage/'.$listingData[$pagination]->id.'">
                                             <i class="icon-docs"></i> Manage
                                         </a></li>';
                     }
@@ -283,6 +284,92 @@ class SubcontractorStructureController extends Controller
             ];
             Log::critical(json_encode($data));
             return response()->json(['message' => 'Something went wrong.'], 500);
+        }
+    }
+
+    public function getEditView(Request $request, $subcontractorStructure){
+        try{
+            $summaries = Summary::where('is_active', true)->select('id', 'name')->get()->toArray();
+            $structureSummaries = $subcontractorStructure->summaries->except(['created_at','updated_at'])->toArray();
+            $iterator = 0;
+            foreach($structureSummaries as $structureSummary){
+                $structureSummaries[$iterator]['summary_name'] = Summary::where('id', $structureSummary['summary_id'])->pluck('name')->first();
+                $subcontractorBillSummaries = SubcontractorBillSummary::where('subcontractor_structure_summary_id', $structureSummary['id'])->get();
+                if ($subcontractorBillSummaries->isEmpty()){
+                    $structureSummaries[$iterator]['min_rate'] = 1;
+                    $structureSummaries[$iterator]['min_total_work_area'] = 1;
+                    if ($subcontractorStructure->contractType->slug == 'itemwise'){
+                        $structureSummaries[$iterator]['can_remove'] = true;
+                    }else{
+                        $structureSummaries[$iterator]['can_remove'] = false;
+                    }
+                } else {
+                    $structureSummaries[$iterator]['min_rate'] = 1;
+                    $structureSummaries[$iterator]['min_total_work_area'] = 1;
+                    if ($subcontractorStructure->contractType->slug == 'itemwise'){
+                        $structureSummaries[$iterator]['can_remove'] = true;
+                    }else{
+                        $structureSummaries[$iterator]['can_remove'] = false;
+                    }
+                  // Logic to restrict minimum rate and work area if bills and approved transactions are created.
+                }
+                $iterator += 1;
+            }
+            $structureExtraItemIds = array_column($subcontractorStructure->extraItems->toArray(), 'extra_item_id');
+            $newExtraItems = ExtraItem::whereNotIn('id', $structureExtraItemIds)->select('id','name','rate')->get()->toArray();
+            return view('subcontractor.new_structure.edit')->with(compact('subcontractorStructure', 'summaries', 'structureSummaries', 'newExtraItems'));
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Get subcontractor structure Edit view',
+                'subcontractor_structure' => $subcontractorStructure,
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function editStructure(Request $request, $subcontractorStructure){
+        try{
+            foreach ($request->summaries as $summaryId){
+                $structureSummaryData = [
+                    'subcontractor_structure_id' => $subcontractorStructure->id,
+                    'summary_id' => $summaryId
+                ];
+                $subcontractorStructureSummary = SubcontractorStructureSummary::where($structureSummaryData)->first();
+                $structureSummaryData['rate'] = (float) $request->rate[$summaryId];
+                $structureSummaryData['description'] = $request->description[$summaryId];
+                $structureSummaryData['total_work_area'] = (float)$request->total_work_area[$summaryId];
+                if ($subcontractorStructureSummary == null){
+                    $subcontractorStructureSummary = SubcontractorStructureSummary::create($structureSummaryData);
+                }else{
+                    $subcontractorStructureSummary->update($structureSummaryData);
+                }
+            }
+            foreach($request->extra_items as $extraItemId => $rate){
+                $structureExtraItemData = [
+                    'subcontractor_structure_id' => $subcontractorStructure->id,
+                    'extra_item_id' => $extraItemId
+                ];
+                $structureExtraItem = SubcontractorStructureExtraItem::where($structureExtraItemData)->first();
+                $structureExtraItemData['rate'] = (double)$rate;
+                if ($structureExtraItem == null){
+                    $structureExtraItem = SubcontractorStructureExtraItem::create($structureExtraItemData);
+                }else{
+                    $structureExtraItem->update($structureExtraItemData);
+                }
+            }
+            $request->session()->flash('success', 'Subcontractor structure edited successfully.');
+            return redirect('/subcontractor/structure/edit/'.$subcontractorStructure->id);
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Edit subcontractor structure',
+                'subcontractor_structure' => $subcontractorStructure,
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
         }
     }
 }

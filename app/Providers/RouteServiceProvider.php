@@ -34,6 +34,7 @@ use App\QuotationWorkOrder;
 use App\Role;
 use App\SiteTransferBill;
 use App\Subcontractor;
+use App\SubcontractorBill;
 use App\SubcontractorStructure;
 use App\Summary;
 use App\Unit;
@@ -106,6 +107,8 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('subcontractorStructure',SubcontractorStructure::class);
         Route::model('siteTransferBill',SiteTransferBill::class);
         Route::model('address',Address::class);
+        Route::model('subcontractorStructure', SubcontractorStructure::class);
+        Route::model('subcontractorBill', SubcontractorBill::class);
     }
 
     /**

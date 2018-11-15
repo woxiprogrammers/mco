@@ -10,7 +10,7 @@ class SubcontractorBillTax extends Model
 
     protected $fillable = ['subcontractor_bills_id','tax_id','percentage'];
 
-    public function taxes(){
+    public function tax(){
         return $this->belongsTo('App\Tax','tax_id');
     }
 }

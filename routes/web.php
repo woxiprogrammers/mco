@@ -683,6 +683,19 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('create', array('uses' => 'Subcontractor\SubcontractorStructureController@createStructure'));
             Route::post('listing', array('uses' => 'Subcontractor\SubcontractorStructureController@structureListing'));
             Route::get('details', array('uses' => 'Subcontractor\SubcontractorStructureController@getStructureDetails'));
+            Route::get('edit/{subcontractorStructure}', array('uses' => 'Subcontractor\SubcontractorStructureController@getEditView'));
+            Route::post('edit/{subcontractorStructure}', array('uses' => 'Subcontractor\SubcontractorStructureController@editStructure'));
+        });
+
+        Route::group(['prefix' => 'bill'], function (){
+            Route::get('manage/{subcontractorStructure}', array('uses' => 'Subcontractor\SubcontractorBillController@getManageView'));
+            Route::post('listing/{subcontractorStructure}/{billStatusSlug}', array('uses' => 'Subcontractor\SubcontractorBillController@billListing'));
+            Route::get('create/{subcontractorStructure}', array('uses' => 'Subcontractor\SubcontractorBillController@getCreateView'));
+            Route::post('create/{subcontractorStructure}', array('uses' => 'Subcontractor\SubcontractorBillController@createBill'));
+            Route::get('view/{subcontractorBill}', array('uses' => 'Subcontractor\SubcontractorBillController@getBillView'));
+            Route::get('edit/{subcontractorBill}', array('uses' => 'Subcontractor\SubcontractorBillController@getEditView'));
+            Route::post('edit/{subcontractorBill}', array('uses' => 'Subcontractor\SubcontractorBillController@editBill'));
+            Route::get('change-status/{statusSlug}/{subcontractorBill}',array('uses' => 'Subcontractor\SubcontractorBillController@changeBillStatus'));
         });
 
         /* -------- End of New Bill related Changes -------- */

@@ -35,4 +35,8 @@ class SubcontractorStructure extends Model
     public function summaries(){
         return $this->hasMany('App\SubcontractorStructureSummary', 'subcontractor_structure_id');
     }
+
+    public function extraItems(){
+        return $this->hasMany('App\SubcontractorStructureExtraItem', 'subcontractor_structure_id');
+    }
 }
