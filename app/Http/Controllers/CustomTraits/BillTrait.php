@@ -413,8 +413,11 @@ trait BillTrait{
                     $listingData[$pagination]['subTotal'],
                 ];
                 $totalTaxAmount = 0;
-                foreach($listingData[$pagination]['tax'] as $taxAmount){
-                    $totalTaxAmount += round($taxAmount,3);
+
+                if(array_key_exists('tax',$listingData[$pagination])){
+                    foreach($listingData[$pagination]['tax'] as $taxAmount){
+                        $totalTaxAmount += round($taxAmount,3);
+                    }
                 }
                 array_push($records['data'][$iterator],round($totalTaxAmount,3));
                 array_push($records['data'][$iterator],$listingData[$iterator]['final_total']);
