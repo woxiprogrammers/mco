@@ -9,7 +9,7 @@ class BillTransaction extends Model
     protected $table = 'bill_transactions';
 
     protected $fillable = ['bill_id','total','remark','debit','hold','paid_from_advanced','retention_percent','retention_amount',
-        'tds_percent','tds_amount','amount','other_recovery_value','bank_id','payment_type_id','paid_from_slug'
+        'tds_percent','tds_amount','amount','other_recovery_value','bank_id','payment_type_id','paid_from_slug','transaction_status_id'
     ];
 
     public function bill(){
@@ -18,5 +18,9 @@ class BillTransaction extends Model
 
     public function paymentType(){
         return $this->belongsTo('App\PaymentType','payment_type_id');
+    }
+
+    public function transactionStatus(){
+        return $this->belongsTo(TransactionStatus::class);
     }
 }

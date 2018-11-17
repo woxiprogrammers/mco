@@ -3,10 +3,12 @@
 namespace App\Console\Commands;
 
 use App\Bill;
+use App\BillTransaction;
 use App\Quotation;
 use App\QuotationProduct;
 use App\QuotationSummary;
 use App\SubcontractorStructureType;
+use App\TransactionStatus;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
@@ -42,7 +44,7 @@ class BillModuleChanges extends Command
      * @return mixed
      */
     public function handle(){
-        $quotationModel = new Quotation();
+        /*$quotationModel = new Quotation();
         $quotationProductModel = new QuotationProduct();
         $quotationSummaryModel = new QuotationSummary();
         $bill = new Bill();
@@ -85,6 +87,14 @@ class BillModuleChanges extends Command
                     }
                 }
             }
-        }
+        }*/
+        $billTransaction = new BillTransaction();
+        $transactionStatus = new TransactionStatus();
+        $approvedStatusId = $transactionStatus->where('slug','approved')->pluck('id')->first();
+        $billTransaction->all()->each(function($thisBillTransaction) use ($approvedStatusId){
+           return $thisBillTransaction->update([
+                'transaction_status_id' => $approvedStatusId
+            ]);
+        });
     }
 }

@@ -379,7 +379,7 @@
                                                 <tr>
                                                     <td colspan="9" style="text-align: right; padding-right: 30px;"><b> Grand Total</b></td>
                                                     <td>
-                                                        <span id="grand_current_bill_total">{{$final['current_bill_gross_total_amount'] + $bill['rounded_amount_by']}}</span>
+                                                        <span id="grand_current_bill_total">{{$final['current_bill_gross_total_amount']}}</span>
                                                     </td>
                                                 </tr>
                                             </table>
@@ -463,6 +463,7 @@
                                                                 <th> TDS </th>
                                                                 <th> Other Recovery Value </th>
                                                                 <th> Total </th>
+                                                                <th> Status </th>
                                                             </tr>
                                                             </thead>
                                                             <tbody>
@@ -563,7 +564,7 @@
             </div>
                 <input type="hidden" id="path" name="path" value="">
                 <input type="hidden" id="max_files_count" name="max_files_count" value="20">
-            <div id="cancel-form" class="modal fade" role="dialog">
+                <div id="cancel-form" class="modal fade" role="dialog">
                 <div class="modal-dialog">
                     <!-- Modal content-->
                     <div class="modal-content">
@@ -608,6 +609,7 @@
                 <form id="paymentCreateForm" method="post" action="/bill/transaction/create">
                     {!! csrf_field() !!}
                     <input type="hidden" name="bill_id" value="{{$selectedBillId}}">
+                    <input type="hidden" name="cancelled_bill_transaction_balance" value="{{$balanceCancelledTransactionAmount}}">
                     <div class="form-group row" id="paymentSelect">
                         <div class="col-md-4">
                             <label class="pull-right control-label">
@@ -619,6 +621,7 @@
                                 <option value="bank"> Bank </option>
                                 <option value="advance"> Advance Payments </option>
                                 <option value="cash"> Cash </option>
+                                <option value="cancelled_bill_advance"> Cancelled Bill Advance </option>
                             </select>
                         </div>
                     </div>
@@ -688,12 +691,6 @@
                                 Retention:
                             </label>
                         </div>
-                        {{--<div class="col-md-5">
-                            <div class="input-group">
-                                <input type="number" class="form-control calculatable-field" id="retention_percent" name="retention_percent" placeholder="Enter Retention Percent">
-                                <span class="input-group-addon" style="font-size: 14px"><b>%</b></span>
-                            </div>
-                        </div>--}}
                         <div class="col-md-6">
                             <input type="number" class="form-control calculatable-field" id='retention_amount' name="retention_amount" placeholder="Retention Amount">
                         </div>
@@ -704,12 +701,6 @@
                                 TDS:
                             </label>
                         </div>
-                        {{--<div class="col-md-5">
-                            <div class="input-group">
-                                <input type="number" class="form-control calculatable-field" id="tds_percent" name="tds_percent" placeholder="Enter TDS Percent">
-                                <span class="input-group-addon" style="font-size: 14px"><b>%</b></span>
-                            </div>
-                        </div>--}}
                         <div class="col-md-6">
                             <input type="number" class="form-control calculatable-field" id="tds_amount" name="tds_amount" placeholder="TDS Amount">
                         </div>
@@ -872,6 +863,13 @@
             $('#retention_amount').prop('readonly',true).val(0);
             $('#tds_amount').prop('readonly',true).val(0);
             $('#other_recovery_value').prop('readonly',true).val(0);
+        }else if(isAdvanceOption == 'cancelled_bill_advance'){
+            $('#bankData').hide();
+            $('#debit').prop('readonly',false);
+            $('#hold').prop('readonly',false);
+            $('#retention_amount').prop('readonly',false);
+            $('#tds_amount').prop('readonly',false);
+            $('#other_recovery_value').prop('readonly',false);
         }else{
             $('#bankData').show();
             $('#debit').prop('readonly',false);
