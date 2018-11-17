@@ -33,7 +33,7 @@
                             <div class="container" style="width: 100%">
                                 <ul class="page-breadcrumb breadcrumb">
                                     <li>
-                                        <a href="/subcontractor/subcontractor-bills/manage/{!! $subcontractorStructure['id'] !!}">Manage Subcontractor Bills</a>
+                                        <a href="/subcontractor/bill/manage/{!! $subcontractorStructure['id'] !!}">Manage Subcontractor Bills</a>
                                         <i class="fa fa-circle"></i>
                                     </li>
                                     <li>
@@ -79,112 +79,6 @@
                                                     @endif
 
                                                     <div class="form-body">
-                                                        {{--<table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll; " id="parentBillTable">
-                                                            <thead>
-                                                            <tr id="tableHeader">
-                                                                <th width="10%" style="text-align: center"><b> Bill No  </b></th>
-                                                                <th width="20%" style="text-align: center"><b> Summary  </b></th>
-                                                                <th width="30%" style="text-align: center"><b> Description </b></th>
-                                                                @if($subcontractorStructure->contractType->slug == 'amountwise')
-                                                                    <th width="15%" class="numeric" style="text-align: center"><b> Number of Floors </b></th>
-                                                                @endif
-                                                                <th width="15%" class="numeric" style="text-align: center"><b> Quantity </b></th>
-
-                                                                <th width="10%" class="numeric" style="text-align: center"><b> Rate </b></th>
-                                                                <th width="10%" class="numeric" style="text-align: center"><b> Amount </b></th>
-                                                            </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                            @foreach($subcontractorBill->summaries as $index => $billSummary)
-                                                                <tr>
-                                                                    @if($index == 0)
-                                                                        <td colspan="{!! count($subcontractorBill->summaries) !!}">
-                                                                            {{ $billName }}
-                                                                        </td>
-                                                                    @endif
-                                                                    <td>
-                                                                        {!! $billSummary->subcontractorStructureSummary->summary->name !!}
-                                                                    </td>
-                                                                    <td>
-                                                                        {{$billSummary->description}}
-                                                                    </td>
-                                                                    <td>
-                                                                        {{$billSummary->quantity}}
-                                                                    </td>
-                                                                </tr>
-                                                            @endforeach
-                                                            <tr>
-                                                                <td>
-                                                                    {!! $billName !!}
-                                                                </td>
-                                                                <td>
-                                                                    {!! $subcontractorBill['description'] !!}
-                                                                </td>
-                                                                @if($subcontractorStructure->contractType->slug == 'amountwise')
-                                                                    <td>
-                                                                        {!! $subcontractorBill['number_of_floors'] !!}
-                                                                    </td>
-                                                                @endif
-                                                                <td>
-                                                                    {!! $subcontractorBill['qty'] !!}
-                                                                </td>
-                                                                <td>
-                                                                    {!! $rate !!}
-                                                                </td>
-                                                                <td>
-                                                                    {!! $subTotal!!}
-                                                                </td>
-                                                            </tr>
-                                                            @if(count($subcontractorBillTaxes) > 0)
-                                                                <tr>
-                                                                    @if($subcontractorStructure->contractType->slug == 'amountwise')
-                                                                        <td colspan="3">
-                                                                    @else
-                                                                        <td colspan="2">
-                                                                    @endif
-                                                                        <b>Tax Name</b>
-                                                                    </td>
-                                                                    <td colspan="2">
-                                                                        <b>Tax Rate</b>
-                                                                    </td>
-                                                                    <td colspan="1">
-
-                                                                    </td>
-                                                                </tr>
-                                                                @foreach($subcontractorBillTaxes as $key => $billTaxData)
-                                                                    <tr>
-                                                                        @if($subcontractorStructure->contractType->slug == 'amountwise')
-                                                                            <td colspan="3">
-                                                                        @else
-                                                                            <td colspan="2">
-                                                                        @endif
-                                                                            {!! $billTaxData->taxes->name !!}
-                                                                        </td>
-                                                                        <td colspan="2">
-                                                                            {!! $billTaxData->percentage !!} %
-                                                                        </td>
-                                                                        <td colspan="1">
-                                                                            {!! round((($billTaxData->percentage * $subTotal) / 100),3) !!}
-                                                                        </td>
-                                                                    </tr>
-                                                                @endforeach
-                                                            @endif
-                                                            <tr>
-                                                                @if($subcontractorStructure->contractType->slug == 'amountwise')
-                                                                    <td colspan="5">
-                                                                @else
-                                                                    <td colspan="4">
-                                                                @endif
-                                                                    <b>Final Total</b>
-                                                                </td>
-                                                                <td colspan="1">
-                                                                    {!! $finalTotal !!}
-                                                                </td>
-                                                            </tr>
-
-                                                            </tbody>
-
-                                                        </table>--}}
                                                         <table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll;align-content: center; " id="parentBillTable">
                                                             <thead>
                                                             <tr id="tableHeader">
@@ -285,16 +179,65 @@
 
                                                                     </td>
                                                                 </tr>
-                                                                @foreach($subcontractorBill->subcontractorBillTaxes as $subcontractorBillTax)
+                                                                @foreach($taxes as $tax)
                                                                     <tr>
                                                                         <td colspan="4">
-                                                                            {!! $subcontractorBillTax->tax->name !!}
+                                                                            {!! $tax['name'] !!}
                                                                         </td>
                                                                         <td colspan="2">
-                                                                            <label class="control-label percentage">{{$subcontractorBillTax->percentage}}</label>
+                                                                            <label class="control-label percentage">{{$tax['percentage']}}</label>
                                                                         </td>
                                                                         <td colspan="1">
-                                                                            <label class="control-label tax-amount"></label>
+                                                                            <label class="control-label tax-amount" id="tax_current_bill_amount_{{$tax['id']}}"></label>
+                                                                        </td>
+                                                                    </tr>
+                                                                @endforeach
+                                                            @endif
+                                                            @if(count($specialTaxes) > 0)
+                                                                <tr>
+                                                                    <td colspan="7">
+                                                                        <label class="control-label"> <b>Special Taxes</b></label>
+                                                                    </td>
+                                                                </tr>
+                                                                @foreach($specialTaxes as $specialTax)
+                                                                    <tr>
+                                                                        <td colspan="3" style="text-align: right; padding-right: 30px;">
+                                                                            <b>{{$specialTax['name']}}<input type="hidden" class="special-tax" value="{{$specialTax['id']}}"> </b>
+                                                                        </td>
+                                                                        <td colspan="2">
+                                                                            <label class="control-label special-tax-percentage"> {{$specialTax['percentage']}}</label>
+                                                                        </td>
+                                                                        <td colspan="1">
+                                                                            <a class="btn green sbold uppercase btn-outline btn-sm" href="javascript:;" data-toggle="dropdown" data-hover="dropdown" data-close-others="true"> Applied On
+                                                                                <i class="fa fa-angle-down"></i>
+                                                                            </a>
+                                                                            <ul class="dropdown-menu" style="position: relative">
+                                                                                {{--<li>
+                                                                                    <input type="checkbox" class="tax-applied-on special_tax_{{$specialTax['id']}}_on" name="applied_on[{{$specialTax['id']}}][on][]" value="0"> Total Round
+                                                                                </li>--}}
+                                                                                @if(in_array($specialTax['id'], $appliedSpecialTaxIds))
+                                                                                    @foreach($taxes as $tax)
+                                                                                        <li>
+                                                                                            @if(in_array($tax['id'], $specialTax['applied_on']))
+                                                                                                <input type="checkbox" class="tax-applied-on" id="special_tax_{{$specialTax['id']}}_on" name="applied_on[{{$specialTax['id']}}][on][]" value="{{$tax['id']}}" checked disabled="disabled"> {{$tax['name']}}
+                                                                                            @else
+                                                                                                <input type="checkbox" class="tax-applied-on" id="special_tax_{{$specialTax['id']}}_on" name="applied_on[{{$specialTax['id']}}][on][]" value="{{$tax['id']}}" disabled="disabled"> {{$tax['name']}}
+                                                                                            @endif
+
+                                                                                        </li>
+                                                                                    @endforeach
+                                                                                @else
+                                                                                    @foreach($taxes as $tax)
+                                                                                        <li>
+                                                                                            <input type="checkbox" class="tax-applied-on" id="special_tax_{{$specialTax['id']}}_on" name="applied_on[{{$specialTax['id']}}][on][]" value="{{$tax['id']}}" onclick="calculateSpecialTax()"> {{$tax['name']}}
+                                                                                        </li>
+                                                                                    @endforeach
+                                                                                @endif
+
+                                                                            </ul>
+                                                                        </td>
+                                                                        <td>
+                                                                            <span id="tax_current_bill_amount_{{$specialTax['id']}}" class="special-tax-amount"></span>
                                                                         </td>
                                                                     </tr>
                                                                 @endforeach
@@ -905,13 +848,41 @@
                     $(this).closest('tr').find(".tax-amount").text(tax_amount.toFixed(3));
                 }
             });
+            calculateSpecialTax();
+        }
+
+        function calculateSpecialTax(){
+            if($(".special-tax").length > 0){
+                $(".special-tax").each(function(){
+                    var specialTaxId = $(this).val();
+                    var taxAmount = 0;
+                    $(this).closest('tr').find('.tax-applied-on:checked').each(function(){
+                        var taxId = $(this).val();
+                        var taxOnAmount = 0;
+                        if(taxId == 0 || taxId == '0'){
+                            taxOnAmount = parseFloat($("#rounded_off_current_bill_amount").val());
+                        }else{
+                            taxOnAmount = parseFloat($("#tax_current_bill_amount_"+taxId).text());
+                        }
+                        var taxPercentage = parseFloat($(this).closest('tr').find('.special-tax-percentage').text());
+                        if(isNaN(taxPercentage)){
+                            taxPercentage = 0;
+                        }
+                        taxAmount += parseFloat((taxOnAmount * (taxPercentage / 100)).toFixed(3));
+                    });
+                    $("#tax_current_bill_amount_"+specialTaxId).text(parseFloat(taxAmount).toFixed(3));
+                });
+            }
             calculateFinalTotal();
         }
 
         function calculateFinalTotal(){
             var finalTotal = parseFloat($('#subtotal').text());
-            $('.tax-amount').each(function(){
+            $('.tax-amount, .special-tax-amount').each(function(){
                 var taxAmount = parseFloat($(this).text());
+                if(isNaN(taxAmount)){
+                    taxAmount = 0;
+                }
                 finalTotal += taxAmount;
             });
             if(isNaN(finalTotal)){
