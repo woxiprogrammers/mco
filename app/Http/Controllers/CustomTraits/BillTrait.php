@@ -2082,12 +2082,12 @@ trait BillTrait{
             }else{
                 $final['current_bill_gross_total_amount'] = round($final['current_bill_amount'],3) + $bill['rounded_amount_by'];
             }
-            $totalTransactionAmount = BillTransaction::where('bill_id')->sum('amount');
+            $approvedBillStatusId = TransactionStatus::where('slug','approved')->pluck('id')->first();
+            $totalTransactionAmount = BillTransaction::where('bill_id')->where('transaction_status_id',$approvedBillStatusId)->sum('amount');
             if(($totalTransactionAmount + $request->amount) > $final['current_bill_gross_total_amount']){
                 $request->session()->flash('error','Total Payment amount is greater than total bill amount');
                 return redirect('/bill/view/'.$request->bill_id);
             }else{
-                $approvedBillStatusId = TransactionStatus::where('slug','approved')->pluck('id')->first();
                 $transactionData['transaction_status_id'] = $approvedBillStatusId;
                 if($transactionData['paid_from_advanced'] == 'advance'){
                     $transactionData['paid_from_advanced'] = true;
