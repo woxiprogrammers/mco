@@ -1204,7 +1204,7 @@ class SubcontractorController extends Controller
                     date('d M Y',strtotime($paymentData[$pagination]['created_at'])),
                     $paymentData[$pagination]->projectSite->project->name,
                     $paymentData[$pagination]['amount'],
-                    $paymentData[$pagination]->paymentType->name,
+                    $paymentData[$pagination]['paid_from_slug'],
                     $paymentData[$pagination]['reference_number']
                 ];
             }
