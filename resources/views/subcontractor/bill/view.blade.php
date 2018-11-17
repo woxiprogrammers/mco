@@ -188,7 +188,7 @@
                                                                             <label class="control-label percentage">{{$tax['percentage']}}</label>
                                                                         </td>
                                                                         <td colspan="1">
-                                                                            <label class="control-label tax-amount"></label>
+                                                                            <label class="control-label tax-amount" id="tax_current_bill_amount_{{$tax['id']}}"></label>
                                                                         </td>
                                                                     </tr>
                                                                 @endforeach
@@ -202,14 +202,10 @@
                                                                 @foreach($specialTaxes as $specialTax)
                                                                     <tr>
                                                                         <td colspan="3" style="text-align: right; padding-right: 30px;">
-                                                                            <b>{{$specialTax['name']}}</b>
+                                                                            <b>{{$specialTax['name']}}<input type="hidden" class="special-tax" value="{{$specialTax['id']}}"> </b>
                                                                         </td>
                                                                         <td colspan="2">
-                                                                            @if(array_key_exists($specialTax['id'], $appliedSpecialTaxes))
-                                                                                <input class="form-control" name="applied_on[{{$specialTax['id']}}][percentage]" value="{{$appliedSpecialTaxes[$specialTax['id']]['percentage']}}" id="tax_percentage_{{$specialTax['id']}}" onchange="calculateSpecialTax()" onkeyup="calculateSpecialTax()()">
-                                                                            @else
-                                                                                <input class="form-control" name="applied_on[{{$specialTax['id']}}][percentage]" value="{{$specialTax['base_percentage']}}" id="tax_percentage_{{$specialTax['id']}}" onchange="calculateSpecialTax()" onkeyup="calculateSpecialTax()()">
-                                                                            @endif
+                                                                            <label class="control-label special-tax-percentage"> {{$specialTax['percentage']}}</label>
                                                                         </td>
                                                                         <td colspan="1">
                                                                             <a class="btn green sbold uppercase btn-outline btn-sm" href="javascript:;" data-toggle="dropdown" data-hover="dropdown" data-close-others="true"> Applied On
@@ -219,16 +215,13 @@
                                                                                 {{--<li>
                                                                                     <input type="checkbox" class="tax-applied-on special_tax_{{$specialTax['id']}}_on" name="applied_on[{{$specialTax['id']}}][on][]" value="0"> Total Round
                                                                                 </li>--}}
-                                                                                @if(array_key_exists($specialTax['id'], $appliedSpecialTaxes))
-                                                                                    @php
-                                                                                        $appliedOn = json_decode($appliedSpecialTaxes[$specialTax['id']]['applied_on']);
-                                                                                    @endphp
+                                                                                @if(in_array($specialTax['id'], $appliedSpecialTaxIds))
                                                                                     @foreach($taxes as $tax)
                                                                                         <li>
-                                                                                            @if(in_array($tax['id'], $appliedOn))
-                                                                                                <input type="checkbox" class="tax-applied-on" id="special_tax_{{$specialTax['id']}}_on" name="applied_on[{{$specialTax['id']}}][on][]" value="{{$tax['id']}}" onclick="calculateSpecialTax()" checked> {{$tax['name']}}
+                                                                                            @if(in_array($tax['id'], $specialTax['applied_on']))
+                                                                                                <input type="checkbox" class="tax-applied-on" id="special_tax_{{$specialTax['id']}}_on" name="applied_on[{{$specialTax['id']}}][on][]" value="{{$tax['id']}}" checked disabled="disabled"> {{$tax['name']}}
                                                                                             @else
-                                                                                                <input type="checkbox" class="tax-applied-on" id="special_tax_{{$specialTax['id']}}_on" name="applied_on[{{$specialTax['id']}}][on][]" value="{{$tax['id']}}" onclick="calculateSpecialTax()"> {{$tax['name']}}
+                                                                                                <input type="checkbox" class="tax-applied-on" id="special_tax_{{$specialTax['id']}}_on" name="applied_on[{{$specialTax['id']}}][on][]" value="{{$tax['id']}}" disabled="disabled"> {{$tax['name']}}
                                                                                             @endif
 
                                                                                         </li>
@@ -855,13 +848,41 @@
                     $(this).closest('tr').find(".tax-amount").text(tax_amount.toFixed(3));
                 }
             });
+            calculateSpecialTax();
+        }
+
+        function calculateSpecialTax(){
+            if($(".special-tax").length > 0){
+                $(".special-tax").each(function(){
+                    var specialTaxId = $(this).val();
+                    var taxAmount = 0;
+                    $(this).closest('tr').find('.tax-applied-on:checked').each(function(){
+                        var taxId = $(this).val();
+                        var taxOnAmount = 0;
+                        if(taxId == 0 || taxId == '0'){
+                            taxOnAmount = parseFloat($("#rounded_off_current_bill_amount").val());
+                        }else{
+                            taxOnAmount = parseFloat($("#tax_current_bill_amount_"+taxId).text());
+                        }
+                        var taxPercentage = parseFloat($(this).closest('tr').find('.special-tax-percentage').text());
+                        if(isNaN(taxPercentage)){
+                            taxPercentage = 0;
+                        }
+                        taxAmount += parseFloat((taxOnAmount * (taxPercentage / 100)).toFixed(3));
+                    });
+                    $("#tax_current_bill_amount_"+specialTaxId).text(parseFloat(taxAmount).toFixed(3));
+                });
+            }
             calculateFinalTotal();
         }
 
         function calculateFinalTotal(){
             var finalTotal = parseFloat($('#subtotal').text());
-            $('.tax-amount').each(function(){
+            $('.tax-amount, .special-tax-amount').each(function(){
                 var taxAmount = parseFloat($(this).text());
+                if(isNaN(taxAmount)){
+                    taxAmount = 0;
+                }
                 finalTotal += taxAmount;
             });
             if(isNaN(finalTotal)){

@@ -321,13 +321,13 @@ class SubcontractorBillController extends Controller
                 if($isSpecial == false){
                     $taxes[$iterator] = SubcontractorBillTax::join('taxes', 'taxes.id', '=', 'subcontractor_bill_taxes.tax_id')
                                                     ->where('subcontractor_bill_taxes.id', $subcontractorBillTaxData['id'])
-                                                    ->select('taxes.name as name', 'subcontractor_bill_taxes.percentage as percentage')
+                                                    ->select('taxes.id as id', 'taxes.name as name', 'subcontractor_bill_taxes.percentage as percentage')
                                                     ->first()->toArray();
                     $iterator++;
                 }else{
                     $specialTaxes[$jIterator] = SubcontractorBillTax::join('taxes', 'taxes.id', '=', 'subcontractor_bill_taxes.tax_id')
                         ->where('subcontractor_bill_taxes.id', $subcontractorBillTaxData['id'])
-                        ->select('taxes.name as name', 'subcontractor_bill_taxes.percentage as percentage', 'subcontractor_bill_taxes.applied_on as applied_on')
+                        ->select('taxes.id as id', 'taxes.name as name', 'subcontractor_bill_taxes.percentage as percentage', 'subcontractor_bill_taxes.applied_on as applied_on')
                         ->first()->toArray();
                     $specialTaxes[$jIterator]['applied_on'] = json_decode($specialTaxes[$jIterator]['applied_on']);
                     $jIterator++;
@@ -342,6 +342,11 @@ class SubcontractorBillController extends Controller
                         $taxTotal += round((($subcontractorBillTaxData['percentage'] * $appliedOnAmount) / 100),3);
                     }
                 }
+            }
+            $appliedSpecialTaxIds = array_column($specialTaxes,'id');
+            $unappliedSpecialTax = Tax::whereNotIn('id', array_column($specialTaxes, 'id'))->where('is_special', true)->select('id', 'name', 'base_percentage as percentage')->get();
+            if(!$unappliedSpecialTax->isEmpty()){
+                $specialTaxes += $unappliedSpecialTax->toArray();
             }
             $finalTotal = round(($subTotal + $taxTotal),3);
             $billNo = 0;
@@ -369,7 +374,7 @@ class SubcontractorBillController extends Controller
             $banks = BankInfo::where('is_active',true)->select('id','bank_name','balance_amount')->get();
             $statistics = $this->getSiteWiseStatistics();
             $cashAllowedLimit = ($statistics['remainingAmount'] > 0) ? $statistics['remainingAmount'] : 0 ;
-            return view('subcontractor.bill.view')->with(compact('structureSlug','subcontractorBill','subcontractorStructure','noOfFloors','billName','rate','subcontractorBillTaxes','subTotal','finalTotal','remainingAmount','paymentTypes','remainingHoldAmount','remainingRetentionAmount','pendingAmount','banks','cashAllowedLimit', 'taxes', 'specialTaxes'));
+            return view('subcontractor.bill.view')->with(compact('structureSlug','subcontractorBill','subcontractorStructure','noOfFloors','billName','rate','subcontractorBillTaxes','subTotal','finalTotal','remainingAmount','paymentTypes','remainingHoldAmount','remainingRetentionAmount','pendingAmount','banks','cashAllowedLimit', 'taxes', 'specialTaxes', 'appliedSpecialTaxIds'));
         }catch (\Exception $e){
             $data = [
                 'action' => 'Get subcontractor bill view',
