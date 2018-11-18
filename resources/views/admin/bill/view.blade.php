@@ -19,7 +19,7 @@
                         <div class="container">
                             <!-- BEGIN PAGE TITLE -->
                             <div class="page-title">
-                                <h1>View Bill</h1>
+                                <h1>View Bill - {{$quotation->project_site->name}} - {{$quotation->billType->name}}wise</h1>
                             </div>
                         </div>
                     </div>
@@ -379,7 +379,7 @@
                                                 <tr>
                                                     <td colspan="9" style="text-align: right; padding-right: 30px;"><b> Grand Total</b></td>
                                                     <td>
-                                                        <span id="grand_current_bill_total">{{$final['current_bill_gross_total_amount'] + $bill['rounded_amount_by']}}</span>
+                                                        <span id="grand_current_bill_total">{{$final['current_bill_gross_total_amount']}}</span>
                                                     </td>
                                                 </tr>
                                             </table>
@@ -463,6 +463,8 @@
                                                                 <th> TDS </th>
                                                                 <th> Other Recovery Value </th>
                                                                 <th> Total </th>
+                                                                <th> Status </th>
+                                                                <th> Action </th>
                                                             </tr>
                                                             </thead>
                                                             <tbody>
@@ -563,7 +565,7 @@
             </div>
                 <input type="hidden" id="path" name="path" value="">
                 <input type="hidden" id="max_files_count" name="max_files_count" value="20">
-            <div id="cancel-form" class="modal fade" role="dialog">
+                <div id="cancel-form" class="modal fade" role="dialog">
                 <div class="modal-dialog">
                     <!-- Modal content-->
                     <div class="modal-content">
@@ -608,6 +610,7 @@
                 <form id="paymentCreateForm" method="post" action="/bill/transaction/create">
                     {!! csrf_field() !!}
                     <input type="hidden" name="bill_id" value="{{$selectedBillId}}">
+                    <input type="hidden" name="cancelled_bill_transaction_balance" value="{{$balanceCancelledTransactionAmount}}">
                     <div class="form-group row" id="paymentSelect">
                         <div class="col-md-4">
                             <label class="pull-right control-label">
@@ -619,6 +622,7 @@
                                 <option value="bank"> Bank </option>
                                 <option value="advance"> Advance Payments </option>
                                 <option value="cash"> Cash </option>
+                                <option value="cancelled_bill_advance"> Cancelled Bill Advance </option>
                             </select>
                         </div>
                     </div>
@@ -688,12 +692,6 @@
                                 Retention:
                             </label>
                         </div>
-                        {{--<div class="col-md-5">
-                            <div class="input-group">
-                                <input type="number" class="form-control calculatable-field" id="retention_percent" name="retention_percent" placeholder="Enter Retention Percent">
-                                <span class="input-group-addon" style="font-size: 14px"><b>%</b></span>
-                            </div>
-                        </div>--}}
                         <div class="col-md-6">
                             <input type="number" class="form-control calculatable-field" id='retention_amount' name="retention_amount" placeholder="Retention Amount">
                         </div>
@@ -704,12 +702,6 @@
                                 TDS:
                             </label>
                         </div>
-                        {{--<div class="col-md-5">
-                            <div class="input-group">
-                                <input type="number" class="form-control calculatable-field" id="tds_percent" name="tds_percent" placeholder="Enter TDS Percent">
-                                <span class="input-group-addon" style="font-size: 14px"><b>%</b></span>
-                            </div>
-                        </div>--}}
                         <div class="col-md-6">
                             <input type="number" class="form-control calculatable-field" id="tds_amount" name="tds_amount" placeholder="TDS Amount">
                         </div>
@@ -819,6 +811,42 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="changeStatusModel" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header" style="padding-bottom:10px">
+                <div class="row">
+                    <div class="col-md-4"></div>
+                    <div class="col-md-4"><center><h4 class="modal-title" id="exampleModalLongTitle">Change Status</h4></center></div>
+                    <div class="col-md-4"><button type="button" class="close" data-dismiss="modal"><i class="fa fa-close" style="font-size: medium"></i></button></div>
+                </div>
+            </div>
+            <div class="modal-body" style="padding:40px 50px; font-size: 15px">
+                <form id="changeStatusForm" method="post" action="/bill/transaction/change-status">
+                    {!! csrf_field() !!}
+                    <input type="hidden" name="bill_transaction_id" id="bill_transaction_id">
+                    <input type="hidden" name="status-slug" id="status_slug">
+                    <div class="form-group row">
+                        <div class="col-md-4" style="text-align: right">
+                            <label for="company" class="control-label">Remark</label>
+                        </div>
+                        <div class="col-md-8">
+                            <input type="text" class="form-control" id="remark" name="remark">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <i> Note : Cancellation of the bill will add transaction amount to advance amount</i>
+                    </div>
+                    <button class="btn btn-set red pull-right" type="submit">
+                        <i class="fa fa-check" style="font-size: large"></i>
+                        Change &nbsp; &nbsp; &nbsp;
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 @section('javascript')
 <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
@@ -838,6 +866,11 @@
 <script src="/assets/custom/bill/hold-reconcile-datatable.js" type="text/javascript"></script>
 <script src="/assets/custom/bill/retention-reconcile-datatable.js" type="text/javascript"></script>
 <script>
+    function openDetails(changeStatusTo,billTransactionId){
+        $('#bill_transaction_id').val(billTransactionId);
+        $('#status_slug').val(changeStatusTo);
+        $("#changeStatusModel").modal('show');
+    }
     $(document).ready(function(){
         CreateBillPayment.init();
         CreateBillReconcilePayment.init();
@@ -872,6 +905,13 @@
             $('#retention_amount').prop('readonly',true).val(0);
             $('#tds_amount').prop('readonly',true).val(0);
             $('#other_recovery_value').prop('readonly',true).val(0);
+        }else if(isAdvanceOption == 'cancelled_bill_advance'){
+            $('#bankData').hide();
+            $('#debit').prop('readonly',false);
+            $('#hold').prop('readonly',false);
+            $('#retention_amount').prop('readonly',false);
+            $('#tds_amount').prop('readonly',false);
+            $('#other_recovery_value').prop('readonly',false);
         }else{
             $('#bankData').show();
             $('#debit').prop('readonly',false);
