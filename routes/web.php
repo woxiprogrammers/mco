@@ -209,6 +209,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('create', array('uses' => 'Admin\BillController@saveTransactionDetails'));
             Route::post('listing/{billId}', array('uses' => 'Admin\BillController@billTransactionListing'));
             Route::get('detail/{bill_transaction}', array('uses' => 'Admin\BillController@billTransactionDetail'));
+            Route::post('change-status', array('uses' => 'Admin\BillController@changeBillTransactionStatus'));
         });
         Route::group(['prefix' => 'reconcile'], function(){
             Route::post('add-transaction', array('uses' => 'Admin\BillController@addReconcileTransaction'));

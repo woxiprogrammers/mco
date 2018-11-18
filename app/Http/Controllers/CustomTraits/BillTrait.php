@@ -2163,6 +2163,31 @@ trait BillTrait{
                 }else{
                     $paidFrom = ucfirst($transactionDetails[$pagination]->paid_from_slug);
                 }
+                if($transactionDetails[$pagination]->transactionStatus->slug == 'cancelled'){Log::info($transactionDetails[$pagination]->bill->quotation->cancelled_bill_transaction_balance_amount);
+                    $balanceAmountAfterChangeStatus = $transactionDetails[$pagination]->bill->quotation->cancelled_bill_transaction_balance_amount - $transactionDetails[$pagination]->total;
+                    if($balanceAmountAfterChangeStatus >= 0){
+                        $changeStatusButton = '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails('.$transactionDetails[$pagination]['id'].')">
+                                        Approve
+                                    </a><a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails('.$transactionDetails[$pagination]['id'].')">
+                                        Delete
+                                    </a>';
+                    }else{
+                        $changeStatusButton = '-';
+                    }
+
+                }elseif($transactionDetails[$pagination]->transactionStatus->slug == 'approved'){
+                    $changeStatusButton = '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails('.$transactionDetails[$pagination]['id'].')">
+                                        Cancel
+                                    </a><a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails('.$transactionDetails[$pagination]['id'].')">
+                                        Delete
+                                    </a>';
+                }else{
+                    $changeStatusButton = '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails('.$transactionDetails[$pagination]['id'].')">
+                                        Approve
+                                    </a><a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails('.$transactionDetails[$pagination]['id'].')">
+                                        Cancel
+                                    </a>';
+                }
 
                 $records['data'][] = [
                     $pagination+1,
@@ -2176,11 +2201,11 @@ trait BillTrait{
                     $transactionDetails[$pagination]['other_recovery_value'],
                     $transactionDetails[$pagination]['total'],
                     $transactionDetails[$pagination]->transactionStatus->name,
+                    $changeStatusButton
                 ];
             }
         }catch(\Exception $e){
             $status = 500;
-            $records = array();
             $data = [
                 'action' => 'Transaction listing',
                 'params' => $request->all(),
@@ -2190,6 +2215,41 @@ trait BillTrait{
             $records = array();
         }
         return response()->json($records,$status);
+    }
+
+    public function changeBillTransactionStatus(Request $request){
+        try{
+            $billTransaction = new BillTransaction();
+            $transactionStatus = new TransactionStatus();
+            $billTransactionData = $billTransaction->where('id',$request['bill_transaction_id'])->first();
+            $bill = $billTransactionData->bill;
+            $quotation = $bill->quotation;
+            if($request['status-slug'] == 'cancelled'){
+                $quotation->update([
+                    'cancelled_bill_transaction_total_amount' => $quotation['cancelled_bill_transaction_total_amount'] + $billTransactionData['total'],
+                    'cancelled_bill_transaction_balance_amount' => $quotation['cancelled_bill_transaction_balance_amount'] + $billTransactionData['total']
+                ]);
+            }elseif($billTransactionData->transactionStatus->slug == 'cancelled'){
+                $quotation->update([
+                    'cancelled_bill_transaction_total_amount' => $quotation['cancelled_bill_transaction_total_amount'] - $billTransactionData['total'],
+                    'cancelled_bill_transaction_balance_amount' => $quotation['cancelled_bill_transaction_balance_amount'] - $billTransactionData['total']
+                ]);
+            }
+            $billTransactionData->update([
+                'transaction_status_id' => $transactionStatus->where('slug',$request['status-slug'])->pluck('id')->first(),
+                'remark' => $request['remark']
+            ]);
+
+            return redirect('/bill/view/'.$bill->id);
+        }catch (\Exception $e){
+            $status = 500;
+            $data = [
+                'action' => 'Transaction listing',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+        }
     }
 
     public function billTransactionDetail(Request $request,$transaction){

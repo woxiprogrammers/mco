@@ -19,7 +19,7 @@
                         <div class="container">
                             <!-- BEGIN PAGE TITLE -->
                             <div class="page-title">
-                                <h1>View Bill</h1>
+                                <h1>View Bill - {{$quotation->project_site->name}} - {{$quotation->billType->name}}wise</h1>
                             </div>
                         </div>
                     </div>
@@ -464,6 +464,7 @@
                                                                 <th> Other Recovery Value </th>
                                                                 <th> Total </th>
                                                                 <th> Status </th>
+                                                                <th> Action </th>
                                                             </tr>
                                                             </thead>
                                                             <tbody>
@@ -810,6 +811,56 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="changeStatusModel" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header" style="padding-bottom:10px">
+                <div class="row">
+                    <div class="col-md-4"></div>
+                    <div class="col-md-4"><center><h4 class="modal-title" id="exampleModalLongTitle">Change Status</h4></center></div>
+                    <div class="col-md-4"><button type="button" class="close" data-dismiss="modal"><i class="fa fa-close" style="font-size: medium"></i></button></div>
+                </div>
+            </div>
+            <div class="modal-body" style="padding:40px 50px; font-size: 15px">
+                <form id="changeStatusForm" method="post" action="/bill/transaction/change-status">
+                    {!! csrf_field() !!}
+                    <input type="hidden" name="bill_transaction_id" id="bill_transaction_id">
+                    <div class="form-group row">
+                        <div class="col-md-4" style="text-align: right">
+                            <label class="control-label">
+                                Change Status:
+                            </label>
+                        </div>
+                        <div class="col-md-6">
+                            <select class="form-control" name="status-slug" id="status_slug">
+                                <option value="cancelled">Cancel</option>
+                                <option value="deleted">Delete</option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <div class="form-group row">
+                        <div class="col-md-4" style="text-align: right">
+                            <label for="company" class="control-label">Remark</label>
+                        </div>
+                        <div class="col-md-8">
+                            <input type="text" class="form-control" id="remark" name="remark">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <i> Note : Cancellation of the bill will add transaction amount to advance amount</i>
+                    </div>
+                    <button class="btn btn-set red pull-right" type="submit">
+                        <i class="fa fa-check" style="font-size: large"></i>
+                        Add &nbsp; &nbsp; &nbsp;
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 @section('javascript')
 <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
@@ -829,6 +880,10 @@
 <script src="/assets/custom/bill/hold-reconcile-datatable.js" type="text/javascript"></script>
 <script src="/assets/custom/bill/retention-reconcile-datatable.js" type="text/javascript"></script>
 <script>
+    function openDetails(billTransactionId){
+        $('#bill_transaction_id').val(billTransactionId);
+        $("#changeStatusModel").modal('show');
+    }
     $(document).ready(function(){
         CreateBillPayment.init();
         CreateBillReconcilePayment.init();
