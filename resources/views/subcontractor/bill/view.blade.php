@@ -314,6 +314,8 @@
                                                                     <th> Created At
                                                                         <input type="hidden" class="filter-submit">
                                                                     </th>
+                                                                    <th> Status </th>
+                                                                    <th> Action </th>
                                                                 </tr>
                                                                 </thead>
                                                                 <tbody>
@@ -333,7 +335,7 @@
                                                                         </div>
                                                                     </div>
                                                                     <div class="modal-body">
-                                                                        <form role="form" id="createTransactionForm" class="form-horizontal" method="post" action="/subcontractor/subcontractor-bills/transaction/create">
+                                                                        <form role="form" id="createTransactionForm" class="form-horizontal" method="post" action="/subcontractor/bill/transaction/create">
                                                                             {!! csrf_field() !!}
                                                                             <input type="hidden" value="{{$subcontractorBill['id']}}" name="subcontractor_bills_id">
                                                                             <input type="hidden" id="remainingTotal" name="remainingTotal" >
@@ -369,6 +371,7 @@
                                                                                         <select class="form-control" id="paid_from_slug" name="paid_from_slug" onchange="changePaidFrom(this)">
                                                                                                 <option value="bank">Bank</option>
                                                                                                 <option value="cash">Cash</option>
+                                                                                                <option value="cancel_transaction_advance">Cancel Transaction Advance</option>
                                                                                         </select>
                                                                                     </div>
                                                                                 </div>
@@ -815,6 +818,8 @@
         function changePaidFrom(element){
             var paidFromSlug = $(element).val();
             if(paidFromSlug == 'cash'){
+                $(element).closest('.modal-body').find('.bankData').hide();
+            }else if(paidFromSlug == 'cancel_transaction_advance'){
                 $(element).closest('.modal-body').find('.bankData').hide();
             }else{
                 $(element).closest('.modal-body').find('.bankData').show();
