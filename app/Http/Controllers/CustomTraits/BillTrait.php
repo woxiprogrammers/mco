@@ -28,6 +28,7 @@ use App\QuotationStatus;
 use App\QuotationSummary;
 use App\Summary;
 use App\Tax;
+use App\TransactionStatus;
 use App\Unit;
 use Cron\Tests\DayOfMonthFieldTest;
 use Illuminate\Http\Request;
@@ -656,12 +657,11 @@ trait BillTrait{
                             }
                         }
                         $specialTaxes[$j]['current_bill_amount'] = round($specialTaxAmount , 3);
-                        $final['current_bill_gross_total_amount'] = round(($final['current_bill_amount'] + $specialTaxAmount),3);
+                        $final['current_bill_gross_total_amount'] = round(($final['current_bill_amount'] + $specialTaxAmount),3) + $bill['rounded_amount_by'];
                     }
                 }else{
-                    $final['current_bill_gross_total_amount'] = round($final['current_bill_amount'],3);
+                    $final['current_bill_gross_total_amount'] = round($final['current_bill_amount'],3) + $bill['rounded_amount_by'];
                 }
-
             }else{
                 $billQuotationProducts = BillQuotationProducts::where('bill_id',$bill['id'])->get()->toArray();
                 for($iterator = 0 ; $iterator < count($billQuotationProducts) ; $iterator++){
@@ -736,13 +736,12 @@ trait BillTrait{
                             }
                         }
                         $specialTaxes[$j]['current_bill_amount'] = round($specialTaxAmount , 3);
-                        $final['current_bill_gross_total_amount'] = round(($final['current_bill_amount'] + $specialTaxAmount),3);
+                        $final['current_bill_gross_total_amount'] = round(($final['current_bill_amount'] + $specialTaxAmount),3) + $bill['rounded_amount_by'];
                     }
                 }else{
-                    $final['current_bill_gross_total_amount'] = round($final['current_bill_amount'],3);
+                    $final['current_bill_gross_total_amount'] = round($final['current_bill_amount'],3) + $bill['rounded_amount_by'];
                 }
             }
-
 
             $BillTransactionTotals = BillTransaction::where('bill_id',$bill->id)->pluck('total')->toArray();
             $remainingAmount = ($final['current_bill_gross_total_amount'] + abs($tdsRetentionTaxAmount)) - array_sum($BillTransactionTotals);
@@ -753,10 +752,10 @@ trait BillTrait{
             $totalBillRetentionAmount = BillTransaction::where('bill_id',$selectedBillId)->sum('retention_amount');
             $reconciledRetentionAmount = BillReconcileTransaction::where('bill_id',$selectedBillId)->where('transaction_slug','retention')->sum('amount');
             $remainingRetentionAmount = $reconciledRetentionAmount - $totalBillRetentionAmount;
+            $balanceCancelledTransactionAmount = $bill->quotation->cancelled_bill_transaction_balance_amount;
             $banks = BankInfo::where('is_active',true)->select('id','bank_name','balance_amount')->get();
             $bill['rounded_amount_by'] = ($bill['rounded_amount_by'] == null) ? 0 : $bill['rounded_amount_by'];
-            //dd($billQuotationSummaries->toArray());
-            return view('admin.bill.view')->with(compact('quotation','billQuotationSummaries','extraItems','bill','selectedBillId','total','total_rounded','final','total_current_bill_amount','bills','billQuotationProducts','taxes','specialTaxes','remainingAmount','paymentTypes','remainingHoldAmount','remainingRetentionAmount','banks'));
+            return view('admin.bill.view')->with(compact('balanceCancelledTransactionAmount','quotation','billQuotationSummaries','extraItems','bill','selectedBillId','total','total_rounded','final','total_current_bill_amount','bills','billQuotationProducts','taxes','specialTaxes','remainingAmount','paymentTypes','remainingHoldAmount','remainingRetentionAmount','banks'));
         }catch (\Exception $e){
             $data = [
                 'action' => 'get view of bills',
@@ -786,6 +785,7 @@ trait BillTrait{
             $bill['sub_total'] = $request['sub_total'];
             $bill['with_tax_amount'] = $request['with_tax_amount'];
             $bill['rounded_amount_by'] = $request['round_amount_by'];
+            $bill['gross_total'] = $request['grand_total'];
             if($request->assign_bank != 'default') {
                 $bill['bank_info_id'] = $request->assign_bank;
             }
@@ -1988,33 +1988,48 @@ trait BillTrait{
             $projectSite = ProjectSite::findOrFail($projectSiteId);
             $bill = Bill::findOrFail($request->bill_id);
             $bills = Bill::where('quotation_id',$bill['quotation_id'])->where('bill_status_id','!=',$cancelBillStatusId)->orderBy('created_at','asc')->get()->toArray();
-            $billQuotationProducts = BillQuotationProducts::where('bill_id',$bill['id'])->get()->toArray();
             $total['previous_bill_amount'] = $total['current_bill_subtotal'] = $total['cumulative_bill_amount'] = $total_extra_item =  0;
-            for($iterator = 0 ; $iterator < count($billQuotationProducts) ; $iterator++){
-                $billQuotationProducts[$iterator]['previous_quantity'] = 0;
-                $billQuotationProducts[$iterator]['quotationProducts'] = QuotationProduct::where('id',$billQuotationProducts[$iterator]['quotation_product_id'])->where('quotation_id',$bill['quotation_id'])->first();
-                $billQuotationProducts[$iterator]['productDetail'] = Product::where('id',$billQuotationProducts[$iterator]['quotationProducts']['product_id'])->first();
-                $billQuotationProducts[$iterator]['product_description'] = ProductDescription::where('id',$billQuotationProducts[$iterator]['product_description_id'])->where('quotation_id',$bill['quotation_id'])->first();
-                $billQuotationProducts[$iterator]['unit'] = Unit::where('id',$billQuotationProducts[$iterator]['productDetail']['unit_id'])->pluck('name')->first();
-                $quotation_id = Bill::where('id',$billQuotationProducts[$iterator]['bill_id'])->pluck('quotation_id')->first();
-                $discount = Quotation::where('id',$quotation_id)->pluck('discount')->first();
-                $rate_per_unit = QuotationProduct::where('id',$billQuotationProducts[$iterator]['quotation_product_id'])->pluck('rate_per_unit')->first();
-               // $billQuotationProducts[$iterator]['rate'] = MaterialProductHelper::customRound(($rate_per_unit - ($rate_per_unit * ($discount / 100))),3);
-                $billQuotationProducts[$iterator]['rate'] = round(($rate_per_unit - ($rate_per_unit * ($discount / 100))),3);
-                //$billQuotationProducts[$iterator]['current_bill_subtotal'] = MaterialProductHelper::customRound(($billQuotationProducts[$iterator]['quantity'] * $billQuotationProducts[$iterator]['rate']),3);
-                $billQuotationProducts[$iterator]['current_bill_subtotal'] = round(($billQuotationProducts[$iterator]['quantity'] * $billQuotationProducts[$iterator]['rate']),3);
-                $billWithoutCancelStatus = Bill::where('id','<',$bill['id'])->where('bill_status_id','!=',$cancelBillStatusId)->pluck('id')->toArray();
-                $previousBills = BillQuotationProducts::whereIn('bill_id',$billWithoutCancelStatus)->get();
-                foreach($previousBills as $key => $previousBill){
-                    if($billQuotationProducts[$iterator]['quotation_product_id'] == $previousBill['quotation_product_id']){
-                        $billQuotationProducts[$iterator]['previous_quantity'] = $billQuotationProducts[$iterator]['previous_quantity'] +  $previousBill['quantity'];
+            if($bill->quotation->billType->slug == 'sqft'){
+                $billQuotationSummaryModel = new BillQuotationSummary();
+                $billModel = new Bill();
+                $billQuotationSummaries = $billQuotationSummaryModel->where('is_deleted',false)->where('bill_id',$bill['id'])->get();
+                for($iterator = 0 ; $iterator < count($billQuotationSummaries) ; $iterator++){
+                    $billQuotationSummaries[$iterator]['current_bill_subtotal'] = round(($billQuotationSummaries[$iterator]['quantity'] * $billQuotationSummaries[$iterator]['rate_per_sqft']),3);
+                    $previousBillIdsWithoutCancelStatus = $billModel->where('quotation_id',$bill->quotation->id)
+                        ->where('id','<',$bill['id'])
+                        ->where('bill_status_id','!=',$cancelBillStatusId)
+                        ->pluck('id')->toArray();
+                    if(count($previousBillIdsWithoutCancelStatus) > 0){
+                        $billQuotationSummaries[$iterator]['previous_quantity'] = $billQuotationSummaryModel->whereIn('bill_id',$previousBillIdsWithoutCancelStatus)
+                            ->where('quotation_summary_id',$billQuotationSummaries[$iterator]['quotation_summary_id'])
+                            ->where('is_deleted',false)->sum('quantity');
+                    }else{
+                        $billQuotationSummaries[$iterator]['previous_quantity'] = 0;
                     }
+                    $billQuotationSummaries[$iterator]['cumulative_quantity'] = round(($billQuotationSummaries[$iterator]['quantity'] + $billQuotationSummaries[$iterator]['previous_quantity']),3);
+                    $total['current_bill_subtotal'] = round(($total['current_bill_subtotal'] + $billQuotationSummaries[$iterator]['current_bill_subtotal']),3);
                 }
-                //$billQuotationProducts[$iterator]['cumulative_quantity'] = MaterialProductHelper::customRound(($billQuotationProducts[$iterator]['quantity'] + $billQuotationProducts[$iterator]['previous_quantity']),3);
-                $billQuotationProducts[$iterator]['cumulative_quantity'] = round(($billQuotationProducts[$iterator]['quantity'] + $billQuotationProducts[$iterator]['previous_quantity']),3);
-                //$total['current_bill_subtotal'] = MaterialProductHelper::customRound(($total['current_bill_subtotal'] + $billQuotationProducts[$iterator]['current_bill_subtotal']),3);
-                $total['current_bill_subtotal'] = round(($total['current_bill_subtotal'] + $billQuotationProducts[$iterator]['current_bill_subtotal']),3);
+            }else{
+                $billQuotationProducts = BillQuotationProducts::where('bill_id',$bill['id'])->get()->toArray();
+                for($iterator = 0 ; $iterator < count($billQuotationProducts) ; $iterator++){
+                    $billQuotationProducts[$iterator]['previous_quantity'] = 0;
+                    $quotation_id = Bill::where('id',$billQuotationProducts[$iterator]['bill_id'])->pluck('quotation_id')->first();
+                    $discount = Quotation::where('id',$quotation_id)->pluck('discount')->first();
+                    $rate_per_unit = QuotationProduct::where('id',$billQuotationProducts[$iterator]['quotation_product_id'])->pluck('rate_per_unit')->first();
+                    $billQuotationProducts[$iterator]['rate'] = round(($rate_per_unit - ($rate_per_unit * ($discount / 100))),3);
+                    $billQuotationProducts[$iterator]['current_bill_subtotal'] = round(($billQuotationProducts[$iterator]['quantity'] * $billQuotationProducts[$iterator]['rate']),3);
+                    $billWithoutCancelStatus = Bill::where('id','<',$bill['id'])->where('bill_status_id','!=',$cancelBillStatusId)->pluck('id')->toArray();
+                    $previousBills = BillQuotationProducts::whereIn('bill_id',$billWithoutCancelStatus)->get();
+                    foreach($previousBills as $key => $previousBill){
+                        if($billQuotationProducts[$iterator]['quotation_product_id'] == $previousBill['quotation_product_id']){
+                            $billQuotationProducts[$iterator]['previous_quantity'] = $billQuotationProducts[$iterator]['previous_quantity'] +  $previousBill['quantity'];
+                        }
+                    }
+                    $billQuotationProducts[$iterator]['cumulative_quantity'] = round(($billQuotationProducts[$iterator]['quantity'] + $billQuotationProducts[$iterator]['previous_quantity']),3);
+                    $total['current_bill_subtotal'] = round(($total['current_bill_subtotal'] + $billQuotationProducts[$iterator]['current_bill_subtotal']),3);
+                }
             }
+
             $extraItems = BillQuotationExtraItem::where('bill_id',$bill->id)->get();
             if(count($extraItems) > 0){
                 $total_extra_item = 0;
@@ -2022,12 +2037,9 @@ trait BillTrait{
                     $extraItem['previous_rate'] = BillQuotationExtraItem::whereIn('bill_id',array_column($bills,'id'))->where('bill_id','!=',$bill->id)->where('quotation_extra_item_id',$extraItem->quotation_extra_item_id)->sum('rate');
                     $total_extra_item = $total_extra_item + $extraItem['rate'];
                 }
-                //$total['current_bill_subtotal'] = MaterialProductHelper::customRound(($total['current_bill_subtotal'] + $total_extra_item),3);
                 $total['current_bill_subtotal'] = round(($total['current_bill_subtotal'] + $total_extra_item),3);
             }
-            //$total_rounded['current_bill_subtotal'] = MaterialProductHelper::customRound($total['current_bill_subtotal']);
             $total_rounded['current_bill_subtotal'] = round($total['current_bill_subtotal']);
-            //$final['current_bill_amount'] = $total_rounded['current_bill_amount'] = $total['current_bill_amount'] = MaterialProductHelper::customRound(($total['current_bill_subtotal'] - $bill['discount_amount']),3);
             $final['current_bill_amount'] = $total_rounded['current_bill_amount'] = $total['current_bill_amount'] = round(($total['current_bill_subtotal'] - $bill['discount_amount']),3);
             $billTaxes = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
                 ->where('bill_taxes.bill_id','=',$bill['id'])
@@ -2040,9 +2052,7 @@ trait BillTrait{
             }
             for($j = 0 ; $j < count($billTaxes) ; $j++){
                 $taxes[$billTaxes[$j]['tax_id']] = $billTaxes[$j];
-                //$taxes[$billTaxes[$j]['tax_id']]['current_bill_amount'] = MaterialProductHelper::customRound($total['current_bill_amount'] * ($taxes[$billTaxes[$j]['tax_id']]['percentage'] / 100) , 3);
                 $taxes[$billTaxes[$j]['tax_id']]['current_bill_amount'] = round($total['current_bill_amount'] * ($taxes[$billTaxes[$j]['tax_id']]['percentage'] / 100) , 3);
-                //$final['current_bill_amount'] = MaterialProductHelper::customRound(($final['current_bill_amount'] + $taxes[$billTaxes[$j]['tax_id']]['current_bill_amount']),3);
                 $final['current_bill_amount'] = round(($final['current_bill_amount'] + $taxes[$billTaxes[$j]['tax_id']]['current_bill_amount']),3);
             }
             $specialTaxes= BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
@@ -2066,18 +2076,19 @@ trait BillTrait{
                             $specialTaxAmount = $specialTaxAmount + ($taxes[$appliedOnTaxId]['current_bill_amount'] * ($specialTaxes[$j]['percentage'] / 100));
                         }
                     }
-                   // $specialTaxes[$j]['current_bill_amount'] = MaterialProductHelper::customRound($specialTaxAmount , 3);
                     $specialTaxes[$j]['current_bill_amount'] = round($specialTaxAmount , 3);
-                    $final['current_bill_gross_total_amount'] = round(($final['current_bill_amount'] + $specialTaxAmount),3);
+                    $final['current_bill_gross_total_amount'] = round(($final['current_bill_amount'] + $specialTaxAmount),3) + $bill['rounded_amount_by'];
                 }
             }else{
-                $final['current_bill_gross_total_amount'] = round($final['current_bill_amount'],3);
+                $final['current_bill_gross_total_amount'] = round($final['current_bill_amount'],3) + $bill['rounded_amount_by'];
             }
-            $totalTransactionAmount = BillTransaction::where('bill_id')->sum('amount');
+            $approvedBillStatusId = TransactionStatus::where('slug','approved')->pluck('id')->first();
+            $totalTransactionAmount = BillTransaction::where('bill_id')->where('transaction_status_id',$approvedBillStatusId)->sum('amount');
             if(($totalTransactionAmount + $request->amount) > $final['current_bill_gross_total_amount']){
                 $request->session()->flash('error','Total Payment amount is greater than total bill amount');
                 return redirect('/bill/view/'.$request->bill_id);
             }else{
+                $transactionData['transaction_status_id'] = $approvedBillStatusId;
                 if($transactionData['paid_from_advanced'] == 'advance'){
                     $transactionData['paid_from_advanced'] = true;
                     $advanceBalanceAmount = ($projectSite->advanced_balance != null) ? $projectSite->advanced_balance : 0 ;
@@ -2100,6 +2111,19 @@ trait BillTrait{
                     $bankData['balance_amount'] = $bank['balance_amount'] + $request['total'];
                     $bankData['total_amount'] = $bank['total_amount'] + $request['total'];
                     $bank->update($bankData);
+
+                }elseif($transactionData['paid_from_advanced'] == 'cancelled_bill_advance'){
+                    $quotation = $bill->quotation;
+                    if($quotation['cancelled_bill_transaction_balance_amount'] < $request->amount){
+                        $request->session()->flash('error','Transaction amount is greater that cancel bill advance balance amount. Cancel Bill Advance balance amount is '.$quotation['cancelled_bill_transaction_balance_amount']);
+                        return redirect('/bill/view/'.$request->bill_id);
+                    }else{
+                        $transactionData['paid_from_advanced'] = false;
+                        $transactionData['paid_from_slug'] = 'cancelled_bill_advance';
+                        $transactionData['payment_type_id'] = $request['payment_type_id'];
+                        BillTransaction::create($transactionData);
+                        $quotation->update(['cancelled_bill_transaction_balance_amount' => $quotation['cancelled_bill_transaction_balance_amount'] - $request->amount]);
+                    }
                 }else {
                     $transactionData['paid_from_advanced'] = false;
                     $transactionData['paid_from_slug'] = 'cash';
@@ -2139,6 +2163,32 @@ trait BillTrait{
                 }else{
                     $paidFrom = ucfirst($transactionDetails[$pagination]->paid_from_slug);
                 }
+                if($transactionDetails[$pagination]->transactionStatus->slug == 'cancelled'){
+                    $balanceAmountAfterChangeStatus = $transactionDetails[$pagination]->bill->quotation->cancelled_bill_transaction_balance_amount - $transactionDetails[$pagination]->total;
+                    if($balanceAmountAfterChangeStatus >= 0){
+                        $changeStatusButton = '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails(\'approved\','.$transactionDetails[$pagination]['id'].')">
+                                        Approve
+                                    </a><a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails(\'deleted\','.$transactionDetails[$pagination]['id'].')">
+                                        Delete
+                                    </a>';
+                    }else{
+                        $changeStatusButton = '-';
+                    }
+
+                }elseif($transactionDetails[$pagination]->transactionStatus->slug == 'approved'){
+                    $changeStatusButton = '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails(\'cancelled\','.$transactionDetails[$pagination]['id'].')">
+                                        Cancel
+ -                                   </a><a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails(\'deleted\','.$transactionDetails[$pagination]['id'].')">
+                                        Delete
+                                    </a>';
+                }else{
+                    $changeStatusButton = '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails(\'approved\','.$transactionDetails[$pagination]['id'].')">
+                                        Approve
+                                    </a><a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails(\'cancelled\','.$transactionDetails[$pagination]['id'].')">
+                                        Cancel
+                                    </a>';
+                }
+
                 $records['data'][] = [
                     $pagination+1,
                     date('j M Y',strtotime($transactionDetails[$pagination]['created_at'])),
@@ -2150,11 +2200,12 @@ trait BillTrait{
                     $transactionDetails[$pagination]['tds_amount'],
                     $transactionDetails[$pagination]['other_recovery_value'],
                     $transactionDetails[$pagination]['total'],
+                    $transactionDetails[$pagination]->transactionStatus->name,
+                    $changeStatusButton
                 ];
             }
         }catch(\Exception $e){
             $status = 500;
-            $records = array();
             $data = [
                 'action' => 'Transaction listing',
                 'params' => $request->all(),
@@ -2164,6 +2215,41 @@ trait BillTrait{
             $records = array();
         }
         return response()->json($records,$status);
+    }
+
+    public function changeBillTransactionStatus(Request $request){
+        try{
+            $billTransaction = new BillTransaction();
+            $transactionStatus = new TransactionStatus();
+            $billTransactionData = $billTransaction->where('id',$request['bill_transaction_id'])->first();
+            $bill = $billTransactionData->bill;
+            $quotation = $bill->quotation;
+            if($request['status-slug'] == 'cancelled'){
+                $quotation->update([
+                    'cancelled_bill_transaction_total_amount' => $quotation['cancelled_bill_transaction_total_amount'] + $billTransactionData['total'],
+                    'cancelled_bill_transaction_balance_amount' => $quotation['cancelled_bill_transaction_balance_amount'] + $billTransactionData['total']
+                ]);
+            }elseif($billTransactionData->transactionStatus->slug == 'cancelled'){
+                $quotation->update([
+                    'cancelled_bill_transaction_total_amount' => $quotation['cancelled_bill_transaction_total_amount'] - $billTransactionData['total'],
+                    'cancelled_bill_transaction_balance_amount' => $quotation['cancelled_bill_transaction_balance_amount'] - $billTransactionData['total']
+                ]);
+            }
+            $billTransactionData->update([
+                'transaction_status_id' => $transactionStatus->where('slug',$request['status-slug'])->pluck('id')->first(),
+                'remark' => $request['remark']
+            ]);
+
+            return redirect('/bill/view/'.$bill->id);
+        }catch (\Exception $e){
+            $status = 500;
+            $data = [
+                'action' => 'Transaction listing',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+        }
     }
 
     public function billTransactionDetail(Request $request,$transaction){

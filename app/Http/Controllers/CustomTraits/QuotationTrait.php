@@ -620,7 +620,7 @@ trait QuotationTrait{
 
                 $quotationMaterialIds[$materialId] = $quotationMaterial->id;
             }
-            $quotationProductModel = new QuotationProduct();
+/*            $quotationProductModel = new QuotationProduct();
             $summaryIds = $quotationProductModel->where('quotation_id',$quotation['id'])->distinct('summary_id')->pluck('summary_id')->toArray();
             if(count($summaryIds) > 0){
                 $quotationSummaryModel = new QuotationSummary();
@@ -643,7 +643,7 @@ trait QuotationTrait{
                         'rate_per_sqft' => $ratePerSQFT
                     ]);
                 }
-            }
+            }*/
 
             if($request->ajax()){
                 $status = 200;
