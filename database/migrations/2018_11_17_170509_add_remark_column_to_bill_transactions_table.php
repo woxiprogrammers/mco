@@ -14,7 +14,7 @@ class AddRemarkColumnToBillTransactionsTable extends Migration
     public function up()
     {
         Schema::table('bill_transactions', function (Blueprint $table) {
-            $table->text('description')->nullable();
+            $table->text('remark')->nullable();
         });
     }
 
@@ -26,7 +26,7 @@ class AddRemarkColumnToBillTransactionsTable extends Migration
     public function down()
     {
         Schema::table('bill_transactions', function (Blueprint $table) {
-            $table->dropColumn('description');
+            $table->dropColumn('remark');
         });
     }
 }

@@ -2163,7 +2163,7 @@ trait BillTrait{
                 }else{
                     $paidFrom = ucfirst($transactionDetails[$pagination]->paid_from_slug);
                 }
-                if($transactionDetails[$pagination]->transactionStatus->slug == 'cancelled'){Log::info($transactionDetails[$pagination]->bill->quotation->cancelled_bill_transaction_balance_amount);
+                if($transactionDetails[$pagination]->transactionStatus->slug == 'cancelled'){
                     $balanceAmountAfterChangeStatus = $transactionDetails[$pagination]->bill->quotation->cancelled_bill_transaction_balance_amount - $transactionDetails[$pagination]->total;
                     if($balanceAmountAfterChangeStatus >= 0){
                         $changeStatusButton = '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails('.$transactionDetails[$pagination]['id'].')">
@@ -2178,12 +2178,12 @@ trait BillTrait{
                 }elseif($transactionDetails[$pagination]->transactionStatus->slug == 'approved'){
                     $changeStatusButton = '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails('.$transactionDetails[$pagination]['id'].')">
                                         Cancel
-                                    </a><a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails('.$transactionDetails[$pagination]['id'].')">
+ -                                   </a><a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails('.$transactionDetails[$pagination]['id'].')">
                                         Delete
                                     </a>';
                 }else{
                     $changeStatusButton = '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails('.$transactionDetails[$pagination]['id'].')">
-                                        Approve
+                                        Approveee
                                     </a><a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails('.$transactionDetails[$pagination]['id'].')">
                                         Cancel
                                     </a>';

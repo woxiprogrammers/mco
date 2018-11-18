@@ -828,21 +828,6 @@
                     <input type="hidden" name="bill_transaction_id" id="bill_transaction_id">
                     <div class="form-group row">
                         <div class="col-md-4" style="text-align: right">
-                            <label class="control-label">
-                                Change Status:
-                            </label>
-                        </div>
-                        <div class="col-md-6">
-                            <select class="form-control" name="status-slug" id="status_slug">
-                                <option value="cancelled">Cancel</option>
-                                <option value="deleted">Delete</option>
-                            </select>
-                        </div>
-
-                    </div>
-
-                    <div class="form-group row">
-                        <div class="col-md-4" style="text-align: right">
                             <label for="company" class="control-label">Remark</label>
                         </div>
                         <div class="col-md-8">
@@ -854,7 +839,7 @@
                     </div>
                     <button class="btn btn-set red pull-right" type="submit">
                         <i class="fa fa-check" style="font-size: large"></i>
-                        Add &nbsp; &nbsp; &nbsp;
+                        Change &nbsp; &nbsp; &nbsp;
                     </button>
                 </form>
             </div>
@@ -881,6 +866,7 @@
 <script src="/assets/custom/bill/retention-reconcile-datatable.js" type="text/javascript"></script>
 <script>
     function openDetails(billTransactionId){
+        console.log(billTransactionId);
         $('#bill_transaction_id').val(billTransactionId);
         $("#changeStatusModel").modal('show');
     }
