@@ -2166,9 +2166,9 @@ trait BillTrait{
                 if($transactionDetails[$pagination]->transactionStatus->slug == 'cancelled'){
                     $balanceAmountAfterChangeStatus = $transactionDetails[$pagination]->bill->quotation->cancelled_bill_transaction_balance_amount - $transactionDetails[$pagination]->total;
                     if($balanceAmountAfterChangeStatus >= 0){
-                        $changeStatusButton = '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails('.$transactionDetails[$pagination]['id'].')">
+                        $changeStatusButton = '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails(\'approved\','.$transactionDetails[$pagination]['id'].')">
                                         Approve
-                                    </a><a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails('.$transactionDetails[$pagination]['id'].')">
+                                    </a><a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails(\'deleted\','.$transactionDetails[$pagination]['id'].')">
                                         Delete
                                     </a>';
                     }else{
@@ -2176,15 +2176,15 @@ trait BillTrait{
                     }
 
                 }elseif($transactionDetails[$pagination]->transactionStatus->slug == 'approved'){
-                    $changeStatusButton = '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails('.$transactionDetails[$pagination]['id'].')">
+                    $changeStatusButton = '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails(\'cancelled\','.$transactionDetails[$pagination]['id'].')">
                                         Cancel
- -                                   </a><a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails('.$transactionDetails[$pagination]['id'].')">
+ -                                   </a><a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails(\'deleted\','.$transactionDetails[$pagination]['id'].')">
                                         Delete
                                     </a>';
                 }else{
-                    $changeStatusButton = '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails('.$transactionDetails[$pagination]['id'].')">
-                                        Approveee
-                                    </a><a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails('.$transactionDetails[$pagination]['id'].')">
+                    $changeStatusButton = '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails(\'approved\','.$transactionDetails[$pagination]['id'].')">
+                                        Approve
+                                    </a><a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails(\'cancelled\','.$transactionDetails[$pagination]['id'].')">
                                         Cancel
                                     </a>';
                 }

@@ -826,6 +826,7 @@
                 <form id="changeStatusForm" method="post" action="/bill/transaction/change-status">
                     {!! csrf_field() !!}
                     <input type="hidden" name="bill_transaction_id" id="bill_transaction_id">
+                    <input type="hidden" name="status-slug" id="status_slug">
                     <div class="form-group row">
                         <div class="col-md-4" style="text-align: right">
                             <label for="company" class="control-label">Remark</label>
@@ -865,9 +866,9 @@
 <script src="/assets/custom/bill/hold-reconcile-datatable.js" type="text/javascript"></script>
 <script src="/assets/custom/bill/retention-reconcile-datatable.js" type="text/javascript"></script>
 <script>
-    function openDetails(billTransactionId){
-        console.log(billTransactionId);
+    function openDetails(changeStatusTo,billTransactionId){
         $('#bill_transaction_id').val(billTransactionId);
+        $('#status_slug').val(changeStatusTo);
         $("#changeStatusModel").modal('show');
     }
     $(document).ready(function(){
