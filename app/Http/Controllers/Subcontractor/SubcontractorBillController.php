@@ -623,41 +623,38 @@ class SubcontractorBillController extends Controller
         }
     }
 
-    public function getTransactionListing(Request $request,$subcontractorBillId){
+    public function changeBillTransactionStatus(Request $request){
         try{
-            $listingData = SubcontractorBillTransaction::where('subcontractor_bills_id', $subcontractorBillId)->get();
-            $iTotalRecords = count($listingData);
-            $records = array();
-            $records['data'] = array();
-            $end = $request->length < 0 ? count($listingData) : $request->length;
-            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($listingData); $iterator++,$pagination++ ){
-                $records['data'][$iterator] = [
-                    $iterator+1,
-                    $listingData[$pagination]['subtotal'],
-                    $listingData[$pagination]['debit'],
-                    $listingData[$pagination]['hold'],
-                    $listingData[$pagination]['retention_amount'],
-                    $listingData[$pagination]['tds_amount'],
-                    $listingData[$pagination]['other_recovery'],
-                    $listingData[$pagination]['total'],
-                    date('d M Y',strtotime($listingData[$pagination]['created_at'])),
-                    date('d M Y',strtotime($listingData[$pagination]['created_at'])),
-                    date('d M Y',strtotime($listingData[$pagination]['created_at'])),
-                ];
+            $subcontractorBillTransaction = new SubcontractorBillTransaction();
+            $transactionStatus = new TransactionStatus();
+            $billTransactionData = $subcontractorBillTransaction->where('id',$request['bill_transaction_id'])->first();
+            $bill = $billTransactionData->subcontractorBill;
+            $subcontractorStructure = $bill->subcontractorStructure;
+            if($request['status-slug'] == 'cancelled'){
+                $subcontractorStructure->update([
+                    'cancelled_bill_transaction_total_amount' => $subcontractorStructure['cancelled_bill_transaction_total_amount'] + $billTransactionData['total'],
+                    'cancelled_bill_transaction_balance_amount' => $subcontractorStructure['cancelled_bill_transaction_balance_amount'] + $billTransactionData['total']
+                ]);
+            }elseif($billTransactionData->transactionStatus->slug == 'cancelled'){
+                $subcontractorStructure->update([
+                    'cancelled_bill_transaction_total_amount' => $subcontractorStructure['cancelled_bill_transaction_total_amount'] - $billTransactionData['total'],
+                    'cancelled_bill_transaction_balance_amount' => $subcontractorStructure['cancelled_bill_transaction_balance_amount'] - $billTransactionData['total']
+                ]);
             }
-            $records["draw"] = intval($request->draw);
-            $records["recordsTotal"] = $iTotalRecords;
-            $records["recordsFiltered"] = $iTotalRecords;
-        }catch(\Exception $e){
-            $records = array();
+            $billTransactionData->update([
+                'transaction_status_id' => $transactionStatus->where('slug',$request['status-slug'])->pluck('id')->first(),
+                'remark' => $request['remark']
+            ]);
+
+            return redirect('subcontractor/bill/view/'.$bill->id);
+        }catch (\Exception $e){
+            $status = 500;
             $data = [
-                'action' => 'Get Subcontractor Listing',
-                'exception' => $e->getMessage(),
-                'params' => $request->all()
+                'action' => 'Change Transaction status',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
             ];
             Log::critical(json_encode($data));
-            abort(500);
         }
-        return response()->json($records,200);
     }
 }

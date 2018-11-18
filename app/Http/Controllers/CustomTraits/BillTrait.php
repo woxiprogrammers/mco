@@ -2237,7 +2237,7 @@ trait BillTrait{
             }
             $billTransactionData->update([
                 'transaction_status_id' => $transactionStatus->where('slug',$request['status-slug'])->pluck('id')->first(),
-                'remark' => $request['remark']
+                'status_remark' => $request['remark']
             ]);
 
             return redirect('/bill/view/'.$bill->id);
