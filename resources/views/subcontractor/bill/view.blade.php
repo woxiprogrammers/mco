@@ -314,6 +314,8 @@
                                                                     <th> Created At
                                                                         <input type="hidden" class="filter-submit">
                                                                     </th>
+                                                                    <th> Status </th>
+                                                                    <th> Action </th>
                                                                 </tr>
                                                                 </thead>
                                                                 <tbody>
@@ -333,7 +335,7 @@
                                                                         </div>
                                                                     </div>
                                                                     <div class="modal-body">
-                                                                        <form role="form" id="createTransactionForm" class="form-horizontal" method="post" action="/subcontractor/subcontractor-bills/transaction/create">
+                                                                        <form role="form" id="createTransactionForm" class="form-horizontal" method="post" action="/subcontractor/bill/transaction/create">
                                                                             {!! csrf_field() !!}
                                                                             <input type="hidden" value="{{$subcontractorBill['id']}}" name="subcontractor_bills_id">
                                                                             <input type="hidden" id="remainingTotal" name="remainingTotal" >
@@ -369,6 +371,7 @@
                                                                                         <select class="form-control" id="paid_from_slug" name="paid_from_slug" onchange="changePaidFrom(this)">
                                                                                                 <option value="bank">Bank</option>
                                                                                                 <option value="cash">Cash</option>
+                                                                                                <option value="cancel_transaction_advance">Cancel Transaction Advance</option>
                                                                                         </select>
                                                                                     </div>
                                                                                 </div>
@@ -649,6 +652,42 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="changeStatusModel" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header" style="padding-bottom:10px">
+                    <div class="row">
+                        <div class="col-md-4"></div>
+                        <div class="col-md-4"><center><h4 class="modal-title" id="exampleModalLongTitle">Change Status</h4></center></div>
+                        <div class="col-md-4"><button type="button" class="close" data-dismiss="modal"><i class="fa fa-close" style="font-size: medium"></i></button></div>
+                    </div>
+                </div>
+                <div class="modal-body" style="padding:40px 50px; font-size: 15px">
+                    <form id="changeStatusForm" method="post" action="/subcontractor/bill/transaction/change-status">
+                        {!! csrf_field() !!}
+                        <input type="hidden" name="bill_transaction_id" id="bill_transaction_id">
+                        <input type="hidden" name="status-slug" id="status_slug">
+                        <div class="form-group row">
+                            <div class="col-md-4" style="text-align: right">
+                                <label for="company" class="control-label">Remark</label>
+                            </div>
+                            <div class="col-md-8">
+                                <input type="text" class="form-control" id="remark" name="remark">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <i> Note : Cancellation of the bill will add transaction amount to advance amount</i>
+                        </div>
+                        <button class="btn btn-set red pull-right" type="submit">
+                            <i class="fa fa-check" style="font-size: large"></i>
+                            Change &nbsp; &nbsp; &nbsp;
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 @section('javascript')
     <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
@@ -662,6 +701,11 @@
     <script src="/assets/custom/subcontractor/hold-reconcile-datatable.js" type="text/javascript"></script>
     <script src="/assets/custom/subcontractor/retention-reconcile-datatable.js" type="text/javascript"></script>
     <script>
+        function openDetails(changeStatusTo,billTransactionId){
+            $('#bill_transaction_id').val(billTransactionId);
+            $('#status_slug').val(changeStatusTo);
+            $("#changeStatusModel").modal('show');
+        }
         $(document).ready(function(){
             CreateTransaction.init();
             CreatePayment.init();
@@ -815,6 +859,8 @@
         function changePaidFrom(element){
             var paidFromSlug = $(element).val();
             if(paidFromSlug == 'cash'){
+                $(element).closest('.modal-body').find('.bankData').hide();
+            }else if(paidFromSlug == 'cancel_transaction_advance'){
                 $(element).closest('.modal-body').find('.bankData').hide();
             }else{
                 $(element).closest('.modal-body').find('.bankData').show();

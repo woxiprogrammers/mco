@@ -7,6 +7,7 @@ use App\BillTransaction;
 use App\Quotation;
 use App\QuotationProduct;
 use App\QuotationSummary;
+use App\SubcontractorBillTransaction;
 use App\SubcontractorStructureType;
 use App\TransactionStatus;
 use Illuminate\Console\Command;
@@ -88,10 +89,16 @@ class BillModuleChanges extends Command
                 }
             }
         }*/
-        $billTransaction = new BillTransaction();
         $transactionStatus = new TransactionStatus();
+        $billTransaction = new BillTransaction();
+        $subcontractorBillTransaction = new SubcontractorBillTransaction();
         $approvedStatusId = $transactionStatus->where('slug','approved')->pluck('id')->first();
         $billTransaction->all()->each(function($thisBillTransaction) use ($approvedStatusId){
+           return $thisBillTransaction->update([
+                'transaction_status_id' => $approvedStatusId
+            ]);
+        });
+        $subcontractorBillTransaction->all()->each(function($thisBillTransaction) use ($approvedStatusId){
            return $thisBillTransaction->update([
                 'transaction_status_id' => $approvedStatusId
             ]);

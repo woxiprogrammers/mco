@@ -997,6 +997,31 @@ class SubcontractorController extends Controller
             $records['data'] = array();
             $end = $request->length < 0 ? count($listingData) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($listingData); $iterator++,$pagination++ ){
+                if($listingData[$pagination]->transactionStatus->slug == 'cancelled'){
+                    $balanceAmountAfterChangeStatus = $listingData[$pagination]->subcontractorBill->subcontractorStructure->cancelled_bill_transaction_balance_amount - $listingData[$pagination]->total;
+                    if($balanceAmountAfterChangeStatus >= 0){
+                        $changeStatusButton = '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails(\'approved\','.$listingData[$pagination]['id'].')">
+                                        Approve
+                                    </a><a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails(\'deleted\','.$listingData[$pagination]['id'].')">
+                                        Delete
+                                    </a>';
+                    }else{
+                        $changeStatusButton = '-';
+                    }
+                }elseif($listingData[$pagination]->transactionStatus->slug == 'approved'){
+                    $changeStatusButton = '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails(\'cancelled\','.$listingData[$pagination]['id'].')">
+                                        Cancel
+                                    </a><a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails(\'deleted\','.$listingData[$pagination]['id'].')">
+                                        Delete
+                                    </a>';
+                }else{
+                    $changeStatusButton = '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails(\'approved\','.$listingData[$pagination]['id'].')">
+                                        Approve
+                                    </a><a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails(\'cancelled\','.$listingData[$pagination]['id'].')">
+                                        Cancel
+                                    </a>';
+                }
+
                 $records['data'][$iterator] = [
                     $iterator+1,
                     $listingData[$pagination]['subtotal'],
@@ -1007,6 +1032,8 @@ class SubcontractorController extends Controller
                     $listingData[$pagination]['other_recovery'],
                     $listingData[$pagination]['total'],
                     date('d M Y',strtotime($listingData[$pagination]['created_at'])),
+                    $listingData[$pagination]->transactionStatus->name,
+                    $changeStatusButton,
                 ];
             }
             $records["draw"] = intval($request->draw);

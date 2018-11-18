@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddRemarkColumnToBillTransactionsTable extends Migration
+class AddRemarkFieldToSubcontractorBillTransactionTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class AddRemarkColumnToBillTransactionsTable extends Migration
      */
     public function up()
     {
-        Schema::table('bill_transactions', function (Blueprint $table) {
+        Schema::table('subcontractor_bill_transactions', function (Blueprint $table) {
             $table->text('status_remark')->nullable();
         });
     }
@@ -25,7 +25,7 @@ class AddRemarkColumnToBillTransactionsTable extends Migration
      */
     public function down()
     {
-        Schema::table('bill_transactions', function (Blueprint $table) {
+        Schema::table('subcontractor_bill_transactions', function (Blueprint $table) {
             $table->dropColumn('status_remark');
         });
     }

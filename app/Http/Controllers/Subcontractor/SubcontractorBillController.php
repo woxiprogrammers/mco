@@ -348,7 +348,7 @@ class SubcontractorBillController extends Controller
             if(!$unappliedSpecialTax->isEmpty()){
                 $specialTaxes += $unappliedSpecialTax->toArray();
             }
-            $finalTotal = round(($subTotal + $taxTotal),3);
+                $finalTotal = $subcontractorBill['grand_total'];
             $billNo = 0;
             foreach($totalBills as $billId){
                 $status = SubcontractorBill::join('subcontractor_bill_status','subcontractor_bill_status.id','=','subcontractor_bills.subcontractor_bill_status_id')
@@ -550,6 +550,111 @@ class SubcontractorBillController extends Controller
             ];
             Log::critical(json_encode($data));
             abort(500);
+        }
+    }
+
+    public function createTransaction(Request $request){
+        try{
+            $subcontractorBillTransactionData = $request->except('_token','remainingTotal','bank_id','payment_id','paid_from_slug');
+            $approvedBillStatusId = TransactionStatus::where('slug','approved')->pluck('id')->first();
+            $subcontractorBillTransactionData['transaction_status_id'] = $approvedBillStatusId;
+            $subcontractorBill = SubcontractorBill::where('id',$request['subcontractor_bills_id'])->first();
+            if($request->has('is_advance')){
+                $subcontractorBillTransactionData['is_advance'] = true;
+                $subcontractorBillTransaction = SubcontractorBillTransaction::create($subcontractorBillTransactionData);
+                $subcontractor = $subcontractorBillTransaction->subcontractorBill->subcontractorStructure->subcontractor;
+                $balanceAdvanceAmount = $subcontractor->balance_advance_amount;
+                $subcontractor->update(['balance_advance_amount' => $balanceAdvanceAmount - $subcontractorBillTransaction->total]);
+            }elseif($request['paid_from_slug'] == 'bank'){
+                $bank = BankInfo::where('id',$request['bank_id'])->first();
+                if($request['total'] <= $bank['balance_amount']){
+                    $subcontractorBillTransactionData['is_advance'] = false;
+                    $subcontractorBillTransactionData['bank_id'] = $request['bank_id'];
+                    $subcontractorBillTransactionData['payment_type_id'] = $request['payment_id'];
+                    $subcontractorBillTransactionData['paid_from_slug'] = $request['paid_from_slug'];
+                    $subcontractorBillTransaction = SubcontractorBillTransaction::create($subcontractorBillTransactionData);
+                    $bankData['balance_amount'] = $bank['balance_amount'] - $subcontractorBillTransaction['subtotal'];
+                    $bank->update($bankData);
+                }else{
+                    $request->session()->flash('success','Bank Balance Amount is insufficient for this transaction');
+                    return redirect('/subcontractor/bill/view/'.$subcontractorBill->id);
+                }
+            }elseif ($request['paid_from_slug'] == 'cancel_transaction_advance'){
+                $subcontractorStructure = $subcontractorBill->subcontractorStructure;
+                if($request['total'] <= $subcontractorStructure['cancelled_bill_transaction_balance_amount']){
+                    $subcontractorBillTransactionData['is_advance'] = false;
+                    $subcontractorBillTransactionData['payment_type_id'] = $request['payment_id'];
+                    $subcontractorBillTransactionData['paid_from_slug'] = $request['paid_from_slug'];
+                    $subcontractorBillTransaction = SubcontractorBillTransaction::create($subcontractorBillTransactionData);
+                    $subcontractorStructure->update([
+                        'cancelled_bill_transaction_balance_amount' => $subcontractorStructure['cancelled_bill_transaction_balance_amount'] - $request->amount
+                    ]);
+                }else{
+                    $request->session()->flash('error','Cancel Bill Transaction amount is insufficient for this transaction');
+                    return redirect('/subcontractor/bill/view/'.$subcontractorBill->id);
+                }
+            }else{
+                $statistics = $this->getSiteWiseStatistics();
+                $cashAllowedLimit = ($statistics['remainingAmount'] > 0) ? $statistics['remainingAmount'] : 0 ;
+                if($request['total'] <= $cashAllowedLimit){
+                    $subcontractorBillTransactionData['is_advance'] = false;
+                    $subcontractorBillTransactionData['paid_from_slug'] = $request['paid_from_slug'];
+                    $subcontractorBillTransaction = SubcontractorBillTransaction::create($subcontractorBillTransactionData);
+                }else{
+                    $request->session()->flash('success','Cash Amount is insufficient for this transaction');
+                    return redirect('/subcontractor/bill/view/'.$subcontractorBill->id);
+                }
+            }
+
+            if($subcontractorBillTransaction != null){
+                $request->session()->flash('success','Transaction created successfully');
+            }else{
+                $request->session()->flash('error','Cannot create transaction');
+            }
+            return redirect('/subcontractor/bill/view/'.$subcontractorBill->id);
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Create Subcontractor Bill Transaction',
+                'exception' => $e->getMessage(),
+                'params' => $request->all()
+            ];
+            Log::Critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function changeBillTransactionStatus(Request $request){
+        try{
+            $subcontractorBillTransaction = new SubcontractorBillTransaction();
+            $transactionStatus = new TransactionStatus();
+            $billTransactionData = $subcontractorBillTransaction->where('id',$request['bill_transaction_id'])->first();
+            $bill = $billTransactionData->subcontractorBill;
+            $subcontractorStructure = $bill->subcontractorStructure;
+            if($request['status-slug'] == 'cancelled'){
+                $subcontractorStructure->update([
+                    'cancelled_bill_transaction_total_amount' => $subcontractorStructure['cancelled_bill_transaction_total_amount'] + $billTransactionData['total'],
+                    'cancelled_bill_transaction_balance_amount' => $subcontractorStructure['cancelled_bill_transaction_balance_amount'] + $billTransactionData['total']
+                ]);
+            }elseif($billTransactionData->transactionStatus->slug == 'cancelled'){
+                $subcontractorStructure->update([
+                    'cancelled_bill_transaction_total_amount' => $subcontractorStructure['cancelled_bill_transaction_total_amount'] - $billTransactionData['total'],
+                    'cancelled_bill_transaction_balance_amount' => $subcontractorStructure['cancelled_bill_transaction_balance_amount'] - $billTransactionData['total']
+                ]);
+            }
+            $billTransactionData->update([
+                'transaction_status_id' => $transactionStatus->where('slug',$request['status-slug'])->pluck('id')->first(),
+                'remark' => $request['remark']
+            ]);
+
+            return redirect('subcontractor/bill/view/'.$bill->id);
+        }catch (\Exception $e){
+            $status = 500;
+            $data = [
+                'action' => 'Change Transaction status',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
         }
     }
 }

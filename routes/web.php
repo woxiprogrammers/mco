@@ -667,6 +667,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::group(['prefix' => 'transaction'], function(){
                 Route::post('create',array('uses' => 'Subcontractor\SubcontractorController@createTransaction'));
                 Route::post('listing/{subcontractorStructureBillId}',array('uses' => 'Subcontractor\SubcontractorController@getTransactionListing'));
+
             });
 
             Route::group(['prefix' => 'reconcile'], function(){
@@ -697,6 +698,12 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('edit/{subcontractorBill}', array('uses' => 'Subcontractor\SubcontractorBillController@getEditView'));
             Route::post('edit/{subcontractorBill}', array('uses' => 'Subcontractor\SubcontractorBillController@editBill'));
             Route::get('change-status/{statusSlug}/{subcontractorBill}',array('uses' => 'Subcontractor\SubcontractorBillController@changeBillStatus'));
+
+            Route::group(['prefix' => 'transaction'], function(){
+                Route::post('create',array('uses' => 'Subcontractor\SubcontractorBillController@createTransaction'));
+                Route::post('listing/{subcontractorStructureBillId}',array('uses' => 'Subcontractor\SubcontractorBillController@getTransactionListing'));
+                Route::post('change-status', array('uses' => 'Subcontractor\SubcontractorBillController@changeBillTransactionStatus'));
+            });
         });
 
         /* -------- End of New Bill related Changes -------- */

@@ -185,7 +185,7 @@
                                                             @endif
                                                                     <b>Discount</b>
                                                             </td>
-                                                                <td colspan="2">
+                                                                <td colspan="4">
                                                                     <div class="form-group" style="margin: 1%">
                                                                         <textarea class="form-control" name="discount_description" placeholder="Discount Description"></textarea>
                                                                     </div>
@@ -194,9 +194,6 @@
                                                                 <div class="form-group" style="margin: 1%">
                                                                     <input type="text" class="form-control" name="discount" placeholder="Discount Percentage" id="discount" onkeyup="calculateDiscount()">
                                                                 </div>
-                                                            </td>
-                                                            <td colspan="2">
-                                                                <label class="control-label" id="discountAmount"></label>
                                                             </td>
                                                         </tr>
                                                         <tr>
@@ -312,7 +309,7 @@
                                                             </td>
                                                             <td colspan="2">
                                                                 <div class="form-group" style="margin: 1%">
-                                                                    <input type="text" class="form-control" name="round_off_amount" id="roundOffAmount" onkeyup="calculateGrandTotal()">
+                                                                    <input type="text" class="form-control" name="round_off_amount" id="roundOffAmount" value="0" onkeyup="calculateGrandTotal()">
                                                                 </div>
                                                             </td>
                                                         </tr>
@@ -465,7 +462,7 @@
             }
             if(isNaN(roundOffAmount)){
                 roundOffAmount = 0;
-                $("#roundOffAmount").val(0);
+               // $("#roundOffAmount").val(0);
             }
             var grandTotal = parseFloat((total+roundOffAmount));
             $("#grandTotal").text(grandTotal);
