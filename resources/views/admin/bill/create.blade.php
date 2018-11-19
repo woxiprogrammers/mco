@@ -172,10 +172,10 @@
                                                                 <input type="checkbox" id="id_{{$extraItems[$iterator]->id}}" name="extra_item[{{$extraItems[$iterator]->id}}]" value="{{$extraItems[$iterator]->id}}" class="extra-item-checkbox">
                                                             </td>
                                                             <td colspan="4">
-                                                        <span>
-                                                            {{$extraItems[$iterator]->extraItem->name}}
-                                                            <input class="extra_item_description form-control" type="text" id="extra_item_description_{{$extraItems[$iterator]->id}}" name="extra_item[{{$extraItems[$iterator]->id}}][description]" disabled>
-                                                        </span>
+                                                            <span>
+                                                                {{$extraItems[$iterator]->extraItem->name}}
+                                                                <input class="extra_item_description form-control" type="text" id="extra_item_description_{{$extraItems[$iterator]->id}}" name="extra_item[{{$extraItems[$iterator]->id}}][description]" disabled>
+                                                            </span>
                                                             </td>
                                                             <td colspan="2">
                                                                 <span id="total_extra_item_rate_{{$extraItems[$iterator]->id}}">{{$extraItems[$iterator]->rate}}</span>

@@ -115,8 +115,11 @@
                                                                 </td>
                                                             </tr>
                                                             <tr>
-                                                                <th colspan="6" style="text-align: center;">
+                                                                <th colspan="3" style="text-align: center;">
                                                                     Name
+                                                                </th>
+                                                                <th colspan="3" style="text-align: center;">
+                                                                    Description
                                                                 </th>
                                                                 <th style="text-align: center;">
                                                                     Rate
@@ -124,8 +127,11 @@
                                                             </tr>
                                                             @foreach($subcontractorBill->subcontractorBillExtraItems as $subcontractorBillExtraItem)
                                                                 <tr>
-                                                                    <td colspan="6">
+                                                                    <td colspan="3">
                                                                         {{ $subcontractorBillExtraItem->subcontractorStructureExtraItem->extraItem->name }}
+                                                                    </td>
+                                                                    <td colspan="3">
+                                                                        {{ $subcontractorBillExtraItem->description }}
                                                                     </td>
                                                                     <td colspan="1">
                                                                         {{$subcontractorBillExtraItem['rate']}}
@@ -144,15 +150,15 @@
                                                                 <td colspan="3">
                                                                     <b> Discount </b>
                                                                 </td>
-                                                                <td colspan="2">
+                                                                <td colspan="3">
                                                                     {{$subcontractorBill['discount_description']}}
                                                                 </td>
                                                                 <td colspan="1">
                                                                     <label class="control-label" id="discount">{{$subcontractorBill['discount']}}</label>
                                                                 </td>
-                                                                <td colspan="1">
+                                                                {{--<td colspan="1">
                                                                     <label class="control-label" id="discountAmount"></label>
-                                                                </td>
+                                                                </td>--}}
                                                             </tr>
                                                             <tr>
                                                                 <td colspan="6">
@@ -876,9 +882,9 @@
             if(isNaN(subtotal)){
                 subtotal = 0;
             }
-            var discountAmount = parseFloat(((discount / 100) * subtotal).toFixed(3));
-            $("#discountAmount").text(discountAmount);
-            var discountedTotal = parseFloat(subtotal - discountAmount).toFixed(3);
+            /*var discountAmount = parseFloat(((discount / 100) * subtotal).toFixed(3));
+            $("#discountAmount").text(discountAmount);*/
+            var discountedTotal = parseFloat(subtotal - discount).toFixed(3);
             $("#discountedTotal").text(discountedTotal);
             calculateTaxAmount();
         }

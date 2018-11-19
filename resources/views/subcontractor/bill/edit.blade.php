@@ -40,7 +40,7 @@
                             <div class="container" style="width: 100%">
                                 <ul class="page-breadcrumb breadcrumb">
                                     <li>
-                                        <a href="/subcontractor/bill/manage/{!! $subcontractorBill['subcontractor_structure_id'] !!}">Manage Subcontractor Bills</a>
+                                        <a href="/subcontractor/bill/manage/{!! $subcontractorBill['sc_structure_id'] !!}">Manage Subcontractor Bills</a>
                                         <i class="fa fa-circle"></i>
                                     </li>
                                     <li>
@@ -132,11 +132,32 @@
                                                                 </td>
                                                         </tr>
                                                         <tr>
+                                                            <th colspan="1" style="text-align: center;">
+                                                                Action
+                                                            </th>
                                                             @if($subcontractorBill->subcontractorStructure->contractType->slug == 'itemwise')
                                                                 <th colspan="3" style="text-align: center;">
                                                             @else
                                                                 <th colspan="2" style="text-align: center;">
-                                                                    @endif
+                                                            @endif
+                                                                    Name
+                                                                </th>
+                                                                <th colspan="3" style="text-align: center;">
+                                                                    Description
+                                                                </th>
+                                                                <th colspan="2" style="text-align: center;">
+                                                                    Rate
+                                                                </th>
+                                                                <th colspan="3" style="text-align: center;">
+                                                                    Current rate
+                                                                </th>
+                                                        </tr>
+                   {{--                                     <tr>
+                                                            @if($subcontractorBill->subcontractorStructure->contractType->slug == 'itemwise')
+                                                                <th colspan="3" style="text-align: center;">
+                                                            @else
+                                                                <th colspan="2" style="text-align: center;">
+                                                            @endif
                                                                 </th>
                                                                 <th colspan="1" style="text-align: center;">
                                                                     Action
@@ -150,25 +171,32 @@
                                                                 <th colspan="3" style="text-align: center;">
                                                                     Current rate
                                                                 </th>
-                                                        </tr>
+                                                        </tr>--}}
                                                         @foreach($structureExtraItems as $structureExtraItem)
                                                             <tr>
+                                                                <td colspan="1">
+                                                                    @if(in_array($structureExtraItem['subcontractor_structure_extra_item_id'], array_column($subcontractorBill->subcontractorBillExtraItems->toArray(),'subcontractor_structure_extra_item_id')))
+                                                                        <input type="checkbox" class="extra-item-checkbox" name="structure_extra_item_ids[]" value="{{$structureExtraItem['subcontractor_structure_extra_item_id']}}" onclick="extraItemClick(this)" checked>
+                                                                    @else
+                                                                        <input type="checkbox" class="extra-item-checkbox" name="structure_extra_item_ids[]" value="{{$structureExtraItem['subcontractor_structure_extra_item_id']}}" onclick="extraItemClick(this)">
+                                                                    @endif
+                                                                </td>
                                                                 @if($subcontractorBill->subcontractorStructure->contractType->slug == 'itemwise')
                                                                     <td colspan="3">
 
                                                                 @else
                                                                     <td colspan="2">
                                                                 @endif
-                                                                    </td>
-                                                                    <td colspan="1">
-                                                                        @if(in_array($structureExtraItem['subcontractor_structure_extra_item_id'], array_column($subcontractorBill->subcontractorBillExtraItems->toArray(),'subcontractor_structure_extra_item_id')))
-                                                                            <input type="checkbox" class="extra-item-checkbox" name="structure_extra_item_ids[]" value="{{$structureExtraItem['subcontractor_structure_extra_item_id']}}" onclick="extraItemClick(this)" checked>
-                                                                        @else
-                                                                            <input type="checkbox" class="extra-item-checkbox" name="structure_extra_item_ids[]" value="{{$structureExtraItem['subcontractor_structure_extra_item_id']}}" onclick="extraItemClick(this)">
-                                                                        @endif
+                                                                        {{$structureExtraItem['name']}}
                                                                     </td>
                                                                     <td colspan="3">
-                                                                        {{$structureExtraItem['name']}}
+                                                                        <div class="form-group" style="margin: 1%;">
+                                                                            @if(in_array($structureExtraItem['subcontractor_structure_extra_item_id'], array_column($subcontractorBill->subcontractorBillExtraItems->toArray(),'subcontractor_structure_extra_item_id')))
+                                                                                <input type="text" class="form-control extra-item-description"  value="{!! $subcontractorBill->subcontractorBillExtraItems->where('subcontractor_structure_extra_item_id', $structureExtraItem['subcontractor_structure_extra_item_id'])->pluck('description')->first() !!}" readonly>
+                                                                            @else
+                                                                                <input type="text" class="form-control extra-item-description" readonly>
+                                                                            @endif
+                                                                        </div>
                                                                     </td>
                                                                     <td colspan="2">
                                                                         {{$structureExtraItem['rate']}}
@@ -205,18 +233,19 @@
                                                                     @endif
                                                                     <b>Discount</b>
                                                                 </td>
-                                                                <td colspan="2">
+                                                                <td colspan="4">
                                                                     <div class="form-group" style="margin: 1%">
                                                                         <textarea class="form-control" name="discount_description" placeholder="Discount Description">{{$subcontractorBill->discount_description}}</textarea>
                                                                     </div>
                                                                 </td>
-                                                                <td colspan="2">
+                                                                {{--<td colspan="2">
                                                                     <div class="form-group" style="margin: 1%">
                                                                         <input type="text" class="form-control" name="discount" placeholder="Discount Percentage" id="discount" onkeyup="calculateDiscount()" value="{{$subcontractorBill->discount}}">
                                                                     </div>
-                                                                </td>
+                                                                </td>--}}
                                                                 <td colspan="2">
-                                                                    <label class="control-label" id="discountAmount"></label>
+                                                                    <input type="text" class="form-control" name="discount" placeholder="Discount Amount" id="discount" onkeyup="calculateDiscount()" value="{{$subcontractorBill->discount}}">
+                                                                    {{--<label class="control-label" id="discountAmount"></label>--}}
                                                                 </td>
                                                         </tr>
                                                         <tr>
@@ -476,9 +505,9 @@
             if(isNaN(subtotal)){
                 subtotal = 0;
             }
-            var discountAmount = parseFloat(((discount / 100) * subtotal).toFixed(3));
-            $("#discountAmount").text(discountAmount);
-            var discountedTotal = parseFloat(subtotal - discountAmount).toFixed(3);
+           /* var discountAmount = parseFloat(((discount / 100) * subtotal).toFixed(3));
+            $("#discountAmount").text(discountAmount);*/
+            var discountedTotal = parseFloat(subtotal - discount).toFixed(3);
             $("#discountedTotal").text(discountedTotal);
             calculateTaxAmount();
         }
@@ -533,10 +562,15 @@
             if($(element).prop('checked')){
                 $(element).closest('tr').find('.extra-item').attr('readonly', false);
                 $(element).closest('tr').find('.extra-item').attr('name', 'structure_extra_item_rate['+structureExtraItemId+']');
+                $(element).closest('tr').find('.extra-item-description').attr('readonly', false);
+                $(element).closest('tr').find('.extra-item-description').attr('name', 'structure_extra_item_description['+structureExtraItemId+']');
             }else{
                 $(element).closest('tr').find('.extra-item').attr('readonly', true);
                 $(element).closest('tr').find('.extra-item').removeAttr('name');
                 $(element).closest('tr').find('.extra-item').val(0);
+                $(element).closest('tr').find('.extra-item-description').attr('readonly', true);
+                $(element).closest('tr').find('.extra-item-description').removeAttr('name');
+                $(element).closest('tr').find('.extra-item-description').val('');
                 calculateSubtotal();
             }
         }

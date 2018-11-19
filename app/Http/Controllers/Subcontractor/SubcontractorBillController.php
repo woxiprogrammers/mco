@@ -99,6 +99,7 @@ class SubcontractorBillController extends Controller
                 foreach($request->structure_extra_item_ids as $structureExtraItemId){
                     $subcontractorBillExtraItemData['subcontractor_structure_extra_item_id'] = $structureExtraItemId;
                     $subcontractorBillExtraItemData['rate'] = $request->structure_extra_item_rate[$structureExtraItemId];
+                    $subcontractorBillExtraItemData['description'] = $request->structure_extra_item_description[$structureExtraItemId];
                     $subcontractorBillExtraItem = SubcontractorBillExtraItem::create($subcontractorBillExtraItemData);
                 }
             }
@@ -154,7 +155,7 @@ class SubcontractorBillController extends Controller
                     ->where('subcontractor_structure.id',$subcontractorStructure->id)
                     ->whereNull('subcontractor_structure.summary_id')
                     ->where('subcontractor_bill_status_id',SubcontractorBillStatus::where('slug','disapproved')->pluck('id')->first())
-                    ->orderBy('subcontractor_bills.id','desc')
+                    ->orderBy('subcontractor_bills.id','asc')
                     ->select('subcontractor_bills.id','subcontractor_bills.qty','subcontractor_bills.subcontractor_bill_status_id','subcontractor_structure.sc_structure_type_id','subcontractor_structure.rate as rate', 'subcontractor_bills.discount as discount', 'subcontractor_bills.subtotal as subtotal', 'subcontractor_bills.grand_total as grand_total', 'subcontractor_bills.round_off_amount as round_off_amount')
                     ->get();
             }else{
@@ -162,7 +163,7 @@ class SubcontractorBillController extends Controller
                     ->where('subcontractor_structure.id',$subcontractorStructure->id)
                     ->whereNull('subcontractor_structure.summary_id')
                     ->whereIn('subcontractor_bill_status_id',SubcontractorBillStatus::whereIn('slug',['approved','draft'])->pluck('id'))
-                    ->orderBy('subcontractor_bills.id','desc')
+                    ->orderBy('subcontractor_bills.id','asc')
                     ->select('subcontractor_bills.id','subcontractor_bills.qty','subcontractor_bills.subcontractor_bill_status_id','subcontractor_structure.sc_structure_type_id','subcontractor_structure.rate as rate', 'subcontractor_bills.discount as discount', 'subcontractor_bills.subtotal as subtotal', 'subcontractor_bills.grand_total as grand_total', 'subcontractor_bills.round_off_amount as round_off_amount')
                     ->get();
             }
@@ -492,6 +493,7 @@ class SubcontractorBillController extends Controller
                     $subcontractorBillExtraItem = SubcontractorBillExtraItem::where($subcontractorBillExtraItemData)->first();
                     $subcontractorBillExtraItemData['subcontractor_structure_extra_item_id'] = $structureExtraItemId;
                     $subcontractorBillExtraItemData['rate'] = $request->structure_extra_item_rate[$structureExtraItemId];
+                    $subcontractorBillExtraItemData['description'] = $request->structure_extra_item_description[$structureExtraItemId];
                     if($subcontractorBillExtraItem == null){
                         $subcontractorBillExtraItem = SubcontractorBillExtraItem::create($subcontractorBillExtraItemData);
                     } else {
