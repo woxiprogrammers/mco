@@ -238,14 +238,8 @@
                                                                         <textarea class="form-control" name="discount_description" placeholder="Discount Description">{{$subcontractorBill->discount_description}}</textarea>
                                                                     </div>
                                                                 </td>
-                                                                {{--<td colspan="2">
-                                                                    <div class="form-group" style="margin: 1%">
-                                                                        <input type="text" class="form-control" name="discount" placeholder="Discount Percentage" id="discount" onkeyup="calculateDiscount()" value="{{$subcontractorBill->discount}}">
-                                                                    </div>
-                                                                </td>--}}
                                                                 <td colspan="2">
                                                                     <input type="text" class="form-control" name="discount" placeholder="Discount Amount" id="discount" onkeyup="calculateDiscount()" value="{{$subcontractorBill->discount}}">
-                                                                    {{--<label class="control-label" id="discountAmount"></label>--}}
                                                                 </td>
                                                         </tr>
                                                         <tr>
