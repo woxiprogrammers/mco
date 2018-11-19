@@ -544,7 +544,7 @@
             }
             if(isNaN(roundOffAmount)){
                 roundOffAmount = 0;
-                $("#roundOffAmount").val(0);
+                //$("#roundOffAmount").val(0);
             }
             var grandTotal = parseFloat((total+roundOffAmount));
             $("#grandTotal").text(grandTotal);

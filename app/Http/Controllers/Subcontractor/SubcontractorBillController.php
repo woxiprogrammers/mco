@@ -468,6 +468,13 @@ class SubcontractorBillController extends Controller
     public function editBill(Request $request, $subcontractorBill){
         try{
             $subcontractorBillData = $request->only('discount', 'discount_description', 'subtotal', 'round_off_amount', 'grand_total');
+            $approvedTrasanctionStatusId = TransactionStatus::where('slug','approved')->pluck('id')->first();
+            $subcontractorTransactionAmount = $subcontractorBill->subcontractorBillTransaction
+                ->where('transaction_status_id',$approvedTrasanctionStatusId)->sum('total');
+            if($subcontractorTransactionAmount > $subcontractorBillData['grand_total']){
+                $request->session()->flash('error', 'Cannot Edit the bill as Transaction amount is greater than the Bill amount you edited.');
+                return redirect('/subcontractor/bill/view/'.$subcontractorBill->id);
+            }
             $subcontractorBill->update($subcontractorBillData);
             foreach($request->structure_summaries as $structureSummaryId){
                 $subcontractorBillSummaryData = [
@@ -631,6 +638,7 @@ class SubcontractorBillController extends Controller
             $transactionStatus = new TransactionStatus();
             $billTransactionData = $subcontractorBillTransaction->where('id',$request['bill_transaction_id'])->first();
             $bill = $billTransactionData->subcontractorBill;
+
             $subcontractorStructure = $bill->subcontractorStructure;
             if($request['status-slug'] == 'cancelled'){
                 $subcontractorStructure->update([

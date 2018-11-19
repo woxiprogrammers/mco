@@ -1394,6 +1394,13 @@ trait BillTrait{
     public function editBill(Request $request, $bill){
         try{
             $billModel = new Bill();
+            $approvedTrasanctionStatusId = TransactionStatus::where('slug','approved')->pluck('id')->first();
+            $billTransactionAmount = $bill->transactions
+                ->where('transaction_status_id',$approvedTrasanctionStatusId)->sum('total');
+            if($billTransactionAmount > $request['grand_total']){
+                $request->session()->flash('error', 'Cannot Edit the bill as Transaction amount is greater than the Bill amount you edited.');
+                return redirect('/bill/view/'.$bill->id);
+            }
             $billData = $request->only('date','performa_invoice_date','discount_amount','discount_description','grand_total');
             $billData['bank_info_id'] = $request['assign_bank'];
             $billData['rounded_amount_by'] = $request['round_amount_by'];
