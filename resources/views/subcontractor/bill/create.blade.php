@@ -117,17 +117,18 @@
                                                                 </td>
                                                         </tr>
                                                         <tr>
+                                                            <th colspan="1" style="text-align: center;">
+                                                                Action
+                                                            </th>
                                                             @if($subcontractorStructure->contractType->slug == 'itemwise')
                                                                 <th colspan="3" style="text-align: center;">
                                                             @else
                                                                 <th colspan="2" style="text-align: center;">
                                                             @endif
-                                                            </th>
-                                                            <th colspan="1" style="text-align: center;">
-                                                                Action
+                                                                Name
                                                             </th>
                                                             <th colspan="3" style="text-align: center;">
-                                                                Name
+                                                                Description
                                                             </th>
                                                             <th colspan="2" style="text-align: center;">
                                                                 Rate
@@ -138,7 +139,18 @@
                                                         </tr>
                                                         @foreach($structureExtraItems as $structureExtraItem)
                                                             <tr>
-                                                                @if($subcontractorStructure->contractType->slug == 'itemwise')
+                                                                <td colspan="1">
+                                                                    <input type="checkbox" name="structure_extra_item_ids[]" value="{{$structureExtraItem['subcontractor_structure_extra_item_id']}}" onclick="extraItemClick(this)">
+                                                                </td>
+                                                                <td colspan="3">
+                                                                    {{$structureExtraItem['name']}}
+                                                                </td>
+                                                                <td colspan="3">
+                                                                    <div class="form-group" style="margin: 1%;">
+                                                                        <input type="text" class="form-control extra-item-description"  readonly>
+                                                                    </div>
+                                                                </td>
+                                                                {{--@if($subcontractorStructure->contractType->slug == 'itemwise')
                                                                     <td colspan="3">
 
                                                                 @else
@@ -153,7 +165,7 @@
                                                                 </td>
                                                                 <td colspan="3">
                                                                     {{$structureExtraItem['name']}}
-                                                                </td>
+                                                                </td>--}}
                                                                 <td colspan="2">
                                                                     {{$structureExtraItem['rate']}}
                                                                 </td>
@@ -185,14 +197,14 @@
                                                             @endif
                                                                     <b>Discount</b>
                                                             </td>
-                                                                <td colspan="4">
-                                                                    <div class="form-group" style="margin: 1%">
-                                                                        <textarea class="form-control" name="discount_description" placeholder="Discount Description"></textarea>
-                                                                    </div>
-                                                                </td>
+                                                            <td colspan="4">
+                                                                <div class="form-group" style="margin: 1%">
+                                                                    <textarea class="form-control" name="discount_description" placeholder="Discount Description"></textarea>
+                                                                </div>
+                                                            </td>
                                                             <td colspan="2">
                                                                 <div class="form-group" style="margin: 1%">
-                                                                    <input type="text" class="form-control" name="discount" placeholder="Discount Percentage" id="discount" onkeyup="calculateDiscount()">
+                                                                    <input type="text" class="form-control" name="discount" placeholder="Discount Amount" id="discount" onkeyup="calculateDiscount()">
                                                                 </div>
                                                             </td>
                                                         </tr>
@@ -416,9 +428,9 @@
             if(isNaN(subtotal)){
                 subtotal = 0;
             }
-            var discountAmount = parseFloat(((discount / 100) * subtotal).toFixed(3));
-            $("#discountAmount").text(discountAmount);
-            var discountedTotal = parseFloat(subtotal - discountAmount).toFixed(3);
+            /*var discountAmount = parseFloat(((discount / 100) * subtotal).toFixed(3));
+            $("#discountAmount").text(discountAmount);*/
+            var discountedTotal = parseFloat(subtotal - discount).toFixed(3);
             $("#discountedTotal").text(discountedTotal);
             calculateTaxAmount();
         }
@@ -474,10 +486,15 @@
             if($(element).prop('checked')){
                 $(element).closest('tr').find('.extra-item').attr('readonly', false);
                 $(element).closest('tr').find('.extra-item').attr('name', 'structure_extra_item_rate['+structureExtraItemId+']');
+                $(element).closest('tr').find('.extra-item-description').attr('readonly', false);
+                $(element).closest('tr').find('.extra-item-description').attr('name', 'structure_extra_item_description['+structureExtraItemId+']');
             }else{
                 $(element).closest('tr').find('.extra-item').attr('readonly', true);
                 $(element).closest('tr').find('.extra-item').removeAttr('name');
                 $(element).closest('tr').find('.extra-item').val(0);
+                $(element).closest('tr').find('.extra-item-description').attr('readonly', true);
+                $(element).closest('tr').find('.extra-item-description').removeAttr('name');
+                $(element).closest('tr').find('.extra-item-description').val('');
                 calculateSubtotal();
             }
         }
