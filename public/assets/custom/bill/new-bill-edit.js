@@ -222,11 +222,11 @@ function checkQuantity (id){
         $("#id_"+id).css('background-color',"#e1e1e1");
         var typingTimer;
         var doneTypingInterval = 500;
-        $('#current_quantity_'+id).rules('add',{
+       /* $('#current_quantity_'+id).rules('add',{
             required: true,
             min: 0.000001,
             max: diff
-        });
+        });*/
         $('#current_quantity_'+id+',#rate_per_unit_'+id).on('keyup', function () {
             clearTimeout(typingTimer);
             typingTimer = setTimeout(doneTyping, doneTypingInterval);
@@ -339,7 +339,7 @@ function calculateDiscount(){
     if((typeof discountAmount == 'undefined') || discountAmount == ''){
         $('#rounded_off_current_bill_amount').text(totalBillAmount);
     }else{
-        discountAmount = parseInt(discountAmount);
+        discountAmount = parseFloat(discountAmount);
         $('#rounded_off_current_bill_amount').text((totalBillAmount-discountAmount));
     }
     calculateTax();

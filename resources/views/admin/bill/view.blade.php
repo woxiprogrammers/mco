@@ -150,7 +150,7 @@
                                                     <th width="10%" class="numeric" style="text-align: center"> Cumulative Quantity </th>
                                                     <th width="10%" class="numeric" style="text-align: center"> Current Bill Amount </th>
                                                 </tr>
-                                                @if($bill->quotation->billType->slug == 'sqft')
+                                                @if($bill->quotation->billType->slug == 'sqft' || $bill->quotation->billType->slug == 'amountwise')
                                                     @for($iterator = 0; $iterator < count($billQuotationSummaries); $iterator++)
                                                         <tr>
                                                             <td>
