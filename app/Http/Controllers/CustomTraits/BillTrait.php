@@ -386,10 +386,15 @@ trait BillTrait{
                     $listingData[$iterator]['final_total'] = round(($listingData[$iterator]['final_total'] + $listingData[$iterator]['tax'][$tax['tax_id']]),3);
                 }
                 $listingData[$iterator]['final_total'] = $listingData[$iterator]['final_total'] + $bill['rounded_amount_by'];
-                $listingData[$iterator]['paid_amount'] = BillTransaction::where('bill_id',$bill->id)->sum('total');
-                $listingData[$iterator]['balance_amount'] = $listingData[$iterator]['final_total'] - $listingData[$iterator]['paid_amount'];
+                $paid_amount = BillTransaction::where('bill_id',$bill->id)->sum('total') + BillTransaction::where('bill_id',$bill->id)->sum('retention_amount') + BillTransaction::where('bill_id',$bill->id)->sum('tds_amount')
+                                + BillTransaction::where('bill_id',$bill->id)->sum('other_recovery_value')
+                                + BillTransaction::where('bill_id',$bill->id)->sum('hold')
+                                + BillTransaction::where('bill_id',$bill->id)->sum('debit');
+                $listingData[$iterator]['paid_amount'] = $paid_amount;
+                $listingData[$iterator]['balance_amount'] = round(($listingData[$iterator]['final_total'] - $paid_amount),2);
                 $iterator++;
             }
+
             $iTotalRecords = count($listingData);
             $records = array();
             $records['data'] = array();
