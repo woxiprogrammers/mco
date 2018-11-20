@@ -133,11 +133,11 @@ $(document).ready(function (){
                 $("#id_"+id).css('background-color',"#e1e1e1");
                 var typingTimer;
                 var doneTypingInterval = 500;
-                $('#current_quantity_'+id).rules('add',{
+                /*$('#current_quantity_'+id).rules('add',{
                     required: true,
                     min: 0.000001,
                     max: diff
-                });
+                });*/
                 $('#current_quantity_'+id+',#rate_per_unit_'+id).on('keyup', function () {
                     clearTimeout(typingTimer);
                     typingTimer = setTimeout(doneTyping, doneTypingInterval);
@@ -177,7 +177,7 @@ function calculateQuantityAmount(current_quantity,id){
         current_quantity = 0;
     }
     var cumulative_quantity = parseFloat($('#previous_quantity_'+id).text()) + parseFloat(current_quantity);
-    if(bill_type_slug == 'sqft'){
+    if(bill_type_slug == 'sqft' || bill_type_slug == 'amountwise'){
         var current_bill_amount = parseFloat(current_quantity) * parseFloat($('#rate_per_unit_'+id).val());
     }else{
         var current_bill_amount = parseFloat(current_quantity) * parseFloat($('#rate_per_unit_'+id).text());

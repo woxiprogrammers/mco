@@ -68,7 +68,6 @@ trait BillTrait{
                     $extraItem['previous_rate'] = 0;
                 }
             }
-
             if($quotation->billType->slug == 'itemwise'){
                 $productModel = new Product();
                 $categoryModel = new Category();
@@ -117,17 +116,23 @@ trait BillTrait{
                     for($i = 0 ; $i < count($quotationSummaries) ; $i++){
                         $quotationSummaries[$i]['summary_name'] = $quotationSummaries[$i]->summary->name;
                         $quotationSummaries[$i]['previous_quantity'] = 0;
-                        $quotationSummaries[$i]['quantity'] = $quotation['built_up_area'];;
+                        $quotationSummaries[$i]['quantity'] = $quotation['built_up_area'];
                         $quotationSummaries[$i]['unit'] = $sQFTUnitName;
                         $quotationSummaries[$i]['previous_quantity'] = $billQuotationSummaryModel->whereIn('bill_id',$previousBillIds)
                                             ->where('quotation_summary_id',$quotationSummaries[$i]['id'])->sum('quantity');
+                        $quotationSummaries[$i]['allowed_quantity'] = ($quotation->billType->slug == 'amountwise') ?
+                                                                  1 - $quotationSummaries[$i]['previous_quantity']
+                                                : $quotationSummaries[$i]['quantity'] - $quotationSummaries[$i]['previous_quantity'];
                     }
                 }else{
                     for($i=0 ; $i < count($quotationSummaries) ; $i++){
                         $quotationSummaries[$i]['summary_name'] = $quotationSummaries[$i]->summary->name;
                         $quotationSummaries[$i]['previous_quantity'] = 0;
-                        $quotationSummaries[$i]['quantity'] = $quotation['built_up_area'];;
+                        $quotationSummaries[$i]['quantity'] = $quotation['built_up_area'];
                         $quotationSummaries[$i]['unit'] = $sQFTUnitName;
+                        $quotationSummaries[$i]['allowed_quantity'] = ($quotation->billType->slug == 'amountwise') ?
+                            1 - $quotationSummaries[$i]['previous_quantity']
+                            : $quotationSummaries[$i]['quantity'] - $quotationSummaries[$i]['previous_quantity'];
                     }
                 }
                 return view('admin.bill.create')->with(compact('banksAssigned','extraItems','quotation','bills','project_site','quotationSummaries','taxes','specialTaxes'));
@@ -284,7 +289,7 @@ trait BillTrait{
                 }
                 $listingData[$iterator]['bill_no_format'] = "B-".strtoupper(date('M',strtotime($bill['created_at'])))."-".$bill->id."/".date('y',strtotime($bill['created_at']));
                 $total_amount = 0;
-                if($bill->quotation->billType->slug == 'sqft'){
+                if($bill->quotation->billType->slug == 'sqft' || $bill->quotation->billType->slug == 'amountwise'){
                     $billQuotationSummaryData = $bill->billQuotationSummary->where('is_deleted',false);
                     foreach($billQuotationSummaryData as $key1 => $billQuotationSummary){
                         $rate = $billQuotationSummary['rate_per_sqft'];
@@ -386,6 +391,7 @@ trait BillTrait{
                     $listingData[$iterator]['final_total'] = round(($listingData[$iterator]['final_total'] + $listingData[$iterator]['tax'][$tax['tax_id']]),3);
                 }
                 $listingData[$iterator]['final_total'] = $listingData[$iterator]['final_total'] + $bill['rounded_amount_by'];
+                $listingData[$iterator]['rounded_amount_by'] = $bill['rounded_amount_by'];
                 $paid_amount = BillTransaction::where('bill_id',$bill->id)->sum('total') + BillTransaction::where('bill_id',$bill->id)->sum('retention_amount') + BillTransaction::where('bill_id',$bill->id)->sum('tds_amount')
                                 + BillTransaction::where('bill_id',$bill->id)->sum('other_recovery_value')
                                 + BillTransaction::where('bill_id',$bill->id)->sum('hold')
@@ -426,6 +432,7 @@ trait BillTrait{
                     }
                 }
                 array_push($records['data'][$iterator],round($totalTaxAmount,3));
+                array_push($records['data'][$iterator],$listingData[$iterator]['rounded_amount_by']);
                 array_push($records['data'][$iterator],$listingData[$iterator]['final_total']);
                 array_push($records['data'][$iterator],$listingData[$iterator]['paid_amount']);
                 array_push($records['data'][$iterator],$listingData[$iterator]['balance_amount']);
@@ -583,7 +590,7 @@ trait BillTrait{
             $cancelBillStatusId = $billStatusModel->where('slug','cancelled')->pluck('id')->first();
             $bills = $billModel->where('quotation_id',$bill['quotation_id'])->where('bill_status_id','!=',$cancelBillStatusId)->orderBy('created_at','asc')->get()->toArray();
             $total['previous_bill_amount'] = $total['current_bill_subtotal'] = $total['cumulative_bill_amount'] = $total_extra_item =  0;
-            if($bill->quotation->billType->slug == 'sqft'){
+            if($bill->quotation->billType->slug == 'sqft' || $bill->quotation->billType->slug == 'amountwise'){
                 $billQuotationSummaryModel = new BillQuotationSummary();
                 $unitModel = new Unit();
                 $sQFTUnitName = $unitModel->where('slug','sqft')->pluck('name')->first();
@@ -1024,7 +1031,7 @@ trait BillTrait{
             $data['clientCompany'] = Client::where('id',$bill->quotation->project_site->project->client_id)->pluck('company')->first();
 
             $i = $j = $data['productSubTotal'] = $data['grossTotal'] = 0;
-            if($quotation->billType->slug == 'sqft'){
+            if($quotation->billType->slug == 'sqft' || $quotation->billType->slug == 'amountwise'){
                 $unitModel = new Unit();
                 $billQuotationSummaryModel = new BillQuotationSummary();
                 $billQuotationSummaries = $billQuotationSummaryModel->where('bill_id',$bill['id'])
@@ -1109,7 +1116,7 @@ trait BillTrait{
             $data['clientCompany'] = $clientModel->where('id',$bill->quotation->project_site->project->client_id)->pluck('company')->first();
             $cancelBillStatusId = $billStatusModel->where('slug','cancelled')->pluck('id')->first();
             $previousBillIds = $billModel->where('quotation_id',$bill['quotation_id'])->where('bill_status_id','!=',$cancelBillStatusId)->where('id','<',$bill['id'])->pluck('id');
-            if($bill->quotation->billType->slug == 'sqft'){
+            if($bill->quotation->billType->slug == 'sqft' || $bill->quotation->billType->slug == 'amountwise'){
                 $billQuotationSummaryModel = new BillQuotationSummary();
                 $quotationSummaryModel = new QuotationSummary();
             $allBillIds = $billModel->where('quotation_id',$bill['quotation_id'])->where('bill_status_id','!=',$cancelBillStatusId)->where('id','<=',$bill['id'])->pluck('id');
@@ -1258,7 +1265,7 @@ trait BillTrait{
                 ->where('bill_status_id',$billStatusModel->where('slug','approved')->pluck('id')->first())
                 ->pluck('id');
             $allBillIDsTillThisBill = $billModel->where('id','<=',$bill->id)->where('quotation_id',$bill->quotation_id)->where('bill_status_id','!=',$cancelBillStatusId)->pluck('id')->toArray();
-            if($quotation->billType->slug == 'sqft'){
+            if($quotation->billType->slug == 'sqft' || $quotation->billType->slug == 'amountwise'){
                 $quotationSummaryModel = new QuotationSummary();
                 $billQuotationSummaryModel = new BillQuotationSummary();
                 $unitModel = new Unit();
@@ -1273,7 +1280,10 @@ trait BillTrait{
                         ->where('quotation_summary_id',$quotationSummary['id'])->sum('quantity');
                     $billQuotationSummary = $billQuotationSummaryModel->where('bill_id',$bill['id'])
                         ->where('quotation_summary_id',$quotationSummary['id'])->where('is_deleted',false)->first();
-                    $quotationSummary['quantity'] = $quotation['built_up_area'];;
+                    $quotationSummary['quantity'] = $quotation['built_up_area'];
+                    $quotationSummary['allowed_quantity'] = ($quotation->billType->slug == 'amountwise')
+                                        ? 1 - $quotationSummary['previous_quantity']
+                                        : $quotation['built_up_area'] - $quotationSummary['previous_quantity'];
                     if($billQuotationSummary != null){
                         if(($billQuotationSummary['product_description_id'] != null)){
                             $quotationSummary['bill_description'] = $billQuotationSummary->productDescription
@@ -1302,6 +1312,7 @@ trait BillTrait{
                                 $quotationProduct['bill_product_description_id'] = ($billQuotationProduct->product_description_id != null) ? $billQuotationProduct->product_description_id : null;
                                 $quotationProduct['current_quantity'] = $billQuotationProduct->quantity;
                             }
+                            $quotationProduct['allowed_quantity'] = $quotationProduct['quantity'] - $quotationProduct['previous_quantity'];
                         }
                     }
                 }
@@ -1380,7 +1391,7 @@ trait BillTrait{
                 $i++;
             }
             $allbankInfoIds = QuotationBankInfo::where('quotation_id',$bill->quotation_id)->select('bank_info_id')->get();
-            if($bill->quotation->billType->slug == 'sqft'){
+            if($bill->quotation->billType->slug == 'sqft' || $bill->quotation->billType->slug == 'amountwise'){
                 return view('admin.bill.edit')->with(compact('sQFTUnitName','bill','quotationSummaries','taxes','specialTaxes','quotationExtraItems','allbankInfoIds'));
             }else{
                 return view('admin.bill.item-wise.edit')->with(compact('bill','quotationProducts','taxes','specialTaxes','quotationExtraItems','allbankInfoIds'));
@@ -1414,7 +1425,7 @@ trait BillTrait{
             }
             $bill->update($billData);
             $quotation = $bill->quotation;
-            if($quotation->billType->slug == 'sqft'){
+            if($quotation->billType->slug == 'sqft' || $quotation->billType->slug == 'amountwise'){
                 $billQuotationSummaryModel = new BillQuotationSummary();
                 $quotationSummaryRequestData = $request['quotation_summary_id'];
                 foreach ($quotationSummaryRequestData as $quotationSummaryId => $quotationSummaryRequest){
@@ -2001,7 +2012,7 @@ trait BillTrait{
             $bill = Bill::findOrFail($request->bill_id);
             $bills = Bill::where('quotation_id',$bill['quotation_id'])->where('bill_status_id','!=',$cancelBillStatusId)->orderBy('created_at','asc')->get()->toArray();
             $total['previous_bill_amount'] = $total['current_bill_subtotal'] = $total['cumulative_bill_amount'] = $total_extra_item =  0;
-            if($bill->quotation->billType->slug == 'sqft'){
+            if($bill->quotation->billType->slug == 'sqft' || $bill->quotation->billType->slug == 'amountwise'){
                 $billQuotationSummaryModel = new BillQuotationSummary();
                 $billModel = new Bill();
                 $billQuotationSummaries = $billQuotationSummaryModel->where('is_deleted',false)->where('bill_id',$bill['id'])->get();

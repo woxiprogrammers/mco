@@ -97,7 +97,6 @@
                                                         </div>
 
                                                     </div>
-
                                                     <table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll; " id="editBillTable">
                                                         <tr style="text-align: center">
                                                             <th width="1%">
@@ -172,9 +171,9 @@
 
                                                                 <td class="form-group">
                                                                     @if(array_key_exists('current_quantity',$quotationSummaries[$iterator]->toArray()))
-                                                                        <input class="form-control current_quantity" type="text" id="current_quantity_{{$quotationSummaries[$iterator]['id']}}" name="quotation_summary_id[{{$quotationSummaries[$iterator]['id']}}][current_quantity]" value="{{$quotationSummaries[$iterator]['current_quantity']}}">
+                                                                        <input class="form-control current_quantity" type="text" id="current_quantity_{{$quotationSummaries[$iterator]['id']}}" name="quotation_summary_id[{{$quotationSummaries[$iterator]['id']}}][current_quantity]" value="{{$quotationSummaries[$iterator]['current_quantity']}}" max="{{$quotationSummaries[$iterator]['allowed_quantity']}}">
                                                                     @else
-                                                                        <input class="form-control current_quantity" type="text" id="current_quantity_{{$quotationSummaries[$iterator]['id']}}" name="quotation_summary_id[{{$quotationSummaries[$iterator]['id']}}][current_quantity]" disabled>
+                                                                        <input class="form-control current_quantity" type="text" id="current_quantity_{{$quotationSummaries[$iterator]['id']}}" name="quotation_summary_id[{{$quotationSummaries[$iterator]['id']}}][current_quantity]" disabled max="{{$quotationSummaries[$iterator]['allowed_quantity']}}">
                                                                     @endif
                                                                 </td>
 

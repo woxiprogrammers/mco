@@ -145,7 +145,7 @@
                                                                 <span id="previous_quantity_{{$quotationSummaries[$iterator]['id']}}">{{$quotationSummaries[$iterator]['previous_quantity']}}</span>
                                                             </td>
                                                             <td class="form-group">
-                                                                <input class="form-control current_quantity" type="text" id="current_quantity_{{$quotationSummaries[$iterator]['id']}}" name="quotation_summary_id[{{$quotationSummaries[$iterator]['id']}}][current_quantity]" disabled>
+                                                                <input class="form-control current_quantity" type="text" id="current_quantity_{{$quotationSummaries[$iterator]['id']}}" name="quotation_summary_id[{{$quotationSummaries[$iterator]['id']}}][current_quantity]" max="{{$quotationSummaries[$iterator]['allowed_quantity']}}" disabled>
                                                             </td>
                                                             <td>
                                                                 <span id="cumulative_quantity_{{$quotationSummaries[$iterator]['id']}}"></span>
