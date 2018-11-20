@@ -129,6 +129,9 @@
                                                         <small class="font-green-sharp"> ₹ </small>
                                                     </h3>
                                                     <hr>
+                                                    <h4 class="font-green-sharp">
+                                                        <span data-counter="counterup" id="salesValueWords" style="text-transform: capitalize;"></span>
+                                                    </h4>
                                                     <span class="caption-subject bold uppercase" style="font-size: large"> SALE P/L </span>
                                                 </div>
                                             </div>
@@ -141,10 +144,11 @@
                                                     <h3 class="font-red-haze">
                                                         <span data-counter="counterup" id="receiptValue">  0.000 </span>
                                                         <small class="font-red-haze"> ₹ </small>
-
                                                     </h3>
                                                     <hr>
-
+                                                    <h4 class="font-red-haze">
+                                                        <span data-counter="counterup" id="receiptValueWords" style="text-transform: capitalize;"></span>
+                                                    </h4>
                                                     <span class="caption-subject bold uppercase" style="font-size: large"> RECEIPT P/L </span>
                                                 </div>
                                             </div>
@@ -157,9 +161,11 @@
                                                     <h3 class="font-blue-sharp">
                                                         <span data-counter="counterup" id="outstandingMobilization">  0.000 </span>
                                                         <small class="font-blue-sharp"> ₹ </small>
-
                                                     </h3>
                                                     <hr>
+                                                    <h4 class="font-blue-sharp">
+                                                        <span data-counter="counterup" id="outstandingMobilizationWords" style="text-transform: capitalize;"></span>
+                                                    </h4>
                                                     <span class="caption-subject bold uppercase" style="font-size: large"> OUTSTANDING MOBILIZATION </span>
                                                 </div>
                                             </div>

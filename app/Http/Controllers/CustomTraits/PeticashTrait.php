@@ -196,12 +196,11 @@ trait PeticashTrait{
                     ->where('paid_from_slug','cash')->sum('gst');
                 $indirectTDSCashAmount = ProjectSiteIndirectExpense::where('project_site_id',$projectSiteId)
                     ->where('paid_from_slug','cash')->sum('tds');
-                $remainingAmount = round((($allocatedAmount + $projectSiteAdvancedAmount + $salesBillCashAmount + $salesBillTransactions) -
+                $remainingAmount = round(($allocatedAmount -
                     ($totalSalaryAmount + $totalAdvanceAmount + $totalPurchaseAmount + $cashPurchaseOrderAdvancePaymentTotal
                         + $cashSubcontractorAdvancePaymentTotal + $cashSubcontractorBillTransactionTotal
                         + $subcontractorBillReconcile + $siteTransferCashAmount + $assetMaintenanceCashAmount
                         + $indirectGSTCashAmount + $indirectTDSCashAmount)),3);
-                $allocatedAmount = $allocatedAmount + $salesBillCashAmount + $salesBillTransactions + $projectSiteAdvancedAmount;
                 $projectName = Project::join('project_sites','projects.id','=','project_sites.project_id')
                                         ->where('project_sites.id', $projectSiteId)
                                         ->pluck('projects.name')->first();
