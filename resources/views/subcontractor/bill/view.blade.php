@@ -767,8 +767,9 @@
                     total += parseFloat(amount);
                 });
                 var changedPayableAmount = originalPayablemount - (total - parseFloat($('#subtotalAmount').val()));
+                changedPayableAmount = changedPayableAmount.toFixed(3)
                 $('#payableAmount').val(changedPayableAmount);
-                $("#transactionTotal").val(total);
+                $("#transactionTotal").val(total.toFixed(3));
                 $("#subtotalAmount").rules('add',{
                     max: changedPayableAmount
                 });
