@@ -1676,54 +1676,112 @@ trait BillTrait{
             $data['cancelledBillStatus'] = BillStatus::where('slug','cancelled')->first();
             $data['tillThisBill'] = Bill::where('quotation_id',$bill->quotation_id)->where('id','<=',$bill->id)->where('bill_status_id','!=',$data['cancelledBillStatus']->id)->orderBy('id','asc')->get();
             $data['bill'] = $bill;
-            $billQuotationProducts = BillQuotationProducts::whereIn('bill_id',array_column($data['tillThisBill']->toArray(),'id'))->distinct('quotation_product_id')->select('quotation_product_id')->get();
-            $i = 0;
-            $productArray = array();
-            $billSubTotal = array();
-            foreach($billQuotationProducts as $key => $billQuotationProduct){
-                $currrentProductId = $billQuotationProduct['quotation_product_id'];
-                $productArray[$i]['name'] = $billQuotationProduct->quotation_products->product->name;
-                $productArray[$i]['quotation_product_id'] = $billQuotationProduct->quotation_product_id;
-                $productArray[$i]['discounted_rate'] = round(($billQuotationProduct->quotation_products->rate_per_unit - ($billQuotationProduct->quotation_products->rate_per_unit * ($bill->quotation->discount / 100))),3);
-                $productArray[$i]['BOQ'] = $billQuotationProduct->quotation_products->quantity;
-                $productArray[$i]['WO_amount'] = $productArray[$i]['discounted_rate'] * $productArray[$i]['BOQ'];
-                $description = BillQuotationProducts::whereIn('bill_id',array_column($data['tillThisBill']->toArray(),'id'))->where('quotation_product_id',$billQuotationProduct->quotation_product_id)->orderBy('product_description_id','asc')->distinct('product_description_id')->select('product_description_id')->get();
-                $j = 0;
-                $productArray[$i]['description'] = array();
-                foreach($description as $key1 => $description_id){
-                    $productArray[$i]['description'][$description_id->product_description->id]['description'] = $description_id->product_description->description;
-                    $productArray[$i]['description'][$description_id->product_description->id]['bills'] =array();
-                    $iterator = 0;
-                    $totalBillQuantity = 0;
-                    $totalBillAmount = 0;
-                    foreach($data['tillThisBill'] as $key2 => $thisBill){
-                        $currentProductQuantity = BillQuotationProducts::where('bill_id',$thisBill->id)->where('quotation_product_id',$currrentProductId)->where('product_description_id',$description_id->product_description_id)->pluck('quantity')->first();
-                        if($currentProductQuantity != null){
-                            $productArray[$i]['description'][$description_id->product_description->id]['bills'][$iterator]['quantity'] = $currentProductQuantity;
-                            $productArray[$i]['description'][$description_id->product_description->id]['bills'][$iterator]['amount'] = round(($currentProductQuantity *  $productArray[$i]['discounted_rate']),3);
-                        }else{
-                            $productArray[$i]['description'][$description_id->product_description->id]['bills'][$iterator]['quantity'] = 0;
-                            $productArray[$i]['description'][$description_id->product_description->id]['bills'][$iterator]['amount'] = 0;
-                        }
-                        if(array_key_exists($thisBill->id,$billSubTotal)){
-                            $billSubTotal[$thisBill->id]['subtotal'] +=  $productArray[$i]['description'][$description_id->product_description->id]['bills'][$iterator]['amount'];
-                        }else{
-                            $billSubTotal[$thisBill->id]['subtotal'] = array();
-                            $billSubTotal[$thisBill->id]['subtotal'] =  $productArray[$i]['description'][$description_id->product_description->id]['bills'][$iterator]['amount'];
-                        }
-                        $billSubTotal[$thisBill->id]['discounted_total'] = round(($billSubTotal[$thisBill->id]['subtotal'] - $thisBill->discount_amount),3);
-                        $billSubTotal[$thisBill->id]['discount'] = $thisBill->discount_amount;
-                        $totalBillQuantity += $productArray[$i]['description'][$description_id->product_description->id]['bills'][$iterator]['quantity'];
-                        $totalBillAmount += $productArray[$i]['description'][$description_id->product_description->id]['bills'][$iterator]['amount'];
-                        $iterator++;
-                    }
+            $quotation = $bill->quotation;
+            if($quotation->billType->slug == 'sqft' || $quotation->billType->slug == 'amountwise'){
+                $billQuotationSummaries = BillQuotationSummary::whereIn('bill_id',array_column($data['tillThisBill']->toArray(),'id'))->distinct('quotation_summary_id')->select('quotation_summary_id')->get();
+                $i = 0;
+                $productArray = array();
+                $billSubTotal = array();
+                foreach($billQuotationSummaries as $key => $billQuotationSummary){
+                    $currrentSummaryId = $billQuotationSummary['quotation_summary_id'];
+                    $productArray[$i]['name'] = $billQuotationSummary->quotationSummary->summary->name;
+                    $productArray[$i]['quotation_summary_id'] = $billQuotationSummary->quotation_summary_id;
+                    $productArray[$i]['discounted_rate'] = round(($billQuotationSummary->quotationSummary->rate_per_sqft),3);
+                    $productArray[$i]['BOQ'] = $billQuotationSummary->quotationSummary->quantity;
+                    $productArray[$i]['WO_amount'] = $productArray[$i]['discounted_rate'] * $productArray[$i]['BOQ'];
+                    $description = BillQuotationSummary::whereIn('bill_id',array_column($data['tillThisBill']->toArray(),'id'))->where('quotation_summary_id',$billQuotationSummary->quotation_summary_id)->orderBy('product_description_id','asc')->distinct('product_description_id')->select('product_description_id')->get();
+                    $j = 0;
+                    $productArray[$i]['description'] = array();
+                    foreach($description as $key1 => $description_id){
+                        $productArray[$i]['description'][$description_id->productDescription->id]['description'] = $description_id->productDescription->description;
+                        $productArray[$i]['description'][$description_id->productDescription->id]['bills'] =array();
+                        $iterator = 0;
+                        $totalBillQuantity = 0;
+                        $totalBillAmount = 0;
 
-                    $productArray[$i]['description'][$description_id->product_description->id]['bills']['total_quantity'] = $totalBillQuantity;
-                    $productArray[$i]['description'][$description_id->product_description->id]['bills']['total_amount'] = round($totalBillAmount,3);
-                      $j++;
+                        foreach($data['tillThisBill'] as $key2 => $thisBill){
+                            $thisBillQuotationSummary = BillQuotationSummary::where('bill_id',$thisBill->id)->where('quotation_summary_id',$currrentSummaryId)->first();
+                            $currentProductQuantity = BillQuotationSummary::where('bill_id',$thisBill->id)->where('quotation_summary_id',$currrentSummaryId)->where('product_description_id',$description_id->product_description_id)->pluck('quantity')->first();
+                            $productArray[$i]['description'][$description_id->productDescription->id]['bills'][$iterator]['rate'] = $thisBillQuotationSummary['rate_per_sqft'];
+                            if($currentProductQuantity != null){
+                                $productArray[$i]['description'][$description_id->productDescription->id]['bills'][$iterator]['quantity'] = $currentProductQuantity;
+                                $productArray[$i]['description'][$description_id->productDescription->id]['bills'][$iterator]['amount'] = round(($currentProductQuantity *  $thisBillQuotationSummary['rate_per_sqft']),3);
+                            }else{
+
+                                $productArray[$i]['description'][$description_id->productDescription->id]['bills'][$iterator]['quantity'] = 0;
+                                $productArray[$i]['description'][$description_id->productDescription->id]['bills'][$iterator]['amount'] = 0;
+                            }
+                            if(array_key_exists($thisBill->id,$billSubTotal)){
+                                $billSubTotal[$thisBill->id]['subtotal'] +=  $productArray[$i]['description'][$description_id->productDescription->id]['bills'][$iterator]['amount'];
+                            }else{
+                                $billSubTotal[$thisBill->id]['subtotal'] = array();
+                                $billSubTotal[$thisBill->id]['subtotal'] =  $productArray[$i]['description'][$description_id->productDescription->id]['bills'][$iterator]['amount'];
+                            }
+                            $billSubTotal[$thisBill->id]['discounted_total'] = round(($billSubTotal[$thisBill->id]['subtotal'] - $thisBill->discount_amount),3);
+                            $billSubTotal[$thisBill->id]['discount'] = $thisBill->discount_amount;
+                            $totalBillQuantity += $productArray[$i]['description'][$description_id->productDescription->id]['bills'][$iterator]['quantity'];
+                            $totalBillAmount += $productArray[$i]['description'][$description_id->productDescription->id]['bills'][$iterator]['amount'];
+                            $iterator++;
+                        }
+
+                        $productArray[$i]['description'][$description_id->productDescription->id]['bills']['total_quantity'] = $totalBillQuantity;
+                        $productArray[$i]['description'][$description_id->productDescription->id]['bills']['total_amount'] = round($totalBillAmount,3);
+                        $j++;
+                    }
+                    $i++;
                 }
-                $i++;
+            }else{
+                $billQuotationProducts = BillQuotationProducts::whereIn('bill_id',array_column($data['tillThisBill']->toArray(),'id'))->distinct('quotation_product_id')->select('quotation_product_id')->get();
+                $i = 0;
+                $productArray = array();
+                $billSubTotal = array();
+                foreach($billQuotationProducts as $key => $billQuotationProduct){
+                    $currrentProductId = $billQuotationProduct['quotation_product_id'];
+                    $productArray[$i]['name'] = $billQuotationProduct->quotation_products->product->name;
+                    $productArray[$i]['quotation_product_id'] = $billQuotationProduct->quotation_product_id;
+                    $productArray[$i]['discounted_rate'] = round(($billQuotationProduct->quotation_products->rate_per_unit - ($billQuotationProduct->quotation_products->rate_per_unit * ($bill->quotation->discount / 100))),3);
+                    $productArray[$i]['BOQ'] = $billQuotationProduct->quotation_products->quantity;
+                    $productArray[$i]['WO_amount'] = $productArray[$i]['discounted_rate'] * $productArray[$i]['BOQ'];
+                    $description = BillQuotationProducts::whereIn('bill_id',array_column($data['tillThisBill']->toArray(),'id'))->where('quotation_product_id',$billQuotationProduct->quotation_product_id)->orderBy('product_description_id','asc')->distinct('product_description_id')->select('product_description_id')->get();
+                    $j = 0;
+                    $productArray[$i]['description'] = array();
+                    foreach($description as $key1 => $description_id){
+                        $productArray[$i]['description'][$description_id->product_description->id]['description'] = $description_id->product_description->description;
+                        $productArray[$i]['description'][$description_id->product_description->id]['bills'] =array();
+                        $iterator = 0;
+                        $totalBillQuantity = 0;
+                        $totalBillAmount = 0;
+                        foreach($data['tillThisBill'] as $key2 => $thisBill){
+                            $currentProductQuantity = BillQuotationProducts::where('bill_id',$thisBill->id)->where('quotation_product_id',$currrentProductId)->where('product_description_id',$description_id->product_description_id)->pluck('quantity')->first();
+                            $productArray[$i]['description'][$description_id->product_description->id]['bills'][$iterator]['rate'] = $productArray[$i]['discounted_rate'];
+                            if($currentProductQuantity != null){
+                                $productArray[$i]['description'][$description_id->product_description->id]['bills'][$iterator]['quantity'] = $currentProductQuantity;
+                                $productArray[$i]['description'][$description_id->product_description->id]['bills'][$iterator]['amount'] = round(($currentProductQuantity *  $productArray[$i]['discounted_rate']),3);
+                            }else{
+                                $productArray[$i]['description'][$description_id->product_description->id]['bills'][$iterator]['quantity'] = 0;
+                                $productArray[$i]['description'][$description_id->product_description->id]['bills'][$iterator]['amount'] = 0;
+                            }
+                            if(array_key_exists($thisBill->id,$billSubTotal)){
+                                $billSubTotal[$thisBill->id]['subtotal'] +=  $productArray[$i]['description'][$description_id->product_description->id]['bills'][$iterator]['amount'];
+                            }else{
+                                $billSubTotal[$thisBill->id]['subtotal'] = array();
+                                $billSubTotal[$thisBill->id]['subtotal'] =  $productArray[$i]['description'][$description_id->product_description->id]['bills'][$iterator]['amount'];
+                            }
+                            $billSubTotal[$thisBill->id]['discounted_total'] = round(($billSubTotal[$thisBill->id]['subtotal'] - $thisBill->discount_amount),3);
+                            $billSubTotal[$thisBill->id]['discount'] = $thisBill->discount_amount;
+                            $totalBillQuantity += $productArray[$i]['description'][$description_id->product_description->id]['bills'][$iterator]['quantity'];
+                            $totalBillAmount += $productArray[$i]['description'][$description_id->product_description->id]['bills'][$iterator]['amount'];
+                            $iterator++;
+                        }
+
+                        $productArray[$i]['description'][$description_id->product_description->id]['bills']['total_quantity'] = $totalBillQuantity;
+                        $productArray[$i]['description'][$description_id->product_description->id]['bills']['total_amount'] = round($totalBillAmount,3);
+                        $j++;
+                    }
+                    $i++;
+                }
             }
+
             $billQuotationExtraItemCollection = BillQuotationExtraItem::whereIn('bill_id',array_column($data['tillThisBill']->toArray(),'id'))->distinct('quotation_extra_item_id')->select('quotation_extra_item_id')->get();
             $billQuotationExtraItems = $billQuotationExtraItemCollection->toArray();
             $iterator = 0;
@@ -1765,7 +1823,7 @@ trait BillTrait{
                     $taxInfo[$taxId['tax_id']]['bills'][$billId]['bill_subtotal'] = $subTotal['subtotal'];
                     $taxInfo[$taxId['tax_id']]['bills'][$billId]['bill_discountedTotal'] = $subTotal['discounted_total'];
                     $isAppliedTax = BillTax::where('tax_id',$taxId['tax_id'])->where('bill_id',$billId)->first();
-                    if(count($isAppliedTax) == 0){
+                    if($isAppliedTax == null){
                         $taxInfo[$taxId['tax_id']]['bills'][$billId]['percentage'] = 0;
                     }else{
                         $taxInfo[$taxId['tax_id']]['bills'][$billId]['percentage'] = $isAppliedTax['percentage'];
@@ -1780,6 +1838,7 @@ trait BillTrait{
                 ->distinct('bill_taxes.tax_id')
                 ->select('bill_taxes.tax_id')
                 ->get();
+
             foreach($TaxIdTillBillWithSpecialTax as $key => $taxId){
                 $taxInfo[$taxId['tax_id']]['name'] = Tax::where('id',$taxId['tax_id'])->pluck('name')->first();
                 $taxInfo[$taxId['tax_id']]['total'] = 0;
@@ -1788,7 +1847,7 @@ trait BillTrait{
                     $taxInfo[$taxId['tax_id']]['bills'][$billId]['bill_subtotal'] = $subTotal['subtotal'];
                     $taxInfo[$taxId['tax_id']]['bills'][$billId]['bill_discountedTotal'] = $subTotal['discounted_total'];
                     $isAppliedTax = BillTax::where('tax_id',$taxId['tax_id'])->where('bill_id',$billId)->first();
-                    if(count($isAppliedTax) == 0){
+                    if($isAppliedTax == null){
                         $taxInfo[$taxId['tax_id']]['bills'][$billId]['percentage'] = 0;
                         $taxAmount = 0;
                     }else{
@@ -1817,7 +1876,9 @@ trait BillTrait{
                     $row = 1;
                     for($iterator = 0 ; $iterator < count($data['tillThisBill']); $iterator++,$next_column++){
                         $current_column = $next_column++;
-                        $sheet->getCell($current_column.($row+1))->setValue('Quantity');
+                        $sheet->getCell($current_column.($row+1))->setValue('Rate');
+                        $sheet->getCell($next_column.($row+1))->setValue('Quantity');
+                        $next_column++;
                         $sheet->getCell(($next_column).($row+1))->setValue('Amount');
                         $sheet->mergeCells($current_column.$row.':'.$next_column.$row);
                         $sheet->getCell($current_column.$row)->setValue("RA Bill".($iterator+1));
@@ -1843,7 +1904,9 @@ trait BillTrait{
                             $sheet->getCell('B'.($productRow))->setValue($description['description']);
                             foreach($description['bills'] as $bill => $thisBill ){
                                 $current_column = $next_column++;
-                                $sheet->getCell($current_column.($productRow))->setValue($thisBill['quantity']);
+                                $sheet->getCell($current_column.($productRow))->setValue($thisBill['rate']);
+                                $sheet->getCell($next_column.($productRow))->setValue($thisBill['quantity']);
+                                $next_column++;
                                 $sheet->getCell(($next_column).($productRow))->setValue($thisBill['amount']);
                                 $next_column++;
                             }
@@ -1863,6 +1926,7 @@ trait BillTrait{
                         $sheet->getCell('E'.($productRow))->setValue($extraItem['quotation_rate']);
                         $next_column = 'G';
                         foreach($extraItem['bills'] as $billIterator => $thisBill ){
+                            $next_column++;
                             $current_column = $next_column++;
                             $sheet->getCell($current_column.($productRow))->setValue($thisBill['current_rate']);
                             $next_column++;
@@ -1877,6 +1941,7 @@ trait BillTrait{
                     $totalSubTotal = 0;
                     foreach($billSubTotal as $subTotal){
                         $totalSubTotal += $subTotal['subtotal'];
+                        $columnForSubTotal++;
                         $sheet->getCell($columnForSubTotal.($productRow))->setValue($subTotal['subtotal']);
                         $columnForSubTotal++;
                         $columnForSubTotal++;
@@ -1889,6 +1954,7 @@ trait BillTrait{
                     $rowForDiscount = $productRow;
                     $totalDiscount = 0;
                     foreach($billSubTotal as $subTotal){
+                        $columnForDiscount++;
                         $totalDiscount += $subTotal['discount'];
                         $sheet->getCell($columnForDiscount.($productRow))->setValue($subTotal['discount']);
                         $columnForDiscount++;
@@ -1902,6 +1968,7 @@ trait BillTrait{
                     $rowForDiscountSubtotal = $productRow;
                     $totalDiscountSubTotal = 0;
                     foreach($billSubTotal as $subTotal){
+                        $columnForDiscountSubTotal++;
                         $totalDiscountSubTotal += $subTotal['discounted_total'];
                         $sheet->getCell($columnForDiscountSubTotal.($productRow))->setValue($subTotal['discounted_total']);
                         $columnForDiscountSubTotal++;
@@ -1912,22 +1979,35 @@ trait BillTrait{
                     $productRow++;
                     foreach($taxInfo as $tax){
                         $sheet->getCell('B'.($productRow))->setValue($tax['name']);
-                        $next_column = 'F';
+                        $next_column = 'G';
                         foreach($tax['bills'] as $bill) {
                             $current_column = $next_column++;
                             $sheet->getCell($current_column . ($productRow))->setValue($bill['percentage']);
                             $sheet->getCell($next_column . ($productRow))->setValue($bill['tax_amount']);
-                            $next_column++;
+                            $next_column++;$next_column++;
                         }
-                        $next_column++;
+                       // $next_column++;
                         $sheet->getCell($next_column . ($productRow))->setValue($tax['total']);
                         $productRow++;
                     }
+
+                    $columnForTotal = 'H';
+                    $productRow++;
+                    $beforeTotalRowNumber = $productRow;
+                    $sheet->getCell('B'.($productRow))->setValue('Round Amount By');
+                    foreach($data['tillThisBill'] as $bill){
+                        $sheet->getCell($columnForTotal.($productRow))->setValue($bill['rounded_amount_by']);
+                        $columnForTotal++;
+                        $columnForTotal++;
+                        $columnForTotal++;
+                    }
+                    $productRow++;
+
                     $columnForTotal = 'G';
                     $productRow++;
-                    $beforeTotalRowNumber = $productRow - 1;
                     $sheet->getCell('B'.($productRow))->setValue('Total');
                     foreach($data['tillThisBill'] as $bill){
+                        $columnForTotal++;
                         $sheet->getCell($columnForTotal.($productRow))->setValue("=SUM($columnForTotal$rowForDiscountSubtotal:$columnForTotal$beforeTotalRowNumber)");
                         $columnForTotal++;
                         $columnForTotal++;
