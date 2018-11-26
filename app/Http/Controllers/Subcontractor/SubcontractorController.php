@@ -31,6 +31,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Client;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
 
 class SubcontractorController extends Controller
@@ -1076,8 +1077,7 @@ class SubcontractorController extends Controller
                 }
             }
 
-
-            return redirect('/subcontractor/subcontractor-bills/view/'.$request->subcontractor_bill_id);
+            return redirect()->back();
         }catch(\Exception $e){
             $data = [
                 'action' => 'Add Subcontractor Reconcile Transactions',

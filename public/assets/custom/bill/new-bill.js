@@ -256,7 +256,7 @@ function calculateSpecialTax(){
             grossTotal = grossTotal + parseFloat($(this).text());
         });
         grossTotal = grossTotal + parseFloat($('#roundAmountBy').val());
-        $("#grand_current_bill_total").val((grossTotal).toFixed(3));
+        $("#grand_current_bill_total").val(parseFloat(grossTotal).toFixed(3));
     }else{
         var grossTotal = parseFloat($("#final_current_bill_total").val());
         grossTotal = grossTotal + parseFloat($('#roundAmountBy').val());
