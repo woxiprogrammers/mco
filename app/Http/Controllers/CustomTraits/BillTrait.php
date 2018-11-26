@@ -603,7 +603,9 @@ trait BillTrait{
                                                                                     ->where('id',$billQuotationSummaries[$iterator]['product_description_id'])
                                                                                     ->where('quotation_id',$bill['quotation_id'])->first();
                     $billQuotationSummaries[$iterator]['unit'] = $sQFTUnitName;
-                    $billQuotationSummaries[$iterator]['current_bill_subtotal'] = round(($billQuotationSummaries[$iterator]['quantity'] * $billQuotationSummaries[$iterator]['rate_per_sqft']),3);
+                    $billQuotationSummaries[$iterator]['current_bill_subtotal'] = ($bill->quotation->billType->slug == 'amountwise') ?
+                                round(($billQuotationSummaries[$iterator]['quantity'] * $billQuotationSummaries[$iterator]['rate_per_sqft'] * $quotation['built_up_area']),3)
+                                : round(($billQuotationSummaries[$iterator]['quantity'] * $billQuotationSummaries[$iterator]['rate_per_sqft']),3);
                     $previousBillIdsWithoutCancelStatus = $billModel->where('quotation_id',$bill->quotation->id)
                                                                 ->where('id','<',$bill['id'])
                                                                 ->where('bill_status_id','!=',$cancelBillStatusId)
