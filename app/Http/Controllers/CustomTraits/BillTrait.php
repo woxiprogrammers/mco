@@ -292,7 +292,7 @@ trait BillTrait{
                 if($bill->quotation->billType->slug == 'sqft' || $bill->quotation->billType->slug == 'amountwise'){
                     $billQuotationSummaryData = $bill->billQuotationSummary->where('is_deleted',false);
                     foreach($billQuotationSummaryData as $key1 => $billQuotationSummary){
-                        $rate = $billQuotationSummary['rate_per_sqft'];
+                        $rate = ($bill->quotation->billType->slug == 'amountwise') ? $billQuotationSummary['rate_per_sqft'] * $bill->quotation->built_up_area : $billQuotationSummary['rate_per_sqft'];
                         $total_amount = round(($total_amount + ($billQuotationSummary['quantity'] * $rate)),3) ;
                     }
                 }else{
