@@ -90,13 +90,13 @@
                                                         <table class="table table-striped table-bordered table-hover order-column" id="purchaseOrder">
                                                             <thead>
                                                             <tr>
-                                                                <th style="width:10%;"> PO Id </th>
+                                                                <th style="width:15%;"> PO Id </th>
                                                                 <th style="width:10%;"> PR Id </th>
-                                                                <th style="width:5%;"> PO Status </th>
+                                                                <th style="width:10%;"> PO Status </th>
                                                                 <th style="width:15%;"> Vendor Company Name </th>
+                                                                <th style="width:5%;">Vendor Mobile No</th>
                                                                 <th style="width:5%;"> Approved Quantity</th>
                                                                 <th style="width:5%;"> Received  Quantity</th>
-                                                                <th style="width:5%;"> Remaining Quantity(10% extra)</th>
                                                                 <th style="width:10%;"> Status </th>
                                                                 <th style="width:10%;"> Created At</th>
                                                                 <th style="width:15%;"> Action </th>
@@ -104,7 +104,15 @@
                                                             <tr class="filter">
                                                                 <th><input type="text" class="form-control form-filter" name="po_id"></th>
                                                                 <th><input type="hidden" class="form-control form-filter" name="postdata" id="postdata"></th>
-                                                                <th></th>
+                                                                <th>
+                                                                    <select class="form-control" id="po_status_id" name="po_status_id">
+                                                                        @foreach($po_status as $status)
+                                                                        <option value="{{$status['id']}}">{{$status['name']}}</option>
+                                                                        @endforeach
+                                                                        <option value="0">ALL</option>
+                                                                    </select>
+                                                                    <input type="hidden" class="form-control form-filter" name="po_status" id="po_status">
+                                                                </th>
                                                                 <th><input type="text" class="form-control form-filter" name="vendor_name"></th>
                                                                 <th></th>
                                                                 <th></th>
@@ -152,7 +160,7 @@
                             <div class="col-md-3"><button type="button" class="close" data-dismiss="modal"><i class="fa fa-close" style="font-size: medium"></i></button></div>
                         </div>
                     </div>
-                    <div class="modal-body" style="padding:40px 50px; font-size: 15px">
+                    <div class="modal-body" style="padding:10px 10px; font-size: 15px">
 
                     </div>
                 </div>
@@ -169,7 +177,7 @@
                             <div class="col-md-3"><button type="button" class="close" data-dismiss="modal"><i class="fa fa-close" style="font-size: medium"></i></button></div>
                         </div>
                     </div>
-                    <div class="modal-body" style="padding:40px 50px; font-size: 15px">
+                    <div class="modal-body" style="padding:10px 10px; font-size: 15px">
 
                     </div>
                 </div>
@@ -220,16 +228,17 @@
                 $(".filter-submit").trigger('click');
             });
 
-            $("#search-withfilter").on('click',function(){
+            $("#po_status_id").on('change',function(){
                 var site_id = $('#globalProjectSite').val();
                 var year = $('#year').val();
                 var month = $('#month').val();
                 var status_id = $('#status_id').val();
+                var po_status_id = $('#po_status_id').val();
                 var po_id = $('#po_id').val();
                 var po_count = $('#po_count').val();
                 var vendor_name = $('#vendor_name').val();
                 var postData =
-                    'site_id=>'+site_id+','+
+                        'site_id=>'+site_id+','+
                         'year=>'+year+','+
                         'month=>'+month+','+
                         'po_count=>'+po_count;
@@ -238,6 +247,30 @@
                 $("input[name='po_id']").val(po_id);
                 $("input[name='vendor_name']").val(vendor_name);
                 $("input[name='status']").val(status_id);
+                $("input[name='po_status']").val(po_status_id);
+                $(".filter-submit").trigger('click');
+            });
+
+            $("#search-withfilter").on('click',function(){
+                var site_id = $('#globalProjectSite').val();
+                var year = $('#year').val();
+                var month = $('#month').val();
+                var status_id = $('#status_id').val();
+                var po_status_id = $('#po_status_id').val();
+                var po_id = $('#po_id').val();
+                var po_count = $('#po_count').val();
+                var vendor_name = $('#vendor_name').val();
+                var postData =
+                        'site_id=>'+site_id+','+
+                        'year=>'+year+','+
+                        'month=>'+month+','+
+                        'po_count=>'+po_count;
+
+                $("input[name='postdata']").val(postData);
+                $("input[name='po_id']").val(po_id);
+                $("input[name='vendor_name']").val(vendor_name);
+                $("input[name='status']").val(status_id);
+                $("input[name='po_status']").val(po_status_id);
                 $(".filter-submit").trigger('click');
             });
         });

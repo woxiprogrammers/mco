@@ -15,6 +15,7 @@ use App\Http\Controllers\CustomTraits\PeticashTrait;
 use App\InventoryComponent;
 use App\InventoryComponentTransferStatus;
 use App\InventoryTransferTypes;
+use App\MaterialRequestComponents;
 use App\MaterialRequestComponentTypes;
 use App\MaterialRequestComponentVersion;
 use App\MaterialVersion;
@@ -73,7 +74,11 @@ class PurchaseOrderController extends Controller
         $projectIds = ProjectSite::whereIn('id',$projectSiteIds)->pluck('project_id')->toArray();
         $clientIds = Project::whereIn('id',$projectIds)->pluck('client_id')->toArray();
         $clients = Client::whereIn('id',$clientIds)->where('is_active',true)->orderBy('id','asc')->get()->toArray();
-        return view('purchase/purchase-order/manage')->with(compact('clients'));
+        $po_status = PurchaseOrderStatus::get(['id','name'])->toArray();
+        $tmp = $po_status[0];
+        $po_status[0] = $po_status[1];
+        $po_status[1] = $tmp;
+        return view('purchase/purchase-order/manage')->with(compact('clients','po_status'));
     }
 
     public function getCreateView(Request $request){
@@ -122,6 +127,7 @@ class PurchaseOrderController extends Controller
             $user = Auth::user();
             $postdata = null;
             $status = 0;
+            $po_status = 2; //1 : represent Open status, 2: Close status, 3: All
             $site_id = 0;
             $month = 0;
             $year = 0;
@@ -144,6 +150,11 @@ class PurchaseOrderController extends Controller
             if ($request->has('status')) {
                 $status = $request['status'];
             }
+
+            if ($request->has('status')) {
+                $po_status = $request['po_status'];
+            }
+
             if($request->has('postdata')) {
                 $postdata = $request['postdata'];
                 if($postdata != null) {
@@ -200,6 +211,15 @@ class PurchaseOrderController extends Controller
                 }
             }
 
+            if ($po_status != 0 && $filterFlag == true) {
+                $ids = PurchaseOrder::join('purchase_order_statuses','purchase_order_statuses.id','=','purchase_orders.purchase_order_status_id')
+                    ->where('purchase_orders.purchase_order_status_id','=',$po_status)
+                    ->whereIn('purchase_orders.id',$ids)->pluck('purchase_orders.id');
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
             if ($po_count != 0 && $filterFlag == true) {
                 $ids = PurchaseOrder::whereIn('id',$ids)->where('serial_no', $po_count)->pluck('id');
                 if(count($ids) <= 0) {
@@ -239,11 +259,21 @@ class PurchaseOrderController extends Controller
                      $purchaseOrderList[$iterator]['purchase_order_id'] = $purchaseOrder['id'];
                      $purchaseRequest = PurchaseRequest::where('id',$purchaseOrder['purchase_request_id'])->first();
                      $purchaseOrderList[$iterator]['purchase_order_format_id'] = $this->getPurchaseIDFormat('purchase-order',$projectSite['id'],$purchaseOrder['created_at'],$purchaseOrder['serial_no']);
+                     $po_material_names = array();
+                     foreach($purchaseRequest->purchaseRequestComponents as $materialComponent) {
+                         $po_material_names[] = MaterialRequestComponents::where('id',$materialComponent['material_request_component_id'])->get()->toArray();
+                     }
+                     $poMatData = array();
+                     foreach ($po_material_names as $key => $po_mat_name) {
+                        $poMatData[] = $po_mat_name[0]['name'];
+                     }
+                     $purchaseOrderList[$iterator]['po_first_material'] = ucwords($poMatData[0]);
                      $purchaseOrderList[$iterator]['purchase_request_id'] = $purchaseOrder['purchase_request_id'];
                      $purchaseOrderList[$iterator]['purchase_request_format_id'] = $this->getPurchaseIDFormat('purchase-request',$projectSite['id'],$purchaseRequest['created_at'],$purchaseRequest['serial_no']);
                      $purchaseOrderList[$iterator]['purchase_order_status'] = ($purchaseOrder['purchase_order_status_id'] != null) ? $purchaseOrder->purchaseOrderStatus->name : '-';
                      $project = $projectSite->project;
                      $purchaseOrderList[$iterator]['client_name'] = ($purchaseOrder->vendor_id != null) ? $purchaseOrder->vendor->company : $purchaseOrder->client->company;
+                     $purchaseOrderList[$iterator]['client_mobile_no'] = ($purchaseOrder->vendor_id != null) ? $purchaseOrder->vendor->mobile : $purchaseOrder->client->mobile;
                      $purchaseOrderList[$iterator]['site_name'] = $projectSite->name;
                      $purchaseOrderComponents = $purchaseOrder->purchaseOrderComponent;
                      $purchaseOrderList[$iterator]['approved_quantity'] = $purchaseOrderComponents->sum('quantity');
@@ -281,7 +311,7 @@ class PurchaseOrderController extends Controller
                         $imageTitle = 'Email is pending.';
                     }
                     $actionData =  '<div>
-                                        <img src="/assets/global/img/'.$imageName.'" style="height: 20px" title="'.$imageTitle.'">';
+                                        <img src="/assets/global/img/'.$imageName.'" style="height: 20px" title="'.$imageTitle.'"> &nbsp;';
                     if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-purchase-order') || $user->customHasPermission('view-purchase-order')){
                         $actionData .= '<div id="sample_editable_1_new" class="btn btn-small blue" >
                                             <a href="/purchase/purchase-order/edit/'.$purchaseOrderList[$iterator]['purchase_order_id'].'" style="color: white; margin-left: 8%"> Edit
@@ -293,19 +323,28 @@ class PurchaseOrderController extends Controller
                     }
                     $actionData .= '</div>';
                 }
+
+                if ($purchaseOrderList[$pagination]['purchase_order_status'] == 'Open') {
+                    $poStatus = '<span style="color:red">'.$purchaseOrderList[$pagination]['purchase_order_status'].'</span>';
+                } elseif ($purchaseOrderList[$pagination]['purchase_order_status'] == 'Close') {
+                    $poStatus = '<span style="color:green">'.$purchaseOrderList[$pagination]['purchase_order_status'].'</span>';
+                } else {
+                    $poStatus = '<span style="color:orange">'.$purchaseOrderList[$pagination]['purchase_order_status'].'</span>';
+                }
+
                 $records['data'][$iterator] = [
                     '<a href="javascript:void(0);" onclick="openPurchaseOrderDetails('.$purchaseOrderList[$pagination]['purchase_order_id'].')">
                         '.$purchaseOrderList[$pagination]['purchase_order_format_id'].'
-                    </a>',
+                    </a>'.'<p>'.$purchaseOrderList[$pagination]['po_first_material'].'</p>',
 
                     '<a href="javascript:void(0);" onclick="openPurchaseRequestDetails('.$purchaseOrderList[$pagination]['purchase_request_id'].')">
                         '.$purchaseOrderList[$pagination]['purchase_request_format_id'].'
                     </a>',
-                    $purchaseOrderList[$pagination]['purchase_order_status'],
-                    $purchaseOrderList[$pagination]['client_name'],
+                    $poStatus,
+                    ucwords($purchaseOrderList[$pagination]['client_name']),
+                    $purchaseOrderList[$pagination]['client_mobile_no'],
                     $purchaseOrderList[$pagination]['approved_quantity'],
                     $purchaseOrderList[$pagination]['received_quantity'],
-                    $purchaseOrderList[$pagination]['remaining_quantity'],
                     $purchaseOrderList[$pagination]['status'],
                     date('d M Y',strtotime($purchaseOrderList[$pagination]['created_at'])),
                     $actionData
