@@ -55,6 +55,7 @@
                                             <div class="tab-content">
                                                 <input type="hidden" id="quotation_id" value="{{$bill->quotation_id}}">
                                                 <input type="hidden" id="bank_info_id" value="{{$bill->bank_info_id}}">
+                                                <input type="hidden" id="bill_type_id" name="bill_type_id" value="{{$bill->quotation->billType->slug}}">
                                                 <form role="form" id="edit_bill" class="form-horizontal" action="/bill/edit/{{$bill->id}}" method="post">
                                                     <div class="col-md-12 form-group">
                                                         <div class="col-md-4 date date-picker" data-date-end-date="0d">
@@ -161,7 +162,7 @@
                                                                 </td>
 
                                                                 <td>
-                                                                    <span>{{round(($quotationSummaries[$iterator]['rate_per_sqft'] * $quotationSummaries[$iterator]['quantity']),3)}}</span>
+                                                                    <span id="wo_amount_{{$quotationSummaries[$iterator]['id']}}">{{round(($quotationSummaries[$iterator]['rate_per_sqft'] * $quotationSummaries[$iterator]['quantity']),3)}}</span>
                                                                 </td>
 
                                                                 <td>
