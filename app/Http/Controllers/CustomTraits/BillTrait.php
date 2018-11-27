@@ -261,7 +261,7 @@ trait BillTrait{
                 $bills = Bill::where('quotation_id',$quotation->id)->where('bill_status_id',$statusId)->orderBy('created_at','asc')->get();
             }else{
                 $statusId = BillStatus::whereIn('slug',['approved','draft'])->get()->toArray();
-                $bills = Bill::where('quotation_id',$quotation->id)->whereIn('bill_status_id',array_column($statusId,'id'))->orderBy('created_at','asc')->get();
+                $bills = Bill::where('quotation_id',$quotation->id)->whereIn('bill_status_id',array_column($statusId,'id'))->orderBy('created_at','ascLog::info($listingData[$iterator][\'tax\'][$tax[\'tax_id\']]);')->get();
             }
             $cancelBillStatusId = BillStatus::where('slug','cancelled')->pluck('id')->first();
             $taxesAppliedToBills = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
@@ -374,19 +374,22 @@ trait BillTrait{
                 }
                 foreach($currentSpecialTaxes as $key2 => $tax){
                     $taxAmount = 0;
-                    if(array_key_exists('applied_on',$tax)){
-                        $appliedOnTaxes = json_decode($tax['applied_on']);
-                        foreach($appliedOnTaxes as $appliedTaxId){
-                            if($appliedTaxId == 0){                 // On Subtotal
-                                $taxAmount += round(($total_amount * ($tax['percentage'] / 100)),3);
-                            }else{
-                                $taxAmount += round(($listingData[$iterator]['tax'][$appliedTaxId] * ($tax['percentage'] / 100)),3);
+                    if(in_array($tax['tax_id'],array_column($thisBillSpecialTaxInfo,'tax_id'))){
+                        if(array_key_exists('applied_on',$tax)){
+                            $appliedOnTaxes = json_decode($tax['applied_on']);
+                            foreach($appliedOnTaxes as $appliedTaxId){
+                                if($appliedTaxId == 0){                 // On Subtotal
+                                    $taxAmount += round(($total_amount * ($tax['percentage'] / 100)),3);
+                                }else{
+                                    $taxAmount += round(($listingData[$iterator]['tax'][$appliedTaxId] * ($tax['percentage'] / 100)),3);
+                                }
                             }
+                        }else{
+                            $taxAmount += round(($total_amount * ($tax['percentage'] / 100)),3);
                         }
                     }else{
-                        $taxAmount += round(($total_amount * ($tax['percentage'] / 100)),3);
+                        $taxAmount += 0;
                     }
-
                     $listingData[$iterator]['tax'][$tax['tax_id']] = $taxAmount;
                     $listingData[$iterator]['final_total'] = round(($listingData[$iterator]['final_total'] + $listingData[$iterator]['tax'][$tax['tax_id']]),3);
                 }
