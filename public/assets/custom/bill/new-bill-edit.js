@@ -247,11 +247,21 @@ function checkQuantity (id){
 }
 
 function calculateQuantityAmount(current_quantity,id){
+    var bill_type_slug = $('#bill_type_id').val();
     if(current_quantity == ""){
         current_quantity = 0;
     }
     var cumulative_quantity = parseFloat($('#previous_quantity_'+id).text()) + parseFloat(current_quantity);
-    var current_bill_amount = parseFloat(current_quantity) * parseFloat($('#rate_per_unit_'+id).val());
+    if(bill_type_slug == 'sqft'){
+        var current_bill_amount = parseFloat(current_quantity) * parseFloat($('#rate_per_unit_'+id).val());
+    }else if(bill_type_slug == 'amountwise'){
+        var boq_quantity = parseFloat($('#boq_quantity_'+id).text()).toFixed(3);
+        var rate = parseFloat(parseFloat($('#rate_per_unit_'+id).val()) * boq_quantity).toFixed(3);
+        $('#wo_amount_'+id).text(rate);
+        var current_bill_amount = parseFloat(current_quantity) * rate;
+    }else{
+        var current_bill_amount = parseFloat(current_quantity) * parseFloat($('#rate_per_unit_'+id).text());
+    }
     $('#cumulative_quantity_'+id).text((cumulative_quantity).toFixed(3));
     $('#current_bill_amount_'+id).text((current_bill_amount).toFixed(3));
     getTotals();
@@ -322,13 +332,13 @@ function calculateSpecialTax(){
         });
         var grossTotal = parseFloat($("#final_current_bill_total").text()).toFixed(3);
         $(".special-tax-amount").each(function(){
-            grossTotal = grossTotal + parseFloat($(this).text());
+            grossTotal = parseFloat(grossTotal) + parseFloat($(this).text());
         });
         grossTotal = grossTotal + parseFloat($('#roundAmountBy').val());
         $("#grand_current_bill_total").val((grossTotal).toFixed(3));
     }else{
         var grossTotal = parseFloat($("#final_current_bill_total").text());
-        grossTotal = grossTotal + parseFloat($('#roundAmountBy').val());
+        grossTotal = parseFloat(grossTotal) + parseFloat($('#roundAmountBy').val());
         $("#grand_current_bill_total").val((grossTotal).toFixed(3));
     }
 }
