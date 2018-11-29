@@ -42,6 +42,7 @@ use App\PurchaseOrderBill;
 use App\PurchaseOrderBillMonthlyExpense;
 use App\SiteTransferBill;
 use App\Subcontractor;
+use App\SubcontractorAdvancePayment;
 use App\SubcontractorBill;
 use App\SubcontractorBillStatus;
 use App\Quotation;
@@ -2014,7 +2015,7 @@ class ReportManagementController extends Controller{
                                             ->select('subcontractor.id','subcontractor.subcontractor_name')->get();
                     $data[$row] = array(
                         ' Subcontractor Name', 'Basic Amount', 'Tax', 'With Tax Amount'/*, 'Transaction Amount'*/, 'TDS', 'Retention',
-                        'Hold', 'Debit', 'Other Recovery', 'Payable', 'Total Paid', 'Balance Amount'
+                        'Hold', 'Debit', 'Other Recovery', 'Payable', 'Total Paid', 'Balance Amount', 'Advanced Given', 'Total Balance'
                     );
                     $row = 1;
                     $statusId = $subcontractorBillStatus->where('slug','approved')->pluck('id');
@@ -2059,6 +2060,18 @@ class ReportManagementController extends Controller{
                                 }
                             }
                         }
+
+                        $subcontractorAdvancePayments = SubcontractorAdvancePayment::join('subcontractor','subcontractor.id','=','subcontractor_advance_payments.subcontractor_id')
+                            //->where('subcontractor_advance_payments.paid_from_slug','cash')
+                            ->where('subcontractor_advance_payments.project_site_id',$project_site_id)
+                            ->where('subcontractor.id','=',$subcontractor['id'])
+                            ->select('subcontractor_advance_payments.id as payment_id','subcontractor_advance_payments.amount as amount'
+                                ,'subcontractor_advance_payments.project_site_id as project_site_id'
+                                ,'subcontractor_advance_payments.created_at as created_at'
+                                ,'subcontractor.company_name as name')->get()->toArray();
+
+                        dd($subcontractorAdvancePayments);
+
                         $data[$row]['basic_amount'] = round($basic_amount,3);
                         $data[$row]['gst'] = round($gst,3);
                         $data[$row]['total_amount'] = round($finalAmount,3);
@@ -2071,6 +2084,8 @@ class ReportManagementController extends Controller{
                         $data[$row]['payable'] = round($finalAmount,3);
                         $data[$row]['receipt'] = round($transaction_amount,3);
                         $data[$row]['balance_remaining'] = round($finalAmount - $receipt,3);
+                        $data[$row]['advanced_amt'] = round($finalAmount - $receipt,3);
+                        $data[$row]['total_balance'] = round($finalAmount - $receipt,3);
                         $totalBasicAmount += $basic_amount; $totalGst += $gst; $totalAmount += $finalAmount;
                         $totalTransactionAmount += $transaction_amount; $totalTds += $tds; $totalRetention += $retention;
                         $totalHold += $hold; $totalDebit += $debit; $totalOtherRecovery += $other_recovery;
@@ -2082,7 +2097,8 @@ class ReportManagementController extends Controller{
                         'Total', round($totalBasicAmount,3), round($totalGst,3), round($totalAmount,3),
                        /* round($totalReceipt,3),*/ round($totalTds,3),
                         round($totalRetention,3), round($totalHold,3), round($totalDebit,3), round($totalOtherRecovery,3),
-                        round($totalAmount,3), round($totalTransactionAmount,3), round($totalBalanceRemaining,3)
+                        round($totalAmount,3), round($totalTransactionAmount,3), round($totalBalanceRemaining,3),
+                        round($totalTransactionAmount,3), round($totalBalanceRemaining,3)
                     );
                     $data[$row] = array_merge($data[$row],$totalRow);
                     $projectName = $projectSite->join('projects','projects.id','=','project_sites.project_id')
