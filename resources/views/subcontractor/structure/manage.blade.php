@@ -46,7 +46,7 @@
                                                 <thead>
                                                 <tr>
                                                     <th data-width="15%"> Subcontractor Name </th>
-                                                    <th>Vender Mobile Number</th>
+                                                    <th>Subcontractor Mobile Number</th>
                                                     <th data-width="15%"> Project Name </th>
                                                     <th> Summary Name </th>
                                                     <th data-width="20%"> Contract type </th>
