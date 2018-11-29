@@ -2061,7 +2061,7 @@ class ReportManagementController extends Controller{
                             }
                         }
 
-                        $subcontractorAdvancePayments = SubcontractorAdvancePayment::join('subcontractor','subcontractor.id','=','subcontractor_advance_payments.subcontractor_id')
+                        /*$subcontractorAdvancePayments = SubcontractorAdvancePayment::join('subcontractor','subcontractor.id','=','subcontractor_advance_payments.subcontractor_id')
                             //->where('subcontractor_advance_payments.paid_from_slug','cash')
                             ->where('subcontractor_advance_payments.project_site_id',$project_site_id)
                             ->where('subcontractor.id','=',$subcontractor['id'])
@@ -2070,7 +2070,7 @@ class ReportManagementController extends Controller{
                                 ,'subcontractor_advance_payments.created_at as created_at'
                                 ,'subcontractor.company_name as name')->get()->toArray();
 
-                        dd($subcontractorAdvancePayments);
+                        dd($subcontractorAdvancePayments);*/
 
                         $data[$row]['basic_amount'] = round($basic_amount,3);
                         $data[$row]['gst'] = round($gst,3);
