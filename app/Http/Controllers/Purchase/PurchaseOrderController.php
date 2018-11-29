@@ -151,7 +151,7 @@ class PurchaseOrderController extends Controller
                 $status = $request['status'];
             }
 
-            if ($request->has('status')) {
+            if ($request->has('po_status')) {
                 $po_status = $request['po_status'];
             }
 

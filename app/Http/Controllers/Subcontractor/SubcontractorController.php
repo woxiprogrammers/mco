@@ -226,7 +226,8 @@ class SubcontractorController extends Controller
             $projectIds = ProjectSite::whereIn('id',$projectSiteIds)->pluck('project_id')->toArray();
             $clientIds = Project::whereIn('id',$projectIds)->pluck('client_id')->toArray();
             $clients = Client::whereIn('id',$clientIds)->where('is_active',true)->orderBy('id','asc')->get()->toArray();
-            return view('subcontractor.structure.manage')->with(compact('clients'));
+            $contract_types = SubcontractorStructureType::get()->toArray();
+            return view('subcontractor.structure.manage')->with(compact('clients','contract_types'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Subcontractor Structure Manage view',
@@ -294,13 +295,19 @@ class SubcontractorController extends Controller
     public function subcontractorStructureListing(Request $request){
         try{
             $user = Auth::user();
+            $contract_status = 0;
             $filterFlag = true;
             $subcontractor_name = null;
             $project_name = null;
             if ($request->has('subcontractor_name')) {
                 $subcontractor_name = $request['subcontractor_name'];
             }
+
             $ids = SubcontractorStructure::whereNotNull('summary_id')->pluck('id');
+
+            if ($request->has('contract_status')) {
+                $contract_status = $request['contract_status'];
+            }
 
             if($request->has('project_name') && $filterFlag == true){
                 $projectSites = Project::join('project_sites','project_sites.project_id','=','projects.id')->where('projects.name','ilike','%'.$request['project_name'].'%')->select('project_sites.id')->get()->toArray();
@@ -314,9 +321,18 @@ class SubcontractorController extends Controller
             }
 
             if($request->has('subcontractor_name') && $filterFlag == true){
-                $subContractorid = Subcontractor::where('company_name','ilike','%'.$request['subcontractor_name'].'%')->select('id')->get()->toArray();
+                $subContractorid = Subcontractor::where('company_name','ilike','%'.$subcontractor_name.'%')->select('id')->get()->toArray();
                 $ids = SubcontractorStructure::whereIn('subcontractor_id',$subContractorid)
                             ->whereIn('id',$ids)->orderBy('created_at','desc')->pluck('id');
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+            if ($contract_status != 0 && $filterFlag == true) {
+                $ids = SubcontractorStructure::join('subcontractor_structure_types','subcontractor_structure_types.id','=','subcontractor_structure.sc_structure_type_id')
+                    ->where('subcontractor_structure.sc_structure_type_id','=',$contract_status)
+                    ->whereIn('subcontractor_structure.id',$ids)->pluck('subcontractor_structure.id');
                 if(count($ids) <= 0) {
                     $filterFlag = false;
                 }
@@ -410,8 +426,9 @@ class SubcontractorController extends Controller
                     }
                     $total_amount = round(($listingData[$pagination]['rate'] * $listingData[$pagination]['total_work_area']),3);
                     $records['data'][$iterator] = [
-                        $listingData[$pagination]->subcontractor->subcontractor_name,
-                        $listingData[$pagination]->projectSite->project->name,
+                        ucwords($listingData[$pagination]->subcontractor->subcontractor_name),
+                        ($listingData[$pagination]->subcontractor->primary_cont_person_mob_number != null) ?$listingData[$pagination]->subcontractor->primary_cont_person_mob_number : "-",
+                        ucwords($listingData[$pagination]->projectSite->project->name),
                         $listingData[$pagination]->summary->name,
                         $listingData[$pagination]->contractType->name,
                         $listingData[$pagination]['rate'],
