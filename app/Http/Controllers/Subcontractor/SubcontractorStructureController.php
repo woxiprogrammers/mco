@@ -133,13 +133,13 @@ class SubcontractorStructureController extends Controller
             if ($filterFlag) {
                 $listingData = SubcontractorStructure::whereIn('id',$ids)->get();
             }
-            $billTotals = 0;
-            $billPaidAmount = 0;
             if ($request->has('get_total')) {
+                $billTotals = 0;
+                $billPaidAmount = 0;
+                $totalRate = 0;
+                $totalWorkArea = 0;
+                $totalAmount = 0;
                 if ($filterFlag) {
-                    $totalRate = 0;
-                    $totalWorkArea = 0;
-                    $totalAmount = 0;
                     foreach($listingData as $subcontractorStruct) {
                         $totalRate += array_sum(array_column($subcontractorStruct->summaries->toArray(),'rate'));
                         $totalWorkArea += array_sum(array_column($subcontractorStruct->summaries->toArray(),'rate'));;
@@ -149,26 +149,7 @@ class SubcontractorStructureController extends Controller
                         $subcontractorBillIdsArray = $subcontractorStruct->subcontractorBill->where('subcontractor_bill_status_id',SubcontractorBillStatus::where('slug','approved')->pluck('id')->first())->pluck('id');
                         foreach ($subcontractorBillIdsArray as $subBillids) {
                             $subcontractorBill = SubcontractorBill::where('id',$subBillids)->first();
-                            $subcontractorStructure = $subcontractorBill->subcontractorStructure;
-                            $subcontractorBillTaxes = $subcontractorBill->subcontractorBillTaxes;
-                            $taxTotal = 0;
-                            $structureSlug = $subcontractorStructure->contractType->slug;
-                            if($structureSlug == 'sqft' || $structureSlug == 'itemwise'){
-                                $rate = $subcontractorStructure['rate'];
-                                $subTotal = round(($subcontractorBill['qty'] * $rate),3);
-                                foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
-                                    $taxTotal += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
-                                }
-                                $finalTotal = round(($subTotal + $taxTotal),3);
-                            }else{
-                                $rate = round(($subcontractorStructure['rate'] * $subcontractorStructure['total_work_area']),3);
-                                $subTotal = round(($subcontractorBill['qty'] * $rate),3);
-                                foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
-                                    $taxTotal += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
-                                }
-                                $finalTotal = round(($subTotal + $taxTotal),3);
-                            }
-                            $billTotals += round(($finalTotal),3);
+                            $billTotals += round(($subcontractorBill['grand_total']),3);
                             $billPaidAmount += round((SubcontractorBillTransaction::where('subcontractor_bills_id',$subBillids)->sum('total')),3);
                         }
                     }
@@ -190,26 +171,7 @@ class SubcontractorStructureController extends Controller
                     $billPaidAmount = 0;
                     foreach ($subcontractorBillIds as $subcontractorStructureBillId) {
                         $subcontractorBill = SubcontractorBill::where('id', $subcontractorStructureBillId)->first();
-                        $subcontractorStructure = $subcontractorBill->subcontractorStructure;
-                        $subcontractorBillTaxes = $subcontractorBill->subcontractorBillTaxes;
-                        $taxTotal = 0;
-                        $structureSlug = $subcontractorStructure->contractType->slug;
-                        if ($structureSlug == 'sqft' || $structureSlug == 'itemwise') {
-                            $rate = $subcontractorStructure['rate'];
-                            $subTotal = round(($subcontractorBill['qty'] * $rate), 3);
-                            foreach ($subcontractorBillTaxes as $key => $subcontractorBillTaxData) {
-                                $taxTotal += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100), 3);
-                            }
-                            $finalTotal = round(($subTotal + $taxTotal), 3);
-                        } else {
-                            $rate = round(($subcontractorStructure['rate'] * $subcontractorStructure['total_work_area']), 3);
-                            $subTotal = round(($subcontractorBill['qty'] * $rate), 3);
-                            foreach ($subcontractorBillTaxes as $key => $subcontractorBillTaxData) {
-                                $taxTotal += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100), 3);
-                            }
-                            $finalTotal = round(($subTotal + $taxTotal), 3);
-                        }
-                        $billTotals += round($finalTotal, 3);
+                        $billTotals += round($subcontractorBill['grand_total'], 3);
                         $billPaidAmount += round((SubcontractorBillTransaction::where('subcontractor_bills_id', $subcontractorStructureBillId)->sum('total')), 3);
                     }
                     $action = '<div class="btn-group">

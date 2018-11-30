@@ -767,11 +767,12 @@
                     total += parseFloat(amount);
                 });
                 var changedPayableAmount = originalPayablemount - (total - parseFloat($('#subtotalAmount').val()));
-                changedPayableAmount = changedPayableAmount.toFixed(3)
+                changedPayableAmount = changedPayableAmount.toFixed(3);
+                console.log('pay amount type', typeof changedPayableAmount);
                 $('#payableAmount').val(changedPayableAmount);
                 $("#transactionTotal").val(total.toFixed(3));
                 $("#subtotalAmount").rules('add',{
-                    max: changedPayableAmount
+                    max: parseFloat(changedPayableAmount)
                 });
                 var remainingBillAmount = parseFloat($("#pendingAmount").val());
                 if(remainingBillAmount == null || typeof remainingBillAmount == 'undefined' || isNaN(remainingBillAmount)){

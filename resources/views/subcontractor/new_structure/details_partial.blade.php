@@ -45,7 +45,18 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @php
+                        $totalRate = 0;
+                        $totalWorkArea = 0;
+                        $totalAmount = 0;
+                    @endphp
                     @foreach($subcontractorStructure->summaries as $subcontractorStructureSummary)
+                        @php
+                            $totalRate += $subcontractorStructureSummary->rate;
+                            $totalWorkArea += $subcontractorStructureSummary->total_work_area;
+                            $amount = $subcontractorStructureSummary->rate *  $subcontractorStructureSummary->total_work_area;
+                            $totalAmount += $amount;
+                        @endphp
                         <tr>
                             <td>
                                 {!! $subcontractorStructureSummary->summary->name !!}
@@ -60,10 +71,24 @@
                                 {!! $subcontractorStructureSummary->total_work_area !!}
                             </td>
                             <td>
-                                {!! $subcontractorStructureSummary->rate *  $subcontractorStructureSummary->total_work_area !!}
+                                {!! $amount !!}
                             </td>
                         </tr>
                     @endforeach
+                    <tr>
+                        <td colspan="2">
+                            <b>Total</b>
+                        </td>
+                        <td>
+                            {!! $totalRate !!}
+                        </td>
+                        <td>
+                            {!! $totalWorkArea !!}
+                        </td>
+                        <td>
+                            {!! $totalAmount !!}
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
