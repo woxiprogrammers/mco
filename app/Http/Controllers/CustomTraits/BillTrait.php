@@ -759,10 +759,8 @@ trait BillTrait{
                     $final['current_bill_gross_total_amount'] = round($final['current_bill_amount'],3) + $bill['rounded_amount_by'];
                 }
             }
-
-            //$BillTransactionTotals = BillTransaction::where('bill_id',$bill->id)->pluck('total')->toArray();
-            $BillTransactionTotals = BillTransaction::where('bill_id',$bill->id)->pluck('amount')->toArray();
-            $remainingAmount = ($final['current_bill_gross_total_amount'] + abs($tdsRetentionTaxAmount)) - array_sum($BillTransactionTotals);
+            $BillTransactionTotals = BillTransaction::where('bill_id',$bill->id)->sum('amount');
+            $remainingAmount = ($final['current_bill_gross_total_amount'] + abs($tdsRetentionTaxAmount)) - ($BillTransactionTotals);
             $paymentTypes = PaymentType::orderBy('id')->whereIn('slug',['cheque','neft','rtgs','internet-banking'])->get();
             $totalBillHoldAmount = BillTransaction::where('bill_id',$selectedBillId)->sum('hold');
             $reconciledHoldAmount = BillReconcileTransaction::where('bill_id',$selectedBillId)->where('transaction_slug','hold')->sum('amount');
@@ -1721,7 +1719,7 @@ trait BillTrait{
                             $currentProductQuantity = BillQuotationSummary::where('bill_id',$thisBill->id)->where('quotation_summary_id',$currrentSummaryId)->where('product_description_id',$description_id->product_description_id)->pluck('quantity')->first();
                             $productArray[$i]['description'][$description_id->productDescription->id]['bills'][$iterator]['rate'] = ($quotation->billType->slug == 'amountwise')
                                                         ? $thisBillQuotationSummary['rate_per_sqft'] * $quotation->built_up_area
-                                                        : ($quotation->billType->slug == 'amountwise');
+                                                        : $thisBillQuotationSummary['rate_per_sqft'];
                             if($currentProductQuantity != null){
                                 $productArray[$i]['description'][$description_id->productDescription->id]['bills'][$iterator]['quantity'] = $currentProductQuantity;
                                 $productArray[$i]['description'][$description_id->productDescription->id]['bills'][$iterator]['amount'] = ($quotation->billType->slug == 'amountwise')

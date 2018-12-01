@@ -89,6 +89,15 @@ class SubcontractorStructureController extends Controller
                 $structureExtraItemData['rate'] = (double)$rate;
                 $structureExtraItem = SubcontractorStructureExtraItem::create($structureExtraItemData);
             }
+            if($request->has('new_extra_item')){
+                foreach($request->new_extra_item as $extraItemData){
+                    $extraItemData['is_active'] = false;
+                    $extraItem = ExtraItem::create($extraItemData);
+                    $structureExtraItemData['extra_item_id'] = $extraItem->id;
+                    $structureExtraItemData['rate'] = (double)$extraItem->rate;
+                    $structureExtraItem = SubcontractorStructureExtraItem::create($structureExtraItemData);
+                }
+            }
             $request->session()->flash('success', 'Subcontractor structure created successfully.');
             return redirect('/subcontractor/structure/manage');
         }catch (\Exception $e){
