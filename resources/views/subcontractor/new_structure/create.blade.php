@@ -157,18 +157,31 @@
                                                             </fieldset>
                                                         </div>
                                                         <div class="tab-pane fade in" id="extraItemsTab">
-                                                           @foreach($extraItems as $extraItem)
-                                                               <div class="form-group">
-                                                                   <div class="col-md-3">
-                                                                        <label class="control-label pull-right">
-                                                                            {{$extraItem['name']}}
-                                                                        </label>
-                                                                   </div>
-                                                                   <div class="col-md-6">
-                                                                       <input type="text" class="form-control extra_items" name="extra_items[{{$extraItem['id']}}]" value="{{$extraItem['rate']}}">
-                                                                   </div>
-                                                               </div>
-                                                           @endforeach
+                                                            <fieldset>
+                                                                <legend>
+                                                                    <span>
+                                                                        <a href="#extraItemModal" data-toggle="modal" class="btn yellow pull-right">
+                                                                            <i class="fa fa-plus"> </i>
+                                                                            Extra Item
+                                                                        </a>
+                                                                    </span>
+                                                                </legend>
+                                                                @foreach($extraItems as $extraItem)
+                                                                    <div class="form-group">
+                                                                        <div class="col-md-3">
+                                                                            <label class="control-label pull-right">
+                                                                                {{$extraItem['name']}}
+                                                                            </label>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <input type="text" class="form-control extra_items" name="extra_items[{{$extraItem['id']}}]" value="{{$extraItem['rate']}}">
+                                                                        </div>
+                                                                    </div>
+                                                                @endforeach
+                                                                <div id="newExtraItemSection">
+
+                                                                </div>
+                                                            </fieldset>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -183,12 +196,53 @@
             </div>
         </div>
     </div>
+    <div id="extraItemModal" class="modal fade" role="dialog">
+        <div class="modal-dialog" style="width: 70%;">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title" style="text-align: center"> <b>Create extra item </b> </h4>
+                </div>
+                <div class="modal-body form">
+                    <form role="form" id="create-extra-item" class="form-horizontal" method="post">
+                        {!! csrf_field() !!}
+                        <div class="form-body">
+                            <div class="form-group row">
+                                <div class="col-md-3" style="text-align: right">
+                                    <label for="name" class="control-label">Name</label>
+                                    <span>*</span>
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="text" class="form-control" id="name" name="name">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-3 control-label">Rate</label>
+                            <div class="col-md-6">
+                                <input type="number" id="rate" name="rate" class="form-control" placeholder="Enter Rate">
+                            </div>
+                        </div>
+                        <div class="form-actions noborder row">
+                            <div class="col-md-offset-3" style="margin-left: 26%">
+                                <button type="submit" class="btn red" id="submit"><i class="fa fa-check"></i> Submit</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
 @endsection
 @section('javascript')
     <script src="/assets/custom/subcontractor/validations.js"></script>
     <script>
         $(document).ready(function() {
             CreateSubcontractorStructure.init();
+            CreateExtraItem.init();
             $(".extra_items").each(function(){
                 $(this).rules('add', {
                     required: true
@@ -345,6 +399,10 @@
 
         function removeSummary(element){
             $(element).closest('tr').remove();
+        }
+
+        function removeExtraItem(element){
+            $(element).closest('.form-group').remove();
         }
     </script>
 @endsection
