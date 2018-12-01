@@ -259,15 +259,16 @@ class PurchaseOrderController extends Controller
                      $purchaseOrderList[$iterator]['purchase_order_id'] = $purchaseOrder['id'];
                      $purchaseRequest = PurchaseRequest::where('id',$purchaseOrder['purchase_request_id'])->first();
                      $purchaseOrderList[$iterator]['purchase_order_format_id'] = $this->getPurchaseIDFormat('purchase-order',$projectSite['id'],$purchaseOrder['created_at'],$purchaseOrder['serial_no']);
-                     $po_material_names = array();
-                     foreach($purchaseRequest->purchaseRequestComponents as $materialComponent) {
-                         $po_material_names[] = MaterialRequestComponents::where('id',$materialComponent['material_request_component_id'])->get()->toArray();
-                     }
                      $poMatData = array();
-                     foreach ($po_material_names as $key => $po_mat_name) {
-                        $poMatData[] = $po_mat_name[0]['name'];
+                     $purchaseRequestComponentIds = $purchaseOrder->purchaseOrderComponent->pluck('purchase_request_component_id');
+                     $jIterator = 0;
+                     foreach($purchaseRequestComponentIds as $purchaseRequestComponentId) {
+                         $purchaseRequestComponent = PurchaseRequestComponent::where('id',$purchaseRequestComponentId)->first();
+                         $poMatData[$jIterator] = $purchaseRequestComponent->materialRequestComponent->name;
+                         $jIterator++;
                      }
                      $purchaseOrderList[$iterator]['po_first_material'] = ucwords($poMatData[0]);
+                     $purchaseOrderList[$iterator]['po_count'] = count($poMatData);
                      $purchaseOrderList[$iterator]['purchase_request_id'] = $purchaseOrder['purchase_request_id'];
                      $purchaseOrderList[$iterator]['purchase_request_format_id'] = $this->getPurchaseIDFormat('purchase-request',$projectSite['id'],$purchaseRequest['created_at'],$purchaseRequest['serial_no']);
                      $purchaseOrderList[$iterator]['purchase_order_status'] = ($purchaseOrder['purchase_order_status_id'] != null) ? $purchaseOrder->purchaseOrderStatus->name : '-';
@@ -335,7 +336,7 @@ class PurchaseOrderController extends Controller
                 $records['data'][$iterator] = [
                     '<a href="javascript:void(0);" onclick="openPurchaseOrderDetails('.$purchaseOrderList[$pagination]['purchase_order_id'].')">
                         '.$purchaseOrderList[$pagination]['purchase_order_format_id'].'
-                    </a>'.'<p>'.$purchaseOrderList[$pagination]['po_first_material'].'</p>',
+                    </a>&nbsp; <span class="badge badge-primary"> '.$purchaseOrderList[$pagination]['po_count'].' </span>'.'<p>'.$purchaseOrderList[$pagination]['po_first_material'].'</p>',
 
                     '<a href="javascript:void(0);" onclick="openPurchaseRequestDetails('.$purchaseOrderList[$pagination]['purchase_request_id'].')">
                         '.$purchaseOrderList[$pagination]['purchase_request_format_id'].'
