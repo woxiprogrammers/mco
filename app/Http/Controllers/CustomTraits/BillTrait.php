@@ -90,6 +90,7 @@ trait BillTrait{
                                     $quotationProducts[$i]['previous_quantity'] = $quotationProducts[$i]['previous_quantity'] + $bill_products[$k]['quantity'];
                                 }
                             }
+                            $quotationProducts[$i]['allowed_quantity'] = $quotationProducts[$i]['quantity'] - $quotationProducts[$i]['previous_quantity'];
                         }
                     }
                 }else{
@@ -98,6 +99,7 @@ trait BillTrait{
                         $quotationProducts[$i]['category_name'] = $categoryModel->where('id',$quotationProducts[$i]['product_detail']['category_id'])->pluck('name')->first();
                         $quotationProducts[$i]['unit'] = $unitModel->where('id',$quotationProducts[$i]['product_detail']['unit_id'])->pluck('name')->first();
                         $quotationProducts[$i]['previous_quantity'] = 0;
+                        $quotationProducts[$i]['allowed_quantity'] = $quotationProducts[$i]['quantity'] - $quotationProducts[$i]['previous_quantity'];
                         if($quotation['discount'] != 0){
                             $quotationProducts[$i]['rate'] = round(($quotationProducts[$i]['rate_per_unit'] - ($quotationProducts[$i]['rate_per_unit'] * ($quotation['discount'] / 100))),3);
                         }else{
@@ -807,12 +809,14 @@ trait BillTrait{
             }
             $bill['discount_description'] = $request->discount_description;
             $bill_created = $billModel->create($bill);
-            if($request['bill_type_slug'] == 'itemwise'){
+            if($quotationData->billType->slug == 'itemwise'){
                 $billQuotationProductsModel = new BillQuotationProducts();
                 foreach($request['quotation_product_id'] as $key => $value){
                     $bill_quotation_product['bill_id'] = $bill_created['id'];
                     $bill_quotation_product['quotation_product_id'] = $key;
+                    $bill_quotation_product['rate_per_unit'] = $value['rate'];
                     $bill_quotation_product['quantity'] = $value['current_quantity'];
+                    $bill_quotation_product['is_deleted'] = false;
                     $bill_quotation_product['product_description_id'] = $value['product_description_id'];
                     $billQuotationProductsModel->create($bill_quotation_product);
                 }
