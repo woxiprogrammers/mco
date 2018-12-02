@@ -165,9 +165,9 @@
 
                                                                 <td class="form-group">
                                                                     @if(array_key_exists('current_quantity',$quotationProducts[$iterator]->toArray()))
-                                                                        <input class="form-control current_quantity" type="text" id="current_quantity_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][current_quantity]" value="{{$quotationProducts[$iterator]['current_quantity']}}">
+                                                                        <input class="form-control current_quantity" type="text" id="current_quantity_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][current_quantity]" value="{{$quotationProducts[$iterator]['current_quantity']}}" max="{{$quotationSummaries[$iterator]['allowed_quantity']}}>
                                                                     @else
-                                                                        <input class="form-control current_quantity" type="text" id="current_quantity_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][current_quantity]" disabled>
+                                                                        <input class="form-control current_quantity" type="text" id="current_quantity_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][current_quantity]" max="{{$quotationSummaries[$iterator]['allowed_quantity']}} disabled>
                                                                     @endif
                                                                 </td>
 
