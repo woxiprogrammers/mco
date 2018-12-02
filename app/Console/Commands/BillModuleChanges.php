@@ -104,6 +104,12 @@ class BillModuleChanges extends Command
                 'transaction_status_id' => $approvedStatusId
             ]);
         });*/
+        $bills = Bill::all();
+        foreach ($bills as $bill){
+            if($bill['rounded_amount_by'] === null){
+                $bill->update(['rounded_amount_by' => 0]);
+            }
+        }
         $billQuotationProduct = new BillQuotationProducts();
         $billQuotationProducts = $billQuotationProduct->all();
         foreach ($billQuotationProducts as $billQuotationProduct){

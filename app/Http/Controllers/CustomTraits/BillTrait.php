@@ -704,7 +704,6 @@ trait BillTrait{
                     $billQuotationProducts[$iterator]['cumulative_quantity'] = round(($billQuotationProducts[$iterator]['quantity'] + $billQuotationProducts[$iterator]['previous_quantity']),3);
                     $total['current_bill_subtotal'] = round(($total['current_bill_subtotal'] + $billQuotationProducts[$iterator]['current_bill_subtotal']),3);
                 }
-               // dd($billQuotationProducts);
                 $extraItems = BillQuotationExtraItem::where('bill_id',$bill->id)->get();
                 if(count($extraItems) > 0){
                     $total_extra_item = 0;
