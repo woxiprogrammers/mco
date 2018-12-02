@@ -146,7 +146,12 @@
                                                                 </td>
 
                                                                 <td>
-                                                                    <span id="rate_per_unit_{{$quotationProducts[$iterator]['id']}}">{{$quotationProducts[$iterator]['discounted_rate']}}</span>
+                                                                    @if(array_key_exists('current_quantity',$quotationProducts[$iterator]->toArray()))
+                                                                        <input class="form-control" type="text" id="rate_per_unit_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][rate]" value="{{$quotationProducts[$iterator]['discounted_rate']}}">
+                                                                    @else
+                                                                        <input class="form-control" type="text" id="rate_per_unit_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][rate]" value="{{$quotationProducts[$iterator]['discounted_rate']}}" disabled>
+                                                                    @endif
+                                                                    {{--<span id="rate_per_unit_{{$quotationProducts[$iterator]['id']}}">{{$quotationProducts[$iterator]['discounted_rate']}}</span>--}}
                                                                 </td>
 
                                                                 <td>
@@ -155,6 +160,7 @@
 
                                                                 <td>
                                                                     <span id="previous_quantity_{{$quotationProducts[$iterator]['id']}}">{{$quotationProducts[$iterator]['previous_quantity']}}</span>
+                                                                    <span id="used_quantity_{{$quotationProducts[$iterator]['id']}}" hidden>{{$quotationProducts[$iterator]['used_quantity']}}</span>
                                                                 </td>
 
                                                                 <td class="form-group">
@@ -330,9 +336,16 @@
                                                         @endforeach
                                                         @endif
                                                         <tr>
+                                                            <td colspan="10" style="text-align: right; padding-right: 30px;"><b> Round Amount By</b></td>
+                                                            <td>
+                                                                <input name="round_amount_by" id="roundAmountBy" class="form-control" type="text" value={{$bill['rounded_amount_by']}} >
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
                                                             <td colspan="10" style="text-align: right; padding-right: 30px;"><b> Grand Total</b></td>
                                                             <td>
-                                                                <span id="grand_current_bill_total"></span>
+                                                                <input name="grand_total" id="grand_current_bill_total" class="form-control" readonly>
+                                                                {{--<span id="grand_current_bill_total"></span>--}}
                                                             </td>
                                                         </tr>
                                                     </table>
