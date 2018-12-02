@@ -1486,10 +1486,6 @@ trait BillTrait{
             }else{
                 $billQuotationProductModel = new BillQuotationProducts();
                 $products = $request->quotation_product_id;
-                $alreadyExistQuotationProductIds = $billQuotationProductModel->where('bill_id',$bill->id)
-                    ->pluck('quotation_product_id')->toArray();
-                $editQuotationProductIds = array_keys($products);
-                $deletedQuotationProductIds = array_values(array_diff($alreadyExistQuotationProductIds,$editQuotationProductIds));
                 foreach($products as $key => $product){
                     $alreadyExistProduct = $billQuotationProductModel->where('bill_id',$bill->id)
                         ->where('quotation_product_id',$key)->first();
@@ -1499,18 +1495,25 @@ trait BillTrait{
                             if($product['current_quantity'] != $alreadyExistProduct->quantity){
                                 $billQuotationProduct['quantity'] = $product['current_quantity'];
                             }
+                            if($product['rate'] !== $alreadyExistProduct['rate_per_sqft']){
+                                $billQuotationProduct['rate_per_unit'] = $product['rate'];
+                            }
+                            $billQuotationProduct['is_deleted'] = false;
                             $billQuotationProduct['product_description_id'] = $product['product_description_id'];
                             $billQuotationProductModel->where('bill_id',$bill->id)
                                 ->where('quotation_product_id',$key)->update($billQuotationProduct);
                         }else{
-                            $billQuotationProductModel->where('bill_id',$bill->id)
-                                ->where('quotation_product_id',$key)->delete();
+                            $alreadyExistProduct->update([
+                                'is_deleted' => true
+                            ]);
                         }
                     }else{
                         if(array_key_exists('current_quantity',$product)){
                             $billQuotationProduct['bill_id'] = $bill->id;
                             $billQuotationProduct['quotation_product_id'] = $key;
+                            $billQuotationProduct['rate_per_unit'] = $product['rate'];
                             $billQuotationProduct['quantity'] = $product['current_quantity'];
+                            $billQuotationSummary['is_deleted'] = false;
                             $billQuotationProduct['product_description_id'] = $product['product_description_id'];
                             $billQuotationProductModel->create($billQuotationProduct);
                         }
