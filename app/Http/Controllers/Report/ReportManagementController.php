@@ -31,6 +31,7 @@ use App\Month;
 use App\PeticashPurchaseTransactionMonthlyExpense;
 use App\PeticashSalaryTransaction;
 use App\PeticashSalaryTransactionMonthlyExpense;
+use App\PeticashStatus;
 use App\PeticashTransactionType;
 use App\Product;
 use App\ProductDescription;
@@ -38,8 +39,11 @@ use App\ProjectSite;
 use App\ProjectSiteAdvancePayment;
 use App\ProjectSiteSalaryDistribution;
 use App\PurcahsePeticashTransaction;
+use App\PurchaseOrderAdvancePayment;
 use App\PurchaseOrderBill;
 use App\PurchaseOrderBillMonthlyExpense;
+use App\PurchaseOrderBillTransactionRelation;
+use App\PurchaseOrderPayment;
 use App\SiteTransferBill;
 use App\Subcontractor;
 use App\SubcontractorAdvancePayment;
@@ -2649,27 +2653,137 @@ class ReportManagementController extends Controller{
                     if($totalAssetRentOpeningExpense == null){
                         $totalAssetRentOpeningExpense = 0;
                     }
+
+                    $salaryAdvTotal = 0;
+
+                    $startDateCreatedAt = date($selectedYear['slug'].'-'.$startMonth['id'].'-01');
+                    $endDateCreatedAt = date($selectedYear['slug'].'-'.$endMonth['id'].'-t');
+
+                    $subcontractorAdvancePaymentTotal = SubcontractorAdvancePayment::where('project_site_id',$project_site_id)
+                                                        ->whereBetween('created_at', [$startDateCreatedAt, $endDateCreatedAt])
+                                                        ->sum('amount');
+                    $advSCBillTxn = SubcontractorBillTransaction::join('subcontractor_bills','subcontractor_bills.id','=','subcontractor_bill_transactions.subcontractor_bills_id')
+                                            ->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
+                                            ->where('subcontractor_structure.project_site_id',$project_site_id)
+                                            ->where('subcontractor_bill_transactions.is_advance', true)
+                                            ->whereBetween('subcontractor_bill_transactions.created_at', [$startDateCreatedAt, $endDateCreatedAt])
+                                            ->sum('total');
+
+                    $subcontractorAdvTotal = $subcontractorAdvancePaymentTotal - $advSCBillTxn;
+
+                    $purchaseOrderAdvancePaymentTotal = PurchaseOrderAdvancePayment::join('purchase_orders','purchase_orders.id','=','purchase_order_advance_payments.purchase_order_id')
+                        ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
+                        ->where('purchase_requests.project_site_id',$project_site_id)
+                        ->whereBetween('purchase_order_advance_payments.created_at', [$startDateCreatedAt, $endDateCreatedAt])
+                        ->sum('amount');
+
+                    $advPurchaseBilltxn = PurchaseOrderPayment::join('purchase_order_bills','purchase_order_bills.id', '=','purchase_order_payments.purchase_order_bill_id')
+                                            ->join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
+                                            ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
+                                            ->where('purchase_requests.project_site_id','=',$project_site_id)
+                                            ->where('purchase_order_payments.is_advance',true)
+                                            ->whereBetween('purchase_order_payments.created_at', [$startDateCreatedAt, $endDateCreatedAt])
+                                            ->sum('purchase_order_payments.amount');
+
+                    $purchaseAdvTotal = $purchaseOrderAdvancePaymentTotal - $advPurchaseBilltxn;
+
+                    //salary advance logic
+/*
+                    $approvedPeticashStatusId = PeticashStatus::where('slug','approved')->pluck('id')->first();
+
+
+                   $totalSalaryAmount = PeticashSalaryTransaction::where('peticash_transaction_type_id',PeticashTransactionType::where('slug','salary')->pluck('id')->first())
+                        ->where('project_site_id',$project_site_id)
+                        ->where('peticash_status_id',$approvedPeticashStatusId)
+                        ->whereBetween('created_at', [$startDateCreatedAt, $endDateCreatedAt])
+                        ->sum('payable_amount');
+                    $totalAdvanceAmount = PeticashSalaryTransaction::where('peticash_transaction_type_id',PeticashTransactionType::where('slug','advance')->pluck('id')->first())
+                        ->where('project_site_id',$project_site_id)
+                        ->where('peticash_status_id',$approvedPeticashStatusId)
+                        ->whereBetween('created_at', [$startDateCreatedAt, $endDateCreatedAt])
+                        ->sum('amount');
+
+                    dd($totalSalaryAmount." : ".$totalAdvanceAmount);*/
+
+
                     $outstanding = $sales - $debitAmount - $tdsAmount - $totalRetention - $otherRecoveryAmount - $totalHold - $receipt - $mobilization;
                     $total = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount + $officeExpense + $subcontractorTotal + $openingExpenses;
+                    $totalWithAdvance = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount + $officeExpense + $subcontractorTotal + $openingExpenses
+                                        + $subcontractorAdvTotal + $purchaseAdvTotal + $salaryAdvTotal ;
                     $salesPnL = $sales - $debitAmount - $tdsAmount - $totalHold - $otherRecoveryAmount;
                     $salesWisePnL = $salesPnL - $total;
                     $receiptWisePnL = $receipt - $total;
+                    $advreceiptWisePnL = (($outstandingMobilization - $mobilization) + $receipt) - $totalWithAdvance;
                     $data = array(
-                        array_merge(array(null,'Sales', 'Retention', 'Receipt', 'Mobilization', 'Outstanding', 'Category', 'Amount')),
-                        array_merge(array(null, round($sales,3), round($totalRetention,3), round($receipt,3), round($mobilization,3), round($outstanding,3), 'Purchase', round($purchaseAmount,3))),
-                        array_merge(array('Debit Note', round($debitAmount,3)), array_fill(0,4,null) , array('Salary', round($salaryAmount,3))),
-                        array_merge(array('TDS', round($tdsAmount,3)) , array_fill(0,4,null) , array('Asset Rent', round($assetRent,3))),
-                        array_merge(array('Hold', round($totalHold,3)) , array_fill(0,4,null) , array('Asset Rent Opening Expense', $totalAssetRentOpeningExpense)),
-                        array_merge(array('Other Recovery', round($otherRecoveryAmount,3)), array_fill(0,4,null) , array('Misc. Purchase', round($peticashPurchaseAmount,3))),
-                        array_merge(array_fill(0,6,null) , array('Office expenses', round($officeExpense,3))),
-                        array_merge(array_fill(0,6,null) , array('Opening Balance', round($openingExpenses,3))),
-                        array_merge(array_fill(0,6,null) , array('Subcontractor', round($subcontractorTotal,3))),
-                        array_merge(array_fill(0,5,null) , array(round($outstanding,3)), array_fill(0,1,null) ,array(round($total,3))),
+                        array_merge(array(null,null, null, null, null, null, null, 'Billwise Expense', null,'Billwise + Advance Expense')),
+                        array_merge(array(null,'Sales', 'Retention', 'Receipt', 'Mobilization', 'Outstanding', 'Category', 'Amount', 'Category','Amount')),
+                        array_merge(array(
+                                            null,
+                                            round($sales,3),
+                                            round($totalRetention,3),
+                                            round($receipt,3),
+                                            round($mobilization,3),
+                                            round($outstanding,3),
+                                            'Purchase',
+                                            round($purchaseAmount,3),
+                                            'Purchase',
+                                            round($purchaseAmount,3)
+                                        )
+                                    ),
+                        array_merge(array('Debit Note', round($debitAmount,3)),
+                                    array_fill(0,4,null) ,
+                                    array('Salary', round($salaryAmount,3)),
+                                    array('Salary', round($salaryAmount,3))
+                                    ),
+                        array_merge(array('TDS', round($tdsAmount,3)),
+                                    array_fill(0,4,null),
+                                    array('Asset Rent', round($assetRent,3)),
+                                    array('Asset Rent', round($assetRent,3))
+                                ),
+                        array_merge(array('Hold', round($totalHold,3)),
+                                    array_fill(0,4,null),
+                                    array('Asset Rent Opening Expense', $totalAssetRentOpeningExpense),
+                                    array('Asset Rent Opening Expense', $totalAssetRentOpeningExpense)
+                                ),
+                        array_merge(array('Other Recovery', round($otherRecoveryAmount,3)),
+                                    array_fill(0,4,null),
+                                    array('Misc. Purchase', round($peticashPurchaseAmount,3)),
+                                    array('Misc. Purchase', round($peticashPurchaseAmount,3))
+                                ),
+                        array_merge(array_fill(0,6,null),
+                                    array('Office expenses', round($officeExpense,3)),
+                                    array('Office expenses', round($officeExpense,3))
+                                ),
+                        array_merge(array_fill(0,6,null),
+                                    array('Opening Balance', round($openingExpenses,3)),
+                                    array('Opening Balance', round($openingExpenses,3))
+                                ),
+                        array_merge(array_fill(0,6,null),
+                                    array('Subcontractor', round($subcontractorTotal,3)),
+                                    array('Subcontractor', round($subcontractorTotal,3))
+                                ),
+                        array_merge(array_fill(0,8,null),
+                            array('Subcontractor Advance', round($subcontractorAdvTotal,3))
+                        ),
+                        array_merge(array_fill(0,8,null),
+                            array('Purchase Advance', round($purchaseAdvTotal,3))
+                        ),
+                       /* array_merge(array_fill(0,8,null),
+                            array('Salary Advance', round($salaryAdvTotal,3))
+                        ),*/
+                        array_merge(array_fill(0,5,null) ,
+                                    array(round($outstanding,3)),
+                                    array_fill(0,1,null),
+                                    array(round($total,3)),
+                                    array_fill(0,1,null),
+                                    array(round($totalWithAdvance,3))
+                                )
                     );
                     $summaryData = array(
                         array_merge(array(null,'Total Bill/Receipt (A)','Total Expense (B)' , 'P/L (A-B)')),
                         array_merge(array('Sales P/L',round(($salesPnL),3) , round($total,3) , round(($salesWisePnL),3))),
                         array_merge(array('Receipt P/L',round($receipt,3) , round($total,3) , round(($receiptWisePnL),3))),
+                        array_merge(array('Advance/Receipt P/L',round(($outstandingMobilization - $mobilization) + $receipt ,3) , round($totalWithAdvance,3) , round(($advreceiptWisePnL),3))),
                         array_merge(array_fill(0,4,null)),
                         array_merge(array_fill(0,4,null)),
                         array_merge(array(null,'Total Mobilization Given','Total Deducted','Balance')),
@@ -2831,7 +2945,7 @@ class ReportManagementController extends Controller{
             $final['current_bill_amount'] = $total_rounded['current_bill_amount'] = $total['current_bill_amount'] = round(($total['current_bill_subtotal'] - $bill['discount_amount']),3);
             $billTaxes = $billTaxInstance->join('taxes','taxes.id','=','bill_taxes.tax_id')
                 ->where('bill_taxes.bill_id','=',$bill['id'])
-                ->where('taxes.is_special','=', false)
+                //->where('taxes.is_special','=', false)
                 ->select('bill_taxes.id as id','bill_taxes.percentage as percentage','taxes.id as tax_id','taxes.name as tax_name','bill_taxes.applied_on as applied_on')
                 ->get();
             $taxes = array();
@@ -2845,7 +2959,7 @@ class ReportManagementController extends Controller{
             }
             $specialTaxes= $billTaxInstance->join('taxes','taxes.id','=','bill_taxes.tax_id')
                 ->where('bill_taxes.bill_id','=',$bill['id'])
-                ->where('taxes.is_special','=', true)
+                //->where('taxes.is_special','=', true)
                 ->select('bill_taxes.id as id','bill_taxes.percentage as percentage','taxes.id as tax_id','taxes.name as tax_name','bill_taxes.applied_on as applied_on')
                 ->get();
             if($specialTaxes != null){
