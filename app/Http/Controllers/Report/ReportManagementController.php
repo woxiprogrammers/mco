@@ -2020,15 +2020,20 @@ class ReportManagementController extends Controller{
                     $row = 1;
                     $statusId = $subcontractorBillStatus->where('slug','approved')->pluck('id');
                     $totalBasicAmount = $totalGst = $totalAmount = $totalTransactionAmount = $totalTds = $totalRetention = $totalHold = 0;
-                    $totalDebit = $totalOtherRecovery = $totalReceipt = $totalBalanceRemaining = 0;
+                    $totalDebit = $totalOtherRecovery = $totalReceipt = $totalBalanceRemaining = $totalAdvGivenAmt = $totalBalAmtAfterAdvDeduct= 0;
                     foreach($subcontractorData as $subcontractor) {
-                        $data[$row]['subcontractor_name'] = $subcontractor['subcontractor_name'];
+                        $subcontractorAdvancePaymentTotal = SubcontractorAdvancePayment::where('subcontractor_id', $subcontractor['id'])
+                            ->where('project_site_id',$project_site_id)
+                            ->sum('amount');
+
+                        $data[$row]['subcontractor_name'] = ucwords($subcontractor['subcontractor_name']);
                         $basic_amount = $gst = $finalAmount = $transaction_amount = $tds = $retention = $hold = 0;
-                        $debit = $other_recovery = $receipt = $balanceRemaining = 0;
+                        $debit = $other_recovery = $receipt = $balanceRemaining = $advancePaidAmt = 0;
 
                         $subcontractorStructureData = $subcontractorStructure->where('subcontractor_id', $subcontractor['id'])
                                                         ->where('project_site_id',$project_site_id)
                                                             ->get();
+
                         foreach ($subcontractorStructureData as $subcontractorStructure) {
                             if ($subcontractorStructure->contractType->slug == 'sqft') {
                                 $rate = round($subcontractorStructure['rate'],3);
@@ -2057,6 +2062,9 @@ class ReportManagementController extends Controller{
                                     $debit += $billTransaction['debit'];
                                     $other_recovery += $billTransaction['other_recovery'];
                                     $receipt += $billTransaction['total'];
+                                    if ($billTransaction['is_advance'] == true) {
+                                        $advancePaidAmt += $billTransaction['total'];
+                                    }
                                 }
                             }
                         }
@@ -2073,21 +2081,31 @@ class ReportManagementController extends Controller{
                         $data[$row]['payable'] = round($finalAmount,3);
                         $data[$row]['receipt'] = round($transaction_amount,3);
                         $data[$row]['balance_remaining'] = round($finalAmount - $receipt,3);
-                        $data[$row]['advanced_amt'] = round($finalAmount - $receipt,3);
-                        $data[$row]['total_balance'] = round($finalAmount - $receipt,3);
-                        $totalBasicAmount += $basic_amount; $totalGst += $gst; $totalAmount += $finalAmount;
-                        $totalTransactionAmount += $transaction_amount; $totalTds += $tds; $totalRetention += $retention;
-                        $totalHold += $hold; $totalDebit += $debit; $totalOtherRecovery += $other_recovery;
-                        $totalReceipt += $receipt; $totalBalanceRemaining += ($finalAmount - $receipt);
+                        $data[$row]['advanced_amt'] = round($subcontractorAdvancePaymentTotal - $advancePaidAmt,3);
+                        $data[$row]['total_balance'] = round($data[$row]['balance_remaining'] - $data[$row]['advanced_amt'],3);
+                        $totalBasicAmount += $basic_amount;
+                        $totalGst += $gst;
+                        $totalAmount += $finalAmount;
+                        $totalTransactionAmount += $transaction_amount;
+                        $totalTds += $tds; $totalRetention += $retention;
+                        $totalHold += $hold;
+                        $totalDebit += $debit;
+                        $totalOtherRecovery += $other_recovery;
+                        $totalReceipt += $receipt;
+                        $totalBalanceRemaining += ($finalAmount - $receipt);
+                        $totalAdvGivenAmt += $data[$row]['advanced_amt'];
+                        $totalBalAmtAfterAdvDeduct += $data[$row]['total_balance'];
+
                         $row++;
                     }
+
                     $data[$row]['make_bold'] = true;
                     $totalRow = array(
                         'Total', round($totalBasicAmount,3), round($totalGst,3), round($totalAmount,3),
                        /* round($totalReceipt,3),*/ round($totalTds,3),
                         round($totalRetention,3), round($totalHold,3), round($totalDebit,3), round($totalOtherRecovery,3),
                         round($totalAmount,3), round($totalTransactionAmount,3), round($totalBalanceRemaining,3),
-                        round($totalTransactionAmount,3), round($totalBalanceRemaining,3)
+                        round($totalAdvGivenAmt,3), round($totalBalAmtAfterAdvDeduct,3)
                     );
                     $data[$row] = array_merge($data[$row],$totalRow);
                     $projectName = $projectSite->join('projects','projects.id','=','project_sites.project_id')
