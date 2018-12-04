@@ -807,6 +807,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::group(['prefix' => 'listing'], function(){
             Route::post('sales',array('uses' => 'Report\ReportManagementController@getSalesListing'));
             Route::post('expense',array('uses' => 'Report\ReportManagementController@getExpensesListing'));
+            Route::post('advance-expense',array('uses' => 'Report\ReportManagementController@getAdvanceExpensesListing'));
         });
     });
 
