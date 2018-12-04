@@ -232,7 +232,7 @@ class SubcontractorBillController extends Controller
                         $finalAmount = round(($basicAmount + $taxAmount),3);
                         $paidAmount = SubcontractorBillTransaction::where('subcontractor_bills_id', $listingData[$pagination]['id'])->sum('total');
                     }else{
-                        $basicAmount = round((($listingData[$pagination]->discount / 100) * $listingData[$pagination]->subtotal) + $listingData[$pagination]->subtotal, 3);
+                        $basicAmount = round(($listingData[$pagination]->subtotal - $listingData[$pagination]->discount), 3);
                         $taxAmount = round(($listingData[$pagination]['grand_total'] - $basicAmount - $listingData[$pagination]['round_off_amount']), 3);
                         $finalAmount = $listingData[$pagination]['grand_total'];
                         $approvedStatusId = TransactionStatus::where('slug', 'approved')->pluck('id')->first();

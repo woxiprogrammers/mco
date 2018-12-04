@@ -9,6 +9,7 @@ namespace App\Http\Controllers\CustomTraits;
 
 use App\BankInfo;
 use App\BillQuotationProducts;
+use App\BillStatus;
 use App\Category;
 use App\CategoryMaterialRelation;
 use App\Client;
@@ -819,7 +820,8 @@ trait QuotationTrait{
             }
             $id = $quotation->id;
             $checkBank = QuotationBankInfo::where('quotation_id',$id)->pluck('bank_info_id')->toArray();
-            $billCount = $quotation->bill->count();
+            $billCancelStatusId = BillStatus::where('slug', 'cancelled')->pluck('id')->first();
+            $billCount = $quotation->bill->where('bill_status_id','!=', $billCancelStatusId)->count();
             $billTypes = $subcontractorStructureType->select('id','name')->get();
             return view('admin.quotation.edit')->with(compact('quotationMiscellaneousMaterials','quotation','summaries','taxes','orderValue','user','quotationProducts','extraItems','userRole','beforeTaxOrderValue','bankInfo','checkBank','billTypes','billCount'));
         }catch(\Exception $e){
@@ -1360,9 +1362,11 @@ trait QuotationTrait{
     public function approve(Request $request,$quotation){
         try{
             $quotationApprovedStatusId = QuotationStatus::where('slug','approved')->pluck('id')->first();
-            $quotationData = array();
-            $quotationData['quotation_status_id'] = $quotationApprovedStatusId;
-            $quotationData['remark'] = $request->remark;
+            $quotationData = [
+                'quotation_status_id' => $quotationApprovedStatusId,
+                'remark' => $request->remark,
+                'bill_type_id' => $request->bill_type_id
+            ];
             $workOrderData = $request->except('_token','product_images','remark');
             $workOrder = QuotationWorkOrder::create($workOrderData);
             $quotationExtraItemData = array();
@@ -1371,6 +1375,15 @@ trait QuotationTrait{
                 $quotationExtraItemData['extra_item_id'] = $extraItemId;
                 $quotationExtraItemData['rate'] = $extraItemValue;
                 QuotationExtraItem::create($quotationExtraItemData);
+            }
+            if($request->has('new_extra_item')){
+                foreach($request->new_extra_item as $extraItemData){
+                    $extraItemData['is_active'] = false;
+                    $extraItem = ExtraItem::create($extraItemData);
+                    $quotationExtraItemData['extra_item_id'] = $extraItem->id;
+                    $quotationExtraItemData['rate'] = (double)$extraItem->rate;
+                    QuotationExtraItem::create($quotationExtraItemData);
+                }
             }
             if($request->has('bank')){
                 foreach($request->bank as $key => $bankID){
@@ -1534,11 +1547,15 @@ trait QuotationTrait{
     public function editWorkOrder(Request $request, $workOrder){
         try{
             $quotationModel = new Quotation();
+            $quotationData = [
+                'opening_expenses' => $request['open_expenses']
+            ];
+            if($request->has('bill_type_id')){
+                $quotationData['bill_type_id'] = $request['bill_type_id'];
+            }
             $quotationModel->where('id',$request['quotation_id'])
-                ->update([
-                    'opening_expenses' => $request['open_expenses'],
-                    'bill_type_id' => $request['bill_type_id']]);
-            $workOrder->quotation->update(['remark' => $request->remark,'bill_type_id'=>$request['bill_type_id']]);
+                ->update($quotationData);
+            $workOrder->quotation->update(['remark' => $request->remark]);
             $workOrderData = $request->except('_token','work_order_images');
             $workOrder->update($workOrderData);
             foreach($workOrder->images as $image){
@@ -1553,6 +1570,15 @@ trait QuotationTrait{
                 if($quotationExtraItem != null){
                     $quotationExtraItem->update($quotationExtraItemData);
                 }else{
+                    QuotationExtraItem::create($quotationExtraItemData);
+                }
+            }
+            if($request->has('new_extra_item')){
+                foreach($request->new_extra_item as $extraItemData){
+                    $extraItemData['is_active'] = false;
+                    $extraItem = ExtraItem::create($extraItemData);
+                    $quotationExtraItemData['extra_item_id'] = $extraItem->id;
+                    $quotationExtraItemData['rate'] = (double)$extraItem->rate;
                     QuotationExtraItem::create($quotationExtraItemData);
                 }
             }
