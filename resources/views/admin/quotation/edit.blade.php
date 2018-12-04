@@ -478,7 +478,7 @@
                                                                                 </label>
                                                                             </div>
                                                                             @if($billCount == 0)
-                                                                                <div class="col-md-3">
+                                                                                <div class="col-md-3" id="billType">
                                                                                     <select class="form-control" name="bill_type_id">
                                                                                         <option value="">Select Bill Type</option>
                                                                                         @foreach($billTypes as $billType)
@@ -492,7 +492,7 @@
                                                                                 </div>
                                                                             @else
                                                                                 <div class="col-md-3">
-                                                                                    <input type="text" class="form-control" name="bill_type_id" value="{{$quotation->billType->name}}" readonly>
+                                                                                    <input type="text" class="form-control" value="{{$quotation->billType->name}}" readonly>
                                                                                 </div>
                                                                             @endif
                                                                         </div>
@@ -585,6 +585,25 @@
                                                                                 <input class="form-control" value="{{$orderValue}}" name="order_value" id="OrderValue" type="text" readonly>
                                                                             </div>
                                                                         </div>
+                                                                        <div class="form-group" id="billType">
+                                                                            <div class="col-md-3">
+                                                                                <label for="bill_type" class="control-form pull-right">
+                                                                                    Bill Type:
+                                                                                </label>
+                                                                            </div>
+                                                                            <div class="col-md-3">
+                                                                                <select class="form-control" name="bill_type_id">
+                                                                                    <option value="">Select Bill Type</option>
+                                                                                    @foreach($billTypes as $billType)
+                                                                                        @if($quotation['bill_type_id'] != null && $billType['id'] == $quotation['bill_type_id'])
+                                                                                            <option value="{{$billType['id']}}" selected>{{$billType['name']}}</option>
+                                                                                        @else
+                                                                                            <option value="{{$billType['id']}}">{{$billType['name']}}</option>
+                                                                                        @endif
+                                                                                    @endforeach
+                                                                                </select>
+                                                                            </div>
+                                                                        </div>
                                                                         <div class="form-group">
                                                                             <div class="row">
                                                                                 <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12"> </div>
@@ -611,21 +630,34 @@
                                                             @endif
                                                         </div>
                                                         <div class="tab-pane fade in" id="extraItemFormTab">
-                                                            @foreach($extraItems as $extraItem)
-                                                                <div class="form-group">
-                                                                    <div class="col-md-3">
-                                                                        <label class="control-form pull-right">
-                                                                            {{$extraItem['name']}}
-                                                                        </label>
+                                                            <fieldset>
+                                                                <legend>
+                                                                    <span>
+                                                                        <a href="#extraItemModal" data-toggle="modal" class="btn yellow pull-right">
+                                                                            <i class="fa fa-plus"> </i>
+                                                                            Extra Item
+                                                                        </a>
+                                                                    </span>
+                                                                </legend>
+                                                                @foreach($extraItems as $extraItem)
+                                                                    <div class="form-group">
+                                                                        <div class="col-md-3">
+                                                                            <label class="control-form pull-right">
+                                                                                {{$extraItem['name']}}
+                                                                            </label>
+                                                                        </div>
+                                                                        <div class="col-md-5">
+                                                                            <input class="form-control" name="extra_item[{{$extraItem['id']}}]" value="{{round($extraItem['rate'],3)}}">
+                                                                            @if(array_key_exists('slug',$extraItem))
+                                                                                <i> Note : This is newly created item and not added to quotation yet</i>
+                                                                            @endif
+                                                                        </div>
                                                                     </div>
-                                                                    <div class="col-md-5">
-                                                                        <input class="form-control" name="extra_item[{{$extraItem['id']}}]" value="{{round($extraItem['rate'],3)}}">
-                                                                        @if(array_key_exists('slug',$extraItem))
-                                                                            <i> Note : This is newly created item and not added to quotation yet</i>
-                                                                        @endif
-                                                                    </div>
+                                                                @endforeach
+                                                                <div id="newExtraItemSection">
+
                                                                 </div>
-                                                            @endforeach
+                                                            </fieldset>
                                                         </div>
                                                         <div class="tab-pane fade in" id="bankassignFormTab">
                                                             <div class="form-group" style="margin-top: 3%">
@@ -684,8 +716,8 @@
                                                                             <input type="hidden" name="miscellaneous_material_id[{{$miscellaneousMaterial['material_id']}}][unit_id]" value="{{$miscellaneousMaterial['unit_id']}}">
                                                                         </td>
                                                                         @if(array_key_exists('quantity',$miscellaneousMaterial) && $miscellaneousMaterial['quantity'] != null)
-                                                                            <td class="form-group">
-                                                                                <input class="form-control current_quantity" type="text" id="current_quantity_{{$miscellaneousMaterial['material_id']}}" name="miscellaneous_material_id[{{$miscellaneousMaterial['material_id']}}][quantity]" value="{{$miscellaneousMaterial['quantity']}}">
+                                                                            <td class="form-group has-error">
+                                                                                <input class="form-control current_quantity " type="text" id="current_quantity_{{$miscellaneousMaterial['material_id']}}" name="miscellaneous_material_id[{{$miscellaneousMaterial['material_id']}}][quantity]" value="{{$miscellaneousMaterial['quantity']}}">
                                                                                 <input type="hidden" name="miscellaneous_material_id[{{$miscellaneousMaterial['material_id']}}][quotation_material_id]" value="{{$miscellaneousMaterial['quotation_material_id']}}">
                                                                             </td>
                                                                         @else
@@ -832,6 +864,46 @@
     </div>
 </div>
 </div>
+<div id="extraItemModal" class="modal fade" role="dialog">
+    <div class="modal-dialog" style="width: 70%;">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title" style="text-align: center"> <b>Create extra item </b> </h4>
+            </div>
+            <div class="modal-body form">
+                <form role="form" id="create-extra-item" class="form-horizontal" method="post">
+                    {!! csrf_field() !!}
+                    <div class="form-body">
+                        <div class="form-group row">
+                            <div class="col-md-3" style="text-align: right">
+                                <label for="name" class="control-label">Name</label>
+                                <span>*</span>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="text" class="form-control" id="name" name="name">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">Rate</label>
+                        <div class="col-md-6">
+                            <input type="number" id="rate" name="rate" class="form-control" placeholder="Enter Rate">
+                        </div>
+                    </div>
+                    <div class="form-actions noborder row">
+                        <div class="col-md-offset-3" style="margin-left: 26%">
+                            <button type="submit" class="btn red" id="submit"><i class="fa fa-check"></i> Submit</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
 @endsection
 @section('javascript')
 <script type="text/javascript" src="/assets/global/plugins/ckeditor/ckeditor.js"></script>
@@ -857,6 +929,7 @@
     $(document).ready(function(){
         EditQuotation.init();
         WorkOrderFrom.init();
+        CreateExtraItem.init();
         calculateSubtotal();
         applyValidation("QuotationEditForm");
         var typingTimer;
