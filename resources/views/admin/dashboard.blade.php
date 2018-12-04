@@ -120,7 +120,7 @@
 
                                 </div>
                                 <div class="row">
-                                    <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12" style="width: 29%">
+                                    <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
                                         <div class="dashboard-stat2 ">
                                             <div class="display">
                                                 <div class="number">
@@ -137,7 +137,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12" style="width: 29%">
+                                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
                                         <div class="dashboard-stat2 ">
                                             <div class="display">
                                                 <div class="number">
@@ -154,7 +154,24 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12" style="width: 29%">
+                                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                                        <div class="dashboard-stat2">
+                                            <div class="display">
+                                                <div class="number">
+                                                    <h3>
+                                                        <span data-counter="counterup" id="advReceiptValue">  0.000 </span>
+                                                        <small> ₹ </small>
+                                                    </h3>
+                                                    <hr>
+                                                    <h4>
+                                                        <span data-counter="counterup" id="advReceiptValueWords" style="text-transform: capitalize;"></span>
+                                                    </h4>
+                                                    <span class="caption-subject bold uppercase" style="font-size: large"> Advanced/RECEIPT P/L </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12" >
                                         <div class="dashboard-stat2">
                                             <div class="display">
                                                 <div class="number">
@@ -196,8 +213,10 @@
                                                             <th style="width:10%"> Outstanding Mobilization </th>
                                                             <th style="width:10%"> Saleswise P/L </th>
                                                             <th style="width:10%"> Receipt P/L </th>
+                                                            <th style="width:10%"> Adv/Receipt P/L </th>
                                                         </tr>
                                                         <tr class="filter">
+                                                            <th></th>
                                                             <th></th>
                                                             <th></th>
                                                             <th></th>
@@ -223,6 +242,7 @@
                                                     <tfoot>
                                                     <tr >
                                                         <th>Total Page Wise: </th>
+                                                        <th style="text-align: center"></th>
                                                         <th style="text-align: center"></th>
                                                         <th style="text-align: center"></th>
                                                         <th style="text-align: center"></th>
@@ -299,6 +319,82 @@
                                                         <th style="text-align: center"></th>
                                                         <th style="text-align: center"></th>
                                                     </tr>
+                                                </tfoot>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <!-- BEGIN EXAMPLE TABLE PORTLET-->
+                                        <div class="portlet light ">
+                                            <div class="portlet-title">
+                                                <div class="caption font-dark">
+                                                    <i class="icon-settings font-dark"></i>
+                                                    <span class="caption-subject bold uppercase"> Advanced + Expenses </span>
+                                                </div>
+                                            </div>
+                                            {!! csrf_field() !!}
+                                            <table class="table table-striped table-bordered table-hover table-checkable order-column" id="advExpensesTable">
+                                                <thead>
+                                                <tr style="background-color: #eaf285">
+                                                    <th width="15%">Site Name</th>
+                                                    <th > Purchase </th>
+                                                    <th > Salary </th>
+                                                    <th > Asset Rent </th>
+                                                    <th > Asset Rent Opening Expense </th>
+                                                    <th > Subcontractor </th>
+                                                    <th > Misc. Purchase </th>
+                                                    <th > Office Expenses </th>
+                                                    <th > Opening Balance </th>
+                                                    <th > Subcontractor Advance </th>
+                                                    <th > Purchase Advance </th>
+                                                    <th > Salary Advance </th>
+                                                    <th > Total Expenses </th>
+                                                </tr>
+                                                <tr class="filter"><th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th>
+                                                        <input type="hidden" class="form-control form-filter" name="expense_month_id" id="expense_month_id">
+                                                    </th>
+                                                    <th>
+                                                        <input type="hidden" class="form-control form-filter" name="expense_project_site_id" id="expense_project_site_id"></th>
+                                                    <th>
+                                                        <input type="hidden" class="form-control form-filter" name="expense_year_id" id="expense_year_id">
+                                                    </th>
+                                                    <th>
+                                                        <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
+                                                        <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
+                                                    </th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+
+
+                                                </tbody>
+                                                <tfoot>
+                                                <tr>
+                                                    <th>Total Page Wise: </th>
+                                                    <th style="text-align: center"></th>
+                                                    <th style="text-align: center"></th>
+                                                    <th style="text-align: center"></th>
+                                                    <th style="text-align: center"></th>
+                                                    <th style="text-align: center"></th>
+                                                    <th style="text-align: center"></th>
+                                                    <th style="text-align: center"></th>
+                                                    <th style="text-align: center"></th>
+                                                    <th style="text-align: center"></th>
+                                                    <th style="text-align: center"></th>
+                                                    <th style="text-align: center"></th>
+                                                    <th style="text-align: center"></th>
+                                                </tr>
                                                 </tfoot>
                                             </table>
                                         </div>
