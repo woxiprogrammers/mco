@@ -213,8 +213,10 @@
                                                             <th style="width:10%"> Outstanding Mobilization </th>
                                                             <th style="width:10%"> Saleswise P/L </th>
                                                             <th style="width:10%"> Receipt P/L </th>
+                                                            <th style="width:10%"> Adv/Receipt P/L </th>
                                                         </tr>
                                                         <tr class="filter">
+                                                            <th></th>
                                                             <th></th>
                                                             <th></th>
                                                             <th></th>
@@ -240,6 +242,7 @@
                                                     <tfoot>
                                                     <tr >
                                                         <th>Total Page Wise: </th>
+                                                        <th style="text-align: center"></th>
                                                         <th style="text-align: center"></th>
                                                         <th style="text-align: center"></th>
                                                         <th style="text-align: center"></th>

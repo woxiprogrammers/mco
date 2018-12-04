@@ -118,6 +118,20 @@ var SalesListing = function () {
                     var number3 = (receiptwisePnL.toFixed(2)  < 0) ? receiptwisePnL.toFixed(2)  * -1 : receiptwisePnL.toFixed(2)
                     $("#receiptValueWords").text(inWords(number3)).digits();
 
+                    advReceiptwisePnL = api
+                        .column( 8, { page: 'current'} )
+                        .data()
+                        .reduce( function (a, b) {
+                            return intVal(a) + intVal(b);
+                        }, 0 );
+
+                    // Update footer
+                    $( api.column( 8 ).footer() ).html(
+                        advReceiptwisePnL.toFixed(3)
+                    );
+                    $("#advReceiptValue").text((advReceiptwisePnL.toFixed(3))).digits();
+                    var number3 = (advReceiptwisePnL.toFixed(2)  < 0) ? advReceiptwisePnL.toFixed(2)  * -1 : advReceiptwisePnL.toFixed(2)
+                    $("#advReceiptValueWords").text(inWords(number3)).digits();
                 },
                 "lengthMenu": [
                     [5, 100, 150],
@@ -532,10 +546,6 @@ var AdvExpensesListing = function () {
                     $( api.column( 12 ).footer() ).html(
                         totalExpense.toFixed(3)
                     );
-
-                    $("#advReceiptValue").text((totalExpense.toFixed(3))).digits();
-                    var number1 = (totalExpense.toFixed(2)  < 0) ? totalExpense.toFixed(2)  * -1 : totalExpense.toFixed(2)
-                    $("#advReceiptValueWords").text(inWords(number1)).digits();
                 },
 
                 "lengthMenu": [

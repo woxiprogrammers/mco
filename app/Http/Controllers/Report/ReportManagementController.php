@@ -3059,6 +3059,8 @@ class ReportManagementController extends Controller{
                             number_format($salesAmount['outstanding_mobilization'], 3),
                             number_format($salesAmount['sitewise_pNl'], 3),
                             number_format($salesAmount['receiptwise_pNl'], 3),
+                            number_format($salesAmount['advReceipt_pNL'], 3)
+
                         ];
                     }
                     break;
@@ -3084,6 +3086,7 @@ class ReportManagementController extends Controller{
                             number_format($salesAmount['outstanding_mobilization'], 3),
                             number_format($salesAmount['sitewise_pNl'], 3),
                             number_format($salesAmount['receiptwise_pNl'], 3),
+                            number_format($salesAmount['advReceipt_pNL'], 3)
                         ];
                     }
                     break;
@@ -3109,6 +3112,7 @@ class ReportManagementController extends Controller{
                             number_format($salesAmount['outstanding_mobilization'], 3),
                             number_format($salesAmount['sitewise_pNl'], 3),
                             number_format($salesAmount['receiptwise_pNl'], 3),
+                            number_format($salesAmount['advReceipt_pNL'], 3)
                         ];
                     }
                     break;
@@ -3132,6 +3136,7 @@ class ReportManagementController extends Controller{
                             number_format($salesAmount['outstanding_mobilization'], 3),
                             number_format($salesAmount['sitewise_pNl'], 3),
                             number_format($salesAmount['receiptwise_pNl'], 3),
+                            number_format($salesAmount['advReceipt_pNL'], 3)
                         ];
                     }
                     break;
@@ -3157,6 +3162,7 @@ class ReportManagementController extends Controller{
                             number_format($salesAmount['outstanding_mobilization'], 3),
                             number_format($salesAmount['sitewise_pNl'], 3),
                             number_format($salesAmount['receiptwise_pNl'], 3),
+                            number_format($salesAmount['advReceipt_pNL'], 3)
                         ];
                     }
                 break;
@@ -3184,6 +3190,7 @@ class ReportManagementController extends Controller{
                             number_format($salesAmount['outstanding_mobilization'], 3),
                             number_format($salesAmount['sitewise_pNl'], 3),
                             number_format($salesAmount['receiptwise_pNl'], 3),
+                            number_format($salesAmount['advReceipt_pNL'], 3)
                         ];
                     }
                 break;
@@ -3211,6 +3218,7 @@ class ReportManagementController extends Controller{
                             number_format($salesAmount['outstanding_mobilization'], 3),
                             number_format($salesAmount['sitewise_pNl'], 3),
                             number_format($salesAmount['receiptwise_pNl'], 3),
+                            number_format($salesAmount['advReceipt_pNL'], 3)
                         ];
                     }
                 break;
@@ -3236,6 +3244,8 @@ class ReportManagementController extends Controller{
                             number_format($salesAmount['outstanding_mobilization'], 3),
                             number_format($salesAmount['sitewise_pNl'], 3),
                             number_format($salesAmount['receiptwise_pNl'], 3),
+                            number_format($salesAmount['advReceipt_pNL'], 3)
+
                         ];
                     }
                 break;
@@ -4225,6 +4235,7 @@ class ReportManagementController extends Controller{
 
             $subcontractorAdvanceAmt = $purchaseAdvanceAmount = $salaryAdvanceAmount = 0;
 
+
             $outstanding = $sales - $debitAmount - $tdsAmount - $totalRetention - $otherRecoveryAmount - $totalHold - $receipt - $mobilization;
             //$totalExpense = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount + $indirectExpenses + $subcontractorTotal + $openingExpenses;
             $totalExpense = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount + $officeExpense + $subcontractorTotal + $openingExpenses;
@@ -4234,6 +4245,8 @@ class ReportManagementController extends Controller{
             $salesPnL = $sales - $debitAmount - $tdsAmount - $totalHold - $otherRecoveryAmount;
             $salesWisePnL = $salesPnL - $totalExpense;
             $receiptWisePnL = $receipt - $totalExpense;
+            $advanceReceiptPnl = (($outstandingMobilization - $mobilization) + $receipt) - $totalExpenseWithAdv;
+
             $salesData['sales'] = $salesPnL;
             $salesData['receipt'] = $receipt;
             $salesData['outstanding'] = $outstanding;
@@ -4241,6 +4254,7 @@ class ReportManagementController extends Controller{
             $salesData['outstanding_mobilization'] = $outstandingMobilization - $mobilization;
             $salesData['sitewise_pNl'] = $salesWisePnL;
             $salesData['receiptwise_pNl'] = $receiptWisePnL;
+            $salesData['advReceipt_pNL'] = $advanceReceiptPnl;
             $salesData['purchase'] = $purchaseAmount;
             $salesData['salary'] = $salaryAmount;
             $salesData['asset_rent'] = $assetRent;
