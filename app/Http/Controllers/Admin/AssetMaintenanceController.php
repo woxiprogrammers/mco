@@ -223,7 +223,7 @@ class AssetMaintenanceController extends Controller{
     public function getMaintenanceRequestListing(Request $request){
         try{
             $projectSiteId = Session::get('global_project_site');
-            $listingData = AssetMaintenance::where('project_site_id',$projectSiteId)->get();
+            $listingData = AssetMaintenance::where('project_site_id',$projectSiteId)->orderby('created_at','desc')->get();
             $status = 200;
             $iTotalRecords = count($listingData);
             $records = array();
@@ -231,7 +231,8 @@ class AssetMaintenanceController extends Controller{
             $end = $request->length < 0 ? count($listingData) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($listingData); $iterator++,$pagination++ ){
                 $records['data'][$iterator] = [
-                    $listingData[$pagination]->asset->name,
+                    $listingData[$pagination]['id'],
+                    ucwords($listingData[$pagination]->asset->name." (<b>".$listingData[$pagination]->asset->id."</b>)"),
                     ($listingData[$pagination]->assetMaintenanceTransaction->count() > 0) ? $listingData[$pagination]->assetMaintenanceTransaction->first()->assetMaintenanceTransactionStatus->name : '-',
                     date('d M Y',strtotime($listingData[$pagination]['created_at'])),
                     '<div class="btn btn-small blue">

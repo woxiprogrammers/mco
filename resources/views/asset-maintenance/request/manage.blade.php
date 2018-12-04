@@ -53,7 +53,8 @@
                                                         <table class="table table-striped table-bordered table-hover order-column" id="assetMaintenanceRequestTable">
                                                             <thead>
                                                                 <tr>
-                                                                    <th> Asset Name </th>
+                                                                    <th>Asset Maintenance ID</th>
+                                                                    <th> Asset Name (System Asset ID) </th>
                                                                     <th> Status </th>
                                                                     <th> Created At </th>
                                                                     <th> Actions </th>
