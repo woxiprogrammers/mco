@@ -134,10 +134,10 @@ var SalesListing = function () {
                     $("#advReceiptValueWords").text(inWords(number3)).digits();
                 },
                 "lengthMenu": [
-                    [5, 100, 150],
-                    [5, 100, 150] // change per page values here
+                    [100, 200],
+                    [100, 200] // change per page values here
                 ],
-                "pageLength": 5, // default record count per page
+                "pageLength": 100, // default record count per page
                 "ajax": {
                     "url": "/reports/listing/sales", // ajax source
                 },
@@ -324,10 +324,10 @@ var ExpensesListing = function () {
                 },
 
                 "lengthMenu": [
-                    [5, 100, 150],
-                    [5, 100, 150] // change per page values here
+                    [100, 200],
+                    [100, 200] // change per page values here
                 ],
-                "pageLength": 5, // default record count per page
+                "pageLength": 100, // default record count per page
                 "ajax": {
                     "url": "/reports/listing/expense", // ajax source
                 },
@@ -523,7 +523,7 @@ var AdvExpensesListing = function () {
                         purchase_adv.toFixed(3)
                     );
 
-                    salary_adv = api
+                    totalExpense = api
                         .column( 11, { page: 'current'} )
                         .data()
                         .reduce( function (a, b) {
@@ -532,27 +532,15 @@ var AdvExpensesListing = function () {
 
                     // Update footer
                     $( api.column( 11 ).footer() ).html(
-                        salary_adv.toFixed(3)
-                    );
-
-                    totalExpense = api
-                        .column( 12, { page: 'current'} )
-                        .data()
-                        .reduce( function (a, b) {
-                            return intVal(a) + intVal(b);
-                        }, 0 );
-
-                    // Update footer
-                    $( api.column( 12 ).footer() ).html(
                         totalExpense.toFixed(3)
                     );
                 },
 
                 "lengthMenu": [
-                    [5, 100, 150],
-                    [5, 100, 150] // change per page values here
+                    [100, 200],
+                    [100, 200] // change per page values here
                 ],
-                "pageLength": 5, // default record count per page
+                "pageLength": 100, // default record count per page
                 "ajax": {
                     "url": "/reports/listing/advance-expense", // ajax source
                 },

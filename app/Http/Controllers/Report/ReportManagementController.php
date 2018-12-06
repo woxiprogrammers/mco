@@ -2654,8 +2654,6 @@ class ReportManagementController extends Controller{
                         $totalAssetRentOpeningExpense = 0;
                     }
 
-                    $salaryAdvTotal = 0;
-
                     $startDateCreatedAt = date($selectedYear['slug'].'-'.$startMonth['id'].'-01');
                     $endDateCreatedAt = date($selectedYear['slug'].'-'.$endMonth['id'].'-t');
 
@@ -2709,7 +2707,7 @@ class ReportManagementController extends Controller{
                     $outstanding = $sales - $debitAmount - $tdsAmount - $totalRetention - $otherRecoveryAmount - $totalHold - $receipt - $mobilization;
                     $total = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount + $officeExpense + $subcontractorTotal + $openingExpenses;
                     $totalWithAdvance = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount + $officeExpense + $subcontractorTotal + $openingExpenses
-                                        + $subcontractorAdvTotal + $purchaseAdvTotal + $salaryAdvTotal ;
+                                        + $subcontractorAdvTotal + $purchaseAdvTotal ;
                     $salesPnL = $sales - $debitAmount - $tdsAmount - $totalHold - $otherRecoveryAmount;
                     $salesWisePnL = $salesPnL - $total;
                     $receiptWisePnL = $receipt - $total;
@@ -2767,9 +2765,6 @@ class ReportManagementController extends Controller{
                         ),
                         array_merge(array_fill(0,8,null),
                             array('Purchase Advance', round($purchaseAdvTotal,3))
-                        ),
-                        array_merge(array_fill(0,8,null),
-                            array('Salary Advance', round($salaryAdvTotal,3))
                         ),
                         array_merge(array_fill(0,5,null) ,
                                     array(round($outstanding,3)),
@@ -3543,7 +3538,6 @@ class ReportManagementController extends Controller{
                             number_format($expenseAmount['opening_balance'],3),
                             number_format($expenseAmount['subcontractor_advance'],3),
                             number_format($expenseAmount['purchase_advance'],3),
-                            number_format($expenseAmount['salary_advance'],3),
                             number_format($expenseAmount['total_expense_with_adv'],3),
                         ];
                     }
@@ -3573,7 +3567,6 @@ class ReportManagementController extends Controller{
                             number_format($expenseAmount['opening_balance'],3),
                             number_format($expenseAmount['subcontractor_advance'],3),
                             number_format($expenseAmount['purchase_advance'],3),
-                            number_format($expenseAmount['salary_advance'],3),
                             number_format($expenseAmount['total_expense_with_adv'],3),
                         ];
                     }
@@ -3603,7 +3596,6 @@ class ReportManagementController extends Controller{
                             number_format($expenseAmount['opening_balance'],3),
                             number_format($expenseAmount['subcontractor_advance'],3),
                             number_format($expenseAmount['purchase_advance'],3),
-                            number_format($expenseAmount['salary_advance'],3),
                             number_format($expenseAmount['total_expense_with_adv'],3),
                         ];
                     }
@@ -3631,7 +3623,6 @@ class ReportManagementController extends Controller{
                             number_format($expenseAmount['opening_balance'],3),
                             number_format($expenseAmount['subcontractor_advance'],3),
                             number_format($expenseAmount['purchase_advance'],3),
-                            number_format($expenseAmount['salary_advance'],3),
                             number_format($expenseAmount['total_expense_with_adv'],3),
                         ];
                     }
@@ -3661,7 +3652,6 @@ class ReportManagementController extends Controller{
                             number_format($expenseAmount['opening_balance'],3),
                             number_format($expenseAmount['subcontractor_advance'],3),
                             number_format($expenseAmount['purchase_advance'],3),
-                            number_format($expenseAmount['salary_advance'],3),
                             number_format($expenseAmount['total_expense_with_adv'],3),
                         ];
                     }
@@ -3693,7 +3683,6 @@ class ReportManagementController extends Controller{
                             number_format($expenseAmount['opening_balance'],3),
                             number_format($expenseAmount['subcontractor_advance'],3),
                             number_format($expenseAmount['purchase_advance'],3),
-                            number_format($expenseAmount['salary_advance'],3),
                             number_format($expenseAmount['total_expense_with_adv'],3),
                         ];
                     }
@@ -3725,7 +3714,6 @@ class ReportManagementController extends Controller{
                             number_format($expenseAmount['opening_balance'],3),
                             number_format($expenseAmount['subcontractor_advance'],3),
                             number_format($expenseAmount['purchase_advance'],3),
-                            number_format($expenseAmount['salary_advance'],3),
                             number_format($expenseAmount['total_expense_with_adv'],3),
                         ];
                     }
@@ -3755,7 +3743,6 @@ class ReportManagementController extends Controller{
                             number_format($expenseAmount['opening_balance'],3),
                             number_format($expenseAmount['subcontractor_advance'],3),
                             number_format($expenseAmount['purchase_advance'],3),
-                            number_format($expenseAmount['salary_advance'],3),
                             number_format($expenseAmount['total_expense_with_adv'],3),
                         ];
                     }
@@ -3818,6 +3805,9 @@ class ReportManagementController extends Controller{
             $otherThanOfficeProjectSiteIds = $projectSite->where('id','!=',$officeProjectSiteId)->pluck('id')->toArray();
             // $inventoryComponentSiteTransferIds = $inventoryTransferTypes->where('slug','site')->get();
           //  $approvedComponentTransferStatusId = $inventoryComponentTransferStatus->where('slug','approved')->pluck('id');
+
+            $purchaseAdvTotal = $subcontractorAdvTotal = 0;
+
             switch(true){
                 case ($yearId == 'null' && $startMonthId == 'null')  :
                     Log::info('Inside CASE 1');
@@ -3940,6 +3930,31 @@ class ReportManagementController extends Controller{
                             ,'=','inventory_component_transfers.inventory_component_id')
                         ->where('inventory_components.project_site_id',$projectSiteId)
                         ->sum(DB::raw('site_transfer_bills.tax_amount + site_transfer_bills.extra_amount_cgst_amount + site_transfer_bills.extra_amount_sgst_amount + site_transfer_bills.extra_amount_igst_amount'));*/
+
+                    $subcontractorAdvancePaymentTotal = SubcontractorAdvancePayment::where('project_site_id',$projectSiteId)
+                        ->sum('amount');
+                    $advSCBillTxn = SubcontractorBillTransaction::join('subcontractor_bills','subcontractor_bills.id','=','subcontractor_bill_transactions.subcontractor_bills_id')
+                        ->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
+                        ->where('subcontractor_structure.project_site_id',$projectSiteId)
+                        ->where('subcontractor_bill_transactions.is_advance', true)
+                        ->sum('subcontractor_bill_transactions.total');
+
+                    $subcontractorAdvTotal = $subcontractorAdvancePaymentTotal - $advSCBillTxn;
+
+                    $purchaseOrderAdvancePaymentTotal = PurchaseOrderAdvancePayment::join('purchase_orders','purchase_orders.id','=','purchase_order_advance_payments.purchase_order_id')
+                        ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
+                        ->where('purchase_requests.project_site_id',$projectSiteId)
+                        ->sum('purchase_order_advance_payments.amount');
+
+                    $advPurchaseBilltxn = PurchaseOrderPayment::join('purchase_order_bills','purchase_order_bills.id', '=','purchase_order_payments.purchase_order_bill_id')
+                        ->join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
+                        ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
+                        ->where('purchase_requests.project_site_id','=',$projectSiteId)
+                        ->where('purchase_order_payments.is_advance',true)
+                        ->sum('purchase_order_payments.amount');
+
+                    $purchaseAdvTotal = $purchaseOrderAdvancePaymentTotal - $advPurchaseBilltxn;
+
                     break;
 
                 case ($yearId === 'null') :
@@ -4026,6 +4041,35 @@ class ReportManagementController extends Controller{
                             $assetRent = $salaryAmount = $officeExpense = 0;
                             $sales = $receipt = $totalAssetRent + $allSiteTotalAssetRentOpeningExpense;
                         }
+
+                        $subcontractorAdvancePaymentTotal = SubcontractorAdvancePayment::where('project_site_id',$projectSiteId)
+                            ->whereMonth('created_at',$month['id'])
+                            ->sum('amount');
+                        $advSCBillTxn = SubcontractorBillTransaction::join('subcontractor_bills','subcontractor_bills.id','=','subcontractor_bill_transactions.subcontractor_bills_id')
+                            ->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
+                            ->where('subcontractor_structure.project_site_id',$projectSiteId)
+                            ->where('subcontractor_bill_transactions.is_advance', true)
+                            ->whereMonth('subcontractor_bill_transactions.created_at',$month['id'])
+                            ->sum('subcontractor_bill_transactions.total');
+
+                        $subcontractorAdvTotal += $subcontractorAdvancePaymentTotal - $advSCBillTxn;
+
+                        $purchaseOrderAdvancePaymentTotal = PurchaseOrderAdvancePayment::join('purchase_orders','purchase_orders.id','=','purchase_order_advance_payments.purchase_order_id')
+                            ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
+                            ->where('purchase_requests.project_site_id',$projectSiteId)
+                            ->whereMonth('purchase_order_advance_payments.created_at', $month['id'])
+                            ->sum('purchase_order_advance_payments.amount');
+
+                        $advPurchaseBilltxn = PurchaseOrderPayment::join('purchase_order_bills','purchase_order_bills.id', '=','purchase_order_payments.purchase_order_bill_id')
+                            ->join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
+                            ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
+                            ->where('purchase_requests.project_site_id','=',$projectSiteId)
+                            ->where('purchase_order_payments.is_advance',true)
+                            ->whereMonth('purchase_order_payments.created_at', $month['id'])
+                            ->sum('purchase_order_payments.amount');
+
+                        $purchaseAdvTotal += $purchaseOrderAdvancePaymentTotal - $advPurchaseBilltxn;
+
                         /*$assetMaintenanceGst += $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
                             ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
                             ->join('assets','assets.id','=','asset_maintenance.asset_id')
@@ -4082,6 +4126,40 @@ class ReportManagementController extends Controller{
                     $assetRentMonthlyExpenseData = $assetRentMonthlyExpense
                         ->where('year_id',$selectedYear['id'])
                         ->where('project_site_id',$projectSiteId)->get();
+
+
+                    $subcontractorAdvancePaymentTotal = SubcontractorAdvancePayment::where('project_site_id',$projectSiteId)
+                        //->whereMonth('created_at',$month['id'])
+                        ->whereYear('created_at',$selectedYear['slug'])
+                        ->sum('amount');
+
+                    $advSCBillTxn = SubcontractorBillTransaction::join('subcontractor_bills','subcontractor_bills.id','=','subcontractor_bill_transactions.subcontractor_bills_id')
+                        ->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
+                        ->where('subcontractor_structure.project_site_id',$projectSiteId)
+                        ->where('subcontractor_bill_transactions.is_advance', true)
+                        //->whereMonth('subcontractor_bill_transactions.created_at',$month['id'])
+                        ->whereYear('subcontractor_bill_transactions.created_at',$selectedYear['slug'])
+                        ->sum('subcontractor_bill_transactions.total');
+
+                    $subcontractorAdvTotal += $subcontractorAdvancePaymentTotal - $advSCBillTxn;
+
+                    $purchaseOrderAdvancePaymentTotal = PurchaseOrderAdvancePayment::join('purchase_orders','purchase_orders.id','=','purchase_order_advance_payments.purchase_order_id')
+                        ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
+                        ->where('purchase_requests.project_site_id',$projectSiteId)
+                        //->whereMonth('purchase_order_advance_payments.created_at', $month['id'])
+                        ->whereYear('purchase_order_advance_payments.created_at',$selectedYear['slug'])
+                        ->sum('purchase_order_advance_payments.amount');
+
+                    $advPurchaseBilltxn = PurchaseOrderPayment::join('purchase_order_bills','purchase_order_bills.id', '=','purchase_order_payments.purchase_order_bill_id')
+                        ->join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
+                        ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
+                        ->where('purchase_requests.project_site_id','=',$projectSiteId)
+                        ->where('purchase_order_payments.is_advance',true)
+                        //->whereMonth('purchase_order_payments.created_at', $month['id'])
+                        ->whereYear('purchase_order_payments.created_at', $selectedYear['slug'])
+                        ->sum('purchase_order_payments.amount');
+
+                    $purchaseAdvTotal += $purchaseOrderAdvancePaymentTotal - $advPurchaseBilltxn;
                     foreach ($totalMonths as $month){
                         $billIds = $bill->where('quotation_id',$quotation['id'])
                             ->where('bill_status_id',$approvedBillStatusId)->orderBy('id')
@@ -4166,7 +4244,6 @@ class ReportManagementController extends Controller{
                                     $totalAssetRent += (json_decode($thisAssetRentExpense[$month['slug']]) == null) ? 0 : json_decode($thisAssetRentExpense[$month['slug']])->rent_for_month;
                                 }
                             }
-                            dd($totalAssetRent);
                             $assetRent = $salaryAmount = $officeExpense = 0;
                             $sales = $receipt = $totalAssetRent + $allSiteTotalAssetRentOpeningExpense;
                         }
@@ -4220,7 +4297,6 @@ class ReportManagementController extends Controller{
                             ->whereYear('site_transfer_bills.created_at',$selectedYear['slug'])
                             ->sum(DB::raw('site_transfer_bills.tax_amount + site_transfer_bills.extra_amount_cgst_amount + site_transfer_bills.extra_amount_sgst_amount + site_transfer_bills.extra_amount_igst_amount'));*/
                     }
-
                     break;
             }
            /* $purchaseTaxAmount = $assetMaintenanceGst + $purchaseOrderGst + $inventorySiteTransfersInGst + $siteTransferBillGst - $inventorySiteTransfersOutGst;
@@ -4233,15 +4309,12 @@ class ReportManagementController extends Controller{
                 $totalAssetRentOpeningExpense = 0;
             }
 
-            $subcontractorAdvanceAmt = $purchaseAdvanceAmount = $salaryAdvanceAmount = 0;
-
-
             $outstanding = $sales - $debitAmount - $tdsAmount - $totalRetention - $otherRecoveryAmount - $totalHold - $receipt - $mobilization;
             //$totalExpense = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount + $indirectExpenses + $subcontractorTotal + $openingExpenses;
             $totalExpense = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount + $officeExpense + $subcontractorTotal + $openingExpenses;
             $totalExpenseWithAdv = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount
                                     + $officeExpense + $subcontractorTotal + $openingExpenses
-                                    + $subcontractorAdvanceAmt + $purchaseAdvanceAmount + $salaryAdvanceAmount;
+                                    + $subcontractorAdvTotal + $purchaseAdvTotal ;
             $salesPnL = $sales - $debitAmount - $tdsAmount - $totalHold - $otherRecoveryAmount;
             $salesWisePnL = $salesPnL - $totalExpense;
             $receiptWisePnL = $receipt - $totalExpense;
@@ -4263,9 +4336,8 @@ class ReportManagementController extends Controller{
             $salesData['misc_purchase'] = $peticashPurchaseAmount;
             $salesData['office_expense'] = $officeExpense;
             $salesData['opening_balance'] = $openingExpenses;
-            $salesData['subcontractor_advance'] = 0;
-            $salesData['purchase_advance'] = 0;
-            $salesData['salary_advance'] = 0;
+            $salesData['subcontractor_advance'] = $subcontractorAdvTotal;
+            $salesData['purchase_advance'] = $purchaseAdvTotal;
             $salesData['total_expense_with_adv'] = $totalExpenseWithAdv;
             return $salesData;
         }catch(\Exception $e){
