@@ -14,6 +14,7 @@
             <div class="page-container">
                 <!-- BEGIN CONTENT -->
                 <div class="page-content-wrapper">
+                    @if(($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin'))
                     <div class="page-head">
                         <div class="container">
                             <!-- BEGIN PAGE TITLE -->
@@ -24,7 +25,6 @@
                     </div>
                     <div class="page-content">
                         <div class="container">
-                            @if(($user->roles[0]->role->slug == 'admin') || ($user->roles[0]->role->slug == 'superadmin'))
                                 {{--<div class="row">
                                     <fieldset>
                                         <legend>
@@ -349,11 +349,9 @@
                                                     <th > Opening Balance </th>
                                                     <th > Subcontractor Advance </th>
                                                     <th > Purchase Advance </th>
-                                                    <th > Salary Advance </th>
                                                     <th > Total Expenses </th>
                                                 </tr>
                                                 <tr class="filter"><th></th>
-                                                    <th></th>
                                                     <th></th>
                                                     <th></th>
                                                     <th></th>
@@ -382,7 +380,6 @@
                                                 <tfoot>
                                                 <tr>
                                                     <th>Total Page Wise: </th>
-                                                    <th style="text-align: center"></th>
                                                     <th style="text-align: center"></th>
                                                     <th style="text-align: center"></th>
                                                     <th style="text-align: center"></th>
@@ -455,10 +452,7 @@
 
 <script>
     $(document).ready(function(){
-        $('#salesTable').DataTable();
-        $('#expensesTable').DataTable();
-
-        $("#search-withfilter").on('click',function(){
+         $("#search-withfilter").on('click',function(){
             var year_slug = $('#year_slug').val();
             var month_slug = $('#month_slug').val();
             var project_site_id = $('#project_site_id').val();

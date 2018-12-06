@@ -84,7 +84,12 @@
                                                     <div class="col-md-4">
                                                         <select class="form-control" id="year_id" name="year_id" onchange="getData()">
                                                             @foreach($yearData as $year)
+                                                                @if ($year['slug'] == date('Y'))
                                                                 <option value="{{$year['id']}}">{{$year['slug']}}</option>
+                                                                @endif
+                                                            @endforeach
+                                                            @foreach($yearData as $year)
+                                                                   <option value="{{$year['id']}}">{{$year['slug']}}</option>
                                                             @endforeach
                                                         </select>
                                                     </div>
