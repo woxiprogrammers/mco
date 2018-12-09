@@ -1827,6 +1827,7 @@ class PeticashController extends Controller
             $month = 0;
             $year = 0;
             $total = 0;
+            $payTotal = 0;
             $postDataArray = array();
             if($request->has('postdata')) {
                 $postdata = $request['postdata'];
@@ -1850,7 +1851,11 @@ class PeticashController extends Controller
             if ($request->has('status')) {
                 $peticashStatus = $request->status;
             }
-            $ids = PeticashSalaryTransaction::where('project_site_id',$projectSiteId)->pluck('id');
+
+            $approvedPeticashStatusId = PeticashStatus::where('slug','approved')->pluck('id')->first();
+            $ids = PeticashSalaryTransaction::where('project_site_id',$projectSiteId)
+                            ->where('peticash_status_id',$approvedPeticashStatusId)
+                            ->pluck('id');
             $filterFlag = true;
 
             if ($request->has('search_employee_id') && $filterFlag == true) {
@@ -1904,9 +1909,11 @@ class PeticashController extends Controller
                 if ($filterFlag) {
                     foreach($salaryTransactionData as $salarytxn) {
                         $total = $total + $salarytxn['amount'];
+                        $payTotal = $payTotal + $salarytxn['payable_amount'];
                     }
                 }
                 $records['total'] = $total;
+                $records['pay_total'] = $payTotal;
             } else {
                 $iTotalRecords = count($salaryTransactionData);
                 $records = array();

@@ -73,93 +73,178 @@
             @endif
         </table>
         <hr>
-            <table border="1" width="100%" style="font-size: 12px;">
-                <tr>
-                    <th style="width: 7%;text-align: center">Sr no.</th>
-                    <th style="width: 30%;text-align: center">Description of item</th>
-                    <th style="width: 8%;text-align: center; font-size: 10px">SAC/HSN Code</th>
-                    <th style="width: 10%;text-align: center">Quantity</th>
-                    <th style="width: 10%;text-align: center">Unit</th>
-                    <th style="width: 15%;text-align: center">Rate</th>
-                    <th style="width: 20%;text-align: center">Amount</th>
-                </tr>
-                @for($iterator = 0 ; $iterator < count($invoiceData) ; $iterator++ )
+            @if($billType != 'amountwise')
+                <table border="1" width="100%" style="font-size: 12px;">
                     <tr>
-                        <td style="text-align: center;height: 25px;">{!! $iterator+1 !!}</td>
-                        <td style="text-align: left; padding-left: 5px">{!! $invoiceData[$iterator]['product_name'] !!} @if($invoiceData[$iterator]['description'] != null) - {!! $invoiceData[$iterator]['description'] !!}@endif</td>
-                        <td style="text-align: center;"> {{$hsnCode}}</td>
-                        <td style="text-align: right; padding-right: 10px;">{!! round($invoiceData[$iterator]['quantity'],3) !!}</td>
-                        <td style="text-align: right; padding-right: 10px;">{!! $invoiceData[$iterator]['unit'] !!}</td>
-                        <td style="text-align: right; padding-right: 10px;">{!! $invoiceData[$iterator]['rate'] !!}</td>
-                        <td style="text-align: right; padding-right: 10px;">{!! $invoiceData[$iterator]['amount'] !!}</td>
+                        <th style="width: 7%;text-align: center">Sr no.</th>
+                        <th style="width: 30%;text-align: center">Description of item</th>
+                        <th style="width: 8%;text-align: center; font-size: 10px">SAC/HSN Code</th>
+                        <th style="width: 10%;text-align: center">Quantity</th>
+                        <th style="width: 10%;text-align: center">Unit</th>
+                        <th style="width: 15%;text-align: center">Rate</th>
+                        <th style="width: 20%;text-align: center">Amount</th>
                     </tr>
-                @endfor
-                @if(count($extraItems) > 0)
-                    @for($i = 0; $i < count($extraItems); $i++,$iterator++)
-                        <tr >
-                            <td style="text-align: center;height: 25px;">{!! $iterator+1  !!}</td>
-                            <td style="text-align: left; padding-left: 5px">
-                            Extra Item : {!! $extraItems[$i]->quotationExtraItems->extraItem->name !!} - {!! $extraItems[$i]->description !!}
-                            </td>
-                            <td style="text-align: center;"> {{$hsnCode}}</td>
-                            <td style="text-align: right; padding-right: 10px;">1</td>
-                            <td style="text-align: right; padding-right: 10px;">Nos</td>
-                            <td colspan="1" style="text-align: right; padding-right: 10px;">
-                                {!! $extraItems[$i]->rate !!}
-                            </td>
-                            <td style="text-align: right; padding-right: 10px;">
-                                {!! $extraItems[$i]->rate !!}
-                            </td>
-                        </tr>
-                    @endfor
-                @endif
-                @if((count($invoiceData) + count($extraItems)) < 5)
-                    @for($i = 0 ; $i < (5 - (count($invoiceData) + count($extraItems))) ; $i++)
+                    @for($iterator = 0 ; $iterator < count($invoiceData) ; $iterator++ )
                         <tr>
-                            <td style="height: 25px;"> </td>
-                            <td>&nbsp;</td>
-                            <td>&nbsp;</td>
-                            <td>&nbsp;</td>
-                            <td>&nbsp;</td>
-                            <td>&nbsp;</td>
-                            <td>&nbsp;</td>
+                            <td style="text-align: center;height: 25px;">{!! $iterator+1 !!}</td>
+                            <td style="text-align: left; padding-left: 5px">{!! $invoiceData[$iterator]['product_name'] !!} @if($invoiceData[$iterator]['description'] != null) - {!! $invoiceData[$iterator]['description'] !!}@endif</td>
+                            <td style="text-align: center;"> {{$hsnCode}}</td>
+                            <td style="text-align: right; padding-right: 10px;">{!! round($invoiceData[$iterator]['quantity'],3) !!}</td>
+                            <td style="text-align: right; padding-right: 10px;">{!! $invoiceData[$iterator]['unit'] !!}</td>
+                            <td style="text-align: right; padding-right: 10px;">{!! $invoiceData[$iterator]['rate'] !!}</td>
+                            <td style="text-align: right; padding-right: 10px;">{!! $invoiceData[$iterator]['amount'] !!}</td>
                         </tr>
                     @endfor
-                @endif
-                <tr>
-                    <td colspan="6" style="text-align: right; padding-right: 10px;"><b>Sub Total</b></td>
-                    <td style="text-align: right; padding-right: 10px;">{!! $sub_total_before_discount !!}</td>
-                </tr>
-                <tr>
-                    <td colspan="6" style="text-align: right; padding-right: 10px;"><b>Discount Amount</b></td>
-                    <td style="text-align: right; padding-right: 10px;">{!! $discount_amount !!}</td>
-                </tr>
-                <tr>
-                    <td colspan="6" style="text-align: right; padding-right: 10px;"><b>Total Amount Before Tax</b></td>
-                    <td style="text-align: right; padding-right: 10px;">{!! $subTotal !!}</td>
-                </tr>
-                @for($iterator = 0 ; $iterator < count($taxData) ; $iterator++)
+                    @if(count($extraItems) > 0)
+                        @for($i = 0; $i < count($extraItems); $i++,$iterator++)
+                            <tr >
+                                <td style="text-align: center;height: 25px;">{!! $iterator+1  !!}</td>
+                                <td style="text-align: left; padding-left: 5px">
+                                    Extra Item : {!! $extraItems[$i]->quotationExtraItems->extraItem->name !!} - {!! $extraItems[$i]->description !!}
+                                </td>
+                                <td style="text-align: center;"> {{$hsnCode}}</td>
+                                <td style="text-align: right; padding-right: 10px;">1</td>
+                                <td style="text-align: right; padding-right: 10px;">Nos</td>
+                                <td colspan="1" style="text-align: right; padding-right: 10px;">
+                                    {!! $extraItems[$i]->rate !!}
+                                </td>
+                                <td style="text-align: right; padding-right: 10px;">
+                                    {!! $extraItems[$i]->rate !!}
+                                </td>
+                            </tr>
+                        @endfor
+                    @endif
+                    @if((count($invoiceData) + count($extraItems)) < 5)
+                        @for($i = 0 ; $i < (5 - (count($invoiceData) + count($extraItems))) ; $i++)
+                            <tr>
+                                <td style="height: 25px;"> </td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                        @endfor
+                    @endif
                     <tr>
-                        <td colspan="6" style="text-align: right; padding-right: 10px;"> {!! $taxData[$iterator]['name'] !!}&nbsp;&nbsp;{!! $taxData[$iterator]['percentage'] !!} %</td>
-                        <td style="text-align: right; padding-right: 10px;">{!! $taxData[$iterator]['tax_amount'] !!}</td>
+                        <td colspan="6" style="text-align: right; padding-right: 10px;"><b>Sub Total</b></td>
+                        <td style="text-align: right; padding-right: 10px;">{!! $sub_total_before_discount !!}</td>
                     </tr>
-                @endfor
-                <tr>
-                    <td colspan="6" style="text-align: right; padding-right: 10px;"><b>Total After tax</b></td>
-                    <td style="text-align: right; padding-right: 10px;">{!! $totalAfterTax !!}</td>
-                </tr>
-                <tr>
-                    <td colspan="6" style="text-align: right; padding-right: 10px;"><b>Rounded By</b></td>
-                    <td style="text-align: right; padding-right: 10px;">{!! $roundedBy !!}</td>
-                </tr>
-                <tr>
-                    <td colspan="6" style="text-align: right; padding-right: 10px;"><b>Net Payable</b></td>
-                    <td style="text-align: right; padding-right: 10px;">{!! $grossTotal !!}</td>
-                </tr>
-                <tr>
-                    <td colspan="7" style="background-color: #808080"><b>Total Invoice in words:</b> <i>Rs. {!! $amountInWords !!}</i></td>
-                </tr>
-            </table>
+                    <tr>
+                        <td colspan="6" style="text-align: right; padding-right: 10px;"><b>Discount Amount</b></td>
+                        <td style="text-align: right; padding-right: 10px;">{!! $discount_amount !!}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="6" style="text-align: right; padding-right: 10px;"><b>Total Amount Before Tax</b></td>
+                        <td style="text-align: right; padding-right: 10px;">{!! $subTotal !!}</td>
+                    </tr>
+                    @for($iterator = 0 ; $iterator < count($taxData) ; $iterator++)
+                        <tr>
+                            <td colspan="6" style="text-align: right; padding-right: 10px;"> {!! $taxData[$iterator]['name'] !!}&nbsp;&nbsp;{!! $taxData[$iterator]['percentage'] !!} %</td>
+                            <td style="text-align: right; padding-right: 10px;">{!! $taxData[$iterator]['tax_amount'] !!}</td>
+                        </tr>
+                    @endfor
+                    <tr>
+                        <td colspan="6" style="text-align: right; padding-right: 10px;"><b>Total After tax</b></td>
+                        <td style="text-align: right; padding-right: 10px;">{!! $totalAfterTax !!}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="6" style="text-align: right; padding-right: 10px;"><b>Rounded By</b></td>
+                        <td style="text-align: right; padding-right: 10px;">{!! $roundedBy !!}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="6" style="text-align: right; padding-right: 10px;"><b>Net Payable</b></td>
+                        <td style="text-align: right; padding-right: 10px;">{!! $grossTotal !!}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="7" style="background-color: #808080"><b>Total Invoice in words:</b> <i>Rs. {!! $amountInWords !!}</i></td>
+                    </tr>
+                </table>
+            @else
+                <table border="1" width="100%" style="font-size: 12px;">
+                    <tr>
+                        <th style="width: 7%;text-align: center">Sr no.</th>
+                        <th style="width: 30%;text-align: center">Description of item</th>
+                        <th style="width: 12%;text-align: center; font-size: 10px">SAC/HSN Code</th>
+                        <th style="width: 15%;text-align: center">Quantity</th>
+                        <th style="width: 15%;text-align: center">Unit</th>
+                        <th style="text-align: center">Rate</th>
+                    </tr>
+                    @for($iterator = 0 ; $iterator < count($invoiceData) ; $iterator++ )
+                        <tr>
+                            <td style="text-align: center;height: 25px;">{!! $iterator+1 !!}</td>
+                            <td style="text-align: left; padding-left: 5px">{!! $invoiceData[$iterator]['product_name'] !!} @if($invoiceData[$iterator]['description'] != null) - {!! $invoiceData[$iterator]['description'] !!}@endif</td>
+                            <td style="text-align: center;"> {{$hsnCode}}</td>
+                            <td style="text-align: right; padding-right: 10px;">{!! round($invoiceData[$iterator]['quantity'],3) !!}</td>
+                            <td style="text-align: right; padding-right: 10px;">{!! $invoiceData[$iterator]['unit'] !!}</td>
+                            <td style="text-align: right; padding-right: 10px;">{!! $invoiceData[$iterator]['rate'] !!}</td>
+                        </tr>
+                    @endfor
+                    @if(count($extraItems) > 0)
+                        @for($i = 0; $i < count($extraItems); $i++,$iterator++)
+                            <tr >
+                                <td style="text-align: center;height: 25px;">{!! $iterator+1  !!}</td>
+                                <td style="text-align: left; padding-left: 5px">
+                                    Extra Item : {!! $extraItems[$i]->quotationExtraItems->extraItem->name !!} - {!! $extraItems[$i]->description !!}
+                                </td>
+                                <td style="text-align: center;"> {{$hsnCode}}</td>
+                                <td style="text-align: right; padding-right: 10px;">1</td>
+                                <td style="text-align: right; padding-right: 10px;">Nos</td>
+                                <td colspan="1" style="text-align: right; padding-right: 10px;">
+                                    {!! $extraItems[$i]->rate !!}
+                                </td>
+                            </tr>
+                        @endfor
+                    @endif
+                    @if((count($invoiceData) + count($extraItems)) < 5)
+                        @for($i = 0 ; $i < (5 - (count($invoiceData) + count($extraItems))) ; $i++)
+                            <tr>
+                                <td style="height: 25px;"> </td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                        @endfor
+                    @endif
+                    <tr>
+                        <td colspan="5" style="text-align: right; padding-right: 10px;"><b>Sub Total</b></td>
+                        <td style="text-align: right; padding-right: 10px;">{!! $sub_total_before_discount !!}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="5" style="text-align: right; padding-right: 10px;"><b>Discount Amount</b></td>
+                        <td style="text-align: right; padding-right: 10px;">{!! $discount_amount !!}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="5" style="text-align: right; padding-right: 10px;"><b>Total Amount Before Tax</b></td>
+                        <td style="text-align: right; padding-right: 10px;">{!! $subTotal !!}</td>
+                    </tr>
+                    @for($iterator = 0 ; $iterator < count($taxData) ; $iterator++)
+                        <tr>
+                            <td colspan="5" style="text-align: right; padding-right: 10px;"> {!! $taxData[$iterator]['name'] !!}&nbsp;&nbsp;{!! $taxData[$iterator]['percentage'] !!} %</td>
+                            <td style="text-align: right; padding-right: 10px;">{!! $taxData[$iterator]['tax_amount'] !!}</td>
+                        </tr>
+                    @endfor
+                    <tr>
+                        <td colspan="5" style="text-align: right; padding-right: 10px;"><b>Total After tax</b></td>
+                        <td style="text-align: right; padding-right: 10px;">{!! $totalAfterTax !!}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="5" style="text-align: right; padding-right: 10px;"><b>Rounded By</b></td>
+                        <td style="text-align: right; padding-right: 10px;">{!! $roundedBy !!}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="5" style="text-align: right; padding-right: 10px;"><b>Net Payable</b></td>
+                        <td style="text-align: right; padding-right: 10px;">{!! $grossTotal !!}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="6" style="background-color: #808080"><b>Total Invoice in words:</b> <i>Rs. {!! $amountInWords !!}</i></td>
+                    </tr>
+                </table>
+            @endif
+
         <br>
         <table style="font-size:15px" width="100%" border="1">
             <tr>

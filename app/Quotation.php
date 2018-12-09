@@ -9,7 +9,9 @@ class Quotation extends Model
     protected $table = 'quotations';
 
     protected $fillable = ['project_site_id','quotation_status_id','remark','is_tax_applied','is_summary_applied'
-        ,'discount','built_up_area','carpet_area','opening_expenses','bill_type_id','cancelled_bill_transaction_total_amount','cancelled_bill_transaction_balance_amount'];
+        ,'discount','built_up_area','carpet_area','opening_expenses','bill_type_id',
+        'cancelled_bill_transaction_total_amount','cancelled_bill_transaction_balance_amount'
+    ];
 
     public function project_site(){
         return $this->belongsTo('App\ProjectSite','project_site_id','id');

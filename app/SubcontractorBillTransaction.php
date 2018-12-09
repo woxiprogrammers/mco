@@ -10,7 +10,7 @@ class SubcontractorBillTransaction extends Model
 
     protected $fillable = ['subcontractor_bills_id','subtotal','total','debit','hold','retention_percent',
         'retention_amount','tds_percent','tds_amount','other_recovery','remark','is_advance','bank_id',
-        'payment_type_id','paid_from_slug', 'payment_mode_slug', 'transaction_status_id','status_remark'
+        'payment_type_id','paid_from_slug', 'payment_mode_slug', 'transaction_status_id','status_remark','created_at'
     ];
 
     public function subcontractorBill(){

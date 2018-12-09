@@ -38,6 +38,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\File;
 use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\Writers\CellWriter;
 
 trait BillTrait{
 
@@ -1033,6 +1034,7 @@ trait BillTrait{
                  $data['billDate'] = date('d/m/Y',strtotime($bill['date']));
             }
             $quotation = $bill->quotation;
+            $data['billType'] = $quotation->billType->slug;
             $projectSiteData = ProjectSite::where('id',$quotation->project_site_id)->first();
             $data['projectSiteName'] = $projectSiteData->name;
             $data['projectSiteAddress'] = $projectSiteData->address;
@@ -1050,9 +1052,18 @@ trait BillTrait{
                     $invoiceData[$i]['description'] = $billQuotationSummary->productDescription->description;
                     $invoiceData[$i]['quantity'] = $billQuotationSummary->quantity;
                     $invoiceData[$i]['unit'] = $sQFTUnitName;
-                    $invoiceData[$i]['rate'] = ($quotation->billType->slug == 'amountwise') ? ($bill->quotation->built_up_area * $billQuotationSummary->rate_per_sqft)
-                                                    : $billQuotationSummary->rate_per_sqft;
-                    $invoiceData[$i]['amount'] = round(($invoiceData[$i]['quantity'] * $invoiceData[$i]['rate']), 3);
+                    if($quotation->billType->slug == 'amountwise'){
+                        $invoiceData[$i]['unit'] = 'Amount';
+                        $rate = $bill->quotation->built_up_area * $billQuotationSummary->rate_per_sqft;
+                        $invoiceData[$i]['rate'] = $invoiceData[$i]['amount'] = round(($invoiceData[$i]['quantity'] * $rate), 3);
+                    }else{
+                        $invoiceData[$i]['unit'] = $sQFTUnitName;
+                        $invoiceData[$i]['rate'] = $billQuotationSummary->rate_per_sqft;
+                        $invoiceData[$i]['amount'] = round(($invoiceData[$i]['quantity'] * $invoiceData[$i]['rate']), 3);
+                    }
+/*//                    $invoiceData[$i]['unit'] = ($quotation->billType->slug == 'amountwise') ? 'Amount' : ;
+                    $rate = ($quotation->billType->slug == 'amountwise') ? ()
+                        : $billQuotationSummary->rate_per_sqft;*/
                     $data['productSubTotal'] = round(($data['productSubTotal'] + $invoiceData[$i]['amount']),3);
                     $i++;
                 }
@@ -1931,15 +1942,25 @@ trait BillTrait{
                             $sheet->getCell('B'.($productRow))->setValue($description['description']);
                             foreach($description['bills'] as $bill => $thisBill ){
                                 $current_column = $next_column++;
-                                $sheet->getCell($current_column.($productRow))->setValue($thisBill['rate']);
-                                $sheet->getCell($next_column.($productRow))->setValue($thisBill['quantity']);
-                                $next_column++;
-                                $sheet->getCell(($next_column).($productRow))->setValue($thisBill['amount']);
-                                $next_column++;
+                                if($thisBill['quantity'] == 0){
+                                    $sheet->getCell($next_column.($productRow))->setValue($thisBill['quantity']);
+                                    $next_column++;
+                                    $next_column++;
+                                } else {
+                                    $sheet->getCell($current_column.($productRow))->setValue($thisBill['rate']);
+                                    $sheet->getCell($next_column.($productRow))->setValue($thisBill['quantity']);
+                                    $next_column++;
+                                    $sheet->getCell(($next_column).($productRow))->setValue($thisBill['amount']);
+                                    $cellWriter = new CellWriter(($next_column).($productRow), $sheet);
+                                    $cellWriter->setFontWeight('bold');
+                                    $next_column++;
+                                }
                             }
                             $sheet->getCell(($amountColumn).($productRow))->setValue($description['bills']['total_quantity']);
                             $amountColumn++;
                             $sheet->getCell(($amountColumn).($productRow))->setValue($description['bills']['total_amount']);
+                            $cellWriter = new CellWriter((($amountColumn).($productRow)),$sheet);
+                            $cellWriter->setFontWeight('bold');
                         }
                         $productRow = $productRow + 1;
                         $productRow++;
@@ -1962,9 +1983,9 @@ trait BillTrait{
                         $productRow = $productRow + 1;
                         $serialNumber++;
                     }
+                    $productRow++;
                     $sheet->getCell('B'.($productRow))->setValue('SubTotal');
                     $columnForSubTotal = 'G';
-                    $rowForSubtotal = $productRow;
                     $totalSubTotal = 0;
                     foreach($billSubTotal as $subTotal){
                         $totalSubTotal += $subTotal['subtotal'];
@@ -2003,7 +2024,7 @@ trait BillTrait{
                     }
                     $sheet->getCell($columnForDiscountSubTotal.($productRow))->setValue($totalDiscountSubTotal);
 
-                    $productRow++;
+                    $productRow += 3;
                     foreach($taxInfo as $tax){
                         $sheet->getCell('B'.($productRow))->setValue($tax['name']);
                         $next_column = 'G';
@@ -2040,7 +2061,8 @@ trait BillTrait{
                         $columnForTotal++;
                     }
                     $sheet->getCell($columnForTotal.($productRow))->setValue("=SUM($columnForTotal$rowForDiscountSubtotal:$columnForTotal$beforeTotalRowNumber)");
-
+                    $cellWriter = new CellWriter(($columnForTotal.($productRow)), $sheet);
+                    $cellWriter->setFontWeight('bold');
                 });
             })->download('xlsx'); //->export('xls');
         }catch(\Exception $e){
