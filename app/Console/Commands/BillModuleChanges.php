@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Bill;
+use App\BillQuotationProducts;
 use App\BillTransaction;
 use App\Quotation;
 use App\QuotationProduct;
@@ -89,7 +90,7 @@ class BillModuleChanges extends Command
                 }
             }
         }*/
-        $transactionStatus = new TransactionStatus();
+        /*$transactionStatus = new TransactionStatus();
         $billTransaction = new BillTransaction();
         $subcontractorBillTransaction = new SubcontractorBillTransaction();
         $approvedStatusId = $transactionStatus->where('slug','approved')->pluck('id')->first();
@@ -102,6 +103,20 @@ class BillModuleChanges extends Command
            return $thisBillTransaction->update([
                 'transaction_status_id' => $approvedStatusId
             ]);
-        });
+        });*/
+        $bills = Bill::all();
+        foreach ($bills as $bill){
+            if($bill['rounded_amount_by'] === null){
+                $bill->update(['rounded_amount_by' => 0]);
+            }
+        }
+        $billQuotationProduct = new BillQuotationProducts();
+        $billQuotationProducts = $billQuotationProduct->all();
+        foreach ($billQuotationProducts as $billQuotationProduct){
+            $billQuotationProduct->update([
+                'rate_per_unit' => $billQuotationProduct->quotation_products->rate_per_unit
+            ]);
+        }
+
     }
 }

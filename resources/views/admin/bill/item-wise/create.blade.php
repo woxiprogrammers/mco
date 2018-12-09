@@ -126,7 +126,8 @@
                                                         <span id="boq_quantity_{{$quotationProducts[$iterator]['id']}}">{{$quotationProducts[$iterator]['quantity']}}</span>
                                                     </td>
                                                     <td>
-                                                        <span id="rate_per_unit_{{$quotationProducts[$iterator]['id']}}">{{$quotationProducts[$iterator]['rate']}}</span>
+                                                        <input class="form-control" type="text" id="rate_per_unit_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][rate]" value="{{$quotationProducts[$iterator]['rate']}}" disabled>
+                                                        {{--<span id="rate_per_unit_{{$quotationProducts[$iterator]['id']}}">{{$quotationProducts[$iterator]['rate']}}</span>--}}
                                                     </td>
                                                     <td>
                                                         <span>{{round(($quotationProducts[$iterator]['rate'] * $quotationProducts[$iterator]['quantity']),3)}}</span>
@@ -135,7 +136,7 @@
                                                         <span id="previous_quantity_{{$quotationProducts[$iterator]['id']}}">{{$quotationProducts[$iterator]['previous_quantity']}}</span>
                                                     </td>
                                                     <td class="form-group">
-                                                        <input class="form-control current_quantity" type="text" id="current_quantity_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][current_quantity]" disabled>
+                                                        <input class="form-control current_quantity" type="text" id="current_quantity_{{$quotationProducts[$iterator]['id']}}" name="quotation_product_id[{{$quotationProducts[$iterator]['id']}}][current_quantity]" max="{{$quotationProducts[$iterator]['allowed_quantity']}}" disabled>
                                                     </td>
                                                     <td>
                                                         <span id="cumulative_quantity_{{$quotationProducts[$iterator]['id']}}"></span>
@@ -205,7 +206,8 @@
                                             <tr>
                                                 <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Total Round</b></td>
                                                 <td>
-                                                    <span id="rounded_off_current_bill_amount"></span>
+                                                    <input name="sub_total" id="rounded_off_current_bill_amount" class="form-control" readonly>
+                                                    {{--<span id="rounded_off_current_bill_amount"></span>--}}
                                                 </td>
                                             </tr>
                                             @if($taxes != null)
@@ -232,7 +234,8 @@
                                                 <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Final Total</b></td>
 
                                                 <td>
-                                                    <span id="final_current_bill_total"></span>
+                                                    <input name="with_tax_amount" id="final_current_bill_total" class="form-control" readonly>
+                                                    {{--<span id="final_current_bill_total"></span>--}}
                                                 </td>
 
 
@@ -272,7 +275,8 @@
                                             <tr>
                                                 <td colspan="10" style="text-align: right; padding-right: 30px;"><b> Grand Total</b></td>
                                                 <td>
-                                                    <span id="grand_current_bill_total"></span>
+                                                    <input name="grand_total" id="grand_current_bill_total" class="form-control" readonly>
+                                                    {{--<span id="grand_current_bill_total"></span>--}}
                                                 </td>
                                             </tr>
 

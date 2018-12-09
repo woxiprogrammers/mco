@@ -91,6 +91,7 @@ trait BillTrait{
                                     $quotationProducts[$i]['previous_quantity'] = $quotationProducts[$i]['previous_quantity'] + $bill_products[$k]['quantity'];
                                 }
                             }
+                            $quotationProducts[$i]['allowed_quantity'] = $quotationProducts[$i]['quantity'] - $quotationProducts[$i]['previous_quantity'];
                         }
                     }
                 }else{
@@ -99,6 +100,7 @@ trait BillTrait{
                         $quotationProducts[$i]['category_name'] = $categoryModel->where('id',$quotationProducts[$i]['product_detail']['category_id'])->pluck('name')->first();
                         $quotationProducts[$i]['unit'] = $unitModel->where('id',$quotationProducts[$i]['product_detail']['unit_id'])->pluck('name')->first();
                         $quotationProducts[$i]['previous_quantity'] = 0;
+                        $quotationProducts[$i]['allowed_quantity'] = $quotationProducts[$i]['quantity'] - $quotationProducts[$i]['previous_quantity'];
                         if($quotation['discount'] != 0){
                             $quotationProducts[$i]['rate'] = round(($quotationProducts[$i]['rate_per_unit'] - ($quotationProducts[$i]['rate_per_unit'] * ($quotation['discount'] / 100))),3);
                         }else{
@@ -692,7 +694,7 @@ trait BillTrait{
                     $discount = Quotation::where('id',$quotation_id)->pluck('discount')->first();
                     $rate_per_unit = QuotationProduct::where('id',$billQuotationProducts[$iterator]['quotation_product_id'])->pluck('rate_per_unit')->first();
                     $billQuotationProducts[$iterator]['rate'] = round(($rate_per_unit - ($rate_per_unit * ($discount / 100))),3);
-                    $billQuotationProducts[$iterator]['current_bill_subtotal'] = round(($billQuotationProducts[$iterator]['quantity'] * $billQuotationProducts[$iterator]['rate']),3);
+                    $billQuotationProducts[$iterator]['current_bill_subtotal'] = round(($billQuotationProducts[$iterator]['quantity'] * $billQuotationProducts[$iterator]['rate_per_unit']),3);
                     $billWithoutCancelStatus = Bill::where('id','<',$bill['id'])->where('bill_status_id','!=',$cancelBillStatusId)->pluck('id')->toArray();
                     $previousBills = BillQuotationProducts::whereIn('bill_id',$billWithoutCancelStatus)->get();
                     foreach($previousBills as $key => $previousBill){
@@ -808,12 +810,14 @@ trait BillTrait{
             }
             $bill['discount_description'] = $request->discount_description;
             $bill_created = $billModel->create($bill);
-            if($request['bill_type_slug'] == 'itemwise'){
+            if($quotationData->billType->slug == 'itemwise'){
                 $billQuotationProductsModel = new BillQuotationProducts();
                 foreach($request['quotation_product_id'] as $key => $value){
                     $bill_quotation_product['bill_id'] = $bill_created['id'];
                     $bill_quotation_product['quotation_product_id'] = $key;
+                    $bill_quotation_product['rate_per_unit'] = $value['rate'];
                     $bill_quotation_product['quantity'] = $value['current_quantity'];
+                    $bill_quotation_product['is_deleted'] = false;
                     $bill_quotation_product['product_description_id'] = $value['product_description_id'];
                     $billQuotationProductsModel->create($bill_quotation_product);
                 }
@@ -1330,10 +1334,11 @@ trait BillTrait{
                 foreach($quotationProducts as $key => $quotationProduct){
                     $quotationProduct['previous_quantity'] = 0;
                     foreach($billQuotationProducts as $key1 => $billQuotationProduct){
-                        $quotationProduct['discounted_rate'] = round(($quotationProduct['rate_per_unit'] - ($quotationProduct['rate_per_unit'] * ($quotationProduct->quotation->discount / 100))),3);
+                        $quotationProduct['discounted_rate'] = round(($quotationProduct['rate_per_unit'] - ($quotationProduct['rate_per_unit'] * ($quotationProduct->quotation->discount / 100))),3);;
                         if($billQuotationProduct->quotation_product_id == $quotationProduct->id){
                             $quotationProduct['previous_quantity'] = $quotationProduct['previous_quantity'] + $billQuotationProduct->quantity;
                             if($billQuotationProduct->bill_id == $bill->id){
+                                $quotationProduct['discounted_rate'] = $billQuotationProduct['rate_per_unit'];
                                 $quotationProduct['previous_quantity'] = $quotationProduct['previous_quantity'] - $billQuotationProduct->quantity;
                                 $quotationProduct['bill_description'] = ($billQuotationProduct->product_description_id != null) ? $billQuotationProduct->product_description->description : '';
                                 $quotationProduct['bill_product_description_id'] = ($billQuotationProduct->product_description_id != null) ? $billQuotationProduct->product_description_id : null;
@@ -1491,10 +1496,6 @@ trait BillTrait{
             }else{
                 $billQuotationProductModel = new BillQuotationProducts();
                 $products = $request->quotation_product_id;
-                $alreadyExistQuotationProductIds = $billQuotationProductModel->where('bill_id',$bill->id)
-                    ->pluck('quotation_product_id')->toArray();
-                $editQuotationProductIds = array_keys($products);
-                $deletedQuotationProductIds = array_values(array_diff($alreadyExistQuotationProductIds,$editQuotationProductIds));
                 foreach($products as $key => $product){
                     $alreadyExistProduct = $billQuotationProductModel->where('bill_id',$bill->id)
                         ->where('quotation_product_id',$key)->first();
@@ -1504,18 +1505,25 @@ trait BillTrait{
                             if($product['current_quantity'] != $alreadyExistProduct->quantity){
                                 $billQuotationProduct['quantity'] = $product['current_quantity'];
                             }
+                            if($product['rate'] !== $alreadyExistProduct['rate_per_sqft']){
+                                $billQuotationProduct['rate_per_unit'] = $product['rate'];
+                            }
+                            $billQuotationProduct['is_deleted'] = false;
                             $billQuotationProduct['product_description_id'] = $product['product_description_id'];
                             $billQuotationProductModel->where('bill_id',$bill->id)
                                 ->where('quotation_product_id',$key)->update($billQuotationProduct);
                         }else{
-                            $billQuotationProductModel->where('bill_id',$bill->id)
-                                ->where('quotation_product_id',$key)->delete();
+                            $alreadyExistProduct->update([
+                                'is_deleted' => true
+                            ]);
                         }
                     }else{
                         if(array_key_exists('current_quantity',$product)){
                             $billQuotationProduct['bill_id'] = $bill->id;
                             $billQuotationProduct['quotation_product_id'] = $key;
+                            $billQuotationProduct['rate_per_unit'] = $product['rate'];
                             $billQuotationProduct['quantity'] = $product['current_quantity'];
+                            $billQuotationSummary['is_deleted'] = false;
                             $billQuotationProduct['product_description_id'] = $product['product_description_id'];
                             $billQuotationProductModel->create($billQuotationProduct);
                         }

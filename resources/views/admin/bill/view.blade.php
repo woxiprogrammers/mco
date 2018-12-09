@@ -215,7 +215,7 @@
                                                             </td>
 
                                                             <td>
-                                                                <span id="rate_per_unit_{{$billQuotationProducts[$iterator]['quotationProducts']['id']}}">{{$billQuotationProducts[$iterator]['rate']}}</span>
+                                                                <span id="rate_per_unit_{{$billQuotationProducts[$iterator]['quotationProducts']['id']}}">{{$billQuotationProducts[$iterator]['rate_per_unit']}}</span>
                                                             </td>
 
                                                             <td>

@@ -185,7 +185,7 @@ function calculateQuantityAmount(current_quantity,id){
         $('#wo_amount_'+id).text(rate);
         var current_bill_amount = parseFloat(current_quantity) * rate;
     }else{
-        var current_bill_amount = parseFloat(current_quantity) * parseFloat($('#rate_per_unit_'+id).text());
+        var current_bill_amount = parseFloat(current_quantity) * parseFloat($('#rate_per_unit_'+id).val());
     }
 
     $('#cumulative_quantity_'+id).text((cumulative_quantity).toFixed(3));
