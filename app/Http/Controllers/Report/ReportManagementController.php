@@ -2911,9 +2911,9 @@ class ReportManagementController extends Controller{
             $bill = $billInstance->where('id',$billId)->first();
             $cancelBillStatusId = $billStatusInstance->where('slug','cancelled')->pluck('id')->first();
             $bills = $billInstance->where('quotation_id',$bill['quotation_id'])->where('bill_status_id','!=',$cancelBillStatusId)->orderBy('created_at','asc')->get()->toArray();
-
+            $quotation = $bill->quotation;
             $total['previous_bill_amount'] = $total['current_bill_subtotal'] = $total['cumulative_bill_amount'] = $total_extra_item =  0;
-            if($bill->quotation->billType->slug == 'sqft' || $bill->quotation->billType->slug == 'amountwise'){
+            if($quotation->billType->slug == 'sqft' || $bill->quotation->billType->slug == 'amountwise'){
                 $billQuotationSummaries = $billQuotationSummaryInstance->where('bill_id',$bill['id'])->get()->toArray();
                 for($iterator = 0 ; $iterator < count($billQuotationSummaries) ; $iterator++){
                     $billQuotationSummaries[$iterator]['previous_quantity'] = 0;
@@ -2921,7 +2921,8 @@ class ReportManagementController extends Controller{
                     $quotation_id = $billInstance->where('id',$billQuotationSummaries[$iterator]['bill_id'])->pluck('quotation_id')->first();
                     $discount = $quotationInstance->where('id',$quotation_id)->pluck('discount')->first();
                     $rate_per_unit = $quotationSummaryInstance->where('id',$billQuotationSummaries[$iterator]['quotation_summary_id'])->pluck('rate_per_sqft')->first();
-                    $billQuotationSummaries[$iterator]['rate'] = round(($rate_per_unit - ($rate_per_unit * ($discount / 100))),3);
+                    //$billQuotationSummaries[$iterator]['rate'] = round(($rate_per_unit - ($rate_per_unit * ($discount / 100))),3);
+                    $billQuotationSummaries[$iterator]['rate'] = ($quotation->billType->slug == 'sqft') ? $billQuotationSummaries[$iterator]['rate_per_sqft'] : $billQuotationSummaries[$iterator]['rate_per_sqft'] * $quotation['built_up_area'];
                     $billQuotationSummaries[$iterator]['current_bill_subtotal'] = round(($billQuotationSummaries[$iterator]['quantity'] * $billQuotationSummaries[$iterator]['rate']),3);
                     $billWithoutCancelStatus = $billInstance->where('id','<',$bill['id'])->where('bill_status_id','!=',$cancelBillStatusId)->pluck('id')->toArray();
                     $previousBills = $billQuotationProductInstance->whereIn('bill_id',$billWithoutCancelStatus)->get();
