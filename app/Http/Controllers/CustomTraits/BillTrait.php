@@ -764,6 +764,7 @@ trait BillTrait{
             }
             $BillTransactionTotals = BillTransaction::where('bill_id',$bill->id)->sum('amount');
             $remainingAmount = ($final['current_bill_gross_total_amount'] + abs($tdsRetentionTaxAmount)) - ($BillTransactionTotals);
+            //dd($remainingAmount);
             $paymentTypes = PaymentType::orderBy('id')->whereIn('slug',['cheque','neft','rtgs','internet-banking'])->get();
             $totalBillHoldAmount = BillTransaction::where('bill_id',$selectedBillId)->sum('hold');
             $reconciledHoldAmount = BillReconcileTransaction::where('bill_id',$selectedBillId)->where('transaction_slug','hold')->sum('amount');
