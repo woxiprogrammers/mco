@@ -68,6 +68,9 @@
                                                         <th> Final Amount </th>
                                                         <th> Paid Amount </th>
                                                         <th> Pending Amount </th>
+                                                        <th> TDS </th>
+                                                        <th> Retention </th>
+                                                        <th> Hold </th>
                                                         <th> Status </th>
                                                         <th> Action </th>
                                                     </tr>
