@@ -48,13 +48,16 @@
                                             </div>
                                             <table class="table table-striped table-bordered table-hover table-checkable order-column" id="projectSiteTable">
                                                 <thead>
-                                                <tr>
-                                                    <th> Company Name </th>
-                                                    <th style="width: 30%"> Project Name </th>
-                                                    <th> Site Name </th>
-                                                    <th> Type </th>
-                                                    <th> Actions </th>
-                                                </tr>
+                                                    <tr>
+                                                        <th width="10%"> Company Name </th>
+                                                        <th width="10%"> Project Name </th>
+                                                        <th width="10%"> Site Name </th>
+                                                        <th width="10%"> Type </th>
+                                                        <th width="10%"> Bill Amount </th>
+                                                        <th width="10%"> Paid Amount </th>
+                                                        <th width="10%"> Balance Amount </th>
+                                                        <th width="10%"> Actions </th>
+                                                    </tr>
                                                 </thead>
                                                 <tbody>
 
