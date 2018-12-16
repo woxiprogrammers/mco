@@ -93,194 +93,387 @@
                                                 <input type="hidden" id="quotation_id" name="quotation_id" value="{{$quotation['id']}}">
                                                 <input type="hidden" id="bill_type_id" name="bill_type_id" value="{{$quotation->billType->slug}}">
 
+
+
+
                                                 <table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll; " id="createBillTable">
-                                                    <tr>
-                                                        <th width="1%">
-                                                            <input type="checkbox" class="group-checkable" disabled="disabled" >
-                                                        </th>
-                                                        <th width="5%" style="text-align: center"> Summary no </th>
-                                                        <th width="30%" style="text-align: center"> Summary Description </th>
-                                                        <th width="6%" class="numeric" style="text-align: center"> UOM </th>
-                                                        <th width="6%" class="numeric" style="text-align: center"> Slab Area </th>
-                                                        <th width="6%" class="numeric" style="text-align: center"> Rate </th>
-                                                        <th width="7%" class="numeric" style="text-align: center"> W.O Amount </th>
-                                                        <th width="5%" class="numeric" style="text-align: center"> Previous Quantity </th>
-                                                        <th width="5%" class="numeric" style="text-align: center"> Current Quantity </th>
-                                                        <th width="8%" class="numeric" style="text-align: center"> Cumulative Quantity </th>
-                                                        <th width="8%" class="numeric" style="text-align: center"> Current Bill Amount </th>
-                                                    </tr>
-                                                    @for($iterator = 0; $iterator < count($quotationSummaries); $iterator++)
-                                                        <tr id="id_{{$quotationSummaries[$iterator]['id']}}">
-                                                            <td>
-                                                                <input type="checkbox" id="id_{{$quotationSummaries[$iterator]['id']}}" name="quotation_summary_id[{{$quotationSummaries[$iterator]['id']}}]" value="{{$quotationSummaries[$iterator]['id']}}" class="product-checkbox">
-                                                            </td>
-                                                            <td>
-                                                                <span>{{$iterator + 1}}</span>
-                                                            </td>
-                                                            <td>
-                                                                <span>{{$quotationSummaries[$iterator]['summary_name']}}</span>
-                                                                <div class="input-group form-group" id="inputGroup" style="padding-left: 10%; padding-right: 10%">
-                                                                    <input type="hidden" class="product-description-id" name="quotation_summary_id[{{$quotationSummaries[$iterator]['id']}}][product_description_id]" id="product_description_id_{{$quotationSummaries[$iterator]['id']}}" disabled>
-                                                                    <input class="product_description form-control" type="text" id="product_description_{{$quotationSummaries[$iterator]['id']}}" name="quotation_summary_id[{{$quotationSummaries[$iterator]['id']}}][product_description]" disabled>
-                                                                    <span class="input-group-addon product_description_create" style="font-size: 12px">C</span>
-                                                                    <span class="input-group-addon product_description_update" style="font-size: 12px">U</span>
-                                                                    <span class="input-group-addon product_description_delete" style="font-size: 12px">D</span>
-                                                                </div>
-
-                                                            </td>
-                                                            <td>
-                                                                <span>{{$quotationSummaries[$iterator]['unit']}}</span>
-                                                            </td>
-                                                            <td>
-                                                                <span id="boq_quantity_{{$quotationSummaries[$iterator]['id']}}">{{$quotationSummaries[$iterator]['quantity']}}</span>
-                                                            </td>
-                                                            <td>
-                                                                <input class="form-control" type="text" id="rate_per_unit_{{$quotationSummaries[$iterator]['id']}}" name="quotation_summary_id[{{$quotationSummaries[$iterator]['id']}}][rate]" value="{{$quotationSummaries[$iterator]['rate_per_sqft']}}" disabled>
-                                                                {{--<span id="rate_per_unit_{{$quotationSummaries[$iterator]['id']}}">{{$quotationSummaries[$iterator]['rate_per_sqft']}}</span>--}}
-                                                            </td>
-                                                            <td>
-                                                                <span id="wo_amount_{{$quotationSummaries[$iterator]['id']}}">{{round(($quotationSummaries[$iterator]['rate_per_sqft'] * $quotationSummaries[$iterator]['quantity']),3)}}</span>
-                                                            </td>
-                                                            <td>
-                                                                <span id="previous_quantity_{{$quotationSummaries[$iterator]['id']}}">{{$quotationSummaries[$iterator]['previous_quantity']}}</span>
-                                                            </td>
-                                                            <td class="form-group">
-                                                                <input class="form-control current_quantity" type="text" id="current_quantity_{{$quotationSummaries[$iterator]['id']}}" name="quotation_summary_id[{{$quotationSummaries[$iterator]['id']}}][current_quantity]" max="{{$quotationSummaries[$iterator]['allowed_quantity']}}" disabled>
-                                                            </td>
-                                                            <td>
-                                                                <span id="cumulative_quantity_{{$quotationSummaries[$iterator]['id']}}"></span>
-                                                            </td>
-
-                                                            <td>
-                                                                <span id="current_bill_amount_{{$quotationSummaries[$iterator]['id']}}"></span>
-                                                            </td>
-
-                                                        </tr>
-                                                    @endfor
-                                                    <tr>
-                                                        <td colspan="11" style="background-color: #F5F5F5">&nbsp; </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td colspan="5"><b>Extra Items</b></td>
-                                                        <td colspan="2"><b>Total Amount Approved</b></td>
-                                                        <td colspan="2"><b>Previous Amount</b></td>
-                                                        <td colspan="2"><b>Current Amount</b></td>
-                                                    </tr>
-                                                    @for($iterator = 0; $iterator < count($extraItems); $iterator++)
+                                                    @if($quotation->billType->slug == 'amountwise')
                                                         <tr>
-                                                            <td>
-                                                                <input type="checkbox" id="id_{{$extraItems[$iterator]->id}}" name="extra_item[{{$extraItems[$iterator]->id}}]" value="{{$extraItems[$iterator]->id}}" class="extra-item-checkbox">
-                                                            </td>
-                                                            <td colspan="4">
+                                                            <th width="4%">
+                                                                <input type="checkbox" class="group-checkable" disabled="disabled" >
+                                                            </th>
+                                                            <th width="7%" style="text-align: center"> Summary no </th>
+                                                            <th width="35%" style="text-align: center"> Summary Description </th>
+                                                            <th width="6%" class="numeric" style="text-align: center"> UOM </th>
+                                                            <th width="7%" class="numeric" style="text-align: center"> Slab Area </th>
+                                                            <th width="7%" class="numeric" style="text-align: center"> Rate </th>
+                                                            <th width="7%" class="numeric" style="text-align: center"> Previous Quantity </th>
+                                                            <th width="7%" class="numeric" style="text-align: center"> Current Quantity </th>
+                                                            <th width="8%" class="numeric" style="text-align: center"> Cumulative Quantity </th>
+                                                            <th width="15%" class="numeric" style="text-align: center"> Current Bill Amount </th>
+                                                        </tr>
+                                                        @for($iterator = 0; $iterator < count($quotationSummaries); $iterator++)
+                                                            <tr id="id_{{$quotationSummaries[$iterator]['id']}}">
+                                                                <td>
+                                                                    <input type="checkbox" id="id_{{$quotationSummaries[$iterator]['id']}}" name="quotation_summary_id[{{$quotationSummaries[$iterator]['id']}}]" value="{{$quotationSummaries[$iterator]['id']}}" class="product-checkbox">
+                                                                </td>
+                                                                <td>
+                                                                    <span>{{$iterator + 1}}</span>
+                                                                </td>
+                                                                <td>
+                                                                    <span>{{$quotationSummaries[$iterator]['summary_name']}}</span>
+                                                                    <div class="input-group form-group" id="inputGroup" style="padding-left: 10%; padding-right: 10%">
+                                                                        <input type="hidden" class="product-description-id" name="quotation_summary_id[{{$quotationSummaries[$iterator]['id']}}][product_description_id]" id="product_description_id_{{$quotationSummaries[$iterator]['id']}}" disabled>
+                                                                        <input class="product_description form-control" type="text" id="product_description_{{$quotationSummaries[$iterator]['id']}}" name="quotation_summary_id[{{$quotationSummaries[$iterator]['id']}}][product_description]" disabled>
+                                                                        <span class="input-group-addon product_description_create" style="font-size: 12px">C</span>
+                                                                        <span class="input-group-addon product_description_update" style="font-size: 12px">U</span>
+                                                                        <span class="input-group-addon product_description_delete" style="font-size: 12px">D</span>
+                                                                    </div>
+
+                                                                </td>
+                                                                <td>
+                                                                    <span>{{$quotationSummaries[$iterator]['unit']}}</span>
+                                                                </td>
+                                                                <td>
+                                                                    <span id="boq_quantity_{{$quotationSummaries[$iterator]['id']}}">{{$quotationSummaries[$iterator]['quantity']}}</span>
+                                                                </td>
+                                                                {{--<td>
+                                                                    <input class="form-control" type="text" id="rate_per_unit_{{$quotationSummaries[$iterator]['id']}}" name="quotation_summary_id[{{$quotationSummaries[$iterator]['id']}}][rate]" value="{{$quotationSummaries[$iterator]['rate_per_sqft']}}" disabled>
+                                                                    --}}{{--<span id="rate_per_unit_{{$quotationSummaries[$iterator]['id']}}">{{$quotationSummaries[$iterator]['rate_per_sqft']}}</span>--}}{{--
+                                                                </td>--}}
+                                                                <td>
+                                                                    <input class="form-control" type="hidden" id="rate_per_unit_{{$quotationSummaries[$iterator]['id']}}" name="quotation_summary_id[{{$quotationSummaries[$iterator]['id']}}][rate]" value="{{$quotationSummaries[$iterator]['rate_per_sqft']}}">
+                                                                    <span id="wo_amount_{{$quotationSummaries[$iterator]['id']}}">{{round(($quotationSummaries[$iterator]['rate_per_sqft'] * $quotationSummaries[$iterator]['quantity']),3)}}</span>
+                                                                </td>
+                                                                <td>
+                                                                    <span id="previous_quantity_{{$quotationSummaries[$iterator]['id']}}">{{$quotationSummaries[$iterator]['previous_quantity']}}</span>
+                                                                </td>
+                                                                <td class="form-group">
+                                                                    <input class="form-control current_quantity" type="text" id="current_quantity_{{$quotationSummaries[$iterator]['id']}}" name="quotation_summary_id[{{$quotationSummaries[$iterator]['id']}}][current_quantity]" max="{{$quotationSummaries[$iterator]['allowed_quantity']}}" disabled>
+                                                                </td>
+                                                                <td>
+                                                                    <span id="cumulative_quantity_{{$quotationSummaries[$iterator]['id']}}"></span>
+                                                                </td>
+
+                                                                <td>
+                                                                    <span id="current_bill_amount_{{$quotationSummaries[$iterator]['id']}}"></span>
+                                                                </td>
+
+                                                            </tr>
+                                                        @endfor
+                                                        <tr>
+                                                            <td colspan="10" style="background-color: #F5F5F5">&nbsp; </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td colspan="4"><b>Extra Items</b></td>
+                                                            <td colspan="2"><b>Total Amount Approved</b></td>
+                                                            <td colspan="2"><b>Previous Amount</b></td>
+                                                            <td colspan="2"><b>Current Amount</b></td>
+                                                        </tr>
+                                                        @for($iterator = 0; $iterator < count($extraItems); $iterator++)
+                                                            <tr>
+                                                                <td>
+                                                                    <input type="checkbox" id="id_{{$extraItems[$iterator]->id}}" name="extra_item[{{$extraItems[$iterator]->id}}]" value="{{$extraItems[$iterator]->id}}" class="extra-item-checkbox">
+                                                                </td>
+                                                                <td colspan="3">
                                                             <span>
                                                                 {{$extraItems[$iterator]->extraItem->name}}
                                                                 <input class="extra_item_description form-control" type="text" id="extra_item_description_{{$extraItems[$iterator]->id}}" name="extra_item[{{$extraItems[$iterator]->id}}][description]" disabled>
                                                             </span>
-                                                            </td>
-                                                            <td colspan="2">
-                                                                <span id="total_extra_item_rate_{{$extraItems[$iterator]->id}}">{{$extraItems[$iterator]->rate}}</span>
-                                                            </td>
-                                                            <td colspan="2">
-                                                                <span id="previous_rates_{{$extraItems[$iterator]->id}}">{{$extraItems[$iterator]->previous_rate}}</span>
-                                                            </td>
-                                                            <td colspan="2" class="form-group">
-                                                                <input class="form-control" type="text" id="extra_item_rate_{{$extraItems[$iterator]->id}}" name="extra_item[{{$extraItems[$iterator]->id}}][rate]" disabled>
-                                                            </td>
-                                                        </tr>
-                                                    @endfor
-                                                    <tr>
-                                                        <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Sub Total</b></td>
-                                                        <td>
-                                                            <span id="sub_total_current_bill_amount"></span>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Sub Total Round</b></td>
-                                                        <td>
-                                                            <span id="rounded_off_current_bill_sub_total"></span>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Discount Amount</b></td>
-                                                        <td>
-                                                            <input name="discount_amount" id="discountAmount" class="form-control" type="text" value="0">
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Discount Description</b></td>
-                                                        <td>
-                                                            <input name="discount_description" id="discountDescription" class="form-control" type="text">
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Total Round</b></td>
-                                                        <td>
-                                                            <input name="sub_total" id="rounded_off_current_bill_amount" class="form-control" readonly>
-                                                            {{--<span id="rounded_off_current_bill_amount"></span>--}}
-                                                        </td>
-                                                    </tr>
-                                                    @if($taxes != null)
-                                                        <tr>
-                                                            <td colspan="6"><b>Tax Name</b></td>
-                                                            <td colspan="4"><b>Tax Rate</b></td>
-                                                            <td colspan="1"></td>
-                                                        </tr>
-                                                        @for($j = 0 ; $j < count($taxes); $j++)
-                                                            <tr>
-                                                                <td colspan="6" style="text-align: center">{{$taxes[$j]['name']}}</td>
-                                                                <td colspan="4" style="text-align: right"><input class="tax form-control" step="any" type="number" id="tax_percentage_{{$taxes[$j]['id']}}" name="tax_percentage[{{$taxes[$j]['id']}}]" value="{{$taxes[$j]['base_percentage']}}" onchange="calculateTax()" onkeyup="calculateTax()"></td>
-                                                                <td>
-                                                                    <span id="tax_current_bill_amount_{{$taxes[$j]['id']}}"></span>
+                                                                </td>
+                                                                <td colspan="2">
+                                                                    <span id="total_extra_item_rate_{{$extraItems[$iterator]->id}}">{{$extraItems[$iterator]->rate}}</span>
+                                                                </td>
+                                                                <td colspan="2">
+                                                                    <span id="previous_rates_{{$extraItems[$iterator]->id}}">{{$extraItems[$iterator]->previous_rate}}</span>
+                                                                </td>
+                                                                <td colspan="2" class="form-group">
+                                                                    <input class="form-control" type="text" id="extra_item_rate_{{$extraItems[$iterator]->id}}" name="extra_item[{{$extraItems[$iterator]->id}}][rate]" disabled>
                                                                 </td>
                                                             </tr>
                                                         @endfor
-                                                    @endif
-                                                    <tr>
-                                                        <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Final Total</b></td>
-                                                        <td>
-                                                            <input name="with_tax_amount" id="final_current_bill_total" class="form-control" readonly>
-                                                            {{--<span id="final_current_bill_total"></span>--}}
-                                                        </td>
-                                                    </tr>
-                                                    @if(!empty($specialTaxes))
-                                                        @foreach($specialTaxes as $specialTax)
+                                                        <tr>
+                                                            <td colspan="9" style="text-align: right; padding-right: 30px;"><b>Sub Total</b></td>
+                                                            <td>
+                                                                <span id="sub_total_current_bill_amount"></span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td colspan="9" style="text-align: right; padding-right: 30px;"><b>Sub Total Round</b></td>
+                                                            <td>
+                                                                <span id="rounded_off_current_bill_sub_total"></span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td colspan="9" style="text-align: right; padding-right: 30px;"><b>Discount Amount</b></td>
+                                                            <td>
+                                                                <input name="discount_amount" id="discountAmount" class="form-control" type="text" value="0">
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td colspan="9" style="text-align: right; padding-right: 30px;"><b>Discount Description</b></td>
+                                                            <td>
+                                                                <input name="discount_description" id="discountDescription" class="form-control" type="text">
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td colspan="9" style="text-align: right; padding-right: 30px;"><b>Total Round</b></td>
+                                                            <td>
+                                                                <input name="sub_total" id="rounded_off_current_bill_amount" class="form-control" readonly>
+                                                                {{--<span id="rounded_off_current_bill_amount"></span>--}}
+                                                            </td>
+                                                        </tr>
+                                                        @if($taxes != null)
                                                             <tr>
-                                                                <td colspan="7" style="text-align: right; padding-right: 30px;"><b>{{$specialTax['name']}}</b><input type="hidden" class="special-tax" name="special_tax[]" value="{{$specialTax['id']}}"> </td>
-                                                                <td><input class="form-control" name="applied_on[{{$specialTax['id']}}][percentage]" value="{{$specialTax['base_percentage']}}" id="tax_percentage_{{$specialTax['id']}}" onchange="calculateTax()" onkeyup="calculateTax()"> </td>
-                                                                <td colspan="2">
-                                                                    <a class="btn green sbold uppercase btn-outline btn-sm" href="javascript:;" data-toggle="dropdown" data-hover="dropdown" data-close-others="true"> Applied On
-                                                                        <i class="fa fa-angle-down"></i>
-                                                                    </a>
-                                                                    <ul class="dropdown-menu" style="position: relative">
-                                                                        <li>
-                                                                            <input type="checkbox" class="tax-applied-on special_tax_{{$specialTax['id']}}_on" name="applied_on[{{$specialTax['id']}}][on][]" value="0"> Total Round
-                                                                        </li>
-                                                                        @foreach($taxes as $tax)
+                                                                <td colspan="5"><b>Tax Name</b></td>
+                                                                <td colspan="4"><b>Tax Rate</b></td>
+                                                                <td colspan="1"></td>
+                                                            </tr>
+                                                            @for($j = 0 ; $j < count($taxes); $j++)
+                                                                <tr>
+                                                                    <td colspan="5" style="text-align: center">{{$taxes[$j]['name']}}</td>
+                                                                    <td colspan="4" style="text-align: right"><input class="tax form-control" step="any" type="number" id="tax_percentage_{{$taxes[$j]['id']}}" name="tax_percentage[{{$taxes[$j]['id']}}]" value="{{$taxes[$j]['base_percentage']}}" onchange="calculateTax()" onkeyup="calculateTax()"></td>
+                                                                    <td>
+                                                                        <span id="tax_current_bill_amount_{{$taxes[$j]['id']}}"></span>
+                                                                    </td>
+                                                                </tr>
+                                                            @endfor
+                                                        @endif
+                                                        <tr>
+                                                            <td colspan="9" style="text-align: right; padding-right: 30px;"><b>Final Total</b></td>
+                                                            <td>
+                                                                <input name="with_tax_amount" id="final_current_bill_total" class="form-control" readonly>
+                                                                {{--<span id="final_current_bill_total"></span>--}}
+                                                            </td>
+                                                        </tr>
+                                                        @if(!empty($specialTaxes))
+                                                            @foreach($specialTaxes as $specialTax)
+                                                                <tr>
+                                                                    <td colspan="6" style="text-align: right; padding-right: 30px;"><b>{{$specialTax['name']}}</b><input type="hidden" class="special-tax" name="special_tax[]" value="{{$specialTax['id']}}"> </td>
+                                                                    <td><input class="form-control" name="applied_on[{{$specialTax['id']}}][percentage]" value="{{$specialTax['base_percentage']}}" id="tax_percentage_{{$specialTax['id']}}" onchange="calculateTax()" onkeyup="calculateTax()"> </td>
+                                                                    <td colspan="2">
+                                                                        <a class="btn green sbold uppercase btn-outline btn-sm" href="javascript:;" data-toggle="dropdown" data-hover="dropdown" data-close-others="true"> Applied On
+                                                                            <i class="fa fa-angle-down"></i>
+                                                                        </a>
+                                                                        <ul class="dropdown-menu" style="position: relative">
                                                                             <li>
-                                                                                <input type="checkbox" class="tax-applied-on special_tax_{{$specialTax['id']}}_on" name="applied_on[{{$specialTax['id']}}][on][]" value="{{$tax['id']}}"> {{$tax['name']}}
+                                                                                <input type="checkbox" class="tax-applied-on special_tax_{{$specialTax['id']}}_on" name="applied_on[{{$specialTax['id']}}][on][]" value="0"> Total Round
                                                                             </li>
-                                                                        @endforeach
-                                                                    </ul>
+                                                                            @foreach($taxes as $tax)
+                                                                                <li>
+                                                                                    <input type="checkbox" class="tax-applied-on special_tax_{{$specialTax['id']}}_on" name="applied_on[{{$specialTax['id']}}][on][]" value="{{$tax['id']}}"> {{$tax['name']}}
+                                                                                </li>
+                                                                            @endforeach
+                                                                        </ul>
+                                                                    </td>
+                                                                    <td>
+                                                                        <span id="tax_current_bill_amount_{{$specialTax['id']}}" class="special-tax-amount"></span>
+                                                                    </td>
+                                                                </tr>
+                                                            @endforeach
+                                                        @endif
+                                                        <tr>
+                                                            <td colspan="9" style="text-align: right; padding-right: 30px;"><b> Round Amount By</b></td>
+                                                            <td>
+                                                                <input name="round_amount_by" id="roundAmountBy" class="form-control" type="text" value="0">
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td colspan="9" style="text-align: right; padding-right: 30px;"><b> Grand Total</b></td>
+                                                            <td>
+                                                                <input name="grand_total" id="grand_current_bill_total" class="form-control" readonly>
+                                                                {{--<span id="grand_current_bill_total"></span>--}}
+                                                            </td>
+                                                        </tr>
+                                                     @else
+                                                        <tr>
+                                                            <th width="1%">
+                                                                <input type="checkbox" class="group-checkable" disabled="disabled" >
+                                                            </th>
+                                                            <th width="5%" style="text-align: center"> Summary no </th>
+                                                            <th width="30%" style="text-align: center"> Summary Description </th>
+                                                            <th width="6%" class="numeric" style="text-align: center"> UOM </th>
+                                                            <th width="6%" class="numeric" style="text-align: center"> Slab Area </th>
+                                                            <th width="6%" class="numeric" style="text-align: center"> Rate </th>
+                                                            <th width="7%" class="numeric" style="text-align: center"> W.O Amount </th>
+                                                            <th width="5%" class="numeric" style="text-align: center"> Previous Quantity </th>
+                                                            <th width="5%" class="numeric" style="text-align: center"> Current Quantity </th>
+                                                            <th width="8%" class="numeric" style="text-align: center"> Cumulative Quantity </th>
+                                                            <th width="8%" class="numeric" style="text-align: center"> Current Bill Amount </th>
+                                                        </tr>
+                                                        @for($iterator = 0; $iterator < count($quotationSummaries); $iterator++)
+                                                            <tr id="id_{{$quotationSummaries[$iterator]['id']}}">
+                                                                <td>
+                                                                    <input type="checkbox" id="id_{{$quotationSummaries[$iterator]['id']}}" name="quotation_summary_id[{{$quotationSummaries[$iterator]['id']}}]" value="{{$quotationSummaries[$iterator]['id']}}" class="product-checkbox">
                                                                 </td>
                                                                 <td>
-                                                                    <span id="tax_current_bill_amount_{{$specialTax['id']}}" class="special-tax-amount"></span>
+                                                                    <span>{{$iterator + 1}}</span>
+                                                                </td>
+                                                                <td>
+                                                                    <span>{{$quotationSummaries[$iterator]['summary_name']}}</span>
+                                                                    <div class="input-group form-group" id="inputGroup" style="padding-left: 10%; padding-right: 10%">
+                                                                        <input type="hidden" class="product-description-id" name="quotation_summary_id[{{$quotationSummaries[$iterator]['id']}}][product_description_id]" id="product_description_id_{{$quotationSummaries[$iterator]['id']}}" disabled>
+                                                                        <input class="product_description form-control" type="text" id="product_description_{{$quotationSummaries[$iterator]['id']}}" name="quotation_summary_id[{{$quotationSummaries[$iterator]['id']}}][product_description]" disabled>
+                                                                        <span class="input-group-addon product_description_create" style="font-size: 12px">C</span>
+                                                                        <span class="input-group-addon product_description_update" style="font-size: 12px">U</span>
+                                                                        <span class="input-group-addon product_description_delete" style="font-size: 12px">D</span>
+                                                                    </div>
+
+                                                                </td>
+                                                                <td>
+                                                                    <span>{{$quotationSummaries[$iterator]['unit']}}</span>
+                                                                </td>
+                                                                <td>
+                                                                    <span id="boq_quantity_{{$quotationSummaries[$iterator]['id']}}">{{$quotationSummaries[$iterator]['quantity']}}</span>
+                                                                </td>
+                                                                <td>
+                                                                    <input class="form-control" type="text" id="rate_per_unit_{{$quotationSummaries[$iterator]['id']}}" name="quotation_summary_id[{{$quotationSummaries[$iterator]['id']}}][rate]" value="{{$quotationSummaries[$iterator]['rate_per_sqft']}}" disabled>
+                                                                    {{--<span id="rate_per_unit_{{$quotationSummaries[$iterator]['id']}}">{{$quotationSummaries[$iterator]['rate_per_sqft']}}</span>--}}
+                                                                </td>
+                                                                <td>
+                                                                    <span id="wo_amount_{{$quotationSummaries[$iterator]['id']}}">{{round(($quotationSummaries[$iterator]['rate_per_sqft'] * $quotationSummaries[$iterator]['quantity']),3)}}</span>
+                                                                </td>
+                                                                <td>
+                                                                    <span id="previous_quantity_{{$quotationSummaries[$iterator]['id']}}">{{$quotationSummaries[$iterator]['previous_quantity']}}</span>
+                                                                </td>
+                                                                <td class="form-group">
+                                                                    <input class="form-control current_quantity" type="text" id="current_quantity_{{$quotationSummaries[$iterator]['id']}}" name="quotation_summary_id[{{$quotationSummaries[$iterator]['id']}}][current_quantity]" max="{{$quotationSummaries[$iterator]['allowed_quantity']}}" disabled>
+                                                                </td>
+                                                                <td>
+                                                                    <span id="cumulative_quantity_{{$quotationSummaries[$iterator]['id']}}"></span>
+                                                                </td>
+
+                                                                <td>
+                                                                    <span id="current_bill_amount_{{$quotationSummaries[$iterator]['id']}}"></span>
+                                                                </td>
+
+                                                            </tr>
+                                                        @endfor
+                                                        <tr>
+                                                            <td colspan="11" style="background-color: #F5F5F5">&nbsp; </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td colspan="5"><b>Extra Items</b></td>
+                                                            <td colspan="2"><b>Total Amount Approved</b></td>
+                                                            <td colspan="2"><b>Previous Amount</b></td>
+                                                            <td colspan="2"><b>Current Amount</b></td>
+                                                        </tr>
+                                                        @for($iterator = 0; $iterator < count($extraItems); $iterator++)
+                                                            <tr>
+                                                                <td>
+                                                                    <input type="checkbox" id="id_{{$extraItems[$iterator]->id}}" name="extra_item[{{$extraItems[$iterator]->id}}]" value="{{$extraItems[$iterator]->id}}" class="extra-item-checkbox">
+                                                                </td>
+                                                                <td colspan="4">
+                                                            <span>
+                                                                {{$extraItems[$iterator]->extraItem->name}}
+                                                                <input class="extra_item_description form-control" type="text" id="extra_item_description_{{$extraItems[$iterator]->id}}" name="extra_item[{{$extraItems[$iterator]->id}}][description]" disabled>
+                                                            </span>
+                                                                </td>
+                                                                <td colspan="2">
+                                                                    <span id="total_extra_item_rate_{{$extraItems[$iterator]->id}}">{{$extraItems[$iterator]->rate}}</span>
+                                                                </td>
+                                                                <td colspan="2">
+                                                                    <span id="previous_rates_{{$extraItems[$iterator]->id}}">{{$extraItems[$iterator]->previous_rate}}</span>
+                                                                </td>
+                                                                <td colspan="2" class="form-group">
+                                                                    <input class="form-control" type="text" id="extra_item_rate_{{$extraItems[$iterator]->id}}" name="extra_item[{{$extraItems[$iterator]->id}}][rate]" disabled>
                                                                 </td>
                                                             </tr>
-                                                        @endforeach
+                                                        @endfor
+                                                        <tr>
+                                                            <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Sub Total</b></td>
+                                                            <td>
+                                                                <span id="sub_total_current_bill_amount"></span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Sub Total Round</b></td>
+                                                            <td>
+                                                                <span id="rounded_off_current_bill_sub_total"></span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Discount Amount</b></td>
+                                                            <td>
+                                                                <input name="discount_amount" id="discountAmount" class="form-control" type="text" value="0">
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Discount Description</b></td>
+                                                            <td>
+                                                                <input name="discount_description" id="discountDescription" class="form-control" type="text">
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Total Round</b></td>
+                                                            <td>
+                                                                <input name="sub_total" id="rounded_off_current_bill_amount" class="form-control" readonly>
+                                                                {{--<span id="rounded_off_current_bill_amount"></span>--}}
+                                                            </td>
+                                                        </tr>
+                                                        @if($taxes != null)
+                                                            <tr>
+                                                                <td colspan="6"><b>Tax Name</b></td>
+                                                                <td colspan="4"><b>Tax Rate</b></td>
+                                                                <td colspan="1"></td>
+                                                            </tr>
+                                                            @for($j = 0 ; $j < count($taxes); $j++)
+                                                                <tr>
+                                                                    <td colspan="6" style="text-align: center">{{$taxes[$j]['name']}}</td>
+                                                                    <td colspan="4" style="text-align: right"><input class="tax form-control" step="any" type="number" id="tax_percentage_{{$taxes[$j]['id']}}" name="tax_percentage[{{$taxes[$j]['id']}}]" value="{{$taxes[$j]['base_percentage']}}" onchange="calculateTax()" onkeyup="calculateTax()"></td>
+                                                                    <td>
+                                                                        <span id="tax_current_bill_amount_{{$taxes[$j]['id']}}"></span>
+                                                                    </td>
+                                                                </tr>
+                                                            @endfor
+                                                        @endif
+                                                        <tr>
+                                                            <td colspan="10" style="text-align: right; padding-right: 30px;"><b>Final Total</b></td>
+                                                            <td>
+                                                                <input name="with_tax_amount" id="final_current_bill_total" class="form-control" readonly>
+                                                                {{--<span id="final_current_bill_total"></span>--}}
+                                                            </td>
+                                                        </tr>
+                                                        @if(!empty($specialTaxes))
+                                                            @foreach($specialTaxes as $specialTax)
+                                                                <tr>
+                                                                    <td colspan="7" style="text-align: right; padding-right: 30px;"><b>{{$specialTax['name']}}</b><input type="hidden" class="special-tax" name="special_tax[]" value="{{$specialTax['id']}}"> </td>
+                                                                    <td><input class="form-control" name="applied_on[{{$specialTax['id']}}][percentage]" value="{{$specialTax['base_percentage']}}" id="tax_percentage_{{$specialTax['id']}}" onchange="calculateTax()" onkeyup="calculateTax()"> </td>
+                                                                    <td colspan="2">
+                                                                        <a class="btn green sbold uppercase btn-outline btn-sm" href="javascript:;" data-toggle="dropdown" data-hover="dropdown" data-close-others="true"> Applied On
+                                                                            <i class="fa fa-angle-down"></i>
+                                                                        </a>
+                                                                        <ul class="dropdown-menu" style="position: relative">
+                                                                            <li>
+                                                                                <input type="checkbox" class="tax-applied-on special_tax_{{$specialTax['id']}}_on" name="applied_on[{{$specialTax['id']}}][on][]" value="0"> Total Round
+                                                                            </li>
+                                                                            @foreach($taxes as $tax)
+                                                                                <li>
+                                                                                    <input type="checkbox" class="tax-applied-on special_tax_{{$specialTax['id']}}_on" name="applied_on[{{$specialTax['id']}}][on][]" value="{{$tax['id']}}"> {{$tax['name']}}
+                                                                                </li>
+                                                                            @endforeach
+                                                                        </ul>
+                                                                    </td>
+                                                                    <td>
+                                                                        <span id="tax_current_bill_amount_{{$specialTax['id']}}" class="special-tax-amount"></span>
+                                                                    </td>
+                                                                </tr>
+                                                            @endforeach
+                                                        @endif
+                                                        <tr>
+                                                            <td colspan="10" style="text-align: right; padding-right: 30px;"><b> Round Amount By</b></td>
+                                                            <td>
+                                                                <input name="round_amount_by" id="roundAmountBy" class="form-control" type="text" value="0">
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td colspan="10" style="text-align: right; padding-right: 30px;"><b> Grand Total</b></td>
+                                                            <td>
+                                                                <input name="grand_total" id="grand_current_bill_total" class="form-control" readonly>
+                                                                {{--<span id="grand_current_bill_total"></span>--}}
+                                                            </td>
+                                                        </tr>
                                                     @endif
-                                                    <tr>
-                                                        <td colspan="10" style="text-align: right; padding-right: 30px;"><b> Round Amount By</b></td>
-                                                        <td>
-                                                            <input name="round_amount_by" id="roundAmountBy" class="form-control" type="text" value="0">
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td colspan="10" style="text-align: right; padding-right: 30px;"><b> Grand Total</b></td>
-                                                        <td>
-                                                            <input name="grand_total" id="grand_current_bill_total" class="form-control" readonly>
-                                                            {{--<span id="grand_current_bill_total"></span>--}}
-                                                        </td>
-                                                    </tr>
 
                                                 </table>
                                                 <div class="form-group">
@@ -311,7 +504,7 @@
     <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
     <script src="/assets/custom/bill/bill-typeahead.js" type="text/javascript"></script>
     <script>
-        var date=new Date();
+        var date = new Date();
         $('#date').val((date.getMonth()+1)+"/"+date.getDate()+"/"+date.getFullYear());
         $('#performa_invoice_date').val((date.getMonth()+1)+"/"+date.getDate()+"/"+date.getFullYear());
     </script>
