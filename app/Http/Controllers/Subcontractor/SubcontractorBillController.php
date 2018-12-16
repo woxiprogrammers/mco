@@ -240,6 +240,9 @@ class SubcontractorBillController extends Controller
                         $taxAmount = round(($basicAmount * ($taxesApplied / 100)),3);
                         $finalAmount = round(($basicAmount + $taxAmount),3);
                         $paidAmount = SubcontractorBillTransaction::where('subcontractor_bills_id', $listingData[$pagination]['id'])->sum('total');
+                        $retentionAmount = SubcontractorBillTransaction::where('subcontractor_bills_id', $listingData[$pagination]['id'])->sum('retention_amount');
+                        $tdsAmount = SubcontractorBillTransaction::where('subcontractor_bills_id', $listingData[$pagination]['id'])->sum('tds_amount');
+                        $holdAmount = SubcontractorBillTransaction::where('subcontractor_bills_id', $listingData[$pagination]['id'])->sum('hold');
                     }else{
                         $basicAmount = round(($listingData[$pagination]->subtotal - $listingData[$pagination]->discount), 3);
                         $taxAmount = round(($listingData[$pagination]['grand_total'] - $basicAmount - $listingData[$pagination]['round_off_amount']), 3);
@@ -248,6 +251,12 @@ class SubcontractorBillController extends Controller
                         $paidAmount = SubcontractorBillTransaction::where('subcontractor_bills_id', $listingData[$pagination]['id'])
                                                                     ->where('transaction_status_id', $approvedStatusId)
                                                                     ->sum('total');
+                        $retentionAmount = SubcontractorBillTransaction::where('subcontractor_bills_id', $listingData[$pagination]['id'])
+                            ->where('transaction_status_id', $approvedStatusId)->sum('retention_amount');
+                        $tdsAmount = SubcontractorBillTransaction::where('subcontractor_bills_id', $listingData[$pagination]['id'])
+                            ->where('transaction_status_id', $approvedStatusId)->sum('tds_amount');
+                        $holdAmount = SubcontractorBillTransaction::where('subcontractor_bills_id', $listingData[$pagination]['id'])
+                            ->where('transaction_status_id', $approvedStatusId)->sum('hold');
                     }
                     if($billStatusSlug == 'disapproved'){
                         $billNo = "-";
@@ -262,6 +271,9 @@ class SubcontractorBillController extends Controller
                         $finalAmount,
                         $paidAmount,
                         round(($finalAmount - $paidAmount),3),
+                        $retentionAmount,
+                        $tdsAmount,
+                        $holdAmount,
                         $billStatus,
                         $action
                     ];
