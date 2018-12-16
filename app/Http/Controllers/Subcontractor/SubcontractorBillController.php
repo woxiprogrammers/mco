@@ -179,26 +179,11 @@ class SubcontractorBillController extends Controller
             if ($request->has('get_total')) {
                 $finalAmount = $paidAmount = 0;
                 foreach($listingData as $data){
-                    $structureTypeSlug = SubcontractorStructureType::where('id',$data['sc_structure_type_id'])->pluck('slug')->first();
-                    if($data['qty'] > 0){
-                        if($structureTypeSlug == 'sqft' || $structureTypeSlug == 'itemwise'){
-                            $rate = $data['rate'];
-                            $basicAmount = round(($rate * $data['qty']),3);
-                        }else{
-                            $rate = $data['rate'] * $data['total_work_area'];
-                            $basicAmount = round(($rate * $data['qty']),3);
-                        }
-                        $taxesApplied = SubcontractorBillTax::where('subcontractor_bills_id',$data['id'])->sum('percentage');
-                        $taxAmount = round(($basicAmount * ($taxesApplied / 100)),3);
-                        $finalAmount += round(($basicAmount + $taxAmount),3);
-                        $paidAmount += SubcontractorBillTransaction::where('subcontractor_bills_id', $data['id'])->sum('total');
-                    }else{
-                        $finalAmount += $data['grand_total'];
-                        $approvedStatusId = TransactionStatus::where('slug', 'approved')->pluck('id')->first();
-                        $paidAmount += SubcontractorBillTransaction::where('subcontractor_bills_id', $data['id'])
-                            ->where('transaction_status_id', $approvedStatusId)
-                            ->sum('total');
-                    }
+                    $finalAmount += $data['grand_total'];
+                    $approvedStatusId = TransactionStatus::where('slug', 'approved')->pluck('id')->first();
+                    $paidAmount += SubcontractorBillTransaction::where('subcontractor_bills_id', $data['id'])
+                        ->where('transaction_status_id', $approvedStatusId)
+                        ->sum('total');
                 }
                 $records['final_amount'] = $finalAmount;
                 $records['paid_amount'] = $paidAmount;
@@ -227,28 +212,19 @@ class SubcontractorBillController extends Controller
                                 </li>
                             </ul>';
                     $billStatus = $listingData[$pagination]->subcontractorBillStatus->name;
-                    $structureTypeSlug = SubcontractorStructureType::where('id',$listingData[$pagination]['sc_structure_type_id'])->pluck('slug')->first();
-                    if($listingData[$pagination]['qty'] > 0){
-                        if($structureTypeSlug == 'sqft' || $structureTypeSlug == 'itemwise'){
-                            $rate = $listingData[$pagination]['rate'];
-                            $basicAmount = round(($rate * $listingData[$pagination]['qty']),3);
-                        }else{
-                            $rate = $listingData[$pagination]['rate'] * $listingData[$pagination]['total_work_area'];
-                            $basicAmount = round(($rate * $listingData[$pagination]['qty']),3);
-                        }
-                        $taxesApplied = SubcontractorBillTax::where('subcontractor_bills_id',$listingData[$pagination]['id'])->sum('percentage');
-                        $taxAmount = round(($basicAmount * ($taxesApplied / 100)),3);
-                        $finalAmount = round(($basicAmount + $taxAmount),3);
-                        $paidAmount = SubcontractorBillTransaction::where('subcontractor_bills_id', $listingData[$pagination]['id'])->sum('total');
-                    }else{
-                        $basicAmount = round(($listingData[$pagination]->subtotal - $listingData[$pagination]->discount), 3);
-                        $taxAmount = round(($listingData[$pagination]['grand_total'] - $basicAmount - $listingData[$pagination]['round_off_amount']), 3);
-                        $finalAmount = $listingData[$pagination]['grand_total'];
-                        $approvedStatusId = TransactionStatus::where('slug', 'approved')->pluck('id')->first();
-                        $paidAmount = SubcontractorBillTransaction::where('subcontractor_bills_id', $listingData[$pagination]['id'])
-                                                                    ->where('transaction_status_id', $approvedStatusId)
-                                                                    ->sum('total');
-                    }
+                    $basicAmount = round(($listingData[$pagination]->subtotal - $listingData[$pagination]->discount), 3);
+                    $taxAmount = round(($listingData[$pagination]['grand_total'] - $basicAmount - $listingData[$pagination]['round_off_amount']), 3);
+                    $finalAmount = $listingData[$pagination]['grand_total'];
+                    $approvedStatusId = TransactionStatus::where('slug', 'approved')->pluck('id')->first();
+                    $paidAmount = SubcontractorBillTransaction::where('subcontractor_bills_id', $listingData[$pagination]['id'])
+                        ->where('transaction_status_id', $approvedStatusId)
+                        ->sum('total');
+                    $retentionAmount = SubcontractorBillTransaction::where('subcontractor_bills_id', $listingData[$pagination]['id'])
+                        ->where('transaction_status_id', $approvedStatusId)->sum('retention_amount');
+                    $tdsAmount = SubcontractorBillTransaction::where('subcontractor_bills_id', $listingData[$pagination]['id'])
+                        ->where('transaction_status_id', $approvedStatusId)->sum('tds_amount');
+                    $holdAmount = SubcontractorBillTransaction::where('subcontractor_bills_id', $listingData[$pagination]['id'])
+                        ->where('transaction_status_id', $approvedStatusId)->sum('hold');
                     if($billStatusSlug == 'disapproved'){
                         $billNo = "-";
                     }else{
@@ -262,6 +238,9 @@ class SubcontractorBillController extends Controller
                         $finalAmount,
                         $paidAmount,
                         round(($finalAmount - $paidAmount),3),
+                        $retentionAmount,
+                        $tdsAmount,
+                        $holdAmount,
                         $billStatus,
                         $action
                     ];
