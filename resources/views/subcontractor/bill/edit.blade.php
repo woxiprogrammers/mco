@@ -55,6 +55,22 @@
                                             <div class="form-body">
                                                 <form role="form" id="editStructureBill" class="form-horizontal" action="/subcontractor/bill/edit/{!! $subcontractorBill->id !!}" method="post">
                                                     {!! csrf_field() !!}
+                                                    <div class="row">
+                                                        <div class="col-md-6 date date-picker" data-date-end-date="0d">
+                                                            <label class="control-label" for="date">Bill Date : </label>
+                                                            <input type="text" style="width: 30%" name="bill_date" placeholder="Select Bill Date" id="date" value="{{date('m/d/Y', strtotime($subcontractorBill->bill_date))}}"/>
+                                                            <button class="btn btn-sm default" type="button">
+                                                                <i class="fa fa-calendar"></i>
+                                                            </button>
+                                                        </div>
+                                                        <div class="col-md-6 date date-picker" data-date-end-date="0d">
+                                                            <label class="control-label" for="performa_invoice_date" style="margin-left: 9%">Proforma Invoice Date : </label>
+                                                            <input type="text" style="width: 32%" name="performa_invoice_date" placeholder="Select Proforma Invoice Date" id="performa_invoice_date"  value="{{date('m/d/Y', strtotime($subcontractorBill->performa_invoice_date))}}"/>
+                                                            <button class="btn btn-sm default" type="button">
+                                                                <i class="fa fa-calendar"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
                                                     <table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll;align-content: center; " id="parentBillTable">
                                                         <thead>
                                                         <tr id="tableHeader">
@@ -112,7 +128,7 @@
                                                                     <td ><div class="form-group" style="margin-left: 1%; margin-right: 1%"><textarea class="form-control description" name="description[{{$structureSummary['id']}}]">{{$structureSummary['description']}}</textarea></div></td>
                                                                     <td >{{$structureSummary['total_work_area']}} <input type="hidden" name="total_work_area[{{$structureSummary['id']}}]" value="{{$structureSummary['total_work_area']}}"></td>
                                                                     <td ><label class="control-label rate">{{$structureSummary['rate']}}</label></td>
-                                                                    <td >{!! $structureSummary['total_work_area'] * $structureSummary['rate'] !!}</td>
+                                                                    <td ><span class="total_amount"> {!! $structureSummary['total_work_area'] * $structureSummary['rate'] !!}</span></td>
                                                                     <td >{{$structureSummary['prev_quantity']}}</td>
                                                                     <td ><div class="form-group" style="margin-left: 1%; margin-right: 1%"><input type="text" class="form-control quantity" max="{{$structureSummary['allowed_quantity']}}" min="0.000001" value="{{$structureSummary['quantity']}}" onkeyup="calculateAmount(this)" name="quantity[{{$structureSummary['id']}}]" required> </div></td>
                                                                     <td >{{$structureSummary['prev_quantity']}}</td>
@@ -428,12 +444,18 @@
     <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
     <script src="/assets/custom/subcontractor/validations.js"></script>
     <script>
+        subcontractorStructureSlug = $("#subcontractorStructureSlug").val();
         $(document).ready(function(){
             EditSubcontractorBills.init();
-            $(".structure-summary:checkbox:checked").each(function(){
-                structureSummarySelected(this);
-                calculateAmount($(this).closest('tr').find('.quantity'));
-            });
+            if(subcontractorStructureSlug == 'itemwise'){
+                $(".structure-summary:checkbox:checked").each(function(){
+                    structureSummarySelected(this);
+                    calculateAmount($(this).closest('tr').find('.quantity'));
+                });
+            }else{
+                calculateAmount($("#parentBillTable").find('.quantity'));
+            }
+
             $(".extra-item-checkbox").each(function(){
                 extraItemClick(this);
 
@@ -459,7 +481,6 @@
                 $(element).closest('tr').find('.quantity').val(0);
                 calculateAmount($(element).closest('tr').find('.quantity'));
             }
-
         }
 
         function calculateAmount(element){
@@ -467,7 +488,12 @@
             if(isNaN(quantity)){
                 quantity = 0;
             }
-            var rate = parseFloat($(element).closest('tr').find('.rate').text());
+            var rate = 0;
+            if(subcontractorStructureSlug == 'amountwise'){
+                rate = parseFloat($(element).closest('tr').find('.total_amount').text());
+            }else{
+                rate = parseFloat($(element).closest('tr').find('.rate').text());
+            }
             var amount = (quantity * rate).toFixed(3);
             $(element).closest('tr').find('.bill-amount').text(amount);
             calculateSubtotal();

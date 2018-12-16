@@ -61,9 +61,10 @@
                                             @endif
                                             <div class="tab-content">
                                                 <div class="tab-pane fade in active" id="billViewTab">
-                                                    <label class="control-label" for="date">Bill Date : {{date('m/d/Y',strtotime($subcontractorBill['created_at']))}}</label>
+                                                    <label class="control-label" for="date">Bill Date : {{date('m/d/Y',strtotime($subcontractorBill['bill_date']))}}</label>
+                                                    <label class="control-label" for="date" style="margin-left: 5%;">Performa Invoice Date : {{date('m/d/Y',strtotime($subcontractorBill['perform_invoice_date']))}}</label>
                                                     @if($subcontractorBill->subcontractorBillStatus->slug == 'draft')
-                                                        <a href="/subcontractor/bill/edit/{{$subcontractorBill['id']}}" class="btn btn-xs blue" style="margin-left: 10px">
+                                                        <a href="/subcontractor/bill/edit/{{$subcontractorBill['id']}}" class="btn btn-xs blue" style="margin-left: 5%;">
                                                             <i class="fa fa-edit"></i>
                                                             Bill
                                                         </a>
@@ -106,7 +107,11 @@
                                                                     <td >{{$billSummary['total_work_area']}}</td>
                                                                     <td ><label class="control-label rate">{{$billSummary->subcontractorStructureSummary['rate']}}</label></td>
                                                                     <td >{{$billSummary['quantity']}}</td>
-                                                                    <td > {!! $billSummary->subcontractorStructureSummary['rate'] * $billSummary['quantity'] !!} </td>
+                                                                        @if($subcontractorBill->subcontractorStructure->contractType->slug == 'amountwise')
+                                                                            <td > {!! $billSummary['total_work_area'] * $billSummary->subcontractorStructureSummary['rate'] * $billSummary['quantity'] !!} </td>
+                                                                        @else
+                                                                            <td > {!! $billSummary->subcontractorStructureSummary['rate'] * $billSummary['quantity'] !!} </td>
+                                                                        @endif
                                                                 </tr>
                                                             @endforeach
                                                             <tr>
