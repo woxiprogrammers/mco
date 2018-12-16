@@ -225,6 +225,7 @@ class SubcontractorBillController extends Controller
                         ->where('transaction_status_id', $approvedStatusId)->sum('tds_amount');
                     $holdAmount = SubcontractorBillTransaction::where('subcontractor_bills_id', $listingData[$pagination]['id'])
                         ->where('transaction_status_id', $approvedStatusId)->sum('hold');
+
                     if($billStatusSlug == 'disapproved'){
                         $billNo = "-";
                     }else{
