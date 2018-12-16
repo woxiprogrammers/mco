@@ -46,7 +46,7 @@ class BillModuleChanges extends Command
      * @return mixed
      */
     public function handle(){
-        /*$quotationModel = new Quotation();
+        $quotationModel = new Quotation();
         $quotationProductModel = new QuotationProduct();
         $quotationSummaryModel = new QuotationSummary();
         $bill = new Bill();
@@ -89,8 +89,8 @@ class BillModuleChanges extends Command
                     }
                 }
             }
-        }*/
-        /*$transactionStatus = new TransactionStatus();
+        }
+        $transactionStatus = new TransactionStatus();
         $billTransaction = new BillTransaction();
         $subcontractorBillTransaction = new SubcontractorBillTransaction();
         $approvedStatusId = $transactionStatus->where('slug','approved')->pluck('id')->first();
@@ -103,7 +103,7 @@ class BillModuleChanges extends Command
            return $thisBillTransaction->update([
                 'transaction_status_id' => $approvedStatusId
             ]);
-        });*/
+        });
         $bills = Bill::all();
         foreach ($bills as $bill){
             if($bill['rounded_amount_by'] === null){
