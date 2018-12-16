@@ -42,7 +42,7 @@ class SubcontractorStructureController extends Controller
     public function getCreateView(Request $request){
         try{
             $subcontractors = Subcontractor::where('is_active',true)->orderBy('id','asc')->get(['id','subcontractor_name'])->toArray();
-            $ScStrutureTypes = SubcontractorStructureType::whereIn('slug', ['itemwise'])->orderBy('id','asc')->get(['id','name','slug'])->toArray();
+            $ScStrutureTypes = SubcontractorStructureType::orderBy('id','asc')->get(['id','name','slug'])->toArray();
             $summaries = Summary::where('is_active', true)->select('id', 'name')->get()->toArray();
             $extraItems = ExtraItem::where('is_active', true)->select('id','name','rate')->orderBy('name','asc')->get();
             return view('subcontractor.new_structure.create')->with(compact('subcontractors', 'ScStrutureTypes', 'summaries', 'extraItems'));
@@ -140,7 +140,7 @@ class SubcontractorStructureController extends Controller
 
             $listingData = array();
             if ($filterFlag) {
-                $listingData = SubcontractorStructure::whereIn('id',$ids)->get();
+                $listingData = SubcontractorStructure::whereIn('id',$ids)->orderBy('id', 'desc')->get();
             }
             if ($request->has('get_total')) {
                 $billTotals = 0;
