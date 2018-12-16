@@ -117,7 +117,7 @@ class SubcontractorStructureController extends Controller
             $filterFlag = true;
             $subcontractor_name = null;
             $project_name = null;
-            $ids = SubcontractorStructure::whereNull('summary_id')->pluck('id');
+            $ids = SubcontractorStructure::pluck('id');
             if($request->has('project_name') && $filterFlag == true){
                 $projectSites = Project::join('project_sites','project_sites.project_id','=','projects.id')->where('projects.name','ilike','%'.$request['project_name'].'%')->select('project_sites.id')->get()->toArray();
                 $ids = SubcontractorStructure::where('project_site_id','!=', 0)
@@ -287,7 +287,7 @@ class SubcontractorStructureController extends Controller
                 $iterator += 1;
             }
             $structureExtraItemIds = array_column($subcontractorStructure->extraItems->toArray(), 'extra_item_id');
-            $newExtraItems = ExtraItem::whereNotIn('id', $structureExtraItemIds)->select('id','name','rate')->get()->toArray();
+            $newExtraItems = ExtraItem::whereNotIn('id', $structureExtraItemIds)->where('is_active', true)->select('id','name','rate')->get()->toArray();
             return view('subcontractor.new_structure.edit')->with(compact('subcontractorStructure', 'summaries', 'structureSummaries', 'newExtraItems'));
         }catch (\Exception $e){
             $data = [

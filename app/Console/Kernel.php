@@ -10,6 +10,7 @@ use App\Console\Commands\PeticashSalaryTransactionMonthlyExpenseCalculations;
 use App\Console\Commands\PurchaseOrderBillMonthlyExpenseCalculations;
 use App\Console\Commands\SalaryDistributionInSites;
 use App\Console\Commands\SendPurchaseOrderEmails;
+use App\Console\Commands\SubcontractorModuleMerge;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -27,7 +28,8 @@ class Kernel extends ConsoleKernel
         PeticashPurchaseTransactionMonthlyExpenseCalculations::class,
         SalaryDistributionInSites::class,
         AssetRentCalculations::class,
-        BillModuleChanges::class
+        BillModuleChanges::class,
+        SubcontractorModuleMerge::class
     ];
 
     /**
