@@ -53,8 +53,11 @@ class SubcontractorBillController extends Controller
                                                     ->where('subcontractor_bill_summaries.subcontractor_structure_summary_id', $subcontractorStructureSummary['id'])
                                                     ->where('subcontractor_bills.sc_structure_id', $subcontractorStructure->id)
                                                     ->sum('quantity');
-
-                $subcontractorStructureSummaries[$iterator]['allowed_quantity'] = $subcontractorStructureSummary['total_work_area'] - $subcontractorStructureSummaries[$iterator]['prev_quantity'];
+                if($subcontractorStructure->contractType->slug == 'amountwise') {
+                    $subcontractorStructureSummaries[$iterator]['allowed_quantity'] = 1 - $subcontractorStructureSummaries[$iterator]['prev_quantity'];
+                }else{
+                    $subcontractorStructureSummaries[$iterator]['allowed_quantity'] = $subcontractorStructureSummary['total_work_area'] - $subcontractorStructureSummaries[$iterator]['prev_quantity'];
+                }
                 $iterator += 1;
             }
             $structureExtraItems = SubcontractorStructureExtraItem::join('extra_items', 'extra_items.id', '=', 'subcontractor_structure_extra_items.extra_item_id')
@@ -81,6 +84,12 @@ class SubcontractorBillController extends Controller
             $subcontractorBillData = $request->only('discount', 'discount_description', 'subtotal', 'round_off_amount', 'grand_total');
             $subcontractorBillData['sc_structure_id'] = $subcontractorStructure->id;
             $subcontractorBillData['subcontractor_bill_status_id'] = SubcontractorBillStatus::where('slug', 'draft')->pluck('id')->first();
+            if($request->has('performa_invoice_date') && $request->performa_invoice_date != '' && $request->performa_invoice_date != null){
+                $subcontractorBillData['performa_invoice_date'] = date('Y-m-d', strtotime($request->performa_invoice_date));
+            }
+            if($request->has('bill_date') && $request->bill_date != '' && $request->bill_date != null){
+                $subcontractorBillData['bill_date'] = date('Y-m-d', strtotime($request->bill_date));
+            }
             $subcontractorBill = SubcontractorBill::create($subcontractorBillData);
             $subcontractorBillSummaryData = [
                 'subcontractor_bill_id' => $subcontractorBill->id
@@ -350,20 +359,12 @@ class SubcontractorBillController extends Controller
                 $specialTaxes += $unappliedSpecialTax->toArray();
             }
                 $finalTotal = $subcontractorBill['grand_total'];
-            $billNo = 0;
-            foreach($totalBills as $billId){
-                $status = SubcontractorBill::join('subcontractor_bill_status','subcontractor_bill_status.id','=','subcontractor_bills.subcontractor_bill_status_id')
-                    ->where('subcontractor_bills.id',$billId)->pluck('subcontractor_bill_status.slug')->first();
-                if($status == 'disapproved'){
-                    $billName = "-";
-                }else{
-                    ++$billNo;
-                    if($billId == $subcontractorBill->id){
-                        $billName = "R. A. - ".($billNo);
-                        break;
-                    }
-                }
-            }
+            $billStatusesToBeCountedIds = SubcontractorBillStatus::where('slug','!=', 'disapproved')->pluck('id');
+            $billCount = SubcontractorBill::where('sc_structure_id', $subcontractorBill->sc_structure_id)
+                ->where('created_at',  '<=', $subcontractorBill->created_at)
+                ->whereIn('subcontractor_bill_status_id', $billStatusesToBeCountedIds)
+                ->count('id');
+            $billName = "R.A. ".($billCount);
             $noOfFloors = $totalBills->count();
             $remainingAmount = $finalTotal - $BillTransactionTotals;
             $paymentTypes = PaymentType::whereIn('slug',['cheque','neft','rtgs','internet-banking'])->orderBy('id')->get();
@@ -399,7 +400,11 @@ class SubcontractorBillController extends Controller
                     ->where('subcontractor_bills.sc_structure_id', $subcontractorBill->sc_structure_id)
                     ->where('subcontractor_bills.id', '!=', $subcontractorBill->id)
                     ->sum('quantity');
-                $subcontractorStructureSummaries[$iterator]['allowed_quantity'] = $subcontractorStructureSummary['total_work_area'] - $subcontractorStructureSummaries[$iterator]['prev_quantity'];
+                if( $subcontractorBill->subcontractorStructure->contractType->slug == 'amountwise'){
+                    $subcontractorStructureSummaries[$iterator]['allowed_quantity'] = 1 - $subcontractorStructureSummaries[$iterator]['prev_quantity'];
+                }else{
+                    $subcontractorStructureSummaries[$iterator]['allowed_quantity'] = $subcontractorStructureSummary['total_work_area'] - $subcontractorStructureSummaries[$iterator]['prev_quantity'];
+                }
                 if (in_array($subcontractorStructureSummary['id'], array_column($subcontractorBill->subcontractorBillSummaries->toArray(),'subcontractor_structure_summary_id'))) {
                     $subcontractorStructureSummaries[$iterator]['description'] = $subcontractorBill->subcontractorBillSummaries->where('subcontractor_structure_summary_id', $subcontractorStructureSummary['id'])->pluck('description')->first();
                     $subcontractorStructureSummaries[$iterator]['quantity'] = $subcontractorBill->subcontractorBillSummaries->where('subcontractor_structure_summary_id', $subcontractorStructureSummary['id'])->pluck('quantity')->first();
@@ -415,9 +420,12 @@ class SubcontractorBillController extends Controller
                 ->where('subcontractor_structure_extra_items.subcontractor_structure_id', $subcontractorBill->subcontractorStructure->id)
                 ->select('subcontractor_structure_extra_items.id as subcontractor_structure_extra_item_id', 'subcontractor_structure_extra_items.rate as rate','extra_items.name as name')
                 ->get()->toArray();
-            $totalBillCount = $subcontractorBill->subcontractorStructure->subcontractorBill->count();
-            $billName = "R.A. ".($totalBillCount + 1);
-            /*$taxes = Tax::whereNotIn('slug',['vat'])->where('is_active',true)->where('is_special',false)->select('id','name','slug','base_percentage')->get();*/
+            $billStatusesToBeCountedIds = SubcontractorBillStatus::where('slug','!=', 'disapproved')->pluck('id');
+            $billCount = SubcontractorBill::where('sc_structure_id', $subcontractorBill->sc_structure_id)
+                    ->where('created_at',  '<=', $subcontractorBill->created_at)
+                    ->whereIn('subcontractor_bill_status_id', $billStatusesToBeCountedIds)
+                    ->count('id');
+            $billName = "R.A. ".($billCount);
             $taxes = SubcontractorBillTax::join('taxes', 'taxes.id', '=', 'subcontractor_bill_taxes.tax_id')
                                         ->where('subcontractor_bill_taxes.subcontractor_bills_id', $subcontractorBill->id)
                                         ->where('taxes.is_special', false)
@@ -474,6 +482,12 @@ class SubcontractorBillController extends Controller
             if($subcontractorTransactionAmount > $subcontractorBillData['grand_total']){
                 $request->session()->flash('error', 'Cannot Edit the bill as Transaction amount is greater than the Bill amount you edited.');
                 return redirect('/subcontractor/bill/view/'.$subcontractorBill->id);
+            }
+            if($request->has('performa_invoice_date') && $request->performa_invoice_date != '' && $request->performa_invoice_date != null){
+                $subcontractorBillData['performa_invoice_date'] = date('Y-m-d', strtotime($request->performa_invoice_date));
+            }
+            if($request->has('bill_date') && $request->bill_date != '' && $request->bill_date != null){
+                $subcontractorBillData['bill_date'] = date('Y-m-d', strtotime($request->bill_date));
             }
             $subcontractorBill->update($subcontractorBillData);
             foreach($request->structure_summaries as $structureSummaryId){
@@ -544,7 +558,7 @@ class SubcontractorBillController extends Controller
                             $subcontractorBillTax->update($subcontractorBillTaxData);
                         }
                     }else{
-                        SubcontractorBillTax::where('subcontractor_bills_id', $subcontractorBill->id)->where('', $specialTaxId)->delete();
+                        SubcontractorBillTax::where('subcontractor_bills_id', $subcontractorBill->id)->where('tax_id', $specialTaxId)->delete();
                     }
                 }
             }
