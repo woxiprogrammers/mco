@@ -661,4 +661,107 @@ class SubcontractorBillController extends Controller
             Log::critical(json_encode($data));
         }
     }
+
+    public function getTransactionListing(Request $request,$subcontractorBillId){
+        try{
+            $listingData = SubcontractorBillTransaction::where('subcontractor_bills_id', $subcontractorBillId)->get();
+            if($request->has('get_total')){
+                /*
+                    $records['final_amount'] = $finalAmount;
+                    $records['paid_amount'] = $paidAmount;
+                    $records['pending_amount'] = round(($finalAmount - $paidAmount),3);
+
+                $listingData[$pagination]['subtotal'],
+                        $listingData[$pagination]['debit'],
+                        $listingData[$pagination]['hold'],
+                        $listingData[$pagination]['retention_amount'],
+                        $listingData[$pagination]['tds_amount'],
+                        $listingData[$pagination]['other_recovery'],
+                        $listingData[$pagination]['total']
+                */
+                $approvedBillStatusId = TransactionStatus::where('slug','approved')->pluck('id')->first();
+                $transactions = SubcontractorBillTransaction::whereIn('id', array_column($listingData->toArray(), 'id'))
+                        ->where('transaction_status_id', $approvedBillStatusId)
+                        ->select('id', 'subtotal', 'debit', 'hold', 'retention_amount', 'tds_amount', 'other_recovery','total')->get()->toArray();
+                $records = [
+                    'subtotal' => array_sum(array_column($transactions, 'subtotal')),
+                    'debit' => array_sum(array_column($transactions, 'debit')),
+                    'hold' => array_sum(array_column($transactions, 'hold')),
+                    'retention_amount' => array_sum(array_column($transactions, 'retention_amount')),
+                    'other_recovery' => array_sum(array_column($transactions, 'other_recovery')),
+                    'total' => array_sum(array_column($transactions, 'total')),
+                    'tds' => array_sum(array_column($transactions, 'tds_amount')),
+                ];
+            }else{
+                $iTotalRecords = count($listingData);
+                $records = [
+                    'data' => array()
+                ];
+                $end = $request->length < 0 ? count($listingData) : $request->length;
+                for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($listingData); $iterator++,$pagination++ ){
+                    if($listingData[$pagination]->transactionStatus->slug == 'cancelled'){
+                        $balanceAmountAfterChangeStatus = $listingData[$pagination]->subcontractorBill->subcontractorStructure->cancelled_bill_transaction_balance_amount - $listingData[$pagination]->total;
+                        if($balanceAmountAfterChangeStatus >= 0){
+                            $changeStatusButton = '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails(\'approved\','.$listingData[$pagination]['id'].')">
+                                        Approve
+                                    </a><a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails(\'deleted\','.$listingData[$pagination]['id'].')">
+                                        Delete
+                                    </a>';
+                        }else{
+                            $changeStatusButton = '-';
+                        }
+                    }elseif($listingData[$pagination]->transactionStatus->slug == 'approved'){
+                        $changeStatusButton = '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails(\'cancelled\','.$listingData[$pagination]['id'].')">
+                                        Cancel
+                                    </a><a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails(\'deleted\','.$listingData[$pagination]['id'].')">
+                                        Delete
+                                    </a>';
+                    }else{
+                        $changeStatusButton = '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails(\'approved\','.$listingData[$pagination]['id'].')">
+                                        Approve
+                                    </a><a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails(\'cancelled\','.$listingData[$pagination]['id'].')">
+                                        Cancel
+                                    </a>';
+                    }
+                    if($listingData[$pagination]->paid_from_slug == 'bank'){
+                        $paidFrom = 'Bank';
+                    }elseif($listingData[$pagination]->paid_from_slug == 'cash'){
+                        $paidFrom = 'Cash';
+                    }elseif($listingData[$pagination]->paid_from_slug == 'cancel_transaction_advance'){
+                        $paidFrom = 'Cancel Transaction Advance';
+                    }else{
+                        $paidFrom = '-';
+                    }
+                    $records['data'][$iterator] = [
+                        $iterator+1,
+                        date('d M Y',strtotime($listingData[$pagination]['created_at'])),
+                        $paidFrom,
+                        $listingData[$pagination]['subtotal'],
+                        $listingData[$pagination]['debit'],
+                        $listingData[$pagination]['hold'],
+                        $listingData[$pagination]['retention_amount'],
+                        $listingData[$pagination]['tds_amount'],
+                        $listingData[$pagination]['other_recovery'],
+                        $listingData[$pagination]['total'],
+
+                        $listingData[$pagination]->transactionStatus->name,
+                        $changeStatusButton,
+                    ];
+                }
+                $records["draw"] = intval($request->draw);
+                $records["recordsTotal"] = $iTotalRecords;
+                $records["recordsFiltered"] = $iTotalRecords;
+            }
+        }catch(\Exception $e){
+            $records = array();
+            $data = [
+                'action' => 'Get Subcontractor Listing',
+                'exception' => $e->getMessage(),
+                'params' => $request->all()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+        return response()->json($records,200);
+    }
 }

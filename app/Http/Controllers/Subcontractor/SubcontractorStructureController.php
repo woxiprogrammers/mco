@@ -28,7 +28,8 @@ class SubcontractorStructureController extends Controller
 
     public function getManageView(Request $request){
         try{
-            return view('subcontractor.new_structure.manage');
+            $contractTypes = SubcontractorStructureType::select('id', 'name')->get()->toArray();
+            return view('subcontractor.new_structure.manage')->with(compact('contractTypes'));
         }catch (\Exception $e){
             $data = [
                 'action' => 'Get Subcontractor structure manage view',
@@ -138,6 +139,15 @@ class SubcontractorStructureController extends Controller
                 }
             }
 
+            if($request->has('contract_type_id') && $request->contract_type_id != "" && $filterFlag == true){
+                $ids = SubcontractorStructure::whereIn('id',$ids)
+                                    ->where('sc_structure_type_id', $request->contract_type_id)
+                                    ->orderBy('created_at','desc')->pluck('id');
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
             $listingData = array();
             if ($filterFlag) {
                 $listingData = SubcontractorStructure::whereIn('id',$ids)->orderBy('id', 'desc')->get();
@@ -214,7 +224,7 @@ class SubcontractorStructureController extends Controller
                         return $summary->rate * $summary->total_work_area;
                     });
                     $records['data'][$iterator] = [
-                        $listingData[$pagination]->subcontractor->subcontractor_name,
+                        ucwords($listingData[$pagination]->subcontractor->subcontractor_name),
                         $listingData[$pagination]->projectSite->project->name,
                         $listingData[$pagination]->contractType->name,
                         $totalRate,
