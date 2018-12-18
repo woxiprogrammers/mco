@@ -959,26 +959,32 @@ trait BillTrait{
             $bill_created = $billModel->create($bill);
             if($quotationData->billType->slug == 'itemwise'){
                 $billQuotationProductsModel = new BillQuotationProducts();
-                foreach($request['quotation_product_id'] as $key => $value){
-                    $bill_quotation_product['bill_id'] = $bill_created['id'];
-                    $bill_quotation_product['quotation_product_id'] = $key;
-                    $bill_quotation_product['rate_per_unit'] = $value['rate'];
-                    $bill_quotation_product['quantity'] = $value['current_quantity'];
-                    $bill_quotation_product['is_deleted'] = false;
-                    $bill_quotation_product['product_description_id'] = $value['product_description_id'];
-                    $billQuotationProductsModel->create($bill_quotation_product);
+                    foreach($request['quotation_product_id'] as $key => $value){
+                        if(array_key_exists('current_quantity',$value)){
+                        $bill_quotation_product['bill_id'] = $bill_created['id'];
+                        $bill_quotation_product['quotation_product_id'] = $key;
+                        $bill_quotation_product['rate_per_unit'] = $value['rate'];
+                        $bill_quotation_product['quantity'] = $value['current_quantity'];
+                        $bill_quotation_product['is_deleted'] = false;
+                        $bill_quotation_product['product_description_id'] = $value['product_description_id'];
+                        $billQuotationProductsModel->create($bill_quotation_product);
+                    }
                 }
+
             }else{
                 $billQuotationSummaryModel = new BillQuotationSummary();
                 foreach($request['quotation_summary_id'] as $key => $value){
-                    $bill_quotation_summary['bill_id'] = $bill_created['id'];
-                    $bill_quotation_summary['quotation_summary_id'] = $key;
-                    $bill_quotation_summary['rate_per_sqft'] = $value['rate'];
-                    $bill_quotation_summary['built_up_area'] = $quotationData['built_up_area'];
-                    $bill_quotation_summary['quantity'] = $value['current_quantity'];
-                    $bill_quotation_summary['is_deleted'] = false;
-                    $bill_quotation_summary['product_description_id'] = $value['product_description_id'];
-                    $billQuotationSummaryModel->create($bill_quotation_summary);
+                    if(array_key_exists('current_quantity',$value)){
+                        $bill_quotation_summary['bill_id'] = $bill_created['id'];
+                        $bill_quotation_summary['quotation_summary_id'] = $key;
+                        $bill_quotation_summary['rate_per_sqft'] = $value['rate'];
+                        $bill_quotation_summary['built_up_area'] = $quotationData['built_up_area'];
+                        $bill_quotation_summary['quantity'] = $value['current_quantity'];
+                        $bill_quotation_summary['is_deleted'] = false;
+                        $bill_quotation_summary['product_description_id'] = $value['product_description_id'];
+                        $billQuotationSummaryModel->create($bill_quotation_summary);
+                    }
+
                 }
             }
 
