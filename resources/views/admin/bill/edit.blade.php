@@ -153,7 +153,11 @@
                                                                     </td>
 
 s                                                                    <td>
-                                                                        <input class="form-control" type="hidden" id="rate_per_unit_{{$quotationSummaries[$iterator]['id']}}" name="quotation_summary_id[{{$quotationSummaries[$iterator]['id']}}][rate]" value="{{$quotationSummaries[$iterator]['rate_per_sqft']}}" disabled>
+                                                                        @if(array_key_exists('current_quantity',$quotationSummaries[$iterator]->toArray()))
+                                                                            <input class="form-control" type="hidden" id="rate_per_unit_{{$quotationSummaries[$iterator]['id']}}" name="quotation_summary_id[{{$quotationSummaries[$iterator]['id']}}][rate]" value="{{$quotationSummaries[$iterator]['rate_per_sqft']}}">
+                                                                        @else
+                                                                            <input class="form-control" type="hidden" id="rate_per_unit_{{$quotationSummaries[$iterator]['id']}}" name="quotation_summary_id[{{$quotationSummaries[$iterator]['id']}}][rate]" value="{{$quotationSummaries[$iterator]['rate_per_sqft']}}" disabled>
+                                                                        @endif
                                                                         <span id="wo_amount_{{$quotationSummaries[$iterator]['id']}}">{{round(($quotationSummaries[$iterator]['rate_per_sqft'] * $quotationSummaries[$iterator]['quantity']),3)}}</span>
                                                                     </td>
 

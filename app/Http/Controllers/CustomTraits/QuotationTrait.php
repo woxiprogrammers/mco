@@ -1371,11 +1371,14 @@ trait QuotationTrait{
             $workOrder = QuotationWorkOrder::create($workOrderData);
             $quotationExtraItemData = array();
             $quotationExtraItemData['quotation_id'] = $request->quotation_id;
-            foreach($request->extra_item as $extraItemId => $extraItemValue){
-                $quotationExtraItemData['extra_item_id'] = $extraItemId;
-                $quotationExtraItemData['rate'] = $extraItemValue;
-                QuotationExtraItem::create($quotationExtraItemData);
+            if($request->has('extra_item')){
+                foreach($request->extra_item as $extraItemId => $extraItemValue){
+                    $quotationExtraItemData['extra_item_id'] = $extraItemId;
+                    $quotationExtraItemData['rate'] = $extraItemValue;
+                    QuotationExtraItem::create($quotationExtraItemData);
+                }
             }
+
             if($request->has('new_extra_item')){
                 foreach($request->new_extra_item as $extraItemData){
                     $extraItemData['is_active'] = false;
