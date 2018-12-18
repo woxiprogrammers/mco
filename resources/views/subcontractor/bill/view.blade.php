@@ -103,7 +103,13 @@
                                                                     <td>
                                                                         <label class="control-label"> {{ $billSummary->subcontractorStructureSummary->summary->name }}</label>
                                                                     </td>
-                                                                    <td >{{$billSummary['description']}}</td>
+                                                                    <td >
+                                                                        @if($billSummary['description'] == null || $billSummary['description'] == '')
+                                                                            -
+                                                                        @else
+                                                                            {{$billSummary['description']}}
+                                                                        @endif
+                                                                    </td>
                                                                     <td >{{$billSummary['total_work_area']}}</td>
                                                                     <td ><label class="control-label rate">{{$billSummary->subcontractorStructureSummary['rate']}}</label></td>
                                                                     <td >{{$billSummary['quantity']}}</td>
@@ -130,19 +136,34 @@
                                                                     Rate
                                                                 </th>
                                                             </tr>
-                                                            @foreach($subcontractorBill->subcontractorBillExtraItems as $subcontractorBillExtraItem)
+                                                            @if(count($subcontractorBill->subcontractorBillExtraItems) > 0)
+                                                                @foreach($subcontractorBill->subcontractorBillExtraItems as $subcontractorBillExtraItem)
+                                                                    <tr>
+                                                                        <td colspan="3">
+                                                                            {{ $subcontractorBillExtraItem->subcontractorStructureExtraItem->extraItem->name }}
+                                                                        </td>
+                                                                        <td colspan="3">
+                                                                            {{ $subcontractorBillExtraItem->description }}
+                                                                        </td>
+                                                                        <td colspan="1">
+                                                                            {{$subcontractorBillExtraItem['rate']}}
+                                                                        </td>
+                                                                    </tr>
+                                                                @endforeach
+                                                            @else
                                                                 <tr>
                                                                     <td colspan="3">
-                                                                        {{ $subcontractorBillExtraItem->subcontractorStructureExtraItem->extraItem->name }}
+                                                                        -
                                                                     </td>
                                                                     <td colspan="3">
-                                                                        {{ $subcontractorBillExtraItem->description }}
+                                                                        -
                                                                     </td>
                                                                     <td colspan="1">
-                                                                        {{$subcontractorBillExtraItem['rate']}}
+                                                                        -
                                                                     </td>
                                                                 </tr>
-                                                            @endforeach
+                                                            @endif
+
                                                             <tr>
                                                                 <td colspan="6">
                                                                     <label class="control-label pull-right" style="margin-right: 3%; margin-bottom: 1%;"> <b>Subtotal</b> </label>
@@ -303,6 +324,10 @@
                                                                 <thead>
                                                                 <tr>
                                                                     <th style="width: 5%"> Sr. No. </th>
+                                                                    <th> Date
+                                                                        <input type="hidden" class="filter-submit">
+                                                                    </th>
+                                                                    <th> Paid From</th>
                                                                     <th> Subtotal </th>
                                                                     <th> Debit
                                                                         <input type="hidden" class="filter-submit">
@@ -322,9 +347,7 @@
                                                                     <th> Total
                                                                         <input type="hidden" class="filter-submit">
                                                                     </th>
-                                                                    <th> Created At
-                                                                        <input type="hidden" class="filter-submit">
-                                                                    </th>
+
                                                                     <th> Status </th>
                                                                     <th> Action </th>
                                                                 </tr>
@@ -332,6 +355,22 @@
                                                                 <tbody>
 
                                                                 </tbody>
+                                                                <tfoot>
+                                                                    <tr>
+                                                                        <th colspan="3">
+                                                                            Total
+                                                                        </th>
+                                                                        <th></th>
+                                                                        <th></th>
+                                                                        <th></th>
+                                                                        <th></th>
+                                                                        <th></th>
+                                                                        <th></th>
+                                                                        <th></th>
+                                                                        <th></th>
+                                                                        <th></th>
+                                                                    </tr>
+                                                                </tfoot>
                                                             </table>
                                                         </div>
                                                         <div class="modal fade" id="billTransactionCreateModel" role="dialog">

@@ -42,7 +42,7 @@
                                         {!! csrf_field() !!}
                                         <div class="portlet-body">
                                             <div class="row">
-                                            <table class="table table-striped table-bordered table-hover" id="subcontractorStructureTable">
+                                                <table class="table table-striped table-bordered table-hover" id="subcontractorStructureTable">
                                                 <thead>
                                                 <tr>
                                                     <th data-width="15%"> Subcontractor Name </th>
@@ -60,7 +60,16 @@
                                                 <tr class="filter">
                                                     <th> <input type="text" class="form-control form-filter" name="subcontractor_name" id="subcontractor_name"> </th>
                                                     <th> <input type="text" class="form-control form-filter" name="project_name" id="project_name"></th>
-                                                    <th></th>
+                                                    <th>
+                                                        <div>
+                                                            <select class="form-control form-filter" name="contract_type_id">
+                                                                <option value="">Select contract type</option>
+                                                                @foreach($contractTypes as $contractType)
+                                                                    <option value="{{$contractType['id']}}"> {{$contractType['name']}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    </th>
                                                     <th></th>
                                                     <th></th>
                                                     <th></th>
