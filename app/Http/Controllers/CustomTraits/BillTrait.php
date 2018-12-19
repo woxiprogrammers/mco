@@ -716,6 +716,7 @@ trait BillTrait{
             }else{
                 $final['current_bill_gross_total_amount'] = round($final['current_bill_amount'],3);
             }
+
             $final['current_bill_gross_total_amount'] = $final['current_bill_gross_total_amount'] + $bill['rounded_amount_by'];
             $billData['date'] = $bill['date'];
             $billData['created_at'] = $bill['created_at'];
@@ -909,8 +910,8 @@ trait BillTrait{
                     $final['current_bill_gross_total_amount'] = round($final['current_bill_amount'],3) + $bill['rounded_amount_by'];
                 }
             }
-            $BillTransactionTotals = BillTransaction::where('bill_id',$bill->id)->sum('amount');
-            $remainingAmount = ($final['current_bill_gross_total_amount'] + abs($tdsRetentionTaxAmount)) - ($BillTransactionTotals);
+            $BillTransactionTotals = BillTransaction::where('bill_id',$bill->id)->pluck('amount')->toArray();
+            $remainingAmount = round(($final['current_bill_gross_total_amount'] + abs($tdsRetentionTaxAmount)) - array_sum($BillTransactionTotals),3);
             $paymentTypes = PaymentType::orderBy('id')->whereIn('slug',['cheque','neft','rtgs','internet-banking'])->get();
             $totalBillHoldAmount = BillTransaction::where('bill_id',$selectedBillId)->sum('hold');
             $reconciledHoldAmount = BillReconcileTransaction::where('bill_id',$selectedBillId)->where('transaction_slug','hold')->sum('amount');
