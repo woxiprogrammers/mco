@@ -177,14 +177,15 @@
                                                                     <b> Discount </b>
                                                                 </td>
                                                                 <td colspan="3">
-                                                                    {{$subcontractorBill['discount_description']}}
+                                                                    @if($subcontractorBill['discount_description'] == "" || $subcontractorBill['discount_description'] == null)
+                                                                        -
+                                                                    @else
+                                                                        {{$subcontractorBill['discount_description']}}
+                                                                    @endif
                                                                 </td>
                                                                 <td colspan="1">
                                                                     <label class="control-label" id="discount">{{$subcontractorBill['discount']}}</label>
                                                                 </td>
-                                                                {{--<td colspan="1">
-                                                                    <label class="control-label" id="discountAmount"></label>
-                                                                </td>--}}
                                                             </tr>
                                                             <tr>
                                                                 <td colspan="6">

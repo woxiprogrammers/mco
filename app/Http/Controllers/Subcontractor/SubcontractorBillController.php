@@ -177,17 +177,34 @@ class SubcontractorBillController extends Controller
                     ->get();
             }
             if ($request->has('get_total')) {
-                $finalAmount = $paidAmount = 0;
+                $finalAmount = $paidAmount = $roundOffAmount = 0;
+                $debitAmount = $holdAmount = 0;
+                $otherRecoveryAmount = $retentionAmount = $tdsAmount = 0;
                 foreach($listingData as $data){
                     $finalAmount += $data['grand_total'];
+                    $roundOffAmount += $data['round_off_amount'];
                     $approvedStatusId = TransactionStatus::where('slug', 'approved')->pluck('id')->first();
-                    $paidAmount += SubcontractorBillTransaction::where('subcontractor_bills_id', $data['id'])
+                    $billTransactions = SubcontractorBillTransaction::where('subcontractor_bills_id', $data['id'])
                         ->where('transaction_status_id', $approvedStatusId)
-                        ->sum('total');
+                        ->select('retention_amount', 'tds_amount', 'hold', 'debit', 'other_recovery', 'total')
+                        ->get()
+                        ->toArray();
+                    $paidAmount += array_sum(array_column($billTransactions,'total' ));
+                    $debitAmount += array_sum(array_column($billTransactions,'debit' ));
+                    $holdAmount += array_sum(array_column($billTransactions,'hold' ));
+                    $otherRecoveryAmount += array_sum(array_column($billTransactions,'other_recovery' ));
+                    $retentionAmount += array_sum(array_column($billTransactions,'retention_amount'));
+                    $tdsAmount += array_sum(array_column($billTransactions,'tds_amount'));
                 }
+                $records['round_off_amount'] = $roundOffAmount;
                 $records['final_amount'] = $finalAmount;
                 $records['paid_amount'] = $paidAmount;
                 $records['pending_amount'] = round(($finalAmount - $paidAmount),3);
+                $records['debit'] = $debitAmount;
+                $records['hold'] = $holdAmount;
+                $records['retention'] = $retentionAmount;
+                $records['other_recovery'] = $otherRecoveryAmount;
+                $records['tds_amount'] = $tdsAmount;
             }else{
                 $iTotalRecords = count($listingData);
                 $records = array();
@@ -219,13 +236,10 @@ class SubcontractorBillController extends Controller
                     $paidAmount = SubcontractorBillTransaction::where('subcontractor_bills_id', $listingData[$pagination]['id'])
                         ->where('transaction_status_id', $approvedStatusId)
                         ->sum('total');
-                    $retentionAmount = SubcontractorBillTransaction::where('subcontractor_bills_id', $listingData[$pagination]['id'])
-                        ->where('transaction_status_id', $approvedStatusId)->sum('retention_amount');
-                    $tdsAmount = SubcontractorBillTransaction::where('subcontractor_bills_id', $listingData[$pagination]['id'])
-                        ->where('transaction_status_id', $approvedStatusId)->sum('tds_amount');
-                    $holdAmount = SubcontractorBillTransaction::where('subcontractor_bills_id', $listingData[$pagination]['id'])
-                        ->where('transaction_status_id', $approvedStatusId)->sum('hold');
-
+                    $billTransactions = SubcontractorBillTransaction::where('subcontractor_bills_id', $listingData[$pagination]['id'])
+                        ->where('transaction_status_id', $approvedStatusId)
+                        ->select('retention_amount', 'tds_amount', 'hold', 'debit', 'other_recovery')
+                        ->get()->toArray();
                     if($billStatusSlug == 'disapproved'){
                         $billNo = "-";
                     }else{
@@ -236,12 +250,15 @@ class SubcontractorBillController extends Controller
                         $billNo,
                         $basicAmount,
                         $taxAmount,
+                        $listingData[$pagination]['round_off_amount'],
                         $finalAmount,
                         $paidAmount,
                         round(($finalAmount - $paidAmount),3),
-                        $retentionAmount,
-                        $tdsAmount,
-                        $holdAmount,
+                        array_sum(array_column($billTransactions, 'debit')),
+                        array_sum(array_column($billTransactions, 'hold')),
+                        array_sum(array_column($billTransactions, 'retention_amount')),
+                        array_sum(array_column($billTransactions, 'tds_amount')),
+                        array_sum(array_column($billTransactions, 'other_recovery')),
                         $billStatus,
                         $action
                     ];
@@ -666,19 +683,6 @@ class SubcontractorBillController extends Controller
         try{
             $listingData = SubcontractorBillTransaction::where('subcontractor_bills_id', $subcontractorBillId)->get();
             if($request->has('get_total')){
-                /*
-                    $records['final_amount'] = $finalAmount;
-                    $records['paid_amount'] = $paidAmount;
-                    $records['pending_amount'] = round(($finalAmount - $paidAmount),3);
-
-                $listingData[$pagination]['subtotal'],
-                        $listingData[$pagination]['debit'],
-                        $listingData[$pagination]['hold'],
-                        $listingData[$pagination]['retention_amount'],
-                        $listingData[$pagination]['tds_amount'],
-                        $listingData[$pagination]['other_recovery'],
-                        $listingData[$pagination]['total']
-                */
                 $approvedBillStatusId = TransactionStatus::where('slug','approved')->pluck('id')->first();
                 $transactions = SubcontractorBillTransaction::whereIn('id', array_column($listingData->toArray(), 'id'))
                         ->where('transaction_status_id', $approvedBillStatusId)
