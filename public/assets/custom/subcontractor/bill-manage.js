@@ -38,10 +38,8 @@ var BillListing = function () {
                             "get_total" : true
                         },
                         success: function(result){
-                            final_amount = result['final_amount'];
-
-                            // Total over this page
-                            pageTotal = api
+                            var roundOff = result['round_off_amount'];
+                            var pageroundOff = api
                                 .column( 3, { page: 'current'} )
                                 .data()
                                 .reduce( function (a, b) {
@@ -50,13 +48,13 @@ var BillListing = function () {
 
                             // Update footer
                             $( api.column( 3 ).footer() ).html(
-                                pageTotal.toFixed(3) +' ( '+ final_amount.toFixed(3) +' total)'
+                                pageroundOff.toFixed(3) +' ( '+ roundOff.toFixed(3) +' total)'
                             );
 
-                            paid_amount = result['paid_amount'];
+                            var final_amount = result['final_amount'];
 
                             // Total over this page
-                            pageTotal = api
+                            var pageTotal = api
                                 .column( 4, { page: 'current'} )
                                 .data()
                                 .reduce( function (a, b) {
@@ -65,13 +63,13 @@ var BillListing = function () {
 
                             // Update footer
                             $( api.column( 4 ).footer() ).html(
-                                pageTotal.toFixed(3) +' ( '+ paid_amount.toFixed(3) +' total)'
+                                pageTotal.toFixed(3) +' ( '+ final_amount.toFixed(3) +' total)'
                             );
 
-                            pending_amount = result['pending_amount'];
+                            var paid_amount = result['paid_amount'];
 
                             // Total over this page
-                            pageTotal = api
+                            var pagePaidAmount = api
                                 .column( 5, { page: 'current'} )
                                 .data()
                                 .reduce( function (a, b) {
@@ -80,7 +78,87 @@ var BillListing = function () {
 
                             // Update footer
                             $( api.column( 5 ).footer() ).html(
-                                pageTotal.toFixed(3) +' ( '+ pending_amount.toFixed(3) +' total)'
+                                pagePaidAmount.toFixed(3) +' ( '+ paid_amount.toFixed(3) +' total)'
+                            );
+
+                            var pending_amount = result['pending_amount'];
+
+                            // Total over this page
+                            var pagePendingAmount = api
+                                .column( 6, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 6 ).footer() ).html(
+                                pagePendingAmount.toFixed(3) +' ( '+ pending_amount.toFixed(3) +' total)'
+                            );
+
+                            var debit = result['debit'];
+                            var pageDebit = api
+                                .column( 7, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 7 ).footer() ).html(
+                                pageDebit.toFixed(3) +' ( '+ debit.toFixed(3) +' total)'
+                            );
+
+                            var hold = result['hold'];
+                            var pageHold = api
+                                .column( 8, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 8 ).footer() ).html(
+                                pageHold.toFixed(3) +' ( '+ hold.toFixed(3) +' total)'
+                            );
+
+                            var retention = result['retention'];
+                            var pageRetention = api
+                                .column( 9, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 9 ).footer() ).html(
+                                pageRetention.toFixed(3) +' ( '+ retention.toFixed(3) +' total)'
+                            );
+
+                            var tds = result['tds_amount'];
+                            var pageTds = api
+                                .column( 10, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 10 ).footer() ).html(
+                                pageTds.toFixed(3) +' ( '+ tds.toFixed(3) +' total)'
+                            );
+
+                            var otherRecovery = result['other_recovery'];
+                            var pageOtherRecovery = api
+                                .column( 11, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 11 ).footer() ).html(
+                                pageOtherRecovery.toFixed(3) +' ( '+ otherRecovery.toFixed(3) +' total)'
                             );
                         }
                     });

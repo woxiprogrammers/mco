@@ -16,6 +16,122 @@ var TransactionListing = function () {
                 // setup uses scrollable div(table-scrollable) with overflow:auto to enable vertical scroll(see: assets/global/scripts/datatable.js). 
                 // So when dropdowns used the scrollable div should be removed. 
                 //"dom": "<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'<'table-group-actions pull-right'>>r>t<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'>>",
+                "footerCallback": function ( row, data, start, end, display ) {
+                    var api = this.api(), data;
+
+                    // Remove the formatting to get integer data for summation
+                    var intVal = function ( i ) {
+                        return typeof i === 'string' ?
+                            i.replace(/[\$,]/g, '')*1 :
+                            typeof i === 'number' ?
+                                i : 0;
+                    };
+
+                    var project_name = $('#project_name').val();
+
+
+                    // Total over all pages
+                    $.ajax({
+                        url: "/bill/transaction/listing/"+billId,
+                        type: 'POST',
+                        data :{
+                            "_token": $("input[name='_token']").val(),
+                            "get_total" : true,
+                        },
+                        success: function(result){
+                            // Total over this page
+                            var value = result['amount']
+                            var pageValue = api
+                                .column( 3, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 3 ).footer() ).html(
+                                pageValue.toFixed(3) +' ( '+ value.toFixed(3) +' total)'
+                            );
+
+                            value = result['debit']
+                            pageValue = api
+                                .column( 4, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 4 ).footer() ).html(
+                                pageValue.toFixed(3) +' ( '+ value.toFixed(3) +' total)'
+                            );
+
+                            value = result['hold']
+                            pageValue = api
+                                .column( 5, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 5 ).footer() ).html(
+                                pageValue.toFixed(3) +' ( '+ value.toFixed(3) +' total)'
+                            );
+
+                            value = result['retention_amount']
+                            pageValue = api
+                                .column( 6, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 6 ).footer() ).html(
+                                pageValue.toFixed(3) +' ( '+ value.toFixed(3) +' total)'
+                            );
+
+                            value = result['tds_amount']
+                            pageValue = api
+                                .column( 7, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 7 ).footer() ).html(
+                                pageValue.toFixed(3) +' ( '+ value.toFixed(3) +' total)'
+                            );
+
+                            value = result['other_recovery_value']
+                            pageValue = api
+                                .column( 8, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 8 ).footer() ).html(
+                                pageValue.toFixed(3) +' ( '+ value.toFixed(3) +' total)'
+                            );
+
+                            value = result['total']
+                            pageValue = api
+                                .column( 9, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 9 ).footer() ).html(
+                                pageValue.toFixed(3) +' ( '+ value.toFixed(3) +' total)'
+                            );
+                        }});
+                },
 
                 "lengthMenu": [
                     [50, 100, 150],
