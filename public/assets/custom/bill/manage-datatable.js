@@ -17,6 +17,76 @@ var ProjectSiteListing = function () {
                 // setup uses scrollable div(table-scrollable) with overflow:auto to enable vertical scroll(see: assets/global/scripts/datatable.js). 
                 // So when dropdowns used the scrollable div should be removed. 
                 //"dom": "<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'<'table-group-actions pull-right'>>r>t<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'>>",
+                "footerCallback": function ( row, data, start, end, display ) {
+                    var api = this.api(), data;
+
+                    // Remove the formatting to get integer data for summation
+                    var intVal = function ( i ) {
+                        return typeof i === 'string' ?
+                            i.replace(/[\$,]/g, '')*1 :
+                            typeof i === 'number' ?
+                                i : 0;
+                    };
+
+                    var project_name = $('#project_name').val();
+
+
+                    // Total over all pages
+                    $.ajax({
+                        url: "/bill/listing/project-site",
+                        type: 'POST',
+                        data :{
+                            "_token": $("input[name='_token']").val(),
+                            "get_total" : true,
+                            "project_name" : project_name
+                        },
+                        success: function(result){
+
+                            // Total over this page
+                            pageBillTotal = api
+                                .column( 3, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 3 ).footer() ).html(
+                                pageBillTotal.toFixed(3) +' ( '+ billtotal.toFixed(3) +' total)'
+                            );
+
+                            paidtotal = result['paidtotal'];
+
+                            // Total over this page
+                            pagePaidTotal = api
+                                .column( 4, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 4 ).footer() ).html(
+                                pagePaidTotal.toFixed(3) +' ( '+ paidtotal.toFixed(3) +' total)'
+                            );
+
+                            balancetotal = result['balancetotal'];
+
+                            // Total over this page
+                            pageBalanceTotal = api
+                                .column( 5, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 5 ).footer() ).html(
+                                pageBalanceTotal.toFixed(3) +' ( '+ balancetotal.toFixed(3) +' total)'
+                            );
+
+                        }});
+                },
 
                 "lengthMenu": [
                     [50, 100, 150],
