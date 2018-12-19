@@ -43,7 +43,23 @@ var ProjectSiteListing = function () {
                         success: function(result){
 
                             // Total over this page
+                            billtotal  = result['billtotal'];
                             pageBillTotal = api
+                                .column( 2, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 2 ).footer() ).html(
+                                pageBillTotal.toFixed(3) +' ( '+ billtotal.toFixed(3) +' total)'
+                            );
+
+                            paidtotal = result['paidtotal'];
+
+                            // Total over this page
+                            pagePaidTotal = api
                                 .column( 3, { page: 'current'} )
                                 .data()
                                 .reduce( function (a, b) {
@@ -52,13 +68,13 @@ var ProjectSiteListing = function () {
 
                             // Update footer
                             $( api.column( 3 ).footer() ).html(
-                                pageBillTotal.toFixed(3) +' ( '+ billtotal.toFixed(3) +' total)'
+                                pagePaidTotal.toFixed(3) +' ( '+ paidtotal.toFixed(3) +' total)'
                             );
 
-                            paidtotal = result['paidtotal'];
+                            balancetotal = result['balancetotal'];
 
                             // Total over this page
-                            pagePaidTotal = api
+                            pageBalanceTotal = api
                                 .column( 4, { page: 'current'} )
                                 .data()
                                 .reduce( function (a, b) {
@@ -67,21 +83,6 @@ var ProjectSiteListing = function () {
 
                             // Update footer
                             $( api.column( 4 ).footer() ).html(
-                                pagePaidTotal.toFixed(3) +' ( '+ paidtotal.toFixed(3) +' total)'
-                            );
-
-                            balancetotal = result['balancetotal'];
-
-                            // Total over this page
-                            pageBalanceTotal = api
-                                .column( 5, { page: 'current'} )
-                                .data()
-                                .reduce( function (a, b) {
-                                    return intVal(a) + intVal(b);
-                                }, 0 );
-
-                            // Update footer
-                            $( api.column( 5 ).footer() ).html(
                                 pageBalanceTotal.toFixed(3) +' ( '+ balancetotal.toFixed(3) +' total)'
                             );
 
@@ -94,10 +95,7 @@ var ProjectSiteListing = function () {
                 ],
                 "pageLength": 50, // default record count per page
                 "ajax": {
-                    "url": "/bill/listing/project-site", // ajax source
-                    "data" :{
-                        '_token' : $("input[name='_token']").val()
-                    }
+                    "url": "/bill/listing/project-site?_token="+$("input[name='_token']").val(), // ajax source
                 },
                 "order": [
                     [1, "asc"]

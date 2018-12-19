@@ -646,24 +646,40 @@
                                                     <div class="table-scrollable">
                                                         <table class="table table-striped table-bordered table-hover table-checkable order-column" id="transactionListingTable">
                                                             <thead>
-                                                            <tr>
-                                                                <th style="width: 5%"> Sr. No. </th>
-                                                                <th> Date </th>
-                                                                <th> Paid From </th>
-                                                                <th> Amount </th>
-                                                                <th> Debit </th>
-                                                                <th> Hold </th>
-                                                                <th> Retention </th>
-                                                                <th> TDS </th>
-                                                                <th> Other Recovery Value </th>
-                                                                <th> Total </th>
-                                                                <th> Status </th>
-                                                                <th> Action </th>
-                                                            </tr>
+                                                                <tr>
+                                                                    <th style="width: 5%"> Sr. No. </th>
+                                                                    <th> Date </th>
+                                                                    <th> Paid From </th>
+                                                                    <th> Amount </th>
+                                                                    <th> Debit </th>
+                                                                    <th> Hold </th>
+                                                                    <th> Retention </th>
+                                                                    <th> TDS </th>
+                                                                    <th> Other Recovery Value </th>
+                                                                    <th> Total </th>
+                                                                    <th> Status </th>
+                                                                    <th> Action </th>
+                                                                </tr>
                                                             </thead>
                                                             <tbody>
 
                                                             </tbody>
+                                                            <tfoot>
+                                                                <tr>
+                                                                    <th colspan="3">
+                                                                        Total
+                                                                    </th>
+                                                                    <th> </th>
+                                                                    <th> </th>
+                                                                    <th> </th>
+                                                                    <th> </th>
+                                                                    <th> </th>
+                                                                    <th> </th>
+                                                                    <th> </th>
+                                                                    <th> </th>
+                                                                    <th> </th>
+                                                                </tr>
+                                                            </tfoot>
                                                         </table>
                                                     </div>
                                                 </div>
