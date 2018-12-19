@@ -1566,14 +1566,16 @@ trait QuotationTrait{
             }
             $quotationExtraItemData = array();
             $quotationExtraItemData['quotation_id'] = $request->quotation_id;
-            foreach($request->extra_item as $extraItemId => $extraItemValue){
-                $quotationExtraItemData['extra_item_id'] = $extraItemId;
-                $quotationExtraItemData['rate'] = round($extraItemValue,3);
-                $quotationExtraItem = QuotationExtraItem::where('quotation_id',$request->quotation_id)->where('extra_item_id',$extraItemId)->first();
-                if($quotationExtraItem != null){
-                    $quotationExtraItem->update($quotationExtraItemData);
-                }else{
-                    QuotationExtraItem::create($quotationExtraItemData);
+            if($request->has('extra_item')) {
+                foreach ($request->extra_item as $extraItemId => $extraItemValue) {
+                    $quotationExtraItemData['extra_item_id'] = $extraItemId;
+                    $quotationExtraItemData['rate'] = round($extraItemValue, 3);
+                    $quotationExtraItem = QuotationExtraItem::where('quotation_id', $request->quotation_id)->where('extra_item_id', $extraItemId)->first();
+                    if ($quotationExtraItem != null) {
+                        $quotationExtraItem->update($quotationExtraItemData);
+                    } else {
+                        QuotationExtraItem::create($quotationExtraItemData);
+                    }
                 }
             }
             if($request->has('new_extra_item')){
