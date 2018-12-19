@@ -1154,13 +1154,14 @@ class PurchaseOrderController extends Controller
                 $purchaseOrderComponentData[$iterator]['units'] = array();
                 if(in_array($purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->component_type_id,$assetComponentTypeIds)){
                     $purchaseOrderComponentData[$iterator]['units'] = Unit::where('slug','nos')->select('id','name')->get()->toArray();
-                    $asset = Asset::where('name','ilike',$purchaseOrderComponentData[$iterator]['name'])->first();
+                    /*$asset = Asset::where('name','ilike',$purchaseOrderComponentData[$iterator]['name'])->first();
                     $otherAssetTypeId = AssetType::where('slug','other')->pluck('id')->first();
                     if($asset != null && $asset->asset_types_id != $otherAssetTypeId){
                         $quantityIsFixed = true;
                     }else{
                         $quantityIsFixed = false;
-                    }
+                    }*/
+                    $quantityIsFixed = true;
                 }else{
                     $quantityIsFixed = false;
                     $quantity = ($purchaseOrderComponent['quantity'] + ($purchaseOrderComponent['quantity'] * (10/100)));
