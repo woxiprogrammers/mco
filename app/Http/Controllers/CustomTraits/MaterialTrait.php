@@ -183,6 +183,18 @@ trait MaterialTrait{
                 }
             }
 
+            if($request->has('search_name_cat') && $request->search_name_cat != '' && $filterFlag == true){
+                $ids = Material::join('category_material_relations','category_material_relations.material_id','=','materials.id')
+                    ->join('categories','categories.id','=','category_material_relations.category_id')
+                    ->where('categories.name','ilike','%'.$request->search_name_cat.'%')
+                    ->whereIn('materials.id',$ids)
+                    ->pluck('materials.id')->toArray();
+                if(count($ids) <= 0){
+                    $filterFlag = false;
+                }
+            }
+
+
             if($filterFlag == true) {
                 $materialData = Material::whereIn('id',$ids)
                                 ->orderBy('name','asc')
@@ -202,9 +214,22 @@ trait MaterialTrait{
                     $status = 'Enable';
                 }
                 if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('edit-material')){
+                    $categoryname = CategoryMaterialRelation::join('categories','categories.id','=','category_material_relations.category_id')
+                                    ->where('category_material_relations.material_id','=',$materialData[$pagination]['id'])
+                                    ->get(['categories.name'])->toArray();
+                    $catNameArr = array();
+                    if(count($categoryname) > 1) {
+                        foreach ($categoryname as $catname) {
+                            $catNameArr[] = $catname['name'];
+                        }
+                        $catNameStr = implode(" , ", $catNameArr);
+                    } else {
+                        $catNameStr = $categoryname[0]['name'];
+                    }
                     $records['data'][$iterator] = [
                         '<input type="checkbox" name="material_ids" value="'.$materialData[$pagination]['id'].'">',
-                        $materialData[$pagination]['name'],
+                        ucwords($catNameStr),
+                        ucwords($materialData[$pagination]['name']),
                         round($materialData[$pagination]['rate_per_unit'],3),
                         Unit::where('id',$materialData[$pagination]['unit_id'])->pluck('name')->first(),
                         $material_status,
