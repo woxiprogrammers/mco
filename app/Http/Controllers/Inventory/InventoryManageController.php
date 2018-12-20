@@ -319,6 +319,8 @@ class InventoryManageController extends Controller
                     ucwords(explode("-",$inventoryTransferData[$pagination]->source_name)[0]),
                     ucwords($inventoryTransferData[$pagination]->inventoryComponent->name),
                     $inventoryTransferData[$pagination]->quantity,
+                    ($inventoryTransferData[$pagination]->rate_per_unit) ? $inventoryTransferData[$pagination]->rate_per_unit : '-',
+                    ($inventoryTransferData[$pagination]->total) ? $inventoryTransferData[$pagination]->total : '-',
                     $inventoryTransferData[$pagination]->unit->name,
                     $transportation_amount,
                     $grnOut,

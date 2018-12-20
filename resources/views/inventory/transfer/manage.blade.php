@@ -40,6 +40,8 @@
                                                                 <th>Site In</th>
                                                                 <th>Material Name</th>
                                                                 <th>Quantity</th>
+                                                                <th>Rate/Rent Per Day</th>
+                                                                <th>With Tax Amount</th>
                                                                 <th>Unit</th>
                                                                 <th>Transportation Amount</th>
                                                                 <th>GRN Out</th>
@@ -53,6 +55,8 @@
                                                                 <th> <input type="text" class="form-control form-filter" name="search_to" id="search_to"></th>
                                                                 <th> <input type="text" class="form-control form-filter" name="search_name" id="search_name" ></th>
                                                                 <th> <input type="text" class="form-control form-filter" name="search_qty" id="search_qty"></th>
+                                                                <th> </th>
+                                                                <th> </th>
                                                                 <th>
                                                                     <select class="form-control" id="unit_id" name="unit_id">
                                                                         <option value="all">ALL</option>
