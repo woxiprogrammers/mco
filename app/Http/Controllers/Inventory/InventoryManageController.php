@@ -599,17 +599,17 @@ class InventoryManageController extends Controller
                 if ($material_name != null && $material_name != "") {
                     $inventoryData = InventoryComponent::where('project_site_id', $projectSiteId)
                         ->where('name', 'ilike', '%' . $request->search_name . '%')
-                        ->orderBy('created_at', 'desc')->get();
+                        ->orderBy('name', 'asc')->get();
                 } else {
                     $inventoryData = InventoryComponent::where('project_site_id', $projectSiteId)
-                        ->orderBy('created_at', 'desc')->get();
+                        ->orderBy('name', 'asc')->get();
                 }
             }else{
                 if ($material_name != null && $material_name != "") {
                     $inventoryData = InventoryComponent::where('name', 'ilike', '%' . $request->search_name . '%')
-                        ->orderBy('created_at', 'desc')->get();
+                        ->orderBy('name', 'asc')->get();
                 } else {
-                    $inventoryData = InventoryComponent::orderBy('created_at', 'desc')->get();
+                    $inventoryData = InventoryComponent::orderBy('name', 'asc')->get();
                 }
             }
             $iTotalRecords = count($inventoryData);
@@ -667,7 +667,7 @@ class InventoryManageController extends Controller
                 $availableQuantity = ($inQuantity + $inventoryData[$iterator]['opening_stock']) - $outQuantity;
                 $records['data'][$iterator] = [
                     ++$sr_no,
-                    ucwords($inventoryData[$pagination]->name),
+                    ucwords(strtolower($inventoryData[$pagination]->name)),
                     ($inQuantity + $inventoryData[$iterator]['opening_stock']).' '.$unitName,
                     $outQuantity.' '.$unitName,
                     $availableQuantity.' '.$unitName,

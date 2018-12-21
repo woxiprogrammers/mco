@@ -134,7 +134,7 @@ class LabourController extends Controller
                                         ->where('projects.name','ilike','%'.$request->employee_project.'%')
                                         ->pluck('employees.id');
             }
-            $listingData = Employee::whereIn('id',$employeeIds)->orderBy('created_at','desc')->get();
+            $listingData = Employee::whereIn('id',$employeeIds)->orderBy('name','asc')->get();
             $iTotalRecords = count($listingData);
             $records = array();
             $records['data'] = array();
@@ -192,7 +192,7 @@ class LabourController extends Controller
                 $records['data'][$iterator] = [
                     $listingData[$pagination]['employee_id'],
                     '<img src="'.$profilePicAddress.'" height="60" width="60" style="border-radius: 50%;box-shadow: 2px 2px 1px 1px #888888;">',
-                    $listingData[$pagination]['name'],
+                    ucwords(strtolower($listingData[$pagination]['name'])),
                     $listingData[$pagination]['mobile'],
                     $listingData[$pagination]['per_day_wages'],
                     $listingData[$pagination]['per_day_wages'] * 30,

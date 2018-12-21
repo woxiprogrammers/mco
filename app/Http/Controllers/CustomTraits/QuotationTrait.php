@@ -54,7 +54,9 @@ trait QuotationTrait{
 
     public function getCreateView(Request $request){
         try{
-            $clients = Client::where('is_active', true)->select('id','company')->get()->toArray();
+            $clients = Client::where('is_active', true)
+                ->orderBy('company','asc')
+                ->select('id','company')->get()->toArray();
             $categories = Category::join('products','categories.id','=','products.category_id')
                 ->where('categories.is_active',true)
                 ->orderBy('categories.name','asc')
@@ -675,7 +677,10 @@ trait QuotationTrait{
     public function getProjects(Request $request){
         try{
             $clientId = $request->client_id;
-            $projects = Project::where('client_id', $clientId)->where('is_active', true)->get();
+            $projects = Project::where('client_id', $clientId)
+                ->where('is_active', true)
+                ->orderBy('name','asc')
+                ->get();
             $response = array();
             foreach($projects as $project){
                 $response[] = '<option value="'.$project->id.'">'.$project->name.'</option> ';
@@ -698,7 +703,10 @@ trait QuotationTrait{
         try{
             $projectId = $request->project_id;
             $quotationProjectSiteIds = Quotation::whereNotNull('quotation_status_id')->pluck('project_site_id')->toArray();
-            $projectSites = ProjectSite::where('project_id',$projectId)->whereNotIn('id',$quotationProjectSiteIds)->select('id','name')->get();
+            $projectSites = ProjectSite::where('project_id',$projectId)
+                ->whereNotIn('id',$quotationProjectSiteIds)
+                ->orderBy('name','asc')
+                ->select('id','name')->get();
             $response = array();
             if(count($projectSites) <= 0)
             {

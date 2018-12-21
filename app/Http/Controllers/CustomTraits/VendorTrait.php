@@ -306,7 +306,7 @@ trait VendorTrait
             if ($request->has('search_name')) {
                 $vendorId = Vendor::whereIn('id',$vendorId)->where('name','ilike','%'.$request->search_name.'%')->pluck('id')->toArray();
             }
-            $vendorsData = Vendor::whereIn('id', $vendorId)->orderBy('id','desc')->get();
+            $vendorsData = Vendor::whereIn('id', $vendorId)->orderBy('company','asc')->get();
             $iTotalRecords = count($vendorsData);
             $records = array();
             $records['data'] = array();
@@ -351,8 +351,8 @@ trait VendorTrait
                 </div>';
                 }
                 $records['data'][$iterator] = [
-                    $vendorsData[$pagination]['company'],
-                    $vendorsData[$pagination]['name'],
+                    ucwords($vendorsData[$pagination]['company']),
+                    ucwords($vendorsData[$pagination]['name']),
                     $vendorsData[$pagination]['mobile'],
                     $vendorsData[$pagination]['alternate_contact'],
                     $vendorsData[$pagination]['gstin'],

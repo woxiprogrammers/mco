@@ -94,7 +94,9 @@ class SubcontractorController extends Controller
             if($request->has('search_name')) {
                 $search_name = $request->search_name;
             }
-            $listingData = Subcontractor::where('company_name','ilike','%'.$search_name.'%')->get();
+            $listingData = Subcontractor::where('company_name','ilike','%'.$search_name.'%')
+                ->orderBy('company_name','asc')
+                ->get();
             $iTotalRecords = count($listingData);
             $records = array();
             $records['data'] = array();
