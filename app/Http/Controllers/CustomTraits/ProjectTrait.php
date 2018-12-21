@@ -25,7 +25,8 @@ trait ProjectTrait{
 
     public function getCreateView(Request $request){
         try{
-            $clients = Client::where('is_active', true)->get();
+            $clients = Client::where('is_active', true)
+                ->orderBy('company','asc')->get();
             $hsnCodes = HsnCode::select('id','code','description')->get();
             $cities = City::get();
             $cityArray = Array();
@@ -75,19 +76,19 @@ trait ProjectTrait{
             }
             $k = 0;
             $clientData = Client::where('company','ilike','%'.$company_name.'%')
-                          ->where('is_active',true)->orderBy('updated_at','desc')->get()->toArray();
+                          ->where('is_active',true)->orderBy('company','asc')->get()->toArray();
             for($i = 0 ; $i < count($clientData) ; $i++){
                 $project = Project::where('name','ilike','%'.$project_name.'%')
                            ->where('client_id',$clientData[$i]['id'])->orderBy('updated_at','desc')->get()->toArray();
                 for($j = 0 ; $j < count($project) ; $j++){
                     $project_site = ProjectSite::where('project_id',$project[$j]['id'])->orderBy('updated_at','desc')->get()->toArray();
                     for($l = 0 ; $l < count($project_site) ; $l++){
-                        $listingData[$k]['company'] = $clientData[$i]['company'];
-                        $listingData[$k]['project_name'] = $project[$j]['name'];
+                        $listingData[$k]['company'] = ucwords($clientData[$i]['company']);
+                        $listingData[$k]['project_name'] = ucwords($project[$j]['name']);
                         $listingData[$k]['project_id'] = $project[$j]['id'];
                         $listingData[$k]['project_is_active'] = $project[$j]['is_active'];
                         $listingData[$k]['project_site_id'] = $project_site[$l]['id'];
-                        $listingData[$k]['project_site_name'] = $project_site[$l]['name'];
+                        $listingData[$k]['project_site_name'] = ucwords($project_site[$l]['name']);
                         $k++;
                     }
 
