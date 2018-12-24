@@ -343,6 +343,19 @@ class SubcontractorStructureController extends Controller
                     $structureExtraItem->update($structureExtraItemData);
                 }
             }
+
+            if($request->has('new_extra_item')){
+                $structureExtraItemData = [
+                    'subcontractor_structure_id' => $subcontractorStructure->id
+                ];
+                foreach($request->new_extra_item as $extraItemData){
+                    $extraItemData['is_active'] = false;
+                    $extraItem = ExtraItem::create($extraItemData);
+                    $structureExtraItemData['extra_item_id'] = $extraItem->id;
+                    $structureExtraItemData['rate'] = (double)$extraItem->rate;
+                    $structureExtraItem = SubcontractorStructureExtraItem::create($structureExtraItemData);
+                }
+            }
             $request->session()->flash('success', 'Subcontractor structure edited successfully.');
             return redirect('/subcontractor/structure/edit/'.$subcontractorStructure->id);
         }catch (\Exception $e){

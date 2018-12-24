@@ -100,14 +100,20 @@
                                                                 <label for="bank" class="control-label" style="margin-left: 10px">Assigned Bank : {!! $bill->bankInfo->bank_name !!} - {!! $bill->bankInfo->account_number !!}</label>
                                                             @endif
 
-                                                            @if(($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-billing')) && $bill->bill_status->slug == 'draft')
-                                                                <a class="btn green-meadow" id="approve" data-toggle="tab" href="#billApproveTab" style="margin-left: 10px">
-                                                                    <i class="fa fa-check-square-o"></i> Approve
-                                                                </a>
+                                                            @if(($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-billing')))
+                                                                @if($bill->bill_status->slug == 'draft')
+                                                                    <a class="btn green-meadow" id="approve" data-toggle="tab" href="#billApproveTab" style="margin-left: 10px">
+                                                                        <i class="fa fa-check-square-o"></i> Approve
+                                                                    </a>
+                                                                    <a href="#" class="btn btn-danger" data-toggle="modal" data-target="#cancel-form" style="margin-left: 10px">
+                                                                        <i class="fa fa-remove"></i> Cancel
+                                                                    </a>
+                                                                @elseif($toChangeStatus == true)
+                                                                    <a href="#" class="btn btn-danger" data-toggle="modal" data-target="#cancel-form" style="margin-left: 10px">
+                                                                        <i class="fa fa-remove"></i> Cancel
+                                                                    </a>
+                                                                @endif
 
-                                                                <a href="#" class="btn btn-danger" data-toggle="modal" data-target="#cancel-form" style="margin-left: 10px">
-                                                                    <i class="fa fa-remove"></i> Cancel
-                                                                </a>
                                                             @endif
 
                                                             {{--<div class="col-md-12" style="margin-top: 1%">
