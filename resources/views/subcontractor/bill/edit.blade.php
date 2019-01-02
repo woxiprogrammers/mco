@@ -86,6 +86,7 @@
                                                             <th width="10%" style="text-align: center"><b> Description </b></th>
                                                             <th width="10%"><b>Total Work Area</b></th>
                                                             <th width="10%" class="numeric" style="text-align: center"><b> Rate </b></th>
+                                                            <th width="10%" class="numeric" style="text-align: center"><b> Unit </b></th>
                                                             <th width="10%" class="numeric" style="text-align: center"><b> Amount </b></th>
                                                             <th width="8%" class="numeric" style="text-align: center"><b> Previous Quantity </b></th>
                                                             <th width="8%" class="numeric" style="text-align: center"><b> Current Quantity </b></th>
@@ -115,6 +116,7 @@
                                                                     <td ><div class="form-group" style="margin-left: 1%; margin-right: 1%"><textarea class="form-control description" readonly>{{$structureSummary['description']}}</textarea></div></td>
                                                                     <td >{{$structureSummary['total_work_area']}} <input type="hidden" name="total_work_area[{{$structureSummary['id']}}]" value="{{$structureSummary['total_work_area']}}"></td>
                                                                     <td ><label class="control-label rate">{{$structureSummary['rate']}}</label></td>
+                                                                    <td ><label class="control-label">{{$structureSummary['unit']}}</label></td>
                                                                     <td >{!! $structureSummary['total_work_area'] * $structureSummary['rate'] !!}</td>
                                                                     <td >{{$structureSummary['prev_quantity']}}</td>
                                                                     <td ><div class="form-group" style="margin-left: 1%; margin-right: 1%"><input type="text" class="form-control quantity" max="{{$structureSummary['allowed_quantity']}}" value="{{$structureSummary['quantity']}}" onkeyup="calculateAmount(this)" readonly> </div></td>
@@ -128,6 +130,7 @@
                                                                     <td ><div class="form-group" style="margin-left: 1%; margin-right: 1%"><textarea class="form-control description" name="description[{{$structureSummary['id']}}]">{{$structureSummary['description']}}</textarea></div></td>
                                                                     <td >{{$structureSummary['total_work_area']}} <input type="hidden" name="total_work_area[{{$structureSummary['id']}}]" value="{{$structureSummary['total_work_area']}}"></td>
                                                                     <td ><label class="control-label rate">{{$structureSummary['rate']}}</label></td>
+                                                                        <td ><label class="control-label">{{$structureSummary['unit']}}</label></td>
                                                                     <td ><span class="total_amount"> {!! $structureSummary['total_work_area'] * $structureSummary['rate'] !!}</span></td>
                                                                     <td >{{$structureSummary['prev_quantity']}}</td>
                                                                     <td ><div class="form-group" style="margin-left: 1%; margin-right: 1%"><input type="text" class="form-control quantity" max="{{$structureSummary['allowed_quantity']}}" min="0.000001" value="{{$structureSummary['quantity']}}" onkeyup="calculateAmount(this)" name="quantity[{{$structureSummary['id']}}]" required> </div></td>
@@ -140,15 +143,15 @@
 
                                                         <tr>
                                                             @if($subcontractorBill->subcontractorStructure->contractType->slug == 'itemwise')
-                                                                <td colspan="11">
+                                                                <td colspan="12">
                                                             @else
-                                                                <td colspan="10">
+                                                                <td colspan="11">
                                                                     @endif
                                                                     <label class="control-label"> <b> Extra Items</b></label>
                                                                 </td>
                                                         </tr>
                                                         <tr>
-                                                            <th colspan="1" style="text-align: center;">
+                                                            <th colspan="2" style="text-align: center;">
                                                                 Action
                                                             </th>
                                                             @if($subcontractorBill->subcontractorStructure->contractType->slug == 'itemwise')
@@ -190,7 +193,7 @@
                                                         </tr>--}}
                                                         @foreach($structureExtraItems as $structureExtraItem)
                                                             <tr>
-                                                                <td colspan="1">
+                                                                <td colspan="2">
                                                                     @if(in_array($structureExtraItem['subcontractor_structure_extra_item_id'], array_column($subcontractorBill->subcontractorBillExtraItems->toArray(),'subcontractor_structure_extra_item_id')))
                                                                         <input type="checkbox" class="extra-item-checkbox" name="structure_extra_item_ids[]" value="{{$structureExtraItem['subcontractor_structure_extra_item_id']}}" onclick="extraItemClick(this)" checked>
                                                                     @else
@@ -230,9 +233,9 @@
                                                         @endforeach
                                                         <tr>
                                                             @if($subcontractorBill->subcontractorStructure->contractType->slug == 'itemwise')
-                                                                <td colspan="9">
+                                                                <td colspan="10">
                                                             @else
-                                                                <td colspan="8">
+                                                                <td colspan="9">
                                                                     @endif
                                                                     <label class="control-label pull-right" style="margin-right: 3%; margin-bottom: 1%;"> <b>Subtotal</b> </label>
                                                                 </td>
@@ -243,9 +246,9 @@
                                                         </tr>
                                                         <tr>
                                                             @if($subcontractorBill->subcontractorStructure->contractType->slug == 'itemwise')
-                                                                <td colspan="5">
+                                                                <td colspan="6">
                                                             @else
-                                                                <td colspan="4">
+                                                                <td colspan="5">
                                                                     @endif
                                                                     <b>Discount</b>
                                                                 </td>
@@ -260,9 +263,9 @@
                                                         </tr>
                                                         <tr>
                                                             @if($subcontractorBill->subcontractorStructure->contractType->slug == 'itemwise')
-                                                                <td colspan="9">
+                                                                <td colspan="10">
                                                             @else
-                                                                <td colspan="8">
+                                                                <td colspan="9">
                                                                     @endif
                                                                     <label class="control-label pull-right" style="margin-right: 3%; margin-bottom: 1%;"> <b>Discounted Amount</b> </label>
                                                                 </td>
@@ -273,18 +276,18 @@
                                                         @if(count($taxes) > 0)
                                                             <tr>
                                                                 @if($subcontractorBill->subcontractorStructure->contractType->slug == 'itemwise')
-                                                                    <td colspan="11">
+                                                                    <td colspan="12">
                                                                 @else
-                                                                    <td colspan="10">
+                                                                    <td colspan="11">
                                                                         @endif
                                                                         <label class="control-label"> <b> Taxes</b></label>
                                                                     </td>
                                                             </tr>
                                                             <tr>
                                                                 @if($subcontractorBill->subcontractorStructure->contractType->slug == 'itemwise')
-                                                                    <td colspan="5">
+                                                                    <td colspan="6">
                                                                 @else
-                                                                    <td colspan="4">
+                                                                    <td colspan="5">
                                                                         @endif
                                                                         <b>Tax Name</b>
                                                                     </td>
@@ -298,9 +301,9 @@
                                                             @foreach($taxes as $key => $taxData)
                                                                 <tr>
                                                                     @if($subcontractorBill->subcontractorStructure->contractType->slug == 'itemwise')
-                                                                        <td colspan="5">
+                                                                        <td colspan="6">
                                                                     @else
-                                                                        <td colspan="4">
+                                                                        <td colspan="5">
                                                                             @endif
                                                                             {!! $taxData['name'] !!}
                                                                         </td>
@@ -316,16 +319,16 @@
                                                         @if(count($specialTaxes) > 0)
                                                             <tr>
                                                                 @if($subcontractorBill->subcontractorStructure->contractType->slug == 'itemwise')
-                                                                    <td colspan="11">
+                                                                    <td colspan="12">
                                                                 @else
-                                                                    <td colspan="10">
+                                                                    <td colspan="11">
                                                                         @endif
                                                                         <label class="control-label"> <b>Special Taxes</b></label>
                                                                     </td>
                                                             </tr>
                                                             @foreach($specialTaxes as $specialTax)
                                                                 <tr>
-                                                                    <td colspan="5" style="text-align: right; padding-right: 30px;">
+                                                                    <td colspan="6" style="text-align: right; padding-right: 30px;">
                                                                         <b>{{$specialTax['name']}}</b>
                                                                         <input type="hidden" class="special-tax" name="special_tax[]" value="{{$specialTax['id']}}">
                                                                     </td>
@@ -376,9 +379,9 @@
                                                         @endif
                                                         <tr>
                                                             @if($subcontractorBill->subcontractorStructure->contractType->slug == 'itemwise')
-                                                                <td colspan="9">
+                                                                <td colspan="10">
                                                             @else
-                                                                <td colspan="8">
+                                                                <td colspan="9">
                                                                     @endif
                                                                     <label class="control-label pull-right"> <b>Final Total</b></label>
                                                                 </td>
@@ -388,9 +391,9 @@
                                                         </tr>
                                                         <tr>
                                                             @if($subcontractorBill->subcontractorStructure->contractType->slug == 'itemwise')
-                                                                <td colspan="9">
+                                                                <td colspan="10">
                                                             @else
-                                                                <td colspan="8">
+                                                                <td colspan="9">
                                                                     @endif
                                                                     <label class="control-label pull-right"> <b>Round off amount</b></label>
                                                                 </td>
@@ -402,9 +405,9 @@
                                                         </tr>
                                                         <tr>
                                                             @if($subcontractorBill->subcontractorStructure->contractType->slug == 'itemwise')
-                                                                <td colspan="9">
+                                                                <td colspan="10">
                                                             @else
-                                                                <td colspan="8">
+                                                                <td colspan="9">
                                                                     @endif
                                                                     <label class="control-label pull-right"> <b>Grand Total</b></label>
                                                                 </td>

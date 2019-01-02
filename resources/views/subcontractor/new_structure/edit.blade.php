@@ -114,9 +114,9 @@
                                                                                 <tr>
                                                                                     <th style="width: 15%"> Summary </th>
                                                                                     <th style="width: 20%"> Description </th>
-
                                                                                     <th style="width: 15%"> Rate </th>
-                                                                                    <th style="width: 15%"> Work Area (Sq.ft.)</th>
+                                                                                    <th style="width: 10%"> Unit </th>
+                                                                                    <th style="width: 10%"> Work Area (Sq.ft.)</th>
                                                                                     <th style="width: 15%"> Total Amount </th>
                                                                                     <th style="width: 25%"> Total Amount (Words)</th>
                                                                                     <th style="width: 5%"> Action </th>
@@ -137,6 +137,26 @@
                                                                                         <td>
                                                                                             <div class="form-group" style="width: 90%; margin-left: 5%">
                                                                                                 <input type="text" class="form-control rate" onkeyup="rateKeyUp(this)" value="{{$subcontractorStructureSummary['rate']}}" name="rate[{{$subcontractorStructureSummary['summary_id']}}]"  min="{{$subcontractorStructureSummary['min_rate']}}" required>
+                                                                                            </div>
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            <div class="form-group" style="width: 90%; margin-left: 5%">
+                                                                                                <select  class="unit form-control" name="unit[{{$subcontractorStructureSummary['summary_id']}}]" required>
+                                                                                                    <option value="">
+                                                                                                        Select Unit
+                                                                                                    </option>
+                                                                                                    @foreach($units as $unit)
+                                                                                                        @if($subcontractorStructureSummary['unit_id'] == $unit['id'])
+                                                                                                            <option value="{{$unit['id']}}" selected>
+                                                                                                                {{$unit['name']}}
+                                                                                                            </option>
+                                                                                                        @else
+                                                                                                            <option value="{{$unit['id']}}">
+                                                                                                                {{$unit['name']}}
+                                                                                                            </option>
+                                                                                                        @endif
+                                                                                                    @endforeach
+                                                                                                </select>
                                                                                             </div>
                                                                                         </td>
                                                                                         <td>
@@ -476,6 +496,8 @@
             $(element).closest('tr').find('.total_amount_inwords').val('');
             $(element).closest('tr').find('.description').attr('name', 'description['+summaryId+']');
             $(element).closest('tr').find('.description').val('');
+            $(element).closest('tr').find('.unit').attr('name', 'unit['+summaryId+']');
+            $(element).closest('tr').find('.unit').val('');
         }
 
         function removeSummary(element){

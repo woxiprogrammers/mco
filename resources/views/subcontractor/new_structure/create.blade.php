@@ -102,11 +102,11 @@
                                                                         <table class="table table-striped table-bordered table-hover" id="summaryTable">
                                                                             <thead>
                                                                             <tr>
-                                                                                <th style="width: 20%"> Summary </th>
+                                                                                <th style="width: 15%"> Summary </th>
                                                                                 <th style="width: 20%"> Description </th>
-
                                                                                 <th style="width: 15%"> Rate </th>
-                                                                                <th style="width: 15%"> Work Area (Sq.ft.)</th>
+                                                                                <th style="width: 10%"> Unit </th>
+                                                                                <th style="width: 10%"> Work Area (Sq.ft.)</th>
                                                                                 <th style="width: 15%"> Total Amount </th>
                                                                                 <th style="width: 25%"> Total Amount (Words)</th>
                                                                                 <th style="width: 5%"> Action </th>
@@ -129,6 +129,20 @@
                                                                                 <td>
                                                                                     <div class="form-group" style="width: 90%; margin-left: 5%">
                                                                                         <input type="text" class="form-control rate" onkeyup="rateKeyUp(this)" min="1" required>
+                                                                                    </div>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <div class="form-group" style="width: 90%; margin-left: 5%">
+                                                                                        <select  class="unit form-control" required>
+                                                                                            <option value="">
+                                                                                                Select Unit
+                                                                                            </option>
+                                                                                            @foreach($units as $unit)
+                                                                                                <option value="{{$unit['id']}}">
+                                                                                                    {{$unit['name']}}
+                                                                                                </option>
+                                                                                            @endforeach
+                                                                                        </select>
                                                                                     </div>
                                                                                 </td>
                                                                                 <td>
@@ -394,6 +408,8 @@
             $(element).closest('tr').find('.total_amount_inwords').val('');
             $(element).closest('tr').find('.description').attr('name', 'description['+summaryId+']');
             $(element).closest('tr').find('.description').val('');
+            $(element).closest('tr').find('.unit').attr('name', 'unit['+summaryId+']');
+            $(element).closest('tr').find('.unit').val('');
 
         }
 

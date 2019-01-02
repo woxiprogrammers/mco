@@ -17,6 +17,7 @@ use App\SubcontractorStructureType;
 use App\Summary;
 use App\Tax;
 use App\TransactionStatus;
+use App\Unit;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Log;
@@ -57,6 +58,11 @@ class SubcontractorBillController extends Controller
                     $subcontractorStructureSummaries[$iterator]['allowed_quantity'] = 1 - $subcontractorStructureSummaries[$iterator]['prev_quantity'];
                 }else{
                     $subcontractorStructureSummaries[$iterator]['allowed_quantity'] = $subcontractorStructureSummary['total_work_area'] - $subcontractorStructureSummaries[$iterator]['prev_quantity'];
+                }
+                if($subcontractorStructureSummary['unit_id'] != null){
+                    $subcontractorStructureSummaries[$iterator]['unit'] = Unit::where('id', $subcontractorStructureSummary['unit_id'])->pluck('name')->first();
+                } else{
+                    $subcontractorStructureSummaries[$iterator]['unit'] = '-';
                 }
                 $iterator += 1;
             }
@@ -410,6 +416,11 @@ class SubcontractorBillController extends Controller
                     $subcontractorStructureSummaries[$iterator]['description'] = '';
                     $subcontractorStructureSummaries[$iterator]['quantity'] = 0;
                     $subcontractorStructureSummaries[$iterator]['is_bill_created'] = false;
+                }
+                if($subcontractorStructureSummary['unit_id'] != null){
+                    $subcontractorStructureSummaries[$iterator]['unit'] = Unit::where('id', $subcontractorStructureSummary['unit_id'])->pluck('name')->first();
+                }else{
+                    $subcontractorStructureSummaries[$iterator]['unit'] = '-';
                 }
                 $iterator += 1;
             }

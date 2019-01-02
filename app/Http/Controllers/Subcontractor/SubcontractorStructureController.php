@@ -14,6 +14,7 @@ use App\SubcontractorStructureExtraItem;
 use App\SubcontractorStructureSummary;
 use App\SubcontractorStructureType;
 use App\Summary;
+use App\Unit;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -42,11 +43,12 @@ class SubcontractorStructureController extends Controller
 
     public function getCreateView(Request $request){
         try{
+            $units = Unit::where('is_active', true)->select('id', 'name')->get()->toArray();
             $subcontractors = Subcontractor::where('is_active',true)->orderBy('id','asc')->get(['id','subcontractor_name'])->toArray();
             $ScStrutureTypes = SubcontractorStructureType::orderBy('id','asc')->get(['id','name','slug'])->toArray();
             $summaries = Summary::where('is_active', true)->select('id', 'name')->get()->toArray();
             $extraItems = ExtraItem::where('is_active', true)->select('id','name','rate')->orderBy('name','asc')->get();
-            return view('subcontractor.new_structure.create')->with(compact('subcontractors', 'ScStrutureTypes', 'summaries', 'extraItems'));
+            return view('subcontractor.new_structure.create')->with(compact('subcontractors', 'ScStrutureTypes', 'summaries', 'extraItems', 'units'));
         }catch (\Exception $e){
             $data = [
                 'action' => 'Get subcontractor structure create view',
@@ -80,6 +82,7 @@ class SubcontractorStructureController extends Controller
                 $structureSummaryData['rate'] = (float) $request->rate[$summaryId];
                 $structureSummaryData['description'] = $request->description[$summaryId];
                 $structureSummaryData['total_work_area'] = (float)$request->total_work_area[$summaryId];
+                $structureSummaryData['unit_id'] = (int)$request->unit[$summaryId];
                 $structureSummary = SubcontractorStructureSummary::create($structureSummaryData);
             }
             $structureExtraItemData = [
@@ -301,7 +304,8 @@ class SubcontractorStructureController extends Controller
             }
             $structureExtraItemIds = array_column($subcontractorStructure->extraItems->toArray(), 'extra_item_id');
             $newExtraItems = ExtraItem::whereNotIn('id', $structureExtraItemIds)->where('is_active', true)->select('id','name','rate')->get()->toArray();
-            return view('subcontractor.new_structure.edit')->with(compact('subcontractorStructure', 'summaries', 'structureSummaries', 'newExtraItems'));
+            $units = Unit::where('is_active', true)->select('id', 'name')->get()->toArray();
+            return view('subcontractor.new_structure.edit')->with(compact('subcontractorStructure', 'summaries', 'structureSummaries', 'newExtraItems', 'units'));
         }catch (\Exception $e){
             $data = [
                 'action' => 'Get subcontractor structure Edit view',
@@ -324,6 +328,7 @@ class SubcontractorStructureController extends Controller
                 $structureSummaryData['rate'] = (float) $request->rate[$summaryId];
                 $structureSummaryData['description'] = $request->description[$summaryId];
                 $structureSummaryData['total_work_area'] = (float)$request->total_work_area[$summaryId];
+                $structureSummaryData['unit_id'] = (int)$request->unit[$summaryId];
                 if ($subcontractorStructureSummary == null){
                     $subcontractorStructureSummary = SubcontractorStructureSummary::create($structureSummaryData);
                 }else{
