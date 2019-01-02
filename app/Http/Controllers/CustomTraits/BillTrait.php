@@ -520,7 +520,7 @@ trait BillTrait{
         try{
             $user = Auth::user();
             $filterFlag = true;
-            $projectSiteIds = ProjectSite::pluck('id')->toArray();
+            $projectSiteIds = Quotation::pluck('project_site_id')->toArray();
             if($request->has('project_name') && $request->project_name != ""){
                 $projectSiteIds = Project::join('project_sites','project_sites.project_id','=','projects.id')
                     ->where('projects.name','ilike','%'.$request['project_name'].'%')
@@ -542,10 +542,6 @@ trait BillTrait{
             }
             $iterator = 0;
             $listingData = array();
-            /*if($filterFlag){
-                $quotationIds = Bill::groupBy('quotation_id')->pluck('quotation_id')->toArray();
-                $projectSiteIds = Quotation::whereIn('id',$quotationIds)->pluck('project_site_id')->toArray();
-            }*/
             $projectSiteData = ProjectSite::orderBy('updated_at','desc')->whereIn('id',$projectSiteIds)->get()->toArray();
             $approvedID = BillStatus::where('slug','approved')->pluck('id')->first();
             for($i = 0 ; $i < count($projectSiteData) ; $i++){
@@ -595,6 +591,7 @@ trait BillTrait{
                 $records['data'] = array();
                 $end = $request->length < 0 ? count($listingData) : $request->length;
                 for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($listingData); $iterator++,$pagination++ ){
+                    $quotationId = Quotation::where('project_site_id', $listingData[$pagination]['project_site_id'])->pluck('id')->first();
                     if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-billing')){
                         $button = '<div class="btn-group">
                                 <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
@@ -610,7 +607,12 @@ trait BillTrait{
                                         <a href="/bill/manage/'.$listingData[$pagination]['project_site_id'].'">
                                             <i class="icon-docs"></i> Manage </a>
                                     </li>
+                                    <li>
+                                        <a href="/quotation/edit/'.$quotationId.'">
+                                            <i class="icon-docs"></i> Quotation </a>
+                                    </li>
                                 </ul>
+                                
                              </div>';
                     }else{
                         $button = '<div class="btn-group">
@@ -623,7 +625,11 @@ trait BillTrait{
                                         <a href="/bill/manage/'.$listingData[$pagination]['project_site_id'].'">
                                             <i class="icon-docs"></i> Manage </a>
                                     </li>
-                                </ul>
+                                <li>
+                                    <a href="/quotation/edit/'.$quotationId.'">
+                                        <i class="icon-docs"></i> Quotation </a>
+                                </li>
+                            </ul>
                              </div>';
                     }
                     $records['data'][$iterator] = [
@@ -969,7 +975,24 @@ trait BillTrait{
                 ->where('quotations.project_site_id','=',$quotation->project_site_id)
                 ->where('paid_from_advanced',true)->sum('amount');
             $billTxtAdv = $projectAdvPayment - $advanceGivenAmt;
-            $BillTransactionTotals = BillTransaction::where('bill_id',$bill->id)->pluck('amount')->toArray();
+            $approvedTransactionId = TransactionStatus::where('slug', 'approved')->pluck('id')->first();
+            if($bill->bill_status->slug == 'draft'){
+                $toChangeStatus = true;
+            } else {
+                if($bill->bill_status->slug == 'approved'){
+                    $approvedTransactionCount = BillTransaction::where('bill_id', $bill->id)
+                        ->where('transaction_status_id', $approvedTransactionId)
+                        ->count();
+                    if($approvedTransactionCount > 0){
+                        $toChangeStatus = false;
+                    }else{
+                        $toChangeStatus = true;
+                    }
+                }else{
+                    $toChangeStatus = false;
+                }
+            }
+            $BillTransactionTotals = BillTransaction::where('bill_id',$bill->id)->where('transaction_status_id', $approvedTransactionId)->pluck('amount')->toArray();
             $remainingAmount = round(($final['current_bill_gross_total_amount'] + abs($tdsRetentionTaxAmount)) - array_sum($BillTransactionTotals),3);
             $paymentTypes = PaymentType::orderBy('id')->whereIn('slug',['cheque','neft','rtgs','internet-banking'])->get();
             $totalBillHoldAmount = BillTransaction::where('bill_id',$selectedBillId)->sum('hold');
@@ -981,7 +1004,7 @@ trait BillTrait{
             $balanceCancelledTransactionAmount = $bill->quotation->cancelled_bill_transaction_balance_amount;
             $banks = BankInfo::where('is_active',true)->select('id','bank_name','balance_amount')->get();
             $bill['rounded_amount_by'] = ($bill['rounded_amount_by'] == null) ? 0 : $bill['rounded_amount_by'];
-            return view('admin.bill.view')->with(compact('advanceGivenAmt','projectAdvPayment','billTxtAdv', 'balanceCancelledTransactionAmount','quotation','billQuotationSummaries','extraItems','bill','selectedBillId','total','total_rounded','final','total_current_bill_amount','bills','billQuotationProducts','taxes','specialTaxes','remainingAmount','paymentTypes','remainingHoldAmount','remainingRetentionAmount','banks'));
+            return view('admin.bill.view')->with(compact('advanceGivenAmt','projectAdvPayment','billTxtAdv', 'balanceCancelledTransactionAmount','quotation','billQuotationSummaries','extraItems','bill','selectedBillId','total','total_rounded','final','total_current_bill_amount','bills','billQuotationProducts','taxes','specialTaxes','remainingAmount','paymentTypes','remainingHoldAmount','remainingRetentionAmount','banks', 'toChangeStatus'));
         }catch (\Exception $e){
             $data = [
                 'action' => 'get view of bills',
@@ -2514,15 +2537,6 @@ trait BillTrait{
             $transactionDetails = BillTransaction::where('bill_id', $billId)->orderBy('id','desc')->get();
             if($request->has('get_total')){
                 $transactionDetails = $transactionDetails->toArray();
-                /*
-                 $transactionDetails[$pagination]['amount'],
-                        $transactionDetails[$pagination]['debit'],
-                        $transactionDetails[$pagination]['hold'],
-                        $transactionDetails[$pagination]['retention_amount'],
-                        $transactionDetails[$pagination]['tds_amount'],
-                        $transactionDetails[$pagination]['other_recovery_value'],
-                        $transactionDetails[$pagination]['total'],
-                 */
                 $records = [
                     'amount' => array_sum(array_column($transactionDetails,'amount')),
                     'debit' => array_sum(array_column($transactionDetails,'debit')),
