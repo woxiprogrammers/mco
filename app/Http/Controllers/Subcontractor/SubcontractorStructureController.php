@@ -44,7 +44,7 @@ class SubcontractorStructureController extends Controller
     public function getCreateView(Request $request){
         try{
             $units = Unit::where('is_active', true)->select('id', 'name')->get()->toArray();
-            $subcontractors = Subcontractor::where('is_active',true)->orderBy('id','asc')->get(['id','subcontractor_name'])->toArray();
+            $subcontractors = Subcontractor::where('is_active',true)->orderBy('subcontractor_name','asc')->get(['id','subcontractor_name'])->toArray();
             $ScStrutureTypes = SubcontractorStructureType::orderBy('id','asc')->get(['id','name','slug'])->toArray();
             $summaries = Summary::where('is_active', true)->select('id', 'name')->get()->toArray();
             $extraItems = ExtraItem::where('is_active', true)->select('id','name','rate')->orderBy('name','asc')->get();

@@ -70,7 +70,7 @@
                                                                     <select class="form-control" id="subcontractor_id" name="subcontractor_id">
                                                                         <option value="">Please select subcontractor</option>
                                                                         @foreach($subcontractors as $subcontractor)
-                                                                            <option value="{{$subcontractor['id']}}">{{$subcontractor['subcontractor_name']}}</option>
+                                                                            <option value="{{$subcontractor['id']}}" style="text-transform: capitalize">{{$subcontractor['subcontractor_name']}}</option>
                                                                         @endforeach
                                                                     </select>
                                                                 </div>
