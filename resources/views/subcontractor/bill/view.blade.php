@@ -90,6 +90,7 @@
                                                                 <th width="10%" style="text-align: center"><b> Description </b></th>
                                                                 <th width="10%"><b>Total Work Area</b></th>
                                                                 <th width="10%" class="numeric" style="text-align: center"><b> Rate </b></th>
+                                                                <th width="10%" class="numeric" style="text-align: center"><b> Unit </b></th>
                                                                 <th width="10%" class="numeric" style="text-align: center"><b> Quantity </b></th>
                                                                 <th width="15%" class="numeric" style="text-align: center"><b> Amount </b></th>
                                                             </tr>
@@ -112,6 +113,7 @@
                                                                     </td>
                                                                     <td >{{$billSummary['total_work_area']}}</td>
                                                                     <td ><label class="control-label rate">{{$billSummary->subcontractorStructureSummary['rate']}}</label></td>
+                                                                    <td ><label class="control-label"> {!! $billSummary->subcontractorStructureSummary['unit_id'] != null? $billSummary->subcontractorStructureSummary->unit->name : '-' !!} </label></td>
                                                                     <td >{{$billSummary['quantity']}}</td>
                                                                         @if($subcontractorBill->subcontractorStructure->contractType->slug == 'amountwise')
                                                                             <td > {!! $billSummary['total_work_area'] * $billSummary->subcontractorStructureSummary['rate'] * $billSummary['quantity'] !!} </td>
@@ -121,12 +123,12 @@
                                                                 </tr>
                                                             @endforeach
                                                             <tr>
-                                                                <td colspan="7">
+                                                                <td colspan="9">
                                                                     <label class="control-label"> <b> Extra Items</b></label>
                                                                 </td>
                                                             </tr>
                                                             <tr>
-                                                                <th colspan="3" style="text-align: center;">
+                                                                <th colspan="4" style="text-align: center;">
                                                                     Name
                                                                 </th>
                                                                 <th colspan="3" style="text-align: center;">
@@ -139,7 +141,7 @@
                                                             @if(count($subcontractorBill->subcontractorBillExtraItems) > 0)
                                                                 @foreach($subcontractorBill->subcontractorBillExtraItems as $subcontractorBillExtraItem)
                                                                     <tr>
-                                                                        <td colspan="3">
+                                                                        <td colspan="4">
                                                                             {{ $subcontractorBillExtraItem->subcontractorStructureExtraItem->extraItem->name }}
                                                                         </td>
                                                                         <td colspan="3">
@@ -152,7 +154,7 @@
                                                                 @endforeach
                                                             @else
                                                                 <tr>
-                                                                    <td colspan="3">
+                                                                    <td colspan="4">
                                                                         -
                                                                     </td>
                                                                     <td colspan="3">
@@ -165,7 +167,7 @@
                                                             @endif
 
                                                             <tr>
-                                                                <td colspan="6">
+                                                                <td colspan="7">
                                                                     <label class="control-label pull-right" style="margin-right: 3%; margin-bottom: 1%;"> <b>Subtotal</b> </label>
                                                                 </td>
                                                                 <td colspan="1">
@@ -173,7 +175,7 @@
                                                                 </td>
                                                             </tr>
                                                             <tr>
-                                                                <td colspan="3">
+                                                                <td colspan="4">
                                                                     <b> Discount </b>
                                                                 </td>
                                                                 <td colspan="3">
@@ -188,7 +190,7 @@
                                                                 </td>
                                                             </tr>
                                                             <tr>
-                                                                <td colspan="6">
+                                                                <td colspan="7">
                                                                     <label class="control-label pull-right" style="margin-right: 3%; margin-bottom: 1%;"> <b>Discounted Amount</b> </label>
                                                                 </td>
                                                                 <td colspan="1">
@@ -197,12 +199,12 @@
                                                             </tr>
                                                             @if(count($subcontractorBill->subcontractorBillTaxes) > 0)
                                                                 <tr>
-                                                                    <td colspan="7">
+                                                                    <td colspan="8">
                                                                         <label class="control-label"> <b> Taxes</b></label>
                                                                     </td>
                                                                 </tr>
                                                                 <tr>
-                                                                    <td colspan="4">
+                                                                    <td colspan="5">
                                                                         <b>Tax Name</b>
                                                                     </td>
                                                                     <td colspan="2">
@@ -214,7 +216,7 @@
                                                                 </tr>
                                                                 @foreach($taxes as $tax)
                                                                     <tr>
-                                                                        <td colspan="4">
+                                                                        <td colspan="5">
                                                                             {!! $tax['name'] !!}
                                                                         </td>
                                                                         <td colspan="2">
@@ -228,13 +230,13 @@
                                                             @endif
                                                             @if(count($specialTaxes) > 0)
                                                                 <tr>
-                                                                    <td colspan="7">
+                                                                    <td colspan="8">
                                                                         <label class="control-label"> <b>Special Taxes</b></label>
                                                                     </td>
                                                                 </tr>
                                                                 @foreach($specialTaxes as $specialTax)
                                                                     <tr>
-                                                                        <td colspan="3" style="text-align: right; padding-right: 30px;">
+                                                                        <td colspan="4" style="text-align: right; padding-right: 30px;">
                                                                             <b>{{$specialTax['name']}}<input type="hidden" class="special-tax" value="{{$specialTax['id']}}"> </b>
                                                                         </td>
                                                                         <td colspan="2">
@@ -276,7 +278,7 @@
                                                                 @endforeach
                                                             @endif
                                                             <tr>
-                                                                <td colspan="6">
+                                                                <td colspan="7">
                                                                     <label class="control-label pull-right"> <b>Final Total</b></label>
                                                                 </td>
                                                                 <td colspan="1">
@@ -284,7 +286,7 @@
                                                                 </td>
                                                             </tr>
                                                             <tr>
-                                                                <td colspan="6">
+                                                                <td colspan="7">
                                                                     <label class="control-label pull-right"> <b>Round off amount</b></label>
                                                                 </td>
                                                                 <td colspan="1">
@@ -294,7 +296,7 @@
                                                                 </td>
                                                             </tr>
                                                             <tr>
-                                                                <td colspan="6">
+                                                                <td colspan="7">
                                                                     <label class="control-label pull-right"> <b>Grand Total</b></label>
                                                                 </td>
                                                                 <td colspan="2">

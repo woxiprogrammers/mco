@@ -40,6 +40,7 @@
                         <th style="width: 20%"> Summary </th>
                         <th style="width: 20%"> Description </th>
                         <th style="width: 15%"> Rate </th>
+                        <th style="width: 15%"> Unit </th>
                         <th style="width: 15%"> Work Area (Sq.ft.)</th>
                         <th style="width: 15%"> Total Amount </th>
                     </tr>
@@ -66,6 +67,13 @@
                             </td>
                             <td>
                                 {!! $subcontractorStructureSummary->rate !!}
+                            </td>
+                            <td>
+                                @if($subcontractorStructureSummary->unit != null)
+                                    {{$subcontractorStructureSummary->unit->name}}
+                                @else
+                                    -
+                                @endif
                             </td>
                             <td>
                                 {!! $subcontractorStructureSummary->total_work_area !!}
