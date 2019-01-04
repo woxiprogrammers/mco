@@ -2380,7 +2380,7 @@ trait BillTrait{
                 $billModel = new Bill();
                 $billQuotationSummaries = $billQuotationSummaryModel->where('is_deleted',false)->where('bill_id',$bill['id'])->get();
                 for($iterator = 0 ; $iterator < count($billQuotationSummaries) ; $iterator++){
-                    $billQuotationSummaries[$iterator]['current_bill_subtotal'] = round(($billQuotationSummaries[$iterator]['quantity'] * $billQuotationSummaries[$iterator]['rate_per_sqft']),3);
+                    $billQuotationSummaries[$iterator]['current_bill_subtotal'] = round(($billQuotationSummaries[$iterator]['quantity'] * $billQuotationSummaries[$iterator]['rate_per_sqft']),6);
                     $previousBillIdsWithoutCancelStatus = $billModel->where('quotation_id',$bill->quotation->id)
                         ->where('id','<',$bill['id'])
                         ->where('bill_status_id','!=',$cancelBillStatusId)
@@ -2393,7 +2393,7 @@ trait BillTrait{
                         $billQuotationSummaries[$iterator]['previous_quantity'] = 0;
                     }
                     $billQuotationSummaries[$iterator]['cumulative_quantity'] = round(($billQuotationSummaries[$iterator]['quantity'] + $billQuotationSummaries[$iterator]['previous_quantity']),3);
-                    $total['current_bill_subtotal'] = round(($total['current_bill_subtotal'] + $billQuotationSummaries[$iterator]['current_bill_subtotal']),3);
+                    $total['current_bill_subtotal'] = round(($total['current_bill_subtotal'] + ($billQuotationSummaries[$iterator]['current_bill_subtotal']*$billQuotationSummaries[$iterator]['built_up_area'])),3);
                 }
             }else{
                 $billQuotationProducts = BillQuotationProducts::where('bill_id',$bill['id'])->get()->toArray();
