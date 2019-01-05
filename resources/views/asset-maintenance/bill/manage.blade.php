@@ -56,6 +56,7 @@
                                                                 <th>Asset Maintenance Id</th>
                                                                 <th>Vendor Company Name</th>
                                                                 <th>Bill Number</th>
+                                                                <th>Asset Bill Number</th>
                                                                 <th>Final Amount</th>
                                                                 <th>Paid Amount</th>
                                                                 <th>Pending Amount</th>
@@ -64,6 +65,7 @@
                                                             <tr class="filter">
                                                                 <th> </th>
                                                                 <th> <input type="text" class="form-control form-filter" name="vendor_name" id ="vendor_name"> </th>
+                                                                <th> </th>
                                                                 <th> </th>
                                                                 <th> </th>
                                                                 <th> </th>
