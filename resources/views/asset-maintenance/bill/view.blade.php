@@ -86,6 +86,18 @@
                                                             </div>
                                                             <div class="form-group row">
                                                                 <div class="col-md-2">
+                                                                    <label class="control-label pull-right"> Assets Bill Number </label>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    @if($assetMaintenanceBill->assets_bill_number != null)
+                                                                        <input type="text" class="form-control" name="assets_bill_number" id="subTotal" value="{{$assetMaintenanceBill->assets_bill_number}}" readonly>
+                                                                        @else
+                                                                        <input type="text" class="form-control" name="assets_bill_number" id="subTotal" value="{{"-"}}" readonly>
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row">
+                                                                <div class="col-md-2">
                                                                     <label class="control-label pull-right">Sub Total</label>
                                                                 </div>
                                                                 <div class="col-md-3">
