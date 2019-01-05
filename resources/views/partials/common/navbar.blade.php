@@ -594,7 +594,7 @@
                     <?php $hasSubcontractorPermission = \App\Helper\ACLHelper::checkModuleAcl('subcontractor');?>
                     @if($hasSubcontractorPermission)
                         <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
-                            <a href="/subcontractor/subcontractor-structure/manage"> Subcontractor
+                            <a href="/subcontractor/structure/manage"> Subcontractor
                                 <span class="arrow"></span>
                             </a>
                         </li>

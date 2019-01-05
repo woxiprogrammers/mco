@@ -68,7 +68,7 @@
                                                                     <select class="form-control" id="clientId" name="client_id" style="width: 80%;">
                                                                         <option value=""> -- Select Client -- </option>
                                                                         @foreach($clients as $client)
-                                                                            <option value="{{$client['id']}}"> {{$client['company']}} </option>
+                                                                            <option value="{{$client['id']}}" style="text-transform: capitalize"> {{$client['company']}} </option>
                                                                         @endforeach
                                                                     </select>
                                                                 </div>
@@ -79,7 +79,7 @@
                                                                 </div>
                                                                 <div class="col-md-4 form-group">
                                                                     <select name="project_site_id" id="projectSiteId" class="form-control" style="width: 80%;">
-                                                                        <option value=""> -- Select Project s -- </option>
+                                                                        <option value=""> -- Select Project Sitename -- </option>
                                                                     </select>
                                                                 </div>
                                                             </div>

@@ -139,7 +139,7 @@
                                                                         @else
                                                                             <td colspan="2">
                                                                         @endif
-                                                                            {!! $billTaxData->taxes->name !!}
+                                                                            {!! $billTaxData->tax->name !!}
                                                                         </td>
                                                                         <td colspan="2">
                                                                             {!! $billTaxData->percentage !!} %

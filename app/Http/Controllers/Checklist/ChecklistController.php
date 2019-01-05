@@ -136,7 +136,9 @@ class ChecklistController extends Controller
         try{
             $user = Auth::user();
             $status = 200;
-            $checklistCategory = ChecklistCategory::where('is_active',true)->whereNotNull('category_id')->orderBy('id','desc')->get();
+            $checklistCategory = ChecklistCategory::where('is_active',true)
+                ->whereNotNull('category_id')
+                ->orderBy('name','asc')->get();
             $records = array();
             $records["draw"] = intval($request->draw);
             $records["recordsTotal"] = $records["recordsFiltered"] = count($checklistCategory);
@@ -151,8 +153,8 @@ class ChecklistController extends Controller
                 }
                 $records['data'][] = [
                     ($iterator+1),
-                    $mainCategoryName,
-                    $checklistCategory[$pagination]->name,
+                    ucwords($mainCategoryName),
+                    ucwords($checklistCategory[$pagination]->name),
                     ChecklistCheckpoint::where('checklist_category_id',$checklistCategory[$pagination]->id)->count(),
                     $actionButton
                 ];

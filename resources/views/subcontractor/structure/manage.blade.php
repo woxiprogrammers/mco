@@ -46,9 +46,10 @@
                                                 <thead>
                                                 <tr>
                                                     <th data-width="15%"> Subcontractor Name </th>
+                                                    <th>Subcontractor Mobile Number</th>
                                                     <th data-width="15%"> Project Name </th>
                                                     <th> Summary Name </th>
-                                                    <th> Contract type </th>
+                                                    <th data-width="20%"> Contract type </th>
                                                     <th> Rate </th>
                                                     <th> Total Work Area </th>
                                                     <th> Total Amount </th>
@@ -60,9 +61,18 @@
                                                 </tr>
                                                 <tr class="filter">
                                                     <th> <input type="text" class="form-control form-filter" name="subcontractor_name" id="subcontractor_name"> </th>
+                                                    <th></th>
                                                     <th> <input type="text" class="form-control form-filter" name="project_name" id="project_name"></th>
                                                     <th></th>
-                                                    <th></th>
+                                                    <th>
+                                                        <select class="form-control" id="contract_status_id" name="contract_status_id">
+                                                            <option value="0">ALL</option>
+                                                            @foreach($contract_types as $types)
+                                                                <option value="{{$types['id']}}">{{$types['name']}}</option>
+                                                            @endforeach
+                                                        </select>
+                                                        <input type="hidden" class="form-control form-filter" name="contract_status" id="contract_status">
+                                                    </th>
                                                     <th></th>
                                                     <th></th>
                                                     <th></th>
@@ -81,7 +91,12 @@
                                                 </tbody>
                                                 <tfoot>
                                                 <tr>
-                                                    <th colspan="6" style="text-align:right">Total Page Wise: </th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th colspan="2" style="text-align:right">Total Page Wise: </th>
                                                     <th></th>
                                                     <th></th>
                                                     <th></th>
@@ -123,10 +138,35 @@
         });
 
         $("input[name='subcontractor_name']").on('keyup',function(){
+            var sc_name = $('#subcontractor_name').val();
+            var project_name = $('#project_name').val();
+            var contract_status_id = $('#contract_status_id').val();
+
+            $("input[name='subcontractor_name']").val(sc_name);
+            $("input[name='project_name']").val(project_name);
+            $("input[name='contract_status']").val(contract_status_id);
             $(".filter-submit").trigger('click');
         });
 
         $("input[name='project_name']").on('keyup',function(){
+            var sc_name = $('#subcontractor_name').val();
+            var project_name = $('#project_name').val();
+            var contract_status_id = $('#contract_status_id').val();
+
+            $("input[name='subcontractor_name']").val(sc_name);
+            $("input[name='project_name']").val(project_name);
+            $("input[name='contract_status']").val(contract_status_id);
+            $(".filter-submit").trigger('click');
+        });
+
+        $("#contract_status_id").on('change',function(){
+            var sc_name = $('#subcontractor_name').val();
+            var project_name = $('#project_name').val();
+            var contract_status_id = $('#contract_status_id').val();
+
+            $("input[name='subcontractor_name']").val(sc_name);
+            $("input[name='project_name']").val(project_name);
+            $("input[name='contract_status']").val(contract_status_id);
             $(".filter-submit").trigger('click');
         });
     });

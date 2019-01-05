@@ -68,6 +68,15 @@
                                                         <th> Final Amount </th>
                                                         <th> Paid Amount </th>
                                                         <th> Pending Amount </th>
+                                                        <th> Round off amount </th>
+                                                        <th> Final Amount </th>
+                                                        <th> Paid Amount </th>
+                                                        <th> Pending Amount </th>
+                                                        <th> Debit </th>
+                                                        <th> Hold </th>
+                                                        <th> Retention </th>
+                                                        <th> TDS </th>
+                                                        <th> Other Recovery </th>
                                                         <th> Status </th>
                                                         <th> Action </th>
                                                     </tr>
@@ -78,6 +87,12 @@
                                                     <tfoot>
                                                         <tr>
                                                             <th colspan="3" style="text-align:right">Total Page Wise: </th>
+                                                            <th></th>
+                                                            <th></th>
+                                                            <th></th>
+                                                            <th></th>
+                                                            <th></th>
+                                                            <th></th>
                                                             <th></th>
                                                             <th></th>
                                                             <th></th>

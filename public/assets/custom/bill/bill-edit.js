@@ -1,5 +1,9 @@
 $(document).ready(function () {
+    getTotals();
     EditBill.init();
+    $('#roundAmountBy').on('change',function () {
+        getTotals();
+    });
     $('input:checked.product-checkbox').each(function () {
         var id = $(this).val();
         $('#product_description_'+id).rules('add',{
@@ -40,20 +44,15 @@ $(document).ready(function () {
                 $('#discountDescription').val('');
             }
             $("#id_" + id).css('background-color', "");
-            $('#current_quantity_' + id).prop('disabled', true);
-            $('#product_description_' + id).prop('disabled', true);
-            $('#product_description_' + id).rules('remove');
-            $('#product_description_id_' + id).rules('remove');
-            $('#current_quantity_' + id).rules('remove');
-            $('#current_quantity_' + id).prop('disabled', true);
-            $('#current_quantity_' + id).closest('form-group').removeClass('has-error');
-            $('#current_quantity_' + id).val('');
-            $('#product_description_' + id).val('');
-            $('#cumulative_quantity_' + id).text("");
-            $('#current_bill_amount_' + id).text("");
+            $('#current_quantity_'+id+',#rate_per_unit_'+id+',#product_description_' + id).prop('disabled', true);
+            $('#product_description_' + id+',#product_description_id_' + id+',#current_quantity_' + id+',#rate_per_unit_'+id).rules('remove');
+            $('#current_quantity_' + id+',#rate_per_unit_'+id).prop('disabled', true);
+            $('#current_quantity_' + id+',#rate_per_unit_'+id).closest('form-group').removeClass('has-error');
+            $('#current_quantity_' + id+',#product_description_' + id).val('');
+            $('#cumulative_quantity_' + id+',#current_bill_amount_' + id).text("");
             getTotals();
         } else {
-            $('#current_quantity_' + id).prop('disabled', false);
+            $('#current_quantity_'+id+',#rate_per_unit_'+id).prop('disabled', false);
             $('#product_description_'+id).rules('add',{
                 required: true
             });
@@ -211,7 +210,8 @@ function checkQuantity (id){
     var input = $('#current_quantity_'+id);
     var boq = $('#boq_quantity_'+id).text();
     var previous_quantity = $('#previous_quantity_'+id).text();
-    var diff = parseFloat(boq - previous_quantity);
+    var used_quantity = $('#used_quantity_'+id).text();
+    var diff = parseFloat(boq - used_quantity);
     if(diff == 0){
         $(this).attr('checked',false);
         $('#boq_quantity_'+id).css('background-color',"ff8884");
@@ -222,16 +222,16 @@ function checkQuantity (id){
         $("#id_"+id).css('background-color',"#e1e1e1");
         var typingTimer;
         var doneTypingInterval = 500;
-        $('#current_quantity_'+id).rules('add',{
+        /*$('#current_quantity_'+id).rules('add',{
             required: true,
             min: 0.000001,
             max: diff
-        });
-        input.on('keyup', function () {
+        });*/
+        $('#current_quantity_'+id+',#rate_per_unit_'+id).on('keyup', function () {
             clearTimeout(typingTimer);
             typingTimer = setTimeout(doneTyping, doneTypingInterval);
         });
-        input.on('keydown', function () {
+        $('#current_quantity_'+id+',#rate_per_unit_'+id).on('keydown', function () {
             clearTimeout(typingTimer);
         });
         function doneTyping () {
@@ -251,7 +251,7 @@ function calculateQuantityAmount(current_quantity,id){
         current_quantity = 0;
     }
     var cumulative_quantity = parseFloat($('#previous_quantity_'+id).text()) + parseFloat(current_quantity);
-    var current_bill_amount = parseFloat(current_quantity) * parseFloat($('#rate_per_unit_'+id).text());
+    var current_bill_amount = parseFloat(current_quantity) * parseFloat($('#rate_per_unit_'+id).val());
     /*$('#cumulative_quantity_'+id).text(customRound(cumulative_quantity));
     $('#current_bill_amount_'+id).text(customRound(current_bill_amount));*/
     $('#cumulative_quantity_'+id).text((cumulative_quantity).toFixed(3));
@@ -282,8 +282,6 @@ function getTotals(){
     }
 
     var total_current_bill_amount = total_extra_item_rate + total_product_current_bill_amount;
-    /*$('#sub_total_current_bill_amount').text(customRound(total_current_bill_amount));
-    $('#rounded_off_current_bill_sub_total').text(customRound(total_current_bill_amount));*/
     $('#sub_total_current_bill_amount').text((total_current_bill_amount).toFixed(3));
     $('#rounded_off_current_bill_sub_total').text((total_current_bill_amount).toFixed(3));
     calculateDiscount();
@@ -297,7 +295,7 @@ function calculateTax(){
         final_total_current_bill = parseFloat(final_total_current_bill) + parseFloat(tax_amount_current_bill);
         $(this).parent().next().find('span').text(tax_amount_current_bill);
     });
-    //$("#final_current_bill_total").text(customRound(final_total_current_bill));
+
     $("#final_current_bill_total").text(parseFloat(final_total_current_bill).toFixed(3));
     calculateSpecialTax()
 }
@@ -328,12 +326,14 @@ function calculateSpecialTax(){
         });
         var grossTotal = parseFloat($("#final_current_bill_total").text()).toFixed(3);
         $(".special-tax-amount").each(function(){
-            grossTotal = grossTotal + parseFloat($(this).text());
+            grossTotal = parseFloat(grossTotal) + parseFloat($(this).text());
         });
-        $("#grand_current_bill_total").text((grossTotal).toFixed(3));
+        grossTotal = grossTotal + parseFloat($('#roundAmountBy').val());
+        $("#grand_current_bill_total").val((grossTotal).toFixed(3));
     }else{
         var grossTotal = parseFloat($("#final_current_bill_total").text());
-        $("#grand_current_bill_total").text((grossTotal).toFixed(3));
+        grossTotal = parseFloat(grossTotal) + parseFloat($('#roundAmountBy').val());
+        $("#grand_current_bill_total").val((grossTotal).toFixed(3));
     }
 }
 
@@ -343,7 +343,7 @@ function calculateDiscount(){
     if((typeof discountAmount == 'undefined') || discountAmount == ''){
         $('#rounded_off_current_bill_amount').text(totalBillAmount);
     }else{
-        discountAmount = parseInt(discountAmount);
+        discountAmount = parseFloat(discountAmount);
         $('#rounded_off_current_bill_amount').text((totalBillAmount-discountAmount));
     }
     calculateTax();

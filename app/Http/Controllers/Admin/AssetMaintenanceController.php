@@ -23,6 +23,7 @@ use App\BankInfo;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\CustomTraits\Inventory\InventoryTrait;
 use App\Http\Controllers\CustomTraits\PeticashTrait;
+use App\Http\Controllers\CustomTraits\Purchase\MaterialRequestTrait;
 use App\InventoryComponent;
 use App\InventoryComponentTransfers;
 use App\InventoryComponentTransferStatus;
@@ -39,6 +40,7 @@ use Illuminate\Support\Facades\Session;
 class AssetMaintenanceController extends Controller{
     use InventoryTrait;
     use PeticashTrait;
+    use MaterialRequestTrait;
     public function __construct(){
         $this->middleware('custom.auth');
     }
@@ -223,7 +225,7 @@ class AssetMaintenanceController extends Controller{
     public function getMaintenanceRequestListing(Request $request){
         try{
             $projectSiteId = Session::get('global_project_site');
-            $listingData = AssetMaintenance::where('project_site_id',$projectSiteId)->get();
+            $listingData = AssetMaintenance::where('project_site_id',$projectSiteId)->orderby('created_at','desc')->get();
             $status = 200;
             $iTotalRecords = count($listingData);
             $records = array();
@@ -231,7 +233,8 @@ class AssetMaintenanceController extends Controller{
             $end = $request->length < 0 ? count($listingData) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($listingData); $iterator++,$pagination++ ){
                 $records['data'][$iterator] = [
-                    $listingData[$pagination]->asset->name,
+                    $listingData[$pagination]['id'],
+                    ucwords($listingData[$pagination]->asset->name." (<b>".$listingData[$pagination]->asset->id."</b>)"),
                     ($listingData[$pagination]->assetMaintenanceTransaction->count() > 0) ? $listingData[$pagination]->assetMaintenanceTransaction->first()->assetMaintenanceTransactionStatus->name : '-',
                     date('d M Y',strtotime($listingData[$pagination]['created_at'])),
                     '<div class="btn btn-small blue">
@@ -645,7 +648,7 @@ class AssetMaintenanceController extends Controller{
             }
                 $assetMaintenanceBillData = AssetMaintenanceBill::join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
                 ->whereIn('asset_maintenance_bills.id',$assetMaintenanceBillIds)
-                ->select('asset_maintenance.id as asset_maintenance_id','asset_maintenance_bills.id as id','asset_maintenance_bills.bill_number as bill_number','asset_maintenance_bills.amount')
+                ->select('asset_maintenance.id as asset_maintenance_id','asset_maintenance_bills.id as id','asset_maintenance_bills.bill_number as bill_number','asset_maintenance_bills.amount','asset_maintenance_bills.assets_bill_number')
                 ->orderBy('id','desc')
                 ->get();
             if ($request->has('get_total')) {
@@ -667,6 +670,11 @@ class AssetMaintenanceController extends Controller{
                     $length = $request->length;
                 }
                 for($iterator = 0,$pagination = $request->start; $iterator < $length && $pagination < count($assetMaintenanceBillData); $iterator++,$pagination++ ){
+                    if($assetMaintenanceBillData[$pagination]['assets_bill_number'] != null){
+                        $assetsBill = $assetMaintenanceBillData[$pagination]['assets_bill_number'];
+                    }else{
+                        $assetsBill = "-";
+                    }
                     $paidAmount = $assetMaintenanceBillData[$pagination]->assetMaintenanceBillPayment->sum('amount');
                     $editButton = '<div id="sample_editable_1_new" class="btn btn-small blue" >
                         <a href="/asset/maintenance/request/bill/view/'.$assetMaintenanceBillData[$pagination]['id'].'" style="color: white"> View
@@ -676,6 +684,7 @@ class AssetMaintenanceController extends Controller{
                         $assetMaintenanceBillData[$pagination]['asset_maintenance_id'],
                         Vendor::where('id',$vendorId)->pluck('company')->first(),
                         $assetMaintenanceBillData[$pagination]['bill_number'],
+                        $assetsBill,
                         $assetMaintenanceBillData[$pagination]['amount'],
                         $paidAmount,
                         $assetMaintenanceBillData[$pagination]['amount'] - $paidAmount,
@@ -756,9 +765,12 @@ class AssetMaintenanceController extends Controller{
 
     public function createBill(Request $request){
         try{
+            $currentDate = Carbon::now();
             $assetMaintenanceBillData = $request->only('asset_maintenance_id','cgst_percentage','cgst_amount','sgst_percentage','sgst_amount','igst_percentage','igst_amount','bill_number');
             $assetMaintenanceBillData['amount'] = round($request['sub_total'],3);
             $assetMaintenanceBillData['extra_amount'] = round($request['extra_amount'],3);
+            $assetMaintenanceBillCount = AssetMaintenanceBill::whereDate('created_at', $currentDate)->count();
+            $assetMaintenanceBillData['assets_bill_number'] = $this->getPurchaseIDFormat('assets-maintenance-bill',$request->asset_maintenance_id,$currentDate,(++$assetMaintenanceBillCount));
             $assetMaintenanceBill = AssetMaintenanceBill::create($assetMaintenanceBillData);
             if($request->has('bill_images')){
                 $assetMaintenanceDirectoryName = sha1($request->asset_maintenance_id);
