@@ -335,20 +335,21 @@ class SubcontractorStructureController extends Controller
                     $subcontractorStructureSummary->update($structureSummaryData);
                 }
             }
-            foreach($request->extra_items as $extraItemId => $rate){
-                $structureExtraItemData = [
-                    'subcontractor_structure_id' => $subcontractorStructure->id,
-                    'extra_item_id' => $extraItemId
-                ];
-                $structureExtraItem = SubcontractorStructureExtraItem::where($structureExtraItemData)->first();
-                $structureExtraItemData['rate'] = (double)$rate;
-                if ($structureExtraItem == null){
-                    $structureExtraItem = SubcontractorStructureExtraItem::create($structureExtraItemData);
-                }else{
-                    $structureExtraItem->update($structureExtraItemData);
+            if($request->has('extra_items')){
+                foreach($request->extra_items as $extraItemId => $rate){
+                    $structureExtraItemData = [
+                        'subcontractor_structure_id' => $subcontractorStructure->id,
+                        'extra_item_id' => $extraItemId
+                    ];
+                    $structureExtraItem = SubcontractorStructureExtraItem::where($structureExtraItemData)->first();
+                    $structureExtraItemData['rate'] = (double)$rate;
+                    if ($structureExtraItem == null){
+                        $structureExtraItem = SubcontractorStructureExtraItem::create($structureExtraItemData);
+                    }else{
+                        $structureExtraItem->update($structureExtraItemData);
+                    }
                 }
             }
-
             if($request->has('new_extra_item')){
                 $structureExtraItemData = [
                     'subcontractor_structure_id' => $subcontractorStructure->id
