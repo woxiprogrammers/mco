@@ -74,7 +74,8 @@ class DprController extends Controller
 
     public function categoryListing(Request $request){
         try{
-            $subCategories = DprMainCategory::select('id','name')->get()->toArray();
+            $subCategories = DprMainCategory::select('id','name')
+                ->orderBy('name','asc')->get()->toArray();
             $iTotalRecords = count($subCategories);
             $records = array();
             $records['data'] = array();
@@ -83,7 +84,7 @@ class DprController extends Controller
             for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $pagination < count($subCategories); $iterator++,$pagination++ ){
                 $records['data'][$iterator] = [
                     $subCategories[$pagination]['id'],
-                    $subCategories[$pagination]['name'],
+                    ucwords($subCategories[$pagination]['name']),
                     '<div class="btn-group">
                             <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                                 Actions

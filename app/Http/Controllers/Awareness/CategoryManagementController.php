@@ -75,7 +75,8 @@ class CategoryManagementController extends Controller
     }
     public function mainCategoryListing(Request $request){
         try{
-            $mainCategories = AwarenessMainCategory::select('id','name','is_active')->get();
+            $mainCategories = AwarenessMainCategory::select('id','name','is_active')
+                    ->orderBy('name','asc')->get();
             $iTotalRecords = count($mainCategories);
             $records = array();
             $records['data'] = array();
@@ -89,7 +90,7 @@ class CategoryManagementController extends Controller
                 }
                 $records['data'][$iterator] = [
                     $mainCategories[$pagination]['id'],
-                    $mainCategories[$pagination]['name'],
+                    ucwords($mainCategories[$pagination]['name']),
                     $category_status,
                     '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">

@@ -48,16 +48,50 @@
                                             </div>
                                             <table class="table table-striped table-bordered table-hover table-checkable order-column" id="projectSiteTable">
                                                 <thead>
-                                                <tr>
-                                                    <th> Company Name </th>
-                                                    <th style="width: 30%"> Project Name </th>
-                                                    <th> Site Name </th>
-                                                    <th> Actions </th>
-                                                </tr>
+                                                    <tr>
+                                                        {{--<th width="10%"> Company Name </th>--}}
+                                                        <th width="10%"> Project Name </th>
+                                                        {{--<th width="10%"> Site Name </th>--}}
+                                                        <th width="10%"> Type </th>
+                                                        <th width="10%"> Bill Amount </th>
+                                                        <th width="10%"> Paid Amount </th>
+                                                        <th width="10%"> Balance Amount </th>
+                                                        <th width="10%"> Actions </th>
+                                                    </tr>
+                                                    <tr class="filter">
+                                                        <th> <input type="text" class="form-control form-filter" name="project_name" id="project_name"></th>
+                                                        <th>
+                                                            <div>
+                                                                <select class="form-control form-filter" name="contract_type_id">
+                                                                    <option value="">Select contract type</option>
+                                                                    @foreach($contractTypes as $contractType)
+                                                                        <option value="{{$contractType['id']}}"> {{$contractType['name']}}</option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
+                                                        </th>
+
+                                                        <th></th>
+                                                        <th></th>
+                                                        <th></th>
+                                                        <th>
+                                                            <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
+                                                            <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
+                                                        </th>
+                                                    </tr>
                                                 </thead>
                                                 <tbody>
 
                                                 </tbody>
+                                                <tfoot>
+                                                    <tr>
+                                                        <th colspan="2" style="text-align:right">Total Page Wise: </th>
+                                                        <th></th>
+                                                        <th></th>
+                                                        <th></th>
+                                                        <th></th>
+                                                    </tr>
+                                                </tfoot>
                                             </table>
                                         </div>
                                     </div>

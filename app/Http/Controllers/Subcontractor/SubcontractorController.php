@@ -31,6 +31,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Client;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
 
 class SubcontractorController extends Controller
@@ -93,7 +94,9 @@ class SubcontractorController extends Controller
             if($request->has('search_name')) {
                 $search_name = $request->search_name;
             }
-            $listingData = Subcontractor::where('company_name','ilike','%'.$search_name.'%')->get();
+            $listingData = Subcontractor::where('company_name','ilike','%'.$search_name.'%')
+                ->orderBy('company_name','asc')
+                ->get();
             $iTotalRecords = count($listingData);
             $records = array();
             $records['data'] = array();
@@ -302,11 +305,11 @@ class SubcontractorController extends Controller
                 $subcontractor_name = $request['subcontractor_name'];
             }
 
+            $ids = SubcontractorStructure::whereNotNull('summary_id')->pluck('id');
+
             if ($request->has('contract_status')) {
                 $contract_status = $request['contract_status'];
             }
-
-            $ids = SubcontractorStructure::pluck('id');
 
             if($request->has('project_name') && $filterFlag == true){
                 $projectSites = Project::join('project_sites','project_sites.project_id','=','projects.id')->where('projects.name','ilike','%'.$request['project_name'].'%')->select('project_sites.id')->get()->toArray();
@@ -1014,6 +1017,31 @@ class SubcontractorController extends Controller
             $records['data'] = array();
             $end = $request->length < 0 ? count($listingData) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($listingData); $iterator++,$pagination++ ){
+                if($listingData[$pagination]->transactionStatus->slug == 'cancelled'){
+                    $balanceAmountAfterChangeStatus = $listingData[$pagination]->subcontractorBill->subcontractorStructure->cancelled_bill_transaction_balance_amount - $listingData[$pagination]->total;
+                    if($balanceAmountAfterChangeStatus >= 0){
+                        $changeStatusButton = '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails(\'approved\','.$listingData[$pagination]['id'].')">
+                                        Approve
+                                    </a><a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails(\'deleted\','.$listingData[$pagination]['id'].')">
+                                        Delete
+                                    </a>';
+                    }else{
+                        $changeStatusButton = '-';
+                    }
+                }elseif($listingData[$pagination]->transactionStatus->slug == 'approved'){
+                    $changeStatusButton = '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails(\'cancelled\','.$listingData[$pagination]['id'].')">
+                                        Cancel
+                                    </a><a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails(\'deleted\','.$listingData[$pagination]['id'].')">
+                                        Delete
+                                    </a>';
+                }else{
+                    $changeStatusButton = '<a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails(\'approved\','.$listingData[$pagination]['id'].')">
+                                        Approve
+                                    </a><a href="javascript:void(0);" class="btn btn-xs green dropdown-toggle" type="button" aria-expanded="true" onclick="openDetails(\'cancelled\','.$listingData[$pagination]['id'].')">
+                                        Cancel
+                                    </a>';
+                }
+
                 $records['data'][$iterator] = [
                     $iterator+1,
                     $listingData[$pagination]['subtotal'],
@@ -1024,6 +1052,8 @@ class SubcontractorController extends Controller
                     $listingData[$pagination]['other_recovery'],
                     $listingData[$pagination]['total'],
                     date('d M Y',strtotime($listingData[$pagination]['created_at'])),
+                    $listingData[$pagination]->transactionStatus->name,
+                    $changeStatusButton,
                 ];
             }
             $records["draw"] = intval($request->draw);
@@ -1066,8 +1096,7 @@ class SubcontractorController extends Controller
                 }
             }
 
-
-            return redirect('/subcontractor/subcontractor-bills/view/'.$request->subcontractor_bill_id);
+            return redirect()->back();
         }catch(\Exception $e){
             $data = [
                 'action' => 'Add Subcontractor Reconcile Transactions',

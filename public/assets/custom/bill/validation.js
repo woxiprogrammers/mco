@@ -208,7 +208,7 @@ var  CreateBillPayment = function () {
                 form.submit();
             }
         });
-    }
+    };
 
     return {
         init: function () {

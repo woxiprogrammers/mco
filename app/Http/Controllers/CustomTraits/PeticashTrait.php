@@ -128,12 +128,14 @@ trait PeticashTrait{
             if($user->roles[0]->role->slug == 'superadmin' || $user->roles[0]->role->slug == 'admin'){
                 $projectSiteIds = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
                                         ->where('projects.is_active', true)
+                                        ->orderBy('projects.name','asc')
                                         ->pluck('project_sites.id')->toArray();
             }else{
                 $projectSiteIds = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
                     ->join('user_project_site_relation','user_project_site_relation.project_site_id','=','project_sites.id')
                     ->where('projects.is_active', true)
                     ->where('user_project_site_relation.user_id', $user->id)
+                    ->orderBy('projects.name','asc')
                     ->pluck('project_sites.id')->toArray();
             }
             $statistics = array();
