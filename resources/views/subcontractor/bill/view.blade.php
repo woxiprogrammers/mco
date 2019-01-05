@@ -978,7 +978,7 @@
         }
 
         function calculateFinalTotal(){
-            var finalTotal = parseFloat($('#subtotal').text());
+            var finalTotal = parseFloat($('#discountedTotal').text());
             $('.tax-amount, .special-tax-amount').each(function(){
                 var taxAmount = parseFloat($(this).text());
                 if(isNaN(taxAmount)){
