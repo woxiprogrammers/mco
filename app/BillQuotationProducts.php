@@ -8,7 +8,7 @@ class BillQuotationProducts extends Model
 {
     protected $table = 'bill_quotation_products';
 
-    protected $fillable = ['bill_id','quotation_product_id','quantity','product_description_id'];
+    protected $fillable = ['bill_id','quotation_product_id','rate_per_unit','quantity','is_deleted','product_description_id'];
 
     public function quotation_products()
     {

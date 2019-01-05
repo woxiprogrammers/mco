@@ -10,7 +10,7 @@ class SubcontractorStructure extends Model
 
     protected $fillable = ['project_site_id', 'subcontractor_id',
         'summary_id' , 'sc_structure_type_id', 'rate' ,'total_work_area',
-        'description','created_at','updated_at'];
+        'description','cancelled_bill_transaction_total_amount','cancelled_bill_transaction_balance_amount',];
 
     public function projectSite(){
         return $this->belongsTo('App\ProjectSite','project_site_id');
@@ -30,5 +30,13 @@ class SubcontractorStructure extends Model
 
     public function subcontractorBill() {
         return $this->hasMany('App\SubcontractorBill','sc_structure_id');
+    }
+
+    public function summaries(){
+        return $this->hasMany('App\SubcontractorStructureSummary', 'subcontractor_structure_id');
+    }
+
+    public function extraItems(){
+        return $this->hasMany('App\SubcontractorStructureExtraItem', 'subcontractor_structure_id');
     }
 }

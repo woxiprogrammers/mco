@@ -8,7 +8,10 @@ class SubcontractorBill extends Model
 {
     protected $table = 'subcontractor_bills';
 
-    protected $fillable = ['sc_structure_id','subcontractor_bill_status_id','qty','description','number_of_floors'];
+    protected $fillable = ['sc_structure_id','subcontractor_bill_status_id','qty','description',
+        'number_of_floors', 'discount', 'discount_description', 'subtotal', 'round_off_amount',
+        'grand_total', 'bill_date', 'performa_invoice_date'
+    ];
 
     public function subcontractorBillStatus(){
         return $this->belongsTo('App\SubcontractorBillStatus','subcontractor_bill_status_id');
@@ -28,5 +31,13 @@ class SubcontractorBill extends Model
 
     public function subcontractorBillReconcileTransaction(){
         return $this->hasMany('App\SubcontractorBillReconcileTransaction','subcontractor_bill_id');
+    }
+
+    public function subcontractorBillSummaries(){
+        return $this->hasMany('App\SubcontractorBillSummary','subcontractor_bill_id');
+    }
+
+    public function subcontractorBillExtraItems(){
+        return $this->hasMany('App\SubcontractorBillExtraItem','subcontractor_bill_id');
     }
 }

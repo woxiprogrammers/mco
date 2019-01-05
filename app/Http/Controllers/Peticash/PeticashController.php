@@ -348,8 +348,12 @@ class PeticashController extends Controller
             $users = array();
             $sites = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
                                      ->where('projects.is_active', true)
-                                     ->select('project_sites.id as id','projects.name as name')->get()->toArray();
-            $banks = BankInfo::where('is_active',true)->select('id','bank_name','balance_amount')->get();
+                                     ->select('project_sites.id as id','projects.name as name')
+                                     ->orderBy('projects.name','asc')
+                                     ->get()->toArray();
+            $banks = BankInfo::where('is_active',true)
+                    ->orderBy('bank_name','asc')
+                    ->select('id','bank_name','balance_amount')->get();
             $masteraccountAmount = PeticashSiteTransfer::where('project_site_id','=',0)->sum('amount');
             $sitewiseaccountAmount = PeticashSiteTransfer::where('project_site_id','!=',0)->sum('amount');
             $cashAllowedLimit = $masteraccountAmount - $sitewiseaccountAmount;

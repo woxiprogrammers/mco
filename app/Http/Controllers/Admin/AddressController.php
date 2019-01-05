@@ -119,7 +119,7 @@ class AddressController extends Controller{
 
     public function addressListing(Request $request){
         try{
-            $addressData = Address::orderBy('id','desc')->get();
+            $addressData = Address::orderBy('address','desc')->get();
             $iTotalRecords = count($addressData);
             $records = array();
             $records['data'] = array();
@@ -132,7 +132,7 @@ class AddressController extends Controller{
                     $status = 'Enable';
                 }
                 $records['data'][$iterator] = [
-                    $addressData[$pagination]['address'],
+                    ucwords($addressData[$pagination]['address']),
                     $addressData[$pagination]->cities->name,
                     $addressData[$pagination]->cities->state->name,
                     $addressData[$pagination]->cities->state->country->name,

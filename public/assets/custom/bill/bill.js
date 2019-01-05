@@ -1,3 +1,6 @@
+/**
+ * Created by manoj on 31/10/18.
+ */
 $(document).ready(function (){
     CreateBill.init();
     $('#submit').css("padding-left",'6px');
@@ -19,22 +22,12 @@ $(document).ready(function (){
             $('#extra_item_description_'+id).prop('disabled',true);
             $('#extra_item_rate_'+id).prop('disabled',true);
             $('#extra_item_rate_'+id).val('');
-            /*$('#extra_item_rate_'+id).rules('remove');
-            $('#extra_item_rate_'+id).closest('form-group').removeClass('has-error');*/
         }else{
             $('#extra_item_description_'+id).prop('disabled',false);
             $('#extra_item_rate_'+id).prop('disabled',false);
             var enteredRate = $('#extra_item_rate_'+id);
             $('#extra_item_rate_'+id).val(0);
 
-            var total_extra_item_rate = $('#total_extra_item_rate_'+id).text();
-            var previous_rates = $('#previous_rates_'+id).text();
-            var diff = parseFloat(total_extra_item_rate - previous_rates);
-            /*$('#extra_item_rate_'+id).rules('add',{
-                required: true,
-                min: 0.000001,
-                max: diff
-            });*/
             enteredRate.on('keyup', function () {
                 clearTimeout(typingTimer);
                 typingTimer = setTimeout(doneTyping, doneTypingInterval);
@@ -51,7 +44,7 @@ $(document).ready(function (){
 
     $('input:checkbox.product-checkbox').click(function(){
         var id = $(this).val();
-        var input = $('#current_quantity_'+id);
+        var quantity = $('#current_quantity_'+id);
         var boq = $('#boq_quantity_'+id).text();
         var previous_quantity = $('#previous_quantity_'+id).text();
         var diff = parseFloat(boq - previous_quantity);
@@ -62,13 +55,13 @@ $(document).ready(function (){
                 $('#submit').prop('disabled',true);
             }
             $("#id_"+id).css('background-color',"");
-            $('#current_quantity_'+id).prop('disabled',true);
+            $('#current_quantity_'+id+',#rate_per_unit_'+id).prop('disabled',true);
             $('#product_description_'+id).prop('disabled',true);
             $('#product_description_'+id).rules('remove');
             $('#product_description_id_'+id).rules('remove');
             $('#product_description_id_'+id).prop('disabled',true);
-            $('#current_quantity_'+id).rules('remove');
-            $('#current_quantity_'+id).closest('form-group').removeClass('has-error');
+            $('#current_quantity_'+id+',#rate_per_unit_'+id).rules('remove');
+            $('#current_quantity_'+id+',#rate_per_unit_'+id).closest('form-group').removeClass('has-error');
             $('#current_quantity_'+id).val('');
             $('#cumulative_quantity_'+id).text("");
             $('#current_bill_amount_'+id).text("");
@@ -135,27 +128,27 @@ $(document).ready(function (){
                     $('#previous_quantity_'+id).val("");
                 });
 
-                $('#current_quantity_'+id).prop('disabled',false);
+                $('#current_quantity_'+id+',#rate_per_unit_'+id).prop('disabled',false);
                 $('#current_quantity_'+id).val(0);
                 $("#id_"+id).css('background-color',"#e1e1e1");
                 var typingTimer;
                 var doneTypingInterval = 500;
-                $('#current_quantity_'+id).rules('add',{
+                /*$('#current_quantity_'+id).rules('add',{
                     required: true,
                     min: 0.000001,
                     max: diff
-                });
-                input.on('keyup', function () {
+                });*/
+                $('#current_quantity_'+id+',#rate_per_unit_'+id).on('keyup', function () {
                     clearTimeout(typingTimer);
                     typingTimer = setTimeout(doneTyping, doneTypingInterval);
                 });
-                input.on('keydown', function () {
+                $('#current_quantity_'+id+',#rate_per_unit_'+id).on('keydown', function () {
                     clearTimeout(typingTimer);
                 });
                 function doneTyping () {
-                    calculateQuantityAmount(input.val(),id);
+                    calculateQuantityAmount(quantity.val(),id);
                 }
-                calculateQuantityAmount(input.val(),id);
+                calculateQuantityAmount(quantity.val(),id);
             }
             if($('input:checked:not(".tax-applied-on")').length > 0){
                 $('#submit').prop('disabled',false);
@@ -169,7 +162,7 @@ $(document).ready(function (){
         calculateTax();
     });
 
-    $('#discountAmount').on('keyup', function () {
+    $('#discountAmount,#roundAmountBy').on('keyup', function () {
         clearTimeout(typingTimer);
         typingTimer = setTimeout(calculateDiscount, doneTypingInterval);
     });
@@ -183,9 +176,7 @@ function calculateQuantityAmount(current_quantity,id){
         current_quantity = 0;
     }
     var cumulative_quantity = parseFloat($('#previous_quantity_'+id).text()) + parseFloat(current_quantity);
-    var current_bill_amount = parseFloat(current_quantity) * parseFloat($('#rate_per_unit_'+id).text());
-    /*$('#cumulative_quantity_'+id).text(customRound(cumulative_quantity));
-    $('#current_bill_amount_'+id).text(customRound(current_bill_amount));*/
+    var current_bill_amount = parseFloat(current_quantity) * parseFloat($('#rate_per_unit_'+id).val());
     $('#cumulative_quantity_'+id).text((cumulative_quantity).toFixed(3));
     $('#current_bill_amount_'+id).text((current_bill_amount).toFixed(3));
     getTotals();
@@ -214,22 +205,20 @@ function getTotals(){
     }
 
     var total_current_bill_amount = parseFloat(total_extra_item_rate) + parseFloat(total_product_current_bill_amount);
-    /*$('#sub_total_current_bill_amount').text(customRound(total_current_bill_amount));
-    $('#rounded_off_current_bill_sub_total').text(customRound(total_current_bill_amount));*/
     $('#sub_total_current_bill_amount').text((total_current_bill_amount).toFixed(3));
     $('#rounded_off_current_bill_sub_total').text((total_current_bill_amount).toFixed(3));
     calculateDiscount();
 }
 
 function calculateTax(){
-    var total_rounded_current_bill = parseFloat($("#rounded_off_current_bill_amount").text()).toFixed(3);
+    var total_rounded_current_bill = parseFloat($("#rounded_off_current_bill_amount").val()).toFixed(3);
     var final_total_current_bill = total_rounded_current_bill;
     $(".tax").each(function(){
         var tax_amount_current_bill = total_rounded_current_bill * ($(this).val() / 100);
         final_total_current_bill = parseFloat(final_total_current_bill) + parseFloat(tax_amount_current_bill);
         $(this).parent().next().find('span').text(tax_amount_current_bill.toFixed(3));
     });
-    $("#final_current_bill_total").text(parseFloat(final_total_current_bill).toFixed(3));
+    $("#final_current_bill_total").val(parseFloat(final_total_current_bill).toFixed(3));
     calculateSpecialTax()
 }
 
@@ -243,7 +232,7 @@ function calculateSpecialTax(){
                     var taxId = $(this).val();
                     var taxOnAmount = 0;
                     if(taxId == 0 || taxId == '0'){
-                        taxOnAmount = taxOnAmount + parseFloat($("#rounded_off_current_bill_amount").text());
+                        taxOnAmount = taxOnAmount + parseFloat($("#rounded_off_current_bill_amount").val());
                     }else{
                         taxOnAmount = taxOnAmount + parseFloat($("#tax_current_bill_amount_"+taxId).text());
                     }
@@ -251,32 +240,31 @@ function calculateSpecialTax(){
                     taxAmount = parseFloat((taxAmount + ( taxOnAmount * (taxPercentage / 100))).toFixed(3));
 
                 });
-               // $("#tax_current_bill_amount_"+specialTaxId).text(customRound(taxAmount));
                 $("#tax_current_bill_amount_"+specialTaxId).text(parseFloat(taxAmount).toFixed(3));
             }else{
                 $("#tax_current_bill_amount_"+specialTaxId).text(0);
             }
         });
-        var grossTotal = parseFloat($("#final_current_bill_total").text()).toFixed(3);
+        var grossTotal = parseFloat($("#final_current_bill_total").val()).toFixed(3);
         $(".special-tax-amount").each(function(){
-            grossTotal = grossTotal + parseFloat($(this).text());
+            grossTotal = parseFloat(grossTotal) + parseFloat($(this).text());
         });
-        $("#grand_current_bill_total").text((grossTotal).toFixed(3));
+        grossTotal = grossTotal + parseFloat($('#roundAmountBy').val());
+        $("#grand_current_bill_total").val(parseFloat(grossTotal).toFixed(3));
     }else{
-        var grossTotal = parseFloat($("#final_current_bill_total").text());
-        $("#grand_current_bill_total").text((grossTotal).toFixed(3));
+        var grossTotal = parseFloat($("#final_current_bill_total").val());
+        grossTotal = grossTotal + parseFloat($('#roundAmountBy').val());
+        $("#grand_current_bill_total").val((grossTotal).toFixed(3));
     }
 }
 
 function calculateDiscount(){
     var discountAmount = parseFloat($('#discountAmount').val()).toFixed(3);
-    //var totalBillAmount = parseInt($('#rounded_off_current_bill_sub_total').text());
     var totalBillAmount = parseFloat($('#rounded_off_current_bill_sub_total').text()).toFixed(3);
     if((typeof discountAmount == 'undefined') || discountAmount == ''){
-        $('#rounded_off_current_bill_amount').text(totalBillAmount);
+        $('#rounded_off_current_bill_amount').val(totalBillAmount);
     }else{
-        //discountAmount = parseInt(discountAmount);
-        $('#rounded_off_current_bill_amount').text((totalBillAmount-discountAmount).toFixed(3));
+        $('#rounded_off_current_bill_amount').val((totalBillAmount-discountAmount).toFixed(3));
     }
     calculateTax();
 }
