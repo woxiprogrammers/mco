@@ -270,7 +270,7 @@ class UserController extends Controller
             $userData = User::join('user_has_roles','user_has_roles.user_id','=','users.id')
                             ->join('roles','roles.id','=','user_has_roles.role_id')
                             ->whereIn('users.id',$userId)
-                            ->orderBy('users.id','asc')
+                            ->orderBy('users.first_name','asc')
                             ->select('users.id as id','users.first_name as first_name','users.last_name as last_name','users.email as email','users.mobile as mobile','users.created_at as created_at','users.is_active as is_active','roles.name as role_name')
                             ->get();
             $iTotalRecords = count($userData);
@@ -326,7 +326,7 @@ class UserController extends Controller
                     </div>';
                 }
                 $records['data'][$iterator] = [
-                    ucfirst($userData[$pagination]['first_name']).' '.ucfirst($userData[$pagination]['last_name']) ,
+                    ucwords(strtolower($userData[$pagination]['first_name']).' '.strtolower($userData[$pagination]['last_name']) ),
                     $userData[$pagination]['email'],
                     $userData[$pagination]['mobile'],
                     $userData[$pagination]['role_name'],

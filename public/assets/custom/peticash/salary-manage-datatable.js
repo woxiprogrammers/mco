@@ -76,6 +76,21 @@ var peticashManagementListing = function () {
                             $( api.column( 4 ).footer() ).html(
                                 pageTotal.toFixed(3) +' ( '+ total.toFixed(3) +' total)'
                             );
+
+                            var pay_total = result['pay_total'];
+
+                            // Total over this page
+                            pageTotal = api
+                                .column( 5, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 5 ).footer() ).html(
+                                pageTotal.toFixed(3) +' ( '+ pay_total.toFixed(3) +' total)'
+                            );
                         }});
                 },
 

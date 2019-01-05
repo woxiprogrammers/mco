@@ -3,12 +3,14 @@
 namespace App\Console;
 
 use App\Console\Commands\AssetRentCalculations;
+use App\Console\Commands\BillModuleChanges;
 use App\Console\Commands\PeticashPurchaseTransactionMonthlyExpenseCalculations;
 use App\Console\Commands\PeticashSalaryTransactionMonthlyExpense;
 use App\Console\Commands\PeticashSalaryTransactionMonthlyExpenseCalculations;
 use App\Console\Commands\PurchaseOrderBillMonthlyExpenseCalculations;
 use App\Console\Commands\SalaryDistributionInSites;
 use App\Console\Commands\SendPurchaseOrderEmails;
+use App\Console\Commands\SubcontractorModuleMerge;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -25,7 +27,9 @@ class Kernel extends ConsoleKernel
         PeticashSalaryTransactionMonthlyExpenseCalculations::class,
         PeticashPurchaseTransactionMonthlyExpenseCalculations::class,
         SalaryDistributionInSites::class,
-        AssetRentCalculations::class
+        AssetRentCalculations::class,
+        BillModuleChanges::class,
+        SubcontractorModuleMerge::class
     ];
 
     /**

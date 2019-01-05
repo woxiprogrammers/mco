@@ -56,8 +56,8 @@
                                                 <div class="portlet-body">
                                                     <div class="table-container">
                                                         <div class="row">
-                                                            <div class="col-md-3" style="text-align: right">
-                                                                <label>Date Range :  </label>
+                                                            <div class="col-md-8" style="text-align: right">
+                                                                <label>Select Entry Date :  </label>
                                                             </div>
                                                             <div class="col-md-3">
                                                                 <div class="input-group input-large date-picker input-daterange" data-date-format="yyyy-mm-dd">
@@ -67,7 +67,7 @@
                                                                 <!-- /input-group -->
                                                                 <span class="help-block"> Select date range </span>
                                                             </div>
-                                                            <div class="col-md-3">
+                                                            <div class="col-md-1">
                                                                 <div class="btn-group">
                                                                     <div id="search-withfilter" class="btn blue" >
                                                                         <a href="#" style="color: white"> Submit
