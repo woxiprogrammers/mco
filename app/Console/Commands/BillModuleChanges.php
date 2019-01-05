@@ -3,10 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Bill;
-<<<<<<< HEAD
-=======
 use App\BillQuotationProducts;
->>>>>>> 996a97f9c47790494156584afebe4410105954c3
 use App\BillTransaction;
 use App\Quotation;
 use App\QuotationProduct;
