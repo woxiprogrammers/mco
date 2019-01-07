@@ -648,7 +648,10 @@ class AssetMaintenanceController extends Controller{
             }
                 $assetMaintenanceBillData = AssetMaintenanceBill::join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
                 ->whereIn('asset_maintenance_bills.id',$assetMaintenanceBillIds)
-                ->select('asset_maintenance.id as asset_maintenance_id','asset_maintenance_bills.id as id','asset_maintenance_bills.bill_number as bill_number','asset_maintenance_bills.amount','asset_maintenance_bills.assets_bill_number')
+                ->select('asset_maintenance_bills.cgst_amount',
+                    'asset_maintenance_bills.sgst_amount',
+                    'asset_maintenance_bills.igst_amount',
+                    'asset_maintenance.id as asset_maintenance_id','asset_maintenance_bills.id as id','asset_maintenance_bills.bill_number as bill_number','asset_maintenance_bills.amount','asset_maintenance_bills.assets_bill_number')
                 ->orderBy('id','desc')
                 ->get();
             if ($request->has('get_total')) {
@@ -680,14 +683,17 @@ class AssetMaintenanceController extends Controller{
                         <a href="/asset/maintenance/request/bill/view/'.$assetMaintenanceBillData[$pagination]['id'].'" style="color: white"> View
                     </div>';
                     $vendorId = AssetMaintenanceVendorRelation::where('asset_maintenance_id',$assetMaintenanceBillData[$pagination]['asset_maintenance_id'])->pluck('vendor_id')->first();
+                    $taxAmount = $assetMaintenanceBillData[$pagination]['cgst_amount'] +
+                        $assetMaintenanceBillData[$pagination]['sgst_amount'] +
+                        $assetMaintenanceBillData[$pagination]['igst_amount'] ;
                     $records['data'][] = [
                         $assetMaintenanceBillData[$pagination]['asset_maintenance_id'],
                         Vendor::where('id',$vendorId)->pluck('company')->first(),
                         $assetMaintenanceBillData[$pagination]['bill_number'],
                         $assetsBill,
-                        $assetMaintenanceBillData[$pagination]['amount'],
+                        $assetMaintenanceBillData[$pagination]['amount'] + $taxAmount,
                         $paidAmount,
-                        $assetMaintenanceBillData[$pagination]['amount'] - $paidAmount,
+                        ($assetMaintenanceBillData[$pagination]['amount'] + $taxAmount) - $paidAmount,
                         $editButton
                     ];
                 }
