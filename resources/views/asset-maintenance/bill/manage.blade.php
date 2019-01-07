@@ -81,7 +81,7 @@
                                                             </tbody>
                                                             <tfoot>
                                                                 <tr>
-                                                                    <th colspan="3" style="text-align:right">Total Page Wise:</th>
+                                                                    <th colspan="4" style="text-align:right">Total Page Wise:</th>
                                                                     <th></th>
                                                                     <th></th>
                                                                     <th></th>
