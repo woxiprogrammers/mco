@@ -142,6 +142,9 @@ trait MaterialRequestTrait{
                     $format = "BI".$project_site_id.date('Ymd',strtotime($created_at)).$serial_no;
                     break;
 
+                case 'assets-maintenance-bill' :
+                    $format = "AS".date('Ymd',strtotime($created_at)).$serial_no;
+                    break;
                 default :
                     $format = "";
                     break;
