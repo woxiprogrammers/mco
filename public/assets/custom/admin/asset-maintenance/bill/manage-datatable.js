@@ -39,20 +39,6 @@ var AssetMaintenanceBillListing = function () {
 
                             // Total over this page
                             pageTotal = api
-                                .column( 3, { page: 'current'} )
-                                .data()
-                                .reduce( function (a, b) {
-                                    return intVal(a) + intVal(b);
-                                }, 0 );
-
-                            // Update footer
-                            $( api.column( 3 ).footer() ).html(
-                                pageTotal.toFixed(3) +' ( '+ total.toFixed(3) +' total )'
-                            );
-
-                            paid_total = result['paid_total'];
-                            // Total over this page
-                            pageTotal_paid = api
                                 .column( 4, { page: 'current'} )
                                 .data()
                                 .reduce( function (a, b) {
@@ -61,12 +47,12 @@ var AssetMaintenanceBillListing = function () {
 
                             // Update footer
                             $( api.column( 4 ).footer() ).html(
-                                pageTotal_paid.toFixed(3) +' ( '+ paid_total.toFixed(3) +' total )'
+                                pageTotal.toFixed(3) +' ( '+ total.toFixed(3) +' total )'
                             );
 
-                            pending_total = result['pending_total'];
+                            paid_total = result['paid_total'];
                             // Total over this page
-                            pageTotal_pending = api
+                            pageTotal_paid = api
                                 .column( 5, { page: 'current'} )
                                 .data()
                                 .reduce( function (a, b) {
@@ -75,6 +61,20 @@ var AssetMaintenanceBillListing = function () {
 
                             // Update footer
                             $( api.column( 5 ).footer() ).html(
+                                pageTotal_paid.toFixed(3) +' ( '+ paid_total.toFixed(3) +' total )'
+                            );
+
+                            pending_total = result['pending_total'];
+                            // Total over this page
+                            pageTotal_pending = api
+                                .column( 6, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 6 ).footer() ).html(
                                 pageTotal_pending.toFixed(3) +' ( '+ pending_total.toFixed(3) +' total )'
                             );
                         }});
