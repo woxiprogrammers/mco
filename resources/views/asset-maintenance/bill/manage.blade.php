@@ -57,7 +57,7 @@
                                                                 <th>Vendor Company Name</th>
                                                                 <th>Bill Number</th>
                                                                 <th>Asset Bill Number</th>
-                                                                <th>Final Amount</th>
+                                                                <th>Final Amount with Tax</th>
                                                                 <th>Paid Amount</th>
                                                                 <th>Pending Amount</th>
                                                                 <th>Action</th>
