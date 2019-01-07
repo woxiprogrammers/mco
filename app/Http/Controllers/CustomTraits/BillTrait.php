@@ -1564,6 +1564,8 @@ trait BillTrait{
                     }
                 }
             }else{
+                $quotationSummaryModel = new QuotationSummary();
+                $quotationSummaries = $quotationSummaryModel->where('quotation_id',$bill['quotation_id'])->get();
                 $billQuotationProducts = BillQuotationProducts::whereIn('bill_id',$allBillIDsTillThisBill)->get();
                 foreach($quotationProducts as $key => $quotationProduct){
                     $quotationProduct['previous_quantity'] = 0;
@@ -1583,7 +1585,6 @@ trait BillTrait{
                     }
                 }
             }
-
             $quotationExtraItems = QuotationExtraItem::where('quotation_id',$bill->quotation->id)->get();
             $billExtraItems = BillQuotationExtraItem::where('bill_id',$bill->id)->get();
             foreach($quotationExtraItems as $key => $quotationExtraItem){
