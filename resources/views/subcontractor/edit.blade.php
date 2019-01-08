@@ -203,6 +203,14 @@
                                                                 <input type="text" class="form-control" id="sc_vat_no" name="sc_vat_no" value="{{$subcontractor['sc_vat_no']}}">
                                                             </div>
                                                         </div>
+                                                        <div class="form-group row">
+                                                            <div class="col-md-3" style="text-align: right">
+                                                                <label for="gstin" class="control-label">GSTIN number</label>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <input type="text" class="form-control" id="gstin" name="gstin" value="{{$subcontractor['gstin']}}">
+                                                            </div>
+                                                        </div>
                                                         @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('edit-manage-user'))
                                                             <div class="form-actions noborder row">
                                                                 <div class="col-md-offset-3" style="margin-left: 26%">

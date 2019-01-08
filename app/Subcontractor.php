@@ -12,7 +12,7 @@ class Subcontractor extends Model
         'sc_turnover_two_fy_ago','primary_cont_person_name','primary_cont_person_mob_number',
         'primary_cont_person_email','escalation_cont_person_name','escalation_cont_person_mob_number',
         'sc_pancard_no','sc_service_no','sc_vat_no',
-        'is_active','created_at','updated_at','subcontractor_name','total_advance_amount','balance_advance_amount'
+        'is_active','created_at','updated_at','subcontractor_name','total_advance_amount','balance_advance_amount','gstin'
     ];
 
     public function dprCategoryRelations(){

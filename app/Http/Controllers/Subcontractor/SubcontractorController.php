@@ -58,7 +58,7 @@ class SubcontractorController extends Controller
     public function createSubcontractor(Request $request){
         try{
             $scData = $request->except('_token');
-            $scData['is_active'] = (boolean)false;
+            $scData['is_active'] = false;
             Subcontractor::create($scData);
             $request->session()->flash('success', 'Subcontractor Created successfully.');
             return redirect('/subcontractor/manage');
