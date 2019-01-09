@@ -218,7 +218,6 @@ class PurchaseOrderController extends Controller
                     $filterFlag = false;
                 }
             }
-
             if ($po_count != 0 && $filterFlag == true) {
                 $ids = PurchaseOrder::whereIn('id',$ids)->where('serial_no', $po_count)->pluck('id');
                 if(count($ids) <= 0) {
@@ -247,9 +246,6 @@ class PurchaseOrderController extends Controller
             if ($filterFlag) {
                 $purchaseOrderDetail = PurchaseOrder::whereIn('id',$ids)->orderBy('created_at','desc')->get();
             }
-
-
-
             $purchaseOrderList = array();
             $iterator = 0;
             if(count($purchaseOrderDetail) > 0){
@@ -260,13 +256,14 @@ class PurchaseOrderController extends Controller
                      $purchaseOrderList[$iterator]['purchase_order_format_id'] = $this->getPurchaseIDFormat('purchase-order',$projectSite['id'],$purchaseOrder['created_at'],$purchaseOrder['serial_no']);
                      $poMatData = array();
                      $purchaseRequestComponentIds = $purchaseOrder->purchaseOrderComponent->pluck('purchase_request_component_id');
+
                      $jIterator = 0;
                      foreach($purchaseRequestComponentIds as $purchaseRequestComponentId) {
                          $purchaseRequestComponent = PurchaseRequestComponent::where('id',$purchaseRequestComponentId)->first();
                          $poMatData[$jIterator] = $purchaseRequestComponent->materialRequestComponent->name;
                          $jIterator++;
                      }
-                     $purchaseOrderList[$iterator]['po_first_material'] = ucwords($poMatData[0]);
+                     $purchaseOrderList[$iterator]['po_first_material'] = (count($poMatData) != 0) ? ucwords($poMatData[0]) : "-" ;
                      $purchaseOrderList[$iterator]['po_count'] = count($poMatData);
                      $purchaseOrderList[$iterator]['purchase_request_id'] = $purchaseOrder['purchase_request_id'];
                      $purchaseOrderList[$iterator]['purchase_request_format_id'] = $this->getPurchaseIDFormat('purchase-request',$projectSite['id'],$purchaseRequest['created_at'],$purchaseRequest['serial_no']);

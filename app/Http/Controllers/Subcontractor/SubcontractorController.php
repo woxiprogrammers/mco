@@ -143,6 +143,7 @@ class SubcontractorController extends Controller
                 $records['data'][$iterator] = [
                     ucwords($listingData[$pagination]['subcontractor_name']),
                     ucwords($listingData[$pagination]['company_name']),
+                    $listingData[$pagination]['gstin'],
                     ucwords($listingData[$pagination]['primary_cont_person_name']),
                     $listingData[$pagination]['primary_cont_person_mob_number'],
                     ucwords($listingData[$pagination]['escalation_cont_person_name']),
