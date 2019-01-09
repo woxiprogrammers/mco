@@ -3066,7 +3066,6 @@ class ReportManagementController extends Controller{
             $decemberMonthId = $month->where('slug','december')->pluck('id')->first();
             switch(true) {
                 case (($request['sales_month_id'] === 'all' && $request['sales_year_id'] === 'all' && $request['sales_project_site_id'] == null)) :
-                    Log::info('inside sales case 1');
                     $projectSiteData = $projectSite->join('projects', 'projects.id', '=', 'project_sites.project_id')
                         ->orderBy('projects.name')->select('project_sites.id', 'projects.name')->get();
                     $iTotalRecords = count($projectSiteData);
@@ -3091,7 +3090,6 @@ class ReportManagementController extends Controller{
                     break;
 
                 case ($request['sales_month_id'] === 'all' && $request['sales_year_id'] === 'all' && $request['sales_project_site_id'] != null) :
-                    Log::info('inside sales case 2');
                     $requestedProjectSiteIds = explode(',',$request['sales_project_site_id']);
                     $projectSiteData = $projectSite->join('projects', 'projects.id', '=', 'project_sites.project_id')
                         ->whereIn('project_sites.id',$requestedProjectSiteIds)
@@ -3117,7 +3115,6 @@ class ReportManagementController extends Controller{
                     break;
 
                 case ($request['sales_month_id'] === 'all' && $request['sales_year_id'] !== 'all' && $request['sales_project_site_id'] != null) :
-                        Log::info('inside sales case 3');
                     $requestedProjectSiteIds = explode(',',$request['sales_project_site_id']);
                     $projectSiteData = $projectSite->join('projects', 'projects.id', '=', 'project_sites.project_id')
                         ->whereIn('project_sites.id',$requestedProjectSiteIds)
@@ -3143,7 +3140,6 @@ class ReportManagementController extends Controller{
                     break;
 
                 case ($request['sales_month_id'] === 'all' && $request['sales_year_id'] !== 'all' && $request['sales_project_site_id'] == null) :
-                    Log::info('inside sales case 4');
                     $projectSiteData = $projectSite->join('projects', 'projects.id', '=', 'project_sites.project_id')
                         ->orderBy('projects.name')->select('project_sites.id', 'projects.name')->get();
                     $iTotalRecords = count($projectSiteData);
@@ -3167,7 +3163,6 @@ class ReportManagementController extends Controller{
                     break;
 
                 case ($request['sales_month_id'] !== 'all' && $request['sales_year_id'] === 'all' && $request['sales_project_site_id'] == null) :
-                    Log::info('inside sales case 5');
                     $startMonthId = $endMonthId = $month->where('id',$request['sales_month_id'])->pluck('id')->first();
 
                     $projectSiteData = $projectSite->join('projects', 'projects.id', '=', 'project_sites.project_id')
@@ -3193,7 +3188,6 @@ class ReportManagementController extends Controller{
                 break;
 
                 case ($request['sales_month_id'] !== 'all' && $request['sales_year_id'] === 'all' && $request['sales_project_site_id'] != null) :
-                    Log::info('inside sales case 6 ');
                     $startMonthId = $endMonthId = $month->where('id',$request['sales_month_id'])->pluck('id')->first();
 
                     $requestedProjectSiteIds = explode(',',$request['sales_project_site_id']);
@@ -3221,7 +3215,6 @@ class ReportManagementController extends Controller{
                 break;
 
                 case ($request['sales_month_id'] !== 'all' && $request['sales_year_id'] !== 'all' && $request['sales_project_site_id'] != null) :
-                    Log::info('inside sales case 7 ');
                     $startMonthId = $endMonthId = $month->where('id',$request['sales_month_id'])->pluck('id')->first();
 
                     $requestedProjectSiteIds = explode(',',$request['sales_project_site_id']);
@@ -3249,7 +3242,6 @@ class ReportManagementController extends Controller{
                 break;
 
                 case ($request['sales_month_id'] !== 'all' && $request['sales_year_id'] !== 'all' && $request['sales_project_site_id'] == null) :
-                    Log::info('inside sales case 8');
                     $startMonthId = $endMonthId = $month->where('id',$request['sales_month_id'])->pluck('id')->first();
 
                     $projectSiteData = $projectSite->join('projects', 'projects.id', '=', 'project_sites.project_id')

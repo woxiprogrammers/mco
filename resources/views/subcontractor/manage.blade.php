@@ -54,6 +54,7 @@
                                                 <tr>
                                                     <th> Subcontractor Name </th>
                                                     <th> Company Name </th>
+                                                    <th> GSTIN Number </th>
                                                     <th> Primary Contact Person </th>
                                                     <th> Primary Contact Number </th>
                                                     <th> Escalation Contact Person </th>
@@ -64,6 +65,7 @@
                                                 <tr>
                                                     <th></th>
                                                     <th> <input class="form-control form-filter" name="search_name" type="text"> </th>
+                                                    <th></th>
                                                     <th></th>
                                                     <th></th>
                                                     <th></th>
