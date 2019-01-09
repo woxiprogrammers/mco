@@ -56,7 +56,8 @@
                                                                 <th>Asset Maintenance Id</th>
                                                                 <th>Vendor Company Name</th>
                                                                 <th>Bill Number</th>
-                                                                <th>Final Amount</th>
+                                                                <th>Asset Bill Number</th>
+                                                                <th>Final Amount with Tax</th>
                                                                 <th>Paid Amount</th>
                                                                 <th>Pending Amount</th>
                                                                 <th>Action</th>
@@ -64,6 +65,7 @@
                                                             <tr class="filter">
                                                                 <th> </th>
                                                                 <th> <input type="text" class="form-control form-filter" name="vendor_name" id ="vendor_name"> </th>
+                                                                <th> </th>
                                                                 <th> </th>
                                                                 <th> </th>
                                                                 <th> </th>
@@ -79,7 +81,7 @@
                                                             </tbody>
                                                             <tfoot>
                                                                 <tr>
-                                                                    <th colspan="3" style="text-align:right">Total Page Wise:</th>
+                                                                    <th colspan="4" style="text-align:right">Total Page Wise:</th>
                                                                     <th></th>
                                                                     <th></th>
                                                                     <th></th>

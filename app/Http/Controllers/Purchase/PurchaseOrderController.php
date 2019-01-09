@@ -210,7 +210,6 @@ class PurchaseOrderController extends Controller
                     $filterFlag = false;
                 }
             }
-
             if ($po_status != 0 && $filterFlag == true) {
                 $ids = PurchaseOrder::join('purchase_order_statuses','purchase_order_statuses.id','=','purchase_orders.purchase_order_status_id')
                     ->where('purchase_orders.purchase_order_status_id','=',$po_status)
