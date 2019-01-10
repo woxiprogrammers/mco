@@ -2059,8 +2059,8 @@ class ReportManagementController extends Controller{
                             foreach ($subcontractorBillData as $subcontractorBill) {
                                 $subTotal = round(($subcontractorBill['subtotal'] - $subcontractorBill['discount']), 3);
                                 $taxTotal = round(($subcontractorBill['grand_total'] - $subTotal - $subcontractorBill['round_off_amount']), 3);
-                                $subcontractorBillTaxes = $subcontractorBill->subcontractorBillTaxes;
-                                /*$subTotal = round(($subcontractorBill['qty'] * $rate),3);
+                                /*$subcontractorBillTaxes = $subcontractorBill->subcontractorBillTaxes;
+                                $subTotal = round(($subcontractorBill['qty'] * $rate),3);
                                 $taxTotal = 0;
                                 foreach ($subcontractorBillTaxes as $key => $subcontractorBillTaxData) {
                                     $taxTotal += ($subcontractorBillTaxData['percentage'] * $subTotal) / 100;
@@ -2088,7 +2088,6 @@ class ReportManagementController extends Controller{
                         $data[$row]['basic_amount'] = round($basic_amount,3);
                         $data[$row]['gst'] = round($gst,3);
                         $data[$row]['total_amount'] = round($finalAmount,3);
-                        //$data[$row]['transaction_amount'] = round($receipt,3);
                         $data[$row]['tds'] = round($tds,3);
                         $data[$row]['retention'] = round($retention,3);
                         $data[$row]['hold'] = round($hold,3);
