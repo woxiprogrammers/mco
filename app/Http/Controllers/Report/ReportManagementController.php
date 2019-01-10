@@ -55,6 +55,7 @@ use App\Quotation;
 use App\QuotationProduct;
 use App\SubcontractorBillTransaction;
 use App\SubcontractorStructure;
+use App\TransactionStatus;
 use App\Unit;
 use App\Year;
 use Carbon\Carbon;
@@ -273,20 +274,20 @@ class ReportManagementController extends Controller{
                 case 'sitewise_subcontractor_report' :
                     $subcontractorBill = new SubcontractorBill();
                     $subcontractorBillStatus = new SubcontractorBillStatus();
-                    $approvedBillStatusId = $subcontractorBillStatus->where('slug','approved')->pluck('id');
+                    $approvedBillStatusId = $subcontractorBillStatus->where('slug','approved')->pluck('id')->first();
                     $subcontractorStructureIds = $subcontractorBill->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
                             ->join('subcontractor_structure_types','subcontractor_structure_types.id','=','subcontractor_structure.sc_structure_type_id')
-                            ->join('summaries','summaries.id','=','subcontractor_structure.summary_id')
+                           // ->join('summaries','summaries.id','=','subcontractor_structure.summary_id')
                             ->where('subcontractor_structure.project_site_id',$globalProjectSiteId)
                             ->where('subcontractor_structure.subcontractor_id',$request['subcontractor_id'])
                             ->where('subcontractor_bills.subcontractor_bill_status_id',$approvedBillStatusId)
                             ->orderBy('subcontractor_structure.id','asc')
-                            ->distinct('subcontractor_structure.id')
-                            ->select('subcontractor_structure.id','subcontractor_structure_types.name','summaries.name as summary_name','subcontractor_structure.created_at')->get();
+                            //->distinct('subcontractor_structure.id')
+                            ->select('subcontractor_structure.id','subcontractor_structure_types.name',/*'summaries.name as summary_name',*/'subcontractor_structure.created_at')->get();
                     for($iterator = 0; $iterator < count($subcontractorStructureIds); $iterator++){
                         $downloadButtonDetails[$iterator]['id'] = $subcontractorStructureIds[$iterator]['id'];
                         $downloadButtonDetails[$iterator]['type'] = $subcontractorStructureIds[$iterator]['name'];
-                        $downloadButtonDetails[$iterator]['summary_name'] = $subcontractorStructureIds[$iterator]['summary_name'];
+//                        $downloadButtonDetails[$iterator]['summary_name'] = $subcontractorStructureIds[$iterator]['summary_name'];
                         $downloadButtonDetails[$iterator]['created_at'] = $subcontractorStructureIds[$iterator]['created_at'];
                     }
                     break;
@@ -1737,6 +1738,7 @@ class ReportManagementController extends Controller{
                     $subcontractorStructure = new SubcontractorStructure();
                     $subcontractorBillTransaction = new SubcontractorBillTransaction();
                     $subcontractorBill = new SubcontractorBill();
+                    $approvedStatusId = TransactionStatus::where('slug', 'approved')->pluck('id')->first();
                     $data[$row] = array(
                         ' Bill Created Date', 'Bill No.', 'Basic Amount', 'GST', 'With Tax Amount'/*, 'Transaction Amount'*/, 'TDS', 'Retention',
                         'Hold', 'Debit', 'Other Recovery', 'Payable', 'Paid Amount', 'Total Paid', 'Remaining', 'Monthly Total'
@@ -1777,13 +1779,14 @@ class ReportManagementController extends Controller{
                             foreach ($billIds as $subcontractorBillId){
                                 $subcontractorBillData = $subcontractorBill->where('id',$subcontractorBillId)
                                     ->first();
-                                $subcontractorBillTaxes = $subcontractorBillData->subcontractorBillTaxes;
+                                /*$subcontractorBillTaxes = $subcontractorBillData->subcontractorBillTaxes;
                                 $subTotal = $subcontractorBillData['qty'] * $rate;
                                 $taxTotal = 0;
                                 foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
                                     $taxTotal += ($subcontractorBillTaxData['percentage'] * $subTotal) / 100;
                                 }
-                                $total += $subTotal + $taxTotal;
+                                $total += $subTotal + $taxTotal;*/
+                                $total += $subcontractorBillData['grand_total'];
                             }
                             $monthlyTotal[$iterator]['total'] = round($total,3);
                             $monthlyTotalAmount += $total;
@@ -1805,11 +1808,13 @@ class ReportManagementController extends Controller{
                         $billName = "R.A. ".$billNo;
                         if($subcontractorBill['subcontractor_bill_status_id'] == $statusId->where('slug','approved')->pluck('id')->first()){
                             $subcontractorBillTaxes = $subcontractorBill->subcontractorBillTaxes;
-                            $subTotal = $subcontractorBill['qty'] * $rate;
+                            $subTotal = round(($subcontractorBill['subtotal'] - $subcontractorBill['discount']), 3);
+                            $taxTotal = round(($subcontractorBill['grand_total'] - $subTotal - $subcontractorBill['round_off_amount']), 3);
+                            /*$subTotal = $subcontractorBill['qty'] * $rate;
                             $taxTotal = 0;
                             foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
                                 $taxTotal += ($subcontractorBillTaxData['percentage'] * $subTotal) / 100;
-                            }
+                            }*/
                             $finalTotal = round(($subTotal + $taxTotal),3);
                             $thisMonth = (int)date('n',strtotime($subcontractorBill['created_at']));
                             $billRow = $row;
@@ -1826,7 +1831,8 @@ class ReportManagementController extends Controller{
                             $data[$row]['total_paid'] = 0;
                             $totalBasicAmount += $rate; $totalGst += $taxTotal;
                             $totalWithTaxAmount += $finalTotal; $totalReceipt += $data[$row]['total_paid'];
-                            $billTransactionData = $subcontractorBillTransaction->where('subcontractor_bills_id',$subcontractorBill['id'])->orderBy('created_at','asc')->get();
+                            $billTransactionData = $subcontractorBillTransaction->where('subcontractor_bills_id',$subcontractorBill['id'])
+                                                    ->where('transaction_status_id',$approvedStatusId)->orderBy('created_at','asc')->get();
                             if($row == 1){
                                 $newMonth = $thisMonth;
                                 $newMonthRow = $row;
@@ -2027,6 +2033,7 @@ class ReportManagementController extends Controller{
                     $statusId = $subcontractorBillStatus->where('slug','approved')->pluck('id');
                     $totalBasicAmount = $totalGst = $totalAmount = $totalTransactionAmount = $totalTds = $totalRetention = $totalHold = 0;
                     $totalDebit = $totalOtherRecovery = $totalReceipt = $totalBalanceRemaining = $totalAdvGivenAmt = $totalBalAmtAfterAdvDeduct= 0;
+                    $approvedStatusId = TransactionStatus::where('slug', 'approved')->pluck('id')->first();
                     foreach($subcontractorData as $subcontractor) {
                         $subcontractorAdvancePaymentTotal = SubcontractorAdvancePayment::where('subcontractor_id', $subcontractor['id'])
                             ->where('project_site_id',$project_site_id)
@@ -2041,25 +2048,28 @@ class ReportManagementController extends Controller{
                                                             ->get();
 
                         foreach ($subcontractorStructureData as $subcontractorStructure) {
-                            if ($subcontractorStructure->contractType->slug == 'sqft') {
+                            /*if ($subcontractorStructure->contractType->slug == 'sqft') {
                                 $rate = round($subcontractorStructure['rate'],3);
                             } else {
                                 $rate = round(($subcontractorStructure['rate'] * $subcontractorStructure['total_work_area']),3);
-                            }
+                            }*/
                             $subcontractorBillData = $subcontractorBill->where('sc_structure_id', $subcontractorStructure['id'])
                                 ->where('subcontractor_bill_status_id', $statusId)
                                 ->get();
                             foreach ($subcontractorBillData as $subcontractorBill) {
+                                $subTotal = round(($subcontractorBill['subtotal'] - $subcontractorBill['discount']), 3);
+                                $taxTotal = round(($subcontractorBill['grand_total'] - $subTotal - $subcontractorBill['round_off_amount']), 3);
                                 $subcontractorBillTaxes = $subcontractorBill->subcontractorBillTaxes;
-                                $subTotal = round(($subcontractorBill['qty'] * $rate),3);
+                                /*$subTotal = round(($subcontractorBill['qty'] * $rate),3);
                                 $taxTotal = 0;
                                 foreach ($subcontractorBillTaxes as $key => $subcontractorBillTaxData) {
                                     $taxTotal += ($subcontractorBillTaxData['percentage'] * $subTotal) / 100;
-                                }
+                                }*/
                                 $basic_amount += $subTotal;
                                 $gst += round($taxTotal,3);
                                 $finalAmount += round(($subTotal + $taxTotal),3);
-                                $billTransactionData = $subcontractorBillTransaction->where('subcontractor_bills_id', $subcontractorBill['id'])->orderBy('created_at', 'asc')->get();
+                                $billTransactionData = $subcontractorBillTransaction->where('subcontractor_bills_id', $subcontractorBill['id'])
+                                    ->where('transaction_status_id', $approvedStatusId)->orderBy('created_at', 'asc')->get();
                                 foreach ($billTransactionData as $key => $billTransaction) {
                                     $transaction_amount += $billTransaction['subtotal'];
                                     $tds += $billTransaction['tds_amount'];
