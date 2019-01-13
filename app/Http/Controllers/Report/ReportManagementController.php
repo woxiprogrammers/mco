@@ -282,7 +282,7 @@ class ReportManagementController extends Controller{
                             ->where('subcontractor_structure.subcontractor_id',$request['subcontractor_id'])
                             ->where('subcontractor_bills.subcontractor_bill_status_id',$approvedBillStatusId)
                             ->orderBy('subcontractor_structure.id','asc')
-                            //->distinct('subcontractor_structure.id')
+                            ->distinct('subcontractor_structure.id')
                             ->select('subcontractor_structure.id','subcontractor_structure_types.name',/*'summaries.name as summary_name',*/'subcontractor_structure.created_at')->get();
                     for($iterator = 0; $iterator < count($subcontractorStructureIds); $iterator++){
                         $downloadButtonDetails[$iterator]['id'] = $subcontractorStructureIds[$iterator]['id'];
@@ -1795,7 +1795,7 @@ class ReportManagementController extends Controller{
                         }
                     }
                     $monthlyTotal[$iterator]['make_bold' ] = true;
-                    $monthlyTotal[$iterator]['total' ] = 'Total Purchase';
+                    $monthlyTotal[$iterator]['total' ] = 'Total';
                     $monthlyTotal[$iterator]['amount'] = round($monthlyTotalAmount,3);
 
                     $billNo = 1;
@@ -1830,8 +1830,10 @@ class ReportManagementController extends Controller{
                             $data[$row]['payable'] = $finalTotal;
                             $data[$row]['receipt'] = null;
                             $data[$row]['total_paid'] = 0;
-                            $totalBasicAmount += $rate; $totalGst += $taxTotal;
-                            $totalWithTaxAmount += $finalTotal; $totalReceipt += $data[$row]['total_paid'];
+                            $totalBasicAmount += $subTotal;
+                            $totalGst += $taxTotal;
+                            $totalWithTaxAmount += $finalTotal;
+                            $totalReceipt += $data[$row]['total_paid'];
                             $billTransactionData = $subcontractorBillTransaction->where('subcontractor_bills_id',$subcontractorBill['id'])
                                                     ->where('transaction_status_id',$approvedStatusId)->orderBy('created_at','asc')->get();
                             if($row == 1){
@@ -1865,12 +1867,12 @@ class ReportManagementController extends Controller{
                                 $data[$row] = array_merge($data[$row],array_fill(14,3,null));
                                 $data[$billRow]['total_paid'] += $receipt;
                                 $row++;$receiptCount++;
-                                $totalTds += $billTransaction['tds_amount']; $totalRetention += $billTransaction['retention_amount'];
+                                $totalTds += $billTransaction['tds_amount'];
+                                $totalRetention += $billTransaction['retention_amount'];
                                 $totalHold += $billTransaction['hold']; $totalDebit += $billTransaction['debit'];
                                 $totalOtherRecovery += $billTransaction['other_recovery'];
                                 $totalReceipt += $receipt;
                             }
-                            //$data[$row] = array_fill(0,16,null);
                             $data[$row] = array_fill(0,15,null);
                             $row++;
                             $totalWithTax = $data[$billRow ]['total_amount'];
@@ -1893,15 +1895,16 @@ class ReportManagementController extends Controller{
                     }
                     $data[$row]['make_bold'] = true;
                     $totalRow = array(
-                        'Total', null, round($totalBasicAmount,3), round($totalGst,3), round($totalWithTaxAmount,3), round($totalReceipt,3)
+                        'Total', null, round($totalBasicAmount,3), round($totalGst,3), round($totalWithTaxAmount,3)
                         , round($totalTds,3), round($totalRetention,3),round($totalHold,3),
                         round($totalDebit,3),round($totalOtherRecovery,3), round($totalPayable,3), round($totalTransactionAmount,3),
                         round($totalPaid,3), round($totalRemaining,3)
                     );
                     $data[$row] = array_merge($data[$row],$totalRow);
-                    Excel::create($reportType."_".$currentDate, function($excel) use($monthlyTotal, $data, $reportType, $header, $companyHeader, $date, $projectName, $subcontractorCompanyName) {
+                    $contractType = $subcontractorStructureData->contractType->name;
+                    Excel::create($reportType."_".$currentDate, function($excel) use($monthlyTotal, $data, $reportType, $header, $companyHeader, $date, $projectName, $subcontractorCompanyName, $contractType) {
                         $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(10);
-                        $excel->sheet($reportType, function($sheet) use($monthlyTotal, $data, $header, $companyHeader, $date, $projectName, $subcontractorCompanyName) {
+                        $excel->sheet($reportType, function($sheet) use($monthlyTotal, $data, $header, $companyHeader, $date, $projectName, $subcontractorCompanyName, $contractType) {
                             $objDrawing = new \PHPExcel_Worksheet_Drawing();
                             $objDrawing->setPath(public_path('/assets/global/img/logo.jpg')); //your image path
                             $objDrawing->setWidthAndHeight(148,74);
@@ -1945,10 +1948,10 @@ class ReportManagementController extends Controller{
                             });
 
                             $sheet->mergeCells('A7:H7');
-                            $sheet->cell('A7', function($cell) use ($projectName,$subcontractorCompanyName){
+                            $sheet->cell('A7', function($cell) use ($projectName,$subcontractorCompanyName,$contractType){
                                 $cell->setFontWeight('bold');
                                 $cell->setAlignment('center')->setValignment('center');
-                                $cell->setValue('Subcontractor  '.$subcontractorCompanyName .' - '. $projectName);
+                                $cell->setValue('Subcontractor  '.$subcontractorCompanyName .' - '. $projectName .' - Contract Type : '.$contractType);
                             });
 
                             $sheet->mergeCells('A8:H8');
