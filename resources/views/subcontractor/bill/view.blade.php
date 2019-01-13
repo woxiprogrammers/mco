@@ -76,7 +76,12 @@
                                                             <a href="/subcontractor/bill/change-status/disapproved/{{$subcontractorBill['id']}}" class="btn btn-xs btn-danger" id="disapprove">
                                                                 <i class="fa fa-remove"></i> Disapprove
                                                             </a>
+
                                                         @endif
+                                                    @elseif(($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-subcontractor-billing')) && $toChangeStatus == true )
+                                                            <a href="/subcontractor/bill/change-status/disapproved/{{$subcontractorBill['id']}}" class="btn btn-xs btn-danger" id="disapprove">
+                                                                <i class="fa fa-remove"></i> Cancel
+                                                        </a>
                                                     @endif
 
                                                     <div class="form-body">
