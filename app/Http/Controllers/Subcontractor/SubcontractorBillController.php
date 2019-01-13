@@ -18,6 +18,7 @@ use App\Summary;
 use App\Tax;
 use App\TransactionStatus;
 use App\Unit;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Log;
@@ -92,9 +93,13 @@ class SubcontractorBillController extends Controller
             $subcontractorBillData['subcontractor_bill_status_id'] = SubcontractorBillStatus::where('slug', 'draft')->pluck('id')->first();
             if($request->has('performa_invoice_date') && $request->performa_invoice_date != '' && $request->performa_invoice_date != null){
                 $subcontractorBillData['performa_invoice_date'] = date('Y-m-d', strtotime($request->performa_invoice_date));
+            }else{
+                $subcontractorBillData['performa_invoice_date'] = Carbon::today();
             }
             if($request->has('bill_date') && $request->bill_date != '' && $request->bill_date != null){
                 $subcontractorBillData['bill_date'] = date('Y-m-d', strtotime($request->bill_date));
+            }else{
+                $subcontractorBillData['bill_date'] = Carbon::today();
             }
             $subcontractorBill = SubcontractorBill::create($subcontractorBillData);
             $subcontractorBillSummaryData = [

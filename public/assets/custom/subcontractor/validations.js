@@ -269,7 +269,7 @@ var CreateSubcontractorBills = function () {
 
             submitHandler: function (form) {
                 var structureTypeSlug = $("#subcontractorStructureSlug").val();
-                if (structureTypeSlug == 'itemwise'){
+                if (structureTypeSlug == 'itemwise' || structureTypeSlug == 'amountwise'){
                     if ($(".structure-summary:checked").length > 0){
                         $("button[type='submit']").prop('disabled', true);
                         success.show();
@@ -334,7 +334,7 @@ var EditSubcontractorBills = function () {
 
             submitHandler: function (form) {
                 var structureTypeSlug = $("#subcontractorStructureSlug").val();
-                if (structureTypeSlug == 'itemwise'){
+                if (structureTypeSlug == 'itemwise' || structureTypeSlug == 'amountwise'){
                     if ($(".structure-summary:checked").length > 0){
                         $("button[type='submit']").prop('disabled', true);
                         success.show();
