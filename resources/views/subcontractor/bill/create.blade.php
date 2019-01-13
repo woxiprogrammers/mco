@@ -553,9 +553,6 @@
 
         $(document).ready(function(){
             CreateSubcontractorBills.init();
-            $(".datepicker").datepicker({
-                    format: 'mm-dd-yyyy'
-                });
         });
     </script>
 @endsection
