@@ -384,7 +384,24 @@ class SubcontractorBillController extends Controller
             $banks = BankInfo::where('is_active',true)->select('id','bank_name','balance_amount')->get();
             $statistics = $this->getSiteWiseStatistics();
             $cashAllowedLimit = ($statistics['remainingAmount'] > 0) ? $statistics['remainingAmount'] : 0 ;
-            return view('subcontractor.bill.view')->with(compact('structureSlug','subcontractorBill','subcontractorStructure','noOfFloors','billName','rate','subcontractorBillTaxes','subTotal','finalTotal','remainingAmount','paymentTypes','remainingHoldAmount','remainingRetentionAmount','pendingAmount','banks','cashAllowedLimit', 'taxes', 'specialTaxes', 'appliedSpecialTaxIds'));
+            $approvedTransactionId = TransactionStatus::where('slug', 'approved')->pluck('id')->first();
+            if($subcontractorBill->subcontractorBillStatus->slug == 'draft'){
+                $toChangeStatus = true;
+            } else {
+                if($subcontractorBill->subcontractorBillStatus->slug == 'approved'){
+                    $approvedTransactionCount = SubcontractorBillTransaction::where('subcontractor_bills_id', $subcontractorBill->id)
+                        ->where('transaction_status_id', $approvedTransactionId)
+                        ->count();
+                    if($approvedTransactionCount > 0){
+                        $toChangeStatus = false;
+                    }else{
+                        $toChangeStatus = true;
+                    }
+                }else{
+                    $toChangeStatus = false;
+                }
+            }
+            return view('subcontractor.bill.view')->with(compact('structureSlug','subcontractorBill','subcontractorStructure','noOfFloors','billName','rate','subcontractorBillTaxes','subTotal','finalTotal','remainingAmount','paymentTypes','remainingHoldAmount','remainingRetentionAmount','pendingAmount','banks','cashAllowedLimit', 'taxes', 'specialTaxes', 'appliedSpecialTaxIds','toChangeStatus'));
         }catch (\Exception $e){
             $data = [
                 'action' => 'Get subcontractor bill view',
