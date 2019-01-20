@@ -390,7 +390,7 @@ trait QuotationTrait{
         try{
             $records = array();
             $records['data'] = array();
-            $quotations = Quotation::where('quotation_status_id','=', $status)->orderBy('updated_at','desc')->get();
+            $quotations = Quotation::where('id',16)->where('quotation_status_id','=', $status)->orderBy('updated_at','desc')->get();
             $end = $request->length < 0 ? count($quotations) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($quotations); $iterator++,$pagination++ ){
                 if($quotations[$pagination]->quotation_status->slug == 'draft'){
@@ -400,11 +400,36 @@ trait QuotationTrait{
                 }else{
                     $quotationStatus = '<td><span class="btn btn-xs btn-danger"> Disapproved </span></td>';
                 }
+                if($quotations[$pagination]['is_summary_applied']){
+                    $summaryData = QuotationProduct::where('quotation_id',$quotations[$pagination]['id'])->whereNotNull('summary_id')->distinct('summary_id')->orderBy('summary_id')->select('summary_id')->get();
+                    $quotationProducts = QuotationProduct::where('quotation_id',$quotations[$pagination]['id'])->get();
+                    $i = $summaryTotalAmount = 0;
+                    foreach($summaryData as $key => $summary){
+                        $summary_amount = 0;
+                        foreach($quotationProducts as $j => $quotationProduct){
+                            if($quotationProduct->summary_id == $summary['summary_id']){
+                                $discounted_price_per_product = round(($quotationProduct->rate_per_unit - ($quotationProduct->rate_per_unit * ($quotationProduct->quotation->discount / 100))),3);
+                                $discounted_price = $quotationProduct->quantity * $discounted_price_per_product;
+                                $summary_amount = $summary_amount + $discounted_price;
+                            }
+                        }
+                        if(!empty($quotations[$pagination]['built_up_area'])){
+                            $summaryData[$i]['rate_per_sft'] = round(($summary_amount / $quotations[$pagination]['built_up_area']),3);
+                        }else{
+                            $summaryData[$i]['rate_per_sft'] = 0.000;
+                        }
+                        $summaryTotalAmount = $summaryTotalAmount + $summaryData[$i]['rate_per_sft'];
+                        $i++;
+                    }
+                }else{
+                    $summaryTotalAmount = '-';
+                }
                 if(Auth::user()->hasPermissionTo('edit-quotation')){
                     $records['data'][] = [
                         $quotations[$pagination]->project_site->project->client->company,
                         $quotations[$pagination]->project_site->project->name,
                         $quotations[$pagination]->project_site->name,
+                        $summaryTotalAmount,
                         $quotationStatus,
                         date('d M Y',strtotime($quotations[$pagination]->created_at)),
                         '<div class="btn-group">
@@ -426,6 +451,7 @@ trait QuotationTrait{
                         $quotations[$pagination]->project_site->project->name,
                         $quotations[$pagination]->project_site->name,
                         $quotationStatus,
+                        $summaryTotalAmount,
                         date('d M Y',strtotime($quotations[$pagination]->created_at)),
                         '<div class="btn-group">
                             <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
@@ -1457,7 +1483,7 @@ trait QuotationTrait{
         try{
             $data = array();
             $data['project_site'] = $quotation->project_site;
-            $summaryData = QuotationProduct::where('quotation_id',$quotation['id'])->distinct('summary_id')->orderBy('summary_id')->select('summary_id')->get();
+            $summaryData = QuotationProduct::where('quotation_id',$quotation['id'])->whereNotNull('summary_id')->distinct('summary_id')->orderBy('summary_id')->select('summary_id')->get();
             $quotationProducts = QuotationProduct::where('quotation_id',$quotation['id'])->get();
             $i = $total['rate_per_sft'] = $total['rate_per_carpet'] = 0;
             foreach($summaryData as $key => $summary){
