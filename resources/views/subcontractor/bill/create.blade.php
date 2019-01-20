@@ -161,7 +161,13 @@
                                                                 <td colspan="2">
                                                                     <input type="checkbox" name="structure_extra_item_ids[]" value="{{$structureExtraItem['subcontractor_structure_extra_item_id']}}" onclick="extraItemClick(this)">
                                                                 </td>
-                                                                <td colspan="3">
+                                                                @if($subcontractorStructure->contractType->slug == 'itemwise')
+                                                                    <td colspan="3">
+
+                                                                @else
+                                                                    <td colspan="2">
+
+                                                                @endif
                                                                     {{$structureExtraItem['name']}}
                                                                 </td>
                                                                 <td colspan="3">
@@ -169,22 +175,7 @@
                                                                         <input type="text" class="form-control extra-item-description"  readonly>
                                                                     </div>
                                                                 </td>
-                                                                {{--@if($subcontractorStructure->contractType->slug == 'itemwise')
-                                                                    <td colspan="3">
 
-                                                                @else
-                                                                    <td colspan="2">
-
-                                                                @endif
-
-
-                                                                </td>
-                                                                <td colspan="1">
-                                                                    <input type="checkbox" name="structure_extra_item_ids[]" value="{{$structureExtraItem['subcontractor_structure_extra_item_id']}}" onclick="extraItemClick(this)">
-                                                                </td>
-                                                                <td colspan="3">
-                                                                    {{$structureExtraItem['name']}}
-                                                                </td>--}}
                                                                 <td colspan="2">
                                                                     {{$structureExtraItem['rate']}}
                                                                 </td>
