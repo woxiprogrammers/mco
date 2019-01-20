@@ -94,12 +94,12 @@ class SubcontractorBillController extends Controller
             if($request->has('performa_invoice_date') && $request->performa_invoice_date != '' && $request->performa_invoice_date != null){
                 $subcontractorBillData['performa_invoice_date'] = date('Y-m-d', strtotime($request->performa_invoice_date));
             }else{
-                $subcontractorBillData['performa_invoice_date'] = Carbon::now();
+                $subcontractorBillData['performa_invoice_date'] = Carbon::today();
             }
             if($request->has('bill_date') && $request->bill_date != '' && $request->bill_date != null){
                 $subcontractorBillData['bill_date'] = date('Y-m-d', strtotime($request->bill_date));
             }else{
-                $subcontractorBillData['bill_date'] = Carbon::now();
+                $subcontractorBillData['bill_date'] = Carbon::today();
             }
             $subcontractorBill = SubcontractorBill::create($subcontractorBillData);
             $subcontractorBillSummaryData = [

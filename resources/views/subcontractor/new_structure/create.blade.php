@@ -296,7 +296,7 @@
         function structureTypeChange(){
             $("#summariesFieldset").show();
             var structureTypeSlug = $("input[name='structure_type']:checked").val();
-            if(structureTypeSlug == 'itemwise'){
+            if(structureTypeSlug == 'itemwise' || structureTypeSlug == 'amountwise' ){
                 $("#addSummaryBtn").show();
             }else{
                 $("#addSummaryBtn").hide();
