@@ -1808,15 +1808,9 @@ class ReportManagementController extends Controller{
                     foreach ($subcontractorBillData as $subcontractorBill){
                         $billName = "R.A. ".$billNo;
                         if($subcontractorBill['subcontractor_bill_status_id'] == $statusId->where('slug','approved')->pluck('id')->first()){
-                            $subcontractorBillTaxes = $subcontractorBill->subcontractorBillTaxes;
                             $subTotal = round(($subcontractorBill['subtotal'] - $subcontractorBill['discount']), 3);
                             $taxTotal = round(($subcontractorBill['grand_total'] - $subTotal - $subcontractorBill['round_off_amount']), 3);
-                            /*$subTotal = $subcontractorBill['qty'] * $rate;
-                            $taxTotal = 0;
-                            foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
-                                $taxTotal += ($subcontractorBillTaxData['percentage'] * $subTotal) / 100;
-                            }*/
-                            $finalTotal = round(($subTotal + $taxTotal),3);
+                            $finalTotal = $subcontractorBill['grand_total'];
                             $thisMonth = (int)date('n',strtotime($subcontractorBill['created_at']));
                             $billRow = $row;
                             $data[$row]['make_bold'] = true;
