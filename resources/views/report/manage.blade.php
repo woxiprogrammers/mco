@@ -22,7 +22,7 @@
                                 <span>*</span>
                             </div>
                             <div class="col-md-4" style="text-align: center">
-                                <label for="name" class="control-label"><b>Type - {{$downloadButton['type']}} : Summary - {{$downloadButton['summary_name']}}</b>  ( Created On <i>{{date('d M Y',strtotime($downloadButton['created_at']))}}</i> )</label>
+                                <label for="name" class="control-label"><b>Type - {{$downloadButton['type']}}{{-- : Summary - {{$downloadButton['summary_name']}}--}}</b>  ( Created On <i>{{date('d M Y',strtotime($downloadButton['created_at']))}}</i> )</label>
                             </div>
                             <div class="btn-group">
                                 <div class="btn blue">
