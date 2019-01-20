@@ -58,7 +58,7 @@
                                                 <input type="hidden" id="bill_type_id" name="bill_type_id" value="{{$bill->quotation->billType->slug}}">
                                                 <form role="form" id="edit_bill" class="form-horizontal" action="/bill/edit/{{$bill->id}}" method="post">
                                                     <div class="col-md-12 form-group">
-                                                        <div class="col-md-4 date date-picker" data-date-end-date="0d">
+                                                        <div class="col-md-4 date date-picker" data-date-end-date="0d" data-date-format="dd/mm/yyyy">
                                                             <label class="control-label" for="date">Select Bill Date : </label>
                                                             @if(!empty($bill['date']))
                                                                 <input type="text"  name="date" value="{{date('m/d/Y',strtotime($bill['date']))}}" id="date" readonly>
@@ -74,7 +74,7 @@
 
                                                             @endif
                                                         </div>
-                                                        <div class="col-md-4 date date-picker" data-date-end-date="0d" style="margin-left: 20%">
+                                                        <div class="col-md-4 date date-picker" data-date-end-date="0d" style="margin-left: 20%" data-date-format="dd/mm/yyyy">
                                                             <label class="control-label" for="performa_invoice_date" style="margin-left: -60%">Select Proforma Invoice Date : </label>
                                                             @if(!empty($bill['performa_invoice_date']))
                                                                 <input type="text"  name="performa_invoice_date" value="{{date('m/d/Y',strtotime($bill['performa_invoice_date']))}}" id="performa_invoice_date" readonly>
@@ -647,7 +647,3 @@ s                                                                    <td>
         $('select[name="assign_bank"]').find('option[value="' + bank_info_id + '"]').attr("selected",true);
     </script>
 @endsection
-
-
-
-
