@@ -1,4 +1,4 @@
--@extends('layout.master')
+@extends('layout.master')
 @section('title','Constro | Create Subcontractor Structure Bill')
 @include('partials.common.navbar')
 @section('css')
@@ -47,16 +47,16 @@
                                                 <form role="form" id="createStructureBill" class="form-horizontal" action="/subcontractor/bill/create/{!! $subcontractorStructure['id'] !!}" method="post">
                                                     {!! csrf_field() !!}
                                                     <div class="row">
-                                                        <div class="col-md-6 date date-picker" data-date-end-date="0d">
+                                                        <div class="col-md-6 date date-picker" data-date-end-date="0d" data-date-format="dd/mm/yyyy">
                                                             <label class="control-label" for="date">Bill Date : </label>
-                                                            <input type="text" style="width: 30%" name="bill_date" placeholder="Select Bill Date" value="{{date('d/m/Y')}}" id="date"/>
+                                                            <input type="text" style="width: 30%" name="bill_date" placeholder="Select Bill Date" value="{{date('d/m/Y')}}" id="date">
                                                             <button class="btn btn-sm default" type="button">
                                                                 <i class="fa fa-calendar"></i>
                                                             </button>
                                                         </div>
-                                                        <div class="col-md-6 date date-picker" data-date-end-date="0d">
+                                                        <div class="col-md-6 date date-picker" data-date-end-date="0d" data-date-format="dd/mm/yyyy">
                                                             <label class="control-label" for="performa_invoice_date" style="margin-left: 9%">Proforma Invoice Date : </label>
-                                                            <input type="text" style="width: 32%" name="performa_invoice_date" placeholder="Select Proforma Invoice Date" value="{{date('d/m/Y')}}" id="performa_invoice_date"/>
+                                                            <input type="text" style="width: 32%" name="performa_invoice_date" placeholder="Select Proforma Invoice Date" id="performa_invoice_date"/>
                                                             <button class="btn btn-sm default" type="button">
                                                                 <i class="fa fa-calendar"></i>
                                                             </button>
@@ -161,7 +161,13 @@
                                                                 <td colspan="2">
                                                                     <input type="checkbox" name="structure_extra_item_ids[]" value="{{$structureExtraItem['subcontractor_structure_extra_item_id']}}" onclick="extraItemClick(this)">
                                                                 </td>
-                                                                <td colspan="3">
+                                                                @if($subcontractorStructure->contractType->slug == 'itemwise')
+                                                                    <td colspan="3">
+
+                                                                @else
+                                                                    <td colspan="2">
+
+                                                                @endif
                                                                     {{$structureExtraItem['name']}}
                                                                 </td>
                                                                 <td colspan="3">
@@ -169,22 +175,7 @@
                                                                         <input type="text" class="form-control extra-item-description"  readonly>
                                                                     </div>
                                                                 </td>
-                                                                {{--@if($subcontractorStructure->contractType->slug == 'itemwise')
-                                                                    <td colspan="3">
 
-                                                                @else
-                                                                    <td colspan="2">
-
-                                                                @endif
-
-
-                                                                </td>
-                                                                <td colspan="1">
-                                                                    <input type="checkbox" name="structure_extra_item_ids[]" value="{{$structureExtraItem['subcontractor_structure_extra_item_id']}}" onclick="extraItemClick(this)">
-                                                                </td>
-                                                                <td colspan="3">
-                                                                    {{$structureExtraItem['name']}}
-                                                                </td>--}}
                                                                 <td colspan="2">
                                                                     {{$structureExtraItem['rate']}}
                                                                 </td>
@@ -546,6 +537,9 @@
 
         $(document).ready(function(){
             CreateSubcontractorBills.init();
+            $(".datepicker").datepicker({
+                    format: 'mm-dd-yyyy'
+                });
         });
     </script>
 @endsection

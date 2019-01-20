@@ -18,6 +18,7 @@ use App\Summary;
 use App\Tax;
 use App\TransactionStatus;
 use App\Unit;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Log;
@@ -92,9 +93,13 @@ class SubcontractorBillController extends Controller
             $subcontractorBillData['subcontractor_bill_status_id'] = SubcontractorBillStatus::where('slug', 'draft')->pluck('id')->first();
             if($request->has('performa_invoice_date') && $request->performa_invoice_date != '' && $request->performa_invoice_date != null){
                 $subcontractorBillData['performa_invoice_date'] = date('Y-m-d', strtotime($request->performa_invoice_date));
+            }else{
+                $subcontractorBillData['performa_invoice_date'] = Carbon::now();
             }
             if($request->has('bill_date') && $request->bill_date != '' && $request->bill_date != null){
                 $subcontractorBillData['bill_date'] = date('Y-m-d', strtotime($request->bill_date));
+            }else{
+                $subcontractorBillData['bill_date'] = Carbon::now();
             }
             $subcontractorBill = SubcontractorBill::create($subcontractorBillData);
             $subcontractorBillSummaryData = [
@@ -379,7 +384,24 @@ class SubcontractorBillController extends Controller
             $banks = BankInfo::where('is_active',true)->select('id','bank_name','balance_amount')->get();
             $statistics = $this->getSiteWiseStatistics();
             $cashAllowedLimit = ($statistics['remainingAmount'] > 0) ? $statistics['remainingAmount'] : 0 ;
-            return view('subcontractor.bill.view')->with(compact('structureSlug','subcontractorBill','subcontractorStructure','noOfFloors','billName','rate','subcontractorBillTaxes','subTotal','finalTotal','remainingAmount','paymentTypes','remainingHoldAmount','remainingRetentionAmount','pendingAmount','banks','cashAllowedLimit', 'taxes', 'specialTaxes', 'appliedSpecialTaxIds'));
+            $approvedTransactionId = TransactionStatus::where('slug', 'approved')->pluck('id')->first();
+            if($subcontractorBill->subcontractorBillStatus->slug == 'draft'){
+                $toChangeStatus = true;
+            } else {
+                if($subcontractorBill->subcontractorBillStatus->slug == 'approved'){
+                    $approvedTransactionCount = SubcontractorBillTransaction::where('subcontractor_bills_id', $subcontractorBill->id)
+                        ->where('transaction_status_id', $approvedTransactionId)
+                        ->count();
+                    if($approvedTransactionCount > 0){
+                        $toChangeStatus = false;
+                    }else{
+                        $toChangeStatus = true;
+                    }
+                }else{
+                    $toChangeStatus = false;
+                }
+            }
+            return view('subcontractor.bill.view')->with(compact('structureSlug','subcontractorBill','subcontractorStructure','noOfFloors','billName','rate','subcontractorBillTaxes','subTotal','finalTotal','remainingAmount','paymentTypes','remainingHoldAmount','remainingRetentionAmount','pendingAmount','banks','cashAllowedLimit', 'taxes', 'specialTaxes', 'appliedSpecialTaxIds','toChangeStatus'));
         }catch (\Exception $e){
             $data = [
                 'action' => 'Get subcontractor bill view',

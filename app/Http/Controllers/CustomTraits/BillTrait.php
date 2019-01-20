@@ -612,7 +612,7 @@ trait BillTrait{
                                             <i class="icon-docs"></i> Quotation </a>
                                     </li>
                                 </ul>
-                                
+
                              </div>';
                     }else{
                         $button = '<div class="btn-group">
@@ -1026,8 +1026,12 @@ trait BillTrait{
             $quotationData = $quotationModel->where('id',$request['quotation_id'])->first();
             $bill['quotation_id'] = $quotationData['id'];
             $bill['bill_status_id'] = $billStatusModel->where('slug','draft')->pluck('id')->first();
-            $bill['date'] = $request->date;
-            $bill['performa_invoice_date'] = $request->performa_invoice_date;
+            if($request->date != null){
+                $bill['date'] = date('Y-m-d', strtotime($request->date));
+            }
+            if($request->performa_invoice_date != null){
+                $bill['performa_invoice_date'] = date('Y-m-d', strtotime($request->performa_invoice_date));
+            }
             $bill['discount_amount'] = $request->discount_amount;
             $bill['sub_total'] = $request['sub_total'];
             $bill['with_tax_amount'] = $request['with_tax_amount'];
@@ -1683,7 +1687,13 @@ trait BillTrait{
                 $request->session()->flash('error', 'Cannot Edit the bill as Transaction amount is greater than the Bill amount you edited.');
                 return redirect('/bill/view/'.$bill->id);
             }
-            $billData = $request->only('date','performa_invoice_date','discount_amount','discount_description','grand_total');
+            $billData = $request->only('discount_amount','discount_description','grand_total');
+            if($request->date != null){
+                $billData['date'] = date('Y-m-d', strtotime($request->date));
+            }
+            if($request->performa_invoice_date != null){
+                $billData['performa_invoice_date'] = date('Y-m-d', strtotime($request->performa_invoice_date));
+            }
             $billData['bank_info_id'] = $request['assign_bank'];
             $billData['rounded_amount_by'] = $request['round_amount_by'];
             if($request['assign_bank'] != 'default') {
