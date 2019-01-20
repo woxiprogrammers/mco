@@ -390,7 +390,7 @@ trait QuotationTrait{
         try{
             $records = array();
             $records['data'] = array();
-            $quotations = Quotation::where('id',16)->where('quotation_status_id','=', $status)->orderBy('updated_at','desc')->get();
+            $quotations = Quotation::where('quotation_status_id','=', $status)->orderBy('updated_at','desc')->get();
             $end = $request->length < 0 ? count($quotations) : $request->length;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($quotations); $iterator++,$pagination++ ){
                 if($quotations[$pagination]->quotation_status->slug == 'draft'){
