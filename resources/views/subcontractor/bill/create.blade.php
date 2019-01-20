@@ -56,7 +56,7 @@
                                                         </div>
                                                         <div class="col-md-6 date date-picker" data-date-end-date="0d" data-date-format="dd/mm/yyyy">
                                                             <label class="control-label" for="performa_invoice_date" style="margin-left: 9%">Proforma Invoice Date : </label>
-                                                            <input type="text" style="width: 32%" name="performa_invoice_date" placeholder="Select Proforma Invoice Date" id="performa_invoice_date"/>
+                                                            <input type="text" style="width: 32%" name="performa_invoice_date" value="{{date('d/m/Y')}}" placeholder="Select Proforma Invoice Date" id="performa_invoice_date"/>
                                                             <button class="btn btn-sm default" type="button">
                                                                 <i class="fa fa-calendar"></i>
                                                             </button>
@@ -143,7 +143,7 @@
                                                         @endforeach
 
                                                         <tr>
-                                                            @if($subcontractorStructure->contractType->slug == 'itemwise' || $subcontractorStructure->contractType->slug == 'amountwise')
+                                                            @if($subcontractorStructure->contractType->slug == 'itemwise')
                                                                 <td colspan="12">
                                                             @else
                                                                 <td colspan="11">
@@ -155,7 +155,7 @@
                                                             <th colspan="2" style="text-align: center;">
                                                                 Action
                                                             </th>
-                                                            @if($subcontractorStructure->contractType->slug == 'itemwise' || $subcontractorStructure->contractType->slug == 'amountwise')
+                                                            @if($subcontractorStructure->contractType->slug == 'itemwise')
                                                                 <th colspan="3" style="text-align: center;">
                                                             @else
                                                                 <th colspan="2" style="text-align: center;">
