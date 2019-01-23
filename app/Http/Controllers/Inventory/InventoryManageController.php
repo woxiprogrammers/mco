@@ -287,6 +287,7 @@ class InventoryManageController extends Controller
                 }else{
                     $actionDropDown = '';
                 }
+                $checkBox= '<input type="checkbox" id="inventory_check['.$inventoryTransferData[$pagination]->id.']" name="inventory_check[]" value="inventory_check['.$inventoryTransferData[$pagination]->id.']">';
                 $transportation_amount = 0;
                 if ($inventoryTransferData[$pagination]->transportation_amount != null && $inventoryTransferData[$pagination]->transportation_amount != "0") {
                     $transportation_amount = $inventoryTransferData[$pagination]->transportation_amount;
@@ -314,6 +315,7 @@ class InventoryManageController extends Controller
                                 ->pluck('grn')->first();
                 }
                 $records['data'][$iterator] = [
+                    $checkBox,
                     date('d M Y',strtotime($inventoryTransferData[$pagination]->created_at)),
                     ucwords($inventoryTransferData[$pagination]->inventoryComponent->projectSite->project->name),
                     ucwords(explode("-",$inventoryTransferData[$pagination]->source_name)[0]),

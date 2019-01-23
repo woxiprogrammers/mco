@@ -21,6 +21,7 @@
                                 </div>
                             </div>
                         </div>
+
                         <div class="page-content">
                             @include('partials.common.messages')
                             <div class="container">
@@ -32,9 +33,19 @@
                                             <div class="portlet-body">
                                                 <div class="portlet-body">
                                                     <div class="table-container">
+                                                        <div class="row">
+                                                            <div class="col-md-3 pull-right" hidden>
+                                                                <div id="sample_editable_1_new" class="btn btn-small blue">
+                                                                    <a href="" style="color: white">
+                                                                        Challan Generate <i class="fa fa-download" aria-hidden="true"></i>
+                                                                    </a>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                         <table class="table table-striped table-bordered table-hover order-column" id="requestComponentListingTable">
                                                             <thead>
                                                             <tr>
+                                                                <th> </th>
                                                                 <th>Transaction Date</th>
                                                                 <th>Site Out</th>
                                                                 <th>Site In</th>
@@ -50,6 +61,7 @@
                                                                 <th>Action</th>
                                                             </tr>
                                                             <tr class="filter">
+                                                                <th></th>
                                                                 <th></th>
                                                                 <th> <input type="text" class="form-control form-filter" name="search_from" id="search_from"></th>
                                                                 <th> <input type="text" class="form-control form-filter" name="search_to" id="search_to"></th>
