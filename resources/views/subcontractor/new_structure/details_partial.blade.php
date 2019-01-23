@@ -6,7 +6,6 @@
  * Time: 10:35 PM
  */
 ?>
-
 <div class="form-body">
     <div class="row form-group">
         <div class="col-md-3" style="text-align: right">
@@ -89,6 +88,9 @@
                         </td>
                         <td>
                             {!! $totalRate !!}
+                        </td>
+                        <td>
+
                         </td>
                         <td>
                             {!! $totalWorkArea !!}

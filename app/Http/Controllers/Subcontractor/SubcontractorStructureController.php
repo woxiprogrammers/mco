@@ -6,6 +6,7 @@ use App\ExtraItem;
 use App\Project;
 use App\Subcontractor;
 use App\SubcontractorBill;
+use App\SubcontractorBillExtraItem;
 use App\SubcontractorBillStatus;
 use App\SubcontractorBillSummary;
 use App\SubcontractorBillTransaction;
@@ -368,6 +369,36 @@ class SubcontractorStructureController extends Controller
             $data = [
                 'action' => 'Edit subcontractor structure',
                 'subcontractor_structure' => $subcontractorStructure,
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+    public function deleteExtraItem(Request $request,$id,$structureId){
+        try{
+            $billStructure = SubcontractorBill::where('sc_structure_id',$structureId)->pluck('id');
+            $flag= true;
+            $billStructureExtraItems = SubcontractorBillExtraItem::whereIn('subcontractor_bill_id',$billStructure)->distinct()->pluck('subcontractor_structure_extra_item_id');
+            foreach ($billStructureExtraItems as $extraItem){
+               $structBill = SubcontractorStructureExtraItem::where('id',$extraItem)->value('extra_item_id');
+                if($id == $structBill){
+                    $flag = false;
+                }
+            }
+            if($flag) {
+                $data['status'] = true;
+                $data['message'] = "Extra Item Deleted Successfully";
+                $query = SubcontractorStructureExtraItem::where('subcontractor_structure_id',$structureId)->where('extra_item_id',$id)->delete();
+            } else {
+                $data['status'] = false;
+                $data['message'] = "Cannot Delete. Extra item already assigned to bill";
+            }
+            return $data;
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'delete Extra Item',
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];
