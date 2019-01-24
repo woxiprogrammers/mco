@@ -441,7 +441,7 @@
                                                                                             </label>
                                                                                         </div>
                                                                                         <div class="col-md-6">
-                                                                                            <select class="form-control" id="transaction_bank_id" name="bank_id" required>
+                                                                                            <select class="form-control" id="transaction_bank_id" name="bank_id">
                                                                                                 <option value="">-- Select Bank --</option>
                                                                                                 @foreach($banks as $bank)
                                                                                                     <option value="{{$bank['id']}}">{{$bank['bank_name']}}</option>
@@ -459,7 +459,7 @@
                                                                                         </label>
                                                                                     </div>
                                                                                     <div class="col-md-6">
-                                                                                        <select class="form-control" name="payment_id" required>
+                                                                                        <select class="form-control" name="payment_id">
                                                                                             <option value="">--- Select Payment Type ---</option>
                                                                                             @foreach($paymentTypes as $paymentType)
                                                                                                 <option value="{{$paymentType['id']}}">{{$paymentType['name']}}</option>
