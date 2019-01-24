@@ -280,6 +280,12 @@ var  CreateTransaction = function () {
             messages: {
                 total : {
                     required: 'Please enter total.'
+                },
+                bank_id: {
+                    required: 'Please select bank'
+                },
+                payment_id: {
+                  required: 'please select payment mode'
                 }
             },
             invalidHandler: function (event, validator) { //display error alert on form submit
