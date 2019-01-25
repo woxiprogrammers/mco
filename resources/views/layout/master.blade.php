@@ -48,7 +48,8 @@
     <meta name="theme-color" content="#ffffff">
     <!-- END THEME LAYOUT STYLES -->
     @yield('css')
-    <link rel="shortcut icon" href="favicon.ico" /> </head>
+    {{--<link rel="shortcut icon" href="favicon.ico" /> --}}
+</head>
 <!-- END HEAD -->
 <body class="page-container-bg-solid page-md">
         <input type="hidden" id="appUrl" value="{{env('APP_URL')}}">
