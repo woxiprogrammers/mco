@@ -92,12 +92,14 @@ class SubcontractorBillController extends Controller
             $subcontractorBillData['sc_structure_id'] = $subcontractorStructure->id;
             $subcontractorBillData['subcontractor_bill_status_id'] = SubcontractorBillStatus::where('slug', 'draft')->pluck('id')->first();
             if($request->has('performa_invoice_date') && $request->performa_invoice_date != '' && $request->performa_invoice_date != null){
-                $subcontractorBillData['performa_invoice_date'] = date('Y-m-d', strtotime($request->performa_invoice_date));
+                $performaDate = str_replace('/','-',$request->performa_invoice_date);
+                $subcontractorBillData['performa_invoice_date'] = date('Y-m-d', strtotime($performaDate));
             }else{
                 $subcontractorBillData['performa_invoice_date'] = Carbon::today();
             }
             if($request->has('bill_date') && $request->bill_date != '' && $request->bill_date != null){
-                $subcontractorBillData['bill_date'] = date('Y-m-d', strtotime($request->bill_date));
+                $bilDate = str_replace('/','-',$request->bill_date);
+                $subcontractorBillData['bill_date'] = date('Y-m-d', strtotime($bilDate));
             }else{
                 $subcontractorBillData['bill_date'] = Carbon::today();
             }
@@ -514,10 +516,12 @@ class SubcontractorBillController extends Controller
                 return redirect('/subcontractor/bill/view/'.$subcontractorBill->id);
             }
             if($request->has('performa_invoice_date') && $request->performa_invoice_date != '' && $request->performa_invoice_date != null){
-                $subcontractorBillData['performa_invoice_date'] = date('Y-m-d', strtotime($request->performa_invoice_date));
+                $performaDate = str_replace('/','-',$request->performa_invoice_date);
+                $subcontractorBillData['performa_invoice_date'] = date('Y-m-d', strtotime($performaDate));
             }
             if($request->has('bill_date') && $request->bill_date != '' && $request->bill_date != null){
-                $subcontractorBillData['bill_date'] = date('Y-m-d', strtotime($request->bill_date));
+                $bilDate = str_replace('/','-',$request->bill_date);
+                $subcontractorBillData['bill_date'] = date('Y-m-d', strtotime($bilDate));
             }
             $subcontractorBill->update($subcontractorBillData);
             foreach($request->structure_summaries as $structureSummaryId){

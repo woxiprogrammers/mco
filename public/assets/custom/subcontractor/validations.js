@@ -435,7 +435,7 @@ var  CreateExtraItem = function () {
                         '<div class="col-md-6">\n' +
                         '      <input type="text" class="form-control extra_items" name="new_extra_item['+count+'][rate]" value="'+rate+'">\n' +
                         '</div>\n' +
-                        '<div class="col-md-1">\n' +
+                        '<div class="">\n' +
                         '    <a class="btn red btn-xs" href="javascript:void(0);" onclick="removeExtraItem(this)">\n' +
                                 '<i class="fa fa-times"></i>\n' +
                             '</a>' +

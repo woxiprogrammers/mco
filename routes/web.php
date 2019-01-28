@@ -687,6 +687,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::get('details', array('uses' => 'Subcontractor\SubcontractorStructureController@getStructureDetails'));
             Route::get('edit/{subcontractorStructure}', array('uses' => 'Subcontractor\SubcontractorStructureController@getEditView'));
             Route::post('edit/{subcontractorStructure}', array('uses' => 'Subcontractor\SubcontractorStructureController@editStructure'));
+            Route::get('delete-extra-item/{id}/{structureId}', array('uses' => 'Subcontractor\SubcontractorStructureController@deleteExtraItem'));
         });
 
         Route::group(['prefix' => 'bill'], function (){

@@ -49,14 +49,14 @@
                                                     <div class="row">
                                                         <div class="col-md-6 date date-picker" data-date-end-date="0d" data-date-format="dd/mm/yyyy">
                                                             <label class="control-label" for="date">Bill Date : </label>
-                                                            <input type="text" style="width: 30%" name="bill_date" placeholder="Select Bill Date" value="{{date('d/m/Y')}}" id="date">
+                                                            <input type="text" style="width: 30%" name="bill_date" placeholder="Select Bill Date" value="" id="date" required>
                                                             <button class="btn btn-sm default" type="button">
                                                                 <i class="fa fa-calendar"></i>
                                                             </button>
                                                         </div>
                                                         <div class="col-md-6 date date-picker" data-date-end-date="0d" data-date-format="dd/mm/yyyy">
                                                             <label class="control-label" for="performa_invoice_date" style="margin-left: 9%">Proforma Invoice Date : </label>
-                                                            <input type="text" style="width: 32%" name="performa_invoice_date" value="{{date('d/m/Y')}}" placeholder="Select Proforma Invoice Date" id="performa_invoice_date"/>
+                                                            <input type="text" style="width: 32%" name="performa_invoice_date" value="" placeholder="Select Proforma Invoice Date" id="performa_invoice_date" required/>
                                                             <button class="btn btn-sm default" type="button">
                                                                 <i class="fa fa-calendar"></i>
                                                             </button>
@@ -103,9 +103,9 @@
                                                                     <td ><label class="control-label rate">{{$structureSummary['rate']}}</label></td>
                                                                     <td ><label class="control-label">{!! $structureSummary['unit'] !!}</label></td>
                                                                     <td >{!! $structureSummary['total_work_area'] * $structureSummary['rate'] !!}</td>
-                                                                    <td >{{$structureSummary['prev_quantity']}}</td>
+                                                                    <td ><div class="form-group" style="margin-left: 1%; margin-right: 1%"><input type="text" class="prev-qty form-control" value="{{$structureSummary['prev_quantity']}}" readonly></div></td>
                                                                     <td ><div class="form-group" style="margin-left: 1%; margin-right: 1%"><input type="text" class="form-control quantity" max="{{$structureSummary['allowed_quantity']}}" onkeyup="calculateAmount(this)" readonly> </div></td>
-                                                                    <td >{{$structureSummary['prev_quantity']}}</td>
+                                                                    <td ><div class="form-group" style="margin-left: 1%; margin-right: 1%"><input type="text" class="cummulative-qty form-control" value="{{$structureSummary['prev_quantity']}}" readonly></div></td>
                                                                     <td > <label class="control-label bill-amount"> 0 </label> </td>
                                                                 @elseif($subcontractorStructure->contractType->slug == 'amountwise')
                                                                         <td>
@@ -119,9 +119,9 @@
                                                                         <td ><label class="control-label rate">{{$structureSummary['rate']}}</label></td>
                                                                         <td ><label class="control-label">{!! $structureSummary['unit'] !!}</label></td>
                                                                         <td ><span class="total_amount">{!! $structureSummary['total_work_area'] * $structureSummary['rate'] !!}</span></td>
-                                                                        <td >{{$structureSummary['prev_quantity']}}</td>
+                                                                        <td ><div class="form-group" style="margin-left: 1%; margin-right: 1%"><input type="text" class="prev-qty form-control" value="{{$structureSummary['prev_quantity']}}" readonly></div></td>
                                                                         <td ><div class="form-group" style="margin-left: 1%; margin-right: 1%"><input type="text" class="form-control quantity" max="{{$structureSummary['allowed_quantity']}}" min="0.000001" onkeyup="calculateAmount(this)" {{--name="quantity[{{$structureSummary['id']}}]"--}} readonly> </div></td>
-                                                                        <td >{{$structureSummary['prev_quantity']}}</td>
+                                                                        <td ><div class="form-group" style="margin-left: 1%; margin-right: 1%"><input type="text" class="cummulative-qty form-control" value="{{$structureSummary['prev_quantity']}}" readonly></div></td>
                                                                         <td > <label class="control-label bill-amount"> 0 </label> </td>
                                                                 @else
                                                                     <td>
@@ -133,9 +133,9 @@
                                                                     <td ><label class="control-label rate">{{$structureSummary['rate']}}</label></td>
                                                                     <td ><label class="control-label">{!! $structureSummary['unit'] !!}</label></td>
                                                                     <td ><span class="total_amount">{!! $structureSummary['total_work_area'] * $structureSummary['rate'] !!}</span></td>
-                                                                    <td >{{$structureSummary['prev_quantity']}}</td>
-                                                                        <td ><div class="form-group" style="margin-left: 1%; margin-right: 1%"><input type="text" class="form-control quantity" max="{{$structureSummary['allowed_quantity']}}" min="0.000001" onkeyup="calculateAmount(this)" name="quantity[{{$structureSummary['id']}}]" required> </div></td>
-                                                                    <td >{{$structureSummary['prev_quantity']}}</td>
+                                                                    <td ><div class="form-group" style="margin-left: 1%; margin-right: 1%"><input type="text" class="prev-qty form-control" value="{{$structureSummary['prev_quantity']}}" readonly></div></td>
+                                                                    <td ><div class="form-group" style="margin-left: 1%; margin-right: 1%"><input type="text" class="form-control quantity" max="{{$structureSummary['allowed_quantity']}}" min="0.000001" onkeyup="calculateAmount(this)" name="quantity[{{$structureSummary['id']}}]" required> </div></td>
+                                                                    <td ><div class="form-group" style="margin-left: 1%; margin-right: 1%"><input type="text" class="cummulative-qty form-control" value="{{$structureSummary['prev_quantity']}}" readonly></div></td>
                                                                     <td > <label class="control-label bill-amount"> 0 </label> </td>
                                                                 @endif
 
@@ -431,6 +431,8 @@
             }
             var amount = (quantity * rate).toFixed(3);
             $(element).closest('tr').find('.bill-amount').text(amount);
+            var cummulativeQty = (parseFloat( $(element).closest('tr').find('.prev-qty').val()) + quantity);
+            $(element).closest('tr').find('.cummulative-qty').val(cummulativeQty);
             calculateSubtotal();
         }
 
