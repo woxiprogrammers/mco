@@ -34,8 +34,8 @@
                                                 <div class="portlet-body">
                                                     <div class="table-container">
                                                         <div class="row">
-                                                            <div class="col-md-3 pull-right" hidden>
-                                                                <div id="sample_editable_1_new" class="btn btn-small blue">
+                                                            <div class="col-md-3 pull-right ">
+                                                                <div id="challan_generate" class="btn btn-small blue">
                                                                     <a href="" style="color: white">
                                                                         Challan Generate <i class="fa fa-download" aria-hidden="true"></i>
                                                                     </a>
@@ -177,5 +177,33 @@
             $(element).next('input[name="_token"]').val(token);
             $(element).closest('form').submit();
         }
+        $(function(){
+            $('#challan_generate').click(function(){
+                var val = [];
+                if($('input.inventory_check').prop('checked')){
+                    $(':checkbox:checked').each(function(i){
+                        val[i] = $(this).val();
+                    });
+                    $.ajax({
+                        url: '/inventory/transfer/challen-generation',
+                        type: 'POST',
+                        async: true,
+                        data: {
+                            _token: $("input[name='_token']").val(),
+                            inventoryTransferId : val,
+                        },
+                        success: function(data,textStatus,xhr) {
+                        },
+                        error: function(){
+
+                        }
+                    });
+                }else{
+                    alert("Please select checkbox to generate challan");
+                }
+
+            });
+        });
+
     </script>
 @endsection

@@ -287,7 +287,7 @@ class InventoryManageController extends Controller
                 }else{
                     $actionDropDown = '';
                 }
-                $checkBox= '<input type="checkbox" id="inventory_check['.$inventoryTransferData[$pagination]->id.']" name="inventory_check[]" value="inventory_check['.$inventoryTransferData[$pagination]->id.']">';
+                $checkBox= '<input type="checkbox" class="inventory_check['.$inventoryTransferData[$pagination]->id.']" name="inventory_check[]" value="'.$inventoryTransferData[$pagination]->id.'">';
                 $transportation_amount = 0;
                 if ($inventoryTransferData[$pagination]->transportation_amount != null && $inventoryTransferData[$pagination]->transportation_amount != "0") {
                     $transportation_amount = $inventoryTransferData[$pagination]->transportation_amount;
@@ -1429,5 +1429,8 @@ class InventoryManageController extends Controller
             Log::critical(json_encode($data));
         }
         return response()->json($response,$status);
+    }
+    public function downloadChallan(Request $request){
+        dd($request->all());
     }
 }
