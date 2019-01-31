@@ -1484,8 +1484,8 @@ class ReportManagementController extends Controller{
                                     ->whereIn('bill_status_id',array_column($statusId->toArray(),'id'))->orderBy('id')
                                     ->select('id','bill_status_id')->get();
                     $date = date('l, d F Y',strtotime($secondParameter)) .' - '. date('l, d F Y',strtotime($firstParameter));
-                    $startYearID = $year->where('slug',(int)date('Y',strtotime($firstParameter)))->pluck('id')->first();
-                    $endYearID = $year->where('slug',(int)date('Y',strtotime($secondParameter)))->pluck('id')->first();
+                    $startYearID = $year->where('slug',date('Y',strtotime($firstParameter)))->pluck('id')->first();
+                    $endYearID = $year->where('slug',date('Y',strtotime($secondParameter)))->pluck('id')->first();
                     $totalYears = $year->whereBetween('id',[$startYearID,$endYearID])->select('id','name','slug')->get();
                     $monthlyTotalAmount = 0;
                     $approvedStatusId = TransactionStatus::where('slug', 'approved')->pluck('id')->first();
@@ -1545,6 +1545,7 @@ class ReportManagementController extends Controller{
                                 $row++;
 
                                 $receiptCount = 1;
+                                $payableDeductComponent = 0;
                                 foreach($billTransactionData as $key => $billTransaction){
                                     $data[$row]['date'] = null;
                                     $data[$row]['bill_no'] = 'Receipt '.$receiptCount;
@@ -1569,21 +1570,25 @@ class ReportManagementController extends Controller{
                                     $data[$row] = array_merge($data[$row],array_fill(14,3,null));
                                     $data[$billRow]['total_paid'] += $receipt;
                                     $row++;$receiptCount++;
-                                    $totalTds += $billTransaction['tds_amount']; $totalRetention += $billTransaction['retention_amount'];
-                                    $totalHold += $billTransaction['hold']; $totalDebit += $billTransaction['debit'];
+                                    $totalTds += $billTransaction['tds_amount'];
+                                    $totalRetention += $billTransaction['retention_amount'];
+                                    $totalHold += $billTransaction['hold'];
+                                    $totalDebit += $billTransaction['debit'];
                                     $totalOtherRecovery += $billTransaction['other_recovery_value'];
                                     $totalReceipt += $receipt;
+                                    $payableDeductComponent += ($billTransaction['tds_amount'] + $billTransaction['retention_amount']
+                                         + $billTransaction['hold'] + $billTransaction['debit'] + $billTransaction['other_recovery_value']);
                                 }
                                 $data[$row] = array_fill(0,17,null);
                                 $row++;
                                 $paidAmount = $data[$billRow ]['total_paid'];
-                                $data[$billRow]['remaining'] = $data[$billRow]['payable'] - $data[$billRow ]['total_paid'];
+                                //$data[$billRow]['remaining'] = ($data[$billRow]['payable']-$payableDeductComponent) - ($data[$billRow ]['total_paid']-$payableDeductComponent);
                                 $totalPaid += $data[$billRow]['total_paid'];
-                                $totalPayable += $data[$billRow]['payable'];
-                                $totalRemaining += $data[$billRow]['remaining'];
-                                $data[$billRow]['remaining'] = round($data[$billRow]['remaining'], 3);
-                                $data[$billRow]['payable'] = round($data[$billRow]['payable'], 3);
+                                $totalPayable += $data[$billRow]['payable'] - $payableDeductComponent;
+                                $data[$billRow]['payable'] = round($data[$billRow]['payable'] - $payableDeductComponent, 3);
                                 $data[$billRow]['total_paid'] = round($data[$billRow]['total_paid'], 3);
+                                $data[$billRow]['remaining'] = round($data[$billRow]['payable'] - $data[$billRow]['total_paid'], 3);
+                                $totalRemaining += $data[$billRow]['remaining'];
                                 if($billRow == 1 || $setMonthlyTotalData){
                                     $data[$billRow]['monthly_total'] = $paidAmount;
                                 }elseif($setMonthlyTotalData == false){
