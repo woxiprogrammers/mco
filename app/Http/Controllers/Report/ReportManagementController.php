@@ -1473,7 +1473,7 @@ class ReportManagementController extends Controller{
                     $billTransaction = new BillTransaction();
                     $data[$row] = array(
                         ' Bill Date : (Created Date)', 'Bill No.', 'Basic Amount', 'GST', 'With Tax Amount', 'Transaction Amount', 'Mobilization', 'TDS', 'Retention',
-                        'Hold', 'Debit', 'Other Recovery', 'Payable', 'Receipt', 'Total Paid', 'Remaining', 'Monthly Total'
+                        'Hold', 'Debit', 'Other Recovery', 'Payable Amount', 'Paid Amount', 'Total Paid', 'Remaining', 'Monthly Total'
                     );
 
                     $projectName = $projectSite->join('projects','projects.id','=','project_sites.project_id')
