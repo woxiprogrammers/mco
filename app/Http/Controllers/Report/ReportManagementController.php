@@ -1613,7 +1613,7 @@ class ReportManagementController extends Controller{
                     $totalRow = array(
                         'Total', null, round($totalBasicAmount,3), round($totalGst,3), round($totalWithTaxAmount,3), round($totalTransactionAmount,3)
                             , round($totalMobilization,3), round($totalTds,3), round($totalRetention,3),round($totalHold,3),
-                        round($totalDebit,3),round($totalOtherRecovery,3), round($totalPayable,3), round($totalReceipt,3),
+                        round($totalDebit,3),round($totalOtherRecovery,3), round($totalPayable,3), round($totalReceipt - $totalMobilization,3),
                         round($totalPaid,3), round($totalRemaining,3), null
                     );
                     $data[$row] = array_merge($data[$row],$totalRow);
