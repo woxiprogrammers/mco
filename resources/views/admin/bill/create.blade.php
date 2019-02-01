@@ -56,16 +56,16 @@
                                                 <form role="form" id="new_bill" class="form-horizontal" action="/bill/create" method="post">
                                                     <div class="row">
                                                         <div class="form-group">
-                                                            <div class="col-md-3 date date-picker" data-date-end-date="0d">
+                                                            <div class="col-md-3 date date-picker" data-date-end-date="0d"  data-date-format="dd/mm/yyyy">
                                                                 <label class="control-label" for="date">Bill Date : </label>
-                                                                <input type="text" style="width: 30%" name="date" placeholder="Select Bill Date" id="date"/>
+                                                                <input type="text" style="width: 30%" name="date" placeholder="Select Bill Date" id="date" value="{{date('d/m/Y')}}"/>
                                                                 <button class="btn btn-sm default" type="button">
                                                                     <i class="fa fa-calendar"></i>
                                                                 </button>
                                                             </div>
-                                                            <div class="col-md-4 date date-picker" data-date-end-date="0d">
+                                                            <div class="col-md-4 date date-picker" data-date-end-date="0d"   data-date-format="dd/mm/yyyy">
                                                                 <label class="control-label" for="performa_invoice_date" style="margin-left: 9%">Proforma Invoice Date : </label>
-                                                                <input type="text" style="width: 32%" name="performa_invoice_date" placeholder="Select Proforma Invoice Date" id="performa_invoice_date"/>
+                                                                <input type="text" style="width: 32%" name="performa_invoice_date" placeholder="Select Proforma Invoice Date" id="performa_invoice_date" value="{{date('d/m/Y')}}"/>
                                                                 <button class="btn btn-sm default" type="button">
                                                                     <i class="fa fa-calendar"></i>
                                                                 </button>
@@ -515,9 +515,4 @@
     <script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
     <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
     <script src="/assets/custom/bill/bill-typeahead.js" type="text/javascript"></script>
-    <script>
-        var date = new Date();
-        $('#date').val((date.getMonth()+1)+"/"+date.getDate()+"/"+date.getFullYear());
-        $('#performa_invoice_date').val((date.getMonth()+1)+"/"+date.getDate()+"/"+date.getFullYear());
-    </script>
 @endsection

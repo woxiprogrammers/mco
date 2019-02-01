@@ -209,6 +209,9 @@
                                                                         <div class="col-md-6">
                                                                             <input type="text" class="form-control extra_items" name="extra_items[{{$subcontractorStructureExtraItem->extraItem['id']}}]" value="{{$subcontractorStructureExtraItem['rate']}}">
                                                                         </div>
+                                                                        <a class="btn red btn-xs" href="javascript:void(0);" onclick="removeExtraItem(this,'{{$subcontractorStructureExtraItem->extraItem['id']}}','{{$subcontractorStructure->id}}')">
+                                                                            <i class="fa fa-times"></i>
+                                                                        </a>
                                                                     </div>
                                                                 @endforeach
                                                                 @foreach( $newExtraItems as $extraItem)
@@ -223,6 +226,7 @@
                                                                         </div>
                                                                     </div>
                                                                 @endforeach
+
                                                                 <div id="newExtraItemSection">
 
                                                                 </div>
@@ -504,8 +508,23 @@
             $(element).closest('tr').remove();
         }
 
-        function removeExtraItem(element){
-            $(element).closest('.form-group').remove();
+        function removeExtraItem(element,id,structureId){
+            var check = confirm("Are you sure, you want to delete Extra Item?");
+            if(check == true){
+                $.ajax({
+                    url: "/subcontractor/structure/delete-extra-item/"+id+"/"+structureId,
+                    success: function(result){
+                        if(result.success == true ){
+                            $(element).closest('.form-group').remove();
+                            alert(result.message);
+                        } else {
+                            alert(result.message);
+                        }
+
+                    }});
+            }else{
+                location.reload();
+            }
         }
     </script>
 @endsection

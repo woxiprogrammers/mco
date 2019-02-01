@@ -269,7 +269,7 @@ var CreateSubcontractorBills = function () {
 
             submitHandler: function (form) {
                 var structureTypeSlug = $("#subcontractorStructureSlug").val();
-                if (structureTypeSlug == 'itemwise'){
+                if (structureTypeSlug == 'itemwise' || structureTypeSlug == 'amountwise'){
                     if ($(".structure-summary:checked").length > 0){
                         $("button[type='submit']").prop('disabled', true);
                         success.show();
@@ -334,7 +334,7 @@ var EditSubcontractorBills = function () {
 
             submitHandler: function (form) {
                 var structureTypeSlug = $("#subcontractorStructureSlug").val();
-                if (structureTypeSlug == 'itemwise'){
+                if (structureTypeSlug == 'itemwise' || structureTypeSlug == 'amountwise'){
                     if ($(".structure-summary:checked").length > 0){
                         $("button[type='submit']").prop('disabled', true);
                         success.show();
@@ -435,7 +435,7 @@ var  CreateExtraItem = function () {
                         '<div class="col-md-6">\n' +
                         '      <input type="text" class="form-control extra_items" name="new_extra_item['+count+'][rate]" value="'+rate+'">\n' +
                         '</div>\n' +
-                        '<div class="col-md-1">\n' +
+                        '<div class="">\n' +
                         '    <a class="btn red btn-xs" href="javascript:void(0);" onclick="removeExtraItem(this)">\n' +
                                 '<i class="fa fa-times"></i>\n' +
                             '</a>' +

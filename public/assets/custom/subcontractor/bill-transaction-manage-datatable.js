@@ -280,7 +280,7 @@ var  CreateTransaction = function () {
             messages: {
                 total : {
                     required: 'Please enter total.'
-                }
+                },
             },
             invalidHandler: function (event, validator) { //display error alert on form submit
                 success.hide();

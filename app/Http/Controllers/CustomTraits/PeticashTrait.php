@@ -22,6 +22,7 @@ use App\ProjectSiteAdvancePayment;
 use App\ProjectSiteIndirectExpense;
 use App\PurcahsePeticashTransaction;
 use App\PurchaseOrderAdvancePayment;
+use App\PurchaseOrderPayment;
 use App\SiteTransferBillPayment;
 use App\SubcontractorAdvancePayment;
 use App\SubcontractorBillReconcileTransaction;
@@ -67,6 +68,13 @@ trait PeticashTrait{
                                                         ->where('purchase_requests.project_site_id',$projectSiteId)
                                                         ->sum('amount');
 
+            $purchaseOrderBillPayments = PurchaseOrderPayment::join('purchase_order_bills','purchase_order_bills.id','=','purchase_order_payments.purchase_order_bill_id')
+                ->join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
+                ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
+                ->where('purchase_order_payments.paid_from_slug','cash')
+                ->where('purchase_requests.project_site_id',$projectSiteId)
+                ->sum('purchase_order_payments.amount');
+
             $cashSubcontractorAdvancePaymentTotal = SubcontractorAdvancePayment::where('subcontractor_advance_payments.paid_from_slug','cash')
                 ->where('project_site_id',$projectSiteId)->sum('amount');
             $cashSubcontractorBillTransactionTotal = SubcontractorBillTransaction::join('subcontractor_bills','subcontractor_bills.id','=','subcontractor_bill_transactions.subcontractor_bills_id')
@@ -105,7 +113,7 @@ trait PeticashTrait{
                                     + $cashPurchaseOrderAdvancePaymentTotal + $cashSubcontractorAdvancePaymentTotal
                                     + $cashSubcontractorBillTransactionTotal + $subcontractorBillReconcile
                                     + $siteTransferCashAmount + $assetMaintenanceCashAmount
-                                    + $indirectGSTCashAmount + $indirectTDSCashAmount);
+                                    + $indirectGSTCashAmount + $indirectTDSCashAmount + $purchaseOrderBillPayments);
 
         }catch (\Exception $e){
             $data = [
@@ -163,6 +171,12 @@ trait PeticashTrait{
                     ->where('project_site_id',$projectSiteId)
                     ->where('peticash_status_id',$approvedPeticashStatusId)
                     ->sum('amount');
+                $purchaseOrderBillPayments = PurchaseOrderPayment::join('purchase_order_bills','purchase_order_bills.id','=','purchase_order_payments.purchase_order_bill_id')
+                    ->join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
+                    ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
+                    ->where('purchase_order_payments.paid_from_slug','cash')
+                    ->where('purchase_requests.project_site_id',$projectSiteId)
+                    ->sum('purchase_order_payments.amount');
                 $totalPurchaseAmount = PurcahsePeticashTransaction::whereIn('peticash_transaction_type_id', PeticashTransactionType::where('type','PURCHASE')->pluck('id'))
                     ->where('project_site_id',$projectSiteId)
                     ->where('peticash_status_id',$approvedPeticashStatusId)
@@ -202,7 +216,7 @@ trait PeticashTrait{
                     ($totalSalaryAmount + $totalAdvanceAmount + $totalPurchaseAmount + $cashPurchaseOrderAdvancePaymentTotal
                         + $cashSubcontractorAdvancePaymentTotal + $cashSubcontractorBillTransactionTotal
                         + $subcontractorBillReconcile + $siteTransferCashAmount + $assetMaintenanceCashAmount
-                        + $indirectGSTCashAmount + $indirectTDSCashAmount)),3);
+                        + $indirectGSTCashAmount + $indirectTDSCashAmount + $purchaseOrderBillPayments)),3);
                 $projectName = Project::join('project_sites','projects.id','=','project_sites.project_id')
                                         ->where('project_sites.id', $projectSiteId)
                                         ->pluck('projects.name')->first();

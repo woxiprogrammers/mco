@@ -76,7 +76,12 @@
                                                             <a href="/subcontractor/bill/change-status/disapproved/{{$subcontractorBill['id']}}" class="btn btn-xs btn-danger" id="disapprove">
                                                                 <i class="fa fa-remove"></i> Disapprove
                                                             </a>
+
                                                         @endif
+                                                    @elseif(($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-subcontractor-billing')) && $toChangeStatus == true )
+                                                            <a href="/subcontractor/bill/change-status/disapproved/{{$subcontractorBill['id']}}" class="btn btn-xs btn-danger" id="disapprove">
+                                                                <i class="fa fa-remove"></i> Cancel
+                                                        </a>
                                                     @endif
 
                                                     <div class="form-body">
@@ -436,8 +441,8 @@
                                                                                             </label>
                                                                                         </div>
                                                                                         <div class="col-md-6">
-                                                                                            <select class="form-control" id="transaction_bank_id" name="bank_id" >
-                                                                                                <option value="default">Select Bank</option>
+                                                                                            <select class="form-control" id="transaction_bank_id" name="bank_id">
+                                                                                                <option value="">-- Select Bank --</option>
                                                                                                 @foreach($banks as $bank)
                                                                                                     <option value="{{$bank['id']}}">{{$bank['bank_name']}}</option>
                                                                                                 @endforeach
@@ -454,7 +459,7 @@
                                                                                         </label>
                                                                                     </div>
                                                                                     <div class="col-md-6">
-                                                                                        <select class="form-control" name="payment_id" >
+                                                                                        <select class="form-control" name="payment_id">
                                                                                             <option value="">--- Select Payment Type ---</option>
                                                                                             @foreach($paymentTypes as $paymentType)
                                                                                                 <option value="{{$paymentType['id']}}">{{$paymentType['name']}}</option>
