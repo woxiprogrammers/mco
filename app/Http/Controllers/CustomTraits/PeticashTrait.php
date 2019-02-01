@@ -68,6 +68,13 @@ trait PeticashTrait{
                                                         ->where('purchase_requests.project_site_id',$projectSiteId)
                                                         ->sum('amount');
 
+            $purchaseOrderBillPayments = PurchaseOrderPayment::join('purchase_order_bills','purchase_order_bills.id','=','purchase_order_payments.purchase_order_bill_id')
+                ->join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
+                ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
+                ->where('purchase_order_payments.paid_from_slug','cash')
+                ->where('purchase_requests.project_site_id',$projectSiteId)
+                ->sum('purchase_order_payments.amount');
+
             $cashSubcontractorAdvancePaymentTotal = SubcontractorAdvancePayment::where('subcontractor_advance_payments.paid_from_slug','cash')
                 ->where('project_site_id',$projectSiteId)->sum('amount');
             $cashSubcontractorBillTransactionTotal = SubcontractorBillTransaction::join('subcontractor_bills','subcontractor_bills.id','=','subcontractor_bill_transactions.subcontractor_bills_id')
@@ -106,7 +113,7 @@ trait PeticashTrait{
                                     + $cashPurchaseOrderAdvancePaymentTotal + $cashSubcontractorAdvancePaymentTotal
                                     + $cashSubcontractorBillTransactionTotal + $subcontractorBillReconcile
                                     + $siteTransferCashAmount + $assetMaintenanceCashAmount
-                                    + $indirectGSTCashAmount + $indirectTDSCashAmount);
+                                    + $indirectGSTCashAmount + $indirectTDSCashAmount + $purchaseOrderBillPayments);
 
         }catch (\Exception $e){
             $data = [
