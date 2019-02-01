@@ -1546,6 +1546,8 @@ class ReportManagementController extends Controller{
 
                                 $receiptCount = 1;
                                 $payableDeductComponent = 0;
+                                $mobilizationComponentCheck = 0;
+                                $mobilizationComponentCheckSum = 0;
                                 foreach($billTransactionData as $key => $billTransaction){
                                     $data[$row]['date'] = null;
                                     $data[$row]['bill_no'] = 'Receipt '.$receiptCount;
@@ -1554,10 +1556,12 @@ class ReportManagementController extends Controller{
                                         $data[$row]['transaction_amount'] = 0;
                                         $data[$row]['mobilisation'] = round($billTransaction['amount'], 3);
                                         $totalMobilization += $billTransaction['amount'];
+                                        $mobilizationComponentCheck = $data[$row]['mobilisation'];
                                     }else{
                                         $data[$row]['transaction_amount'] = round($billTransaction['amount'], 3);
                                         $data[$row]['mobilisation'] = 0;
                                         $totalTransactionAmount += $billTransaction['amount'];
+                                        $mobilizationComponentCheck = 0;
                                     }
                                     $data[$row]['tds'] = round($billTransaction['tds_amount'], 3);
                                     $data[$row]['retention'] = round($billTransaction['retention_amount'], 3);
@@ -1566,7 +1570,11 @@ class ReportManagementController extends Controller{
                                     $data[$row]['other_recovery'] = round($billTransaction['other_recovery_value'], 3);
                                     $data[$row]['payable_amount'] = null;
                                     $receipt = $billTransaction['total'];
-                                    $data[$row]['receipt'] = round($receipt, 3);
+                                    if($billTransaction['paid_from_advanced'] == true){
+                                        $data[$row]['receipt'] = 0;
+                                    } else {
+                                        $data[$row]['receipt'] = round($receipt, 3);
+                                    }
                                     $data[$row] = array_merge($data[$row],array_fill(14,3,null));
                                     $data[$billRow]['total_paid'] += $receipt;
                                     $row++;$receiptCount++;
@@ -1577,7 +1585,9 @@ class ReportManagementController extends Controller{
                                     $totalOtherRecovery += $billTransaction['other_recovery_value'];
                                     $totalReceipt += $receipt;
                                     $payableDeductComponent += ($billTransaction['tds_amount'] + $billTransaction['retention_amount']
-                                         + $billTransaction['hold'] + $billTransaction['debit'] + $billTransaction['other_recovery_value']);
+                                         + $billTransaction['hold'] + $billTransaction['debit'] + $billTransaction['other_recovery_value']
+                                         + $mobilizationComponentCheck);
+                                    $mobilizationComponentCheckSum += $mobilizationComponentCheck;
                                 }
                                 $data[$row] = array_fill(0,17,null);
                                 $row++;
@@ -1586,7 +1596,7 @@ class ReportManagementController extends Controller{
                                 $totalPaid += $data[$billRow]['total_paid'];
                                 $totalPayable += $data[$billRow]['payable'] - $payableDeductComponent;
                                 $data[$billRow]['payable'] = round($data[$billRow]['payable'] - $payableDeductComponent, 3);
-                                $data[$billRow]['total_paid'] = round($data[$billRow]['total_paid'], 3);
+                                $data[$billRow]['total_paid'] = round($data[$billRow]['total_paid'] - $mobilizationComponentCheckSum, 3);
                                 $data[$billRow]['remaining'] = round($data[$billRow]['payable'] - $data[$billRow]['total_paid'], 3);
                                 $totalRemaining += $data[$billRow]['remaining'];
                                 if($billRow == 1 || $setMonthlyTotalData){
