@@ -413,10 +413,13 @@ trait BillTrait{
                 }
                 $listingData[$iterator]['final_total'] = $listingData[$iterator]['final_total'] + $bill['rounded_amount_by'];
                 $listingData[$iterator]['rounded_amount_by'] = $bill['rounded_amount_by'];
-                $paid_amount = BillTransaction::where('bill_id',$bill->id)->sum('total') + BillTransaction::where('bill_id',$bill->id)->sum('retention_amount') + BillTransaction::where('bill_id',$bill->id)->sum('tds_amount')
-                    + BillTransaction::where('bill_id',$bill->id)->sum('other_recovery_value')
-                    + BillTransaction::where('bill_id',$bill->id)->sum('hold')
-                    + BillTransaction::where('bill_id',$bill->id)->sum('debit');
+                $txnStatusIds = TransactionStatus::where('slug',['approved'])->pluck('id');
+                $paid_amount = BillTransaction::where('bill_id',$bill->id)->whereIn('transaction_status_id',$txnStatusIds)->sum('total')
+                    + BillTransaction::where('bill_id',$bill->id)->whereIn('transaction_status_id',$txnStatusIds)->sum('retention_amount')
+                    + BillTransaction::where('bill_id',$bill->id)->whereIn('transaction_status_id',$txnStatusIds)->sum('tds_amount')
+                    + BillTransaction::where('bill_id',$bill->id)->whereIn('transaction_status_id',$txnStatusIds)->sum('other_recovery_value')
+                    + BillTransaction::where('bill_id',$bill->id)->whereIn('transaction_status_id',$txnStatusIds)->sum('hold')
+                    + BillTransaction::where('bill_id',$bill->id)->whereIn('transaction_status_id',$txnStatusIds)->sum('debit');
                 $listingData[$iterator]['paid_amount'] = $paid_amount;
                 $listingData[$iterator]['balance_amount'] = round(($listingData[$iterator]['final_total'] - $paid_amount),2);
                 $iterator++;
@@ -542,6 +545,7 @@ trait BillTrait{
             }
             $iterator = 0;
             $listingData = array();
+            $txnStatusApprovedId = TransactionStatus::where('slug','approved')->pluck('id');
             $projectSiteData = ProjectSite::orderBy('updated_at','desc')->whereIn('id',$projectSiteIds)->get()->toArray();
             $approvedID = BillStatus::where('slug','approved')->pluck('id')->first();
             for($i = 0 ; $i < count($projectSiteData) ; $i++){
@@ -563,10 +567,12 @@ trait BillTrait{
                         foreach ($bills as $bill){
                             $billData = $this->getBillData($bill['id']);
                             $billAmount += $billData['total_amount_with_tax'];
-                            $paidAmount += BillTransaction::where('bill_id',$bill->id)->sum('total') + BillTransaction::where('bill_id',$bill->id)->sum('retention_amount') + BillTransaction::where('bill_id',$bill->id)->sum('tds_amount')
-                                + BillTransaction::where('bill_id',$bill->id)->sum('other_recovery_value')
-                                + BillTransaction::where('bill_id',$bill->id)->sum('hold')
-                                + BillTransaction::where('bill_id',$bill->id)->sum('debit');
+                            $paidAmount += BillTransaction::where('bill_id',$bill->id)->whereIn('transaction_status_id',$txnStatusApprovedId)->sum('total')
+                                + BillTransaction::where('bill_id',$bill->id)->whereIn('transaction_status_id',$txnStatusApprovedId)->sum('retention_amount')
+                                + BillTransaction::where('bill_id',$bill->id)->whereIn('transaction_status_id',$txnStatusApprovedId)->sum('tds_amount')
+                                + BillTransaction::where('bill_id',$bill->id)->whereIn('transaction_status_id',$txnStatusApprovedId)->sum('other_recovery_value')
+                                + BillTransaction::where('bill_id',$bill->id)->whereIn('transaction_status_id',$txnStatusApprovedId)->sum('hold')
+                                + BillTransaction::where('bill_id',$bill->id)->whereIn('transaction_status_id',$txnStatusApprovedId)->sum('debit');
                         }
                         $listingData[$iterator]['bill_amount'] = $billAmount;
                         $listingData[$iterator]['paid_amount'] = $paidAmount;
