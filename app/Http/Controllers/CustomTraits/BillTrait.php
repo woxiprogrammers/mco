@@ -2485,16 +2485,21 @@ trait BillTrait{
                 return redirect('/bill/view/'.$request->bill_id);
             }else{
                 $transactionData['transaction_status_id'] = $approvedBillStatusId;
+                $projectAdvPayment = ProjectSiteAdvancePayment::where('project_site_id','=', $projectSiteId)
+                    ->sum('amount');
+                $advanceGivenAmt = BillTransaction::join('bills','bills.id','=','bill_transactions.bill_id')
+                    ->join('quotations','quotations.id','=','bills.quotation_id')
+                    ->where('quotations.project_site_id','=',$projectSiteId)
+                    ->where('paid_from_advanced',true)->sum('amount');
+                $billTxtAdv = $projectAdvPayment - $advanceGivenAmt;
                 if($transactionData['paid_from_advanced'] == 'advance'){
                     $transactionData['paid_from_advanced'] = true;
-                    $advanceBalanceAmount = ($projectSite->advanced_balance != null) ? $projectSite->advanced_balance : 0 ;
-
-                    if($advanceBalanceAmount < $request->amount){
-                        $request->session()->flash('error','Transaction amount is greater that advance balance amount. Advance balance amount is '.$advanceBalanceAmount);
+                    if($billTxtAdv < $request->amount){
+                        $request->session()->flash('error','Transaction amount is greater that advance balance amount. Advance balance amount is '.$billTxtAdv);
                         return redirect('/bill/view/'.$request->bill_id);
                     }else{
                         BillTransaction::create($transactionData);
-                        $newAdvanceBalanceAmount = $advanceBalanceAmount - $request->amount;
+                        $newAdvanceBalanceAmount = $billTxtAdv - $request->amount;
                         $projectSite->update(['advanced_balance' => $newAdvanceBalanceAmount]);
                     }
                 }elseif($transactionData['paid_from_advanced'] == 'bank'){

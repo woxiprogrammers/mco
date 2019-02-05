@@ -267,6 +267,20 @@
                     </div>
                 </td>
                 <td>
+                    <div class="form-group" style="width: 90%; margin-left: 5%">
+                        <select  class="unit form-control" name="unit[{{$subcontractorStructureSummary['summary_id']}}]" required>
+                            <option value="">
+                                Select Unit
+                            </option>
+                            @foreach($units as $unit)
+                                <option value="{{$unit['id']}}">
+                                    {{$unit['name']}}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </td>
+                <td>
                     <div class="form-group"  style="width: 90%; margin-left: 5%">
                         <input type="text" class="form-control total_work_area" onkeyup="workAreaKeyUp(this)"  min="1" required>
                     </div>
