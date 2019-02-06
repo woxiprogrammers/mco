@@ -78,13 +78,15 @@ class SubcontractorStructureController extends Controller
             $structureSummaryData = [
                 'subcontractor_structure_id' => $subcontractorStructure->id
             ];
+            $counter = 0;
             foreach($request->summaries as $summaryId){
                 $structureSummaryData['summary_id'] = (int) $summaryId;
-                $structureSummaryData['rate'] = (float) $request->rate[$summaryId];
-                $structureSummaryData['description'] = $request->description[$summaryId];
-                $structureSummaryData['total_work_area'] = (float)$request->total_work_area[$summaryId];
-                $structureSummaryData['unit_id'] = (int)$request->unit[$summaryId];
+                $structureSummaryData['rate'] = (float) $request->rate[$counter][$summaryId];
+                $structureSummaryData['description'] = $request->description[$counter][$summaryId];
+                $structureSummaryData['total_work_area'] = (float)$request->total_work_area[$counter][$summaryId];
+                $structureSummaryData['unit_id'] = (int)$request->unit[$counter][$summaryId];
                 $structureSummary = SubcontractorStructureSummary::create($structureSummaryData);
+                $counter++;
             }
             $structureExtraItemData = [
                 'subcontractor_structure_id' => $subcontractorStructure->id
