@@ -2303,14 +2303,8 @@ class ReportManagementController extends Controller{
                             if(count($subcontractorBillIds) > 0){
                                 foreach ($subcontractorBillIds as $subcontractorBillId){
                                     $subcontractorBillData = $subcontractorBill->where('id',$subcontractorBillId)->first();
-                                    $subcontractorStructureData = $subcontractorStructure->where('id',$subcontractorBillData['sc_structure_id'])->first();
-                                    if($subcontractorStructureData->contractType->slug == 'sqft'){
-                                        $rate = $subcontractorStructureData['rate'];
-                                    }else{
-                                        $rate = $subcontractorStructureData['rate'] * $subcontractorStructureData['total_work_area'];
-                                    }
                                     $subcontractorBillTaxes = $subcontractorBillData->subcontractorBillTaxes;
-                                    $subTotal = $subcontractorBillData['qty'] * $rate;
+                                    $subTotal = $subcontractorBillData['subtotal']-$subcontractorBillData['discount'];
                                     foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
                                         $subcontractorGst += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
                                     }
@@ -2400,14 +2394,8 @@ class ReportManagementController extends Controller{
                             if(count($subcontractorBillIds) > 0){
                                 foreach ($subcontractorBillIds as $subcontractorBillId){
                                     $subcontractorBillData = $subcontractorBill->where('id',$subcontractorBillId)->first();
-                                    $subcontractorStructureData = $subcontractorStructure->where('id',$subcontractorBillData['sc_structure_id'])->first();
-                                    if($subcontractorStructureData->contractType->slug == 'sqft'){
-                                        $rate = $subcontractorStructureData['rate'];
-                                    }else{
-                                        $rate = $subcontractorStructureData['rate'] * $subcontractorStructureData['total_work_area'];
-                                    }
                                     $subcontractorBillTaxes = $subcontractorBillData->subcontractorBillTaxes;
-                                    $subTotal = $subcontractorBillData['qty'] * $rate;
+                                    $subTotal = $subcontractorBillData['subtotal']-$subcontractorBillData['discount'];
                                     foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
                                         $subcontractorGst += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
                                     }
