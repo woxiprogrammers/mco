@@ -2303,12 +2303,9 @@ class ReportManagementController extends Controller{
                             if(count($subcontractorBillIds) > 0){
                                 foreach ($subcontractorBillIds as $subcontractorBillId){
                                     $subcontractorBillData = $subcontractorBill->where('id',$subcontractorBillId)->first();
-                                    $subcontractorBillTaxes = $subcontractorBillData->subcontractorBillTaxes;
-                                    $subTotal = $subcontractorBillData['subtotal']-$subcontractorBillData['discount'];
-                                    foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
-                                        $subcontractorGst += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
-                                    }
-                                }
+                                    $subTotal = round($subcontractorBillData['subtotal'],3) - round($subcontractorBillData['discount'],3);
+                                    $subcontractorGst += round($subcontractorBillData['grand_total'],3) - (round($subTotal,3) + round($subcontractorBillData['round_off_amount'],3));
+                                  }
                             }
                             $data[$row]['subcontractor_gst'] = round($subcontractorGst,3);
 
@@ -2394,11 +2391,8 @@ class ReportManagementController extends Controller{
                             if(count($subcontractorBillIds) > 0){
                                 foreach ($subcontractorBillIds as $subcontractorBillId){
                                     $subcontractorBillData = $subcontractorBill->where('id',$subcontractorBillId)->first();
-                                    $subcontractorBillTaxes = $subcontractorBillData->subcontractorBillTaxes;
-                                    $subTotal = $subcontractorBillData['subtotal']-$subcontractorBillData['discount'];
-                                    foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
-                                        $subcontractorGst += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
-                                    }
+                                    $subTotal = round($subcontractorBillData['subtotal'],3) - round($subcontractorBillData['discount'],3);
+                                    $subcontractorGst += round($subcontractorBillData['grand_total'],3) - (round($subTotal,3) + round($subcontractorBillData['round_off_amount'],3));
                                 }
                             }
                             $data[$row]['subcontractor_gst'] = round($subcontractorGst,3);
