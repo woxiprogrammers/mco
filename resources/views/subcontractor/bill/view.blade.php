@@ -789,8 +789,7 @@
                     $('#paidFromSlug').hide();
                     $('#paymentSelect').hide();
                     $("#transactionTotal").rules('add',{
-                        max: parseFloat(balanceAdvanceAmount),
-                        min: parseFloat(balanceAdvanceAmount)
+                        max: parseFloat(balanceAdvanceAmount)
                     });
                 }else{
                     $('#paidFromSlug').show();
@@ -801,8 +800,7 @@
                     $("#tds_tax_amount").prop('readonly', false);
                     $("#other_recovery").prop('readonly', false);
                     $("#transactionTotal").rules('add',{
-                        max: parseFloat(pendingAmount),
-                        min: parseFloat(pendingAmount)
+                        max: parseFloat(pendingAmount)
                     });
                 }
                 $(".calculate-amount").trigger('keyup');
@@ -826,8 +824,7 @@
                 $('#payableAmount').val(changedPayableAmount);
                 $("#transactionTotal").val(total.toFixed(3));
                 $("#subtotalAmount").rules('add',{
-                    max: parseFloat(changedPayableAmount),
-                    min: parseFloat(changedPayableAmount)
+                    max: parseFloat(changedPayableAmount)
                 });
                 var remainingBillAmount = parseFloat($("#pendingAmount").val());
                 if(remainingBillAmount == null || typeof remainingBillAmount == 'undefined' || isNaN(remainingBillAmount)){
@@ -840,13 +837,11 @@
                     }
                     if(balanceAdvanceAmount < remainingBillAmount){
                         $("#transactionTotal").rules('add',{
-                            max: parseFloat(balanceAdvanceAmount),
-                            min: parseFloat(balanceAdvanceAmount)
+                            max: parseFloat(balanceAdvanceAmount)
                         });
                     }else{
                         $("#transactionTotal").rules('add',{
-                            max: parseFloat(remainingBillAmount),
-                            min: parseFloat(remainingBillAmount)
+                            max: parseFloat(remainingBillAmount)
                         });
                     }
 
@@ -856,17 +851,15 @@
                         amount = 0;
                     }
                     var paid_from_slug = $('#paid_from_slug').val();
-                    if(paid_from_slug == 'cash'){
+                    if(paid_from_slug == 'cash' || paid_from_slug == 'cancel_transaction_advance'){
                         var allowedCashAmount = parseFloat($('#cashAllowedLimit').val());
                         if(allowedCashAmount < remainingBillAmount){
                             $("#transactionTotal").rules('add',{
-                                max: parseFloat(remainingBillAmount),
-                                min: parseFloat(remainingBillAmount)
+                                max: parseFloat(remainingBillAmount)
                             });
                         }else{
                             $("#transactionTotal").rules('add',{
-                                max: parseFloat(remainingBillAmount),
-                                min: parseFloat(remainingBillAmount)
+                                max: parseFloat(remainingBillAmount)
                             });
                         }
                     }else{
@@ -877,13 +870,11 @@
                             var allowedBankAmount = parseFloat($('#transaction_balance_amount_'+selectedBankId).val());
                             if(allowedBankAmount < remainingBillAmount){
                                 $("#transactionTotal").rules('add',{
-                                    max: (allowedBankAmount),
-                                    min: (allowedBankAmount)
+                                    max: (allowedBankAmount)
                                 });
                             }else{
                                 $("#transactionTotal").rules('add',{
-                                    max: (remainingBillAmount),
-                                    min: (remainingBillAmount)
+                                    max: (remainingBillAmount)
                                 });
                             }
 
