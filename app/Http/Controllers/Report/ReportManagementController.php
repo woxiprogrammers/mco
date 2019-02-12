@@ -2598,7 +2598,9 @@ class ReportManagementController extends Controller{
                             ->whereMonth('date',$month['id'])
                             ->whereYear('date',$selectedYear['slug'])
                             ->pluck('id');
-                        $billTransactionData = $billTransaction->whereIn('bill_id',$billIds)->where('transaction_status_id',$approvedStatusId)->get();
+                        $billTransactionData = $billTransaction->whereIn('bill_id',$billIds)
+                            ->where('transaction_status_id',$approvedStatusId)
+                            ->get();
                         $billReconcileTransactionData = $billReconcileTransaction->whereIn('bill_id',$billIds)->get();
                         foreach ($billIds as $billId) {
                             $billData = $this->getBillData($billId);
@@ -2750,7 +2752,7 @@ class ReportManagementController extends Controller{
                                             null,
                                             round($sales,3),
                                             round($totalRetention,3),
-                                            round($receipt,3),
+                                            round($receipt-$mobilization,3),
                                             round($mobilization,3),
                                             round($outstanding,3),
                                             'Purchase',
@@ -4241,6 +4243,7 @@ class ReportManagementController extends Controller{
             $totalExpenseWithAdv = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount
                                     + $officeExpense + $subcontractorTotal + $openingExpenses
                                     + $subcontractorAdvTotal + $purchaseAdvTotal ;
+            $receipt = $receipt - $mobilization;
             $salesPnL = $sales - $debitAmount - $tdsAmount - $totalHold - $otherRecoveryAmount;
             $salesWisePnL = $salesPnL - $totalExpense;
             $receiptWisePnL = $receipt - $totalExpense;
