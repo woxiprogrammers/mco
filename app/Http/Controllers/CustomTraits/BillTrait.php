@@ -973,13 +973,17 @@ trait BillTrait{
                     $final['current_bill_gross_total_amount'] = round($final['current_bill_amount'],3) + $bill['rounded_amount_by'];
                 }
             }
+            $billtxnStatusId = new TransactionStatus();
+            $approvedBillStatusTxnId = $billtxnStatusId->where('slug','approved')->pluck('id')->first();
 
             $projectAdvPayment = ProjectSiteAdvancePayment::where('project_site_id','=', $quotation->project_site_id)
                 ->sum('amount');
             $advanceGivenAmt = BillTransaction::join('bills','bills.id','=','bill_transactions.bill_id')
                 ->join('quotations','quotations.id','=','bills.quotation_id')
                 ->where('quotations.project_site_id','=',$quotation->project_site_id)
-                ->where('paid_from_advanced',true)->sum('amount');
+                ->where('transaction_status_id', $approvedBillStatusTxnId)
+                ->where('paid_from_advanced',true)
+                ->sum('amount');
             $billTxtAdv = $projectAdvPayment - $advanceGivenAmt;
             $approvedTransactionId = TransactionStatus::where('slug', 'approved')->pluck('id')->first();
             if($bill->bill_status->slug == 'draft'){
@@ -2490,12 +2494,15 @@ trait BillTrait{
                 $request->session()->flash('error','Total Payment amount is greater than total bill amount');
                 return redirect('/bill/view/'.$request->bill_id);
             }else{
+                $billtxnStatusId = new TransactionStatus();
+                $approvedBillStatusTxnId = $billtxnStatusId->where('slug','approved')->pluck('id')->first();
                 $transactionData['transaction_status_id'] = $approvedBillStatusId;
                 $projectAdvPayment = ProjectSiteAdvancePayment::where('project_site_id','=', $projectSiteId)
                     ->sum('amount');
                 $advanceGivenAmt = BillTransaction::join('bills','bills.id','=','bill_transactions.bill_id')
                     ->join('quotations','quotations.id','=','bills.quotation_id')
                     ->where('quotations.project_site_id','=',$projectSiteId)
+                    ->where('transaction_status_id',$approvedBillStatusTxnId)
                     ->where('paid_from_advanced',true)->sum('amount');
                 $billTxtAdv = $projectAdvPayment - $advanceGivenAmt;
                 if($transactionData['paid_from_advanced'] == 'advance'){
