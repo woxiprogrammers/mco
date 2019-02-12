@@ -421,61 +421,79 @@ trait BillTrait{
                     + BillTransaction::where('bill_id',$bill->id)->whereIn('transaction_status_id',$txnStatusIds)->sum('hold')
                     + BillTransaction::where('bill_id',$bill->id)->whereIn('transaction_status_id',$txnStatusIds)->sum('debit');
                 $listingData[$iterator]['paid_amount'] = $paid_amount;
-                $listingData[$iterator]['balance_amount'] = round(($listingData[$iterator]['final_total'] - $paid_amount),2);
+                $listingData[$iterator]['balance_amount'] = round(($listingData[$iterator]['final_total'] - $paid_amount),3);
                 $iterator++;
             }
 
-            $iTotalRecords = count($listingData);
-            $records = array();
-            $records['data'] = array();
-            $end = $request->length < 0 ? count($listingData) : $request->length;
-            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($listingData); $iterator++,$pagination++ ){
-                switch($listingData[$iterator]['status']){
-                    case "draft" :
-                        $billStatus = '<td><span class="btn btn-xs btn-warning"> Draft </span></td>';
-                        break;
-
-                    case "approved" :
-                        $billStatus = '<td><span class="btn btn-xs green-meadow"> Approve </span></td>';
-                        break;
-
-                    case "cancelled" :
-                        $billStatus = '<td><span class="btn btn-xs btn-danger"> Cancelled </span></td>';
-                        break;
-                }
-                $records['data'][$iterator] = [
-                    $iterator+1,
-                    $listingData[$pagination]['array_no'],
-                    $listingData[$pagination]['subTotal'],
-                ];
-                $totalTaxAmount = 0;
-
-                if(array_key_exists('tax',$listingData[$pagination])){
-                    foreach($listingData[$pagination]['tax'] as $taxAmount){
-                        $totalTaxAmount += round($taxAmount,3);
+            if($request->has('get_total')){
+                $transactionDetails = $listingData;
+                $taxAmt = 0;
+                foreach ($transactionDetails as $txnDetail) {
+                    foreach ($txnDetail['tax'] as $txn) {
+                        $taxAmt = $taxAmt + $txn;
                     }
                 }
-                array_push($records['data'][$iterator],round($totalTaxAmount,3));
-                array_push($records['data'][$iterator],$listingData[$iterator]['rounded_amount_by']);
-                array_push($records['data'][$iterator],$listingData[$iterator]['final_total']);
-                array_push($records['data'][$iterator],$listingData[$iterator]['paid_amount']);
-                array_push($records['data'][$iterator],$listingData[$iterator]['balance_amount']);
-                array_push($records['data'][$iterator],$billStatus);
-                if($listingData[$iterator]['status'] == "approved"){
-                    array_push($records['data'][$iterator],'<div class="btn-group">
+                $records = [
+                    'subTotal' => array_sum(array_column($transactionDetails,'subTotal')),
+                    'tax' => $taxAmt,
+                    'rounded_amount_by' => array_sum(array_column($transactionDetails,'rounded_amount_by')),
+                    'final_total' => array_sum(array_column($transactionDetails,'final_total')),
+                    'paid_amount' => array_sum(array_column($transactionDetails,'paid_amount')),
+                    'balance_amount' => array_sum(array_column($transactionDetails,'balance_amount')),
+                ];
+            } else {
+
+                $iTotalRecords = count($listingData);
+                $records = array();
+                $records['data'] = array();
+                $end = $request->length < 0 ? count($listingData) : $request->length;
+                for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($listingData); $iterator++, $pagination++) {
+                    switch ($listingData[$iterator]['status']) {
+                        case "draft" :
+                            $billStatus = '<td><span class="btn btn-xs btn-warning"> Draft </span></td>';
+                            break;
+
+                        case "approved" :
+                            $billStatus = '<td><span class="btn btn-xs green-meadow"> Approve </span></td>';
+                            break;
+
+                        case "cancelled" :
+                            $billStatus = '<td><span class="btn btn-xs btn-danger"> Cancelled </span></td>';
+                            break;
+                    }
+                    $records['data'][$iterator] = [
+                        $iterator + 1,
+                        $listingData[$pagination]['array_no'],
+                        $listingData[$pagination]['subTotal'],
+                    ];
+                    $totalTaxAmount = 0;
+
+                    if (array_key_exists('tax', $listingData[$pagination])) {
+                        foreach ($listingData[$pagination]['tax'] as $taxAmount) {
+                            $totalTaxAmount += round($taxAmount, 3);
+                        }
+                    }
+                    array_push($records['data'][$iterator], round($totalTaxAmount, 3));
+                    array_push($records['data'][$iterator], $listingData[$iterator]['rounded_amount_by']);
+                    array_push($records['data'][$iterator], $listingData[$iterator]['final_total']);
+                    array_push($records['data'][$iterator], $listingData[$iterator]['paid_amount']);
+                    array_push($records['data'][$iterator], $listingData[$iterator]['balance_amount']);
+                    array_push($records['data'][$iterator], $billStatus);
+                    if ($listingData[$iterator]['status'] == "approved") {
+                        array_push($records['data'][$iterator], '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                             Actions
                             <i class="fa fa-angle-down"></i>
                         </button>
                         <ul class="dropdown-menu pull-left" role="menu">
                             <li>
-                                <a href="/bill/view/'.$listingData[$pagination]['bill_id'].'">
+                                <a href="/bill/view/' . $listingData[$pagination]['bill_id'] . '">
                                     <i class="icon-docs"></i> View </a>
                             </li>
                         </ul>
                     </div>');
-                }elseif($listingData[$iterator]['status'] == "cancelled"){
-                    array_push($records['data'][$iterator],'<div class="btn-group">
+                    } elseif ($listingData[$iterator]['status'] == "cancelled") {
+                        array_push($records['data'][$iterator], '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                             Actions
                             <i class="fa fa-angle-down"></i>
@@ -487,25 +505,26 @@ trait BillTrait{
                             </li>
                         </ul>
                     </div>');
-                }else{
-                    array_push($records['data'][$iterator],'<div class="btn-group">
+                    } else {
+                        array_push($records['data'][$iterator], '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                             Actions
                             <i class="fa fa-angle-down"></i>
                         </button>
                         <ul class="dropdown-menu pull-left" role="menu">
                             <li>
-                                <a href="/bill/view/'.$listingData[$pagination]['bill_id'].'">
+                                <a href="/bill/view/' . $listingData[$pagination]['bill_id'] . '">
                                     <i class="icon-docs"></i> View </a>
                             </li>
                         </ul>
                     </div>');
-                }
+                    }
 
+                }
+                $records["draw"] = intval($request->draw);
+                $records["recordsTotal"] = $iTotalRecords;
+                $records["recordsFiltered"] = $iTotalRecords;
             }
-            $records["draw"] = intval($request->draw);
-            $records["recordsTotal"] = $iTotalRecords;
-            $records["recordsFiltered"] = $iTotalRecords;
         }catch(\Exception $e){
             $records = array();
             $data = [
@@ -2619,13 +2638,13 @@ trait BillTrait{
                         $pagination+1,
                         date('j M Y',strtotime($transactionDetails[$pagination]['created_at'])),
                         $paidFrom,
-                        $transactionDetails[$pagination]['amount'],
-                        $transactionDetails[$pagination]['debit'],
-                        $transactionDetails[$pagination]['hold'],
-                        $transactionDetails[$pagination]['retention_amount'],
-                        $transactionDetails[$pagination]['tds_amount'],
-                        $transactionDetails[$pagination]['other_recovery_value'],
-                        $transactionDetails[$pagination]['total'],
+                        round($transactionDetails[$pagination]['amount'],3),
+                        round($transactionDetails[$pagination]['debit'],3),
+                        round($transactionDetails[$pagination]['hold'],3),
+                        round($transactionDetails[$pagination]['retention_amount'],3),
+                        round($transactionDetails[$pagination]['tds_amount'],3),
+                        round($transactionDetails[$pagination]['other_recovery_value'],3),
+                        round($transactionDetails[$pagination]['total'],3),
                         $transactionDetails[$pagination]->transactionStatus->name,
                         $changeStatusButton
                     ];

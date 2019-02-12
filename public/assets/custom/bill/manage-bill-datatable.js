@@ -19,6 +19,114 @@ var BillListing = function () {
                 // So when dropdowns used the scrollable div should be removed.
                 //"dom": "<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'<'table-group-actions pull-right'>>r>t<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'>>",
 
+
+                "footerCallback": function ( row, data, start, end, display ) {
+                    var api = this.api(), data;
+
+                    // Remove the formatting to get integer data for summation
+                    var intVal = function ( i ) {
+                        return typeof i === 'string' ?
+                            i.replace(/[\$,]/g, '')*1 :
+                            typeof i === 'number' ?
+                                i : 0;
+                    };
+
+                    var project_name = $('#projectSiteId').val();
+                    var bill_status = $('#bill_status').val();
+
+
+
+                    // Total over all pages
+                    $.ajax({
+                        url: "/bill/listing/"+project_name+"/"+bill_status,
+                        type: 'POST',
+                        data :{
+                            "_token": $("input[name='_token']").val(),
+                            "get_total" : true,
+                        },
+                        success: function(result){
+                            // Total over this page
+                            var value = result['subTotal']
+                            var pageValue = api
+                                .column( 2, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 2 ).footer() ).html(
+                                pageValue.toFixed(3) +' ( '+ value.toFixed(3) +' total)'
+                            );
+
+                            value = result['tax']
+                            pageValue = api
+                                .column( 3, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 3 ).footer() ).html(
+                                pageValue.toFixed(3) +' ( '+ value.toFixed(3) +' total)'
+                            );
+
+                            value = result['rounded_amount_by']
+                            pageValue = api
+                                .column( 4, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 4 ).footer() ).html(
+                                pageValue.toFixed(3) +' ( '+ value.toFixed(3) +' total)'
+                            );
+
+                            value = result['final_total']
+                            pageValue = api
+                                .column( 5, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 5 ).footer() ).html(
+                                pageValue.toFixed(3) +' ( '+ value.toFixed(3) +' total)'
+                            );
+
+                            value = result['paid_amount']
+                            pageValue = api
+                                .column( 6, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 6 ).footer() ).html(
+                                pageValue.toFixed(3) +' ( '+ value.toFixed(3) +' total)'
+                            );
+
+                            value = result['balance_amount']
+                            pageValue = api
+                                .column( 7, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 7 ).footer() ).html(
+                                pageValue.toFixed(3) +' ( '+ value.toFixed(3) +' total)'
+                            );
+
+                        }});
+                },
+
                 "lengthMenu": [
                     [50, 100, 150],
                     [50, 100, 150] // change per page values here
