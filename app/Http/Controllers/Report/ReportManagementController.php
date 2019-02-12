@@ -3827,6 +3827,7 @@ class ReportManagementController extends Controller{
             $bill = new Bill();
             $billStatus = new BillStatus();
             $billTransaction = new BillTransaction();
+            $billtxnStatusId = new TransactionStatus();
             $billReconcileTransaction = new BillReconcileTransaction();
             $subcontractorStructure = new SubcontractorStructure();
             $subcontractorBill = new SubcontractorBill();
@@ -3845,6 +3846,7 @@ class ReportManagementController extends Controller{
             $projectSiteAdvancePayment = new ProjectSiteAdvancePayment();
             $outstandingMobilization = $projectSiteAdvancePayment->where('project_site_id',$projectSiteId)->sum('amount');
             $approvedBillStatusId = $billStatus->where('slug','approved')->pluck('id')->first();
+            $approvedBillStatusTxnId = $billtxnStatusId->where('slug','approved')->pluck('id')->first();
             $sales = $receipt = $total = $totalRetention = $totalHold = $debitAmount = $tdsAmount = $subcontractorTotal =
             $otherRecoveryAmount = $mobilization = $purchaseAmount = $salaryAmount = $peticashPurchaseAmount =
             $salesTaxAmount = $officeExpense /*$purchaseOrderGst = $assetMaintenanceGst = $subcontractorGst = $inventorySiteTransfersInGst =
@@ -3865,7 +3867,8 @@ class ReportManagementController extends Controller{
                     $billIds = $bill->where('quotation_id',$quotation['id'])
                             ->where('bill_status_id',$approvedBillStatusId)->orderBy('id')
                             ->pluck('id');
-                    $billTransactionData = $billTransaction->whereIn('bill_id',$billIds)->get();
+                    $billTransactionData = $billTransaction->where('transaction_status_id',$approvedBillStatusTxnId)
+                        ->whereIn('bill_id',$billIds)->get();
                     $billReconcileTransactionData = $billReconcileTransaction->whereIn('bill_id',$billIds)->get();
                     foreach ($billIds as $billId) {
                         $billData = $this->getBillData($billId);
@@ -3982,7 +3985,8 @@ class ReportManagementController extends Controller{
                             ->where('bill_status_id',$approvedBillStatusId)->orderBy('id')
                             ->whereMonth('date',$month['id'])
                             ->pluck('id');
-                        $billTransactionData = $billTransaction->whereIn('bill_id',$billIds)->get();
+                        $billTransactionData = $billTransaction->where('transaction_status_id',$approvedBillStatusTxnId)
+                            ->whereIn('bill_id',$billIds)->get();
                         $billReconcileTransactionData = $billReconcileTransaction->whereIn('bill_id',$billIds)->get();
                         foreach ($billIds as $billId) {
                             $billData = $this->getBillData($billId);
@@ -4138,7 +4142,9 @@ class ReportManagementController extends Controller{
                             ->whereMonth('date',$month['id'])
                             ->whereYear('date',$selectedYear['slug'])
                             ->pluck('id');
-                        $billTransactionData = $billTransaction->whereIn('bill_id',$billIds)->get();
+                        $billTransactionData = $billTransaction->where('transaction_status_id',$approvedBillStatusTxnId)
+
+                            ->whereIn('bill_id',$billIds)->get();
                         $billReconcileTransactionData = $billReconcileTransaction->whereIn('bill_id',$billIds)->get();
                         foreach ($billIds as $billId) {
                             $billData = $this->getBillData($billId);
