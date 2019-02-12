@@ -2736,8 +2736,8 @@ class ReportManagementController extends Controller{
 
                     dd($totalSalaryAmount." : ".$totalAdvanceAmount);*/
 
-
-                    $outstanding = $sales - $debitAmount - $tdsAmount - $totalRetention - $otherRecoveryAmount - $totalHold - $receipt - $mobilization;
+                    $receipt = $receipt - $mobilization;
+                    $outstanding = $sales - $debitAmount - $tdsAmount - $totalRetention - $otherRecoveryAmount - $totalHold - $receipt;
                     $total = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount + $officeExpense + $subcontractorTotal + $openingExpenses;
                     $totalWithAdvance = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount + $officeExpense + $subcontractorTotal + $openingExpenses
                                         + $subcontractorAdvTotal + $purchaseAdvTotal ;
@@ -2752,7 +2752,7 @@ class ReportManagementController extends Controller{
                                             null,
                                             round($sales,3),
                                             round($totalRetention,3),
-                                            round($receipt-$mobilization,3),
+                                            round($receipt,3),
                                             round($mobilization,3),
                                             round($outstanding,3),
                                             'Purchase',
@@ -4238,12 +4238,12 @@ class ReportManagementController extends Controller{
                 $totalAssetRentOpeningExpense = 0;
             }
 
-            $outstanding = $sales - $debitAmount - $tdsAmount - $totalRetention - $otherRecoveryAmount - $totalHold - $receipt - $mobilization;
+            $receipt = $receipt - $mobilization;
+            $outstanding = $sales - $debitAmount - $tdsAmount - $totalRetention - $otherRecoveryAmount - $totalHold - $receipt;
             $totalExpense = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount + $officeExpense + $subcontractorTotal + $openingExpenses;
             $totalExpenseWithAdv = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount
                                     + $officeExpense + $subcontractorTotal + $openingExpenses
                                     + $subcontractorAdvTotal + $purchaseAdvTotal ;
-            $receipt = $receipt - $mobilization;
             $salesPnL = $sales - $debitAmount - $tdsAmount - $totalHold - $otherRecoveryAmount;
             $salesWisePnL = $salesPnL - $totalExpense;
             $receiptWisePnL = $receipt - $totalExpense;
