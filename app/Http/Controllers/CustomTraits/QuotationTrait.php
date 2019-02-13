@@ -859,7 +859,7 @@ trait QuotationTrait{
             $billCount = $quotation->bill->where('bill_status_id','!=', $billCancelStatusId)->count();
             $billTypes = $subcontractorStructureType->select('id','name')->get();
             $opening_balance = OpeningBalanceSite::where('quotation_id',$quotation->id)->get()->toArray();
-            return view('admin.quotation.edit')->with(compact('quotationMiscellaneousMaterials','quotation','summaries','taxes','orderValue','user','quotationProducts','extraItems','userRole','beforeTaxOrderValue','bankInfo','checkBank','billTypes','billCount'));
+            return view('admin.quotation.edit')->with(compact('opening_balance','quotationMiscellaneousMaterials','quotation','summaries','taxes','orderValue','user','quotationProducts','extraItems','userRole','beforeTaxOrderValue','bankInfo','checkBank','billTypes','billCount'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Quotation Edit View',
