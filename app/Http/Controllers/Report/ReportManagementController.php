@@ -2741,7 +2741,7 @@ class ReportManagementController extends Controller{
                     $total = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount + $officeExpense + $subcontractorTotal + $openingExpenses;
                     $totalWithAdvance = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount + $officeExpense + $subcontractorTotal + $openingExpenses
                                         + $subcontractorAdvTotal + $purchaseAdvTotal ;
-                    $salesPnL = $sales - $debitAmount - $tdsAmount - $totalHold - $otherRecoveryAmount;
+                    $salesPnL = $sales - $debitAmount - $tdsAmount - $totalHold - $otherRecoveryAmount - $mobilization;
                     $salesWisePnL = $salesPnL - $total;
                     $receiptWisePnL = $receipt - $total;
                     $advreceiptWisePnL = (($outstandingMobilization - $mobilization) + $receipt) - $totalWithAdvance;
@@ -4244,7 +4244,7 @@ class ReportManagementController extends Controller{
             $totalExpenseWithAdv = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount
                                     + $officeExpense + $subcontractorTotal + $openingExpenses
                                     + $subcontractorAdvTotal + $purchaseAdvTotal ;
-            $salesPnL = $sales - $debitAmount - $tdsAmount - $totalHold - $otherRecoveryAmount;
+            $salesPnL = $sales - $debitAmount - $tdsAmount - $totalHold - $otherRecoveryAmount - $mobilization;
             $salesWisePnL = $salesPnL - $totalExpense;
             $receiptWisePnL = $receipt - $totalExpense;
             $advanceReceiptPnl = (($outstandingMobilization - $mobilization) + $receipt) - $totalExpenseWithAdv;
