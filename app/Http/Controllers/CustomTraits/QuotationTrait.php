@@ -18,6 +18,7 @@ use App\Helper\NumberHelper;
 use App\Helper\MaterialProductHelper;
 use App\Helper\UnitHelper;
 use App\Material;
+use App\OpeningBalanceSite;
 use App\Product;
 use App\ProductMaterialRelation;
 use App\ProductProfitMarginRelation;
@@ -857,6 +858,7 @@ trait QuotationTrait{
             $billCancelStatusId = BillStatus::where('slug', 'cancelled')->pluck('id')->first();
             $billCount = $quotation->bill->where('bill_status_id','!=', $billCancelStatusId)->count();
             $billTypes = $subcontractorStructureType->select('id','name')->get();
+            $opening_balance = OpeningBalanceSite::where('quotation_id',$quotation->id)->get()->toArray();
             return view('admin.quotation.edit')->with(compact('quotationMiscellaneousMaterials','quotation','summaries','taxes','orderValue','user','quotationProducts','extraItems','userRole','beforeTaxOrderValue','bankInfo','checkBank','billTypes','billCount'));
         }catch(\Exception $e){
             $data = [
