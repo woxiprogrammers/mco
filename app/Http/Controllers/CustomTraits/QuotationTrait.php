@@ -1587,6 +1587,7 @@ trait QuotationTrait{
     public function editWorkOrder(Request $request, $workOrder){
         try{
             $quotationModel = new Quotation();
+            $quotationData = array();
             /*$quotationData = [
                 'opening_expenses' => $request['open_expenses']
             ];*/
@@ -1844,19 +1845,18 @@ trait QuotationTrait{
         try{
             $status = 200;
             $counter = 0;
-            $openingBalData = new OpeningBalanceSite();
             $quotation = new Quotation();
             foreach ($request->opening_bal_id as $opening_bal) {
                 if($request->opening_bal_label[$counter] != "" && $request->opening_bal_values[$counter] != "" ) {
                     if ($opening_bal == 'new_opening_bal') {
-                        $data = array(
-                            'quotation_id' =>  (int)$request->quotation_id,
-                            'opening_balance_label' => $request->opening_bal_label[$counter],
-                            'opening_balance_value' => $request->opening_bal_values[$counter]
+                        DB::table('opening_balance_site')->insert(
+                            [ 'quotation_id' =>  (int)$request->quotation_id,
+                                'opening_balance_label' => $request->opening_bal_label[$counter],
+                                'opening_balance_value' => $request->opening_bal_values[$counter]
+                            ]
                         );
-                        $openingBalData::create($data);
                     } else {
-                        $openingBalData->where('id',$request->opening_bal_id[$counter])->update(
+                        DB::table('opening_balance_site')->where('id',$request->opening_bal_id[$counter])->update(
                             [ 'quotation_id' =>  (int)$request->quotation_id,
                                 'opening_balance_label' => $request->opening_bal_label[$counter],
                                 'opening_balance_value' => $request->opening_bal_values[$counter]
