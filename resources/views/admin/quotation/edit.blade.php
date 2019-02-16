@@ -736,8 +736,8 @@
                                                                         Opening Expenses
                                                                     </label>
                                                                 </div>
-                                                                <div class="col-md-4">
-                                                                    <input class="form-control" type="number" name="open_expenses" id="open_expenses" value="{{$quotation->opening_expenses}}">
+                                                                <div class="col-md-4 form-group">
+                                                                    <input class="form-control" type="number" name="open_expenses" id="open_expenses" value="{{$quotation->opening_expenses}}" >
                                                                     <input class="form-control" type="hidden" name="open_expenses_hidden" id="open_expenses_hidden" value="{{$quotation->opening_expenses}}">
 
                                                                 </div>
@@ -756,16 +756,14 @@
                                                                     <div class="row form-group" id="openingbalancefields">
                                                                         <?php $count = 1; ?>
                                                                         @foreach($opening_balance as $ob)
-                                                                            <div class="col-md-12">
-                                                                                <div class="col-md-2"><span class="form-control">{{$count++}}</span></div>
-                                                                                <div class="col-md-5"><input class="form-control" type="text" id="label-{{$ob['id']}}" value="{{$ob['opening_balance_label']}}"></div>
-                                                                                <div class="col-md-4"><input class="form-control" type="number" id="value-{{$ob['id']}}" value="{{$ob['opening_balance_value']}}" onkeyup="addopening_balance_amt('value-{{$ob['id']}}')"></div>
-                                                                                <div class="col-md-1"><button onclick="deleteOpeningbalance({{$ob['id']}});">X</button></div>
+                                                                            <div class="col-md-12 form-group" id="new-{{$count}}">
+                                                                                <div class="col-md-2"><span class="form-control">{{$count}}</span></div>
+                                                                                <div class="col-md-5"><input class="form-control" type="text" name="label-{{$ob['id']}}" id="label-{{$ob['id']}}" value="{{$ob['opening_balance_label']}}"></div>
+                                                                                <div class="col-md-4"><input class="form-control" type="number" name="value-{{$ob['id']}}" id="value-{{$ob['id']}}" value="{{$ob['opening_balance_value']}}" onkeyup="addopening_balance_amt('value-{{$ob['id']}}')"></div>
+                                                                                <div class="col-md-1"><button onclick="deleteOpeningbalance({{$ob['id']}}, '#new-{{$count++}}');">X</button></div>
                                                                             </div>
                                                                         @endforeach
                                                                     </div>
-                                                                    {{--<div class="row form-group" >
-                                                                    </div>--}}
                                                             </div>
                                                         </div>
                                                         <div class="tab-pane fade in" id="floorFormTab">
@@ -954,9 +952,25 @@
 @endif
 <script>
     var ob_count = {{$count}}
-    function deleteOpeningbalance(id) {
+    function deleteOpeningbalance(id, currId) {
         event.preventDefault();
-        alert(id + "Delete Logic here");
+
+        $.ajax({
+            url:'/quotation/remove-opening-balance',
+            type: "POST",
+            async: false,
+            data: {
+                _token: $('input[name="_token"]').val(),
+                opening_bal_id: id
+            },
+            success: function(data, textStatus, xhr){
+                $(currId).css('display','none');
+                alert(data['message']);
+            },
+            error: function(){
+
+            }
+        });
     }
 
     function deleteOpeningbalanceNew(id) {
@@ -977,8 +991,8 @@
             var ob_counter = 'new-'+ob_count;
             var addData = '<div class="col-md-12" id="new-'+ob_count+'">'+
                 '<div class="col-md-2"><span class="form-control">'+ob_count+'</span></div>' +
-                '<div class="col-md-5"><input class="form-control" type="text" id="label-'+ob_count+'" value=""></div>'+
-                '<div class="col-md-4"><input class="form-control" type="number" id="value-'+ob_count+'" value="" onkeyup="addopening_balance_amt(\'value-'+ob_count+'\')"></div>'+
+                '<div class="col-md-5"><input class="form-control" type="text" name="label-'+ob_count+'" id="label-'+ob_count+'" value=""></div>'+
+                '<div class="col-md-4"><input class="form-control" type="number" name="value-'+ob_count+'" id="value-'+ob_count+'" value="" onkeyup="addopening_balance_amt(\'value-'+ob_count+'\')"></div>'+
                 '<div class="col-md-1"><button onclick="deleteOpeningbalanceNew(\''+ob_counter+'\');">X</button></div>'+
                 '</div>';
                 $("#openingbalancefields").append(addData);

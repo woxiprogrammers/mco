@@ -1820,4 +1820,22 @@ trait QuotationTrait{
             ->count();
         return $productBillCount;
     }
+
+    public function openingBalanceRemove(Request $request){
+        try{
+            $status = 200;
+            OpeningBalanceSite::destroy($request->opening_bal_id);
+            $response = ['message' => 'Opening Balance deleted successfully.'];
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Remove Opening Balance',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 500;
+            $response = ['message' => 'Something went wrong.'];
+        }
+        return response()->json($response,$status);
+    }
 }
