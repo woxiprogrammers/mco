@@ -254,6 +254,9 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::group(['prefix' => 'extra-item'],function(){
             Route::post('create',array('uses'=>'Admin\QuotationController@addExtraItems'));
         });
+        Route::post('remove-opening-balance',array('uses' => 'Admin\QuotationController@openingBalanceRemove'));
+        Route::post('opening-balance-save',array('uses' => 'Admin\QuotationController@openingBalanceSave'));
+
     });
 
     Route::group(['prefix' => 'project'], function(){

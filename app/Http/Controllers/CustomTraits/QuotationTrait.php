@@ -859,7 +859,8 @@ trait QuotationTrait{
             $billCount = $quotation->bill->where('bill_status_id','!=', $billCancelStatusId)->count();
             $billTypes = $subcontractorStructureType->select('id','name')->get();
             $opening_balance = OpeningBalanceSite::where('quotation_id',$quotation->id)->get()->toArray();
-            return view('admin.quotation.edit')->with(compact('opening_balance','quotationMiscellaneousMaterials','quotation','summaries','taxes','orderValue','user','quotationProducts','extraItems','userRole','beforeTaxOrderValue','bankInfo','checkBank','billTypes','billCount'));
+            $opening_bal = array_sum(array_column($opening_balance,'opening_balance_value'));
+            return view('admin.quotation.edit')->with(compact('opening_bal','opening_balance','quotationMiscellaneousMaterials','quotation','summaries','taxes','orderValue','user','quotationProducts','extraItems','userRole','beforeTaxOrderValue','bankInfo','checkBank','billTypes','billCount'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Quotation Edit View',
@@ -1586,9 +1587,9 @@ trait QuotationTrait{
     public function editWorkOrder(Request $request, $workOrder){
         try{
             $quotationModel = new Quotation();
-            $quotationData = [
+            /*$quotationData = [
                 'opening_expenses' => $request['open_expenses']
-            ];
+            ];*/
             if($request->has('bill_type_id')){
                 $quotationData['bill_type_id'] = $request['bill_type_id'];
             }
@@ -1819,5 +1820,68 @@ trait QuotationTrait{
             ->where('bills.quotation_id',$quotationId)
             ->count();
         return $productBillCount;
+    }
+
+    public function openingBalanceRemove(Request $request){
+        try{
+            $status = 200;
+            OpeningBalanceSite::destroy($request->opening_bal_id);
+            $response = ['message' => 'Opening Balance deleted successfully.'];
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Remove Opening Balance',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 500;
+            $response = ['message' => 'Something went wrong.'];
+        }
+        return response()->json($response,$status);
+    }
+
+    public function openingBalanceSave(Request $request) {
+        try{
+            $status = 200;
+            $counter = 0;
+            $openingBalData = new OpeningBalanceSite();
+            $quotation = new Quotation();
+            foreach ($request->opening_bal_id as $opening_bal) {
+                if($request->opening_bal_label[$counter] != "" && $request->opening_bal_values[$counter] != "" ) {
+                    if ($opening_bal == 'new_opening_bal') {
+                        $data = array(
+                            'quotation_id' =>  (int)$request->quotation_id,
+                            'opening_balance_label' => $request->opening_bal_label[$counter],
+                            'opening_balance_value' => $request->opening_bal_values[$counter]
+                        );
+                        $openingBalData::create($data);
+                    } else {
+                        $openingBalData->where('id',$request->opening_bal_id[$counter])->update(
+                            [ 'quotation_id' =>  (int)$request->quotation_id,
+                                'opening_balance_label' => $request->opening_bal_label[$counter],
+                                'opening_balance_value' => $request->opening_bal_values[$counter]
+                            ]
+                        );
+                    }
+                }
+                $counter++;
+            }
+            $opening_bal_sum = OpeningBalanceSite::where('quotation_id', $request->quotation_id)->sum('opening_balance_value');
+            $quotation->where('id',$request->quotation_id)->update(
+                [ 'opening_expenses' => $opening_bal_sum
+                ]
+            );
+            $response = ['message' => 'Opening Balance save successfully.'];
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Remove Opening Balance',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 500;
+            $response = ['message' => 'Something went wrong.'];
+        }
+        return response()->json($response,$status);
     }
 }
