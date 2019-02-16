@@ -738,11 +738,11 @@
                                                                 </div>
                                                                 <div class="col-md-4 form-group">
                                                                     <input class="form-control" type="number" name="open_expenses" id="open_expenses" value="{{$quotation->opening_expenses}}" >
-                                                                    <input class="form-control" type="hidden" name="open_expenses_hidden" id="open_expenses_hidden" value="{{$quotation->opening_expenses}}">
 
                                                                 </div>
                                                                 <div class="col-md-5">
                                                                     <button id="addOpeningbalance">Add</button>
+                                                                    <button id="saveOpeningbalance">Save</button>
                                                                 </div>
                                                                     <div class="row" style="font-weight: bolder;">
                                                                         <div class="col-md-12">
@@ -758,8 +758,11 @@
                                                                         @foreach($opening_balance as $ob)
                                                                             <div class="col-md-12 form-group" id="new-{{$count}}">
                                                                                 <div class="col-md-2"><span class="form-control">{{$count}}</span></div>
-                                                                                <div class="col-md-5"><input class="form-control" type="text" name="label-{{$ob['id']}}" id="label-{{$ob['id']}}" value="{{$ob['opening_balance_label']}}"></div>
-                                                                                <div class="col-md-4"><input class="form-control" type="number" name="value-{{$ob['id']}}" id="value-{{$ob['id']}}" value="{{$ob['opening_balance_value']}}" onkeyup="addopening_balance_amt('value-{{$ob['id']}}')"></div>
+                                                                                <div class="col-md-5">
+                                                                                    <input class="form-control" type="hidden" name="op_id[]"  value="{{$ob['id']}}">
+                                                                                    <input class="form-control" type="text" name="label_ob[]" id="label-{{$ob['id']}}" value="{{$ob['opening_balance_label']}}">
+                                                                                </div>
+                                                                                <div class="col-md-4"><input class="form-control" type="number" name="value_ob[]" id="value-{{$ob['id']}}" value="{{$ob['opening_balance_value']}}" onkeyup="addopening_balance_amt()"></div>
                                                                                 <div class="col-md-1"><button onclick="deleteOpeningbalance({{$ob['id']}}, '#new-{{$count++}}');">X</button></div>
                                                                             </div>
                                                                         @endforeach
@@ -951,10 +954,10 @@
 
 @endif
 <script>
+
     var ob_count = {{$count}}
     function deleteOpeningbalance(id, currId) {
         event.preventDefault();
-
         $.ajax({
             url:'/quotation/remove-opening-balance',
             type: "POST",
@@ -964,7 +967,12 @@
                 opening_bal_id: id
             },
             success: function(data, textStatus, xhr){
-                $(currId).css('display','none');
+                $(currId).remove();
+                var ob_amt = 0;
+                $("input[name='value_ob[]']").each(function() {
+                    ob_amt = parseFloat(ob_amt) + parseFloat($(this).val());
+                });
+                document.getElementById('open_expenses').value = ob_amt.toFixed(3);
                 alert(data['message']);
             },
             error: function(){
@@ -976,28 +984,81 @@
     function deleteOpeningbalanceNew(id) {
         event.preventDefault();
         var idStr = "#"+id;
-        $(idStr).css('display','none');
+        $(idStr).remove();
+        var ob_amt = 0;
+        $("input[name='value_ob[]']").each(function() {
+            ob_amt = parseFloat(ob_amt) + parseFloat($(this).val());
+        });
+        document.getElementById('open_expenses').value = ob_amt.toFixed(3);
+
+
     }
 
-    function addopening_balance_amt(amount) {
+    function addopening_balance_amt() {
         event.preventDefault();
-        var new_opening_balance = parseFloat(document.getElementById('open_expenses_hidden').value) + parseFloat(document.getElementById(amount).value);
-        document.getElementById('open_expenses').value = new_opening_balance.toFixed(3);
+        var ob_amt = 0;
+        $("input[name='value_ob[]']").each(function() {
+            ob_amt = parseFloat(ob_amt) + parseFloat($(this).val());
+        });
+        document.getElementById('open_expenses').value = ob_amt.toFixed(3);
     }
 
     $(document).ready(function(){
+
         $("#addOpeningbalance").on('click', function () {
             event.preventDefault();
             var ob_counter = 'new-'+ob_count;
-            var addData = '<div class="col-md-12" id="new-'+ob_count+'">'+
+            var addData = '<div class="col-md-12 form-group" id="new-'+ob_count+'">'+
                 '<div class="col-md-2"><span class="form-control">'+ob_count+'</span></div>' +
-                '<div class="col-md-5"><input class="form-control" type="text" name="label-'+ob_count+'" id="label-'+ob_count+'" value=""></div>'+
-                '<div class="col-md-4"><input class="form-control" type="number" name="value-'+ob_count+'" id="value-'+ob_count+'" value="" onkeyup="addopening_balance_amt(\'value-'+ob_count+'\')"></div>'+
+                '<div class="col-md-5"><input class="form-control" type="hidden" name="op_id[]" value="new_opening_bal"><input class="form-control" type="text" name="label_ob[]" id="label-'+ob_count+'" value=""></div>'+
+                '<div class="col-md-4"><input class="form-control" type="number" name="value_ob[]" id="value-'+ob_count+'" value="0" onkeyup="addopening_balance_amt()" ></div>'+
                 '<div class="col-md-1"><button onclick="deleteOpeningbalanceNew(\''+ob_counter+'\');">X</button></div>'+
                 '</div>';
                 $("#openingbalancefields").append(addData);
-                ob_count++
+                ob_count++;
         });
+
+        $("#saveOpeningbalance").on('click', function(){
+            event.preventDefault();
+            var values = [];
+            var label = [];
+            var ob_id = [];
+
+            $("input[name='value_ob[]']").each(function() {
+                values.push($(this).val());
+            });
+
+
+            $("input[name='label_ob[]']").each(function() {
+                label.push($(this).val());
+            });
+
+            $("input[name='op_id[]']").each(function() {
+                ob_id.push($(this).val());
+            });
+
+            $.ajax({
+                url:'/quotation/opening-balance-save',
+                type: "POST",
+                async: false,
+                data: {
+                    _token: $('input[name="_token"]').val(),
+                    opening_bal_id: ob_id,
+                    opening_bal_label: label,
+                    opening_bal_values: values,
+                    quotation_id : $('input[name="quotation_id"]').val()
+
+                },
+                success: function(data, textStatus, xhr){
+                    //$(currId).css('display','none');
+                    alert(data['message']);
+                },
+                error: function(){
+
+                }
+            });
+        });
+
         EditQuotation.init();
         WorkOrderFrom.init();
         CreateExtraItem.init();
