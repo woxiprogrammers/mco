@@ -356,7 +356,6 @@ class ReportManagementController extends Controller{
             switch($reportType) {
 
                 case 'sitewise_master_peticash_report' :
-                    $date = date('l, d F Y',strtotime($secondParameter)) .' - '. date('l, d F Y',strtotime($firstParameter));
                     $data = $this->getMasterPeticashReport($firstParameter,$secondParameter,$project_site_id);
                     $projectSite = new ProjectSite();
                     $projectName = $projectSite->join('projects','projects.id','=','project_sites.project_id')
@@ -499,15 +498,8 @@ class ReportManagementController extends Controller{
                             $row++; $row++;
                             $headerRow =  $row + 1;
                             foreach($data as $key => $rowData){
-                                //dd($rowData);
                                 $next_column = 'A';
                                 $row++;
-                                /*if(array_key_exists('set_color',$rowData)){
-                                    $setColor = true;
-                                    unset($rowData['set_color']);
-                                }else{
-                                    $setColor = false;
-                                }*/
                                 if(array_key_exists('Colour',$rowData)){
                                     $backgroundColor = $rowData['Colour'];
                                     unset($rowData['Colour']);
@@ -531,8 +523,7 @@ class ReportManagementController extends Controller{
                                         }
                                         $cell->setBorder('thin', 'thin', 'thin', 'thin');
                                         $cell->setAlignment('center')->setValignment('center');
-                                        ($key1 === 'basic_amount' ||$key1 === 'tax_amount' || $key1 === 'bill_amount' || ($key1 === 'monthly_total' && $cellData !== null))
-                                            ? $cell->setValue(round($cellData,3)) : $cell->setValue($cellData);
+                                        $cell->setValue($cellData);
 
                                     });
                                 }
