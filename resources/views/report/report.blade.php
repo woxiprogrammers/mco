@@ -53,6 +53,7 @@
                                                     <div class="col-md-4">
                                                         <select class="form-control" id="report_type" name="report_type" onchange="getDivData()">
                                                             <option value="sitewise_asset_rent_report">Asset Rent Report</option>
+                                                            <option value="sitewise_master_peticash_report">Master Peticash Report</option>
                                                             <option value="sitewise_indirect_expenses_report">Indirect Expenses Report</option>
                                                             <option value="sitewise_mis_purchase_report">Mis. Purchase Report</option>
                                                             <option value="sitewise_purchase_report">Purchase Report</option>
