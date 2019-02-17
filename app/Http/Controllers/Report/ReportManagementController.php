@@ -357,13 +357,19 @@ class ReportManagementController extends Controller{
                 case 'sitewise_master_peticash_report' :
                     $date = date('l, d F Y',strtotime($secondParameter)) .' - '. date('l, d F Y',strtotime($firstParameter));
                     $data = $this->getMasterPeticashReport($firstParameter,$secondParameter,$project_site_id);
-                   // dd($data);
-                    $projectName = '';
+                    $projectSite = new ProjectSite();
+                    $projectName = $projectSite->join('projects','projects.id','=','project_sites.project_id')
+                        ->where('project_sites.id',$project_site_id)->pluck('projects.name')->first();
 
-                    $date = '';
-                    Excel::create($reportType."_".$currentDate, function($excel) use($monthlyTotal, $data, $reportType, /*$header,*/ $companyHeader, $date, $projectName/*, $colorData*/) {
+                    $date = date('l, d F Y',strtotime($firstParameter)) .' - '. date('l, d F Y',strtotime($secondParameter));
+                    $colorData = array(['Mis. Purchase' => '#f9fbfc'], ['Peticash Labour Salary' => '#77b4ea'], ['Peticash labour Advance' => '#9346a8'],
+                        ['Purchase Order Advance Payments' => '#f7f8f9'], ['Purchase Order Bill Payments' => '#7b68b7'], ['Subcontractor Advance Payments' => '#c48738'],
+                        ['Subcontractor Payment' => '#e21257'], ['Project Site Advance Payments' => '#f7f8f9'], ['Site Transfer Bill Payments' => '#f7f8f9'],
+                        ['Asset Maintenance Bill Payment' => '#f7f8f9'], ['Subcontractor Bill Reconcile Cash' => '#f7f8f9'], ['Sales Bill Reconcile Transaction' => '#f7f8f9'],
+                        ['Project Site Indirect Expenses' => '#f7f8f9']);
+                    Excel::create($reportType."_".$currentDate, function($excel) use($monthlyTotal, $data, $reportType, /*$header,*/ $companyHeader, $date, $projectName, $colorData) {
                         $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(10);
-                        $excel->sheet($reportType, function($sheet) use($monthlyTotal, $data, /*$header,*/ $companyHeader, $date, $projectName/*, $colorData*/) {
+                        $excel->sheet($reportType, function($sheet) use($monthlyTotal, $data, /*$header,*/ $companyHeader, $date, $projectName, $colorData) {
                             $objDrawing = new \PHPExcel_Worksheet_Drawing();
                             $objDrawing->setPath(public_path('/assets/global/img/logo.jpg')); //your image path
                             $objDrawing->setWidthAndHeight(148,74);
@@ -420,7 +426,8 @@ class ReportManagementController extends Controller{
                                 $cell->setValue($date);
                             });
 
-                            /*$colorRow = $row = 10;
+                          //  dd($colorData);
+                            $colorRow = $row = 10;
                             foreach($colorData as $key => $rowData){
                                 $next_column = 'D';
                                 $colorRow++;
@@ -436,7 +443,7 @@ class ReportManagementController extends Controller{
 
                                 }
                             }
-                            $monthHeaderRow =  $row+1;
+                            /*$monthHeaderRow =  $row+1;
                             foreach($monthlyTotal as $key => $rowData){
                                 $next_column = 'A';
                                 if(array_key_exists('make_bold',$rowData)){
@@ -459,9 +466,9 @@ class ReportManagementController extends Controller{
                                     });
 
                                 }
-                            }
-                            $row++; $row++;*/
-                            $row = 10;
+                            }*/
+                            $row = $colorRow++;
+                            $row++; $row++;
                             $headerRow =  $row + 1;
                             foreach($data as $key => $rowData){
                                 //dd($rowData);
@@ -3222,6 +3229,7 @@ class ReportManagementController extends Controller{
         $data[0] = array(
             'Bill Date', 'Bill Create Date', 'Bill No', 'Vendor/ Subcontractor / Labour name', 'Item Name', 'Bill Amount', 'Monthly Total'
         );
+
         foreach ($transactionsData as $key => $reportData){
             if(array_key_exists('purchase_id',$reportData->toArray())){
                 $color = '#f9fbfc'; // White
@@ -3246,7 +3254,7 @@ class ReportManagementController extends Controller{
                 $color = '#7b68b7';  //purple
                 $source = 'purchase_order_bill_payments';
             }elseif(array_key_exists('subcontractor_advance_payments',$reportData->toArray())){
-                $color = 'skin';
+                $color = '#c48738';
                 $reportData['source_name'] = 'Advance cash';
                 $source = 'subcontractor_advance_payments';
             }elseif(array_key_exists('subcontractor_payment',$reportData->toArray())){
