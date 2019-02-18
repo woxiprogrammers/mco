@@ -733,7 +733,7 @@
                                                             <div class="form-group">
                                                                 <div class="col-md-3">
                                                                     <label class="control-form pull-right">
-                                                                        Opening Expenses
+                                                                        Total Opening Expenses
                                                                     </label>
                                                                 </div>
                                                                 <div class="col-md-4 form-group">
@@ -745,6 +745,9 @@
                                                                     <button id="saveOpeningbalance">Save</button>
                                                                 </div>
                                                                     <div class="row" style="font-weight: bolder;">
+                                                                        <div class="col-md-12">
+                                                                            <p>NOTE : <i style="font-size: 10px;color: indianred;">Please click on save button before submitting data . Only then the Total Opening Expenses will be saved against the quotation.</i></p>
+                                                                        </div>
                                                                         <div class="col-md-12">
                                                                             <div class="col-md-2">Sr No :</div>
                                                                             <div class="col-md-5">Label</div>
@@ -958,47 +961,54 @@
     var ob_count = {{$count}}
     function deleteOpeningbalance(id, currId) {
         event.preventDefault();
-        $.ajax({
-            url:'/quotation/remove-opening-balance',
-            type: "POST",
-            async: false,
-            data: {
-                _token: $('input[name="_token"]').val(),
-                opening_bal_id: id
-            },
-            success: function(data, textStatus, xhr){
-                $(currId).remove();
-                var ob_amt = 0;
-                $("input[name='value_ob[]']").each(function() {
-                    ob_amt = parseFloat(ob_amt) + parseFloat($(this).val());
-                });
-                document.getElementById('open_expenses').value = ob_amt.toFixed(3);
-                alert(data['message']);
-            },
-            error: function(){
+        if (confirm("Are you sure you want to delete?")) {
+            $.ajax({
+                url:'/quotation/remove-opening-balance',
+                type: "POST",
+                async: false,
+                data: {
+                    _token: $('input[name="_token"]').val(),
+                    opening_bal_id: id,
+                    quotation_id : $('input[name="quotation_id"]').val()
+                },
+                success: function(data, textStatus, xhr){
+                    $(currId).remove();
+                    var ob_amt = 0;
+                    $("input[name='value_ob[]']").each(function() {
+                        ob_amt = parseFloat(ob_amt) + parseFloat($(this).val());
+                    });
+                    document.getElementById('open_expenses').value = ob_amt.toFixed(3);
+                    alert(data['message']);
+                },
+                error: function(){
 
-            }
-        });
+                }
+            });
+        }
     }
 
     function deleteOpeningbalanceNew(id) {
         event.preventDefault();
-        var idStr = "#"+id;
-        $(idStr).remove();
-        var ob_amt = 0;
-        $("input[name='value_ob[]']").each(function() {
-            ob_amt = parseFloat(ob_amt) + parseFloat($(this).val());
-        });
-        document.getElementById('open_expenses').value = ob_amt.toFixed(3);
-
-
+        if (confirm("Are you sure you want to delete?")) {
+            var idStr = "#"+id;
+            $(idStr).remove();
+            var ob_amt = 0;
+            $("input[name='value_ob[]']").each(function() {
+                ob_amt = parseFloat(ob_amt) + parseFloat($(this).val());
+            });
+            document.getElementById('open_expenses').value = ob_amt.toFixed(3);
+        }
     }
 
     function addopening_balance_amt() {
         event.preventDefault();
         var ob_amt = 0;
         $("input[name='value_ob[]']").each(function() {
-            ob_amt = parseFloat(ob_amt) + parseFloat($(this).val());
+            var current_amt = $(this).val();
+            if (current_amt == "") {
+                current_amt = 0;
+            }
+            ob_amt = parseFloat(ob_amt) + parseFloat(current_amt);
         });
         document.getElementById('open_expenses').value = ob_amt.toFixed(3);
     }
@@ -1020,43 +1030,45 @@
 
         $("#saveOpeningbalance").on('click', function(){
             event.preventDefault();
-            var values = [];
-            var label = [];
-            var ob_id = [];
+            if (confirm("Are you sure you want to save?")) {
+                var values = [];
+                var label = [];
+                var ob_id = [];
 
-            $("input[name='value_ob[]']").each(function() {
-                values.push($(this).val());
-            });
+                $("input[name='value_ob[]']").each(function() {
+                    values.push($(this).val());
+                });
 
 
-            $("input[name='label_ob[]']").each(function() {
-                label.push($(this).val());
-            });
+                $("input[name='label_ob[]']").each(function() {
+                    label.push($(this).val());
+                });
 
-            $("input[name='op_id[]']").each(function() {
-                ob_id.push($(this).val());
-            });
+                $("input[name='op_id[]']").each(function() {
+                    ob_id.push($(this).val());
+                });
 
-            $.ajax({
-                url:'/quotation/opening-balance-save',
-                type: "POST",
-                async: false,
-                data: {
-                    _token: $('input[name="_token"]').val(),
-                    opening_bal_id: ob_id,
-                    opening_bal_label: label,
-                    opening_bal_values: values,
-                    quotation_id : $('input[name="quotation_id"]').val()
+                $.ajax({
+                    url:'/quotation/opening-balance-save',
+                    type: "POST",
+                    async: false,
+                    data: {
+                        _token: $('input[name="_token"]').val(),
+                        opening_bal_id: ob_id,
+                        opening_bal_label: label,
+                        opening_bal_values: values,
+                        quotation_id : $('input[name="quotation_id"]').val()
 
-                },
-                success: function(data, textStatus, xhr){
-                    //$(currId).css('display','none');
-                    alert(data['message']);
-                },
-                error: function(){
+                    },
+                    success: function(data, textStatus, xhr){
+                        //$(currId).css('display','none');
+                        alert(data['message']);
+                    },
+                    error: function(){
 
-                }
-            });
+                    }
+                });
+            }
         });
 
         EditQuotation.init();
