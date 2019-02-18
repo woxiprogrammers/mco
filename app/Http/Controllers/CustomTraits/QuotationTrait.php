@@ -1826,7 +1826,13 @@ trait QuotationTrait{
     public function openingBalanceRemove(Request $request){
         try{
             $status = 200;
+            $quotation = new Quotation();
             OpeningBalanceSite::destroy($request->opening_bal_id);
+            $opening_bal_sum = OpeningBalanceSite::where('quotation_id', $request->quotation_id)->sum('opening_balance_value');
+            $quotation->where('id',$request->quotation_id)->update(
+                [ 'opening_expenses' => $opening_bal_sum
+                ]
+            );
             $response = ['message' => 'Opening Balance deleted successfully.'];
         }catch(\Exception $e){
             $data = [
@@ -1871,10 +1877,10 @@ trait QuotationTrait{
                 [ 'opening_expenses' => $opening_bal_sum
                 ]
             );
-            $response = ['message' => 'Opening Balance save successfully.'];
+            $response = ['message' => 'Opening Expenses saved successfully.'];
         }catch(\Exception $e){
             $data = [
-                'action' => 'Remove Opening Balance',
+                'action' => 'Save Opening Balance',
                 'param' => $request->all(),
                 'exception' => $e->getMessage()
             ];
