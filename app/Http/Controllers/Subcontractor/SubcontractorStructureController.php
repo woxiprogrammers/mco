@@ -288,7 +288,7 @@ class SubcontractorStructureController extends Controller
                 if ($subcontractorBillSummaries->isEmpty()){
                     $structureSummaries[$iterator]['min_rate'] = 1;
                     $structureSummaries[$iterator]['min_total_work_area'] = 1;
-                    if ($subcontractorStructure->contractType->slug == 'itemwise'){
+                    if (in_array($subcontractorStructure->contractType->slug, ['itemwise', 'amountwise'])){
                         $structureSummaries[$iterator]['can_remove'] = true;
                     }else{
                         $structureSummaries[$iterator]['can_remove'] = false;
@@ -296,7 +296,7 @@ class SubcontractorStructureController extends Controller
                 } else {
                     $structureSummaries[$iterator]['min_rate'] = 1;
                     $structureSummaries[$iterator]['min_total_work_area'] = 1;
-                    if ($subcontractorStructure->contractType->slug == 'itemwise'){
+                    if (in_array($subcontractorStructure->contractType->slug, ['itemwise', 'amountwise'])){
                         $structureSummaries[$iterator]['can_remove'] = true;
                     }else{
                         $structureSummaries[$iterator]['can_remove'] = false;
@@ -322,20 +322,25 @@ class SubcontractorStructureController extends Controller
 
     public function editStructure(Request $request, $subcontractorStructure){
         try{
-            foreach ($request->summaries as $summaryId){
-                $structureSummaryData = [
-                    'subcontractor_structure_id' => $subcontractorStructure->id,
-                    'summary_id' => $summaryId
-                ];
-                $subcontractorStructureSummary = SubcontractorStructureSummary::where($structureSummaryData)->first();
-                $structureSummaryData['rate'] = (float) $request->rate[$summaryId];
-                $structureSummaryData['description'] = $request->description[$summaryId];
-                $structureSummaryData['total_work_area'] = (float)$request->total_work_area[$summaryId];
-                $structureSummaryData['unit_id'] = (int)$request->unit[$summaryId];
-                if ($subcontractorStructureSummary == null){
-                    $subcontractorStructureSummary = SubcontractorStructureSummary::create($structureSummaryData);
-                }else{
-                    $subcontractorStructureSummary->update($structureSummaryData);
+            $structureSummaryIds = [];
+            foreach($request->structure_summaries as $structureSummary){
+                if(array_key_exists('summary_id', $structureSummary)){
+                    $structureSummary['subcontractor_structure_id'] = $subcontractorStructure->id;
+                    $subcontractorStructureSummary = SubcontractorStructureSummary::create($structureSummary);
+                } elseif (array_key_exists('subcontractor_structure_summary_id', $structureSummary)) {
+                    $subcontractorStructureSummary = SubcontractorStructureSummary::where('id', $structureSummary['subcontractor_structure_summary_id'])->first();
+                    unset($structureSummary['subcontractor_structure_summary_id']);
+                    $subcontractorStructureSummary->update($structureSummary);
+                } else {
+                    $request->session()->flash('error', 'Something went wrong with submitted data.');
+                    return redirect('/subcontractor/structure/edit/'.$subcontractorStructure->id);
+                }
+                $structureSummaryIds[] = $subcontractorStructureSummary->id;
+            }
+            $deletedStructureSummaries = SubcontractorStructureSummary::where('subcontractor_structure_id', $subcontractorStructure->id)->whereNotIn('id', $structureSummaryIds)->get();
+            if($deletedStructureSummaries->isNotEmpty()){
+                foreach ($deletedStructureSummaries as $deletedStructureSummary){
+                    $deletedStructureSummary->delete();
                 }
             }
             if($request->has('extra_items')){
