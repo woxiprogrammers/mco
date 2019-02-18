@@ -1833,7 +1833,7 @@ trait QuotationTrait{
                 [ 'opening_expenses' => $opening_bal_sum
                 ]
             );
-            $response = ['message' => 'Opening Balance deleted successfully.'];
+            $response = ['message' => 'Opening Expenses deleted successfully.'];
         }catch(\Exception $e){
             $data = [
                 'action' => 'Remove Opening Balance',

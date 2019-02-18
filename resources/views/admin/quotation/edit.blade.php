@@ -1016,7 +1016,17 @@
     $(document).ready(function(){
 
         $("#addOpeningbalance").on('click', function () {
+            var ob_values = [];
             event.preventDefault();
+
+            $("input[name='value_ob[]']").each(function() {
+                ob_values.push($(this).val());
+            });
+
+            if (ob_values.length == 0) {
+                ob_count = 1;
+            }
+
             var ob_counter = 'new-'+ob_count;
             var addData = '<div class="col-md-12 form-group" id="new-'+ob_count+'">'+
                 '<div class="col-md-2"><span class="form-control">'+ob_count+'</span></div>' +
