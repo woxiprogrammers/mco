@@ -602,7 +602,6 @@ class InventoryManageController extends Controller
                         ->orderBy('name', 'asc')->get();
                 } else {
                     $inventoryData = InventoryComponent::where('project_site_id', $projectSiteId)
-                        //->where('id',3658)
                         ->orderBy('name', 'asc')->get();
                 }
             }else{
