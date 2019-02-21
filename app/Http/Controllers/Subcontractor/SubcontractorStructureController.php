@@ -15,6 +15,7 @@ use App\SubcontractorStructureExtraItem;
 use App\SubcontractorStructureSummary;
 use App\SubcontractorStructureType;
 use App\Summary;
+use App\TransactionStatus;
 use App\Unit;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -282,6 +283,7 @@ class SubcontractorStructureController extends Controller
             $summaries = Summary::where('is_active', true)->select('id', 'name')->get()->toArray();
             $structureSummaries = $subcontractorStructure->summaries->except(['created_at','updated_at'])->toArray();
             $iterator = 0;
+            $approvedTransactionStatus = TransactionStatus::where('slug', 'active')->pluck('id')->first();
             foreach($structureSummaries as $structureSummary){
                 $structureSummaries[$iterator]['summary_name'] = Summary::where('id', $structureSummary['summary_id'])->pluck('name')->first();
                 $subcontractorBillSummaries = SubcontractorBillSummary::where('subcontractor_structure_summary_id', $structureSummary['id'])->get();
@@ -294,14 +296,23 @@ class SubcontractorStructureController extends Controller
                         $structureSummaries[$iterator]['can_remove'] = false;
                     }
                 } else {
-                    $structureSummaries[$iterator]['min_rate'] = 1;
-                    $structureSummaries[$iterator]['min_total_work_area'] = 1;
-                    if (in_array($subcontractorStructure->contractType->slug, ['itemwise', 'amountwise'])){
+                    $approvedBillTransactions = SubcontractorBillTransaction::join('subcontractor_bills', 'subcontractor_bills.id','=', 'subcontractor_bill_transactions.subcontractor_bills_id')
+                        ->where('subcontractor_bill_transactions.transaction_status_id', $approvedTransactionStatus)
+                        ->where('subcontractor_bills.sc_structure_id', $subcontractorStructure->id )
+                        ->get();
+                    if ($approvedBillTransactions->isEmpty()){
+                        $structureSummaries[$iterator]['min_rate'] = 1;
+                        $structureSummaries[$iterator]['min_total_work_area'] = 1;
                         $structureSummaries[$iterator]['can_remove'] = true;
-                    }else{
+                    } else {
+                        $structureSummaries[$iterator]['min_rate'] = $structureSummary->rate;
+                        $structureSummaries[$iterator]['min_total_work_area'] = $structureSummary->total_work_area;
                         $structureSummaries[$iterator]['can_remove'] = false;
                     }
-                  // Logic to restrict minimum rate and work area if bills and approved transactions are created.
+                    if($subcontractorStructure->contractType->slug == 'sqft' && $structureSummaries[$iterator]['can_remove']){
+                        $structureSummaries[$iterator]['can_remove'] = false;
+                    }
+
                 }
                 $iterator += 1;
             }
