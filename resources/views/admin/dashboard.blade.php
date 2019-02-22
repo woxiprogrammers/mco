@@ -280,6 +280,7 @@
                                                     <th style="width:10%"> Misc. Purchase </th>
                                                     <th style="width:10%"> Office Expenses </th>
                                                     <th style="width:10%"> Opening Balance </th>
+                                                    <th style="width:10%"> Indirect Expenses </th>
                                                     <th style="width:10%"> Total Expenses </th>
                                                 </tr>
                                                     <tr class="filter"><th></th>
@@ -296,6 +297,7 @@
                                                         <th>
                                                             <input type="hidden" class="form-control form-filter" name="expense_year_id" id="expense_year_id">
                                                         </th>
+                                                        <th></th>
                                                         <th>
                                                             <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                             <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
@@ -309,6 +311,7 @@
                                                 <tfoot>
                                                     <tr>
                                                         <th>Total Page Wise: </th>
+                                                        <th style="text-align: center"></th>
                                                         <th style="text-align: center"></th>
                                                         <th style="text-align: center"></th>
                                                         <th style="text-align: center"></th>
@@ -349,6 +352,7 @@
                                                     <th > Opening Balance </th>
                                                     <th > Subcontractor Advance </th>
                                                     <th > Purchase Advance </th>
+                                                    <th > Indirect Expenses </th>
                                                     <th > Total Expenses </th>
                                                 </tr>
                                                 <tr class="filter"><th></th>
@@ -367,6 +371,7 @@
                                                     <th>
                                                         <input type="hidden" class="form-control form-filter" name="expense_year_id" id="expense_year_id">
                                                     </th>
+                                                    <th></th>
                                                     <th>
                                                         <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                         <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
@@ -380,6 +385,7 @@
                                                 <tfoot>
                                                 <tr>
                                                     <th>Total Page Wise: </th>
+                                                    <th style="text-align: center"></th>
                                                     <th style="text-align: center"></th>
                                                     <th style="text-align: center"></th>
                                                     <th style="text-align: center"></th>
