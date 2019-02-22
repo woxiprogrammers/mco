@@ -616,8 +616,9 @@ class InventoryManageController extends Controller
             $records = array();
             $records['data'] = array();
             $end = $request->length < 0 ? count($inventoryData) : $request->length;
-            $sr_no = 0;
+            $sr_no = $opening_stock = 0;
             for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($inventoryData); $iterator++,$pagination++ ){
+                $opening_stock = $inventoryData[$pagination]->opening_stock;
                 if($inventoryData[$pagination]->is_material == true){
                     $materialUnit = Material::where('id',$inventoryData[$iterator]['reference_id'])->pluck('unit_id')->first();
                     if($materialUnit == null){
@@ -665,11 +666,16 @@ class InventoryManageController extends Controller
                         ->sum('inventory_component_transfers.quantity');
                     $is_material = 'Asset';
                 }
-                $availableQuantity = ($inQuantity + $inventoryData[$iterator]['opening_stock']) - $outQuantity;
+
+                $openQty = 0;
+                if ($opening_stock != null) {
+                    $openQty = $opening_stock;
+                }
+                $availableQuantity = ($inQuantity + $openQty) - $outQuantity;
                 $records['data'][$iterator] = [
                     ++$sr_no,
                     ucwords(strtolower($inventoryData[$pagination]->name)),
-                    ($inQuantity + $inventoryData[$iterator]['opening_stock']).' '.$unitName,
+                    ($inQuantity + $openQty).' '.$unitName,
                     $outQuantity.' '.$unitName,
                     $availableQuantity.' '.$unitName,
                     $is_material,
