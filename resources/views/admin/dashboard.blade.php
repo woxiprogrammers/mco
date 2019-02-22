@@ -497,6 +497,7 @@
             default :
                 redirectionUrl = '/dashboard';
         }
+
         $.ajax({
             url: '/change-project-site',
             type: 'POST',

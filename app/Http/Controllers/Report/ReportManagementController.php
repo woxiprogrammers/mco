@@ -4260,7 +4260,6 @@ class ReportManagementController extends Controller{
                             ->where('inventory_components.is_material',true)
                             ->whereMonth('inventory_component_transfers.created_at',$month['id'])
                             ->where('inventory_component_transfers.transfer_type_id',
-
                                 $inventoryComponentSiteTransferIds->where('type','IN')->pluck('id')->first())
                             ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
                             ->whereMonth('inventory_component_transfers.created_at',$month['id'])
@@ -4434,6 +4433,50 @@ class ReportManagementController extends Controller{
                             ->join('purchase_requests','purchase_requests.id','='
                                 ,'purchase_orders.purchase_request_id')
                             ->join('vendors','vendors.id','=','purchase_orders.vendor_id')
+                            ->whereMonth('purchase_order_bills.created_at',$month['id'])
+                            ->whereYear('purchase_order_bills.created_at',$selectedYear['slug'])
+                            ->sum(DB::raw('purchase_order_bills.transportation_tax_amount + purchase_order_bills.tax_amount + purchase_order_bills.extra_tax_amount')),3);
+                        $assetMaintenanceGst = $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
+                            ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
+                            ->join('assets','assets.id','=','asset_maintenance.asset_id')
+                            ->whereMonth('asset_maintenance_bill_payments.created_at',$month['id'])
+                            ->whereYear('asset_maintenance_bill_payments.created_at',$selectedYear['slug'])
+                            ->sum(DB::raw('asset_maintenance_bills.cgst_amount +asset_maintenance_bills.sgst_amount +asset_maintenance_bills.igst_amount'));
+
+                        $inventorySiteTransfersInGst = $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
+                            ,'=','inventory_component_transfers.inventory_component_id')
+                            ->where('inventory_components.is_material',true)
+                            ->where('inventory_component_transfers.transfer_type_id',
+                                $inventoryComponentSiteTransferIds->where('type','IN')->pluck('id')->first())
+                            ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
+                            ->whereMonth('inventory_component_transfers.created_at',$month['id'])
+                            ->whereYear('inventory_component_transfers.created_at',$selectedYear['slug'])
+                            ->sum(DB::raw('inventory_component_transfers.cgst_amount + inventory_component_transfers.sgst_amount + inventory_component_transfers.igst_amount'));
+
+                        $inventorySiteTransfersOutGst = $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
+                            ,'=','inventory_component_transfers.inventory_component_id')
+                            ->where('inventory_components.is_material',true)
+                            ->where('inventory_component_transfers.transfer_type_id',
+                                $inventoryComponentSiteTransferIds->where('type','OUT')->pluck('id')->first())
+                            ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
+                            ->whereMonth('inventory_component_transfers.created_at',$month['id'])
+                            ->whereYear('inventory_component_transfers.created_at',$selectedYear['slug'])
+                            ->sum(DB::raw('inventory_component_transfers.cgst_amount + inventory_component_transfers.sgst_amount + inventory_component_transfers.igst_amount'));
+
+                        $siteTransferBillGst = $siteTransferBill->join('inventory_component_transfers','inventory_component_transfers.id',
+                            '=','site_transfer_bills.inventory_component_transfer_id')
+                            ->join('inventory_components','inventory_components.id'
+                                ,'=','inventory_component_transfers.inventory_component_id')
+                            ->whereMonth('site_transfer_bills.created_at',$month['id'])
+                            ->whereYear('site_transfer_bills.created_at',$selectedYear['slug'])
+                            ->sum(DB::raw('site_transfer_bills.tax_amount + site_transfer_bills.extra_amount_cgst_amount + site_transfer_bills.extra_amount_sgst_amount + site_transfer_bills.extra_amount_igst_amount'));
+
+                        /*$purchaseOrderGst = round($purchaseOrderBill
+                            ->join('purchase_orders','purchase_orders.id','='
+                                ,'purchase_order_bills.purchase_order_id')
+                            ->join('purchase_requests','purchase_requests.id','='
+                                ,'purchase_orders.purchase_request_id')
+                            ->join('vendors','vendors.id','=','purchase_orders.vendor_id')
                             ->where('purchase_requests.project_site_id',$projectSiteId)
                             ->whereMonth('purchase_order_bills.created_at',$month['id'])
                             ->whereYear('purchase_order_bills.created_at', $selectedYear['slug'])
@@ -4478,7 +4521,7 @@ class ReportManagementController extends Controller{
                             ->where('inventory_components.project_site_id',$projectSiteId)
                             ->whereYear('site_transfer_bills.created_at', $selectedYear['slug'])
                             ->whereMonth('site_transfer_bills.created_at',$month['id'])
-                            ->sum(DB::raw('site_transfer_bills.tax_amount + site_transfer_bills.extra_amount_cgst_amount + site_transfer_bills.extra_amount_sgst_amount + site_transfer_bills.extra_amount_igst_amount'));
+                            ->sum(DB::raw('site_transfer_bills.tax_amount + site_transfer_bills.extra_amount_cgst_amount + site_transfer_bills.extra_amount_sgst_amount + site_transfer_bills.extra_amount_igst_amount'));*/
 
                         $purchaseGst = $purchaseOrderGst + $assetMaintenanceGst + $inventorySiteTransfersInGst + $siteTransferBillGst - $inventorySiteTransfersOutGst;
                         $totalMonthGst = $salesGst - $purchaseGst - $subcontractorGst;
