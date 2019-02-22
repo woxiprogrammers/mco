@@ -458,21 +458,25 @@
 
 <script>
     $(document).ready(function(){
-         $("#search-withfilter").on('click',function(){
+         $("#search-withfilter").on('click',function(e){
             var year_slug = $('#year_slug').val();
             var month_slug = $('#month_slug').val();
             var project_site_id = $('#project_site_id').val();
-            $('#expense_year_id,#sales_year_id').val(year_slug);
-            $('#expense_month_id,#sales_month_id').val(month_slug);
-            $('#expense_project_site_id,#sales_project_site_id').val(project_site_id);
+            $('#expense_year_id, #sales_year_id').val(year_slug);
+            $('#expense_month_id, #sales_month_id').val(month_slug);
+            $('#expense_project_site_id, #sales_project_site_id').val(project_site_id);
             /*var postData =
                 'year_slug=>'+year_slug+','+
                 'month_slug=>'+month_slug+','+
                 'project_site_id=>'+project_site_id;
                 $("input[name='sales_post_data']").val(postData);
                 $("input[name='expense_post_data']").val(postData);*/
-                $(".filter-submit").trigger('click');
-        });
+                //$(".filter-submit").trigger('click');
+
+             $('#expensesTable').DataTable().ajax.reload();
+             $('#advExpensesTable').DataTable().ajax.reload();
+             $('#salesTable').DataTable().ajax.reload();
+         });
     });
 
     function switchProjectSiteModule(projectSiteId, moduleSlug){
