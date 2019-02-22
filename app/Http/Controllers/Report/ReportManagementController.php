@@ -494,7 +494,7 @@ class ReportManagementController extends Controller{
 
                                 }
                             }
-                            $row = $colorRow++;
+                           // $row = $colorRow++;
                             $row++; $row++;
                             $headerRow =  $row + 1;
                             foreach($data as $key => $rowData){
