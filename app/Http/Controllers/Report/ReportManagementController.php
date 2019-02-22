@@ -3158,7 +3158,26 @@ class ReportManagementController extends Controller{
         try{
             $iTotalRecords = 0;
             $projectSite = new ProjectSite();
-            if(!(array_key_exists('sales_month_id',$request->all()))){
+            $postdata = null;
+            $postDataArray = array();
+            if($request->has('sales_post_data')) {
+                $postdata = $request['sales_post_data'];
+                if($postdata != null) {
+                    $mstr = explode(",",$request['sales_post_data']);
+                    foreach($mstr as $nstr)
+                    {
+                        $narr = explode("=>",$nstr);
+                        $narr[0] = str_replace("\x98","",$narr[0]);
+                        $ytr[1] = $narr[1];
+                        $postDataArray[$narr[0]] = $ytr[1];
+                    }
+                }
+                $request['sales_month_id'] = $postDataArray['month_slug'];
+                $request['sales_year_id'] = $postDataArray['year_slug'];
+                $request['sales_project_site_id'] = $postDataArray['project_site_id'];
+            }
+
+            if(!(array_key_exists('sales_post_data',$request->all()))){
                 $request['sales_month_id'] = 'all'; $request['sales_year_id'] = 'all'; $request['sales_project_site_id'] = null;
             }
             $month = new Month();
@@ -3387,7 +3406,25 @@ class ReportManagementController extends Controller{
         try{
             $projectSite = new ProjectSite();
             $iTotalRecords = 0;
-            if(!(array_key_exists('expense_month_id',$request->all()))){
+            $postdata = null;
+            $postDataArray = array();
+            if($request->has('expense_post_data')) {
+                $postdata = $request['expense_post_data'];
+                if($postdata != null) {
+                    $mstr = explode(",",$request['expense_post_data']);
+                    foreach($mstr as $nstr)
+                    {
+                        $narr = explode("=>",$nstr);
+                        $narr[0] = str_replace("\x98","",$narr[0]);
+                        $ytr[1] = $narr[1];
+                        $postDataArray[$narr[0]] = $ytr[1];
+                    }
+                }
+                $request['expense_month_id'] = $postDataArray['month_slug'];
+                $request['expense_year_id'] = $postDataArray['year_slug'];
+                $request['expense_project_site_id'] = $postDataArray['project_site_id'];
+            }
+            if(!(array_key_exists('expense_post_data',$request->all()))){
                 $request['expense_month_id'] = 'all'; $request['expense_year_id'] = 'all'; $request['expense_project_site_id'] = null;
             }
             $month = new Month();
@@ -3639,7 +3676,25 @@ class ReportManagementController extends Controller{
         try{
             $projectSite = new ProjectSite();
             $iTotalRecords = 0;
-            if(!(array_key_exists('expense_month_id',$request->all()))){
+            $postdata = null;
+            $postDataArray = array();
+            if($request->has('adv_expense_post_data')) {
+                $postdata = $request['adv_expense_post_data'];
+                if($postdata != null) {
+                    $mstr = explode(",",$request['adv_expense_post_data']);
+                    foreach($mstr as $nstr)
+                    {
+                        $narr = explode("=>",$nstr);
+                        $narr[0] = str_replace("\x98","",$narr[0]);
+                        $ytr[1] = $narr[1];
+                        $postDataArray[$narr[0]] = $ytr[1];
+                    }
+                }
+                $request['expense_month_id'] = $postDataArray['month_slug'];
+                $request['expense_year_id'] = $postDataArray['year_slug'];
+                $request['expense_project_site_id'] = $postDataArray['project_site_id'];
+            }
+            if(!(array_key_exists('adv_expense_post_data',$request->all()))){
                 $request['expense_month_id'] = 'all'; $request['expense_year_id'] = 'all'; $request['expense_project_site_id'] = null;
             }
             $month = new Month();
@@ -4429,7 +4484,7 @@ class ReportManagementController extends Controller{
                         $salesGst = $salesTaxAmount;
                         $subcontractorGst = $subcontractorGstTax;
 
-                        /*$purchaseOrderGst = round($purchaseOrderBill
+                        $purchaseOrderGst = round($purchaseOrderBill
                             ->join('purchase_orders','purchase_orders.id','='
                                 ,'purchase_order_bills.purchase_order_id')
                             ->join('purchase_requests','purchase_requests.id','='
@@ -4472,7 +4527,7 @@ class ReportManagementController extends Controller{
                                 ,'=','inventory_component_transfers.inventory_component_id')
                             ->whereMonth('site_transfer_bills.created_at',$month['id'])
                             ->whereYear('site_transfer_bills.created_at',$selectedYear['slug'])
-                            ->sum(DB::raw('site_transfer_bills.tax_amount + site_transfer_bills.extra_amount_cgst_amount + site_transfer_bills.extra_amount_sgst_amount + site_transfer_bills.extra_amount_igst_amount'));*/
+                            ->sum(DB::raw('site_transfer_bills.tax_amount + site_transfer_bills.extra_amount_cgst_amount + site_transfer_bills.extra_amount_sgst_amount + site_transfer_bills.extra_amount_igst_amount'));
 
                         /*$purchaseOrderGst = round($purchaseOrderBill
                             ->join('purchase_orders','purchase_orders.id','='
@@ -4526,8 +4581,7 @@ class ReportManagementController extends Controller{
                             ->whereMonth('site_transfer_bills.created_at',$month['id'])
                             ->sum(DB::raw('site_transfer_bills.tax_amount + site_transfer_bills.extra_amount_cgst_amount + site_transfer_bills.extra_amount_sgst_amount + site_transfer_bills.extra_amount_igst_amount'));*/
 
-                        //$purchaseGst = $purchaseOrderGst + $assetMaintenanceGst + $inventorySiteTransfersInGst + $siteTransferBillGst - $inventorySiteTransfersOutGst;
-                        $purchaseGst = 0;
+                        $purchaseGst = $purchaseOrderGst + $assetMaintenanceGst + $inventorySiteTransfersInGst + $siteTransferBillGst - $inventorySiteTransfersOutGst;
                         $totalMonthGst = $salesGst - $purchaseGst - $subcontractorGst;
                         $yearlyGst += $totalMonthGst;
                     }
