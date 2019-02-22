@@ -310,7 +310,7 @@ var ExpensesListing = function () {
                         openingBalanceTotal.toFixed(3)
                     );
 
-                    totalExpense = api
+                    indirectExpTotal = api
                         .column( 9, { page: 'current'} )
                         .data()
                         .reduce( function (a, b) {
@@ -319,6 +319,18 @@ var ExpensesListing = function () {
 
                     // Update footer
                     $( api.column( 9 ).footer() ).html(
+                        indirectExpTotal.toFixed(3)
+                    );
+
+                    totalExpense = api
+                        .column( 10, { page: 'current'} )
+                        .data()
+                        .reduce( function (a, b) {
+                            return intVal(a) + intVal(b);
+                        }, 0 );
+
+                    // Update footer
+                    $( api.column( 10 ).footer() ).html(
                         totalExpense.toFixed(3)
                     );
                 },
@@ -523,7 +535,7 @@ var AdvExpensesListing = function () {
                         purchase_adv.toFixed(3)
                     );
 
-                    totalExpense = api
+                    indirectExpTotal = api
                         .column( 11, { page: 'current'} )
                         .data()
                         .reduce( function (a, b) {
@@ -532,6 +544,18 @@ var AdvExpensesListing = function () {
 
                     // Update footer
                     $( api.column( 11 ).footer() ).html(
+                        indirectExpTotal.toFixed(3)
+                    );
+
+                    totalExpense = api
+                        .column( 12, { page: 'current'} )
+                        .data()
+                        .reduce( function (a, b) {
+                            return intVal(a) + intVal(b);
+                        }, 0 );
+
+                    // Update footer
+                    $( api.column( 12 ).footer() ).html(
                         totalExpense.toFixed(3)
                     );
                 },
