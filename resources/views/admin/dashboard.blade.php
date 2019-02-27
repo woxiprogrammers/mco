@@ -222,6 +222,7 @@
                                                             <th></th>
                                                             <th></th>
                                                             <th>
+                                                                <input type="hidden" class="form-control form-filter" name="sales_post_data" id="sales_post_data">
                                                                 <input type="hidden" class="form-control form-filter" name="sales_month_id" id="sales_month_id">
                                                             </th>
                                                             <th>
@@ -280,6 +281,7 @@
                                                     <th style="width:10%"> Misc. Purchase </th>
                                                     <th style="width:10%"> Office Expenses </th>
                                                     <th style="width:10%"> Opening Balance </th>
+                                                    <th style="width:10%"> Indirect Expenses </th>
                                                     <th style="width:10%"> Total Expenses </th>
                                                 </tr>
                                                     <tr class="filter"><th></th>
@@ -289,6 +291,7 @@
                                                         <th></th>
                                                         <th></th>
                                                         <th>
+                                                            <input type="hidden" class="form-control form-filter" name="expense_post_data" id="expense_post_data">
                                                             <input type="hidden" class="form-control form-filter" name="expense_month_id" id="expense_month_id">
                                                         </th>
                                                         <th>
@@ -296,6 +299,7 @@
                                                         <th>
                                                             <input type="hidden" class="form-control form-filter" name="expense_year_id" id="expense_year_id">
                                                         </th>
+                                                        <th></th>
                                                         <th>
                                                             <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                             <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
@@ -309,6 +313,7 @@
                                                 <tfoot>
                                                     <tr>
                                                         <th>Total Page Wise: </th>
+                                                        <th style="text-align: center"></th>
                                                         <th style="text-align: center"></th>
                                                         <th style="text-align: center"></th>
                                                         <th style="text-align: center"></th>
@@ -349,6 +354,7 @@
                                                     <th > Opening Balance </th>
                                                     <th > Subcontractor Advance </th>
                                                     <th > Purchase Advance </th>
+                                                    <th > Indirect Expenses </th>
                                                     <th > Total Expenses </th>
                                                 </tr>
                                                 <tr class="filter"><th></th>
@@ -360,6 +366,7 @@
                                                     <th></th>
                                                     <th></th>
                                                     <th>
+                                                        <input type="hidden" class="form-control form-filter" name="adv_expense_post_data" id="adv_expense_post_data">
                                                         <input type="hidden" class="form-control form-filter" name="expense_month_id" id="expense_month_id">
                                                     </th>
                                                     <th>
@@ -367,6 +374,7 @@
                                                     <th>
                                                         <input type="hidden" class="form-control form-filter" name="expense_year_id" id="expense_year_id">
                                                     </th>
+                                                    <th></th>
                                                     <th>
                                                         <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                         <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
@@ -380,6 +388,7 @@
                                                 <tfoot>
                                                 <tr>
                                                     <th>Total Page Wise: </th>
+                                                    <th style="text-align: center"></th>
                                                     <th style="text-align: center"></th>
                                                     <th style="text-align: center"></th>
                                                     <th style="text-align: center"></th>
@@ -452,21 +461,26 @@
 
 <script>
     $(document).ready(function(){
-         $("#search-withfilter").on('click',function(){
+         $("#search-withfilter").on('click',function(e){
             var year_slug = $('#year_slug').val();
             var month_slug = $('#month_slug').val();
             var project_site_id = $('#project_site_id').val();
-            $('#expense_year_id,#sales_year_id').val(year_slug);
-            $('#expense_month_id,#sales_month_id').val(month_slug);
-            $('#expense_project_site_id,#sales_project_site_id').val(project_site_id);
-            /*var postData =
+            $('#expense_year_id, #sales_year_id').val(year_slug);
+            $('#expense_month_id, #sales_month_id').val(month_slug);
+            $('#expense_project_site_id, #sales_project_site_id').val(project_site_id);
+            var postData =
                 'year_slug=>'+year_slug+','+
                 'month_slug=>'+month_slug+','+
                 'project_site_id=>'+project_site_id;
                 $("input[name='sales_post_data']").val(postData);
-                $("input[name='expense_post_data']").val(postData);*/
+                $("input[name='expense_post_data']").val(postData);
+                $("input[name='adv_expense_post_data']").val(postData);
                 $(".filter-submit").trigger('click');
-        });
+
+            /* $('#expensesTable').DataTable().ajax.reload();
+             $('#advExpensesTable').DataTable().ajax.reload();
+             $('#salesTable').DataTable().ajax.reload();*/
+         });
     });
 
     function switchProjectSiteModule(projectSiteId, moduleSlug){
@@ -491,6 +505,7 @@
             default :
                 redirectionUrl = '/dashboard';
         }
+
         $.ajax({
             url: '/change-project-site',
             type: 'POST',
