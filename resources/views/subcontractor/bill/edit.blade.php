@@ -58,14 +58,14 @@
                                                     <div class="row">
                                                         <div class="col-md-6 date date-picker" data-date-end-date="0d" data-date-format="dd/mm/yyyy">
                                                             <label class="control-label" for="date">Bill Date : </label>
-                                                            <input type="text" style="width: 30%" name="bill_date" placeholder="Select Bill Date" id="date" value="{{date('m/d/Y', strtotime($subcontractorBill->bill_date))}}"/>
+                                                            <input type="text" style="width: 30%" name="bill_date" placeholder="Select Bill Date" id="date" value="{{date('d/m/Y', strtotime($subcontractorBill->bill_date))}}"/>
                                                             <button class="btn btn-sm default" type="button">
                                                                 <i class="fa fa-calendar"></i>
                                                             </button>
                                                         </div>
                                                         <div class="col-md-6 date date-picker" data-date-end-date="0d" data-date-format="dd/mm/yyyy">
                                                             <label class="control-label" for="performa_invoice_date" style="margin-left: 9%">Proforma Invoice Date : </label>
-                                                            <input type="text" style="width: 32%" name="performa_invoice_date" placeholder="Select Proforma Invoice Date" id="performa_invoice_date"  value="{{date('m/d/Y', strtotime($subcontractorBill->performa_invoice_date))}}"/>
+                                                            <input type="text" style="width: 32%" name="performa_invoice_date" placeholder="Select Proforma Invoice Date" id="performa_invoice_date"  value="{{date('d/m/Y', strtotime($subcontractorBill->performa_invoice_date))}}"/>
                                                             <button class="btn btn-sm default" type="button">
                                                                 <i class="fa fa-calendar"></i>
                                                             </button>
