@@ -468,13 +468,13 @@
             $('#expense_year_id, #sales_year_id').val(year_slug);
             $('#expense_month_id, #sales_month_id').val(month_slug);
             $('#expense_project_site_id, #sales_project_site_id').val(project_site_id);
-            var postData =
+            /*var postData =
                 'year_slug=>'+year_slug+','+
                 'month_slug=>'+month_slug+','+
                 'project_site_id=>'+project_site_id;
                 $("input[name='sales_post_data']").val(postData);
                 $("input[name='expense_post_data']").val(postData);
-                $("input[name='adv_expense_post_data']").val(postData);
+                $("input[name='adv_expense_post_data']").val(postData);*/
                 $(".filter-submit").trigger('click');
 
             /* $('#expensesTable').DataTable().ajax.reload();
@@ -482,7 +482,6 @@
              $('#salesTable').DataTable().ajax.reload();*/
          });
     });
-
     function switchProjectSiteModule(projectSiteId, moduleSlug){
         var redirectionUrl = '';
         switch(moduleSlug){
