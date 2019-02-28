@@ -517,11 +517,11 @@ class SubcontractorBillController extends Controller
             }
             if($request->has('performa_invoice_date') && $request->performa_invoice_date != '' && $request->performa_invoice_date != null){
                 $performaDate = str_replace('/','-',$request->performa_invoice_date);
-                $subcontractorBillData['performa_invoice_date'] = date('Y-m-d', strtotime($performaDate));
+                $subcontractorBillData['performa_invoice_date'] = date('Y-m-d 00:00:00', strtotime($performaDate));
             }
             if($request->has('bill_date') && $request->bill_date != '' && $request->bill_date != null){
                 $bilDate = str_replace('/','-',$request->bill_date);
-                $subcontractorBillData['bill_date'] = date('Y-m-d', strtotime($bilDate));
+                $subcontractorBillData['bill_date'] = date('Y-m-d 00:00:00', strtotime($bilDate));
             }
             $subcontractorBill->update($subcontractorBillData);
             foreach($request->structure_summaries as $structureSummaryId){

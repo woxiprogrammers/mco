@@ -57,7 +57,7 @@
                                                 <div class="form-body">
                                                     <div class="row">
                                                         <div class="col-md-offset-9 col-md-3">
-                                                            <button type="submit" class="btn red pull-right" id="labour_submit"><i class="fa fa-check"></i> Edit Structure</button>
+                                                            <button type="submit" class="btn red pull-right" id="labour_submit"><i class="fa fa-check"></i> Save Structure</button>
                                                         </div>
                                                     </div>
 
@@ -357,6 +357,23 @@
             $(".total_work_area").each(function(){
                 workAreaKeyUp(this);
             });
+
+
+            $( "#labour_submit" ).on('click',function( event ) {
+                event.preventDefault();
+                var rowCount = $('#summaryTable tr').length;
+                if(rowCount != 1) {
+                    if(confirm("Are You Sure you want to save structure?")) {
+                        $( "#editSubcontractorStructure").submit();
+                    } else {
+                        return false;
+                    }
+                } else {
+                    alert("Please select at least one summary");
+                }
+                return false;
+           });
+
             // onSummaryChange($('#summaryTable tbody .summary'));
         });
 
