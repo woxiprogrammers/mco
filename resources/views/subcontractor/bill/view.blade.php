@@ -61,8 +61,8 @@
                                             @endif
                                             <div class="tab-content">
                                                 <div class="tab-pane fade in active" id="billViewTab">
-                                                    <label class="control-label" for="date">Bill Date : {{date('m/d/Y',strtotime($subcontractorBill['bill_date']))}}</label>
-                                                    <label class="control-label" for="date" style="margin-left: 5%;">Performa Invoice Date : {{date('m/d/Y',strtotime($subcontractorBill['performa_invoice_date']))}}</label>
+                                                    <label class="control-label" for="date">Bill Date : {{date('d/m/Y',strtotime($subcontractorBill['bill_date']))}}</label>
+                                                    <label class="control-label" for="date" style="margin-left: 5%;">Performa Invoice Date : {{date('d/m/Y',strtotime($subcontractorBill['performa_invoice_date']))}}</label>
                                                     @if($subcontractorBill->subcontractorBillStatus->slug == 'draft')
                                                         <a href="/subcontractor/bill/edit/{{$subcontractorBill['id']}}" class="btn btn-xs blue" style="margin-left: 5%;">
                                                             <i class="fa fa-edit"></i>
