@@ -563,7 +563,6 @@ class ReportManagementController extends Controller{
                         $data[$row]['asset_name'] = ($assetData['model_number'] == null) ? $assetData['name'] : $assetData['name'].' ('.$assetData['model_number'].' )';
                         $data[$row]['asset_quantity'] = $assetData['quantity'];
                         $data[$row]['asset_rent_per_day'] = $assetData['rent_per_day'];
-
                         $januaryData = json_decode($assetRentMonthlyExpense['january']);
                         if($januaryData == null){
                             $data[$row]['jan_no_of_days_used'] = $data[$row]['jan_quantity'] = $data[$row]['jan_amount'] = '-';
@@ -574,7 +573,6 @@ class ReportManagementController extends Controller{
                             $data[$row]['jan_amount'] = $januaryData->rent_for_month;
                             $monthlyTotal[1]['january'] += $data[$row]['jan_amount'];
                         }
-
 
                         $februaryData = json_decode($assetRentMonthlyExpense['february']);
                         if($februaryData == null){
@@ -587,7 +585,6 @@ class ReportManagementController extends Controller{
                             $monthlyTotal[2]['february'] += $data[$row]['feb_amount'];
 
                         }
-
                         $marchData = json_decode($assetRentMonthlyExpense['march']);
                         if($marchData == null){
                             $data[$row]['march_no_of_days_used'] = $data[$row]['march_quantity'] = $data[$row]['march_amount'] = '-';
@@ -598,7 +595,6 @@ class ReportManagementController extends Controller{
                             $data[$row]['march_amount'] = $marchData->rent_for_month;
                             $monthlyTotal[3]['march'] += $data[$row]['march_amount'];
                         }
-
 
                         $aprilData = json_decode($assetRentMonthlyExpense['april']);
                         if($aprilData == null){
@@ -670,7 +666,6 @@ class ReportManagementController extends Controller{
                             $monthlyTotal[9]['september'] += $data[$row]['sept_amount'];
                         }
 
-
                         $octData = json_decode($assetRentMonthlyExpense['october']);
                         if($octData == null){
                             $data[$row]['oct_no_of_days_used'] = $data[$row]['oct_quantity'] = $data[$row]['oct_amount'] = '-';
@@ -688,18 +683,17 @@ class ReportManagementController extends Controller{
                             $monthlyTotal[11]['november'] += 0;
                         }else{
                             $data[$row]['nov_no_of_days_used'] = $novData->days_used;
-                            $data[$row]['nov_quantity'] = $novData->carry_forward_quantity.' / '.$novData->rent_per_month;
+                            $data[$row]['nov_quantity'] = $novData->carry_forward_quantity.' / '.$novData->rent_per_day_per_quantity;
                             $data[$row]['nov_amount'] = $novData->rent_for_month;
                             $monthlyTotal[11]['november'] += $data[$row]['nov_amount'];
                         }
-
                         $decData = json_decode($assetRentMonthlyExpense['december']);
                         if($decData == null){
                             $data[$row]['dec_no_of_days_used'] = $data[$row]['dec_quantity'] = $data[$row]['dec_amount'] = '-';
                             $monthlyTotal[12]['december'] += 0;
                         }else{
                             $data[$row]['dec_no_of_days_used'] = $decData->days_used;
-                            $data[$row]['dec_quantity'] = $decData->carry_forward_quantity.' / '.$decData->rent_per_month;
+                            $data[$row]['dec_quantity'] = $decData->carry_forward_quantity.' / '.$decData->rent_per_day_per_quantity;
                             $data[$row]['dec_amount'] = $decData->rent_for_month;
                             $monthlyTotal[12]['december'] += $data[$row]['dec_amount'];
                         }
