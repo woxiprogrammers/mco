@@ -366,26 +366,30 @@ class ReportManagementController extends Controller{
                         ['Purchase Order Advance Payments' => '#f7f8f9'], ['Purchase Order Bill Payments' => '#7b68b7'], ['Subcontractor Advance Payments' => '#c48738'],
                         ['Subcontractor Payment' => '#e21257'], ['Project Site Advance Payments' => '#f7f8f9'], ['Site Transfer Bill Payments' => '#f7f8f9'],
                         ['Asset Maintenance Bill Payment' => '#f7f8f9'], ['Subcontractor Bill Reconcile Cash' => '#f7f8f9'], ['Sales Bill Reconcile Transaction' => '#f7f8f9'],
-                        ['Project Site Indirect Expenses' => '#f7f8f9']);
+                        ['Sales Bill Transaction' => '#f7f8f9'], ['Project Site Indirect Expenses' => '#f7f8f9']);
 
                     $startYearID = $year->where('slug',(int)date('Y',strtotime($firstParameter)))->pluck('id')->first();
                     $endYearID = $year->where('slug',(int)date('Y',strtotime($secondParameter)))->pluck('id')->first();
                     $totalYears = $year->whereBetween('id',[$startYearID,$endYearID])->select('id','name','slug')->get();
-                    $monthlyTotalAmount = $monthlyAllocatedAmount = 0;
+                    $monthlyTotalAmount = $monthlyAllocatedAmount = $monthlySalesAmount = 0;
                     $monthlyTotal = [];
                     $monthlyTotal[0]['month'] = 'Month-Year';
                     $monthlyTotal[0]['allocated'] = 'Amount per month';
                     $monthlyTotal[0]['used'] = 'Utilized Amount';
                     $monthlyTotal[0]['balance'] = 'Balance';
+                    $monthlyTotal[0]['sales'] = 'Income';
                     foreach ($totalYears as $thisYear){
                         foreach ($months as $month){
                             $monthlyTotal[$iterator]['month'] = $month['name'].'-'.$thisYear['name'];
-                            $total = $this->getCashMonthlySum($project_site_id,$month['id'],$thisYear['slug']);
+                            $response = $this->getCashMonthlySum($project_site_id,$month['id'],$thisYear['slug']);
+                            $total = $response['total'];
                             $monthlyTotal[$iterator]['allocated'] = PeticashSiteTransfer::where('project_site_id',$project_site_id)
                                                                         ->whereMonth('created_at', $month['id'])
                                                                         ->whereYear('created_at', $thisYear['slug'])->sum('amount');
                             $monthlyTotal[$iterator]['used'] = ($total != null) ? round($total,3) : 0;
                             $monthlyTotal[$iterator]['balance'] = $monthlyTotal[$iterator]['allocated'] - $monthlyTotal[$iterator]['used'];
+                            $monthlyTotal[$iterator]['sales'] = $response['sales'];
+                            $monthlySalesAmount += $monthlyTotal[$iterator]['sales'];
                             $monthlyAllocatedAmount += $monthlyTotal[$iterator]['allocated'];
                             $monthlyTotalAmount += $monthlyTotal[$iterator]['used'];
                             $iterator++;
@@ -395,6 +399,7 @@ class ReportManagementController extends Controller{
                     $monthlyTotal[$iterator]['allocated'] = $monthlyAllocatedAmount;
                     $monthlyTotal[$iterator]['used'] = $monthlyTotalAmount;
                     $monthlyTotal[$iterator]['balance'] = $monthlyAllocatedAmount - $monthlyTotalAmount;
+                    $monthlyTotal[$iterator]['sales'] = $monthlySalesAmount;
                     Excel::create($reportType."_".$currentDate, function($excel) use($monthlyTotal, $data, $reportType, /*$header,*/ $companyHeader, $date, $projectName, $colorData) {
                         $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(10);
                         $excel->sheet($reportType, function($sheet) use($monthlyTotal, $data, /*$header,*/ $companyHeader, $date, $projectName, $colorData) {
@@ -456,7 +461,7 @@ class ReportManagementController extends Controller{
 
                             $colorRow = $row = 10;
                             foreach($colorData as $key => $rowData){
-                                $next_column = 'E';
+                                $next_column = 'F';
                                 $colorRow++;
                                 foreach($rowData as $key1 => $cellData){
                                     $current_column = $next_column++;
@@ -3252,6 +3257,13 @@ class ReportManagementController extends Controller{
             ->where('bill_reconcile_transactions.paid_from_slug','cash')
             ->whereMonth('bill_reconcile_transactions.created_at', $month)->whereYear('bill_reconcile_transactions.created_at', $year)->orderBy('bill_reconcile_transactions.created_at','desc')
             ->sum('bill_reconcile_transactions.amount');
+        $salesBillTransactionCash = BillTransaction::join('bills','bills.id','=','bill_transactions.bill_id')
+            ->join('quotations','quotations.id','=','bills.quotation_id')
+            ->join('project_sites','project_sites.id','=','quotations.project_site_id')
+            ->where('quotations.project_site_id',$projectSiteId)
+            ->where('bill_transactions.paid_from_slug','cash')
+            ->whereMonth('bill_transactions.created_at', $month)->whereYear('bill_transactions.created_at', $year)->orderBy('bill_transactions.created_at','desc')
+            ->sum('bill_transactions.amount');
         $subcontractorBillReconcileCash = SubcontractorBillReconcileTransaction::join('subcontractor_bills','subcontractor_bills.id','=','subcontractor_bill_reconcile_transactions.subcontractor_bill_id')
             ->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
             ->where('subcontractor_structure.project_site_id',$projectSiteId)
@@ -3267,10 +3279,15 @@ class ReportManagementController extends Controller{
             ->whereMonth('project_site_indirect_expenses.created_at', $month)->whereYear('project_site_indirect_expenses.created_at', $year)->orderBy('project_site_indirect_expenses.created_at','desc')
             ->sum('project_site_indirect_expenses.gst', '+', 'project_site_indirect_expenses.tds');
         $total = $indirectCashPayments + $subcontractorBillReconcileCash + $subcontractorBillReconcileCash + $salesBillReconcileCash
-                + $subcontractorCashBillTransactions + $assetMaintenancePayments + $siteTransferPayments + $projectSiteAdvancePayments
+                + $subcontractorCashBillTransactions + $assetMaintenancePayments + $siteTransferPayments
                 + $subcontractorAdvancePayments + $purchaseOrderBillPayments + $purchaseOrderAdvancePayments + $purchaseTransactionData
                 + $salaryTransactionData + $advanceTransactionData;
-        return $total;
+        $salesTotal = $projectSiteAdvancePayments + $salesBillTransactionCash;;
+        $data = [
+            'total' => $total,
+            'sales' => $salesTotal
+        ];
+        return $data;
     }
 
     public function getMasterPeticashReport($start_date,$end_date,$project_site_id){
@@ -3312,7 +3329,7 @@ class ReportManagementController extends Controller{
                 ,'subcontractor_advance_payments.project_site_id as project_site_id'
                 ,'subcontractor_advance_payments.created_at as date'
                 ,'subcontractor.company_name as name','subcontractor_advance_payments.id as subcontractor_advance_payments')->get();
-        $projectSiteAdvancePayments = ProjectSiteAdvancePayment::join('project_sites','project_sites.id','=','project_site_advance_payments.project_site_id')
+        /*$projectSiteAdvancePayments = ProjectSiteAdvancePayment::join('project_sites','project_sites.id','=','project_site_advance_payments.project_site_id')
             ->where('project_site_advance_payments.paid_from_slug','cash')
             ->where('project_site_advance_payments.project_site_id',$projectSiteId)
             ->whereBetween('project_site_advance_payments.created_at',[$start_date,$end_date])
@@ -3320,7 +3337,7 @@ class ReportManagementController extends Controller{
                 ,'project_site_advance_payments.amount as amount'
                 ,'project_site_advance_payments.created_at as date'
                 ,'project_site_advance_payments.project_site_id as project_site_id'
-                ,'project_sites.name as name','project_site_advance_payments.id as project_site_advance_payments')->get();
+                ,'project_sites.name as name','project_site_advance_payments.id as project_site_advance_payments')->get();*/
         $siteTransferPayments = SiteTransferBillPayment::join('site_transfer_bills','site_transfer_bills.id','=','site_transfer_bill_payments.site_transfer_bill_id')
             ->join('inventory_component_transfers','inventory_component_transfers.id','=','site_transfer_bills.inventory_component_transfer_id')
             ->join('vendors','vendors.id','=','inventory_component_transfers.vendor_id')
@@ -3364,6 +3381,16 @@ class ReportManagementController extends Controller{
                 ,'bill_reconcile_transactions.created_at as date'
                 ,'quotations.project_site_id as project_site_id'
                 ,'project_sites.name as name','bill_reconcile_transactions.id as sales_bill_reconcile_transaction')->get();
+        /*$salesBillTransactionCash = BillTransaction::join('bills','bills.id','=','bill_transactions.bill_id')
+            ->join('quotations','quotations.id','=','bills.quotation_id')
+            ->join('project_sites','project_sites.id','=','quotations.project_site_id')
+            ->where('quotations.project_site_id',$projectSiteId)
+            ->where('bill_transactions.paid_from_slug','cash')
+            ->whereBetween('bill_transactions.created_at',[$start_date,$end_date])
+            ->select('bill_transactions.id as payment_id','bill_transactions.amount as bill_amount'
+                ,'bill_transactions.created_at as date'
+                ,'quotations.project_site_id as project_site_id'
+                ,'project_sites.name as name','bill_transactions.id as sales_bill_transaction')->get();*/
         $subcontractorBillReconcileCash = SubcontractorBillReconcileTransaction::join('subcontractor_bills','subcontractor_bills.id','=','subcontractor_bill_reconcile_transactions.subcontractor_bill_id')
             ->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
             ->where('subcontractor_structure.project_site_id',$projectSiteId)
@@ -3387,7 +3414,7 @@ class ReportManagementController extends Controller{
                 ,'project_sites.name as name','project_site_indirect_expenses.id as project_site_indirect_expenses')->get();
         $cashPaymentData = new Collection();
         $cashPaymentData = $cashPaymentData->merge($purchaseOrderAdvancePayments)->merge($purchaseOrderBillPayments)
-            ->merge($subcontractorAdvancePayments)->merge($projectSiteAdvancePayments)
+            ->merge($subcontractorAdvancePayments)
             ->merge($siteTransferPayments)->merge($assetMaintenancePayments)
             ->merge($subcontractorCashBillTransactions)->merge($salesBillReconcileCash)
             ->merge($subcontractorBillReconcileCash)->merge($indirectCashPayments);
@@ -3452,6 +3479,9 @@ class ReportManagementController extends Controller{
             }elseif(array_key_exists('sales_bill_reconcile_transaction',$reportData->toArray())){
                 $color = '#f7f8f9';   // Default
                 $source = 'sales_bill_reconcile_transaction';
+            }elseif(array_key_exists('sales_bill_transaction',$reportData->toArray())){
+                $color = '#f7f8f9';   // Default
+                $source = 'sales_bill_transaction';
             }elseif(array_key_exists('project_site_indirect_expenses',$reportData->toArray())){
                 $color = '#f7f8f9';   // Default
                 $source = 'project_site_indirect_expenses';
@@ -3460,7 +3490,7 @@ class ReportManagementController extends Controller{
 
             $data[$row]['Colour'] = $color;
             $data[$row]['Bill Date'] = $reportData['date'];
-            $data[$row]['Bill Create Date'] = $reportData['created_at'];
+            $data[$row]['Bill Create Date'] = $reportData['date'];
             $data[$row]['Bill No'] = (array_key_exists('bill_number',$reportData->toArray())) ? $reportData['bill_number'] : '-';
             $data[$row]['Vendor/ Subcontractor / Labour name'] = (array_key_exists('source_name',$reportData->toArray())) ? $reportData['source_name'] : '-';;
             $data[$row]['item name'] = $reportData['name'];
@@ -3468,15 +3498,31 @@ class ReportManagementController extends Controller{
             if($row == 1){
                 $newMonth = $thisMonth;
                 $newMonthRow = $row;
-                $data[$row]['monthly_total'] = round($data[$row]['bill_amount'],3);
+                if($source == 'project_site_advance_payments' || $source == 'sales_bill_transaction'){
+                    $data[$row]['sales_monthly_total'] = round($data[$row]['bill_amount'],3);
+                }else{
+                    $data[$row]['monthly_total'] = round($data[$row]['bill_amount'],3);
+                }
+
             }else{
                 if($newMonth == $thisMonth && $newMonth != null){
-                    $data[$newMonthRow]['monthly_total'] += round($data[$row]['bill_amount'],3);
-                    $data[$row]['monthly_total'] = null;
+                    if($source == 'project_site_advance_payments' || $source == 'sales_bill_transaction'){
+                        $data[$newMonthRow]['sales_monthly_total'] += round($data[$row]['bill_amount'],3);
+                        $data[$row]['sales_monthly_total'] = null;
+                    }else{
+                        $data[$newMonthRow]['monthly_total'] += round($data[$row]['bill_amount'],3);
+                        $data[$row]['monthly_total'] = null;
+                    }
+
                 }else{
                     $newMonth = $thisMonth;
                     $newMonthRow = $row;
-                    $data[$row]['monthly_total'] = round($data[$row]['bill_amount'],3);
+                    if($source == 'project_site_advance_payments' || $source == 'sales_bill_transaction'){
+                        $data[$row]['monthly_total'] = round($data[$row]['bill_amount'],3);
+                    }else{
+                        $data[$row]['sales_monthly_total'] = round($data[$row]['bill_amount'],3);
+                    }
+
                 }
             }
             $row++;
