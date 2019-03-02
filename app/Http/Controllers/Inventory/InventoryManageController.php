@@ -30,6 +30,7 @@ use App\Quotation;
 use App\QuotationMaterial;
 use App\Unit;
 use App\UnitConversion;
+use App\User;
 use App\UserLastLogin;
 use App\Vendor;
 use Carbon\Carbon;
@@ -1126,7 +1127,6 @@ class InventoryManageController extends Controller
                 }else{
                     $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first();
                 }
-
                 $inventoryComponentTransfer = $this->createInventoryComponentTransfer($data);
                 if($request->has('work_order_images')){
                     $imageUploads = $this->uploadInventoryComponentTransferImages($request->work_order_images,$inventoryComponent->id,$inventoryComponentTransfer->id);
@@ -1412,27 +1412,122 @@ class InventoryManageController extends Controller
         }
     }
 
-    public function getGRNDetails(Request $request){
+    public function inventoryTransfer(Request $request){
         try{
-            $inventoryComponentTransfer= InventoryComponentTransfers::where('id',$request['inventory_component_transfer_id'])->first();
-            $transportation_cgst_amount = ($inventoryComponentTransfer['transportation_amount'] * $inventoryComponentTransfer['transportation_cgst_percent']) / 100;
-            $transportation_sgst_amount = ($inventoryComponentTransfer['transportation_amount'] * $inventoryComponentTransfer['transportation_sgst_percent']) / 100;
-            $transportation_igst_amount = ($inventoryComponentTransfer['transportation_amount'] * $inventoryComponentTransfer['transportation_igst_percent']) / 100;
-            $response['inventory_component_transfer'] = $inventoryComponentTransfer;
-            $response['inventory_component_transfer']['unit'] = Unit::where('id',$inventoryComponentTransfer['unit_id'])->pluck('name')->first();
-            $response['inventory_component_transfer']['transportation_tax_amount'] = $transportation_cgst_amount + $transportation_sgst_amount + $transportation_igst_amount;
-            $response['inventory_component_transfer']['company_name'] = Vendor::where('id',$inventoryComponentTransfer['vendor_id'])->pluck('company')->first();
-            $status = 200;
+            $projectSiteId = Session::get('global_project_site');
+            $projectSite = ProjectSite::where('id',$projectSiteId)->first();
+            $officeSite = ProjectSite::where('name',env('OFFICE_PROJECT_SITE_NAME'))->first();
+            if($projectSiteId = $officeSite){
+                return 'Check Site';
+            }
+            $now = Carbon::now();
+            $inventoryData = InventoryComponent::where('project_site_id',$projectSiteId)->orderBy('name', 'asc')->get();
+            $outTransferId = InventoryTransferTypes::where('type','OUT')->where('slug','site')->pluck('id')->first();
+            $inTransferId = InventoryTransferTypes::where('type','IN')->where('slug','site')->pluck('id')->first();
+            foreach($inventoryData as $inventory){
+                if($inventory->is_material == true){
+                    $materialUnit = Material::where('id',$inventory['reference_id'])->pluck('unit_id')->first();
+                    if($materialUnit == null){
+                        $materialUnit = Material::where('name','ilike',$inventory['name'])->pluck('unit_id')->first();
+                    }
+                    $inTransferQuantities = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
+                        ->where('inventory_transfer_types.type','ilike','in')
+                        ->where('inventory_component_transfers.inventory_component_id',$inventory->id)
+                        ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
+                        ->select('inventory_component_transfers.quantity as quantity','inventory_component_transfers.unit_id as unit_id')
+                        ->get();
+                    $outTransferQuantities = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
+                        ->where('inventory_transfer_types.type','ilike','out')
+                        ->where('inventory_component_transfers.inventory_component_id',$inventory->id)
+                        ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
+                        ->select('inventory_component_transfers.quantity as quantity','inventory_component_transfers.unit_id as unit_id')
+                        ->get();
+                    $inQuantity = $outQuantity = 0;
+                    foreach($inTransferQuantities as $inTransferQuantity){
+
+                        $unitConversionQuantity = UnitHelper::unitQuantityConversion($inTransferQuantity['unit_id'],$materialUnit,$inTransferQuantity['quantity']);
+                        if(!is_array($unitConversionQuantity)){
+                            $inQuantity += $unitConversionQuantity;
+                        }
+                    }
+                    foreach($outTransferQuantities as $outTransferQuantity){
+                        $unitConversionQuantity = UnitHelper::unitQuantityConversion($outTransferQuantity['unit_id'],$materialUnit,$outTransferQuantity['quantity']);
+                        if(!is_array($unitConversionQuantity)){
+                            $outQuantity += $unitConversionQuantity;
+                        }
+                    }
+                    $unit = $materialUnit;
+                }else{
+                    $unit = Unit::where('slug','nos')->pluck('id')->first();
+                    $inQuantity = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
+                        ->where('inventory_transfer_types.type','ilike','in')
+                        ->where('inventory_component_transfers.inventory_component_id',$inventory->id)
+                        ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
+                        ->sum('inventory_component_transfers.quantity');
+                    $outQuantity = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
+                        ->where('inventory_transfer_types.type','ilike','out')
+                        ->where('inventory_component_transfers.inventory_component_id',$inventory->id)
+                        ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
+                        ->sum('inventory_component_transfers.quantity');
+                }
+                $availableQuantity = $inQuantity - $outQuantity;
+                if($availableQuantity > 0){
+                    $inventoryComponentOutTransfer = [
+                        'inventory_component_id' => $inventory['id'],
+                        'transfer_type_id' => $outTransferId,
+                        'quantity' => $availableQuantity,
+                        'unit_id' => $unit,
+                        'remark' => 'Transfer to Head Office',
+                        'source_name' => $officeSite->project->name.'-'.$officeSite->name,
+                        'in_time' => $now,
+                        'out_time' => $now,
+                        'date' => $now,
+                        'user_id' => User::where('email','superadmin@gmail.com')->pluck('id')->first(),
+                        'inventory_component_transfer_status_id' => InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first(),
+                        'rate_per_unit' => 0,
+                        'total' => 0,
+                        'related_transfer_id' => $officeSite['id']
+                    ];
+                    $inventoryComponentTransfer = $this->createInventoryComponentTransfer($inventoryComponentOutTransfer);
+
+                    $headOfficeInventory = InventoryComponent::where('project_site_id',$officeSite['id'])->where('name',$inventory['name'])->first();
+                    if($headOfficeInventory == null){
+                        $headOfficeInventory = new InventoryComponent([
+                            'name' => $inventory['name'],
+                            'project_site_id' => $officeSite['id'],
+                            'is_material' => $inventory['is_material'],
+                            'reference_id' => $inventory['reference_id'],
+                            'opening_stock' => 0
+                        ]);
+                        $headOfficeInventory->save();
+                        $headOfficeInventory->fresh();
+                    }
+                    $inventoryComponentInTransfer = [
+                        'inventory_component_id' => $headOfficeInventory['id'],
+                        'transfer_type_id' => $inTransferId,
+                        'quantity' => $availableQuantity,
+                        'unit_id' => $unit,
+                        'remark' => 'Transfer from Site',
+                        'source_name' => $projectSite->project->name.'-'.$projectSite->name,
+                        'in_time' => $now,
+                        'out_time' => $now,
+                        'date' => $now,
+                        'user_id' => User::where('email','superadmin@gmail.com')->pluck('id')->first(),
+                        'inventory_component_transfer_status_id' => InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first(),
+                        'rate_per_unit' => 0,
+                        'total' => 0,
+                        'related_transfer_id' => $projectSite['id']
+                    ];
+                    $inventoryComponentTransfer = $this->createInventoryComponentTransfer($inventoryComponentInTransfer);
+                }
+            }
+            return 'Done';
         }catch(\Exception $e){
             $data = [
-                'action' => 'Get GRN Details',
-                'params' => $request->all(),
-                'exception' => $e->getMessage()
+                'action' => 'Inventory Out',
+                'exception' => $e->getMessage(),
+                'param' => $request->all()
             ];
-            $status = 500;
-            $response = array();
-            Log::critical(json_encode($data));
         }
-        return response()->json($response,$status);
     }
 }
