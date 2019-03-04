@@ -831,7 +831,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('get-category',array('uses'=> 'Dpr\DprController@getSubcontractorsCategories'));
         });
     });
-
+    Route::get('inventory',array('uses'=> 'Inventory\InventoryManageController@inventoryTransfer'));
     Route::group(['prefix'=>'reports'],function (){
         Route::get('/',array('uses' => 'Report\ReportController@reportsRoute'));
         Route::get('manage',array('uses' => 'Report\ReportManagementController@getView'));

@@ -654,6 +654,11 @@
                             </a>
                         </li>
                     @endif
+                    <!--<li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                        <a href="/inventory"> Inventory
+                            <span class="arrow"></span>
+                        </a>
+                    </li>-->
                 </ul>
             </li>
         </div>
