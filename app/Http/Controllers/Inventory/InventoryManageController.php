@@ -1417,7 +1417,7 @@ class InventoryManageController extends Controller
             $projectSiteId = Session::get('global_project_site');
             $projectSite = ProjectSite::where('id',$projectSiteId)->first();
             $officeSite = ProjectSite::where('name',env('OFFICE_PROJECT_SITE_NAME'))->first();
-            if($projectSiteId = $officeSite){
+            if($projectSiteId == $officeSite){
                 return 'Check Site';
             }
             $now = Carbon::now();
