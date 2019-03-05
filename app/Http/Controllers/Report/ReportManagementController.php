@@ -2970,88 +2970,19 @@ class ReportManagementController extends Controller{
 
                     $purchaseAdvTotal = $purchaseOrderAdvancePaymentTotal - $advPurchaseBilltxn;
 
-                    /*//indirect Expense logic here
-                    $salesGst = $salesTaxAmount;
-                    $subcontractorGst = $subcontractorGstTax;
-
-                    $purchaseOrderGst = round($purchaseOrderBill
-                        ->join('purchase_orders','purchase_orders.id','='
-                            ,'purchase_order_bills.purchase_order_id')
-                        ->join('purchase_requests','purchase_requests.id','='
-                            ,'purchase_orders.purchase_request_id')
-                        ->join('vendors','vendors.id','=','purchase_orders.vendor_id')
-                        ->where('purchase_requests.project_site_id',$project_site_id)
-                        ->whereBetween('purchase_order_bills.created_at', [$startDateCreatedAt, $endDateCreatedAt])
-                        ->sum(DB::raw('purchase_order_bills.transportation_tax_amount + purchase_order_bills.tax_amount + purchase_order_bills.extra_tax_amount')),3);
-
-                    $assetMaintenanceGst = $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
-                        ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
-                        ->join('assets','assets.id','=','asset_maintenance.asset_id')
-                        ->where('asset_maintenance.project_site_id',$project_site_id)
-                        ->whereBetween('asset_maintenance_bill_payments.created_at', [$startDateCreatedAt, $endDateCreatedAt])
-                        ->sum(DB::raw('asset_maintenance_bills.cgst_amount +asset_maintenance_bills.sgst_amount +asset_maintenance_bills.igst_amount'));
-
-                    $inventorySiteTransfersInGst = $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
-                        ,'=','inventory_component_transfers.inventory_component_id')
-                        ->where('inventory_components.project_site_id',$project_site_id)
-                        ->where('inventory_components.is_material',true)
-                        ->where('inventory_component_transfers.transfer_type_id',
-                            $inventoryComponentSiteTransferIds->where('type','IN')->pluck('id')->first())
-                        ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
-                        ->whereBetween('inventory_component_transfers.created_at', [$startDateCreatedAt, $endDateCreatedAt])
-                        ->sum(DB::raw('inventory_component_transfers.cgst_amount + inventory_component_transfers.sgst_amount + inventory_component_transfers.igst_amount'));
-
-                   $inventorySiteTransfersOutGst = $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
-                        ,'=','inventory_component_transfers.inventory_component_id')
-                        ->where('inventory_components.project_site_id',$project_site_id)
-                        ->where('inventory_components.is_material',true)
-                        ->where('inventory_component_transfers.transfer_type_id',
-                            $inventoryComponentSiteTransferIds->where('type','OUT')->pluck('id')->first())
-                        ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
-                        ->whereBetween('inventory_component_transfers.created_at', [$startDateCreatedAt, $endDateCreatedAt])
-                        ->sum(DB::raw('inventory_component_transfers.cgst_amount + inventory_component_transfers.sgst_amount + inventory_component_transfers.igst_amount'));
-
-                    $siteTransferBillGst = $siteTransferBill->join('inventory_component_transfers','inventory_component_transfers.id',
-                        '=','site_transfer_bills.inventory_component_transfer_id')
-                        ->join('inventory_components','inventory_components.id'
-                            ,'=','inventory_component_transfers.inventory_component_id')
-                        ->where('inventory_components.project_site_id',$project_site_id)
-                        ->whereBetween('site_transfer_bills.created_at', [$startDateCreatedAt, $endDateCreatedAt])
-                        //->whereMonth('site_transfer_bills.created_at',$month['id'])
-                        //->whereYear('site_transfer_bills.created_at',$selectedYear['slug'])
-                        ->sum(DB::raw('site_transfer_bills.tax_amount + site_transfer_bills.extra_amount_cgst_amount + site_transfer_bills.extra_amount_sgst_amount + site_transfer_bills.extra_amount_igst_amount'));
-
-                    $purchaseGst = $purchaseOrderGst + $assetMaintenanceGst + $inventorySiteTransfersInGst + $siteTransferBillGst - $inventorySiteTransfersOutGst;
-                    $totalMonthGst = $salesGst - $purchaseGst - $subcontractorGst;
-                    $yearlyGst += $totalMonthGst;*/
-
-                    //salary advance logic
-/*
-                    $approvedPeticashStatusId = PeticashStatus::where('slug','approved')->pluck('id')->first();
-
-
-                   $totalSalaryAmount = PeticashSalaryTransaction::where('peticash_transaction_type_id',PeticashTransactionType::where('slug','salary')->pluck('id')->first())
-                        ->where('project_site_id',$project_site_id)
-                        ->where('peticash_status_id',$approvedPeticashStatusId)
-                        ->whereBetween('created_at', [$startDateCreatedAt, $endDateCreatedAt])
-                        ->sum('payable_amount');
-                    $totalAdvanceAmount = PeticashSalaryTransaction::where('peticash_transaction_type_id',PeticashTransactionType::where('slug','advance')->pluck('id')->first())
-                        ->where('project_site_id',$project_site_id)
-                        ->where('peticash_status_id',$approvedPeticashStatusId)
-                        ->whereBetween('created_at', [$startDateCreatedAt, $endDateCreatedAt])
-                        ->sum('amount');
-
-                    dd($totalSalaryAmount." : ".$totalAdvanceAmount);*/
                     $indirectExpenses = $yearlyGst;
                     $receipt = $receipt - $mobilization;
                     $outstanding = $sales - $debitAmount - $tdsAmount - $totalRetention - $otherRecoveryAmount - $totalHold - $receipt - $mobilization;
-                    $total = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount + $officeExpense + $subcontractorTotal + $openingExpenses + $indirectExpenses;
+                    $total = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount
+                            + $officeExpense + $subcontractorTotal + $openingExpenses + $indirectExpenses + $totalAssetRentOpeningExpense;
+
                     $totalWithAdvance = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount + $officeExpense + $subcontractorTotal + $openingExpenses
-                                        + $subcontractorAdvTotal + $purchaseAdvTotal + $indirectExpenses;
+                                        + $subcontractorAdvTotal + $purchaseAdvTotal + $indirectExpenses + $totalAssetRentOpeningExpense;
                     $salesPnL = $sales - $debitAmount - $tdsAmount - $totalHold - $otherRecoveryAmount - $mobilization;
                     $salesWisePnL = $salesPnL - $total;
                     $receiptWisePnL = $receipt - $total;
                     $advreceiptWisePnL = (($outstandingMobilization - $mobilization) + $receipt) - $totalWithAdvance;
+
                     $data = array(
                         array_merge(array(null,null, null, null, null, null, null, 'Billwise Expense', null,'Billwise + Advance Expense')),
                         array_merge(array(null,'Sales', 'Retention', 'Receipt', 'Mobilization', 'Outstanding', 'Category', 'Amount', 'Category','Amount')),
@@ -5133,10 +5064,11 @@ class ReportManagementController extends Controller{
             $indirectExpense = $yearlyGst;
             $receipt = $receipt - $mobilization;
             $outstanding = $sales - $debitAmount - $tdsAmount - $totalRetention - $otherRecoveryAmount - $totalHold - $receipt- $mobilization;
-            $totalExpense = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount + $officeExpense + $subcontractorTotal + $openingExpenses + $indirectExpense;
+            $totalExpense = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount
+                + $officeExpense + $subcontractorTotal + $openingExpenses + $indirectExpense + $totalAssetRentOpeningExpense;
             $totalExpenseWithAdv = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount
                                     + $officeExpense + $subcontractorTotal + $openingExpenses
-                                    + $subcontractorAdvTotal + $purchaseAdvTotal + $indirectExpense;
+                                    + $subcontractorAdvTotal + $purchaseAdvTotal + $indirectExpense + $totalAssetRentOpeningExpense;
             $salesPnL = $sales - $debitAmount - $tdsAmount - $totalHold - $otherRecoveryAmount - $mobilization;
             $salesWisePnL = $salesPnL - $totalExpense;
             $receiptWisePnL = $receipt - $totalExpense;
