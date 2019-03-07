@@ -35,7 +35,7 @@ var AssetMaintenanceBillListing = function () {
                             "vendor_name" : $("#vendor_name").val(),
                         },
                         success: function(result){
-                            total = result['total'];
+                            subtotal = result['subtotal'];
 
                             // Total over this page
                             pageTotal = api
@@ -47,12 +47,13 @@ var AssetMaintenanceBillListing = function () {
 
                             // Update footer
                             $( api.column( 4 ).footer() ).html(
-                                pageTotal.toFixed(3) +' ( '+ total.toFixed(3) +' total )'
+                                pageTotal.toFixed(3) +' ( '+ subtotal.toFixed(3) +' total )'
                             );
 
-                            paid_total = result['paid_total'];
+                            taxAmount = result['taxamount'];
+
                             // Total over this page
-                            pageTotal_paid = api
+                            pageTotal = api
                                 .column( 5, { page: 'current'} )
                                 .data()
                                 .reduce( function (a, b) {
@@ -61,12 +62,13 @@ var AssetMaintenanceBillListing = function () {
 
                             // Update footer
                             $( api.column( 5 ).footer() ).html(
-                                pageTotal_paid.toFixed(3) +' ( '+ paid_total.toFixed(3) +' total )'
+                                pageTotal.toFixed(3) +' ( '+ taxAmount.toFixed(3) +' total )'
                             );
 
-                            pending_total = result['pending_total'];
+                            total = result['total'];
+
                             // Total over this page
-                            pageTotal_pending = api
+                            pageTotal = api
                                 .column( 6, { page: 'current'} )
                                 .data()
                                 .reduce( function (a, b) {
@@ -75,6 +77,34 @@ var AssetMaintenanceBillListing = function () {
 
                             // Update footer
                             $( api.column( 6 ).footer() ).html(
+                                pageTotal.toFixed(3) +' ( '+ total.toFixed(3) +' total )'
+                            );
+
+                            paid_total = result['paid_total'];
+                            // Total over this page
+                            pageTotal_paid = api
+                                .column( 7, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 7 ).footer() ).html(
+                                pageTotal_paid.toFixed(3) +' ( '+ paid_total.toFixed(3) +' total )'
+                            );
+
+                            pending_total = result['pending_total'];
+                            // Total over this page
+                            pageTotal_pending = api
+                                .column( 8, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 8 ).footer() ).html(
                                 pageTotal_pending.toFixed(3) +' ( '+ pending_total.toFixed(3) +' total )'
                             );
                         }});

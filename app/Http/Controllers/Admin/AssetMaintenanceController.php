@@ -1,9 +1,9 @@
 <?php
-    /**
-     * Created by Harsha
-     * Date: 27/1/18
-     * Time: 12:25 PM
-     */
+/**
+ * Created by Harsha
+ * Date: 27/1/18
+ * Time: 12:25 PM
+ */
 
 namespace App\Http\Controllers\Admin;
 
@@ -166,13 +166,13 @@ class AssetMaintenanceController extends Controller{
             if(Session::has('global_project_site')){
                 $projectSiteId = Session::get('global_project_site');
                 $assetIds = InventoryComponent::join('assets','assets.id','=','inventory_components.reference_id')
-                                        ->join('asset_types','asset_types.id','=','assets.asset_types_id')
-                                        ->where('inventory_components.project_site_id', $projectSiteId)
-                                        ->where('assets.name','ilike','%'.$keyword.'%')
-                                        ->where('inventory_components.is_material', false)
-                                        ->where('assets.is_active',true)
-                                        ->where('asset_types.slug','!=','other')
-                                        ->pluck('inventory_components.id');
+                    ->join('asset_types','asset_types.id','=','assets.asset_types_id')
+                    ->where('inventory_components.project_site_id', $projectSiteId)
+                    ->where('assets.name','ilike','%'.$keyword.'%')
+                    ->where('inventory_components.is_material', false)
+                    ->where('assets.is_active',true)
+                    ->where('asset_types.slug','!=','other')
+                    ->pluck('inventory_components.id');
             }else{
                 $assetIds = array();
             }
@@ -181,8 +181,8 @@ class AssetMaintenanceController extends Controller{
             $assetList = array();
             foreach($assetIds as $inventoryComponentId){
                 $lastInTransferDate = InventoryComponentTransfers::where('inventory_component_id', $inventoryComponentId)
-                                            ->whereIn('transfer_type_id', $inTransferIds)
-                                            ->orderBy('created_at', 'desc')->pluck('created_at')->first();
+                    ->whereIn('transfer_type_id', $inTransferIds)
+                    ->orderBy('created_at', 'desc')->pluck('created_at')->first();
                 $lastOutTransferDate = InventoryComponentTransfers::where('inventory_component_id', $inventoryComponentId)
                     ->whereIn('transfer_type_id', $outTransferIds)
                     ->where('created_at', '>=', $lastInTransferDate)
@@ -307,11 +307,11 @@ class AssetMaintenanceController extends Controller{
             $user = Auth::user();
             $projectSiteId = Session::get('global_project_site');
             $vendorAssignedAssetMaintenance = AssetMaintenanceVendorRelation::join('asset_maintenance','asset_maintenance_vendor_relation.asset_maintenance_id','=','asset_maintenance.id')
-                                                                            ->where('asset_maintenance.project_site_id',$projectSiteId)
-                                                                            ->where('asset_maintenance.asset_maintenance_status_id',AssetMaintenanceStatus::where('slug','vendor-assigned')->pluck('id')->first())
-                                                                            ->select('asset_maintenance_vendor_relation.id','asset_maintenance_vendor_relation.asset_maintenance_id','asset_maintenance_vendor_relation.vendor_id','asset_maintenance_vendor_relation.quotation_amount','asset_maintenance_vendor_relation.user_id','asset_maintenance_vendor_relation.is_approved')
-                                                                            ->orderBy('asset_maintenance_vendor_relation.id', 'DESC')
-                                                                            ->get();
+                ->where('asset_maintenance.project_site_id',$projectSiteId)
+                ->where('asset_maintenance.asset_maintenance_status_id',AssetMaintenanceStatus::where('slug','vendor-assigned')->pluck('id')->first())
+                ->select('asset_maintenance_vendor_relation.id','asset_maintenance_vendor_relation.asset_maintenance_id','asset_maintenance_vendor_relation.vendor_id','asset_maintenance_vendor_relation.quotation_amount','asset_maintenance_vendor_relation.user_id','asset_maintenance_vendor_relation.is_approved')
+                ->orderBy('asset_maintenance_vendor_relation.id', 'DESC')
+                ->get();
             $status = 200;
             $iTotalRecords = count($vendorAssignedAssetMaintenance);
             $records = array();
@@ -334,7 +334,7 @@ class AssetMaintenanceController extends Controller{
                     $actionDropDown =  '';
                 }
 
-               $records['data'][$iterator] = [
+                $records['data'][$iterator] = [
                     $vendorAssignedAssetMaintenance[$pagination]->assetMaintenance->asset->name,
                     date('d M Y H:i:s',strtotime($vendorAssignedAssetMaintenance[$pagination]->assetMaintenance['created_at'])),
                     $vendorAssignedAssetMaintenance[$pagination]->vendor->name,
@@ -391,10 +391,10 @@ class AssetMaintenanceController extends Controller{
             $assetMaintenance = AssetMaintenance::where('id',$assetMaintenanceId)->first();
             $alreadyAssignedVendorId = $assetMaintenance->assetMaintenanceVendorRelation->pluck('vendor_id');
             $vendorList = Vendor::join('asset_vendor_relation','asset_vendor_relation.vendor_id','=','vendors.id')
-                            ->where('asset_vendor_relation.asset_id',$assetMaintenance['asset_id'])
-                            ->whereNotIn('vendors.id',$alreadyAssignedVendorId)
-                            ->where('vendors.name','ilike','%'.$keyword.'%')->where('vendors.is_active',true)
-                            ->where('vendors.for_transportation',false)->select('vendors.id','vendors.company')->get();
+                ->where('asset_vendor_relation.asset_id',$assetMaintenance['asset_id'])
+                ->whereNotIn('vendors.id',$alreadyAssignedVendorId)
+                ->where('vendors.name','ilike','%'.$keyword.'%')->where('vendors.is_active',true)
+                ->where('vendors.for_transportation',false)->select('vendors.id','vendors.company')->get();
             $response = array();
             if(count($vendorList) > 0){
                 $response = $vendorList->toArray();
@@ -639,30 +639,47 @@ class AssetMaintenanceController extends Controller{
             }
             if($filterFlag == true && $request->has('vendor_name') && $request->vendor_name != ''){
                 $assetMaintenanceBillIds = AssetMaintenanceVendorRelation::join('vendors','vendors.id','=','asset_maintenance_vendor_relation.vendor_id')
-                                                                        ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_vendor_relation.asset_maintenance_id')
-                                                                        ->join('asset_maintenance_bills','asset_maintenance_bills.asset_maintenance_id','=','asset_maintenance.id')
-                                                                        ->whereIn('asset_maintenance_bills.id', $assetMaintenanceBillIds)
-                                                                        ->where('asset_maintenance_vendor_relation.is_approved', true)
-                                                                        ->where('vendors.company','ilike','%'.$request->vendor_name.'%')
-                                                                        ->pluck('asset_maintenance_bills.id')->toArray();
+                    ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_vendor_relation.asset_maintenance_id')
+                    ->join('asset_maintenance_bills','asset_maintenance_bills.asset_maintenance_id','=','asset_maintenance.id')
+                    ->whereIn('asset_maintenance_bills.id', $assetMaintenanceBillIds)
+                    ->where('asset_maintenance_vendor_relation.is_approved', true)
+                    ->where('vendors.company','ilike','%'.$request->vendor_name.'%')
+                    ->pluck('asset_maintenance_bills.id')->toArray();
             }
-                $assetMaintenanceBillData = AssetMaintenanceBill::join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
+            $assetMaintenanceBillData = AssetMaintenanceBill::join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
                 ->whereIn('asset_maintenance_bills.id',$assetMaintenanceBillIds)
                 ->select('asset_maintenance_bills.cgst_amount',
                     'asset_maintenance_bills.sgst_amount',
                     'asset_maintenance_bills.igst_amount',
-                    'asset_maintenance.id as asset_maintenance_id','asset_maintenance_bills.id as id','asset_maintenance_bills.bill_number as bill_number','asset_maintenance_bills.amount','asset_maintenance_bills.assets_bill_number')
+                    'asset_maintenance.id as asset_maintenance_id',
+                    'asset_maintenance_bills.id as id',
+                    'asset_maintenance_bills.bill_number as bill_number',
+                    'asset_maintenance_bills.amount',
+                    'asset_maintenance_bills.assets_bill_number',
+                    'asset_maintenance_bills.extra_amount')
                 ->orderBy('id','desc')
                 ->get();
             if ($request->has('get_total')) {
                 $total = 0;
                 $paidTotal = 0;
+                $subtotal = 0;
+                $taxAmt = 0;
                 foreach($assetMaintenanceBillData as $assetBilldata) {
                     $paidTotal += $assetBilldata->assetMaintenanceBillPayment->sum('amount');
-                    $total = $total + $assetBilldata['amount'];
+                    $total = $total + ($assetBilldata['amount']+
+                            $assetBilldata['cgst_amount']+
+                            $assetBilldata['sgst_amount']+
+                            $assetBilldata['igst_amount']+
+                            $assetBilldata['extra_amount']);
+                    $subtotal += $assetBilldata['amount'] + $assetBilldata['extra_amount'];
+                    $taxAmt = $taxAmt + ($assetBilldata['cgst_amount']+
+                            $assetBilldata['sgst_amount']+
+                            $assetBilldata['igst_amount']);
                 }
                 $pendingTotal = $total - $paidTotal;
                 $records['total'] = $total;
+                $records['subtotal'] = $subtotal;
+                $records['taxamount'] = $taxAmt;
                 $records['pending_total'] = $pendingTotal;
                 $records['paid_total'] = $paidTotal;
             } else {
@@ -691,9 +708,11 @@ class AssetMaintenanceController extends Controller{
                         Vendor::where('id',$vendorId)->pluck('company')->first(),
                         $assetMaintenanceBillData[$pagination]['bill_number'],
                         $assetsBill,
-                        $assetMaintenanceBillData[$pagination]['amount'] + $taxAmount,
+                        $assetMaintenanceBillData[$pagination]['amount'],
+                        $taxAmount,
+                        $assetMaintenanceBillData[$pagination]['amount'] + $assetMaintenanceBillData[$pagination]['extra_amount'] + $taxAmount,
                         $paidAmount,
-                        ($assetMaintenanceBillData[$pagination]['amount'] + $taxAmount) - $paidAmount,
+                        ($assetMaintenanceBillData[$pagination]['amount'] + $assetMaintenanceBillData[$pagination]['extra_amount'] + $taxAmount) - $paidAmount,
                         $editButton
                     ];
                 }
