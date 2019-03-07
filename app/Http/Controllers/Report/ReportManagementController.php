@@ -197,11 +197,13 @@ class ReportManagementController extends Controller{
                         ->whereBetween('inventory_component_transfers.created_at',[$start_date,$end_date])
                         ->count();
 
-                    $assetMaintenanceBillCount = $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
-                        ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
-                        ->where('asset_maintenance.project_site_id',$globalProjectSiteId)
-                        ->whereBetween('asset_maintenance_bill_payments.created_at',[$start_date,$end_date])
+                    $assetMaintenanceBillCount = AssetMaintenanceBill::join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
+                        ->join('assets','assets.id','=','asset_maintenance.asset_id')
+                        ->where('asset_maintenance.project_site_id', $globalProjectSiteId)
+                        ->whereBetween('asset_maintenance_bills.created_at',[$start_date,$end_date])
                         ->count();
+
+
                     $count = $purchaseCount + $inventorySiteTransferCount + $assetMaintenanceBillCount;
                     $noOfButtons = $count/$reportLimit;
                     for($iterator = 0; $iterator < $noOfButtons; $iterator++){
@@ -961,7 +963,6 @@ class ReportManagementController extends Controller{
                     $inventoryComponentTransferStatus = new InventoryComponentTransferStatus();
                     $siteTransferBill = new SiteTransferBill();
                     $assetMaintenanceBill = new AssetMaintenanceBill();
-                    $assetMaintenanceBillPayment = new AssetMaintenanceBillPayment();
                     $purchaseOrderBillMonthlyExpense = new PurchaseOrderBillMonthlyExpense();
                     $data[$row] = array(
                         'Bill Date', 'Bill Create Date', 'Bill No', 'Paritculars', 'Basic Amount', 'Tax Amount',
@@ -1039,16 +1040,15 @@ class ReportManagementController extends Controller{
                         ->orderBy('site_transfer_bills.created_at','desc')
                         ->get()->toArray();
 
-                    $assetMaintenanceBillsData = $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
-                        ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
+                    $assetMaintenanceBillsData = AssetMaintenanceBill::join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
                         ->join('assets','assets.id','=','asset_maintenance.asset_id')
                         ->where('asset_maintenance.project_site_id',$project_site_id)
-                        ->where('asset_maintenance_bill_payments.created_at','>=',$firstParameter)
-                        ->where('asset_maintenance_bill_payments.created_at','<=',$secondParameter)
+                        ->where('asset_maintenance_bills.created_at','>=',$firstParameter)
+                        ->where('asset_maintenance_bills.created_at','<=',$secondParameter)
                         ->select('asset_maintenance_bills.id as asset_maintenance_bill_id'
-                            ,'asset_maintenance_bill_payments.amount as total','asset_maintenance_bill_payments.created_at as created_at'
-                            ,'assets.name as asset_name','asset_maintenance.id as asset_maintenance_id')
-                        ->orderBy('asset_maintenance_bill_payments.created_at','desc')
+                            ,'asset_maintenance_bills.amount as total','asset_maintenance_bills.created_at as created_at'
+                            ,'assets.name as asset_name','asset_maintenance.id as asset_maintenance_id','asset_maintenance_bills.extra_amount as extra_amount')
+                        ->orderBy('asset_maintenance_bills.created_at','desc')
                         ->get()->toArray();
                     $totalData = array_merge($purchaseOrderBillsData,$inventorySiteTransfersData,$siteTransferBillData,$assetMaintenanceBillsData);
                     usort($totalData, function ($item1, $item2) {
@@ -1071,13 +1071,17 @@ class ReportManagementController extends Controller{
                             $data[$row]['bill_amount'] = round($data[$row]['basic_amount'],3) + round($data[$row]['tax_amount'],3);
                         }elseif(array_key_exists('inventory_component_transfer_id',$reportData)){
                             $data[$row]['background'] = '#efd2d5';
+
                             $inventoryComponentTransferData = $inventoryComponentTransfer->where('id',$reportData['inventory_component_transfer_id'])
                                         ->first();
+                            $InventoryMaterialName = InventoryComponentTransfers::join('inventory_components','inventory_components.id','=','inventory_component_transfers.inventory_component_id')
+                                                         ->where('inventory_component_transfers.id','=',$inventoryComponentTransferData['id'])
+                                                         ->first()->toArray();
                             $thisMonth = (int)date('n',strtotime($inventoryComponentTransferData['created_at']));
                             $data[$row]['bill_entry_date'] = date('d-m-Y',strtotime($inventoryComponentTransferData['created_at']));
                             $data[$row]['bill_created_date'] = date('d-m-Y',strtotime($inventoryComponentTransferData['created_at']));
                             $data[$row]['bill_number'] = $inventoryComponentTransferData['grn'];
-                            $data[$row]['source_name'] = $inventoryComponentTransferData['source_name'].' - '.$inventoryComponentTransferData->transferType->type;
+                            $data[$row]['source_name'] = "(".ucwords($InventoryMaterialName['name']).") ".$inventoryComponentTransferData['source_name'].' - '.$inventoryComponentTransferData->transferType->type;
                             $data[$row]['basic_amount'] = $inventoryComponentTransferData['rate_per_unit'] * $inventoryComponentTransferData['quantity'];
                             $data[$row]['tax_amount'] = $inventoryComponentTransferData['cgst_amount'] + $inventoryComponentTransferData['sgst_amount'] + $inventoryComponentTransferData['igst_amount'] ;
                             $total = $data[$row]['basic_amount'] + $data[$row]['tax_amount'];
@@ -1109,7 +1113,7 @@ class ReportManagementController extends Controller{
                             $data[$row]['company_name'] = $reportData['asset_name'].' - '.$vendorCompany;
                             $data[$row]['basic_amount'] = $assetMaintenanceBillData['amount'] + $assetMaintenanceBillData['extra_amount'];
                             $data[$row]['tax_amount'] = $assetMaintenanceBillData['cgst_amount'] + $assetMaintenanceBillData['sgst_amount'] + $assetMaintenanceBillData['igst_amount'];
-                            $data[$row]['bill_amount'] = (float)$reportData['total'];
+                            $data[$row]['bill_amount'] = $data[$row]['basic_amount'] + $data[$row]['tax_amount'];
                         }
 
                         if($row == 1){

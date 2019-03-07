@@ -32,6 +32,11 @@ var SiteTransferBillListing = function () {
                     };
 
                     var vendor_name = $('#vendor_name').val();
+                    var bill_number = $('#bill_number').val();
+                    var project_name = $('#project_name').val();
+                    var basic_amt = $('#basic_amt').val();
+                    var total_amt = $('#total_amt').val();
+                    var bill_date = $('#bill_date').val();
 
 
                     // Total over all pages
@@ -40,13 +45,33 @@ var SiteTransferBillListing = function () {
                         type: 'POST',
                         data :{
                             "get_total" : true,
-                            "vendor_name" : vendor_name
+                            "bill_number" : bill_number,
+                            "project_name" : project_name,
+                            "basic_amt" : basic_amt,
+                            "total_amt" : total_amt,
+                            "vendor_name" : vendor_name,
+                            "bill_date" : bill_date
                         },
                         success: function(result){
                             total = result['total'];
 
                             // Total over this page
                             pageTotal = api
+                                .column( 7, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 7 ).footer() ).html(
+                                pageTotal.toFixed(3) +' ( '+ total.toFixed(3) +' total)'
+                            );
+
+                            billtotal = result['billtotal'];
+
+                            // Total over this page
+                            pageBillTotal = api
                                 .column( 8, { page: 'current'} )
                                 .data()
                                 .reduce( function (a, b) {
@@ -55,13 +80,13 @@ var SiteTransferBillListing = function () {
 
                             // Update footer
                             $( api.column( 8 ).footer() ).html(
-                                pageTotal.toFixed(3) +' ( '+ total.toFixed(3) +' total)'
+                                pageBillTotal.toFixed(3) +' ( '+ billtotal.toFixed(3) +' total)'
                             );
 
-                            billtotal = result['billtotal'];
+                            paidtotal = result['paidtotal'];
 
                             // Total over this page
-                            pageBillTotal = api
+                            pagePaidTotal = api
                                 .column( 9, { page: 'current'} )
                                 .data()
                                 .reduce( function (a, b) {
@@ -70,21 +95,6 @@ var SiteTransferBillListing = function () {
 
                             // Update footer
                             $( api.column( 9 ).footer() ).html(
-                                pageBillTotal.toFixed(3) +' ( '+ billtotal.toFixed(3) +' total)'
-                            );
-
-                            paidtotal = result['paidtotal'];
-
-                            // Total over this page
-                            pagePaidTotal = api
-                                .column( 10, { page: 'current'} )
-                                .data()
-                                .reduce( function (a, b) {
-                                    return intVal(a) + intVal(b);
-                                }, 0 );
-
-                            // Update footer
-                            $( api.column( 10 ).footer() ).html(
                                 pagePaidTotal.toFixed(3) +' ( '+ paidtotal.toFixed(3) +' total)'
                             );
                         }});
