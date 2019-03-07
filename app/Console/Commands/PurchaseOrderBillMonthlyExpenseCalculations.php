@@ -130,13 +130,13 @@ class PurchaseOrderBillMonthlyExpenseCalculations extends Command
                                     ->whereYear('site_transfer_bills.created_at',$thisYear)
                                     ->sum('site_transfer_bills.total');
 
-                                $assetMaintenanceBillPaymentTotal = $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
-                                    ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
+                                $assetMaintenanceBillPaymentTotal = AssetMaintenanceBill::join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
                                     ->join('assets','assets.id','=','asset_maintenance.asset_id')
                                     ->where('asset_maintenance.project_site_id',$projectSiteId)
-                                    ->whereMonth('asset_maintenance_bill_payments.created_at',$thisMonth)
-                                    ->whereYear('asset_maintenance_bill_payments.created_at',$thisYear)
-                                    ->sum('asset_maintenance_bill_payments.amount');
+                                    ->whereMonth('asset_maintenance_bills.created_at',$thisMonth)
+                                    ->whereYear('asset_maintenance_bills.created_at',$thisYear)
+                                    ->sum(DB::raw('asset_maintenance_bills.amount + asset_maintenance_bills.extra_amount + asset_maintenance_bills.cgst_amount +asset_maintenance_bills.sgst_amount +asset_maintenance_bills.igst_amount'));
+
                                 $totalAmount = $purchaseOrderBillTotalAmount + $inventorySiteTransfersTotal + $assetMaintenanceBillPaymentTotal + $siteTransferBillTotal;
 
                                 if($totalAmount != 0){
@@ -226,13 +226,13 @@ class PurchaseOrderBillMonthlyExpenseCalculations extends Command
                                         ->whereYear('site_transfer_bills.created_at',$thisYear)
                                         ->sum('site_transfer_bills.total');
 
-                                    $assetMaintenanceBillPaymentTotal = $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
-                                        ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
+                                    $assetMaintenanceBillPaymentTotal = AssetMaintenanceBill::join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
                                         ->join('assets','assets.id','=','asset_maintenance.asset_id')
                                         ->where('asset_maintenance.project_site_id',$projectSiteId)
-                                        ->whereMonth('asset_maintenance_bill_payments.created_at',$thisMonth)
-                                        ->whereYear('asset_maintenance_bill_payments.created_at',$thisYear)
-                                        ->sum('asset_maintenance_bill_payments.amount');
+                                        ->whereMonth('asset_maintenance_bills.created_at',$thisMonth)
+                                        ->whereYear('asset_maintenance_bills.created_at',$thisYear)
+                                        ->sum(DB::raw('asset_maintenance_bills.amount + asset_maintenance_bills.extra_amount + asset_maintenance_bills.cgst_amount +asset_maintenance_bills.sgst_amount +asset_maintenance_bills.igst_amount'));
+
                                     $totalAmount = $purchaseOrderBillTotalAmount + $inventorySiteTransfersTotal + $siteTransferBillTotal + $assetMaintenanceBillPaymentTotal;
                                     if($totalAmount != 0){
                                         $alreadyExist = $purchaseOrderBillMonthlyExpenses->where('project_site_id',$projectSiteId)->where('month_id',$thisMonth)->where('year_id',$yearId)->first();
@@ -317,12 +317,12 @@ class PurchaseOrderBillMonthlyExpenseCalculations extends Command
                             ->whereDate('site_transfer_bills.created_at','=',$todayDate)
                             ->sum('site_transfer_bills.total');
 
-                        $assetMaintenanceBillPaymentTotal = $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
-                            ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
+                        $assetMaintenanceBillPaymentTotal = AssetMaintenanceBill::join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
                             ->join('assets','assets.id','=','asset_maintenance.asset_id')
                             ->where('asset_maintenance.project_site_id',$projectSiteId)
-                            ->whereDate('asset_maintenance_bill_payments.created_at','=',$todayDate)
-                            ->sum('asset_maintenance_bill_payments.amount');
+                            ->whereDate('asset_maintenance_bills.created_at','=',$todayDate)
+                            ->sum(DB::raw('asset_maintenance_bills.amount + asset_maintenance_bills.extra_amount + asset_maintenance_bills.cgst_amount +asset_maintenance_bills.sgst_amount +asset_maintenance_bills.igst_amount'));
+
                         $totalAmount = $purchaseOrderBillTotalAmount + $inventorySiteTransfersTotal + $assetMaintenanceBillPaymentTotal + $siteTransferBillTotal;
 
                         if($totalAmount != 0){
@@ -414,13 +414,13 @@ class PurchaseOrderBillMonthlyExpenseCalculations extends Command
                                     ->whereYear('site_transfer_bills.created_at',$thisYear)
                                     ->sum('site_transfer_bills.total');
 
-                                $assetMaintenanceBillPaymentTotal = $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
-                                    ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
+                                $assetMaintenanceBillPaymentTotal = AssetMaintenanceBill::join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
                                     ->join('assets','assets.id','=','asset_maintenance.asset_id')
                                     ->where('asset_maintenance.project_site_id',$projectSiteId)
-                                    ->whereMonth('asset_maintenance_bill_payments.created_at',$thisMonth)
-                                    ->whereYear('asset_maintenance_bill_payments.created_at',$thisYear)
-                                    ->sum('asset_maintenance_bill_payments.amount');
+                                    ->whereMonth('asset_maintenance_bills.created_at',$thisMonth)
+                                    ->whereYear('asset_maintenance_bills.created_at',$thisYear)
+                                    ->sum(DB::raw('asset_maintenance_bills.amount + asset_maintenance_bills.extra_amount + asset_maintenance_bills.cgst_amount +asset_maintenance_bills.sgst_amount +asset_maintenance_bills.igst_amount'));
+
                                 $totalAmount = $purchaseOrderBillTotalAmount + $inventorySiteTransfersTotal + $siteTransferBillTotal + $assetMaintenanceBillPaymentTotal;
 
                                 if($totalAmount != 0){
