@@ -1530,4 +1530,28 @@ class InventoryManageController extends Controller
             ];
         }
     }
+
+    public function getGRNDetails(Request $request){
+        try{
+            $inventoryComponentTransfer= InventoryComponentTransfers::where('id',$request['inventory_component_transfer_id'])->first();
+            $transportation_cgst_amount = ($inventoryComponentTransfer['transportation_amount'] * $inventoryComponentTransfer['transportation_cgst_percent']) / 100;
+            $transportation_sgst_amount = ($inventoryComponentTransfer['transportation_amount'] * $inventoryComponentTransfer['transportation_sgst_percent']) / 100;
+            $transportation_igst_amount = ($inventoryComponentTransfer['transportation_amount'] * $inventoryComponentTransfer['transportation_igst_percent']) / 100;
+            $response['inventory_component_transfer'] = $inventoryComponentTransfer;
+            $response['inventory_component_transfer']['unit'] = Unit::where('id',$inventoryComponentTransfer['unit_id'])->pluck('name')->first();
+            $response['inventory_component_transfer']['transportation_tax_amount'] = $transportation_cgst_amount + $transportation_sgst_amount + $transportation_igst_amount;
+            $response['inventory_component_transfer']['company_name'] = Vendor::where('id',$inventoryComponentTransfer['vendor_id'])->pluck('company')->first();
+            $status = 200;
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get GRN Details',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            $status = 500;
+            $response = array();
+            Log::critical(json_encode($data));
+        }
+        return response()->json($response,$status);
+    }
 }
