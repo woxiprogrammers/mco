@@ -146,6 +146,9 @@ class SendPurchaseOrderEmails extends Command
                     }else{
                         $projectSiteInfo['delivery_address'] = $projectSiteInfo['project_name'].', '.$projectSiteInfo['project_site_name'].', '.$projectSiteInfo['project_site_address'].', '.$projectSiteInfo['project_site_city'];
                     }
+
+                    $projectSiteInfo['por_remarks'] = ($purchaseOrder->purchaseOrderRequest->por_remarks !=null && $purchaseOrder->purchaseOrderRequest->por_remarks != "")? $purchaseOrder->purchaseOrderRequest->por_remarks : "-";
+
                     $pdf = App::make('dompdf.wrapper');
                     $pdfFlag = "purchase-order-listing-download";
                     $pdfTitle = 'Purchase Order';

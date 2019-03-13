@@ -45,7 +45,7 @@
                                                 <div class="form-group">
                                                     <div class="col-md-3">
                                                         <label class="control-label pull-right">
-                                                            Purchase Request
+                                                            Purchase Request :
                                                         </label>
                                                     </div>
                                                     <div class="col-md-6">
@@ -55,7 +55,7 @@
                                                 <div class="form-group">
                                                     <div class="col-md-3">
                                                         <label class="control-label pull-right">
-                                                            Delivery Address
+                                                            Delivery Address :
                                                         </label>
                                                     </div>
                                                     <div class="col-md-6">
@@ -64,6 +64,17 @@
                                                                 <option value="{{$deliveryAddress}}">{{$deliveryAddress}}</option>
                                                             @endforeach
                                                         </select>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <div class="col-md-3">
+                                                        <label class="control-label pull-right">
+                                                            Remarks :
+                                                        </label>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <textarea class="form-control" id="por_remarks" name="por_remarks" ></textarea>
                                                     </div>
                                                 </div>
                                                 <div class="table-scrollable" style="overflow: scroll !important;">
