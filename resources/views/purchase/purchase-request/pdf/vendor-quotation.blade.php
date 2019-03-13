@@ -387,5 +387,9 @@
                 @endif
             </tr>
         </table>
+        <fieldset>
+            <legend>Remark :</legend>
+            <p style="font-weight: bolder;font-size: 12px;">{{array_key_exists("por_remarks",$projectSiteInfo) ? $projectSiteInfo['por_remarks'] : "-"}}</p>
+        </fieldset>
     </body>
 </html>

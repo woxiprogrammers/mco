@@ -231,6 +231,8 @@ class VendorMailController extends Controller
                         $projectSiteInfo['delivery_address'] = $projectSiteInfo['project_name'].', '.$projectSiteInfo['project_site_name'].', '.$projectSiteInfo['project_site_address'].', '.$projectSiteInfo['project_site_city'];
                     }
 
+                    $projectSiteInfo['por_remarks'] = ($purchaseOrder->purchaseOrderRequest->por_remarks !=null && $purchaseOrder->purchaseOrderRequest->por_remarks != "")? $purchaseOrder->purchaseOrderRequest->por_remarks : "-";
+
                     foreach($purchaseOrder->purchaseOrderComponent as $purchaseOrderComponent){
                         $vendorInfo['materials'][$iterator] = array();
                         $vendorInfo['materials'][$iterator]['item_name'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name;
