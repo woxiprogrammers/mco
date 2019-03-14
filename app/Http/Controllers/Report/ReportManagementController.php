@@ -1290,7 +1290,7 @@ class ReportManagementController extends Controller{
                     $date = date('l, d F Y',strtotime($secondParameter)) .' - '. date('l, d F Y',strtotime($firstParameter));
                     $startYearID = $year->where('slug',(int)date('Y',strtotime($firstParameter)))->pluck('id')->first();
                     $endYearID = $year->where('slug',(int)date('Y',strtotime($secondParameter)))->pluck('id')->first();
-                    $totalYears = $year->whereBetween('id',[$startYearID,$endYearID])->select('id','name','slug')->get();
+                    $totalYears = $year->whereBetween('id',[$endYearID, $startYearID])->select('id','name','slug')->get();
                     $monthlyTotalAmount = 0;
                     foreach ($totalYears as $thisYear){
                         foreach ($months as $month){
@@ -1482,7 +1482,7 @@ class ReportManagementController extends Controller{
                     $date = date('l, d F Y',strtotime($secondParameter)) .' - '. date('l, d F Y',strtotime($firstParameter));
                     $startYearID = $year->where('slug',(int)date('Y',strtotime($firstParameter)))->pluck('id')->first();
                     $endYearID = $year->where('slug',(int)date('Y',strtotime($secondParameter)))->pluck('id')->first();
-                    $totalYears = $year->whereBetween('id',[$startYearID,$endYearID])->select('id','name','slug')->get();
+                    $totalYears = $year->whereBetween('id',[$endYearID, $startYearID])->select('id','name','slug')->get();
                     $monthlyTotalAmount = 0;
                     foreach ($totalYears as $thisYear){
                         foreach ($months as $month){
@@ -1677,9 +1677,10 @@ class ReportManagementController extends Controller{
                     $date = date('l, d F Y',strtotime($secondParameter)) .' - '. date('l, d F Y',strtotime($firstParameter));
                     $startYearID = $year->where('slug',date('Y',strtotime($firstParameter)))->pluck('id')->first();
                     $endYearID = $year->where('slug',date('Y',strtotime($secondParameter)))->pluck('id')->first();
-                    $totalYears = $year->whereBetween('id',[$startYearID,$endYearID])->select('id','name','slug')->get();
+                    $totalYears = $year->whereBetween('id',[$endYearID, $startYearID])->select('id','name','slug')->get();
                     $monthlyTotalAmount = 0;
                     $approvedStatusId = TransactionStatus::where('slug', 'approved')->pluck('id')->first();
+                    $approvedBillStatusId = BillStatus::where('slug', 'approved')->pluck('id')->first();
                     foreach ($totalYears as $thisYear){
                         foreach ($months as $month){
                             $monthlyTotal[$iterator]['month'] = $month['name'].'-'.$thisYear['name'];
@@ -1687,8 +1688,10 @@ class ReportManagementController extends Controller{
                                 ->whereIn('bill_status_id',array_column($statusId->toArray(),'id'))->orderBy('id')
                                 ->whereMonth('date',$month['id'])
                                 ->whereYear('date',$thisYear['slug'])
+                                ->where('bill_status_id',$approvedBillStatusId)
                                 ->pluck('id');
-                            $total = $billTransaction->whereIn('bill_id',$billIds)
+                            $total = $billTransaction->where('transaction_status_id',$approvedStatusId)
+                                ->whereIn('bill_id',$billIds)
                                 ->sum('total');
                             $monthlyTotal[$iterator]['total'] = ($total != null) ? round($total,3) : 0;
                             $monthlyTotalAmount += ($total != null) ? $total : 0;
@@ -1696,7 +1699,7 @@ class ReportManagementController extends Controller{
                         }
                     }
                     $monthlyTotal[$iterator]['make_bold'] = true;
-                    $monthlyTotal[$iterator]['total'] = 'Total';
+                    $monthlyTotal[$iterator]['total'] = 'Total : (Paid Amount)';
                     $monthlyTotal[$iterator]['amount'] = round($monthlyTotalAmount,3);
                     $billNo = 1;
                     $row = 1;
@@ -1720,7 +1723,9 @@ class ReportManagementController extends Controller{
                                 $data[$row]['total_paid'] = 0;
                                 $totalBasicAmount += $billData['basic_amount']; $totalGst += $billData['tax_amount'];
                                 $totalWithTaxAmount += $billData['total_amount_with_tax']; $totalReceipt += $data[$row]['total_paid'];
-                                $billTransactionData = $billTransaction->where('transaction_status_id',$approvedStatusId)->where('bill_id',$thisBill['id'])->orderBy('created_at','asc')->get();
+                                $billTransactionData = $billTransaction->where('transaction_status_id',$approvedStatusId)
+                                                        ->where('bill_id',$thisBill['id'])
+                                                        ->orderBy('created_at','asc')->get();
                                 if($row == 1){
                                     $newMonth = $thisMonth;
                                     $newMonthRow = $row;
