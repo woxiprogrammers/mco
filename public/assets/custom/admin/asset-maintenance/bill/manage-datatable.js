@@ -32,7 +32,7 @@ var AssetMaintenanceBillListing = function () {
                         type: 'POST',
                         data :{
                             "get_total" : true,
-                            "vendor_name" : $("#vendor_name").val(),
+                            "vendor_name" : $("#vendor_name").val()
                         },
                         success: function(result){
                             subtotal = result['subtotal'];

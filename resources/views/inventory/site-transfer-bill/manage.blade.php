@@ -185,6 +185,78 @@
         $(document).ready(function(){
             SiteTransferBillListing.init();
             $(".form-filter:input[name='vendor_name']").on('keyup', function(){
+                var bill_number = $('#bill_number').val();
+                var project_name = $('#project_name').val();
+                var basic_amt = $('#basic_amt').val();
+                var total_amt = $('#total_amt').val();
+                var vendor_name = $('#vendor_name').val();
+                var bill_date = $('#bill_date').val();
+                $("input[name='bill_number']").val(bill_number);
+                $("input[name='project_name']").val(project_name);
+                $("input[name='basic_amt']").val(basic_amt);
+                $("input[name='total_amt']").val(total_amt);
+                $("input[name='vendor_name']").val(vendor_name);
+                $("input[name='bill_date']").val(bill_date);
+                $(".filter-submit").trigger('click');
+            });
+            $(".form-filter:input[name='project_name']").on('keyup', function(){
+                var bill_number = $('#bill_number').val();
+                var project_name = $('#project_name').val();
+                var basic_amt = $('#basic_amt').val();
+                var total_amt = $('#total_amt').val();
+                var vendor_name = $('#vendor_name').val();
+                var bill_date = $('#bill_date').val();
+                $("input[name='bill_number']").val(bill_number);
+                $("input[name='project_name']").val(project_name);
+                $("input[name='basic_amt']").val(basic_amt);
+                $("input[name='total_amt']").val(total_amt);
+                $("input[name='vendor_name']").val(vendor_name);
+                $("input[name='bill_date']").val(bill_date);
+                $(".filter-submit").trigger('click');
+            });
+            $(".form-filter:input[name='bill_number']").on('keyup', function(){
+                var bill_number = $('#bill_number').val();
+                var project_name = $('#project_name').val();
+                var basic_amt = $('#basic_amt').val();
+                var total_amt = $('#total_amt').val();
+                var vendor_name = $('#vendor_name').val();
+                var bill_date = $('#bill_date').val();
+                $("input[name='bill_number']").val(bill_number);
+                $("input[name='project_name']").val(project_name);
+                $("input[name='basic_amt']").val(basic_amt);
+                $("input[name='total_amt']").val(total_amt);
+                $("input[name='vendor_name']").val(vendor_name);
+                $("input[name='bill_date']").val(bill_date);
+                $(".filter-submit").trigger('click');
+            });
+            $(".form-filter:input[name='basic_amt']").on('keyup', function(){
+                var bill_number = $('#bill_number').val();
+                var project_name = $('#project_name').val();
+                var basic_amt = $('#basic_amt').val();
+                var total_amt = $('#total_amt').val();
+                var vendor_name = $('#vendor_name').val();
+                var bill_date = $('#bill_date').val();
+                $("input[name='bill_number']").val(bill_number);
+                $("input[name='project_name']").val(project_name);
+                $("input[name='basic_amt']").val(basic_amt);
+                $("input[name='total_amt']").val(total_amt);
+                $("input[name='vendor_name']").val(vendor_name);
+                $("input[name='bill_date']").val(bill_date);
+                $(".filter-submit").trigger('click');
+            });
+            $(".form-filter:input[name='total_amt']").on('keyup', function(){
+                var bill_number = $('#bill_number').val();
+                var project_name = $('#project_name').val();
+                var basic_amt = $('#basic_amt').val();
+                var total_amt = $('#total_amt').val();
+                var vendor_name = $('#vendor_name').val();
+                var bill_date = $('#bill_date').val();
+                $("input[name='bill_number']").val(bill_number);
+                $("input[name='project_name']").val(project_name);
+                $("input[name='basic_amt']").val(basic_amt);
+                $("input[name='total_amt']").val(total_amt);
+                $("input[name='vendor_name']").val(vendor_name);
+                $("input[name='bill_date']").val(bill_date);
                 $(".filter-submit").trigger('click');
             });
         });

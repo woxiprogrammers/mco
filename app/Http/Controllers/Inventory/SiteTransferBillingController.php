@@ -153,7 +153,7 @@ class SiteTransferBillingController extends Controller
                 $siteTransferBillId = SiteTransferBill::whereDate('bill_date', $request->bill_date)
                                                         ->whereIn('id',$siteTransferBillId)
                                                         ->pluck('id')->toArray();
-                if(count($siteTransferBillId) > 0){
+                if(count($siteTransferBillId) <= 0){
                     $filterFlag = false;
                 }
             }
@@ -164,7 +164,7 @@ class SiteTransferBillingController extends Controller
                                                 ->where('vendors.company','ilike','%'.$request->vendor_name.'%')
                                                 ->pluck('site_transfer_bills.id')
                                                 ->toArray();
-                if(count($siteTransferBillId) > 0){
+                if(count($siteTransferBillId) <= 0){
                     $filterFlag = false;
                 }
             }
@@ -172,12 +172,13 @@ class SiteTransferBillingController extends Controller
             if($filterFlag == true && $request->has('project_name') && $request->project_name != ''){
                 $siteTransferBillId = SiteTransferBill::join('inventory_component_transfers','inventory_component_transfers.id','=','site_transfer_bills.inventory_component_transfer_id')
                     ->join('inventory_components','inventory_component_transfers.inventory_component_id','=','inventory_components.id')
-                    ->join('project_sites','project_sites.id','=','inventory_components.project_site_id')
+                    ->join('project_sites','project_sites.id','=','project_sites.project_id')
+                    ->join('projects','projects.id','=','inventory_components.project_site_id')
+                    ->where('projects.name','ilike','%'.$request->project_name.'%')
                     ->whereIn('site_transfer_bills.id', $siteTransferBillId)
-                    ->where('project_sites.name','ilike','%'.$request->project_name.'%')
                     ->pluck('site_transfer_bills.id')
                     ->toArray();
-                if(count($siteTransferBillId) > 0){
+                if(count($siteTransferBillId) <= 0){
                     $filterFlag = false;
                 }
             }
@@ -186,7 +187,7 @@ class SiteTransferBillingController extends Controller
                 $siteTransferBillId = SiteTransferBill::where('bill_number','like', $request->bill_number)
                     ->whereIn('id',$siteTransferBillId)
                     ->pluck('id')->toArray();
-                if(count($siteTransferBillId) > 0){
+                if(count($siteTransferBillId) <= 0){
                     $filterFlag = false;
                 }
             }
@@ -195,7 +196,7 @@ class SiteTransferBillingController extends Controller
                 $siteTransferBillId = SiteTransferBill::whereRaw('(subtotal + extra_amount) = ?', $request->basic_amt)
                     ->whereIn('id',$siteTransferBillId)
                     ->pluck('id')->toArray();
-                if(count($siteTransferBillId) > 0){
+                if(count($siteTransferBillId) <= 0){
                     $filterFlag = false;
                 }
             }
@@ -204,16 +205,13 @@ class SiteTransferBillingController extends Controller
                 $siteTransferBillId = SiteTransferBill::where('total','=',$request->total_amt)
                     ->whereIn('id',$siteTransferBillId)
                     ->pluck('id')->toArray();
-                if(count($siteTransferBillId) > 0){
+                if(count($siteTransferBillId) <= 0){
                     $filterFlag = false;
                 }
             }
 
             $siteTransferBillData = SiteTransferBill::whereIn('id', $siteTransferBillId)
                                     ->orderBy('created_at','desc')->get();
-            $total = 0;
-            $paidAmount = 0;
-            $pendingAmount = 0;
             if ($request->has('get_total')) {
                 if ($filterFlag) {
                     $total = $siteTransferBillData->sum('total');

@@ -20,7 +20,6 @@ var SiteTransferBillListing = function () {
                 // So when dropdowns used the scrollable div should be removed.
                 //"dom": "<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'<'table-group-actions pull-right'>>r>t<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'>>",
                 "footerCallback": function ( row, data, start, end, display ) {
-                    console.log('inside here');
                     var api = this.api(), data;
 
                     // Remove the formatting to get integer data for summation
@@ -31,26 +30,18 @@ var SiteTransferBillListing = function () {
                                 i : 0;
                     };
 
-                    var vendor_name = $('#vendor_name').val();
-                    var bill_number = $('#bill_number').val();
-                    var project_name = $('#project_name').val();
-                    var basic_amt = $('#basic_amt').val();
-                    var total_amt = $('#total_amt').val();
-                    var bill_date = $('#bill_date').val();
-
-
                     // Total over all pages
                     $.ajax({
                         url: "/inventory/transfer/billing/listing?_token="+$("input[name='_token']").val(), // ajax source
                         type: 'POST',
                         data :{
                             "get_total" : true,
-                            "bill_number" : bill_number,
-                            "project_name" : project_name,
-                            "basic_amt" : basic_amt,
-                            "total_amt" : total_amt,
-                            "vendor_name" : vendor_name,
-                            "bill_date" : bill_date
+                            "bill_number" : $('#bill_number').val(),
+                            "project_name" : $('#project_name').val(),
+                            "basic_amt" : $('#basic_amt').val(),
+                            "total_amt" : $('#total_amt').val(),
+                            "vendor_name" : $('#vendor_name').val(),
+                            "bill_date" : $('#bill_date').val()
                         },
                         success: function(result){
                             total = result['total'];

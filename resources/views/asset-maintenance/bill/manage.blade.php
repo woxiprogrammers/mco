@@ -46,7 +46,7 @@
 
                                     <!-- BEGIN EXAMPLE TABLE PORTLET-->
                                     <div class="portlet light ">
-                                        <span style="color: red">(Note : All Sites data displayed)</span>
+                                        <span style="color: red">(Note : Global Site data displayed)</span>
                                         {!! csrf_field() !!}
                                         <div class="portlet-body">
                                             <div class="table-container">
