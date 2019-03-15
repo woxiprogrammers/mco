@@ -187,6 +187,18 @@
             $(".form-filter:input[name='vendor_name']").on('keyup', function(){
                 $(".filter-submit").trigger('click');
             });
+            $(".form-filter:input[name='project_name']").on('keyup', function(){
+                $(".filter-submit").trigger('click');
+            });
+            $(".form-filter:input[name='bill_number']").on('keyup', function(){
+                $(".filter-submit").trigger('click');
+            });
+            $(".form-filter:input[name='basic_amt']").on('keyup', function(){
+                $(".filter-submit").trigger('click');
+            });
+            $(".form-filter:input[name='total_amt']").on('keyup', function(){
+                $(".filter-submit").trigger('click');
+            });
         });
     </script>
 @endsection

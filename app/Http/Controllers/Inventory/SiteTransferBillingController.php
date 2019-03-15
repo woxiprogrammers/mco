@@ -172,9 +172,10 @@ class SiteTransferBillingController extends Controller
             if($filterFlag == true && $request->has('project_name') && $request->project_name != ''){
                 $siteTransferBillId = SiteTransferBill::join('inventory_component_transfers','inventory_component_transfers.id','=','site_transfer_bills.inventory_component_transfer_id')
                     ->join('inventory_components','inventory_component_transfers.inventory_component_id','=','inventory_components.id')
-                    ->join('project_sites','project_sites.id','=','inventory_components.project_site_id')
+                    ->join('project_sites','project_sites.id','=','project_sites.project_id')
+                    ->join('projects','projects.id','=','inventory_components.project_site_id')
+                    ->where('projects.name','ilike','%'.$request->project_name.'%')
                     ->whereIn('site_transfer_bills.id', $siteTransferBillId)
-                    ->where('project_sites.name','ilike','%'.$request->project_name.'%')
                     ->pluck('site_transfer_bills.id')
                     ->toArray();
                 if(count($siteTransferBillId) > 0){
