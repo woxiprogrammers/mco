@@ -784,8 +784,8 @@ class SubcontractorBillController extends Controller
                         $listingData[$pagination]['tds_amount'],
                         $listingData[$pagination]['other_recovery'],
                         $listingData[$pagination]['total'],
-
                         $listingData[$pagination]->transactionStatus->name,
+                        ($listingData[$pagination]['remark'] != null) ? $listingData[$pagination]['remark'] : "-",
                         $changeStatusButton,
                     ];
                 }

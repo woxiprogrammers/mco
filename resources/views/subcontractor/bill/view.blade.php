@@ -357,6 +357,7 @@
                                                                     </th>
 
                                                                     <th> Status </th>
+                                                                    <th> Remarks </th>
                                                                     <th> Action </th>
                                                                 </tr>
                                                                 </thead>
@@ -368,6 +369,7 @@
                                                                         <th colspan="3">
                                                                             Total
                                                                         </th>
+                                                                        <th></th>
                                                                         <th></th>
                                                                         <th></th>
                                                                         <th></th>

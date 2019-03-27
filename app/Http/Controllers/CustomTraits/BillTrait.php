@@ -2646,6 +2646,7 @@ trait BillTrait{
                         round($transactionDetails[$pagination]['other_recovery_value'],3),
                         round($transactionDetails[$pagination]['total'],3),
                         $transactionDetails[$pagination]->transactionStatus->name,
+                        ($transactionDetails[$pagination]['remark'] != null) ? $transactionDetails[$pagination]['remark'] : "-",
                         $changeStatusButton
                     ];
                 }
