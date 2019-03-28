@@ -52,7 +52,6 @@ class AssetRentCalculations extends Command
      */
     public function handle(){
         try{
-
             $year = new Year();
             $month = new Month();
             $projectSite = new ProjectSite();
@@ -71,7 +70,10 @@ class AssetRentCalculations extends Command
                 }
 
             }else{
-                $months = $month->orderBy('id','asc')->get();
+                $datestring = date('Y-m-d').' first day of last month';
+                $dt = date_create($datestring);
+                $last_month_id = $dt->format('m');
+                $months = $month->where('id',$last_month_id)->orderBy('id','asc')->get();
                 $thisYear = $year->where('slug',date('Y', strtotime('last month')))->first();
             }
             $totalMonths = $month->orderBy('id','asc')->get();
@@ -83,7 +85,6 @@ class AssetRentCalculations extends Command
                 $inventoryComponentData = $inventoryComponent->where('project_site_id',$projectSiteId)
                     ->where('is_material',false)
                     ->select('id','reference_id')->get();
-
                 foreach ($inventoryComponentData as $thisInventoryComponent){
                     $assetId = $thisInventoryComponent['reference_id'];
                     foreach ($months as $thisMonth){
@@ -122,12 +123,11 @@ class AssetRentCalculations extends Command
                                 $lastMonthName = $totalMonths->where('id',$lastMonthId)->pluck('slug')->first();
                                 $noOfDaysInThisMonth = cal_days_in_month(CAL_GREGORIAN, $thisMonth['id'], $thisYear['slug']);
                                 $lastMonthDataa = json_decode($alreadyExistAssetRentMonthlyExpense[$lastMonthName]);
-
-                                $lastMonthData['rent_per_day_per_quantity'] = $lastMonthDataa->rent_per_day_per_quantity;
-                                $lastMonthData['days_used'] = ($lastMonthDataa->carry_forward_quantity == 0) ? 0 : $noOfDaysInThisMonth;
-                                $lastMonthData['quantity_used'] = $lastMonthDataa->carry_forward_quantity;
+                                $lastMonthData['rent_per_day_per_quantity'] = ($lastMonthDataa != null) ? $lastMonthDataa->rent_per_day_per_quantity : 0;
+                                $lastMonthData['days_used'] = ($lastMonthDataa == null) ? 0 : $noOfDaysInThisMonth;
+                                $lastMonthData['quantity_used'] = ($lastMonthDataa != null) ? $lastMonthDataa->carry_forward_quantity : 0;
                                 $lastMonthData['rent_for_month'] = ($lastMonthData['rent_per_day_per_quantity'] * $lastMonthData['days_used'] * $lastMonthData['quantity_used']);
-                                $lastMonthData['carry_forward_quantity'] = $lastMonthDataa->carry_forward_quantity;
+                                $lastMonthData['carry_forward_quantity'] = ($lastMonthDataa != null) ? $lastMonthDataa->carry_forward_quantity : 0;
                             }else{
                                 $lastMonthData['rent_per_day_per_quantity'] = 0;
                                 $lastMonthData['quantity_used'] = 0;
