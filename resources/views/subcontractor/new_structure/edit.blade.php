@@ -137,7 +137,7 @@
                                                                                         </td>
                                                                                         <td>
                                                                                             <div class="form-group" style="width: 90%; margin-left: 5%">
-                                                                                                <input type="text" class="form-control rate" onkeyup="rateKeyUp(this)" value="{{$structureSummaries[$iterator]['rate']}}" name="structure_summaries[{{$iterator}}][rate]"  min="{{$structureSummaries[$iterator]['min_rate']}}" required>
+                                                                                                <input type="text" class="form-control rate" onkeyup="rateKeyUp(this)" value="{{$structureSummaries[$iterator]['rate']}}" name="structure_summaries[{{$iterator}}][rate]"  min="0" required>
                                                                                             </div>
                                                                                         </td>
                                                                                         <td>
@@ -378,8 +378,8 @@
         });
 
         function rateKeyUp(element){
-            var rate = parseInt($(element).val());
-            var total_work_area = parseInt($(element).closest('tr').find('.total_work_area').val());
+            var rate = parseFloat($(element).val());
+            var total_work_area = parseFloat($(element).closest('tr').find('.total_work_area').val());
             if (isNaN(rate)){
                 rate = 0;
             }
