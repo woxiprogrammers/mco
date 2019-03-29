@@ -4532,7 +4532,6 @@ class ReportManagementController extends Controller{
             $approvedStatusId = TransactionStatus::where('slug', 'approved')->pluck('id')->first();
             switch(true){
                 case ($yearId == 'null' && $startMonthId == 'null')  :
-                    Log::info('Inside CASE 1');
                     $billIds = $bill->where('quotation_id',$quotation['id'])
                             ->where('bill_status_id',$approvedBillStatusId)->orderBy('id')
                             ->pluck('id');
@@ -4614,7 +4613,6 @@ class ReportManagementController extends Controller{
                             $totalAssetRent += (json_decode($thisAssetRentExpense[$month['slug']]) == null) ? 0 : json_decode($thisAssetRentExpense[$month['slug']])->rent_for_month;
                             }
                         }
-                        Log::info($totalAssetRent);
                         $assetRent = $salaryAmount = $officeExpense = 0;
                         $sales = $receipt = $totalAssetRent + $allSiteTotalAssetRentOpeningExpense;
                     }
@@ -4695,7 +4693,6 @@ class ReportManagementController extends Controller{
                     break;
 
                 case ($yearId === 'null') :
-                    Log::info('Inside CASE 2');
                     $totalMonths = $month->whereBetween('id',[$startMonthId,$endMonthId])
                         ->select('id','name','slug')->get();
                     $assetRentMonthlyExpenseData = $assetRentMonthlyExpense
@@ -4870,7 +4867,6 @@ class ReportManagementController extends Controller{
                     break;
 
                 case ($yearId != 'null') :
-                    Log::info('Inside CASE 3');
                     $totalMonths = $month->whereBetween('id',[$startMonthId, $endMonthId])
                         ->select('id','name','slug')->get();
                     $selectedYear = $year->where('id',$yearId)->first();

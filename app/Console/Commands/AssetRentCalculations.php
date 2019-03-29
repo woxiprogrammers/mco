@@ -73,7 +73,7 @@ class AssetRentCalculations extends Command
                 $datestring = date('Y-m-d').' first day of last month';
                 $dt = date_create($datestring);
                 $last_month_id = $dt->format('m');
-                $months = $month->where('id',$last_month_id)->orderBy('id','asc')->get();
+                $months = $month->where('id', 3)->orderBy('id','asc')->get();
                 $thisYear = $year->where('slug',date('Y', strtotime('last month')))->first();
             }
             $totalMonths = $month->orderBy('id','asc')->get();
@@ -93,8 +93,8 @@ class AssetRentCalculations extends Command
                             ->where('project_site_id',$projectSiteId)
                             ->where('asset_id',$assetId)
                             ->first();
-                        $firstDayOfThisMonth = date('Y-m-d H:i:s', mktime(0, 0, 0, $thisMonth['id'], 1, $thisYear['slug']));
-                        $lastDayOfThisMonth = date('Y-m-t H:i:s', mktime(23, 59, 59, $thisMonth['id'], 1, $thisYear['slug']));
+                        $firstDayOfThisMonth = '2019-03-15 00:00:00';//date('Y-m-d H:i:s', mktime(0, 0, 0, $thisMonth['id'], 1, $thisYear['slug']));
+                        $lastDayOfThisMonth = '2019-03-29 23:59:59';//date('Y-m-t H:i:s', mktime(23, 59, 59, $thisMonth['id'], 1, $thisYear['slug']));
                         $lastMonthData = array();
                         $thisMonthAssetRentMonthlyExpenseData = array();
                         if($thisMonth['slug'] == 'january'){
@@ -138,8 +138,9 @@ class AssetRentCalculations extends Command
                         }
                         $inventoryComponentTransfers = $inventoryComponentTransfer
                             ->where('inventory_component_id',$thisInventoryComponent['id'])
-                            ->whereMonth('created_at', $thisMonth['id'])
-                            ->whereYear('created_at', $thisYear['slug'])
+                            ->whereBetween('created_at',array('2019-03-15 00:00:00','2019-03-29 23:59:59'))
+                            //->whereMonth('created_at', $thisMonth['id'])
+                            //->whereYear('created_at', $thisYear['slug'])
                             ->orderBy('created_at','asc')
                             ->get();
                         $inventoryComponentTransferGroupByDateData = $inventoryComponentTransfers->sortBy('created_at')->groupBy(function($transactionsData) {
