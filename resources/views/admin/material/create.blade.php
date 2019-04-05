@@ -41,6 +41,7 @@
                                     <div class="portlet-body form">
                                         <form role="form" id="create-material" class="form-horizontal" action="/material/create" method="post">
                                             {!! csrf_field() !!}
+                                            <input type="hidden"  id="csrf-token" name="csrf-token" value="{{ csrf_token() }}">
                                             <div class="form-body">
                                                 <div class="form-group">
                                                     <label class="col-md-3 control-label">Category Name</label>
@@ -98,12 +99,36 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                            <div class="form-group">
+                                                <div class="row">
+                                                    <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12" style="margin-left: 20%"></div>
+                                                </div>
+                                                <div id="tab_images_uploader_container" class="col-md-offset-5" style="position: relative;">
+                                                    <a id="tab_images_uploader_pickfiles" href="javascript:;" class="btn green-meadow" style="margin-left: 26%">
+                                                        Browse</a>
+                                                    <a id="tab_images_uploader_uploadfiles" href="javascript:;" class="btn btn-primary">
+                                                        <i class="fa fa-share"></i> Upload Files </a>
+                                                    <div id="html5_1d7m4bbnu11kf1epbvbv1g44aqv3_container" class="moxie-shim moxie-shim-html5" style="position: absolute; top: 0px; left: 217px; width: 80px; height: 33px; overflow: hidden;"><input id="html5_1d7m4bbnu11kf1epbvbv1g44aqv3" type="file" style="font-size: 999px; opacity: 0; position: absolute; top: 0px; left: 0px; width: 100%; height: 100%;" multiple="" accept="image/jpeg,image/png"></div></div>
+                                                <table class="table table-bordered table-hover" style="width: 554px; margin-left: 26%; margin-top: 1%">
+                                                    <thead>
+                                                    <tr role="row" class="heading">
+                                                        <th> Image </th>
+                                                        <th> Action </th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody id="show-product-images">
+
+                                                    </tbody>
+                                                </table>
+                                            </div>
                                             <div class="form-actions noborder row">
                                                 <div class="col-md-offset-3" style="margin-left: 26%">
                                                     <button type="submit" class="btn red btn-md"><i class="fa fa-check"></i> Submit</button>
                                                 </div>
                                             </div>
-                                        </form>
+                                       </form>
+                                        <input type="hidden" id="path" name="path" value="">
+                                        <input type="hidden" id="max_files_count" name="max_files_count" value="20">
                                     </div>
                                 </div>
                             </div>
@@ -119,6 +144,9 @@
 <script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
 <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
 <script src="/assets/custom/admin/material/material.js" type="application/javascript"></script>
+<script src="/assets/global/plugins/plupload/js/plupload.full.min.js" type="text/javascript"></script>
+<script src="/assets/custom/admin/material/image-datatable.js"></script>
+<script src="/assets/custom/admin/material/image-upload.js"></script>
 <script>
     $(document).ready(function() {
        CreateMaterial.init();
