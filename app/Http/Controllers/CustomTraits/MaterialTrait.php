@@ -1,7 +1,10 @@
 <?php
 namespace App\Http\Controllers\CustomTraits;
 
+use App\AssetImage;
 use App\Category;
+use App\MaterialImages;
+use Illuminate\Support\Facades\File;
 use App\CategoryMaterialRelation;
 use App\Helper\MaterialProductHelper;
 use App\Http\Requests\MaterialRequest;
@@ -17,6 +20,64 @@ use Illuminate\Support\Facades\App;
 use Barryvdh\DomPDF\Facade as PDF;
 
 trait MaterialTrait{
+
+    public function displayMaterialImages(Request $request){
+        try{
+            $path = $request->path;
+            $count = $request->count;
+            $random = mt_rand(1,10000000000);
+        }catch (\Exception $e){
+            $path = null;
+            $count = null;
+        }
+        return view('partials.material.image')->with(compact('path','count','random'));
+    }
+
+    public function removeMaterialImage(Request $request)
+    {
+        try {
+/*            $splitPath = explode("/",$request->path);
+            $imgname = $splitPath[count($splitPath)-1];
+            DB::table('material_images')->where('name', $imgname)->delete();*/
+            $sellerUploadPath = public_path() . $request->path;
+            File::delete($sellerUploadPath);
+            return response(200);
+        } catch (\Exception $e) {
+            return response(500);
+        }
+    }
+
+    public function uploadTempMaterialImages(Request $request){
+        try {
+            $user = Auth::user();
+            $assetDirectoryName = sha1($user->id);
+            $tempUploadPath = public_path() . env('MATERIAL_TEMP_IMAGE_UPLOAD');
+            $tempImageUploadPath = $tempUploadPath . DIRECTORY_SEPARATOR . $assetDirectoryName;
+            /* Create Upload Directory If Not Exists */
+            if (!file_exists($tempImageUploadPath)) {
+                File::makeDirectory($tempImageUploadPath, $mode = 0777, true, true);
+            }
+            $extension = $request->file('file')->getClientOriginalExtension();
+            $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
+            $request->file('file')->move($tempImageUploadPath,$filename);
+            $path = env('MATERIAL_TEMP_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$assetDirectoryName.DIRECTORY_SEPARATOR.$filename;
+            $response = [
+                'jsonrpc' => '2.0',
+                'result' => 'OK',
+                'path' => $path,
+            ];
+        }catch (\Exception $e){
+            $response = [
+                'jsonrpc' => '2.0',
+                'error' => [
+                    'code' => 101,
+                    'message' => 'Failed to open input stream.',
+                ],
+                'id' => 'id'
+            ];
+        }
+        return response()->json($response);
+    }
 
     public function getManageView(Request $request) {
        try{
@@ -71,8 +132,13 @@ trait MaterialTrait{
                 ->pluck('id')
                 ->toArray();
             $materialData['category_id'] = implode(',',$categoryIds);
-            $categories = Category::whereNotIn('id',$categoryIds)->where('is_active', true)->select('id','name')->orderBy('name','asc')->get()->toArray();
-            return view('admin.material.edit')->with(compact('categories','units','materialData'));
+            $materialImages = MaterialImages::where('material_id',$material->id)->select('id','name')->get();
+            if($materialImages != null){
+                $materialImage = $this->getImagePath($material->id,$materialImages);
+            }
+
+           $categories = Category::whereNotIn('id',$categoryIds)->where('is_active', true)->select('id','name')->orderBy('name','asc')->get()->toArray();
+            return view('admin.material.edit')->with(compact('materialImage','categories','units','materialData'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'get Edit material view',
@@ -82,6 +148,20 @@ trait MaterialTrait{
             Log::critical(json_encode($data));
             abort(500);
         }
+    }
+
+    public function getImagePath($assetId,$images){
+        $assetDirectoryName = sha1($assetId);
+        $imageUploadPath = env('MATERIAL_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$assetDirectoryName;
+        $iterator = 0;
+        $imagePaths = array();
+        foreach($images as $image){
+            $imagePaths[$iterator] = array();
+            $imagePaths[$iterator]['path'] = $imageUploadPath.DIRECTORY_SEPARATOR.$image['name'];
+            $imagePaths[$iterator]['id'] = $image['id'];
+            $iterator++;
+        }
+        return $imagePaths;
     }
 
     public function createMaterial(MaterialRequest $request){
@@ -111,8 +191,31 @@ trait MaterialTrait{
                 $materialVersionData['rate_per_unit'] = round($request->rate_per_unit,3);
                 $materialVersionData['unit_id'] = $request->unit;
                 $materialVersion = MaterialVersion::create($materialVersionData);
+                if($request->work_order_images != null) {
+                    $matId = $material['id'];
+                    $work_order_images = $request->work_order_images;
+                    $assetDirectoryName = sha1($matId);
+                    $UploadPath = public_path() . env('MATERIAL_IMAGE_UPLOAD');
+                    $ImageUploadPath = $UploadPath . DIRECTORY_SEPARATOR . $assetDirectoryName;
+                    if (!file_exists($ImageUploadPath)) {
+                        File::makeDirectory($ImageUploadPath, $mode = 0777, true, true);
+                    }
+                    foreach ($work_order_images as $images) {
+                        $imagePath = $images['image_name'];
+                        $imageName = explode("/", $imagePath);
+                        $filename = $imageName[4];
+                        $data = Array();
+                        $data['name'] = $filename;
+                        $data['material_id'] = $matId;
+                        MaterialImages::create($data);
+                        $oldFilePath = public_path() . $imagePath;
+                        $newFilePath = public_path() . env('MATERIAL_IMAGE_UPLOAD') . DIRECTORY_SEPARATOR . $assetDirectoryName . DIRECTORY_SEPARATOR . $filename;
+                        File::move($oldFilePath, $newFilePath);
+                    }
+                }
             }
-            $request->session()->flash('success','Material created successfully.');
+
+           $request->session()->flash('success','Material created successfully.');
             return redirect('/material/manage');
         }catch(\Exception $e){
             $data = [
@@ -142,6 +245,51 @@ trait MaterialTrait{
             $updateMaterial[0]['rate_per_unit'] = $request->rate_per_unit;
             $updateMaterial[0]['unit_id'] = $request->unit;
             $response = MaterialProductHelper::updateMaterialsProductsAndProfitMargins($updateMaterial);
+            $assetImages = $request->material_images;
+            if($request->work_order_images != null) {
+                $assetDirectoryName = sha1($material->id);
+                $UploadPath = public_path() . env('MATERIAL_IMAGE_UPLOAD');
+                $ImageUploadPath = $UploadPath . DIRECTORY_SEPARATOR . $assetDirectoryName;
+                if (!file_exists($ImageUploadPath)) {
+                    File::makeDirectory($ImageUploadPath, $mode = 0777, true, true);
+                }
+                foreach ($request->work_order_images as $images) {
+                    $imagePath = $images['image_name'];
+                    $imageName = explode("/", $imagePath);
+                    $filename = $imageName[4];
+                    $data = Array();
+                    $data['name'] = $filename;
+                    $data['material_id'] = $material->id;
+                    MaterialImages::create($data);
+                    $oldFilePath = public_path() . $imagePath;
+                    $newFilePath = public_path() . env('MATERIAL_IMAGE_UPLOAD') . DIRECTORY_SEPARATOR . $assetDirectoryName . DIRECTORY_SEPARATOR . $filename;
+                    File::move($oldFilePath, $newFilePath);
+                }
+
+            }
+            if ($request->work_order_images != null && $assetImages != null) {
+                $existingImages = array_column(array_merge($request->work_order_images, $assetImages), "image_name");
+            } elseif ($request->work_order_images != null) {
+                $existingImages = array_column($request->work_order_images, "image_name");
+            } elseif ($assetImages != null) {
+                $existingImages = array_column($assetImages, "image_name");
+            } else {
+                $existingImages = null;
+            }
+            $filename = Array();
+            if ($existingImages != null) {
+                foreach ($existingImages as $images) {
+                    $imagePath = $images;
+                    $imageName = explode("/", $imagePath);
+                    $filename[] = end($imageName);
+                }
+            } else {
+                $filename[] = emptyArray();
+            }
+            $deletedAssetImages = MaterialImages::where('material_id', $material->id)->whereNotIn('name', $filename)->get();
+            foreach ($deletedAssetImages as $images) {
+                $images->delete();
+            }
             if($response['slug'] == 'error'){
                 $request->session()->flash('error',$response['message']);
             }else{
