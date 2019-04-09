@@ -723,6 +723,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('change-status',array('uses' => 'Peticash\PeticashController@changeSalaryStatus'));
         Route::post('change-status-purchase-disapproved',array('uses' => 'Peticash\PeticashController@changePurchaseStatus'));
         Route::post('stats-salary',array('uses' => 'Peticash\PeticashController@getSalaryStats'));
+        Route::post('change-status-purchase',array('uses' => 'Peticash\PeticashController@changePurchaseTxnStatus'));
 
         Route::group(['prefix' => 'master-peticash-account'], function(){
             Route::get('manage',array('uses' => 'Peticash\PeticashController@getManageViewForMasterPeticashAccount'));
