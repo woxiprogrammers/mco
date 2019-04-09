@@ -82,9 +82,15 @@
                                                                         <i class="fa fa-plus"></i>
                                                                     </a>
                                                                 </div>
-                                                            </div>
+
+                                                           </div>
                                                         </div>
                                                         <div class="col-md-1">
+                                                            <label>&nbsp;</label>
+                                                            <div id="save_value" name="save_value" class="btn blue" >
+                                                                <a href="#" style="color: white">Voucher Received / Not Received All
+                                                                </a>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     <div class="table-container">
@@ -323,6 +329,37 @@
     <script src="/assets/global/plugins/clockface/js/clockface.js" type="text/javascript"></script>
     <script>
         $(document).ready(function(){
+
+            $('#save_value').click(function(){
+                var val = [];
+                $(':checkbox:checked').each(function(i){
+                    val[i] = $(this).val();
+                });
+                if(val.length <= 0) {
+                    alert("Please select at least one checkbox.")
+                } else {
+                    var value = confirm('Are you sure to receive voucher?');
+                    if(value) {
+                        $.ajax({
+                            url:'/peticash/change-status-purchase',
+                            type: "POST",
+                            data: {
+                                _token: $("input[name='_token']").val(),
+                                purchasetxn_ids: val,
+                                type : 'purchase'
+                            },
+                            success: function(data, textStatus, xhr){
+                                $(".filter-submit").trigger('click');
+                            },
+                            error: function(data){
+
+                            }
+                        });
+                    }
+
+                }
+            });
+
             peticashManagementListing.init();
             $("input[name='search_name'], input[name='purchase_by'] ").on('keyup',function(){
                 $(".filter-submit").trigger('click');
