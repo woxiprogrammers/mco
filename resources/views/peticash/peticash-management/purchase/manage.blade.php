@@ -338,7 +338,7 @@
                 if(val.length <= 0) {
                     alert("Please select at least one checkbox.")
                 } else {
-                    var value = confirm('Are you sure to receive voucher?');
+                    var value = confirm('Are you sure?');
                     if(value) {
                         $.ajax({
                             url:'/peticash/change-status-purchase',
@@ -427,7 +427,7 @@
         }
 
         function changeVoucherStatus(txnId){
-            var value = confirm('Are you sure to receive voucher?');
+            var value = confirm('Are you sure?');
             if(value){
                 $('#purchase_transaction_id').val(txnId);
                 $('#type').val('purchase');
