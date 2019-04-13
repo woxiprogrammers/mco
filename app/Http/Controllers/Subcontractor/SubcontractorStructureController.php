@@ -129,6 +129,7 @@ class SubcontractorStructureController extends Controller
             $subcontractor_name = null;
             $project_name = null;
             $ids = SubcontractorStructure::pluck('id');
+            $approvedStatusId = TransactionStatus::where('slug', 'approved')->pluck('id')->first();
             if($request->has('project_name') && $filterFlag == true){
                 $projectSites = Project::join('project_sites','project_sites.project_id','=','projects.id')->where('projects.name','ilike','%'.$request['project_name'].'%')->select('project_sites.id')->get()->toArray();
                 $ids = SubcontractorStructure::where('project_site_id','!=', 0)
@@ -179,7 +180,7 @@ class SubcontractorStructureController extends Controller
                         foreach ($subcontractorBillIdsArray as $subBillids) {
                             $subcontractorBill = SubcontractorBill::where('id',$subBillids)->first();
                             $billTotals += round(($subcontractorBill['grand_total']),3);
-                            $billPaidAmount += round((SubcontractorBillTransaction::where('subcontractor_bills_id',$subBillids)->sum('total')),3);
+                            $billPaidAmount += round((SubcontractorBillTransaction::where('transaction_status_id', $approvedStatusId)->where('subcontractor_bills_id',$subBillids)->sum('total')),3);
                         }
                     }
                 }
@@ -201,7 +202,7 @@ class SubcontractorStructureController extends Controller
                     foreach ($subcontractorBillIds as $subcontractorStructureBillId) {
                         $subcontractorBill = SubcontractorBill::where('id', $subcontractorStructureBillId)->first();
                         $billTotals += round($subcontractorBill['grand_total'], 3);
-                        $billPaidAmount += round((SubcontractorBillTransaction::where('subcontractor_bills_id', $subcontractorStructureBillId)->sum('total')), 3);
+                        $billPaidAmount += round((SubcontractorBillTransaction::where('transaction_status_id', $approvedStatusId)->where('subcontractor_bills_id', $subcontractorStructureBillId)->sum('total')), 3);
                     }
                     $action = '<div class="btn-group">
                             <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
