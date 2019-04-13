@@ -38,6 +38,11 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         });
     });
 
+    Route::group(['prefix'=>'salary-distribution'],function() {
+        Route::get('manage', array('uses' => 'Admin\SalaryDistributionController@getManageView'));
+        Route::post('listing', array('uses' => 'Admin\SalaryDistributionController@salaryDistributionListing'));
+    });
+
     Route::group(['prefix' => 'client'],function (){
         Route::get('create',array('uses' => 'Client\ClientController@getClientView'));
         Route::post('create',array('uses' => 'Client\ClientController@createClient'));
