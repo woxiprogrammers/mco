@@ -20,6 +20,7 @@ use App\Project;
 use App\ProjectSite;
 use App\ProjectSiteAdvancePayment;
 use App\ProjectSiteIndirectExpense;
+use App\TransactionStatus;
 use App\PurcahsePeticashTransaction;
 use App\PurchaseOrderAdvancePayment;
 use App\PurchaseOrderPayment;
@@ -156,10 +157,12 @@ trait PeticashTrait{
                     ->where('quotations.project_site_id', $projectSiteId)
                     ->where('bill_reconcile_transactions.paid_from_slug','cash')
                     ->sum('bill_reconcile_transactions.amount');
+                $billTxnStatusIds = TransactionStatus::where('slug',['approved'])->pluck('id');
                 $salesBillTransactions = BillTransaction::join('bills','bills.id','=','bill_transactions.bill_id')
                     ->join('quotations','quotations.id','=','bills.quotation_id')
                     ->where('quotations.project_site_id', $projectSiteId)
                     ->where('bill_transactions.paid_from_slug','cash')
+                    ->whereIn('bill_transactions.transaction_status_id',$billTxnStatusIds)
                     ->sum('total');
                 $approvedPeticashStatusId = PeticashStatus::where('slug','approved')->pluck('id')->first();
                 $allocatedAmount  = PeticashSiteTransfer::where('project_site_id',$projectSiteId)->sum('amount');
@@ -188,9 +191,11 @@ trait PeticashTrait{
                     ->sum('amount');
                 $cashSubcontractorAdvancePaymentTotal = SubcontractorAdvancePayment::where('subcontractor_advance_payments.paid_from_slug','cash')
                     ->where('project_site_id',$projectSiteId)->sum('amount');
+                $approvedBillStatusId = TransactionStatus::where('slug','approved')->pluck('id')->first();
                 $cashSubcontractorBillTransactionTotal = SubcontractorBillTransaction::join('subcontractor_bills','subcontractor_bills.id','=','subcontractor_bill_transactions.subcontractor_bills_id')
                     ->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
                     ->where('subcontractor_structure.project_site_id',$projectSiteId)
+                    ->where('subcontractor_bill_transactions.transaction_status_id', $approvedBillStatusId)
                     ->where('subcontractor_bill_transactions.paid_from_slug','cash')->sum('subcontractor_bill_transactions.subtotal');
                 $subcontractorBillReconcile = SubcontractorBillReconcileTransaction::join('subcontractor_bills','subcontractor_bills.id','=','subcontractor_bill_reconcile_transactions.subcontractor_bill_id')
                     ->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
