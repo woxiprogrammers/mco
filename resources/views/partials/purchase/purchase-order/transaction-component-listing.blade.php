@@ -33,7 +33,7 @@
             </td>
             <td  class="form-group">
                 @if($quantityIsFixed == true)
-                    <input type="text" class="form-control" name="component_data[{{$purchaseOrderComponent['purchase_order_component_id']}}][quantity]" value="1" readonly>
+                    <input type="text" class="form-control" name="component_data[{{$purchaseOrderComponent['purchase_order_component_id']}}][quantity]" value="{{$purchaseOrderComponent['qty']}}" readonly>
                 @else
                     <input type="hidden" id="remainingQuantity_{{$purchaseOrderComponent['purchase_order_component_id']}}" value="{{$purchaseOrderComponent['units'][0]['quantity']}}">
                     <input type="text" class="form-control quantity_{{$purchaseOrderComponent['purchase_order_component_id']}}" id="quantity_{{$purchaseOrderComponent['purchase_order_component_id']}}" name="component_data[{{$purchaseOrderComponent['purchase_order_component_id']}}][quantity]" required="required" value="{{$purchaseOrderComponent['units'][0]['quantity']}}" onkeyup="checkQuantity({{$purchaseOrderComponent['purchase_order_component_id']}})">
