@@ -128,7 +128,7 @@
                                                                                 </td>
                                                                                 <td>
                                                                                     <div class="form-group" style="width: 90%; margin-left: 5%">
-                                                                                        <input type="text" class="form-control rate" onkeyup="rateKeyUp(this)" min="1" required>
+                                                                                        <input type="text" class="form-control rate" onkeyup="rateKeyUp(this)" min="0" required>
                                                                                     </div>
                                                                                 </td>
                                                                                 <td>
@@ -266,8 +266,8 @@
         });
 
         function rateKeyUp(element){
-            var rate = parseInt($(element).val());
-            var total_work_area = parseInt($(element).closest('tr').find('.total_work_area').val());
+            var rate = parseFloat($(element).val());
+            var total_work_area = parseFloat($(element).closest('tr').find('.total_work_area').val());
             if (isNaN(rate)){
                 rate = 0;
             }
@@ -392,23 +392,23 @@
 
         function onSummaryChange(element){
             var summaryId = $(element).val();
-            $(element).closest('tr').find('.rate').attr('name', 'rate['+summaryId+']');
+            $(element).closest('tr').find('.rate').attr('name', 'rate[]['+summaryId+']');
             $(element).closest('tr').find('.rate').val('');
             $(element).closest('tr').find('.rate').rules('add',{
                 required: true
             });
-            $(element).closest('tr').find('.total_work_area').attr('name', 'total_work_area['+summaryId+']');
+            $(element).closest('tr').find('.total_work_area').attr('name', 'total_work_area[]['+summaryId+']');
             $(element).closest('tr').find('.total_work_area').val('');
             $(element).closest('tr').find('.total_work_area').rules('add',{
                 required: true
             });
-            $(element).closest('tr').find('.total_amount').attr('name', 'total_amount['+summaryId+']');
+            $(element).closest('tr').find('.total_amount').attr('name', 'total_amount[]['+summaryId+']');
             $(element).closest('tr').find('.total_amount').val('');
-            $(element).closest('tr').find('.total_amount_inwords').attr('name', 'total_amount_inwords['+summaryId+']');
+            $(element).closest('tr').find('.total_amount_inwords').attr('name', 'total_amount_inwords[]['+summaryId+']');
             $(element).closest('tr').find('.total_amount_inwords').val('');
-            $(element).closest('tr').find('.description').attr('name', 'description['+summaryId+']');
+            $(element).closest('tr').find('.description').attr('name', 'description[]['+summaryId+']');
             $(element).closest('tr').find('.description').val('');
-            $(element).closest('tr').find('.unit').attr('name', 'unit['+summaryId+']');
+            $(element).closest('tr').find('.unit').attr('name', 'unit[]['+summaryId+']');
             $(element).closest('tr').find('.unit').val('');
 
         }

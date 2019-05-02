@@ -55,24 +55,22 @@
                                                         <table class="table table-striped table-bordered table-hover order-column" id="siteTransferBillListingTable">
                                                             <thead>
                                                                 <tr>
-                                                                    <th style="width: 11%">Project</th>
-                                                                    <th style="width: 11%">Sr.No.</th>
-                                                                    <th style="width: 11%">Entry Date</th>
-                                                                    <th style="width: 11%">Bill Date</th>
-                                                                    <th style="width: 11%">Bill Number</th>
-                                                                    <th style="width: 11%">Vendor Name</th>
-                                                                    <th style="width: 11%">Basic Amount</th>
-                                                                    <th style="width: 11%">Tax Amount</th>
-                                                                    <th style="width: 11%">Total</th>
-                                                                    <th style="width: 11%">Paid Amount</th>
-                                                                    <th style="width: 11%">Pending Amount</th>
-                                                                    <th style="width: 11%">Action</th>
+                                                                    <th >Project</th>
+                                                                    <th >Entry Date</th>
+                                                                    <th >Bill Date</th>
+                                                                    <th >Bill Number</th>
+                                                                    <th >Vendor Name</th>
+                                                                    <th >Basic Amount</th>
+                                                                    <th >Tax Amount</th>
+                                                                    <th >Total</th>
+                                                                    <th >Paid Amount</th>
+                                                                    <th >Pending Amount</th>
+                                                                    <th >Action</th>
                                                                 </tr>
                                                                 <tr class="filter">
-                                                                    <th style="width: 11%"></th>
-                                                                    <th style="width: 11%"></th>
-                                                                    <th style="width: 11%"> <input type="hidden" class="form-control form-filter" name="postdata" id="postdata"></th>
-                                                                    <th style="width: 11%">
+                                                                    <th><input type="text" class="form-control form-filter"  name="project_name" id="project_name"></th>
+                                                                    <th> <input type="hidden" class="form-control form-filter" name="postdata" id="postdata"></th>
+                                                                    <th>
                                                                         <div class="input-group date date-picker" data-date-format="yyyy-mm-dd" data-date-end-date="+0d">
                                                                             <input type="text" class="form-control form-filter" name="bill_date" style="font-size: 9px" readonly>
                                                                             <span class="input-group-btn">
@@ -82,14 +80,14 @@
                                                                                 </span>
                                                                         </div>
                                                                     </th>
-                                                                    <th style="width: 11%"> </th>
-                                                                    <th style="width: 11%"> <input type="text" class="form-control form-filter" style="margin-left: 5% !important; width: 90% !important;" name="vendor_name" id="vendor_name"></th>
-                                                                    <th style="width: 11%"> </th>
-                                                                    <th style="width: 11%"> </th>
-                                                                    <th style="width: 11%"> </th>
-                                                                    <th style="width: 11%"> </th>
-                                                                    <th style="width: 11%"> </th>
-                                                                    <th style="width: 11%">
+                                                                    <th> <input type="text" class="form-control form-filter"  name="bill_number" id="bill_number"></th>
+                                                                    <th> <input type="text" class="form-control form-filter"  name="vendor_name" id="vendor_name"></th>
+                                                                    <th><input type="text" class="form-control form-filter"  name="basic_amt" id="basic_amt"> </th>
+                                                                    <th> </th>
+                                                                    <th> <input type="text" class="form-control form-filter"  name="total_amt" id="total_amt"></th>
+                                                                    <th> </th>
+                                                                    <th> </th>
+                                                                    <th>
                                                                         <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                                         <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
                                                                     </th>
@@ -100,8 +98,7 @@
                                                             </tbody>
                                                             <tfoot>
                                                                 <tr>
-                                                                    <th colspan="8" style="text-align:right">Total Page Wise: </th>
-                                                                    <th></th>
+                                                                    <th colspan="7" style="text-align:right">Total Page Wise: </th>
                                                                     <th></th>
                                                                     <th></th>
                                                                     <th></th>
@@ -188,6 +185,78 @@
         $(document).ready(function(){
             SiteTransferBillListing.init();
             $(".form-filter:input[name='vendor_name']").on('keyup', function(){
+                var bill_number = $('#bill_number').val();
+                var project_name = $('#project_name').val();
+                var basic_amt = $('#basic_amt').val();
+                var total_amt = $('#total_amt').val();
+                var vendor_name = $('#vendor_name').val();
+                var bill_date = $('#bill_date').val();
+                $("input[name='bill_number']").val(bill_number);
+                $("input[name='project_name']").val(project_name);
+                $("input[name='basic_amt']").val(basic_amt);
+                $("input[name='total_amt']").val(total_amt);
+                $("input[name='vendor_name']").val(vendor_name);
+                $("input[name='bill_date']").val(bill_date);
+                $(".filter-submit").trigger('click');
+            });
+            $(".form-filter:input[name='project_name']").on('keyup', function(){
+                var bill_number = $('#bill_number').val();
+                var project_name = $('#project_name').val();
+                var basic_amt = $('#basic_amt').val();
+                var total_amt = $('#total_amt').val();
+                var vendor_name = $('#vendor_name').val();
+                var bill_date = $('#bill_date').val();
+                $("input[name='bill_number']").val(bill_number);
+                $("input[name='project_name']").val(project_name);
+                $("input[name='basic_amt']").val(basic_amt);
+                $("input[name='total_amt']").val(total_amt);
+                $("input[name='vendor_name']").val(vendor_name);
+                $("input[name='bill_date']").val(bill_date);
+                $(".filter-submit").trigger('click');
+            });
+            $(".form-filter:input[name='bill_number']").on('keyup', function(){
+                var bill_number = $('#bill_number').val();
+                var project_name = $('#project_name').val();
+                var basic_amt = $('#basic_amt').val();
+                var total_amt = $('#total_amt').val();
+                var vendor_name = $('#vendor_name').val();
+                var bill_date = $('#bill_date').val();
+                $("input[name='bill_number']").val(bill_number);
+                $("input[name='project_name']").val(project_name);
+                $("input[name='basic_amt']").val(basic_amt);
+                $("input[name='total_amt']").val(total_amt);
+                $("input[name='vendor_name']").val(vendor_name);
+                $("input[name='bill_date']").val(bill_date);
+                $(".filter-submit").trigger('click');
+            });
+            $(".form-filter:input[name='basic_amt']").on('keyup', function(){
+                var bill_number = $('#bill_number').val();
+                var project_name = $('#project_name').val();
+                var basic_amt = $('#basic_amt').val();
+                var total_amt = $('#total_amt').val();
+                var vendor_name = $('#vendor_name').val();
+                var bill_date = $('#bill_date').val();
+                $("input[name='bill_number']").val(bill_number);
+                $("input[name='project_name']").val(project_name);
+                $("input[name='basic_amt']").val(basic_amt);
+                $("input[name='total_amt']").val(total_amt);
+                $("input[name='vendor_name']").val(vendor_name);
+                $("input[name='bill_date']").val(bill_date);
+                $(".filter-submit").trigger('click');
+            });
+            $(".form-filter:input[name='total_amt']").on('keyup', function(){
+                var bill_number = $('#bill_number').val();
+                var project_name = $('#project_name').val();
+                var basic_amt = $('#basic_amt').val();
+                var total_amt = $('#total_amt').val();
+                var vendor_name = $('#vendor_name').val();
+                var bill_date = $('#bill_date').val();
+                $("input[name='bill_number']").val(bill_number);
+                $("input[name='project_name']").val(project_name);
+                $("input[name='basic_amt']").val(basic_amt);
+                $("input[name='total_amt']").val(total_amt);
+                $("input[name='vendor_name']").val(vendor_name);
+                $("input[name='bill_date']").val(bill_date);
                 $(".filter-submit").trigger('click');
             });
         });

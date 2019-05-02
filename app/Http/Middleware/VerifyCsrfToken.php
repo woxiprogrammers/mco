@@ -12,7 +12,7 @@ class VerifyCsrfToken extends BaseVerifier
      * @var array
      */
     protected $except = [
-        '/material/check-name','/material/listing','/category/listing','/product/listing','/profit-margin/listing','/units/listing','/units/conversion/listing',
+        '/subcontractor/bill/transaction/listing','/subcontractor/structure/listing','/material/check-name','/material/listing','/category/listing','/product/listing','/profit-margin/listing','/units/listing','/units/conversion/listing',
         '/summary/listing','/tax/listing','/quotation/get-materials','/quotation/get-profit-margins','/quotation/listing/*','bill/create','/project/listing','/quotation/get-product-calculations',
         '/quotation/image-upload/*','/quotation/display-images/*','/quotation/delete-temp-product-image','bill/approve','/bill/image-upload/*','/bill/display-images/*','/bill/delete-temp-product-image','/bill/edit/*',
         '/bill/product_description/create','/bill/product_description/update','/bill/calculate-tax-amounts','/bill/transaction/listing/*',
@@ -27,6 +27,6 @@ class VerifyCsrfToken extends BaseVerifier
         '/drawing/images/display-images/*','/drawing/images/delete-temp-product-image/','/drawing/images/get-data/','/user/get-permission','/peticash/salary-request/get-labours','/purchase/purchase-order/reopen','/change-project-site','/asset/maintenance/request/display-images','/asset/maintenance/request/delete-temp-product-image',
         '/asset/maintenance/request/listing','/asset/maintenance/request/approval/listing','/inventory/transfer/upload-pre-grn-images'
         ,'purchase/purchase-order-request/file-upload/*','purchase/purchase-order-request/display-files/*','/purchase/purchase-order-request/delete-temp-file','/address/get-states','/address/get-cities','/client/listing',
-        '/reports/listing/sales','/reports/listing/expense','/reports/listing/advance-expense'
+        '/reports/listing/sales','/reports/listing/expense','/reports/listing/advance-expense','/material/display-images','/material/delete-temp-product-image','/salary-distribution/listing'
     ];
 }

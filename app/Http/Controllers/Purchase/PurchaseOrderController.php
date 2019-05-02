@@ -1083,6 +1083,8 @@ class PurchaseOrderController extends Controller
                     $projectSiteInfo['delivery_address'] = $projectSiteInfo['project_name'].', '.$projectSiteInfo['project_site_name'].', '.$projectSiteInfo['project_site_address'].', '.$projectSiteInfo['project_site_city'];
                 }
 
+                $projectSiteInfo['por_remarks'] = ($purchaseOrder->purchaseOrderRequest->por_remarks !=null && $purchaseOrder->purchaseOrderRequest->por_remarks != "")? $purchaseOrder->purchaseOrderRequest->por_remarks : "-";
+
                 /*if(count($projectSiteInfo) <= 0){
                     $projectSiteInfo['project_name'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->materialRequest->projectSite->project->name;
                     $projectSiteInfo['project_site_name'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->materialRequest->projectSite->name;
@@ -1148,6 +1150,7 @@ class PurchaseOrderController extends Controller
                 $purchaseOrderComponentData[$iterator]['purchase_order_component_id'] = $purchaseOrderComponentId;
                 $purchaseOrderComponentData[$iterator]['name'] = $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name;
                 $purchaseOrderComponentData[$iterator]['unit_id'] = $purchaseOrderComponent->unit_id;
+                $purchaseOrderComponentData[$iterator]['qty'] = $purchaseOrderComponent->quantity;
                 $purchaseOrderComponentData[$iterator]['units'] = array();
                 if(in_array($purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->component_type_id,$assetComponentTypeIds)){
                     $purchaseOrderComponentData[$iterator]['units'] = Unit::where('slug','nos')->select('id','name')->get()->toArray();
@@ -1157,9 +1160,11 @@ class PurchaseOrderController extends Controller
                     $quantity = ($purchaseOrderComponent['quantity'] + ($purchaseOrderComponent['quantity'] * (10/100)));
                     $consumedQuantity = $purchaseOrderComponent->purchaseOrderTransactionComponent->sum('quantity');
                     $remainingQuantity = $quantity - $consumedQuantity;
+                    //$purchaseOrderComponentData[$iterator]['units'] = Unit::where('id',$purchaseOrderComponentData[$iterator]['unit_id'])->select('id','name')->get()->toArray();
                     $material = Material::where('name', 'ilike', $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name)->first();
                     $unit1Array = UnitConversion::join('units', 'units.id', '=', 'unit_conversions.unit_2_id')
                         ->where('unit_conversions.unit_1_id', $material->unit_id)
+                        ->where('units.id','!=',$purchaseOrderComponentData[$iterator]['unit_id'])
                         ->select('units.id as id', 'units.name as name')
                         ->get()
                         ->toArray();
@@ -1169,17 +1174,22 @@ class PurchaseOrderController extends Controller
                         ->select('units.id as id', 'units.name as name')
                         ->get()
                         ->toArray();
-                    $unitsArray = array_merge($unit1Array, $units2Array);
+                    $mainArray[0] = [
+                        'id' => $material->unit->id,
+                        'name' => $material->unit->name,
+                    ];
+                    $unitsArray = array_merge($mainArray, $unit1Array, $units2Array);
                     $jIterator = 0;
                     foreach ($unitsArray as $unit){
                         $unitsArray[$jIterator]['quantity'] = UnitHelper::unitQuantityConversion($material->unit->id,$unit['id'],$remainingQuantity);
                         $jIterator++;
                     }
                     $baseArray[0] = [
-                        'id' => $material->unit->id,
-                        'name' => $material->unit->name,
+                        'id' => $purchaseOrderComponentData[$iterator]['unit_id'],
+                        'name' => Unit::where('id',$purchaseOrderComponentData[$iterator]['unit_id'])->value('name'),
                         'quantity' => $remainingQuantity
                     ];
+
                     $purchaseOrderComponentData[$iterator]['units'] = array_merge($baseArray,$unitsArray);
                 }
                $iterator++;
@@ -1323,7 +1333,7 @@ class PurchaseOrderController extends Controller
                     $materialList[$iterator]['rate_per_unit'] = $purchaseOrderComponent->rate_per_unit;
                 }else{
                     $materialList[$iterator]['quantityIsFixed'] = false;
-                    $materialList[$iterator]['rate_per_unit'] = UnitHelper::unitConversion($purchaseOrderComponent->unit_id,$purchaseOrderTransactionComponent->unit_id,$purchaseOrderComponent->rate_per_unit);
+                    $materialList[$iterator]['rate_per_unit'] = $purchaseOrderComponent->rate_per_unit;
                     $newMaterialTypeId = MaterialRequestComponentTypes::where('slug', 'new-material')->pluck('id')->first();
                     if ($newMaterialTypeId == $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->component_type_id) {
                         $materialList[$iterator]['units'] = Unit::where('is_active', true)->select('id', 'name')->orderBy('name')->get()->toArray();
@@ -1541,6 +1551,9 @@ class PurchaseOrderController extends Controller
             }else{
                 $vendorInfo = Vendor::findOrFail($purchaseOrder->vendor_id)->toArray();
             }
+
+            $projectSiteInfo['por_remarks'] = ($purchaseOrder->purchaseOrderRequest->por_remarks !=null && $purchaseOrder->purchaseOrderRequest->por_remarks != "")? $purchaseOrder->purchaseOrderRequest->por_remarks : "-";
+
             $vendorInfo['materials'][] = [
                 'item_name' => $purchaseOrderComponent->purchaseRequestComponent->materialRequestComponent->name,
                 'quantity' => $purchaseOrderComponent['quantity'],

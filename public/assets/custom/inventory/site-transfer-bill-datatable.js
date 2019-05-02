@@ -20,7 +20,6 @@ var SiteTransferBillListing = function () {
                 // So when dropdowns used the scrollable div should be removed.
                 //"dom": "<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'<'table-group-actions pull-right'>>r>t<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'>>",
                 "footerCallback": function ( row, data, start, end, display ) {
-                    console.log('inside here');
                     var api = this.api(), data;
 
                     // Remove the formatting to get integer data for summation
@@ -31,22 +30,39 @@ var SiteTransferBillListing = function () {
                                 i : 0;
                     };
 
-                    var vendor_name = $('#vendor_name').val();
-
-
                     // Total over all pages
                     $.ajax({
                         url: "/inventory/transfer/billing/listing?_token="+$("input[name='_token']").val(), // ajax source
                         type: 'POST',
                         data :{
                             "get_total" : true,
-                            "vendor_name" : vendor_name
+                            "bill_number" : $('#bill_number').val(),
+                            "project_name" : $('#project_name').val(),
+                            "basic_amt" : $('#basic_amt').val(),
+                            "total_amt" : $('#total_amt').val(),
+                            "vendor_name" : $('#vendor_name').val(),
+                            "bill_date" : $('#bill_date').val()
                         },
                         success: function(result){
                             total = result['total'];
 
                             // Total over this page
                             pageTotal = api
+                                .column( 7, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 7 ).footer() ).html(
+                                pageTotal.toFixed(3) +' ( '+ total.toFixed(3) +' total)'
+                            );
+
+                            billtotal = result['billtotal'];
+
+                            // Total over this page
+                            pageBillTotal = api
                                 .column( 8, { page: 'current'} )
                                 .data()
                                 .reduce( function (a, b) {
@@ -55,13 +71,13 @@ var SiteTransferBillListing = function () {
 
                             // Update footer
                             $( api.column( 8 ).footer() ).html(
-                                pageTotal.toFixed(3) +' ( '+ total.toFixed(3) +' total)'
+                                pageBillTotal.toFixed(3) +' ( '+ billtotal.toFixed(3) +' total)'
                             );
 
-                            billtotal = result['billtotal'];
+                            paidtotal = result['paidtotal'];
 
                             // Total over this page
-                            pageBillTotal = api
+                            pagePaidTotal = api
                                 .column( 9, { page: 'current'} )
                                 .data()
                                 .reduce( function (a, b) {
@@ -70,21 +86,6 @@ var SiteTransferBillListing = function () {
 
                             // Update footer
                             $( api.column( 9 ).footer() ).html(
-                                pageBillTotal.toFixed(3) +' ( '+ billtotal.toFixed(3) +' total)'
-                            );
-
-                            paidtotal = result['paidtotal'];
-
-                            // Total over this page
-                            pagePaidTotal = api
-                                .column( 10, { page: 'current'} )
-                                .data()
-                                .reduce( function (a, b) {
-                                    return intVal(a) + intVal(b);
-                                }, 0 );
-
-                            // Update footer
-                            $( api.column( 10 ).footer() ).html(
                                 pagePaidTotal.toFixed(3) +' ( '+ paidtotal.toFixed(3) +' total)'
                             );
                         }});

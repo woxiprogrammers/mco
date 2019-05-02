@@ -1749,14 +1749,14 @@ class PeticashController extends Controller
                 $end = $request->length < 0 ? count($purchaseTransactionData) : $request->length;
                 for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($purchaseTransactionData); $iterator++,$pagination++ ){
                     if($purchaseTransactionData[$pagination]->is_voucher_created == true){
-                        $voucherButtonText = 'Delete';
+                        $voucherButtonText = 'Not Received';
                         $voucherStatusTest = 'Yes';
                     }else{
-                        $voucherButtonText = 'Create';
+                        $voucherButtonText = 'Received';
                         $voucherStatusTest = 'No';
                     }
                     $records['data'][] = [
-                        $purchaseTransactionData[$pagination]->id,
+                        '<input name="purchasetxn[]" id="'.$purchaseTransactionData[$pagination]->id.'" '.'type="Checkbox" value="'.$purchaseTransactionData[$pagination]->id.'">',
                         ucwords($purchaseTransactionData[$pagination]->name),
                         $purchaseTransactionData[$pagination]->quantity,
                         $purchaseTransactionData[$pagination]->unit->name,
@@ -1764,7 +1764,7 @@ class PeticashController extends Controller
                         ucwords($purchaseTransactionData[$pagination]->referenceUser->first_name.' '.$purchaseTransactionData[$pagination]->referenceUser->last_name),
                         date('j M Y',strtotime($purchaseTransactionData[$pagination]->date)),
                         $purchaseTransactionData[$pagination]->projectSite->project->name,
-                        '<td><span class="label label-sm label-danger"> '.$voucherStatusTest.' </span></td>',
+                        ($voucherStatusTest == 'Yes') ? '<td><span class="label label-sm label-success"> '.$voucherStatusTest.' </span></td>' : '<td><span class="label label-sm label-danger"> '.$voucherStatusTest.' </span></td>',
                         '<button class="btn btn-xs blue"> 
                             <a href="javascript:void(0);" onclick="detailsPurchaseModal('.$purchaseTransactionData[$pagination]->id.')" style="color: white">
                                 Details
@@ -1793,6 +1793,39 @@ class PeticashController extends Controller
             Log::critical(json_encode($data));
         }
         return response()->json($records,$status);
+    }
+
+    public function changePurchaseTxnStatus(Request $request){
+        try{
+            if($request['type'] == 'purchase'){
+                foreach($request->purchasetxn_ids as $purchaseTxnId){
+                    $purchasePeticashTransaction = PurcahsePeticashTransaction::where('id',$purchaseTxnId)->first();
+                    $purchasePeticashTransaction->update(['is_voucher_created' => !($purchasePeticashTransaction->is_voucher_created)]);
+                }
+            }elseif($request['type'] == 'salary'){
+                foreach($request->purchasetxn_ids as $salaryTxnId){
+                    $salaryPeticashTransaction = PeticashSalaryTransaction::where('id', $salaryTxnId)->first();
+                    $salaryPeticashTransaction->update(['is_voucher_created' => !($salaryPeticashTransaction->is_voucher_created)]);
+                }
+            }
+
+
+            $message = 'Voucher created successfully.';
+            $status = 200;
+        }catch(\Exception $e){
+            $message = 'Something went wrong';
+            $status = 500;
+            $data = [
+                'action' => 'Change Purchase Txn status',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+        }
+        $response = [
+            'message' => $message,
+        ];
+        return response($response,$status);
     }
 
     public function changeVoucherStatus(Request $request){
@@ -1925,10 +1958,10 @@ class PeticashController extends Controller
                 $end = $request->length < 0 ? count($salaryTransactionData) : $request->length;
                 for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($salaryTransactionData); $iterator++,$pagination++ ){
                     if($salaryTransactionData[$pagination]->is_voucher_created == true){
-                        $voucherButtonText = 'Delete Voucher';
+                        $voucherButtonText = 'Not Received';
                         $voucherStatusTest = 'Yes';
                     }else{
-                        $voucherButtonText = 'Create Voucher';
+                        $voucherButtonText = 'Received';
                         $voucherStatusTest = 'No';
                     }
                     $actionDropDown =  '<button class="btn btn-xs blue">
@@ -1950,7 +1983,7 @@ class PeticashController extends Controller
                                             </button>';
 
                     $records['data'][] = [
-                        $salaryTransactionData[$pagination]->id,
+                        '<input name="purchasetxn[]" id="'.$salaryTransactionData[$pagination]->id.'" '.'type="Checkbox" value="'.$salaryTransactionData[$pagination]->id.'">',
                         $salaryTransactionData[$pagination]->employee->employee_id,
                         ucwords($salaryTransactionData[$pagination]->employee->name),
                         $salaryTransactionData[$pagination]->peticashTransactionType->name,
@@ -1959,7 +1992,7 @@ class PeticashController extends Controller
                         ucwords($salaryTransactionData[$pagination]->referenceUser->first_name.' '.$salaryTransactionData[$pagination]->referenceUser->last_name),
                         date('j M Y',strtotime($salaryTransactionData[$pagination]->date)),
                         $salaryTransactionData[$pagination]->projectSite->project->name,
-                        '<td><span class="label label-sm label-danger"> '.$voucherStatusTest.' </span></td>',
+                        ($voucherStatusTest == 'Yes') ? '<td><span class="label label-sm label-success"> '.$voucherStatusTest.' </span></td>' : '<td><span class="label label-sm label-danger"> '.$voucherStatusTest.' </span></td>',
                         $actionDropDown
                     ];
                 }

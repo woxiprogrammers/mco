@@ -15,6 +15,7 @@ use App\SubcontractorStructureExtraItem;
 use App\SubcontractorStructureSummary;
 use App\SubcontractorStructureType;
 use App\Summary;
+use App\TransactionStatus;
 use App\Unit;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -78,13 +79,15 @@ class SubcontractorStructureController extends Controller
             $structureSummaryData = [
                 'subcontractor_structure_id' => $subcontractorStructure->id
             ];
+            $counter = 0;
             foreach($request->summaries as $summaryId){
                 $structureSummaryData['summary_id'] = (int) $summaryId;
-                $structureSummaryData['rate'] = (float) $request->rate[$summaryId];
-                $structureSummaryData['description'] = $request->description[$summaryId];
-                $structureSummaryData['total_work_area'] = (float)$request->total_work_area[$summaryId];
-                $structureSummaryData['unit_id'] = (int)$request->unit[$summaryId];
+                $structureSummaryData['rate'] = (float) $request->rate[$counter][$summaryId];
+                $structureSummaryData['description'] = $request->description[$counter][$summaryId];
+                $structureSummaryData['total_work_area'] = (float)$request->total_work_area[$counter][$summaryId];
+                $structureSummaryData['unit_id'] = (int)$request->unit[$counter][$summaryId];
                 $structureSummary = SubcontractorStructureSummary::create($structureSummaryData);
+                $counter++;
             }
             $structureExtraItemData = [
                 'subcontractor_structure_id' => $subcontractorStructure->id
@@ -126,6 +129,7 @@ class SubcontractorStructureController extends Controller
             $subcontractor_name = null;
             $project_name = null;
             $ids = SubcontractorStructure::pluck('id');
+            $approvedStatusId = TransactionStatus::where('slug', 'approved')->pluck('id')->first();
             if($request->has('project_name') && $filterFlag == true){
                 $projectSites = Project::join('project_sites','project_sites.project_id','=','projects.id')->where('projects.name','ilike','%'.$request['project_name'].'%')->select('project_sites.id')->get()->toArray();
                 $ids = SubcontractorStructure::where('project_site_id','!=', 0)
@@ -176,7 +180,7 @@ class SubcontractorStructureController extends Controller
                         foreach ($subcontractorBillIdsArray as $subBillids) {
                             $subcontractorBill = SubcontractorBill::where('id',$subBillids)->first();
                             $billTotals += round(($subcontractorBill['grand_total']),3);
-                            $billPaidAmount += round((SubcontractorBillTransaction::where('subcontractor_bills_id',$subBillids)->sum('total')),3);
+                            $billPaidAmount += round((SubcontractorBillTransaction::where('transaction_status_id', $approvedStatusId)->where('subcontractor_bills_id',$subBillids)->sum('total')),3);
                         }
                     }
                 }
@@ -198,7 +202,7 @@ class SubcontractorStructureController extends Controller
                     foreach ($subcontractorBillIds as $subcontractorStructureBillId) {
                         $subcontractorBill = SubcontractorBill::where('id', $subcontractorStructureBillId)->first();
                         $billTotals += round($subcontractorBill['grand_total'], 3);
-                        $billPaidAmount += round((SubcontractorBillTransaction::where('subcontractor_bills_id', $subcontractorStructureBillId)->sum('total')), 3);
+                        $billPaidAmount += round((SubcontractorBillTransaction::where('transaction_status_id', $approvedStatusId)->where('subcontractor_bills_id', $subcontractorStructureBillId)->sum('total')), 3);
                     }
                     $action = '<div class="btn-group">
                             <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
@@ -280,26 +284,36 @@ class SubcontractorStructureController extends Controller
             $summaries = Summary::where('is_active', true)->select('id', 'name')->get()->toArray();
             $structureSummaries = $subcontractorStructure->summaries->except(['created_at','updated_at'])->toArray();
             $iterator = 0;
+            $approvedTransactionStatus = TransactionStatus::where('slug', 'active')->pluck('id')->first();
             foreach($structureSummaries as $structureSummary){
                 $structureSummaries[$iterator]['summary_name'] = Summary::where('id', $structureSummary['summary_id'])->pluck('name')->first();
                 $subcontractorBillSummaries = SubcontractorBillSummary::where('subcontractor_structure_summary_id', $structureSummary['id'])->get();
                 if ($subcontractorBillSummaries->isEmpty()){
                     $structureSummaries[$iterator]['min_rate'] = 1;
                     $structureSummaries[$iterator]['min_total_work_area'] = 1;
-                    if ($subcontractorStructure->contractType->slug == 'itemwise'){
+                    if (in_array($subcontractorStructure->contractType->slug, ['itemwise', 'amountwise'])){
                         $structureSummaries[$iterator]['can_remove'] = true;
                     }else{
                         $structureSummaries[$iterator]['can_remove'] = false;
                     }
                 } else {
-                    $structureSummaries[$iterator]['min_rate'] = 1;
-                    $structureSummaries[$iterator]['min_total_work_area'] = 1;
-                    if ($subcontractorStructure->contractType->slug == 'itemwise'){
+                    $approvedBillTransactions = SubcontractorBillTransaction::join('subcontractor_bills', 'subcontractor_bills.id','=', 'subcontractor_bill_transactions.subcontractor_bills_id')
+                        ->where('subcontractor_bill_transactions.transaction_status_id', $approvedTransactionStatus)
+                        ->where('subcontractor_bills.sc_structure_id', $subcontractorStructure->id )
+                        ->get();
+                    if ($approvedBillTransactions->isEmpty()){
+                        $structureSummaries[$iterator]['min_rate'] = 1;
+                        $structureSummaries[$iterator]['min_total_work_area'] = 1;
                         $structureSummaries[$iterator]['can_remove'] = true;
-                    }else{
+                    } else {
+                        $structureSummaries[$iterator]['min_rate'] = $structureSummary->rate;
+                        $structureSummaries[$iterator]['min_total_work_area'] = $structureSummary->total_work_area;
                         $structureSummaries[$iterator]['can_remove'] = false;
                     }
-                  // Logic to restrict minimum rate and work area if bills and approved transactions are created.
+                    if($subcontractorStructure->contractType->slug == 'sqft' && $structureSummaries[$iterator]['can_remove']){
+                        $structureSummaries[$iterator]['can_remove'] = false;
+                    }
+
                 }
                 $iterator += 1;
             }
@@ -320,20 +334,25 @@ class SubcontractorStructureController extends Controller
 
     public function editStructure(Request $request, $subcontractorStructure){
         try{
-            foreach ($request->summaries as $summaryId){
-                $structureSummaryData = [
-                    'subcontractor_structure_id' => $subcontractorStructure->id,
-                    'summary_id' => $summaryId
-                ];
-                $subcontractorStructureSummary = SubcontractorStructureSummary::where($structureSummaryData)->first();
-                $structureSummaryData['rate'] = (float) $request->rate[$summaryId];
-                $structureSummaryData['description'] = $request->description[$summaryId];
-                $structureSummaryData['total_work_area'] = (float)$request->total_work_area[$summaryId];
-                $structureSummaryData['unit_id'] = (int)$request->unit[$summaryId];
-                if ($subcontractorStructureSummary == null){
-                    $subcontractorStructureSummary = SubcontractorStructureSummary::create($structureSummaryData);
-                }else{
-                    $subcontractorStructureSummary->update($structureSummaryData);
+            $structureSummaryIds = [];
+            foreach($request->structure_summaries as $structureSummary){
+                if(array_key_exists('summary_id', $structureSummary)){
+                    $structureSummary['subcontractor_structure_id'] = $subcontractorStructure->id;
+                    $subcontractorStructureSummary = SubcontractorStructureSummary::create($structureSummary);
+                } elseif (array_key_exists('subcontractor_structure_summary_id', $structureSummary)) {
+                    $subcontractorStructureSummary = SubcontractorStructureSummary::where('id', $structureSummary['subcontractor_structure_summary_id'])->first();
+                    unset($structureSummary['subcontractor_structure_summary_id']);
+                    $subcontractorStructureSummary->update($structureSummary);
+                } else {
+                    $request->session()->flash('error', 'Something went wrong with submitted data.');
+                    return redirect('/subcontractor/structure/edit/'.$subcontractorStructure->id);
+                }
+                $structureSummaryIds[] = $subcontractorStructureSummary->id;
+            }
+            $deletedStructureSummaries = SubcontractorStructureSummary::where('subcontractor_structure_id', $subcontractorStructure->id)->whereNotIn('id', $structureSummaryIds)->get();
+            if($deletedStructureSummaries->isNotEmpty()){
+                foreach ($deletedStructureSummaries as $deletedStructureSummary){
+                    $deletedStructureSummary->delete();
                 }
             }
             if($request->has('extra_items')){

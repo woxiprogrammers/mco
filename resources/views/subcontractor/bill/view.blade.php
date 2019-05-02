@@ -10,9 +10,9 @@
     <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
-    <input type="hidden" id="balanceAdvanceAmount" value="{{$subcontractorBill->subcontractorStructure->subcontractor->balance_advance_amount}}">
-    <input type="hidden" id="pendingAmount" value="{{$pendingAmount}}">
-    <input type="hidden" id="cashAllowedLimit" value="{{$cashAllowedLimit}}">
+    <input type="hidden" id="balanceAdvanceAmount" value="{{round($subcontractorBill->subcontractorStructure->subcontractor->balance_advance_amount,3)}}">
+    <input type="hidden" id="pendingAmount" value="{{round($pendingAmount,3)}}">
+    <input type="hidden" id="cashAllowedLimit" value="{{round($cashAllowedLimit,3)}}">
     <div class="page-wrapper">
         <div class="page-wrapper-row full-height">
             <div class="page-wrapper-middle">
@@ -45,6 +45,7 @@
                                     <!-- BEGIN VALIDATION STATES-->
                                     <div class="portlet light ">
                                         <div class="portlet-body form">
+                                                {!! csrf_field() !!}
                                             <input type="hidden" id="subcontractorBillId" value="{!! $subcontractorBill['id'] !!}">
                                             @if($subcontractorBill->subcontractorBillStatus->slug == 'approved')
                                                 <ul class="nav nav-tabs nav-tabs-lg">
@@ -61,8 +62,8 @@
                                             @endif
                                             <div class="tab-content">
                                                 <div class="tab-pane fade in active" id="billViewTab">
-                                                    <label class="control-label" for="date">Bill Date : {{date('m/d/Y',strtotime($subcontractorBill['bill_date']))}}</label>
-                                                    <label class="control-label" for="date" style="margin-left: 5%;">Performa Invoice Date : {{date('m/d/Y',strtotime($subcontractorBill['performa_invoice_date']))}}</label>
+                                                    <label class="control-label" for="date">Bill Date : {{date('d/m/Y',strtotime($subcontractorBill['bill_date']))}}</label>
+                                                    <label class="control-label" for="date" style="margin-left: 5%;">Performa Invoice Date : {{date('d/m/Y',strtotime($subcontractorBill['performa_invoice_date']))}}</label>
                                                     @if($subcontractorBill->subcontractorBillStatus->slug == 'draft')
                                                         <a href="/subcontractor/bill/edit/{{$subcontractorBill['id']}}" class="btn btn-xs blue" style="margin-left: 5%;">
                                                             <i class="fa fa-edit"></i>
@@ -80,7 +81,7 @@
                                                         @endif
                                                     @elseif(($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-subcontractor-billing')) && $toChangeStatus == true )
                                                             <a href="/subcontractor/bill/change-status/disapproved/{{$subcontractorBill['id']}}" class="btn btn-xs btn-danger" id="disapprove">
-                                                                <i class="fa fa-remove"></i> Cancel
+                                                               <i class="fa fa-remove"></i> Cancel
                                                         </a>
                                                     @endif
 
@@ -357,6 +358,7 @@
                                                                     </th>
 
                                                                     <th> Status </th>
+                                                                    <th> Remarks </th>
                                                                     <th> Action </th>
                                                                 </tr>
                                                                 </thead>
@@ -368,6 +370,7 @@
                                                                         <th colspan="3">
                                                                             Total
                                                                         </th>
+                                                                        <th></th>
                                                                         <th></th>
                                                                         <th></th>
                                                                         <th></th>
@@ -513,8 +516,8 @@
                                                                                         <span>*</span>
                                                                                     </div>
                                                                                     <div class="col-md-6">
-                                                                                        <input type="hidden" class="form-control" id="originalPayableAmount" value="{{$pendingAmount}}">
-                                                                                        <input type="text" class="form-control" id="payableAmount" value="{{$pendingAmount}}" readonly>
+                                                                                        <input type="hidden" class="form-control" id="originalPayableAmount" value="{{round($pendingAmount,3)}}">
+                                                                                        <input type="text" class="form-control" id="payableAmount" value="{{round($pendingAmount,3)}}" readonly>
                                                                                     </div>
                                                                                 </div>
                                                                                 <div class="form-group row">
@@ -789,7 +792,7 @@
                     $('#paidFromSlug').hide();
                     $('#paymentSelect').hide();
                     $("#transactionTotal").rules('add',{
-                        max: balanceAdvanceAmount
+                        max: parseFloat(balanceAdvanceAmount)
                     });
                 }else{
                     $('#paidFromSlug').show();
@@ -800,7 +803,7 @@
                     $("#tds_tax_amount").prop('readonly', false);
                     $("#other_recovery").prop('readonly', false);
                     $("#transactionTotal").rules('add',{
-                        max: pendingAmount
+                        max: parseFloat(pendingAmount)
                     });
                 }
                 $(".calculate-amount").trigger('keyup');
@@ -820,7 +823,7 @@
                 });
                 var changedPayableAmount = originalPayablemount - (total - parseFloat($('#subtotalAmount').val()));
                 changedPayableAmount = changedPayableAmount.toFixed(3);
-                console.log('pay amount type', typeof changedPayableAmount);
+
                 $('#payableAmount').val(changedPayableAmount);
                 $("#transactionTotal").val(total.toFixed(3));
                 $("#subtotalAmount").rules('add',{
@@ -837,11 +840,11 @@
                     }
                     if(balanceAdvanceAmount < remainingBillAmount){
                         $("#transactionTotal").rules('add',{
-                            max: balanceAdvanceAmount
+                            max: parseFloat(balanceAdvanceAmount)
                         });
                     }else{
                         $("#transactionTotal").rules('add',{
-                            max: remainingBillAmount
+                            max: parseFloat(remainingBillAmount)
                         });
                     }
 
@@ -850,32 +853,31 @@
                     if(typeof amount == '' || amount == 'undefined' || isNaN(amount)){
                         amount = 0;
                     }
-                    var paid_from_slug = $('.transactionPaidFromSlug').val();
-                    if(paid_from_slug == 'cash'){
+                    var paid_from_slug = $('#paid_from_slug').val();
+                    if(paid_from_slug == 'cash' || paid_from_slug == 'cancel_transaction_advance'){
                         var allowedCashAmount = parseFloat($('#cashAllowedLimit').val());
                         if(allowedCashAmount < remainingBillAmount){
                             $("#transactionTotal").rules('add',{
-                                max: allowedCashAmount
+                                max: parseFloat(remainingBillAmount)
                             });
                         }else{
                             $("#transactionTotal").rules('add',{
-                                max: remainingBillAmount
+                                max: parseFloat(remainingBillAmount)
                             });
                         }
                     }else{
                         var selectedBankId = $('#transaction_bank_id').val();
-                        if(selectedBankId == ''){
+                        if(selectedBankId == '' && paid_from_slug != ''){
                             alert('Please select Bank');
                         }else{
-
                             var allowedBankAmount = parseFloat($('#transaction_balance_amount_'+selectedBankId).val());
                             if(allowedBankAmount < remainingBillAmount){
                                 $("#transactionTotal").rules('add',{
-                                    max: allowedBankAmount
+                                    max: (allowedBankAmount)
                                 });
                             }else{
                                 $("#transactionTotal").rules('add',{
-                                    max: remainingBillAmount
+                                    max: (remainingBillAmount)
                                 });
                             }
 
@@ -904,13 +906,13 @@
                     }
                     var allowedAmount = parseFloat($('#balance_amount_'+selectedBankId).val());
                     $('#bilAmount').rules('add',{
-                        max: allowedAmount
+                        max: parseFloat(allowedAmount)
                     });
                 }
             }else{
                 var cashAllowedLimit = parseFloat($('#cashAllowedLimit').val());
                 $('#bilAmount').rules('add',{
-                    max: cashAllowedLimit
+                    max: parseFloat(cashAllowedLimit)
                 });
             }
 

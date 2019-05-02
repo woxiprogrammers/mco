@@ -19,6 +19,7 @@
     <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
+    <input type="hidden" id="summaryCount" value="{{count($structureSummaries)}}">
     <div class="page-wrapper">
         <div class="page-wrapper-row full-height">
             <div class="page-wrapper-middle">
@@ -56,7 +57,7 @@
                                                 <div class="form-body">
                                                     <div class="row">
                                                         <div class="col-md-offset-9 col-md-3">
-                                                            <button type="submit" class="btn red pull-right" id="labour_submit"><i class="fa fa-check"></i> Edit Structure</button>
+                                                            <button type="submit" class="btn red pull-right" id="labour_submit"><i class="fa fa-check"></i> Save Structure</button>
                                                         </div>
                                                     </div>
 
@@ -100,7 +101,7 @@
                                                             <fieldset id="summariesFieldset">
                                                                 <legend>
                                                                     Summaries
-                                                                    @if($subcontractorStructure->contractType->slug == 'itemwise')
+                                                                    @if($subcontractorStructure->contractType->slug == 'itemwise' || $subcontractorStructure->contractType->slug == 'amountwise')
                                                                         <a class="btn yellow btn-md col-md-offset-8" href="javascript:void(0);" id="addSummaryBtn" onclick="addSummary()">
                                                                             <i class="fa fa-plus"></i>
                                                                             Summary
@@ -123,30 +124,30 @@
                                                                                 </tr>
                                                                             </thead>
                                                                             <tbody>
-                                                                                @foreach($structureSummaries as $subcontractorStructureSummary)
+                                                                                @for($iterator=0; $iterator < count($structureSummaries); $iterator++)
                                                                                     <tr>
                                                                                         <td>
-                                                                                            <input type="hidden" name="summaries[]" value="{{$subcontractorStructureSummary['summary_id']}}">
-                                                                                            <label class="control-label"> {!! $subcontractorStructureSummary['summary_name'] !!}</label>
+                                                                                            <input type="hidden" name="structure_summaries[{{$iterator}}][subcontractor_structure_summary_id]" value="{{$structureSummaries[$iterator]['id']}}">
+                                                                                            <label class="control-label"> {{$structureSummaries[$iterator]['summary_name']}} </label>
                                                                                         </td>
                                                                                         <td>
                                                                                             <div class="form-group" style="width: 90%; margin-left: 5%">
-                                                                                                <textarea class="form-control description" rows="3" name="description[{{$subcontractorStructureSummary['summary_id']}}]">{{$subcontractorStructureSummary['description']}}</textarea>
+                                                                                                <textarea class="form-control description" rows="3" name="structure_summaries[{{$iterator}}][description]">{{$structureSummaries[$iterator]['description']}}</textarea>
                                                                                             </div>
                                                                                         </td>
                                                                                         <td>
                                                                                             <div class="form-group" style="width: 90%; margin-left: 5%">
-                                                                                                <input type="text" class="form-control rate" onkeyup="rateKeyUp(this)" value="{{$subcontractorStructureSummary['rate']}}" name="rate[{{$subcontractorStructureSummary['summary_id']}}]"  min="{{$subcontractorStructureSummary['min_rate']}}" required>
+                                                                                                <input type="text" class="form-control rate" onkeyup="rateKeyUp(this)" value="{{$structureSummaries[$iterator]['rate']}}" name="structure_summaries[{{$iterator}}][rate]"  min="0" required>
                                                                                             </div>
                                                                                         </td>
                                                                                         <td>
                                                                                             <div class="form-group" style="width: 90%; margin-left: 5%">
-                                                                                                <select  class="unit form-control" name="unit[{{$subcontractorStructureSummary['summary_id']}}]" required>
+                                                                                                <select  class="unit form-control" name="structure_summaries[{{$iterator}}][unit_id]" required>
                                                                                                     <option value="">
                                                                                                         Select Unit
                                                                                                     </option>
                                                                                                     @foreach($units as $unit)
-                                                                                                        @if($subcontractorStructureSummary['unit_id'] == $unit['id'])
+                                                                                                        @if($structureSummaries[$iterator]['unit_id'] == $unit['id'])
                                                                                                             <option value="{{$unit['id']}}" selected>
                                                                                                                 {{$unit['name']}}
                                                                                                             </option>
@@ -161,12 +162,12 @@
                                                                                         </td>
                                                                                         <td>
                                                                                             <div class="form-group"  style="width: 90%; margin-left: 5%">
-                                                                                                <input type="text" class="form-control total_work_area" onkeyup="workAreaKeyUp(this)" value="{{$subcontractorStructureSummary['total_work_area']}}" name="total_work_area[{{$subcontractorStructureSummary['summary_id']}}]" min="{{$subcontractorStructureSummary['min_total_work_area']}}" required>
+                                                                                                <input type="text" class="form-control total_work_area" onkeyup="workAreaKeyUp(this)" value="{{$structureSummaries[$iterator]['total_work_area']}}" name="structure_summaries[{{$iterator}}][total_work_area]" min="{{$structureSummaries[$iterator]['min_total_work_area']}}" required>
                                                                                             </div>
                                                                                         </td>
                                                                                         <td>
                                                                                             <div class="form-group"  style="width: 90%; margin-left: 5%">
-                                                                                                <input type="text" class="form-control total_amount" value="{!! $subcontractorStructureSummary['rate'] * $subcontractorStructureSummary['total_work_area'] !!}" readonly>
+                                                                                                <input type="text" class="form-control total_amount" value="{!! $structureSummaries[$iterator]['rate'] * $structureSummaries[$iterator]['total_work_area'] !!}" readonly>
                                                                                             </div>
                                                                                         </td>
                                                                                         <td>
@@ -175,14 +176,14 @@
                                                                                             </div>
                                                                                         </td>
                                                                                         <td>
-                                                                                            @if($subcontractorStructureSummary['can_remove'])
+                                                                                            @if($structureSummaries[$iterator]['can_remove'])
                                                                                                 <a class="btn red btn-xs" href="javascript:void(0);" onclick="removeSummary(this)">
                                                                                                     <i class="fa fa-times"></i>
                                                                                                 </a>
                                                                                             @endif
                                                                                         </td>
                                                                                     </tr>
-                                                                                @endforeach
+                                                                                @endfor
                                                                             </tbody>
                                                                         </table>
                                                                     </div>
@@ -246,11 +247,11 @@
             </div>
         </div>
     </div>
-    @if($subcontractorStructure->contractType->slug == 'itemwise')
+    @if($subcontractorStructure->contractType->slug == 'itemwise' || $subcontractorStructure->contractType->slug == 'amountwise')
         <table id="tempSummaryTable" hidden>
             <tr>
                 <td>
-                    <select class="summary form-control" onchange="onSummaryChange(this)" name="summaries[]">
+                    <select class="summary form-control" onchange="onSummaryChange(this)">
                         @foreach($summaries as $summary)
                             <option value="{{$summary['id']}}"> {{$summary['name']}} </option>
                         @endforeach
@@ -264,6 +265,20 @@
                 <td>
                     <div class="form-group" style="width: 90%; margin-left: 5%">
                         <input type="text" class="form-control rate" onkeyup="rateKeyUp(this)" min="1" required>
+                    </div>
+                </td>
+                <td>
+                    <div class="form-group" style="width: 90%; margin-left: 5%">
+                        <select  class="unit form-control" required>
+                            <option value="">
+                                Select Unit
+                            </option>
+                            @foreach($units as $unit)
+                                <option value="{{$unit['id']}}">
+                                    {{$unit['name']}}
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
                 </td>
                 <td>
@@ -342,12 +357,29 @@
             $(".total_work_area").each(function(){
                 workAreaKeyUp(this);
             });
+
+
+            $( "#labour_submit" ).on('click',function( event ) {
+                event.preventDefault();
+                var rowCount = $('#summaryTable tr').length;
+                if(rowCount != 1) {
+                    if(confirm("Are You Sure you want to save structure?")) {
+                        $( "#editSubcontractorStructure").submit();
+                    } else {
+                        return false;
+                    }
+                } else {
+                    alert("Please select at least one summary");
+                }
+                return false;
+           });
+
             // onSummaryChange($('#summaryTable tbody .summary'));
         });
 
         function rateKeyUp(element){
-            var rate = parseInt($(element).val());
-            var total_work_area = parseInt($(element).closest('tr').find('.total_work_area').val());
+            var rate = parseFloat($(element).val());
+            var total_work_area = parseFloat($(element).closest('tr').find('.total_work_area').val());
             if (isNaN(rate)){
                 rate = 0;
             }
@@ -376,7 +408,7 @@
         function structureTypeChange(){
             $("#summariesFieldset").show();
             var structureTypeSlug = $("input[name='structure_type']:checked").val();
-            if(structureTypeSlug == 'itemwise'){
+            if(structureTypeSlug == 'itemwise' || structureTypeSlug == 'amountwise'){
                 $("#addSummaryBtn").show();
             }else{
                 $("#addSummaryBtn").hide();
@@ -466,15 +498,15 @@
             newRow.find('td:last').html('<a class="btn red btn-xs" href="javascript:void(0);" onclick="removeSummary(this)">\n' +
                 '<i class="fa fa-times"></i>\n' +
                 '</a>\n');
-            console.log('new row', newRow);
             $("#summaryTable tbody").append(newRow);
-            console.log(newRow.find('.summary').val());
             onSummaryChange(newRow.find('.summary'));
         }
 
         function onSummaryChange(element){
             var summaryId = $(element).val();
-            $(element).closest('tr').find('.rate').attr('name', 'rate['+summaryId+']');
+            var summaryCount = parseInt($("#summaryCount").val());
+            $(element).closest('tr').find('.summary').attr('name', 'structure_summaries['+summaryCount+'][summary_id]');
+            $(element).closest('tr').find('.rate').attr('name', 'structure_summaries['+summaryCount+'][rate]');
             $(element).closest('tr').find('.rate').val('');
             var minRate = $(element).closest('tr').find('.rate').attr('min');
             if(typeof  minRate == 'undefined'){
@@ -484,7 +516,7 @@
                 required: true,
                 min: minRate
             });
-            $(element).closest('tr').find('.total_work_area').attr('name', 'total_work_area['+summaryId+']');
+            $(element).closest('tr').find('.total_work_area').attr('name', 'structure_summaries['+summaryCount+'][total_work_area]');
             $(element).closest('tr').find('.total_work_area').val('');
             var minTotalWorkArea = $(element).closest('tr').find('.total_work_area').attr('min');
             if (typeof minTotalWorkArea == 'undefined'){
@@ -494,13 +526,11 @@
                 required: true,
                 min: minTotalWorkArea
             });
-            $(element).closest('tr').find('.total_amount').attr('name', 'total_amount['+summaryId+']');
             $(element).closest('tr').find('.total_amount').val('');
-            $(element).closest('tr').find('.total_amount_inwords').attr('name', 'total_amount_inwords['+summaryId+']');
             $(element).closest('tr').find('.total_amount_inwords').val('');
-            $(element).closest('tr').find('.description').attr('name', 'description['+summaryId+']');
+            $(element).closest('tr').find('.description').attr('name', 'structure_summaries['+summaryCount+'][description]');
             $(element).closest('tr').find('.description').val('');
-            $(element).closest('tr').find('.unit').attr('name', 'unit['+summaryId+']');
+            $(element).closest('tr').find('.unit').attr('name', 'structure_summaries['+summaryCount+'][unit_id]');
             $(element).closest('tr').find('.unit').val('');
         }
 

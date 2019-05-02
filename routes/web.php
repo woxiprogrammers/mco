@@ -38,6 +38,11 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         });
     });
 
+    Route::group(['prefix'=>'salary-distribution'],function() {
+        Route::get('manage', array('uses' => 'Admin\SalaryDistributionController@getManageView'));
+        Route::post('listing', array('uses' => 'Admin\SalaryDistributionController@salaryDistributionListing'));
+    });
+
     Route::group(['prefix' => 'client'],function (){
         Route::get('create',array('uses' => 'Client\ClientController@getClientView'));
         Route::post('create',array('uses' => 'Client\ClientController@createClient'));
@@ -101,6 +106,9 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('create',array('uses' => 'Admin\MaterialController@getCreateView'));
         Route::post('create',array('uses' => 'Admin\MaterialController@createMaterial'));
         Route::get('edit/{material}',array('uses' => 'Admin\MaterialController@getEditView'));
+        Route::post('image-upload',array('uses'=>'Admin\MaterialController@uploadTempMaterialImages'));
+        Route::post('display-images',array('uses'=>'Admin\MaterialController@displayMaterialImages'));
+        Route::post('delete-temp-product-image',array('uses'=>'Admin\MaterialController@removeMaterialImage'));
         Route::put('edit/{material}',array('uses' => 'Admin\MaterialController@editMaterial'));
         Route::post('change-status',array('uses' => 'Admin\MaterialController@changeMaterialStatus'));
         Route::post('check-name',array('uses' => 'Admin\MaterialController@checkMaterialName'));
@@ -254,6 +262,9 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::group(['prefix' => 'extra-item'],function(){
             Route::post('create',array('uses'=>'Admin\QuotationController@addExtraItems'));
         });
+        Route::post('remove-opening-balance',array('uses' => 'Admin\QuotationController@openingBalanceRemove'));
+        Route::post('opening-balance-save',array('uses' => 'Admin\QuotationController@openingBalanceSave'));
+
     });
 
     Route::group(['prefix' => 'project'], function(){
@@ -718,6 +729,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::post('change-status',array('uses' => 'Peticash\PeticashController@changeSalaryStatus'));
         Route::post('change-status-purchase-disapproved',array('uses' => 'Peticash\PeticashController@changePurchaseStatus'));
         Route::post('stats-salary',array('uses' => 'Peticash\PeticashController@getSalaryStats'));
+        Route::post('change-status-purchase',array('uses' => 'Peticash\PeticashController@changePurchaseTxnStatus'));
 
         Route::group(['prefix' => 'master-peticash-account'], function(){
             Route::get('manage',array('uses' => 'Peticash\PeticashController@getManageViewForMasterPeticashAccount'));
@@ -829,7 +841,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('get-category',array('uses'=> 'Dpr\DprController@getSubcontractorsCategories'));
         });
     });
-
+    Route::get('inventory',array('uses'=> 'Inventory\InventoryManageController@inventoryTransfer'));
     Route::group(['prefix'=>'reports'],function (){
         Route::get('/',array('uses' => 'Report\ReportController@reportsRoute'));
         Route::get('manage',array('uses' => 'Report\ReportManagementController@getView'));

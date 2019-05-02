@@ -38,6 +38,8 @@
                                 <!-- BEGIN VALIDATION STATES-->
                                 <div class="portlet light ">
                                     <div class="portlet-body form">
+                                        <input type="hidden" id="path" name="path" value="">
+                                        <input type="hidden" id="max_files_count" name="max_files_count" value="20">
                                         <input type="hidden" id="materialId" value="{{$materialData['id']}}">
                                         <form role="form" id="edit-material" class="form-horizontal" action="/material/edit/{{$materialData['id']}}" method="post">
                                             {!! csrf_field() !!}
@@ -112,6 +114,40 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                            <div class="form-group">
+                                                <div class="row">
+                                                    <div id="tab_images_uploader_filelist" class="col-md-6 col-sm-12" style="margin-left: 20%"> </div>
+                                                </div>
+                                                <div id="tab_images_uploader_container" class="col-md-offset-5">
+                                                    <a id="tab_images_uploader_pickfiles" href="javascript:;" class="btn green-meadow" style="margin-left: 26%">
+                                                        Browse</a>
+                                                    <a id="tab_images_uploader_uploadfiles" href="javascript:;" class="btn btn-primary">
+                                                        <i class="fa fa-share"></i> Upload Files </a>
+                                                </div>
+                                                <table class="table table-bordered table-hover" style="width: 554px; margin-left: 26%; margin-top: 1%">
+                                                    <thead>
+                                                    <tr role="row" class="heading">
+                                                        <th> Image </th>
+                                                        <th> Action </th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody id="show-product-images">
+                                                    @foreach($materialImage as $image)
+                                                    <tr id="image-{{$image['id']}}">
+                                                        <td>
+                                                            <a href="{{$image['path']}}" target="_blank" class="fancybox-button" data-rel="fancybox-button">
+                                                                <img class="img-responsive" src="{{$image['path']}}" alt="" style="width:100px; height:100px;"> </a>
+                                                            <input type="hidden" class="work-order-image-name" name="material_images[{{$image['id']}}][image_name]" id="work-order-image-{{$image['id']}}" value="{{$image['path']}}"/>
+                                                        </td>
+                                                        <td>
+                                                            <a href="javascript:;" class="btn btn-default btn-sm" onclick='removeAssetImage("#image-{{$image['id']}}","{{$image['path']}}",0);'>
+                                                            <i class="fa fa-times"></i> Remove </a>
+                                                        </td>
+                                                    </tr>
+                                                    @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
                                             @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('edit-material'))
                                                 <div class="form-actions noborder row">
                                                     <div class="col-md-offset-3" style="margin-left: 26%">
@@ -134,6 +170,9 @@
 @endsection
 @section('javascript')
 <script src="/assets/custom/admin/material/material.js" type="application/javascript"></script>
+<script src="/assets/global/plugins/plupload/js/plupload.full.min.js" type="text/javascript"></script>
+<script src="/assets/custom/admin/material/image-datatable.js"></script>
+<script src="/assets/custom/admin/material/image-upload.js"></script>
 <script>
     $(document).ready(function() {
         EditMaterial.init();

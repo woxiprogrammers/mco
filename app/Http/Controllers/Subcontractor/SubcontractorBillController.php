@@ -22,6 +22,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Log;
+use App\Subcontractor;
 
 class SubcontractorBillController extends Controller
 {
@@ -517,11 +518,11 @@ class SubcontractorBillController extends Controller
             }
             if($request->has('performa_invoice_date') && $request->performa_invoice_date != '' && $request->performa_invoice_date != null){
                 $performaDate = str_replace('/','-',$request->performa_invoice_date);
-                $subcontractorBillData['performa_invoice_date'] = date('Y-m-d', strtotime($performaDate));
+                $subcontractorBillData['performa_invoice_date'] = date('Y-m-d 00:00:00', strtotime($performaDate));
             }
             if($request->has('bill_date') && $request->bill_date != '' && $request->bill_date != null){
                 $bilDate = str_replace('/','-',$request->bill_date);
-                $subcontractorBillData['bill_date'] = date('Y-m-d', strtotime($bilDate));
+                $subcontractorBillData['bill_date'] = date('Y-m-d 00:00:00', strtotime($bilDate));
             }
             $subcontractorBill->update($subcontractorBillData);
             foreach($request->structure_summaries as $structureSummaryId){
@@ -682,12 +683,17 @@ class SubcontractorBillController extends Controller
 
     public function changeBillTransactionStatus(Request $request){
         try{
+            
             $subcontractorBillTransaction = new SubcontractorBillTransaction();
+            $subcontractor = new Subcontractor();
             $transactionStatus = new TransactionStatus();
             $billTransactionData = $subcontractorBillTransaction->where('id',$request['bill_transaction_id'])->first();
+            
             $bill = $billTransactionData->subcontractorBill;
 
             $subcontractorStructure = $bill->subcontractorStructure;
+            $data = $subcontractor->where('id',$subcontractorStructure->subcontractor_id)->first()->toArray();
+            //dd($data['total_advance_amount']);
             if($request['status-slug'] == 'cancelled'){
                 $subcontractorStructure->update([
                     'cancelled_bill_transaction_total_amount' => $subcontractorStructure['cancelled_bill_transaction_total_amount'] + $billTransactionData['total'],
@@ -784,8 +790,8 @@ class SubcontractorBillController extends Controller
                         $listingData[$pagination]['tds_amount'],
                         $listingData[$pagination]['other_recovery'],
                         $listingData[$pagination]['total'],
-
                         $listingData[$pagination]->transactionStatus->name,
+                        ($listingData[$pagination]['remark'] != null) ? $listingData[$pagination]['remark'] : "-",
                         $changeStatusButton,
                     ];
                 }
