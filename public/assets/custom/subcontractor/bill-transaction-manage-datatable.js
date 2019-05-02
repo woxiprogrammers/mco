@@ -124,7 +124,10 @@ var BillTransactionListing = function () {
                 ],
                 "pageLength": 50, // default record count per page
                 "ajax": {
-                    "url": "/subcontractor/bill/transaction/listing/"+$("#subcontractorBillId").val()+"?_token="+$("input[name='_token']").val(), // ajax source
+                    "url": "/subcontractor/bill/transaction/listing/"+$("#subcontractorBillId").val(),
+                    "data" :{
+                        '_token' : $("input[name='_token']").val()
+                    }
                 },
                 "order": [
                     [1, "asc"]

@@ -22,6 +22,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Log;
+use App\Subcontractor;
 
 class SubcontractorBillController extends Controller
 {
@@ -682,12 +683,17 @@ class SubcontractorBillController extends Controller
 
     public function changeBillTransactionStatus(Request $request){
         try{
+            
             $subcontractorBillTransaction = new SubcontractorBillTransaction();
+            $subcontractor = new Subcontractor();
             $transactionStatus = new TransactionStatus();
             $billTransactionData = $subcontractorBillTransaction->where('id',$request['bill_transaction_id'])->first();
+            
             $bill = $billTransactionData->subcontractorBill;
 
             $subcontractorStructure = $bill->subcontractorStructure;
+            $data = $subcontractor->where('id',$subcontractorStructure->subcontractor_id)->first()->toArray();
+            //dd($data['total_advance_amount']);
             if($request['status-slug'] == 'cancelled'){
                 $subcontractorStructure->update([
                     'cancelled_bill_transaction_total_amount' => $subcontractorStructure['cancelled_bill_transaction_total_amount'] + $billTransactionData['total'],

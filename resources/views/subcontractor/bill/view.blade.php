@@ -45,6 +45,7 @@
                                     <!-- BEGIN VALIDATION STATES-->
                                     <div class="portlet light ">
                                         <div class="portlet-body form">
+                                                {!! csrf_field() !!}
                                             <input type="hidden" id="subcontractorBillId" value="{!! $subcontractorBill['id'] !!}">
                                             @if($subcontractorBill->subcontractorBillStatus->slug == 'approved')
                                                 <ul class="nav nav-tabs nav-tabs-lg">
