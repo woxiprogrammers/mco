@@ -177,31 +177,31 @@
             $(element).next('input[name="_token"]').val(token);
             $(element).closest('form').submit();
         }
-        $(function(){
+        $(document).ready(function(){
             $('#challan_generate').click(function(){
                 var val = [];
-                if($('input.inventory_check').prop('checked')){
-                    $(':checkbox:checked').each(function(i){
-                        val[i] = $(this).val();
-                    });
-                    $.ajax({
-                        url: '/inventory/transfer/challen-generation',
-                        type: 'POST',
-                        async: true,
-                        data: {
-                            _token: $("input[name='_token']").val(),
-                            inventoryTransferId : val,
-                        },
-                        success: function(data,textStatus,xhr) {
-                        },
-                        error: function(){
-
-                        }
-                    });
-                }else{
+                $(':checkbox:checked').each(function(i){
+                    val[i] = $(this).val();
+                });
+                if(val.length <= 0) {
                     alert("Please select checkbox to generate challan");
-                }
+                } else{
+                    var value = confirm('Are you sure?');
+                    if(value) {
+                        $.ajax({
+                            url:'/inventory/transfer/challen-generation',
+                            type: "GET",
+                            data: {
+                                inventory_site_transfer_data: val,
+                            },
+                            success: function(data, textStatus, xhr){
+                            },
+                            error: function(data){
+                            }
+                        });
+                    }
 
+                }
             });
         });
 
