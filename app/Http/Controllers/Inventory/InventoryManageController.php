@@ -1,6 +1,6 @@
 <?php
-
 namespace App\Http\Controllers\Inventory;
+
 
 use App\Asset;
 use App\AssetType;
@@ -288,6 +288,9 @@ class InventoryManageController extends Controller
                 }else{
                     $actionDropDown = '';
                 }
+                $siteOutTransferName = explode("-",$inventoryTransferData[$pagination]->source_name)[0];
+                $siteOutTransferId = Project::where('name' ,$siteOutTransferName)->select('id')->first();
+                $checkBox= '<input type="checkbox" class="inventory_check['.$inventoryTransferData[$pagination]->id.']" name="inventory_check[]" value="'.$inventoryTransferData[$pagination]->id.'_'.$inventoryTransferData[$pagination]->inventoryComponent->projectSite->project->id.'_'.$siteOutTransferId->id.'">';
                 $transportation_amount = 0;
                 if ($inventoryTransferData[$pagination]->transportation_amount != null && $inventoryTransferData[$pagination]->transportation_amount != "0") {
                     $transportation_amount = $inventoryTransferData[$pagination]->transportation_amount;
@@ -315,6 +318,7 @@ class InventoryManageController extends Controller
                                 ->pluck('grn')->first();
                 }
                 $records['data'][$iterator] = [
+                    $checkBox,
                     date('d M Y',strtotime($inventoryTransferData[$pagination]->created_at)),
                     ucwords($inventoryTransferData[$pagination]->inventoryComponent->projectSite->project->name),
                     ucwords(explode("-",$inventoryTransferData[$pagination]->source_name)[0]),
@@ -1390,7 +1394,6 @@ class InventoryManageController extends Controller
             $data['vehicle_number'] = $inventoryComponentTransfer->vehicle_number;
             $data['created_at'] = $inventoryComponentTransfer->created_at;
             $data['company_name'] = Vendor::where('id',$inventoryComponentTransfer->vendor_id)->pluck('company')->first();
-
             if($data['is_material'] == true){
                 $data['rate'] = null;
                 $data['tax'] = null;
@@ -1553,5 +1556,63 @@ class InventoryManageController extends Controller
             Log::critical(json_encode($data));
         }
         return response()->json($response,$status);
+    }
+    public function downloadChallan(Request $request){
+        $requestedData = explode(',',$request->component_transfer_id);
+        foreach ($requestedData as $value){
+            $inventorySiteTransfer[] = explode('_',$value);
+        }
+        foreach ($inventorySiteTransfer as $item){
+            $inventoryComponentTransferID[] = $item[0];
+        }
+        $i = 1;
+         $inventoryComponentTransferData = InventoryComponentTransfers::whereIn('id',$inventoryComponentTransferID)->with('inventoryComponent')->get()->toArray();
+         foreach($inventoryComponentTransferData as $inventoryComponentTransfer){
+             $inventoryComponent = $inventoryComponentTransfer['inventory_component'];
+             $projectSiteFrom = ProjectSite::where('id',$inventoryComponent['project_site_id'])->first()->toArray();
+             $data['project_site_from'] = Project::where('id',$projectSiteFrom['project_id'])->value('name').'-'.$projectSiteFrom['name'];
+             $data['project_site_from_address'] = $projectSiteFrom['address'];
+             $data['project_site_to'] = $inventoryComponentTransfer['source_name'];
+             $project_site_data = explode('-',$inventoryComponentTransfer['source_name']);
+             $data['project_site_to_address'] = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
+                 ->where('projects.name',$project_site_data[0])->where('project_sites.name',$project_site_data[1])->pluck('project_sites.address')->first();
+             $data['data1'][$i]['grn'] = $inventoryComponentTransfer['grn'];
+             $data['data1'][$i]['component_name'] = $inventoryComponent['name'];
+             $data['data1'][$i]['quantity'] = $inventoryComponentTransfer['quantity'];
+             $data['data1'][$i]['rate_per_unit'] = round($inventoryComponentTransfer['rate_per_unit'],3);
+             $data['data1'][$i]['cgst_percentage'] = round($inventoryComponentTransfer['cgst_percentage'],3);
+             $data['data1'][$i]['sgst_percentage'] = round($inventoryComponentTransfer['sgst_percentage'],3);
+             $data['data1'][$i]['igst_percentage'] = round($inventoryComponentTransfer['igst_percentage'],3);
+             $data['data1'][$i]['cgst_amount'] = round($inventoryComponentTransfer['cgst_amount'],3);
+             $data['data1'][$i]['sgst_amount'] = round($inventoryComponentTransfer['sgst_amount'],3);
+             $data['data1'][$i]['igst_amount'] = round($inventoryComponentTransfer['igst_amount'],3);
+             $data['data1'][$i]['total'] = round($inventoryComponentTransfer['total'],3);
+             $data['data1'][$i]['unit'] = Unit::where('id',$inventoryComponentTransfer['unit_id'])->value('name');
+             $data['data1'][$i]['is_material'] = $inventoryComponent['is_material'];
+             $data['data1'][$i]['transportation_amount'] = round($inventoryComponentTransfer['transportation_amount'],3);
+             $data['data1'][$i]['transportation_cgst_percent'] = round($inventoryComponentTransfer['transportation_cgst_percent'],3);
+             $data['data1'][$i]['transportation_cgst_amount'] = round((($inventoryComponentTransfer['transportation_amount'] * $inventoryComponentTransfer['transportation_cgst_percent']) / 100),3);
+             $data['data1'][$i]['transportation_sgst_percent'] = round($inventoryComponentTransfer['transportation_sgst_percent'],3);
+             $data['data1'][$i]['transportation_sgst_amount'] = round((($inventoryComponentTransfer['transportation_amount'] * $inventoryComponentTransfer['transportation_sgst_percent']) / 100),3);
+             $data['data1'][$i]['transportation_igst_percent'] = round($inventoryComponentTransfer['transportation_igst_percent'],3);
+             $data['data1'][$i]['transportation_igst_amount'] = round((($inventoryComponentTransfer['transportation_amount'] * $inventoryComponentTransfer['transportation_igst_percent']) / 100),3);
+             $data['data1'][$i]['driver_name'] = $inventoryComponentTransfer['driver_name'];
+             $data['data1'][$i]['mobile'] = $inventoryComponentTransfer['mobile'];
+             $data['data1'][$i]['vehicle_number'] = $inventoryComponentTransfer['vehicle_number'];
+             $data['data1'][$i]['created_at'] = $inventoryComponentTransfer['created_at'];
+             $data['data1'][$i]['company_name'] = Vendor::where('id',$inventoryComponentTransfer['vendor_id'])->pluck('company')->first();
+
+             if($data['data1'][$i]['is_material'] == true){
+                 $data['data1'][$i]['rate'] = null;
+                 $data['data1'][$i]['tax'] = null;
+                 $data['data1'][$i]['total_amount'] = null;
+             }else{
+                 $data['data1'][$i]['rent'] = $inventoryComponentTransfer['bill_amount'];
+             }
+             $i ++;
+         }
+        $pdf = App::make('dompdf.wrapper');
+        $pdf->loadHTML(view('inventory.transfer.multiple-request-pdf', $data))->setPaper('a4', 'landscape');
+        return $pdf->stream();
     }
 }
