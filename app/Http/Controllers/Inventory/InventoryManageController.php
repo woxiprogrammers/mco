@@ -1,6 +1,6 @@
 <?php
-
 namespace App\Http\Controllers\Inventory;
+
 
 use App\Asset;
 use App\AssetType;
@@ -1558,7 +1558,7 @@ class InventoryManageController extends Controller
         return response()->json($response,$status);
     }
     public function downloadChallan(Request $request){
-        $requestedData = $request->inventory_site_transfer_data;
+        $requestedData = explode(',',$request->component_transfer_id);
         foreach ($requestedData as $value){
             $inventorySiteTransfer[] = explode('_',$value);
         }
@@ -1576,45 +1576,43 @@ class InventoryManageController extends Controller
              $project_site_data = explode('-',$inventoryComponentTransfer['source_name']);
              $data['project_site_to_address'] = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
                  ->where('projects.name',$project_site_data[0])->where('project_sites.name',$project_site_data[1])->pluck('project_sites.address')->first();
-             $data['data'][$i]['grn'] = $inventoryComponentTransfer['grn'];
-             $data['data'][$i]['component_name'] = $inventoryComponent['name'];
-             $data['data'][$i]['quantity'] = $inventoryComponentTransfer['quantity'];
-             $data['data'][$i]['rate_per_unit'] = round($inventoryComponentTransfer['rate_per_unit'],3);
-             $data['data'][$i]['cgst_percentage'] = round($inventoryComponentTransfer['cgst_percentage'],3);
-             $data['data'][$i]['sgst_percentage'] = round($inventoryComponentTransfer['sgst_percentage'],3);
-             $data['data'][$i]['igst_percentage'] = round($inventoryComponentTransfer['igst_percentage'],3);
-             $data['data'][$i]['cgst_amount'] = round($inventoryComponentTransfer['cgst_amount'],3);
-             $data['data'][$i]['sgst_amount'] = round($inventoryComponentTransfer['sgst_amount'],3);
-             $data['data'][$i]['igst_amount'] = round($inventoryComponentTransfer['igst_amount'],3);
-             $data['data'][$i]['total'] = round($inventoryComponentTransfer['total'],3);
-             $data['data'][$i]['unit'] = Unit::where('id',$inventoryComponentTransfer['unit_id'])->value('name');
-             $data['data'][$i]['is_material'] = $inventoryComponent['is_material'];
-             $data['data'][$i]['transportation_amount'] = round($inventoryComponentTransfer['transportation_amount'],3);
-             $data['data'][$i]['transportation_cgst_percent'] = round($inventoryComponentTransfer['transportation_cgst_percent'],3);
-             $data['data'][$i]['transportation_cgst_amount'] = round((($inventoryComponentTransfer['transportation_amount'] * $inventoryComponentTransfer['transportation_cgst_percent']) / 100),3);
-             $data['data'][$i]['transportation_sgst_percent'] = round($inventoryComponentTransfer['transportation_sgst_percent'],3);
-             $data['data'][$i]['transportation_sgst_amount'] = round((($inventoryComponentTransfer['transportation_amount'] * $inventoryComponentTransfer['transportation_sgst_percent']) / 100),3);
-             $data['data'][$i]['transportation_igst_percent'] = round($inventoryComponentTransfer['transportation_igst_percent'],3);
-             $data['data'][$i]['transportation_igst_amount'] = round((($inventoryComponentTransfer['transportation_amount'] * $inventoryComponentTransfer['transportation_igst_percent']) / 100),3);
-             $data['data'][$i]['driver_name'] = $inventoryComponentTransfer['driver_name'];
-             $data['data'][$i]['mobile'] = $inventoryComponentTransfer['mobile'];
-             $data['data'][$i]['vehicle_number'] = $inventoryComponentTransfer['vehicle_number'];
-             $data['data'][$i]['created_at'] = $inventoryComponentTransfer['created_at'];
-             $data['data'][$i]['company_name'] = Vendor::where('id',$inventoryComponentTransfer['vendor_id'])->pluck('company')->first();
+             $data['data1'][$i]['grn'] = $inventoryComponentTransfer['grn'];
+             $data['data1'][$i]['component_name'] = $inventoryComponent['name'];
+             $data['data1'][$i]['quantity'] = $inventoryComponentTransfer['quantity'];
+             $data['data1'][$i]['rate_per_unit'] = round($inventoryComponentTransfer['rate_per_unit'],3);
+             $data['data1'][$i]['cgst_percentage'] = round($inventoryComponentTransfer['cgst_percentage'],3);
+             $data['data1'][$i]['sgst_percentage'] = round($inventoryComponentTransfer['sgst_percentage'],3);
+             $data['data1'][$i]['igst_percentage'] = round($inventoryComponentTransfer['igst_percentage'],3);
+             $data['data1'][$i]['cgst_amount'] = round($inventoryComponentTransfer['cgst_amount'],3);
+             $data['data1'][$i]['sgst_amount'] = round($inventoryComponentTransfer['sgst_amount'],3);
+             $data['data1'][$i]['igst_amount'] = round($inventoryComponentTransfer['igst_amount'],3);
+             $data['data1'][$i]['total'] = round($inventoryComponentTransfer['total'],3);
+             $data['data1'][$i]['unit'] = Unit::where('id',$inventoryComponentTransfer['unit_id'])->value('name');
+             $data['data1'][$i]['is_material'] = $inventoryComponent['is_material'];
+             $data['data1'][$i]['transportation_amount'] = round($inventoryComponentTransfer['transportation_amount'],3);
+             $data['data1'][$i]['transportation_cgst_percent'] = round($inventoryComponentTransfer['transportation_cgst_percent'],3);
+             $data['data1'][$i]['transportation_cgst_amount'] = round((($inventoryComponentTransfer['transportation_amount'] * $inventoryComponentTransfer['transportation_cgst_percent']) / 100),3);
+             $data['data1'][$i]['transportation_sgst_percent'] = round($inventoryComponentTransfer['transportation_sgst_percent'],3);
+             $data['data1'][$i]['transportation_sgst_amount'] = round((($inventoryComponentTransfer['transportation_amount'] * $inventoryComponentTransfer['transportation_sgst_percent']) / 100),3);
+             $data['data1'][$i]['transportation_igst_percent'] = round($inventoryComponentTransfer['transportation_igst_percent'],3);
+             $data['data1'][$i]['transportation_igst_amount'] = round((($inventoryComponentTransfer['transportation_amount'] * $inventoryComponentTransfer['transportation_igst_percent']) / 100),3);
+             $data['data1'][$i]['driver_name'] = $inventoryComponentTransfer['driver_name'];
+             $data['data1'][$i]['mobile'] = $inventoryComponentTransfer['mobile'];
+             $data['data1'][$i]['vehicle_number'] = $inventoryComponentTransfer['vehicle_number'];
+             $data['data1'][$i]['created_at'] = $inventoryComponentTransfer['created_at'];
+             $data['data1'][$i]['company_name'] = Vendor::where('id',$inventoryComponentTransfer['vendor_id'])->pluck('company')->first();
 
-             if($data['data'][$i]['is_material'] == true){
-                 $data['data'][$i]['rate'] = null;
-                 $data['data'][$i]['tax'] = null;
-                 $data['data'][$i]['total_amount'] = null;
+             if($data['data1'][$i]['is_material'] == true){
+                 $data['data1'][$i]['rate'] = null;
+                 $data['data1'][$i]['tax'] = null;
+                 $data['data1'][$i]['total_amount'] = null;
              }else{
-                 $data['data'][$i]['rent'] = $inventoryComponentTransfer['bill_amount'];
+                 $data['data1'][$i]['rent'] = $inventoryComponentTransfer['bill_amount'];
              }
              $i ++;
          }
-         dd($data);
         $pdf = App::make('dompdf.wrapper');
-        $pdf->loadHTML(view('inventory.transfer.multiple-request-pdf')->with(compact('data')));
-        Log::info($pdf);
+        $pdf->loadHTML(view('inventory.transfer.multiple-request-pdf', $data))->setPaper('a4', 'landscape');
         return $pdf->stream();
     }
 }

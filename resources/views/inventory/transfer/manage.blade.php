@@ -35,11 +35,14 @@
                                                     <div class="table-container">
                                                         <div class="row">
                                                             <div class="col-md-3 pull-right ">
-                                                                <div id="challan_generate" class="btn btn-small blue">
-                                                                    <a href="" style="color: white">
-                                                                        Challan Generate <i class="fa fa-download" aria-hidden="true"></i>
-                                                                    </a>
-                                                                </div>
+                                                                <form method="Post" action="/inventory/transfer/challen-generation" id="challan">
+                                                                    <input type="hidden" id="component_transfer_id" value="" name="component_transfer_id">
+                                                                    <div id="challan_generate" class="btn btn-small blue">
+                                                                        <a href="" style="color: white">
+                                                                            Challan Generate <i class="fa fa-download" aria-hidden="true"></i>
+                                                                        </a>
+                                                                    </div>
+                                                                </form>
                                                             </div>
                                                         </div>
                                                         <table class="table table-striped table-bordered table-hover order-column" id="requestComponentListingTable">
@@ -177,30 +180,36 @@
             $(element).next('input[name="_token"]').val(token);
             $(element).closest('form').submit();
         }
-        $(document).ready(function(){
-            $('#challan_generate').click(function(){
-                var val = [];
-                $(':checkbox:checked').each(function(i){
-                    val[i] = $(this).val();
-                });
-                if(val.length <= 0) {
-                    alert("Please select checkbox to generate challan");
-                } else{
-                    var value = confirm('Are you sure?');
-                    if(value) {
-                        $.ajax({
-                            url:'/inventory/transfer/challen-generation',
-                            type: "GET",
-                            data: {
-                                inventory_site_transfer_data: val,
-                            },
-                            success: function(data, textStatus, xhr){
-                            },
-                            error: function(data){
-                            }
-                        });
-                    }
 
+        function onlyUnique(value, index, self) {
+            return self.indexOf(value) === index;
+        }
+
+        $(document).ready(function(){
+            $('#challan_generate').click(function(e){
+                e.preventDefault();
+                var val = [];
+                var count = 0;
+                var valIn = [];
+                var valOut = [];
+                $(':checkbox:checked').each(function(){
+                    val[count] = $(this).val();
+                    var ids = val[count].split("_");
+                    valOut.push(ids[1]);
+                    valIn.push(ids[2]);
+                    count++;
+                });
+                var uniqueIn = valIn.filter( onlyUnique );
+                var uniqueOut = valOut.filter( onlyUnique );
+                if (valIn.length <= 0) {
+                    alert("Please select checkbox to generate challan");
+                } else if (uniqueIn.length > 1) {
+                    alert("Site IN should be same.")
+                } else if (uniqueOut.length > 1) {
+                    alert("Site OUT should be same.")
+                } else {
+                    $('#component_transfer_id').val(val);
+                    $('#challan').submit();
                 }
             });
         });
