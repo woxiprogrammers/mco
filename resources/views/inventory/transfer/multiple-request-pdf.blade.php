@@ -89,9 +89,9 @@
         <td class="text_alignment"><b>Transportation IGST %)</b></td>
         <td class="text_alignment"><b>Driver Name</b></td>
         <td class="text_alignment"><b>Company Name</b></td>
+        <td class="text_alignment"><b>Mobile no</b></td>
         <td class="text_alignment"><b>Vehicle number</b></td>
         <td class="text_alignment"><b>Transaction Date</b></td>
-        <td class="text_alignment"><b>Mobile no</b></td>
     </tr>
     @foreach($data1 as $key => $value)
     <tr>
