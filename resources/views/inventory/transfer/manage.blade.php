@@ -21,6 +21,7 @@
                                 </div>
                             </div>
                         </div>
+
                         <div class="page-content">
                             @include('partials.common.messages')
                             <div class="container">
@@ -32,9 +33,22 @@
                                             <div class="portlet-body">
                                                 <div class="portlet-body">
                                                     <div class="table-container">
+                                                        <div class="row">
+                                                            <div class="col-md-3 pull-right ">
+                                                                <form method="Post" action="/inventory/transfer/challen-generation" id="challan">
+                                                                    <input type="hidden" id="component_transfer_id" value="" name="component_transfer_id">
+                                                                    <div id="challan_generate" class="btn btn-small blue">
+                                                                        <a href="" style="color: white">
+                                                                            Challan Generate <i class="fa fa-download" aria-hidden="true"></i>
+                                                                        </a>
+                                                                    </div>
+                                                                </form>
+                                                            </div>
+                                                        </div>
                                                         <table class="table table-striped table-bordered table-hover order-column" id="requestComponentListingTable">
                                                             <thead>
                                                             <tr>
+                                                                <th> </th>
                                                                 <th>Transaction Date</th>
                                                                 <th>Site Out</th>
                                                                 <th>Site In</th>
@@ -50,6 +64,7 @@
                                                                 <th>Action</th>
                                                             </tr>
                                                             <tr class="filter">
+                                                                <th></th>
                                                                 <th></th>
                                                                 <th> <input type="text" class="form-control form-filter" name="search_from" id="search_from"></th>
                                                                 <th> <input type="text" class="form-control form-filter" name="search_to" id="search_to"></th>
@@ -165,5 +180,39 @@
             $(element).next('input[name="_token"]').val(token);
             $(element).closest('form').submit();
         }
+
+        function onlyUnique(value, index, self) {
+            return self.indexOf(value) === index;
+        }
+
+        $(document).ready(function(){
+            $('#challan_generate').click(function(e){
+                e.preventDefault();
+                var val = [];
+                var count = 0;
+                var valIn = [];
+                var valOut = [];
+                $(':checkbox:checked').each(function(){
+                    val[count] = $(this).val();
+                    var ids = val[count].split("_");
+                    valOut.push(ids[1]);
+                    valIn.push(ids[2]);
+                    count++;
+                });
+                var uniqueIn = valIn.filter( onlyUnique );
+                var uniqueOut = valOut.filter( onlyUnique );
+                if (valIn.length <= 0) {
+                    alert("Please select checkbox to generate challan");
+                } else if (uniqueIn.length > 1) {
+                    alert("Site IN should be same.")
+                } else if (uniqueOut.length > 1) {
+                    alert("Site OUT should be same.")
+                } else {
+                    $('#component_transfer_id').val(val);
+                    $('#challan').submit();
+                }
+            });
+        });
+
     </script>
 @endsection
