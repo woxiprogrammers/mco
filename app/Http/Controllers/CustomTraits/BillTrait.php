@@ -1614,9 +1614,10 @@ trait BillTrait{
                             $quotationProduct['allowed_quantity'] = $quotationProduct['quantity'] - $quotationProduct['previous_quantity'];
                         }
                     }
+                    $quotationProduct['allowed_quantity'] = $quotationProduct['quantity'] - $quotationProduct['previous_quantity'];
                 }
+                
             }
-
             $quotationExtraItems = QuotationExtraItem::where('quotation_id',$bill->quotation->id)->get();
             $billExtraItems = BillQuotationExtraItem::where('bill_id',$bill->id)->get();
             foreach($quotationExtraItems as $key => $quotationExtraItem){
@@ -1689,6 +1690,7 @@ trait BillTrait{
                 }
                 $i++;
             }
+            //dd($quotationProducts->toArray());
             $allbankInfoIds = QuotationBankInfo::where('quotation_id',$bill->quotation_id)->select('bank_info_id')->get();
             if($bill->quotation->billType->slug == 'sqft' || $bill->quotation->billType->slug == 'amountwise'){
                 return view('admin.bill.edit')->with(compact('sQFTUnitName','bill','quotationSummaries','taxes','specialTaxes','quotationExtraItems','allbankInfoIds'));
