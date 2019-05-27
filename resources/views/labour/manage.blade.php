@@ -63,14 +63,24 @@
                                                         <th> Actions </th>
                                                     </tr>
                                                     <tr class="filter">
-                                                        <th style="width: 10%"> <input type="text" class="form-control form-filter" name="employee_id"> </th>
+                                                        <th style="width: 10%"> <input type="text" class="form-control form-filter" name="employee_id" id="employee_id"> </th>
                                                         <th style="width: 10%">  </th>
-                                                        <th style="width: 20%"> <input type="text" class="form-control form-filter" name="employee_name"> </th>
-                                                        <th> <input type="text" class="form-control form-filter" name="employee_contact" > </th>
-                                                        <th> <input type="text" class="form-control form-filter" name="employee_wages" > </th>
-                                                        <th>{{-- <input type="text" class="form-control form-filter" disabled="" >--}} </th>
-                                                        <th> <input type="text" class="form-control form-filter" name="employee_project"> </th>
-                                                        <th> {{--<input type="text" class="form-control form-filter" name="search_created_on" readonly>--}} </th>
+                                                        <th style="width: 20%"> <input type="text" class="form-control form-filter" name="employee_name" id="employee_name"> </th>
+                                                        <th> <input type="text" class="form-control form-filter" name="employee_contact" id="employee_contact"> </th>
+                                                        <th> <input type="text" class="form-control form-filter" name="employee_wages" id="employee_wages"> </th>
+                                                        <th>
+                                                            <input type="text" class="form-control form-filter" name="employee_monthly_wages" id="employee_monthly_wages" >
+                                                            {{-- <input type="text" class="form-control form-filter" disabled="" >--}} 
+                                                        </th>
+                                                        <th> <input type="text" class="form-control form-filter" name="employee_project" id="employee_project"> </th>
+                                                        <th> 
+                                                            <select id="emp_status" name="emp_status" class="form-control form-filter">
+                                                                <option value="1">Enabled</option>
+                                                                <option value="0">Disabled</option>
+                                                                <option value="2">All</option>
+                                                            </select>
+                                                            {{--<input type="text" class="form-control form-filter" name="search_created_on" readonly>--}} 
+                                                        </th>
                                                         <th>
                                                             <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                             <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
@@ -105,6 +115,24 @@
         $(document).ready(function() {
             $('#labourTable').DataTable();
             $(".form-filter").on('keyup',function(){
+                $(".filter-submit").trigger('click');
+            });
+
+            $("#emp_status").on('change',function(){
+                var employee_id = $('#employee_name').val();
+                var employee_name = $('#employee_name').val();
+                var employee_contact = $('#employee_contact').val();
+                var employee_wages = $('#employee_wages').val();
+                var employee_monthly_wages = $('#employee_monthly_wages').val();
+                var employee_project = $('#employee_project').val();
+                var emp_status = $('#emp_status').val();
+                $("input[name='employee_id']").val(employee_id);
+                $("input[name='employee_name']").val(employee_name);
+                $("input[name='employee_contact']").val(employee_contact);
+                $("input[name='employee_wages']").val(employee_wages);
+                $("input[name='employee_monthly_wages']").val(employee_monthly_wages);
+                $("input[name='employee_project']").val(employee_project);
+                $("input[name='emp_status']").val(emp_status);
                 $(".filter-submit").trigger('click');
             });
         });
