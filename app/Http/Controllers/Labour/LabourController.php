@@ -101,6 +101,10 @@ class LabourController extends Controller
     public function labourListing(Request $request){
         try{
             $user = Auth::user();
+            $empStatus = 1;
+            if ($request->has('emp_status')) {
+                $empStatus = $request->emp_status;
+            }
             $employeeIds = Employee::pluck('id')->toArray();
             $filterFlag = true;
             if($request->has('employee_name')){
@@ -127,6 +131,27 @@ class LabourController extends Controller
                     $filterFlag = false;
                 }
             }
+
+            if($request->has('employee_monthly_wages') && $filterFlag){
+                $employeeIds = Employee::whereIn('id', $employeeIds)->where('per_day_wages',($request->employee_monthly_wages/30))->pluck('id');
+                if(count($employeeIds) <= 0){
+                    $filterFlag = false;
+                }
+            }
+            if($empStatus == 1 && $filterFlag){
+                $employeeIds = Employee::whereIn('id', $employeeIds)
+                            ->where('is_active', TRUE)->pluck('id');
+                if(count($employeeIds) <= 0){
+                    $filterFlag = false;
+                }
+            } else if ($empStatus == 0 && $filterFlag) {
+                $employeeIds = Employee::whereIn('id', $employeeIds)
+                            ->where('is_active', FALSE)->pluck('id');
+                if(count($employeeIds) <= 0){
+                    $filterFlag = false;
+                }
+            }
+            
             if($request->has('employee_project') && $filterFlag){
                 $employeeIds = Employee::join('project_sites','employees.project_site_id','=','project_sites.id')
                                         ->join('projects','projects.id','=','project_sites.project_id')
