@@ -73,8 +73,8 @@
                                                             {{-- <input type="text" class="form-control form-filter" disabled="" >--}} 
                                                         </th>
                                                         <th> <input type="text" class="form-control form-filter" name="employee_project" id="employee_project"> </th>
-                                                        <th> 
-                                                            <select id="emp_status" name="emp_status" class="form-control form-filter">
+                                                        <th style="width: 15%">
+                                                            <select id="emp_status" name="emp_status" class="form-control form-filter" style="width: 80%;margin-left: 10%;">
                                                                 <option value="1">Enabled</option>
                                                                 <option value="0">Disabled</option>
                                                                 <option value="2">All</option>
