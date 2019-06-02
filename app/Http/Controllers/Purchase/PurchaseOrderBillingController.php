@@ -325,9 +325,9 @@ class PurchaseOrderBillingController extends Controller
             foreach($purchaseOrderTransactions as $purchaseOrderTransaction){
                 foreach($purchaseOrderTransaction->purchaseOrderTransactionComponents as $purchaseOrderTransactionComponent){
                     $purchaseOrderComponent = $purchaseOrderTransactionComponent->purchaseOrderComponent;
-                    $unitConversionRate = UnitHelper::unitConversion($purchaseOrderTransactionComponent->purchaseOrderComponent->unit_id,$purchaseOrderTransactionComponent->unit_id,$purchaseOrderTransactionComponent->purchaseOrderComponent->rate_per_unit);
-                    if(!is_array($unitConversionRate)){
-                        $tempAmount = round(($purchaseOrderTransactionComponent->quantity * $unitConversionRate),3);
+                    //$unitConversionRate = UnitHelper::unitConversion($purchaseOrderTransactionComponent->purchaseOrderComponent->unit_id,$purchaseOrderTransactionComponent->unit_id,$purchaseOrderTransactionComponent->purchaseOrderComponent->rate_per_unit);
+                    //if(!is_array($unitConversionRate)){
+                        $tempAmount = round(($purchaseOrderTransactionComponent->quantity * $purchaseOrderTransactionComponent->purchaseOrderComponent->rate_per_unit),3);
                         $amount += $tempAmount;
                         if($purchaseOrderComponent->cgst_percentage != null || $purchaseOrderComponent->cgst_percentage != ''){
                             $taxAmount += round(($tempAmount * ($purchaseOrderComponent->cgst_percentage/100)),3);
@@ -338,7 +338,7 @@ class PurchaseOrderBillingController extends Controller
                         if($purchaseOrderComponent->igst_percentage != null || $purchaseOrderComponent->igst_percentage != ''){
                             $taxAmount += round(($tempAmount * ($purchaseOrderComponent->igst_percentage/100)),3);
                         }
-                    }
+                    //}
                     $purchaseOrderRequestComponent = $purchaseOrderComponent->purchaseOrderRequestComponent;
                     $transportationAmount += $purchaseOrderRequestComponent->transportation_amount;
                     $transportation_cgst_amount = round((($purchaseOrderRequestComponent->transportation_amount * $purchaseOrderRequestComponent->transportation_cgst_percentage) /100),3);
