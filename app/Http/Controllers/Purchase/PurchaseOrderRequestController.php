@@ -531,7 +531,7 @@ class PurchaseOrderRequestController extends Controller
                                 if($purchaseRequestComponent->materialRequestComponent->component_type_id == $systemAssetTypeId){
                                     $lastPurchaseOrderRate = Asset::where('name','ilike',$purchaseRequestComponentData[$iterator]['name'])->pluck('price')->first();
                                 }elseif(in_array($purchaseRequestComponent->materialRequestComponent->component_type_id,$materialTypeIds)){
-                                    $materialInfo = Material::where('name','ilike',$purchaseRequestComponentData[$iterator]['name'])->select('id','rate_per_unit','unit_id')->first();
+                                    $materialInfo = Material::where('name','ilike','%'.$purchaseRequestComponentData[$iterator]['name'].'%')->select('id','rate_per_unit','unit_id')->first();
                                     $lastPurchaseOrderRate = UnitHelper::unitConversion($materialInfo['unit_id'],$purchaseRequestComponentData[$iterator]['unit_id'],$materialInfo['rate_per_unit']);
                                     if(is_array($lastPurchaseOrderRate) && array_key_exists('message',$lastPurchaseOrderRate)){
                                         $error = true;
