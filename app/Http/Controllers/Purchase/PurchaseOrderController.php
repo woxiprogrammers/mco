@@ -176,6 +176,10 @@ class PurchaseOrderController extends Controller
             if($request->has('site_id')){
                 $site_id = $request->site_id;
             }
+            if(Session::has('global_project_site')){
+                $projectSiteId = Session::get('global_project_site');
+                $site_id = $projectSiteId;
+            }
             $ids = PurchaseOrder::all()->pluck('id');
             $filterFlag = true;
             if ($site_id != 0 && $filterFlag == true) {
@@ -281,6 +285,13 @@ class PurchaseOrderController extends Controller
                      }
                      $purchaseOrderList[$iterator]['received_quantity'] = $consumedQuantity;
                      $purchaseOrderList[$iterator]['remaining_quantity'] = round(($quantity - $consumedQuantity),3);
+                     
+                     /*if($purchaseOrderList[$iterator]['received_quantity'] >= $purchaseOrderList[$iterator]['approved_quantity']) {
+                        Log::info('matched : '.$purchaseOrderList[$iterator]['received_quantity']." : ".$purchaseOrderList[$iterator]['approved_quantity']);
+                        $purchaseOrder->update([
+                               'purchase_order_status_id' => PurchaseOrderStatus::where('slug','close')->pluck('id')->first()
+                            ]);
+                     }*/
                      $purchaseOrderList[$iterator]['project'] = $project->name;
                      $purchaseOrderList[$iterator]['chk_status'] = $purchaseOrder['is_approved'];
                      $purchaseOrderList[$iterator]['status'] = ($purchaseOrder['is_approved'] == true) ? '<span class="label label-sm label-success"> Approved </span>' : '<span class="label label-sm label-danger"> Disapproved </span>';
@@ -736,6 +747,9 @@ class PurchaseOrderController extends Controller
             $transactionQuantity = PurchaseOrderTransactionComponent::whereIn('purchase_order_component_id',$purchaseOrderComponentIds)->sum('quantity');
             if($transactionQuantity >= $purchaseOrderComponentQuantities){
                 $poClose = true;
+                $purchaseOrder->update([
+                    'purchase_order_status_id' => PurchaseOrderStatus::where('slug','close')->pluck('id')->first()
+                ]);
             }
             if($poClose && $purchaseOrder->purchaseOrderStatus->slug != 'close'){
                 $mail_id = Vendor::where('id',$purchaseOrder['vendor_id'])->pluck('email')->first();
