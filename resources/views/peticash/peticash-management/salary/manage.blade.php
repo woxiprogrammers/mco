@@ -107,14 +107,17 @@
                                                                     <th> Type</th>
                                                                     <th> Amount </th>
                                                                     <th> Payable Amount  </th>
+                                                                    <th> Transaction Type </th>ss
                                                                     <th> Created By  </th>
                                                                     <th> Date  </th>
                                                                     <th> Site  </th>
                                                                     <th> Voucher Created </th>
-                                                                    <th style="width: 20%"> Action </th>
+                                                                    <th> Remark </th>
+                                                                    <th style="width: 15%"> Action </th>
                                                                 </tr>
                                                                 <tr class="filter">
-                                                                    <th> {{--<input type="text" class="form-control form-filter" name="search_id" hidden>--}} </th>
+                                                                    
+                                                                    <th> {{--<input type="text" class="form-control form-filter" name="search_site" hidden>--}} </th><th> {{--<input type="text" class="form-control form-filter" name="search_id" hidden>--}} </th>
                                                                     <th> <input type="text" class="form-control form-filter" name="search_employee_id" id="search_employee_id"> </th>
                                                                     <th> <input type="text" class="form-control form-filter" name="search_name" id="search_name"> </th>
                                                                     <th>
@@ -126,7 +129,16 @@
                                                                         <input type="hidden" class="form-control form-filter" name="status" id="status">
                                                                     </th>
                                                                     <th> {{--<input type="text" class="form-control form-filter" name="search_amount" hidden>--}} </th>
-                                                                    <th> {{--<input type="text" class="form-control form-filter" name="search_payable_amount" hidden>--}} </th>
+                                                                    <th> {{--<input type="text" class="form-control form-filter" name="search_amount" hidden>--}} </th>
+                                                                    <th>
+                                                                        <select class="form-control" id="payment_status_id" name="payment_status_id">
+                                                                            <option value="all">ALL</option>
+                                                                            @foreach($paymenttypes as $paymentType)
+                                                                                <option value="{{$paymentType['id']}}">{{$paymentType['name']}}</option>
+                                                                            @endforeach
+                                                                        </select>
+                                                                        <input type="hidden" class="form-control form-filter" name="payment_status" id="payment_status">
+                                                                    </th>
                                                                     <th> {{--<input type="text" class="form-control form-filter" name="search_created_by" hidden>--}} </th>
                                                                     <th> {{--<input type="text" class="form-control form-filter" name="search_created_on" hidden>--}} </th>
                                                                     <th> {{--<input type="text" class="form-control form-filter" name="search_site" hidden>--}} </th>
@@ -322,17 +334,19 @@
                 $(".filter-submit").trigger('click');
             });
 
-            $("#status_id").on('change',function(){
+            $("#status_id, #payment_status_id").on('change',function(){
                 var year = $('#year').val();
                 var month = $('#month').val();
                 var status_id = $('#status_id').val();
                 var search_name = $('#search_name').val();
                 var emp_id = $('#emp_id').val();
+                var p_status_id = $('#payment_status_id').val();
 
                 var postData =
                     'year=>'+year+','+
                     'month=>'+month;
-                $("input[name='status']").val(status_id)
+                $("input[name='status']").val(status_id);
+                $("input[name='payment_status']").val(p_status_id);
                 $("input[name='postdata']").val(postData);
                 $("input[name='search_name']").val(search_name);
                 $("input[name='search_employee_id']").val(emp_id);
@@ -348,11 +362,13 @@
                 var status_id = $('#status_id').val();
                 var search_name = $('#search_name').val();
                 var emp_id = $('#emp_id').val();
+                var p_status_id = $('#payment_status_id').val();
 
                 var postData =
                     'year=>'+year+','+
                     'month=>'+month;
-                $("input[name='status']").val(status_id)
+                $("input[name='status']").val(status_id);
+                $("input[name='payment_status']").val(p_status_id);
                 $("input[name='postdata']").val(postData);
                 $("input[name='search_name']").val(search_name);
                 $("input[name='search_employee_id']").val(emp_id);

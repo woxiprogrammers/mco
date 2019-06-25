@@ -1651,7 +1651,8 @@ class PeticashController extends Controller
     public function getSalaryManageView(Request $request){
         try{
             $clients = Client::where('is_active', true)->get();
-            return view('peticash.peticash-management.salary.manage')->with(compact('clients'));
+            $paymenttypes = PaymentType::get(['id','name'])->toArray();
+            return view('peticash.peticash-management.salary.manage')->with(compact('clients','paymenttypes'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Salary Management View',
@@ -1860,6 +1861,7 @@ class PeticashController extends Controller
             $postdata = null;
             $emp_name = null;
             $peticashStatus = null;
+            $peticashPaymentStatus = null;
             $site_id = 0;
             $month = 0;
             $year = 0;
@@ -1887,6 +1889,10 @@ class PeticashController extends Controller
             }
             if ($request->has('status')) {
                 $peticashStatus = $request->status;
+            }
+
+            if ($request->has('payment_status')) {
+                $peticashPaymentStatus = $request->payment_status;
             }
 
             $approvedPeticashStatusId = PeticashStatus::where('slug','approved')->pluck('id')->first();
@@ -1918,6 +1924,16 @@ class PeticashController extends Controller
                 $ids = PeticashSalaryTransaction::join('peticash_transaction_types','peticash_transaction_types.id','=','peticash_salary_transactions.peticash_transaction_type_id')
                     ->whereIn('peticash_salary_transactions.id',$ids)
                     ->where('peticash_transaction_types.slug',$peticashStatus)
+                    ->pluck('peticash_salary_transactions.id');
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+            if ($peticashPaymentStatus != 'all' && $peticashPaymentStatus != null && $filterFlag == true) {
+                $ids = PeticashSalaryTransaction::join('payment_types','payment_types.id','=','peticash_salary_transactions.payment_type_id')
+                    ->whereIn('peticash_salary_transactions.id',$ids)
+                    ->where('payment_types.id',$peticashPaymentStatus)
                     ->pluck('peticash_salary_transactions.id');
                 if(count($ids) <= 0) {
                     $filterFlag = false;
@@ -1981,18 +1997,19 @@ class PeticashController extends Controller
                                                     '.$voucherButtonText.'
                                                  </a>
                                             </button>';
-
                     $records['data'][] = [
                         '<input name="purchasetxn[]" id="'.$salaryTransactionData[$pagination]->id.'" '.'type="Checkbox" value="'.$salaryTransactionData[$pagination]->id.'">',
                         $salaryTransactionData[$pagination]->employee->employee_id,
-                        ucwords($salaryTransactionData[$pagination]->employee->name),
+                        ucwords(strtolower($salaryTransactionData[$pagination]->employee->name)),
                         $salaryTransactionData[$pagination]->peticashTransactionType->name,
                         $salaryTransactionData[$pagination]->amount,
                         $salaryTransactionData[$pagination]->payable_amount,
+                        $salaryTransactionData[$pagination]->paymentType->name,
                         ucwords($salaryTransactionData[$pagination]->referenceUser->first_name.' '.$salaryTransactionData[$pagination]->referenceUser->last_name),
                         date('j M Y',strtotime($salaryTransactionData[$pagination]->date)),
                         $salaryTransactionData[$pagination]->projectSite->project->name,
                         ($voucherStatusTest == 'Yes') ? '<td><span class="label label-sm label-success"> '.$voucherStatusTest.' </span></td>' : '<td><span class="label label-sm label-danger"> '.$voucherStatusTest.' </span></td>',
+                        $salaryTransactionData[$pagination]->remark,
                         $actionDropDown
                     ];
                 }
