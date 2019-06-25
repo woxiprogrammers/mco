@@ -129,7 +129,6 @@
                                                                         <input type="hidden" class="form-control form-filter" name="status" id="status">
                                                                     </th>
                                                                     <th> {{--<input type="text" class="form-control form-filter" name="search_amount" hidden>--}} </th>
-                                                                    <th> {{--<input type="text" class="form-control form-filter" name="search_amount" hidden>--}} </th>
                                                                     <th>
                                                                         <select class="form-control" id="payment_status_id" name="payment_status_id">
                                                                             <option value="all">ALL</option>
@@ -139,6 +138,7 @@
                                                                         </select>
                                                                         <input type="hidden" class="form-control form-filter" name="payment_status" id="payment_status">
                                                                     </th>
+                                                                    <th> {{--<input type="text" class="form-control form-filter" name="search_amount" hidden>--}} </th>
                                                                     <th> {{--<input type="text" class="form-control form-filter" name="search_created_by" hidden>--}} </th>
                                                                     <th> {{--<input type="text" class="form-control form-filter" name="search_created_on" hidden>--}} </th>
                                                                     <th> {{--<input type="text" class="form-control form-filter" name="search_site" hidden>--}} </th>
