@@ -117,9 +117,10 @@
                                                                 </tr>
                                                                 <tr class="filter">
                                                                     
-                                                                    <th> {{--<input type="text" class="form-control form-filter" name="search_site" hidden>--}} </th><th> {{--<input type="text" class="form-control form-filter" name="search_id" hidden>--}} </th>
+                                                                    <th> {{--<input type="text" class="form-control form-filter" name="search_site" hidden>--}} </th>
                                                                     <th> <input type="text" class="form-control form-filter" name="search_employee_id" id="search_employee_id"> </th>
                                                                     <th> <input type="text" class="form-control form-filter" name="search_name" id="search_name"> </th>
+                                                                    <th> {{--<input type="text" class="form-control form-filter" name="search_id" hidden>--}} </th>
                                                                     <th>
                                                                         <select class="form-control" id="status_id" name="status_id">
                                                                             <option value="all">ALL</option>
