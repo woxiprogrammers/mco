@@ -65,6 +65,7 @@ class AssetRentCalculations extends Command
                 $thisYear = $year->where('slug',$yearSlug)->first();
                 if($currentYear == $thisYear['slug']){
                     $months = $month->where('id','<',date('m'))->orderBy('id','asc')->get();
+		    //$months = $month->where('id','<',date('m'))->whereIn('id',[3,4,5,6])->orderBy('id','asc')->get();
                 }else{
                     $months = $month->orderBy('id','asc')->get();
                 }
@@ -95,6 +96,9 @@ class AssetRentCalculations extends Command
                             ->first();
                         $firstDayOfThisMonth = date('Y-m-d H:i:s', mktime(0, 0, 0, $thisMonth['id'], 1, $thisYear['slug'])); //'2019-03-15 00:00:00';
                         $lastDayOfThisMonth = date('Y-m-t H:i:s', mktime(23, 59, 59, $thisMonth['id'], 1, $thisYear['slug'])); //'2019-03-29 23:59:59';
+			//$firstDayOfThisMonth = '2019-06-01 00:00:00';
+			//$lastDayOfThisMonth = '2019-06-30 23:59:59';		
+
                         $lastMonthData = array();
                         $thisMonthAssetRentMonthlyExpenseData = array();
                         if($thisMonth['slug'] == 'january'){
@@ -138,7 +142,7 @@ class AssetRentCalculations extends Command
                         }
                         $inventoryComponentTransfers = $inventoryComponentTransfer
                             ->where('inventory_component_id',$thisInventoryComponent['id'])
-                            //->whereBetween('created_at',array('2019-03-15 00:00:00','2019-03-29 23:59:59'))
+                            //->whereBetween('created_at',array('2019-06-01 00:00:00','2019-06-30 23:59:59'))
                             ->whereMonth('created_at', $thisMonth['id'])
                             ->whereYear('created_at', $thisYear['slug'])
                             ->orderBy('created_at','asc')

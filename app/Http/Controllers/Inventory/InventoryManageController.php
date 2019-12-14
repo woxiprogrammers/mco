@@ -630,7 +630,7 @@ class InventoryManageController extends Controller
                         $materialUnit = Material::where('name','ilike',$inventoryData[$iterator]['name'])->pluck('unit_id')->first();
                     }
                     $unitName = Unit::where('id', $materialUnit)->pluck('name')->first();
-                    $inTransferQuantities = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
+		    $inTransferQuantities = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
                         ->where('inventory_transfer_types.type','ilike','in')
                         ->where('inventory_component_transfers.inventory_component_id',$inventoryData[$pagination]->id)
                         ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
@@ -644,17 +644,19 @@ class InventoryManageController extends Controller
                         ->get();
                     $inQuantity = $outQuantity = 0;
                     foreach($inTransferQuantities as $inTransferQuantity){
-
-                        $unitConversionQuantity = UnitHelper::unitQuantityConversion($inTransferQuantity['unit_id'],$materialUnit,$inTransferQuantity['quantity']);
+                        
+			$unitConversionQuantity = UnitHelper::unitQuantityConversion($inTransferQuantity['unit_id'],$materialUnit,$inTransferQuantity['quantity']);
                         if(!is_array($unitConversionQuantity)){
                             $inQuantity += $unitConversionQuantity;
                         }
+			//$inQuantity += $inTransferQuantity['quantity']; 
                     }
                     foreach($outTransferQuantities as $outTransferQuantity){
                        $unitConversionQuantity = UnitHelper::unitQuantityConversion($outTransferQuantity['unit_id'],$materialUnit,$outTransferQuantity['quantity']);
                         if(!is_array($unitConversionQuantity)){
                             $outQuantity += $unitConversionQuantity;
                         }
+			//$outQuantity += $outTransferQuantity['quantity'];
                     }
                     $is_material = 'Material';
                 }else{

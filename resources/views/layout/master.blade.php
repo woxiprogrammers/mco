@@ -49,6 +49,18 @@
     <!-- END THEME LAYOUT STYLES -->
     @yield('css')
     {{--<link rel="shortcut icon" href="favicon.ico" /> --}}
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-146605175-1"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-146605175-1');
+    </script>
+
+
 </head>
 <!-- END HEAD -->
 <body class="page-container-bg-solid page-md">

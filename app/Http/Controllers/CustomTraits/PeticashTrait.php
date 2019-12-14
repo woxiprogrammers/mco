@@ -8,7 +8,7 @@
 
 namespace App\Http\Controllers\CustomTraits;
 
-
+use App\PaymentType;
 use App\AssetMaintenanceBillPayment;
 use App\BillReconcileTransaction;
 use App\BillTransaction;
@@ -50,14 +50,17 @@ trait PeticashTrait{
                                             ->where('bill_transactions.paid_from_slug','cash')
                                             ->sum('total');
             $approvedPeticashStatusId = PeticashStatus::where('slug','approved')->pluck('id')->first();
+	    $paymenttypes = PaymentType::whereIn('slug',['cheque','neft','rtgs','internet-banking'])->pluck('id')->toArray();
             $allocatedAmount  = PeticashSiteTransfer::where('project_site_id',$projectSiteId)->sum('amount');
             $totalSalaryAmount = PeticashSalaryTransaction::where('peticash_transaction_type_id',PeticashTransactionType::where('slug','salary')->pluck('id')->first())
                 ->where('project_site_id',$projectSiteId)
                 ->where('peticash_status_id',$approvedPeticashStatusId)
+		->whereNotIn('payment_type_id',$paymenttypes)
                 ->sum('payable_amount');
             $totalAdvanceAmount = PeticashSalaryTransaction::where('peticash_transaction_type_id',PeticashTransactionType::where('slug','advance')->pluck('id')->first())
                 ->where('project_site_id',$projectSiteId)
                 ->where('peticash_status_id',$approvedPeticashStatusId)
+		->whereNotIn('payment_type_id',$paymenttypes)
                 ->sum('amount');
             $totalPurchaseAmount = PurcahsePeticashTransaction::whereIn('peticash_transaction_type_id', PeticashTransactionType::where('type','PURCHASE')->pluck('id'))
                 ->where('project_site_id',$projectSiteId)
@@ -165,14 +168,17 @@ trait PeticashTrait{
                     ->whereIn('bill_transactions.transaction_status_id',$billTxnStatusIds)
                     ->sum('total');
                 $approvedPeticashStatusId = PeticashStatus::where('slug','approved')->pluck('id')->first();
+		$paymenttypes = PaymentType::whereIn('slug',['cheque','neft','rtgs','internet-banking'])->pluck('id')->toArray();
                 $allocatedAmount  = PeticashSiteTransfer::where('project_site_id',$projectSiteId)->sum('amount');
                 $totalSalaryAmount = PeticashSalaryTransaction::where('peticash_transaction_type_id',PeticashTransactionType::where('slug','salary')->pluck('id')->first())
                     ->where('project_site_id',$projectSiteId)
                     ->where('peticash_status_id',$approvedPeticashStatusId)
+		    ->whereNotIn('payment_type_id',$paymenttypes)
                     ->sum('payable_amount');
                 $totalAdvanceAmount = PeticashSalaryTransaction::where('peticash_transaction_type_id',PeticashTransactionType::where('slug','advance')->pluck('id')->first())
                     ->where('project_site_id',$projectSiteId)
                     ->where('peticash_status_id',$approvedPeticashStatusId)
+                    ->whereNotIn('payment_type_id',$paymenttypes)
                     ->sum('amount');
                 $purchaseOrderBillPayments = PurchaseOrderPayment::join('purchase_order_bills','purchase_order_bills.id','=','purchase_order_payments.purchase_order_bill_id')
                     ->join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')

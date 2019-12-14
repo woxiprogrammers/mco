@@ -525,7 +525,7 @@
                     @endif
 
                     <?php $hasPeticashPermission = \App\Helper\ACLHelper::checkModuleAcl('peticash');?>
-                    @if($hasPeticashPermission)
+                    @if($hasPeticashPermission != true)
                         <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                         <a> Peticash
                             @if(($peticashSalaryRequestApprovalNotificationCount) > 0)

@@ -1129,7 +1129,7 @@
 
         function showBankData(){
             var isAdvanceOption = $('#paid_from_advanced').val();
-            if(isAdvanceOption == 'advance'){
+            if(isAdvanceOption == 'advance' || isAdvanceOption == 'cash'){
                 $('#bankData').hide();
                 $('#debit').prop('readonly',true).val(0);
                 $('#hold').prop('readonly',true).val(0);
