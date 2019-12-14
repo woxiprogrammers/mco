@@ -11,7 +11,9 @@ class AdminController extends Controller
     public function __construct(){
         $this->middleware('guest');
     }
-
+    /*
+	View Login
+    */
     public function viewLogin(Request $request){
         try{
             return view('admin.login');
