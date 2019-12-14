@@ -188,6 +188,10 @@ return [
         ConsoleTVs\Charts\ChartsServiceProvider::class,
         Spatie\Permission\PermissionServiceProvider::class,
         LaravelFCM\FCMServiceProvider::class,
+
+
+	Mnabialek\LaravelSqlLogger\Providers\ServiceProvider::class,
+
     ],
 
     /*

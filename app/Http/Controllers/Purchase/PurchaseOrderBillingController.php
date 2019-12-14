@@ -528,10 +528,13 @@ class PurchaseOrderBillingController extends Controller
                 }
             }
             if($filterFlag == true){
+		
+
                 $purchaseOrderBillData = PurchaseOrderBill::join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
                     ->whereIn('purchase_order_bills.id', $purchaseOrderBillIds)
                     ->select('purchase_orders.id as purchase_order_id','purchase_order_bills.id as id','purchase_order_bills.bill_number as serial_number','purchase_order_bills.created_at as created_at','purchase_order_bills.bill_date as bill_date','purchase_order_bills.vendor_bill_number as vendor_bill_number','purchase_orders.vendor_id as vendor_id','purchase_order_bills.transportation_tax_amount as transportation_tax_amount','purchase_order_bills.extra_tax_amount as extra_tax_amount','purchase_order_bills.tax_amount as tax_amount','purchase_order_bills.amount as amount')
                     ->orderBy('id','desc')
+		    //->skip($request->start)->take($request->length)
                     ->get();
             }else{
                 $purchaseOrderBillData = array();
@@ -553,7 +556,8 @@ class PurchaseOrderBillingController extends Controller
                 $records['billtotal'] = round($billTotals,3);
                 $records['paidtotal'] = round($billPaidAmount,3);
             } else {
-                $records = array();
+                
+		$records = array();
                 $records["recordsFiltered"] = $records["recordsTotal"] = count($purchaseOrderBillData);
                 $records['data'] = array();
                 $records["draw"] = intval($request->draw);

@@ -113,7 +113,7 @@
                                                                 <th> <input type="text" class="form-control form-filter" name="search_name" id="search_name"> </th>
                                                                 <th> {{--<input type="text" class="form-control form-filter" name="search_name" hidden>--}} </th>
                                                                 <th> {{--<input type="text" class="form-control form-filter" name="search_type" hidden>--}} </th>
-                                                                <th> {{--<input type="text" class="form-control form-filter" name="search_amount" hidden>--}} </th>
+                                                                <th> <input type="text" class="form-control form-filter" name="search_amount"> </th>
                                                                 <th> <input type="text" class="form-control form-filter" name="purchase_by"> </th>
                                                                 <th> {{--<input type="text" class="form-control form-filter" name="search_created_by" hidden>--}} </th>
                                                                 <th> {{--<input type="text" class="form-control form-filter" name="search_created_on" hidden>--}} </th>
@@ -361,7 +361,7 @@
             });
 
             peticashManagementListing.init();
-            $("input[name='search_name'], input[name='purchase_by'] ").on('keyup',function(){
+            $("input[name='search_name'], input[name='purchase_by'], input[name='search_amount'] ").on('keyup',function(){
                 $(".filter-submit").trigger('click');
             });
             $("#search-withfilter").on('click',function(){
@@ -372,6 +372,8 @@
                 var month = $('#month').val();
                 var status_id = $('#status_id').val();
                 var search_name = $('#search_name').val();
+		var search_amount = $('#search_amount').val();
+
 
                 var postData =
                     'year=>'+year+','+
@@ -379,6 +381,7 @@
 
                 $("input[name='postdata']").val(postData);
                 $("input[name='search_name']").val(search_name);
+		$("input[name='search_amount']").val(search_amount);
                 $(".filter-submit").trigger('click');
             });
         });

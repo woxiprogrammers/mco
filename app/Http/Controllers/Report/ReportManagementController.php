@@ -5074,14 +5074,16 @@ class ReportManagementController extends Controller{
             $totalExpenseWithAdv = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount
                                     + $officeExpense + $subcontractorTotal + $openingExpenses
                                     + $subcontractorAdvTotal + $purchaseAdvTotal + $indirectExpense + $totalAssetRentOpeningExpense;
-            $salesPnL = $sales - $debitAmount - $tdsAmount - $totalHold - $otherRecoveryAmount - $mobilization;
+            $salesPnL = $sales - $debitAmount - $tdsAmount - $totalHold - $otherRecoveryAmount - $mobilization - $totalRetention;
             $salesWisePnL = $salesPnL - $totalExpense;
             $receiptWisePnL = $receipt - $totalExpense;
             $advanceReceiptPnl = (($outstandingMobilization - $mobilization) + $receipt) - $totalExpenseWithAdv;
 
             $salesData['indirect_expense'] = $indirectExpense;
-            $salesData['sales'] = $salesPnL;
-            $salesData['receipt'] = $receipt;
+            $salesData['sales'] = $salesPnL + $mobilization;
+	    //$salesData['sales'] = $sales;
+
+            $salesData['receipt'] = $receipt + $mobilization;
             $salesData['outstanding'] = $outstanding;
             $salesData['total_expense'] = $totalExpense;
             $salesData['outstanding_mobilization'] = $outstandingMobilization - $mobilization;

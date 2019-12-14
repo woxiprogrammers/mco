@@ -779,6 +779,8 @@ class SubcontractorBillController extends Controller
                     }else{
                         $paidFrom = '-';
                     }
+
+	  	    if ($listingData[$pagination]->transactionStatus->name != 'Deleted') {
                     $records['data'][$iterator] = [
                         $iterator+1,
                         date('d M Y',strtotime($listingData[$pagination]['created_at'])),
@@ -794,6 +796,7 @@ class SubcontractorBillController extends Controller
                         ($listingData[$pagination]['remark'] != null) ? $listingData[$pagination]['remark'] : "-",
                         $changeStatusButton,
                     ];
+		    }
                 }
                 $records["draw"] = intval($request->draw);
                 $records["recordsTotal"] = $iTotalRecords;

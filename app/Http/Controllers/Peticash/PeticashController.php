@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Peticash;
 
+use App\TransactionStatus;
 use App\Asset;
 use App\AssetMaintenanceBillPayment;
 use App\AssetType;
@@ -1670,6 +1671,7 @@ class PeticashController extends Controller
             $postdata = null;
             $material_name = null;
             $purchase_by = null;
+   	    $search_amount = null;
             $month = 0;
             $year = 0;
             $total = 0;
@@ -1698,6 +1700,9 @@ class PeticashController extends Controller
                 $purchase_by = $request['purchase_by'];
             }
 
+	    if ($request->has('search_amount')) {
+                $search_amount = $request['search_amount'];
+            }
 
             $ids = PurcahsePeticashTransaction::where('project_site_id',$projectSiteId)->pluck('id');
             $filterFlag = true;
@@ -1718,6 +1723,16 @@ class PeticashController extends Controller
                     $filterFlag = false;
                 }
             }
+
+	    if ($request->has('search_amount') && $filterFlag == true) {
+                $ids = PurcahsePeticashTransaction::whereIn('id',$ids)
+                        ->where('bill_amount', $search_amount)
+                        ->pluck('id');
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
             if ($year != 0 && $filterFlag == true) {
                 $ids = PurcahsePeticashTransaction::whereIn('id',$ids)->whereYear('created_at', $year)->pluck('id');
                 if(count($ids) <= 0) {
@@ -2004,7 +2019,8 @@ class PeticashController extends Controller
                         $salaryTransactionData[$pagination]->peticashTransactionType->name,
                         $salaryTransactionData[$pagination]->amount,
                         $salaryTransactionData[$pagination]->payable_amount,
-                        $salaryTransactionData[$pagination]->paymentType->name,
+                        //$salaryTransactionData[$pagination]->paymentType->name,
+			isset($salaryTransactionData[$pagination]->paymentType->name) ? $salaryTransactionData[$pagination]->paymentType->name : 'Peticash',
                         ucwords($salaryTransactionData[$pagination]->referenceUser->first_name.' '.$salaryTransactionData[$pagination]->referenceUser->last_name),
                         date('j M Y',strtotime($salaryTransactionData[$pagination]->date)),
                         $salaryTransactionData[$pagination]->projectSite->project->name,
@@ -2328,13 +2344,14 @@ class PeticashController extends Controller
                                                 ,'asset_maintenance.project_site_id as project_site_id'
                                                 ,'vendors.company as name')->get()->toArray();
 
-
+	    $approvedBillStatusId = TransactionStatus::where('slug','approved')->pluck('id')->first();
             $subcontractorCashBillTransactions = SubcontractorBillTransaction::join('subcontractor_bills','subcontractor_bills.id','=','subcontractor_bill_transactions.subcontractor_bills_id')
                 ->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
                 ->where('subcontractor_structure.project_site_id',$projectSiteId)
                 ->where('subcontractor_bill_transactions.paid_from_slug','cash')
                 ->join('subcontractor','subcontractor.id','=','subcontractor_structure.subcontractor_id')
                 ->where('subcontractor.company_name','ilike','%'.$search_name.'%')
+		->where('subcontractor_bill_transactions.transaction_status_id', $approvedBillStatusId)
                 ->select('subcontractor_bill_transactions.id as payment_id','subcontractor_bill_transactions.subtotal as amount'
                     ,'subcontractor_bill_transactions.created_at as created_at'
                     ,'subcontractor_structure.project_site_id as project_site_id'

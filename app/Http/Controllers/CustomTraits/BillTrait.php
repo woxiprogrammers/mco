@@ -429,9 +429,12 @@ trait BillTrait{
                 $transactionDetails = $listingData;
                 $taxAmt = 0;
                 foreach ($transactionDetails as $txnDetail) {
-                    foreach ($txnDetail['tax'] as $txn) {
-                        $taxAmt = $taxAmt + $txn;
-                    }
+		    //dd($transactionDetails);
+                    if (isset($txnDetail['tax'])) {
+	     	        foreach ($txnDetail['tax'] as $txn) {
+                        	$taxAmt = $taxAmt + $txn;
+                    	}
+		    }
                 }
                 $records = [
                     'subTotal' => array_sum(array_column($transactionDetails,'subTotal')),
@@ -2635,7 +2638,8 @@ trait BillTrait{
                                         Cancel
                                     </a>';
                     }
-
+			
+		    if ($transactionDetails[$pagination]->transactionStatus->name != 'Deleted') {
                     $records['data'][] = [
                         $pagination+1,
                         date('j M Y',strtotime($transactionDetails[$pagination]['created_at'])),
@@ -2651,6 +2655,7 @@ trait BillTrait{
                         ($transactionDetails[$pagination]['remark'] != null) ? $transactionDetails[$pagination]['remark'] : "-",
                         $changeStatusButton
                     ];
+		   }
                 }
             }
         }catch(\Exception $e){
