@@ -354,7 +354,9 @@ class PurchaseController extends Controller
                     $quotation = Quotation::where('project_site_id',$request['project_site_id'])->first();
                     if(count($quotation) != null){
                         $quotationMaterialId = Material::whereIn('id',array_column($quotation->quotation_materials->toArray(),'material_id'))
-                            ->where('name','ilike','%'.$request->keyword.'%')->pluck('id');
+                            ->where('name','ilike','%'.$request->keyword.'%')
+                            ->where('is_active','t')
+                            ->pluck('id');
                         $quotationMaterials = QuotationMaterial::where('quotation_id',$quotation->id)->whereIn('material_id',$quotationMaterialId)->get();
                         $quotationMaterialSlug = MaterialRequestComponentTypes::where('slug','quotation-material')->first();
                         $materialRequestID = MaterialRequests::where('project_site_id',$request['project_site_id'])->pluck('id')->first();
@@ -402,9 +404,9 @@ class PurchaseController extends Controller
                             $materialList[$iterator]['material_request_component_type_id'] = $quotationMaterialSlug->id;
                             $iterator++;
                         }
-                        $structureMaterials = Material::whereNotIn('id',$quotationMaterialId)->where('name','ilike','%'.$request->keyword.'%')->get();
+                        $structureMaterials = Material::whereNotIn('id',$quotationMaterialId)->where('is_active','t')->where('name','ilike','%'.$request->keyword.'%')->get();
                     }else{
-                        $structureMaterials = Material::where('name','ilike','%'.$request->keyword.'%')->get();
+                        $structureMaterials = Material::where('name','ilike','%'.$request->keyword.'%')->where('is_active','t')->get();
                     }
                     $structureMaterialSlug = MaterialRequestComponentTypes::where('slug','structure-material')->first();
                     foreach($structureMaterials as $key1 => $material){
@@ -442,6 +444,7 @@ class PurchaseController extends Controller
                         $materialList[$iterator]['material_request_component_type_id'] = $newMaterialSlug->id;
                     }
                     $data = $materialList;
+                
                     break;
                 case "asset" :
                     $assetList = array();

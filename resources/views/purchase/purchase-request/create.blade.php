@@ -219,7 +219,7 @@
                                                         <option value="{{$unit['id']}}">{{$unit['name']}}</option>
                                                     @endforeach
                                                 </select>
-                                            </div>
+                                            </div> 
                                          <article>
                                                 <label for="files">Select multiple files:</label>
                                                 <input id="files" type="file" multiple="multiple" />

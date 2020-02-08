@@ -168,7 +168,7 @@ trait MaterialTrait{
         try{
             $now = Carbon::now();
             if($request->has('material_id')){
-                $categoryId = CategoryMaterialRelation::where('material_id',$request->material_id)->pluck('category_id')->first();
+                $categoryId = CategoryMaterialRelation::where('is')->where('material_id',$request->material_id)->pluck('category_id')->first();
                 if($categoryId != $request->category_id){
                     $categoryMaterialData['material_id'] = $request->material_id;
                     $categoryMaterialData['category_id'] = $request->category_id;
@@ -184,7 +184,7 @@ trait MaterialTrait{
                 $materialData['updated_at'] = $now;
                 $materialData['gst'] = $request->gst;
                 $materialData['hsn_code'] = $request->hsn_code;
-                $material = Material::create($materialData);
+                $material = Material::where('is_active',true)->create($materialData);
                 $categoryMaterialData['material_id'] = $material['id'];
                 $categoryMaterial = CategoryMaterialRelation::create($categoryMaterialData);
                 $materialVersionData['material_id'] = $material->id;
@@ -482,7 +482,7 @@ trait MaterialTrait{
 
     public function autoSuggest(Request $request,$keyword){
         try{
-            $materials = Material::where('name','ilike','%'.$keyword.'%')->get();
+            $materials = Material::where('is_active',true)->where('name','ilike','%'.$keyword.'%')->get();
             $response = array();
             if($materials != null){
                 $iterator = 0;

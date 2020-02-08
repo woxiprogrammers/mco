@@ -391,6 +391,7 @@ class PurchaseOrderBillingController extends Controller
             if (!file_exists($imageUploadPath)) {
                 File::makeDirectory($imageUploadPath, $mode = 0777, true, true);
             }
+
             if($request->has('bill_images')){
                 foreach($request->bill_images as $billImage){
                     $imageArray = explode(';',$billImage);
@@ -796,11 +797,51 @@ class PurchaseOrderBillingController extends Controller
 
     public function editPurchaseOrderBill(Request $request,$purchaseOrderBill){
         try{
+            $purchaseOrderBill = PurchaseOrderBill::where('id',$purchaseOrderBill['id'])->first();
+
             $purchaseOrderBillData = $request->except('_token');
             if($request->has('extra_amount')){
                 $purchaseOrderBillData['extra_amount'] = round($request['extra_amount'],3);
             }
+
             $purchaseOrderBill = PurchaseOrderBill::where('id',$purchaseOrderBill['id'])->first();
+
+            //update purchase order bill image
+            $purchaseOrderDirectoryName = sha1($purchaseOrderBill->purchase_order_id);
+            $purchaseBillDirectoryName = sha1($purchaseOrderBill->id);
+            
+            $imageUploadPath = public_path().env('PURCHASE_ORDER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.$purchaseOrderDirectoryName.DIRECTORY_SEPARATOR.'bills'.DIRECTORY_SEPARATOR.$purchaseBillDirectoryName;
+            if (!file_exists($imageUploadPath)) {
+                File::makeDirectory($imageUploadPath, 0777, true, true);
+            }
+
+            if($request->has('bill_images')){
+                $existingImages = PurchaseOrderBillImage::where('purchase_order_bill_id',$purchaseOrderBill->id)->get();
+                if(!is_null($existingImages)) {
+                    $fileFullPath = $imageUploadPath.DIRECTORY_SEPARATOR;
+                    foreach($existingImages as $existingImage) {
+                        if(file_exists($fileFullPath.$existingImage->name)) {
+                            unlink($fileFullPath.$existingImage->name);
+                        }  
+                    }
+                }
+
+                foreach($request->bill_images as $billImage){
+                    $imageArray = explode(';',$billImage);
+                    $image = explode(',',$imageArray[1])[1];
+                    $pos  = strpos($billImage, ';');
+                    $type = explode(':', substr($billImage, 0, $pos))[1];
+                    $extension = explode('/',$type)[1];
+                    $filename = mt_rand(1,1000000000).sha1(time()).".{$extension}";
+                    $fileFullPath = $imageUploadPath.DIRECTORY_SEPARATOR.$filename;
+
+                    file_put_contents($fileFullPath,base64_decode($image));
+
+                    PurchaseOrderBillImage::where('purchase_order_bill_id',$purchaseOrderBill->id)
+                    ->update(['name' => $filename]);
+                }
+            } //updated
+            
             $purchaseOrderBill->update($purchaseOrderBillData);
             $request->session()->flash('success','Purchase Order Bill Edited Successfully');
             return redirect('/purchase/purchase-order-bill/edit/'.$purchaseOrderBill['id']);
@@ -814,4 +855,6 @@ class PurchaseOrderBillingController extends Controller
             abort(500);
         }
     }
+  
+
 }

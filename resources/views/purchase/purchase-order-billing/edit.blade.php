@@ -203,7 +203,18 @@
                                                                                 @endforeach
                                                                             </div>
                                                                         </div>
+                                                                    </div><br>
+                                                                    <div class="form-group">
+                                                                        <label class="control-label">Select Images :</label>
+                                                                        <input id="imageupload" type="file" class="btn blue" multiple />
+                                                                        <br />
+                                                                        <div class="row">
+                                                                            <div id="preview-image" class="row">
+
+                                                                            </div>
+                                                                        </div>
                                                                     </div>
+                                                                        
                                                                     <div class="form-actions noborder row" id="submitDiv">
                                                                         <div class="col-md-offset-3" style="margin-left: 26%">
                                                                             <button type="submit" class="btn red" id="submit"><i class="fa fa-check"></i> Submit</button>
@@ -509,6 +520,34 @@
                     changePaidFrom();
                 }
             });
+
+            $("#imageupload").on('change', function () {
+                var countFiles = $(this)[0].files.length;
+                var imgPath = $(this)[0].value;
+                var extn = imgPath.substring(imgPath.lastIndexOf('.') + 1).toLowerCase();
+                var image_holder = $("#preview-image");
+                image_holder.empty();
+                if (extn == "gif" || extn == "png" || extn == "jpg" || extn == "jpeg") {
+                    if (typeof (FileReader) != "undefined") {
+                        for (var i = 0; i < countFiles; i++) {
+                            var reader = new FileReader()
+                            reader.onload = function (e) {
+                                var imagePreview = '<div class="col-md-2"><input type="hidden" name="bill_images[]" value="'+e.target.result+'"><img src="'+e.target.result+'" class="thumbimage" /></div>';
+                                image_holder.append(imagePreview);
+                            };
+                            image_holder.show();
+                            reader.readAsDataURL($(this)[0].files[i]);
+                        }
+                    } else {
+                        alert("It doesn't supports");
+                    }
+                } else {
+                    alert("Select Only images");
+                }
+            });
+
+
+
         });
 
         function calculateTotal(){
