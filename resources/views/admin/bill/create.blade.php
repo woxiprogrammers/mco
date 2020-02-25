@@ -56,21 +56,21 @@
                                                 <form role="form" id="new_bill" class="form-horizontal" action="/bill/create" method="post">
                                                     <div class="row">
                                                         <div class="form-group">
-                                                            <div class="col-md-3 date date-picker" data-date-end-date="0d"  data-date-format="dd/mm/yyyy">
+                                                            <div class="col-md-2 date date-picker" data-date-end-date="0d">
                                                                 <label class="control-label" for="date">Bill Date : </label>
-                                                                <input type="text" style="width: 30%" name="date" placeholder="Select Bill Date" id="date" value="{{date('d/m/Y')}}"/>
+                                                                <input type="text" style="width: 30%" name="date" placeholder="Select Bill Date" id="date" value="{{date('m/d/Y')}}"/>
                                                                 <button class="btn btn-sm default" type="button">
                                                                     <i class="fa fa-calendar"></i>
                                                                 </button>
                                                             </div>
-                                                            <div class="col-md-4 date date-picker" data-date-end-date="0d"   data-date-format="dd/mm/yyyy">
+                                                            <div class="col-md-4 date date-picker" data-date-end-date="0d">
                                                                 <label class="control-label" for="performa_invoice_date" style="margin-left: 9%">Proforma Invoice Date : </label>
-                                                                <input type="text" style="width: 32%" name="performa_invoice_date" placeholder="Select Proforma Invoice Date" id="performa_invoice_date" value="{{date('d/m/Y')}}"/>
+                                                                <input type="text" style="width: 32%" name="performa_invoice_date" placeholder="Select Proforma Invoice Date" id="performa_invoice_date" value="{{date('m/d/Y')}}"/>
                                                                 <button class="btn btn-sm default" type="button">
                                                                     <i class="fa fa-calendar"></i>
                                                                 </button>
                                                             </div>
-                                                            <div class="col-md-2" style="margin-left: 6%">
+                                                            <div class="col-md-2" >
                                                                 <select class="table-group-action-input form-control input-inline input-small input-sm" name="assign_bank" id="assign_bank">
                                                                     <option value="default">Select Bank</option>
                                                                     @foreach($banksAssigned as $bankId)
@@ -78,12 +78,33 @@
                                                                     @endforeach
                                                                 </select>
                                                             </div>
+                                                                <div class="col-md-2 table-actions-wrapper" style="margin-bottom: 20px;">
+                                                                    <select class="table-group-action-input form-control input-inline input-small input-sm" name="change_bill_types" id="change_bill_types">
+                                                                        <option value="default">Select Bill Type</option>
+                                                                        @for($i = 0 ; $i < count($billTypes); $i++)
+                                                                        <option value="{{$billTypes[$i]['id']}}">{{$billTypes[$i]['name']}}</option>
+                                                                        @endfor
+                                                                    </select>
+                                                                </div>
+
                                                             @if($bills != NULL)
-                                                                <div class="col-md-offset-8 table-actions-wrapper" style="margin-bottom: 20px; margin-left: 86%">
+                                                                <?php
+                                                                    $billTypesData = array();
+                                                                    foreach($billTypes as $btypes) {
+                                                                        $billTypesData[$btypes['id']] = 0;
+                                                                    }
+                                                                ?>
+
+                                                                <div class="col-md-2 table-actions-wrapper" style="margin-bottom: 20px;">
                                                                     <select class="table-group-action-input form-control input-inline input-small input-sm" name="change_bill" id="change_bill">
                                                                         <option value="default">Select Bill</option>
                                                                         @for($i = 0 ; $i < count($bills); $i++)
-                                                                            <option value="{{$bills[$i]['id']}}">R.A Bill {{$i+1}}</option>
+                                                                        <?php
+                                                                            if (array_key_exists($bills[$i]['bill_types_id'], $billTypesData)) {
+                                                                                $billTypesData[$bills[$i]['bill_types_id']] +=  1;
+                                                                            }
+                                                                        ?>
+                                                                            <option value="{{$bills[$i]['id']}}">{{$bills[$i]['bill_type_name']}} Bill {{$billTypesData[$bills[$i]['bill_types_id']]}}</option>
                                                                         @endfor
                                                                     </select>
                                                                 </div>

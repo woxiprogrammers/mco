@@ -9,10 +9,14 @@ class Bill extends Model
     protected $table = 'bills';
 
     protected $fillable = ['quotation_id','bill_status_id','remark','date','performa_invoice_date','discount_amount'
-        ,'discount_description','bank_info_id','rounded_amount_by','gross_total'];
+        ,'discount_description','bank_info_id','rounded_amount_by','gross_total','bill_types_id'];
 
     public function quotation(){
         return $this->belongsTo('App\Quotation','quotation_id');
+    }
+
+    public function bill_types(){
+        return $this->belongsTo('App\BillTypes','bill_types_id');
     }
 
     public function bill_quotation_product(){

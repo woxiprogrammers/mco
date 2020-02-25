@@ -38,7 +38,7 @@
 </table>
 <table border="1" style="padding-top: 20px; padding-bottom:20px " width="100%">
     <tr>
-        <td style="text-align: center"><b>R. A. BILL NO. - {!! $currentBillID !!} </b></td>
+        <td style="text-align: center"><b>{!! $currentBillName !!} BILL NO. - {!! $currentBillID !!} </b></td>
     </tr>
     <tr>
         <td style="height: 80px; padding-left: 40px; font-size: 14px;">
