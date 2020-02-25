@@ -63,10 +63,21 @@
                                             <div class="tab-content">
                                                 <div class="tab-pane fade in active" id="billViewTab">
                                                     @if($bills != NULL)
+                                                        <?php
+                                                            $billTypesData = array();
+                                                            foreach($billTypes as $btypes) {
+                                                                $billTypesData[$btypes['id']] = 0;
+                                                            }
+                                                        ?>
                                                         <div class="col-md-12 table-actions-wrapper" style="margin-bottom: 20px;">
                                                             <select class="table-group-action-input form-control input-inline input-small input-sm" name="change_bill" id="change_bill" style="margin-left: 1%">
                                                                 @for($i = 0 ; $i < count($bills); $i++)
-                                                                    <option value="{{$bills[$i]['id']}}">R.A Bill {{$i+1}}</option>
+                                                                    <?php
+                                                                        if (array_key_exists($bills[$i]['bill_types_id'], $billTypesData)) {
+                                                                            $billTypesData[$bills[$i]['bill_types_id']] +=  1;
+                                                                        }
+                                                                    ?>
+                                                                    <option value="{{$bills[$i]['id']}}">{{$bills[$i]['bill_type_name']}} Bill {{$billTypesData[$bills[$i]['bill_types_id']]}}</option>
                                                                 @endfor
                                                             </select>
 

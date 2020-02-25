@@ -48,6 +48,7 @@
                                                     <input type="hidden" id="quotation_id" value="{{$bill->quotation_id}}">
                                                     <input type="hidden" id="bank_info_id" value="{{$bill->bank_info_id}}">
                                                     <form role="form" id="edit_bill" class="form-horizontal" action="/bill/edit/{{$bill->id}}" method="post">
+
                                                         <div class="col-md-12 form-group">
                                                             <div class="col-md-4 date date-picker" data-date-end-date="0d">
                                                                 <label class="control-label" for="date">Select Bill Date : </label>
@@ -61,12 +62,10 @@
                                                                     <button class="btn btn-sm default" type="button">
                                                                         <i class="fa fa-calendar"></i>
                                                                     </button>
-
-
                                                                 @endif
                                                             </div>
-                                                            <div class="col-md-4 date date-picker" data-date-end-date="0d" style="margin-left: 20%">
-                                                                <label class="control-label" for="performa_invoice_date" style="margin-left: -60%">Select Proforma Invoice Date : </label>
+                                                            <div class="col-md-4 date date-picker" data-date-end-date="0d">
+                                                                <label class="control-label" for="performa_invoice_date">Select Proforma Invoice Date : </label>
                                                                 @if(!empty($bill['performa_invoice_date']))
                                                                     <input type="text"  name="performa_invoice_date" value="{{date('m/d/Y',strtotime($bill['performa_invoice_date']))}}" id="performa_invoice_date" readonly>
                                                                     <button class="btn btn-sm default" type="button">
@@ -79,7 +78,7 @@
                                                                     </button>
                                                                 @endif
                                                             </div>
-                                                            <div class="col-md-2" style="margin-left: -4%">
+                                                            <div class="col-md-2" style="margin-left: 0%">
                                                                 <select class="table-group-action-input form-control input-inline input-small input-sm" name="assign_bank" id="assign_bank">
                                                                     <option value="">Select Bank</option>
                                                                     @foreach($allbankInfoIds as $bank)
@@ -87,7 +86,15 @@
                                                                     @endforeach
                                                                 </select>
                                                             </div>
-
+                                                            <div class="col-md-2 table-actions-wrapper">
+                                                                <select class="table-group-action-input form-control input-inline input-small input-sm" name="change_bill_types" id="change_bill_types">
+                                                                    <option value="default">Select Bill Type for Edit</option>
+                                                                    @for($i = 0 ; $i < count($billTypes); $i++)
+                                                                        <option value="{{$billTypes[$i]['id']}}">{{$billTypes[$i]['name']}}</option>
+                                                                    @endfor
+                                                                </select>
+                                                                <p style="padding-top:10px;font-weight:bold">Current Bill Type: <span style="color:red">{{$bill['bill_type_name']}}</span></p>
+                                                            </div>
                                                         </div>
 
                                                         <table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll; " id="editBillTable">

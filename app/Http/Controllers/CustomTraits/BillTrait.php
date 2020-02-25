@@ -9,6 +9,7 @@ use App\BillQuotationProducts;
 use App\BillQuotationSummary;
 use App\BillReconcileTransaction;
 use App\BillStatus;
+use App\BillTypes;
 use App\BillTax;
 use App\BillTransaction;
 use App\Category;
@@ -54,6 +55,8 @@ trait BillTrait{
             $billQuotationExtraItem = new BillQuotationExtraItem();
             $quotationBankInfo = new QuotationBankInfo();
             $tax = new Tax();
+            $billTypesModel = new BillTypes();
+            $billTypes = $billTypesModel->get()->toArray();
             $unitModel = new Unit();
             $quotation = $quotationModel->where('project_site_id',$project_site['id'])->first();
             $cancelBillStatusId = $billStatusModel->where('slug','cancelled')->pluck('id')->first();
@@ -71,7 +74,11 @@ trait BillTrait{
                     $extraItem['previous_rate'] = 0;
                 }
             }
-
+            $bill_cnt = 0;
+            foreach ($bills as $bill) {
+                $bills[$bill_cnt]['bill_type_name'] = $billTypesModel->where('id',$bill['bill_types_id'])->value('name');
+                $bill_cnt++;
+            }
             if ($quotation!= null) {
                 if ($quotation->billType != null) {
                     $billTypeAssign = true;
@@ -114,7 +121,7 @@ trait BillTrait{
                                 }
                             }
                         }
-                        return view('admin.bill.item-wise.create')->with(compact('billTypeAssign', 'banksAssigned', 'extraItems', 'quotation', 'bills', 'project_site', 'quotationProducts', 'taxes', 'specialTaxes'));
+                        return view('admin.bill.item-wise.create')->with(compact('billTypes','billTypeAssign', 'banksAssigned', 'extraItems', 'quotation', 'bills', 'project_site', 'quotationProducts', 'taxes', 'specialTaxes'));
                     } else {
                         $quotationSummaryModel = new QuotationSummary();
                         $sQFTUnitName = $unitModel->where('slug', 'sqft')->pluck('name')->first();
@@ -144,15 +151,15 @@ trait BillTrait{
                                     : $quotationSummaries[$i]['quantity'] - $quotationSummaries[$i]['previous_quantity'];
                             }
                         }
-                        return view('admin.bill.create')->with(compact('billTypeAssign', 'banksAssigned', 'extraItems', 'quotation', 'bills', 'project_site', 'quotationSummaries', 'taxes', 'specialTaxes'));
+                        return view('admin.bill.create')->with(compact('billTypes','billTypeAssign', 'banksAssigned', 'extraItems', 'quotation', 'bills', 'project_site', 'quotationSummaries', 'taxes', 'specialTaxes'));
                     }
                 } else {
                     $billTypeAssign = false;
-                    return view('admin.bill.create')->with(compact('billTypeAssign'));
+                    return view('admin.bill.create')->with(compact('billTypes','billTypeAssign'));
                 }
             } else {
                 $billTypeAssign = false;
-                return view('admin.bill.create')->with(compact('billTypeAssign'));
+                return view('admin.bill.create')->with(compact('billTypes','billTypeAssign'));
             }
 
 
@@ -269,17 +276,26 @@ trait BillTrait{
 
     public function billListing(Request $request,$project_site,$status){
         try{
+            $billTypesModel = new BillTypes();
+            $billTypes = $billTypesModel->get()->toArray();
             $listingData = $currentTaxes = array();
             $iterator = $i = 0;
             $array_no = 1;
             $quotation = Quotation::where('project_site_id',$project_site->id)->first();
             $allBills = Bill::where('quotation_id',$quotation->id)->get();
+
             if($status == "cancelled"){
                 $statusId = BillStatus::where('slug',$status)->pluck('id')->first();
-                $bills = Bill::where('quotation_id',$quotation->id)->where('bill_status_id',$statusId)->orderBy('created_at','asc')->get();
+                $bills = Bill::where('quotation_id',$quotation->id)
+                         ->where('bill_status_id',$statusId)
+                         ->orderBy('created_at','asc')
+                         ->get();
             }else{
                 $statusId = BillStatus::whereIn('slug',['approved','draft'])->get()->toArray();
-                $bills = Bill::where('quotation_id',$quotation->id)->whereIn('bill_status_id',array_column($statusId,'id'))->orderBy('created_at','asc')->get();
+                $bills = Bill::where('quotation_id',$quotation->id)
+                         ->whereIn('bill_status_id',array_column($statusId,'id'))
+                         ->orderBy('created_at','asc')
+                         ->get();
             }
             $cancelBillStatusId = BillStatus::where('slug','cancelled')->pluck('id')->first();
             $taxesAppliedToBills = BillTax::join('taxes','taxes.id','=','bill_taxes.tax_id')
@@ -296,11 +312,23 @@ trait BillTrait{
                 ->orderBy('bill_taxes.tax_id')
                 ->pluck('bill_taxes.tax_id')
                 ->toArray();
+
+            $billTypesData = array();
+            foreach($billTypes as $btypes) {
+                $billTypesData[$btypes['id']] = 0;
+            }
+
             foreach($bills as $key => $bill){
                 $listingData[$iterator]['status'] = $bill->bill_status->slug ;
                 $listingData[$iterator]['bill_id'] = $bill->id;
+
+                if (array_key_exists($bill['bill_types_id'], $billTypesData)) {
+                    $billTypesData[$bill['bill_types_id']] +=  1;
+                }
+
                 if($bill->bill_status_id != $cancelBillStatusId){
-                    $listingData[$iterator]['array_no'] = "RA Bill - ".$array_no;
+                    $billTypeName = $billTypesModel->where('id',$bill['bill_types_id'])->value('name');
+                    $listingData[$iterator]['array_no'] = $billTypeName." Bill - ".$billTypesData[$bill['bill_types_id']];
                     $array_no++;
                 }else{
                     $listingData[$iterator]['array_no'] = '-';
@@ -825,9 +853,18 @@ trait BillTrait{
             $quotation = $bill->quotation;
             $selectedBillId = $bill['id'];
             $billStatusModel = new BillStatus();
+            $billTypesModel = new BillTypes();
+            $billTypes = $billTypesModel->get()->toArray();
             $billModel = new Bill();
             $cancelBillStatusId = $billStatusModel->where('slug','cancelled')->pluck('id')->first();
             $bills = $billModel->where('quotation_id',$bill['quotation_id'])->where('bill_status_id','!=',$cancelBillStatusId)->orderBy('created_at','asc')->get()->toArray();
+
+            $bill_cnt = 0;
+            foreach ($bills as $billType) {
+                $bills[$bill_cnt]['bill_type_name'] = $billTypesModel->where('id',$billType['bill_types_id'])->value('name');
+                $bill_cnt++;
+            }
+
             $total['previous_bill_amount'] = $total['current_bill_subtotal'] = $total['cumulative_bill_amount'] = $total_extra_item =  0;
             if($bill->quotation->billType->slug == 'sqft' || $bill->quotation->billType->slug == 'amountwise'){
                 $billQuotationSummaryModel = new BillQuotationSummary();
@@ -1036,7 +1073,7 @@ trait BillTrait{
             $balanceCancelledTransactionAmount = $bill->quotation->cancelled_bill_transaction_balance_amount;
             $banks = BankInfo::where('is_active',true)->select('id','bank_name','balance_amount')->get();
             $bill['rounded_amount_by'] = ($bill['rounded_amount_by'] == null) ? 0 : $bill['rounded_amount_by'];
-            return view('admin.bill.view')->with(compact('advanceGivenAmt','projectAdvPayment','billTxtAdv', 'balanceCancelledTransactionAmount','quotation','billQuotationSummaries','extraItems','bill','selectedBillId','total','total_rounded','final','total_current_bill_amount','bills','billQuotationProducts','taxes','specialTaxes','remainingAmount','paymentTypes','remainingHoldAmount','remainingRetentionAmount','banks', 'toChangeStatus'));
+            return view('admin.bill.view')->with(compact('billTypes','advanceGivenAmt','projectAdvPayment','billTxtAdv', 'balanceCancelledTransactionAmount','quotation','billQuotationSummaries','extraItems','bill','selectedBillId','total','total_rounded','final','total_current_bill_amount','bills','billQuotationProducts','taxes','specialTaxes','remainingAmount','paymentTypes','remainingHoldAmount','remainingRetentionAmount','banks', 'toChangeStatus'));
         }catch (\Exception $e){
             $data = [
                 'action' => 'get view of bills',
@@ -1069,6 +1106,7 @@ trait BillTrait{
             $bill['with_tax_amount'] = $request['with_tax_amount'];
             $bill['rounded_amount_by'] = $request['round_amount_by'];
             $bill['gross_total'] = $request['grand_total'];
+            $bill['bill_types_id'] = $request['change_bill_types'];
             if($request->assign_bank != 'default') {
                 $bill['bank_info_id'] = $request->assign_bank;
             }
@@ -1271,6 +1309,8 @@ trait BillTrait{
 
     public function generateCurrentBill(Request $request,$slug,$bill){
         try{
+            $billTypesModel = new BillTypes();
+            $billTypes = $billTypesModel->get()->toArray();
             $data = array();
             $data['slug'] = $slug;
             $data['bankData'] = ($bill->bankInfo != null) ? $bill->bankInfo : null;
@@ -1287,17 +1327,26 @@ trait BillTrait{
             $data['address']= $bill->quotation->project_site->project->client->address;
             $data['billData'] = $bill;
             $data['currentBillID'] = 1;
+            $currBillType = $bill->bill_types_id;
+
             $billIterator = 0;
             $cancelBillStatusId = BillStatus::where('slug','cancelled')->pluck('id')->first();
+            $billCounter = 1;
             foreach($allBillIds as $key => $billId){
                 $billStatusId = Bill::where('id',$billId)->pluck('bill_status_id')->first();
+                $billTypesId = Bill::where('id',$billId)->pluck('bill_types_id')->first();
                 if($billStatusId != $cancelBillStatusId){
-                    if($billId == $bill['id']){
-                        $data['currentBillID'] = $billIterator+1;
+                    if ($currBillType == $billTypesId) {
+                        if($billId == $bill['id']){
+                            $data['currentBillID'] = $billCounter;
+                            $data['currentBillName'] = $billTypesModel->where('id', $billTypesId)->pluck('name')->first();
+                        }
+                        $billCounter++;
                     }
                     $billIterator++;
                 }
             }
+
             if($slug == "performa-invoice"){
                 $data['billDate'] = date('d/m/Y',strtotime($bill['performa_invoice_date']));
             }else{
@@ -1309,7 +1358,6 @@ trait BillTrait{
             $data['projectSiteName'] = $projectSiteData->name;
             $data['projectSiteAddress'] = $projectSiteData->address;
             $data['clientCompany'] = Client::where('id',$bill->quotation->project_site->project->client_id)->pluck('company')->first();
-
             $i = $j = $data['productSubTotal'] = $data['grossTotal'] = 0;
             if($quotation->billType->slug == 'sqft' || $quotation->billType->slug == 'amountwise'){
                 $unitModel = new Unit();
@@ -1400,23 +1448,46 @@ trait BillTrait{
             $billStatusModel = new BillStatus();
             $billModel = new Bill();
 
+            $billTypesModel = new BillTypes();
+            $billTypes = $billTypesModel->get()->toArray();
+            $currBillType = $bill->bill_types_id;
+
             $data = array();
             $data['currentBillID'] = 1;
             $data['projectSiteName'] = $projectSiteModel->where('id',$bill->quotation->project_site_id)->pluck('name')->first();
             $data['clientCompany'] = $clientModel->where('id',$bill->quotation->project_site->project->client_id)->pluck('company')->first();
             $cancelBillStatusId = $billStatusModel->where('slug','cancelled')->pluck('id')->first();
-            $previousBillIds = $billModel->where('quotation_id',$bill['quotation_id'])->where('bill_status_id','!=',$cancelBillStatusId)->where('id','<',$bill['id'])->pluck('id');
+            $previousBillIds = $billModel->where('quotation_id',$bill['quotation_id'])
+                                         ->where('bill_status_id','!=',$cancelBillStatusId)
+                                         ->where('bill_types_id','=',$currBillType)
+                                         ->where('id','<',$bill['id'])
+                                         ->orderby('id')
+                                         ->pluck('id');
             if($bill->quotation->billType->slug == 'sqft' || $bill->quotation->billType->slug == 'amountwise'){
                 $billQuotationSummaryModel = new BillQuotationSummary();
                 $quotationSummaryModel = new QuotationSummary();
-                $allBillIds = $billModel->where('quotation_id',$bill['quotation_id'])->where('bill_status_id','!=',$cancelBillStatusId)->where('id','<=',$bill['id'])->pluck('id');
+                $allBillIds = $billModel->where('quotation_id',$bill['quotation_id'])
+                                        ->where('bill_status_id','!=',$cancelBillStatusId)
+                                        ->where('bill_types_id','=',$currBillType)
+                                        ->where('id','<=',$bill['id'])
+                                        ->orderby('id')
+                                        ->pluck('id');
+                $billCounter = 1;
                 foreach($allBillIds as $key => $billId){
-                    if($billId == $bill['id']){
-                        $data['currentBillID'] = $key+1;
-                        break;
+                    $billStatusId = Bill::where('id',$billId)->pluck('bill_status_id')->first();
+                    $billTypesId = Bill::where('id',$billId)->pluck('bill_types_id')->first();
+                    if($billStatusId != $cancelBillStatusId){
+                        if ($currBillType == $billTypesId) {
+                            if($billId == $bill['id']){
+                                $data['currentBillID'] = $billCounter;
+                                $data['currentBillName'] = $billTypesModel->where('id', $billTypesId)->pluck('name')->first();
+                            }
+                            $billCounter++;
+                        }
                     }
                 }
-                $distinctQuotationSummaryIds = $billQuotationSummaryModel->whereIn('bill_id',$allBillIds)
+
+               $distinctQuotationSummaryIds = $billQuotationSummaryModel->whereIn('bill_id',$allBillIds)
                     ->distinct('quotation_summary_id')->orderBy('quotation_summary_id')
                     ->pluck('quotation_summary_id');
                 $invoiceData = $total = array();
@@ -1472,13 +1543,28 @@ trait BillTrait{
                 }
             }else{
                 $billQuotationProductModel = new BillQuotationProducts();
-                $billProducts = $billQuotationProductModel->whereIn('bill_id',$previousBillIds)->get()->toArray();
+                $billProducts = $billQuotationProductModel->whereIn('bill_id',$previousBillIds)
+                                ->get()
+                                ->toArray();
                 $currentBillProducts = $billQuotationProductModel->where('bill_id',$bill['id'])->get()->toArray();
-                $allBillIds = $billModel->where('quotation_id',$bill['quotation_id'])->where('bill_status_id','!=',$cancelBillStatusId)->where('id','<=',$bill['id'])->pluck('id');
+                $allBillIds = $billModel->where('quotation_id',$bill['quotation_id'])
+                                        ->where('bill_status_id','!=',$cancelBillStatusId)
+                                        ->where('id','<=',$bill['id'])
+                                        ->where('bill_types_id','=',$currBillType)
+                                        ->orderby('id')
+                                        ->pluck('id');
+                $billCounter = 1;
                 foreach($allBillIds as $key => $billId){
-                    if($billId == $bill['id']){
-                        $data['currentBillID'] = $key+1;
-                        break;
+                    $billStatusId = Bill::where('id',$billId)->pluck('bill_status_id')->first();
+                    $billTypesId = Bill::where('id',$billId)->pluck('bill_types_id')->first();
+                    if($billStatusId != $cancelBillStatusId){
+                        if ($currBillType == $billTypesId) {
+                            if($billId == $bill['id']){
+                                $data['currentBillID'] = $billCounter;
+                                $data['currentBillName'] = $billTypesModel->where('id', $billTypesId)->pluck('name')->first();
+                            }
+                            $billCounter++;
+                        }
                     }
                 }
                 $distinctProducts = $billQuotationProductModel->whereIn('bill_id',$allBillIds)->distinct('quotation_product_id')->orderBy('quotation_product_id')->select('quotation_product_id')->get();
@@ -1490,6 +1576,7 @@ trait BillTrait{
                     $invoiceData[$i]['rate'] = round(($distinctProduct->quotation_products->rate_per_unit - ($distinctProduct->quotation_products->rate_per_unit * ($bill->quotation->discount / 100))),3);
                     $invoiceData[$i]['quotation_product_id'] = $distinctProduct['quotation_product_id'];
                     $invoiceData[$i]['previous_quantity'] = 0;
+
                     foreach($billProducts as $k => $billProduct){
                         if($distinctProduct['quotation_product_id'] == $billProduct['quotation_product_id']){
                             $invoiceData[$i]['previous_quantity'] = (($invoiceData[$i]['previous_quantity'] + $billProduct['quantity']));
@@ -1557,11 +1644,21 @@ trait BillTrait{
         try{
             $billModel = new Bill();
             $billStatusModel = new BillStatus();
+            $billTypesModel = new BillTypes();
+            $billTypes = $billTypesModel->get()->toArray();
             $i = 0;
             $quotation = $bill->quotation;
             $quotationProducts = $quotation->quotation_products;
             $cancelBillStatusId = $billStatusModel->where('slug','cancelled')->pluck('id')->first();
             $allBills = $billModel->where('quotation_id',$bill['quotation_id'])->where('bill_status_id','!=',$cancelBillStatusId)->orderBy('created_at','asc')->get()->toArray();
+            $bill_cnt = 0;
+            foreach ($allBills as $billType) {
+                $allBills[$bill_cnt]['bill_type_name'] = $billTypesModel->where('id',$billType['bill_types_id'])->value('name');
+                if ($bill->bill_types_id == $billType['bill_types_id']) {
+                    $bill->setAttribute('bill_type_name', $allBills[$bill_cnt]['bill_type_name']);
+                }
+                $bill_cnt++;
+            }
             $approvedBillIds = $billModel->where('quotation_id',$bill['quotation_id'])
                 ->where('bill_status_id',$billStatusModel->where('slug','approved')->pluck('id')->first())
                 ->pluck('id');
@@ -1693,12 +1790,12 @@ trait BillTrait{
                 }
                 $i++;
             }
-            //dd($quotationProducts->toArray());
+
             $allbankInfoIds = QuotationBankInfo::where('quotation_id',$bill->quotation_id)->select('bank_info_id')->get();
             if($bill->quotation->billType->slug == 'sqft' || $bill->quotation->billType->slug == 'amountwise'){
-                return view('admin.bill.edit')->with(compact('sQFTUnitName','bill','quotationSummaries','taxes','specialTaxes','quotationExtraItems','allbankInfoIds'));
+                return view('admin.bill.edit')->with(compact('billTypes','sQFTUnitName','bill','quotationSummaries','taxes','specialTaxes','quotationExtraItems','allbankInfoIds'));
             }else{
-                return view('admin.bill.item-wise.edit')->with(compact('bill','quotationProducts','taxes','specialTaxes','quotationExtraItems','allbankInfoIds'));
+                return view('admin.bill.item-wise.edit')->with(compact('billTypes','bill','quotationProducts','taxes','specialTaxes','quotationExtraItems','allbankInfoIds'));
             }
         }catch(\Exception $e){
             $data = [
@@ -1729,6 +1826,9 @@ trait BillTrait{
                 $billData['performa_invoice_date'] = date('Y-m-d', strtotime($request->performa_invoice_date));
             }
             $billData['bank_info_id'] = $request['assign_bank'];
+            if ($request['change_bill_types'] != 'default') {
+                $billData['bill_types_id'] =  (int)$request['change_bill_types'];
+            }
             $billData['rounded_amount_by'] = $request['round_amount_by'];
             if($request['assign_bank'] != 'default') {
                 $billData['bank_info_id'] = $request['assign_bank'];
@@ -1986,8 +2086,24 @@ trait BillTrait{
     public function generateCumulativeExcelSheet(Request $request,$bill){
         try{
             $data = array();
+            $billTypesModel = new BillTypes();
+            $billTypes = $billTypesModel->get()->toArray();
+            $currBillType = $bill->bill_types_id;
+
+
             $data['cancelledBillStatus'] = BillStatus::where('slug','cancelled')->first();
-            $data['tillThisBill'] = Bill::where('quotation_id',$bill->quotation_id)->where('id','<=',$bill->id)->where('bill_status_id','!=',$data['cancelledBillStatus']->id)->orderBy('id','asc')->get();
+            $data['tillThisBill'] = Bill::where('quotation_id',$bill->quotation_id)
+                                          ->where('id','<=',$bill->id)
+                                          ->where('bill_status_id','!=',$data['cancelledBillStatus']->id)
+                                          ->where('bill_types_id','=',$currBillType)
+                                          ->orderBy('id','asc')
+                                          ->get();
+            $bill_cnt = 0;
+            foreach ($data['tillThisBill'] as $billData) {
+                $data['tillThisBill'][$bill_cnt]['bill_type_name'] = $billTypesModel->where('id',$billData['bill_types_id'])->value('name');
+                $bill_cnt++;
+            }
+
             $data['bill'] = $bill;
             $quotation = $bill->quotation;
             if($quotation->billType->slug == 'sqft' || $quotation->billType->slug == 'amountwise'){
@@ -2192,12 +2308,13 @@ trait BillTrait{
                     $row = 1;
                     for($iterator = 0 ; $iterator < count($data['tillThisBill']); $iterator++,$next_column++){
                         $current_column = $next_column++;
+                        $billTypeName = $data['tillThisBill'][$iterator]['bill_type_name'];
                         $sheet->getCell($current_column.($row+1))->setValue('Rate');
                         $sheet->getCell($next_column.($row+1))->setValue('Quantity');
                         $next_column++;
                         $sheet->getCell(($next_column).($row+1))->setValue('Amount');
                         $sheet->mergeCells($current_column.$row.':'.$next_column.$row);
-                        $sheet->getCell($current_column.$row)->setValue("RA Bill".($iterator+1));
+                        $sheet->getCell($current_column.$row)->setValue($billTypeName." Bill ".($iterator+1));
 
                     }
                     $totalAmountColumn = $next_column;

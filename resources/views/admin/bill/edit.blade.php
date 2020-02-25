@@ -58,7 +58,7 @@
                                                 <input type="hidden" id="bill_type_id" name="bill_type_id" value="{{$bill->quotation->billType->slug}}">
                                                 <form role="form" id="edit_bill" class="form-horizontal" action="/bill/edit/{{$bill->id}}" method="post">
                                                     <div class="col-md-12 form-group">
-                                                        <div class="col-md-4 date date-picker" data-date-end-date="0d" data-date-format="dd/mm/yyyy">
+                                                        <div class="col-md-4 date date-picker" data-date-end-date="0d">
                                                             <label class="control-label" for="date">Select Bill Date : </label>
                                                             @if(!empty($bill['date']))
                                                                 <input type="text"  name="date" value="{{date('m/d/Y',strtotime($bill['date']))}}" id="date" readonly>
@@ -74,8 +74,8 @@
 
                                                             @endif
                                                         </div>
-                                                        <div class="col-md-4 date date-picker" data-date-end-date="0d" style="margin-left: 20%" data-date-format="dd/mm/yyyy">
-                                                            <label class="control-label" for="performa_invoice_date" style="margin-left: -60%">Select Proforma Invoice Date : </label>
+                                                        <div class="col-md-4 date date-picker" data-date-end-date="0d">
+                                                            <label class="control-label" for="performa_invoice_date" >Select Proforma Invoice Date : </label>
                                                             @if(!empty($bill['performa_invoice_date']))
                                                                 <input type="text"  name="performa_invoice_date" value="{{date('m/d/Y',strtotime($bill['performa_invoice_date']))}}" id="performa_invoice_date" readonly>
                                                                 <button class="btn btn-sm default" type="button">
@@ -88,7 +88,7 @@
                                                                 </button>
                                                             @endif
                                                         </div>
-                                                        <div class="col-md-2" style="margin-left: -4%">
+                                                        <div class="col-md-2" style="margin-left: 0%">
                                                             <select class="table-group-action-input form-control input-inline input-small input-sm" name="assign_bank" id="assign_bank">
                                                                 <option value="">Select Bank</option>
                                                                 @foreach($allbankInfoIds as $bank)
@@ -96,7 +96,15 @@
                                                                 @endforeach
                                                             </select>
                                                         </div>
-
+                                                        <div class="col-md-2 table-actions-wrapper">
+                                                                <select class="table-group-action-input form-control input-inline input-small input-sm" name="change_bill_types" id="change_bill_types">
+                                                                    <option value="default">Select Bill Type for Edit</option>
+                                                                    @for($i = 0 ; $i < count($billTypes); $i++)
+                                                                        <option value="{{$billTypes[$i]['id']}}">{{$billTypes[$i]['name']}}</option>
+                                                                    @endfor
+                                                                </select>
+                                                                <p style="padding-top:10px;font-weight:bold">Current Bill Type: <span style="color:red">{{$bill['bill_type_name']}}</span></p>
+                                                            </div>
                                                     </div>
                                                     <table class="table table-bordered table-striped table-condensed flip-content" style="width:100%;overflow: scroll; " id="editBillTable">
                                                         @if($bill->quotation->billType->slug == 'amountwise')
@@ -152,7 +160,7 @@
                                                                         <span id="boq_quantity_{{$quotationSummaries[$iterator]['id']}}">{{$quotationSummaries[$iterator]['quantity']}}</span>
                                                                     </td>
 
-s                                                                    <td>
+                                                                    <td>
                                                                         @if(array_key_exists('current_quantity',$quotationSummaries[$iterator]->toArray()))
                                                                             <input class="form-control" type="hidden" id="rate_per_unit_{{$quotationSummaries[$iterator]['id']}}" name="quotation_summary_id[{{$quotationSummaries[$iterator]['id']}}][rate]" value="{{$quotationSummaries[$iterator]['rate_per_sqft']}}">
                                                                         @else
