@@ -1355,7 +1355,7 @@ trait BillTrait{
             $quotation = $bill->quotation;
             $data['billType'] = $quotation->billType->slug;
             $projectSiteData = ProjectSite::where('id',$quotation->project_site_id)->first();
-            $data['projectSiteName'] = $projectSiteData->name;
+            $data['projectSiteName'] = $projectSiteData->project->name;
             $data['projectSiteAddress'] = $projectSiteData->address;
             $data['clientCompany'] = Client::where('id',$bill->quotation->project_site->project->client_id)->pluck('company')->first();
             $i = $j = $data['productSubTotal'] = $data['grossTotal'] = 0;
@@ -1454,7 +1454,9 @@ trait BillTrait{
 
             $data = array();
             $data['currentBillID'] = 1;
-            $data['projectSiteName'] = $projectSiteModel->where('id',$bill->quotation->project_site_id)->pluck('name')->first();
+            $projectSiteData = ProjectSite::where('id', $bill->quotation->project_site_id)->first();
+            $data['projectSiteName'] = $projectSiteData->project->name;
+
             $data['clientCompany'] = $clientModel->where('id',$bill->quotation->project_site->project->client_id)->pluck('company')->first();
             $cancelBillStatusId = $billStatusModel->where('slug','cancelled')->pluck('id')->first();
             $previousBillIds = $billModel->where('quotation_id',$bill['quotation_id'])
