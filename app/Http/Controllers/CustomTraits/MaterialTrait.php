@@ -482,7 +482,7 @@ trait MaterialTrait{
 
     public function autoSuggest(Request $request,$keyword){
         try{
-            $materials = Material::where('name','ilike','%'.$keyword.'%')->get();
+            $materials = Material::where('is_active', true)->where('name','ilike','%'.$keyword.'%')->get();
             $response = array();
             if($materials != null){
                 $iterator = 0;
