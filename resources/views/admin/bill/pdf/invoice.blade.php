@@ -57,7 +57,7 @@
                 <td style="font-weight: lighter;" colspan="2"><b>GSTIN :</b>{!! $gstin !!}
             </tr>
             <tr>
-                <td style="width: 50%; font-weight: bolder;">Bill No : RA BILL NO - {!! $currentBillID !!}</td>
+                <td style="width: 50%; font-weight: bolder;">Bill No : {!! $currentBillName !!} BILL NO - {!! $currentBillID !!}</td>
                 <td style=" text-align: right; font-weight: lighter;"> <b>DATE :</b> {!! $billDate !!} </td>
             </tr>
         </table>

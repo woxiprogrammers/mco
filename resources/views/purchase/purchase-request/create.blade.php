@@ -220,7 +220,7 @@
                                                     @endforeach
                                                 </select>
                                             </div>
-                                         <article>
+                                            <article>
                                                 <label for="files">Select multiple files:</label>
                                                 <input id="files" type="file" multiple="multiple" />
                                                 <output id="result" />

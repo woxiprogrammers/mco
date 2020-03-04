@@ -15,6 +15,7 @@ use App\AssetMaintenanceBillPayment;
 use App\AssetMaintenanceVendorRelation;
 use App\AssetRentMonthlyExpenses;
 use App\Bill;
+use App\BillTypes;
 use App\BillQuotationExtraItem;
 use App\BillQuotationProducts;
 use App\BillQuotationSummary;
@@ -1703,12 +1704,21 @@ class ReportManagementController extends Controller{
                     $monthlyTotal[$iterator]['amount'] = round($monthlyTotalAmount,3);
                     $billNo = 1;
                     $row = 1;
+                    $billTypesModel = new BillTypes();
+                    $billTypes = $billTypesModel->get()->toArray();
+                    $billTypesData = array();
+                    foreach($billTypes as $btypes) {
+                        $billTypesData[$btypes['id']] = 0;
+                    }                               
                     $totalBasicAmount = $totalGst = $totalWithTaxAmount = $totalTransactionAmount = $totalMobilization = $totalTds =
                     $totalRetention = $totalHold = $totalDebit = $totalOtherRecovery = $totalPayable = $totalReceipt = $totalPaid = $totalRemaining = 0;
                     foreach ($totalBillData as $thisBill){
-                        $billName = "R.A. ".$billNo;
                         if($thisBill['bill_status_id'] == $statusId->where('slug','approved')->pluck('id')->first()){
                             $billData = $this->getBillData($thisBill['id']);
+                            if (array_key_exists($billData['bill_type_id'], $billTypesData)) {
+                                $billTypesData[$billData['bill_type_id']] +=  1;
+                            }
+                            $billName = $billData['bill_type_name']." ".$billTypesData[$billData['bill_type_id']];
                             $thisMonth = (int)date('n',strtotime($billData['date']));
                             $billRow = $row;
                                 $data[$row]['make_bold'] = true;
@@ -3636,6 +3646,10 @@ class ReportManagementController extends Controller{
             }
             $final['current_bill_gross_total_amount'] = $final['current_bill_gross_total_amount'] + $bill['rounded_amount_by'];
             $billData['date'] = $bill['date'];
+            $billData['bill_type_id'] = $bill['bill_types_id'];
+            $billTypesModel = new BillTypes();
+            $billTypes = $billTypesModel->get()->toArray();
+            $billData['bill_type_name'] = $billTypesModel->where('id',$bill['bill_types_id'])->value('name');
             $billData['created_at'] = $bill['created_at'];
             $billData['basic_amount'] = $total_rounded['current_bill_amount'];
             $billData['total_amount_with_tax'] = $final['current_bill_gross_total_amount'];
