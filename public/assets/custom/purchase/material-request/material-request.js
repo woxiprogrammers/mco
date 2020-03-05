@@ -151,7 +151,10 @@ $(document).ready(function(){
             $("#searchbox").closest('.form-group').addClass('has-error').removeClass('has-success');
             alert('Please select from dropdown');
             validFlag = false;
-        }else{
+        } else if (componentTypeId == 4) {
+            alert('New material cannot be created. Please contact administrator.');
+            validFlag = false;
+        } else {
             $("#searchbox").closest('.form-group').addClass('has-success').removeClass('has-error');
         }
         if(/^[^$!@#]*$/.test(material_name) == false) {
@@ -255,7 +258,10 @@ $(document).ready(function(){
             $("#Assetsearchbox").closest('.form-group').addClass('has-error').removeClass('has-success');
             alert('Please select from dropdown');
             validFlag = false;
-        }else{
+        } else if (componentTypeId == 6) {
+            alert('New asset can not be created. Please contact administrator.');
+            validFlag = false;
+        } else {
             $("#Assetsearchbox").closest('.form-group').addClass('has-success').removeClass('has-error');
         }
         if(/^[^$!@#]*$/.test(asset_name) == false) {
