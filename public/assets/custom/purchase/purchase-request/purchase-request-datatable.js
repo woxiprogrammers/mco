@@ -185,7 +185,10 @@ $('#createMaterial').click(function(){
         $("#searchbox").closest('.form-group').addClass('has-error').removeClass('has-success');
         alert('Please select from dropdown');
         validFlag = false;
-    }else{
+    } else if (componentTypeId == 4) {
+        alert('New material cannot be created. Please contact administrator.');
+        validFlag = false;
+    } else {
         $("#searchbox").closest('.form-group').addClass('has-success').removeClass('has-error');
     }
     if(/^[^$!@#]*$/.test(material_name) == false) {
@@ -226,7 +229,7 @@ $('#createMaterial').click(function(){
         $('#Materialrows').append(rows);
         var iterator = parseInt(iterator) + 1;
         $('#iterator').val(iterator);
-        $('#deleteRowButton').click(DeleteRow);
+        //$('#deleteRowButton').click(DeleteRow);
         $('#component_id').val(null);
         $('#searchbox').html('');
         $('#qty').val('');
@@ -248,7 +251,10 @@ $('#createAsset').click(function(){
         $("#Assetsearchbox").closest('.form-group').addClass('has-error').removeClass('has-success');
         alert('Please select from dropdown');
         validFlag = false;
-    }else{
+    } else if (componentTypeId == 6) {
+        alert('New asset can not be created. Please contact administrator.');
+        validFlag = false;
+    }else {
         $("#Assetsearchbox").closest('.form-group').addClass('has-success').removeClass('has-error');
     }
     if(/^[^$!@#]*$/.test(asset_name) == false) {
@@ -283,7 +289,7 @@ $('#createAsset').click(function(){
         $('#Assetrows').append(rows);
         var iterator = parseInt(iterator) + 1;
         $('#iterator').val(iterator);
-        $('#deleteAssetRowButton').click(DeleteRow);
+        //$('#deleteAssetRowButton').click(DeleteRow);
         $('#component_id').val(null);
         $('#filesAsset').val(null);
     }
