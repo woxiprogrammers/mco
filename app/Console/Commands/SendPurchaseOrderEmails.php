@@ -170,11 +170,20 @@ class SendPurchaseOrderEmails extends Command
                     $purchaseRequestFormat = $purchaseOrder->purchaseRequest->format_id;
                     $mailMessage = 'Attached herewith the Purchase Order '.$purchaseOrder->format_id.' for Purchase Request '.$purchaseRequestFormat;
                     $this->comment('Sending mail to '.$vendorInfo['company'].' at email address '.$vendorInfo['email']);
-                    Mail::send('purchase.purchase-request.email.vendor-quotation', ['mailMessage' => $mailMessage], function($message) use ($mailData, $purchaseRequestFormat){
+                    
+                    $projectCcEmail = $purchaseOrderRequest->purchaseRequest->projectSite->project->cc_mail;
+                    if(!is_null($projectCcEmail)) {
+                        $projectCcEmail = explode(",",$projectCcEmail);
+                        array_push($projectCcEmail,env('PURCHASE_CC_MAIL'));
+                    } else {
+                        $projectCcEmail = [];
+                        array_push($projectCcEmail,env('PURCHASE_CC_MAIL'));
+                    }
+                    $bccEmails = $purchaseOrderRequest->purchaseRequest->projectSite->project->name;
+                    Mail::send('purchase.purchase-request.email.vendor-quotation', ['mailMessage' => $mailMessage], function($message) use ($mailData, $purchaseRequestFormat, $projectCcEmail){
                         $message->subject('Purchase Order for '.$purchaseRequestFormat);
                         $message->to($mailData['toMail']);
-                        $message->cc(env('PURCHASE_CC_MAIL'));
-                        $message->bcc('megha.woxi@gmail.com');
+                        $message->cc($projectCcEmail);
                         $message->from(env('MAIL_USERNAME'));
                         $message->attach($mailData['path']);
                     });

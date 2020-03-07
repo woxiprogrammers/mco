@@ -193,6 +193,7 @@ trait ProjectTrait{
             $projectData['client_id'] = $request->client_id;
             $projectData['is_active'] = false;
             $projectData['hsn_code_id'] = $request->hsn_code;
+            $projectData['cc_mail'] = $request->cc_mail;
             $project = Project::create($projectData);
             $projectSiteData = array();
             $projectSiteData['city_id'] = $request->city_id;
@@ -240,6 +241,7 @@ trait ProjectTrait{
             $project->project_site = $project->project_site->toArray();
             $projectData['project_site_id'] = $project->project_site[0]['id'];
             $projectData['project_site'] = $project->project_site[0]['name'];
+            $projectData['cc_mail'] = $project->cc_mail;
             $projectData['project_site_address'] = $project->project_site[0]['address'];
             $projectData['project_city_id'] = $project->project_site[0]['city_id'];
             $projectData['asset_rent_opening_expense'] = $project->project_site[0]['asset_rent_opening_expense'];
@@ -272,7 +274,8 @@ trait ProjectTrait{
         try{
             $project->update([
                 'name'=>$request->project_name,
-                'hsn_code_id' => $request->hsn_code
+                'hsn_code_id' => $request->hsn_code,
+                'cc_mail' => $request->cc_mail
             ]);
             ProjectSite::where('project_id',$project->id)->update([
                 'name' => $request->project_site_name,

@@ -125,6 +125,18 @@
                                                                 @endforeach
                                                             </div>
                                                         </div>
+                                                        <div class="form-group">
+                                                            <div class="col-md-3" style="text-align: right">
+                                                                <label for="name" class="control-label">Extra Email</label>
+                                                                <span></span>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <textarea class="form-control" name="cc_mail" id="cc_mail">{{$projectData['cc_mail']}}</textarea>
+                                                            </div>
+                                                            <div class="col-md-2">
+                                                                <span>If multiple email id then use <strong>, (comma)</strong> to seperate it out.</span>
+                                                            </div>
+                                                        </div>
                                                         <div class="form-body">
                                                             <div class="form-group row">
                                                                 <div class="col-md-3" style="text-align: right">
