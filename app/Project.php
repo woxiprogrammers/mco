@@ -8,7 +8,7 @@ class Project extends Model
 {
     protected $table = 'projects';
 
-    protected $fillable = ['name','client_id','is_active','hsn_code_id','city_id'];
+    protected $fillable = ['name','client_id','is_active','hsn_code_id','city_id','cc_mail'];
 
     public function project_site(){
         return $this->hasMany('App\ProjectSite','project_id');
