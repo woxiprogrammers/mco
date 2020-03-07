@@ -76,6 +76,9 @@
                                                     <div class="col-md-6">
                                                         <textarea class="form-control" id="por_remarks" name="por_remarks" ></textarea>
                                                     </div>
+                                                    <div class="col-md-2">
+                                                    <span>If you want to add remark on new line add <strong style="color:red"> {{ "<br />" }} </strong> . After br it will work as new line</span>
+                                                    </div>
                                                 </div>
                                                 <div class="table-scrollable" style="overflow: scroll !important;">
                                                     <table class="table table-striped table-bordered table-hover" id="purchaseRequestComponentTable" style="overflow: scroll; table-layout: fixed">
