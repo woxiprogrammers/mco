@@ -390,7 +390,7 @@ $totalSubtotal =  $totalCGSTAmount = $totalSGSTAmount = $totalIGSTAmount = 0;
 <br/>
 <fieldset>
     <legend>Remark :</legend>
-    <span style="font-weight: bolder;font-size: 12px;">{{array_key_exists("por_remarks",$projectSiteInfo) ? $projectSiteInfo['por_remarks'] : "-"}}</span>
+    <span style="font-weight: bolder;font-size: 12px;">{!! array_key_exists("por_remarks",$projectSiteInfo) ? $projectSiteInfo['por_remarks'] : '-' !!}</span>
 </fieldset>
 </body>
 </html>
