@@ -195,9 +195,9 @@
         });
     });
     $(document).ajaxStop(function(){
-        setTimeout(function(){
+        //setTimeout(function(){
             $.LoadingOverlay("hide");
-        }, 200);
+        //}, 200);
 
     });
 
