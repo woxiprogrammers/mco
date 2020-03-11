@@ -20,10 +20,10 @@ var InventoryListing = function () {
                 //"dom": "<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'<'table-group-actions pull-right'>>r>t<'row'<'col-md-8 col-sm-12'pli><'col-md-4 col-sm-12'>>",
 
                 "lengthMenu": [
-                    [50, 100, 150],
-                    [50, 100, 150] // change per page values here
+                    [20, 100, 150],
+                    [20, 100, 150] // change per page values here
                 ],
-                "pageLength": 50, // default record count per page
+                "pageLength": 20, // default record count per page
                 "ajax": {
                     "url": "/inventory/listing?_token="+$("input[name='_token']").val(), // ajax source
                 },
