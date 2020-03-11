@@ -197,7 +197,7 @@
     $(document).ajaxStop(function(){
         setTimeout(function(){
             $.LoadingOverlay("hide");
-        }, 1000);
+        }, 200);
 
     });
 
