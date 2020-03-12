@@ -444,11 +444,20 @@ class PurchaseOrderBillingController extends Controller
 
     public function listing(Request $request){
         try{
+            if(Session::has('global_project_site')){
+                $projectSiteId = Session::get('global_project_site');
+                $purchaseOrderBillIds = PurchaseOrderBill::join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
+                ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
+                ->where('purchase_requests.project_site_id', $projectSiteId)
+                ->pluck('purchase_order_bills.id')
+                ->toArray();
+            } else {
+                $purchaseOrderBillIds = PurchaseOrderBill::pluck('id')->toArray();
+            }
             $records = array();
             $status = 200;
 
             $postDataArray = array();
-            $purchaseOrderBillIds = PurchaseOrderBill::pluck('id')->toArray();
             $filterFlag = true;
             if($request->has('postdata')){
                 $postdata = $request['postdata'];
