@@ -162,6 +162,13 @@ var PurchaseOrderListing = function () {
 jQuery(document).ready(function() {
     PurchaseOrderListing.init();
     $(".search_filter").on('keyup', function(){
-        $(".filter-submit").trigger('click');
+        if( $("#project_name").val().length > 3 ||
+            $("#system_bill_number").val().length > 3 ||
+            $("#bill_number").val().length > 3  ||
+            $("#grn").val().length > 3 ||
+            $("#vendor_name").val().length > 3 
+        ) {
+            $(".filter-submit").trigger('click');
+        }
     });
 });

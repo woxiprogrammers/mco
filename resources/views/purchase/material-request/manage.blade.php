@@ -430,25 +430,27 @@
         });
 
         $(".custom_filter").on('keyup',function(){
-            var site_id = $('#globalProjectSite').val();
-            var year = $('#year').val();
-            var month = $('#month').val();
-            var status_id = $('#status_id').val();
-            var m_name = $('#m_name').val();
-            var m_id = $('#m_id').val();
-            var m_count = $('#m_count').val();
+            if ($("#m_name").val().length > 3 || $("#m_id").val().length > 3) {
+                var site_id = $('#globalProjectSite').val();
+                var year = $('#year').val();
+                var month = $('#month').val();
+                var status_id = $('#status_id').val();
+                var m_name = $('#m_name').val();
+                var m_id = $('#m_id').val();
+                var m_count = $('#m_count').val();
 
-            var postData =
-                'site_id=>'+site_id+','+
-                    'year=>'+year+','+
-                    'month=>'+month+','+
-                    'm_count=>'+m_count;
+                var postData =
+                    'site_id=>'+site_id+','+
+                        'year=>'+year+','+
+                        'month=>'+month+','+
+                        'm_count=>'+m_count;
 
-            $("input[name='postdata']").val(postData);
-            $("input[name='m_name']").val(m_name);
-            $("input[name='m_id']").val(m_id);
-            $("input[name='status']").val(status_id);
-            $(".filter-submit").trigger('click');
+                $("input[name='postdata']").val(postData);
+                $("input[name='m_name']").val(m_name);
+                $("input[name='m_id']").val(m_id);
+                $("input[name='status']").val(status_id);
+                $(".filter-submit").trigger('click');
+            }
         });
 
 

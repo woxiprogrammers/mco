@@ -155,11 +155,15 @@
             });
 
             $('#search_name').on('keyup',function(){
-                $(".filter-submit").trigger('click');
+                if ($("#search_name").val().length > 3 ) {
+                    $(".filter-submit").trigger('click');
+                }
             });
 
             $('.search_filter').on('keyup',function(){
-                $(".filter-submit").trigger('click');
+                if ($("#search_name").val().length > 3 ) {
+                    $(".filter-submit").trigger('click');
+                }
             });
 
             $('#createComponentButton').click(function(){

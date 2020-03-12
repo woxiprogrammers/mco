@@ -200,11 +200,15 @@
             $('#purchaseOrder').DataTable();
 
             $("input[name='po_id']").on('keyup',function(){
-                $(".filter-submit").trigger('click');
+                if ($("input[name='po_id']").val().length > 3) {
+                    $(".filter-submit").trigger('click');
+                }
             });
 
             $("input[name='vendor_name']").on('keyup',function(){
-                $(".filter-submit").trigger('click');
+                if ($("input[name='vendor_name']").val().length > 3) {
+                    $(".filter-submit").trigger('click');
+                }
             });
 
             $("#status_id").on('change',function(){
