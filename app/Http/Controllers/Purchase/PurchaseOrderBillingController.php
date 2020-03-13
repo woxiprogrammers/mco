@@ -486,6 +486,7 @@ class PurchaseOrderBillingController extends Controller
                     ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
                     ->join('project_sites','purchase_requests.project_site_id','=','project_sites.id')
                     ->join('projects','project_sites.project_id','=','projects.id')
+                    ->whereIn('purchase_order_bills.id', $purchaseOrderBillIds)
                     ->where('projects.name','ilike','%'.$request->project_name.'%')
                     ->pluck('purchase_order_bills.id')->toArray();
                 if(count($purchaseOrderBillIds) <= 0){
@@ -495,6 +496,7 @@ class PurchaseOrderBillingController extends Controller
             if($request->has('system_bill_number') && $request->system_bill_number != '' && $filterFlag == true){
                 $purchaseOrderBillIds = PurchaseOrderBill::join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
                     ->where('purchase_order_bills.bill_number','ilike','%'.$request->system_bill_number.'%')
+                    ->whereIn('purchase_order_bills.id', $purchaseOrderBillIds)
                     ->pluck('purchase_order_bills.id')->toArray();
                 if(count($purchaseOrderBillIds) <= 0){
                     $filterFlag = false;
@@ -503,6 +505,7 @@ class PurchaseOrderBillingController extends Controller
             if($request->has('bill_number') && $request->bill_number != '' && $filterFlag == true){
                 $purchaseOrderBillIds = PurchaseOrderBill::join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
                     ->where('purchase_order_bills.vendor_bill_number','ilike','%'.$request->bill_number.'%')
+                    ->whereIn('purchase_order_bills.id', $purchaseOrderBillIds)
                     ->pluck('purchase_order_bills.id')->toArray();
                 if(count($purchaseOrderBillIds) <= 0){
                     $filterFlag = false;
@@ -521,6 +524,7 @@ class PurchaseOrderBillingController extends Controller
             if($request->has('bill_date') && $request->bill_date != '' && $filterFlag == true){
                 $purchaseOrderBillIds = PurchaseOrderBill::whereIn('id', $purchaseOrderBillIds)
                                             ->whereDate('bill_date',$request->bill_date)
+                                            ->whereIn('purchase_order_bills.id', $purchaseOrderBillIds)
                                             ->pluck('id')->toArray();
                 if(count($purchaseOrderBillIds) <= 0){
                     $filterFlag = false;

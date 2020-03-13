@@ -164,7 +164,7 @@ jQuery(document).ready(function() {
     $(".search_filter").on('keyup', function(){
         if( $("#project_name").val().length > 3 ||
             $("#system_bill_number").val().length > 3 ||
-            $("#bill_number").val().length > 3  ||
+            $("#bill_number").val().length > 0  ||
             $("#grn").val().length > 3 ||
             $("#vendor_name").val().length > 3 
         ) {
