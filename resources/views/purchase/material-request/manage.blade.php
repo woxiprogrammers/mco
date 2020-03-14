@@ -68,11 +68,12 @@
                                       {!! csrf_field() !!}
                                       <div class="portlet-body">
                                           <label class="checkbox-inline">
-                                              <input type="checkbox" id="materialtWiseListing" value=""><span style="color: salmon">Materialwise Listing</span>
+                                              <input type="checkbox" id="materialtWiseListing" value=""><span>Materialwise Listing</span>
                                           </label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                        </label>&nbsp;&nbsp;&nbsp;&nbsp;
                                           <label class="checkbox-inline">
-                                              <input type="checkbox" id="materialRequestWiseListing" value=""><span style="color: salmon">Material Requestwise Listing</span>
+                                              <input type="checkbox" id="materialRequestWiseListing" value=""><span>Material Requestwise Listing</span>
                                           </label>
+                                          &nbsp;&nbsp;&nbsp;<span style="color: red">(Note : Only Global Sites data displayed)</span>
                                           <hr/>
                                           <div class="portlet-body">
                                               <div class="row">

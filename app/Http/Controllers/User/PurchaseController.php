@@ -115,7 +115,14 @@ class PurchaseController extends Controller
                 $site_id = $request->site_id;
             }
             $materialRequestComponentArray = array();
-            $materialRequestComponentIds = MaterialRequestComponents::all()->pluck('id');
+            if (Session::has('global_project_site')){
+                $projectSiteId = Session::get('global_project_site');
+                $materialRequestComponentIds = MaterialRequestComponents::join('material_requests', 'material_request_components.material_request_id','=','material_requests.id')
+                                           ->where('material_requests.project_site_id','=', $projectSiteId)
+                                           ->pluck('material_request_components.id');
+            } else {
+                $materialRequestComponentIds = MaterialRequestComponents::pluck('id');
+            }
             $filterFlag = true;
             if ($site_id != 0 && $filterFlag == true) {
                 $materialRequestComponentIds = MaterialRequestComponents::join('material_requests','material_requests.id','=','material_request_components.material_request_id')
