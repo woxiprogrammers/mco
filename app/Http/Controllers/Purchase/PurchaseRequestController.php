@@ -282,6 +282,8 @@ class PurchaseRequestController extends Controller
 
     public function purchaseRequestListing(Request $request){
         try{
+            $skip = $request->start;
+            $take = $request->length;
             $postdata = null;
             $status = 0;
             $site_id = 0;
@@ -322,7 +324,13 @@ class PurchaseRequestController extends Controller
             $response = array();
             $responseStatus = 200;
             $purchaseRequests = array();
-            $ids = PurchaseRequest::all()->pluck('id');
+
+            if(Session::has('global_project_site')){
+                $projectSiteId = Session::get('global_project_site');
+            }else{
+                $projectSiteId = null;
+            }
+            $ids = PurchaseRequest::where('project_site_id','=',$projectSiteId)->pluck('id');
             $filterFlag = true;
             if ($site_id != 0 && $filterFlag == true) {
                 $ids = PurchaseRequest::whereIn('id',$ids)->where('project_site_id', $site_id)->pluck('id');
@@ -362,15 +370,20 @@ class PurchaseRequestController extends Controller
                     $filterFlag = false;
                 }
             }
+
             if ($filterFlag) {
-                $purchaseRequests = PurchaseRequest::whereIn('id',$ids)->orderBy('created_at','desc')->get();
+                $totalrecordsCount = PurchaseRequest::whereIn('id',$ids)->count();
+                $purchaseRequests = PurchaseRequest::whereIn('id',$ids)
+                                    ->skip($skip)->take($take)
+                                    ->orderBy('created_at','desc')->get();
             }
+
             $iTotalRecords = count($purchaseRequests);
             $records = array();
             $records['data'] = array();
             $user = Auth::user();
             $end = $request->length < 0 ? count($purchaseRequests) : $request->length;
-            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($purchaseRequests); $iterator++,$pagination++ ){
+            for($iterator = 0,$pagination = 0; $iterator < $end && $pagination < count($purchaseRequests); $iterator++,$pagination++ ){
                 $txnInfo = PurchaseRequestComponentStatuses::where('id',$purchaseRequests[$pagination]['purchase_component_status_id'])->select('slug','name')->first()->toArray();
                 switch ($txnInfo['slug']){
                     case 'purchase-requested':
@@ -523,8 +536,8 @@ class PurchaseRequestController extends Controller
                 ];
             }
             $records["draw"] = intval($request->draw);
-            $records["recordsTotal"] = $iTotalRecords;
-            $records["recordsFiltered"] = $iTotalRecords;
+            $records["recordsTotal"] = $totalrecordsCount;
+            $records["recordsFiltered"] = $totalrecordsCount;
         }catch (\Exception $e){
             $data = [
                 'action' => 'Purchase Requests listing',
