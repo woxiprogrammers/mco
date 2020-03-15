@@ -338,11 +338,18 @@ use InventoryTrait;
 
     public function assetListing(Request $request){
         try{
-
+            $skip = $request->start;
+            $take = $request->length;
+            $totalRecordCount = 0;
             if($request->has('asset_name')){
-                $assetData = Asset::where('name','ilike','%'.$request['asset_name'].'%')->orderBy('name','asc')->get();
+                $assetData = Asset::where('name','ilike','%'.$request['asset_name'].'%')
+                            ->skip($skip)->take($take)
+                            ->orderBy('name','asc')->get();
+                $totalRecordCount = Asset::where('name','ilike','%'.$request['asset_name'].'%')
+                ->count();
             }else{
-                $assetData = Asset::orderBy('name','asc')->get();
+                $assetData = Asset::orderBy('name','asc')->skip($skip)->take($take)->get();
+                $totalRecordCount = Asset::count();
             }
 
             if ($request->has('get_total')) {
@@ -356,7 +363,7 @@ use InventoryTrait;
                 $records = array();
                 $records['data'] = array();
                 $end = $request->length < 0 ? count($assetData) : $request->length;
-                for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($assetData); $iterator++,$pagination++ ){
+                for($iterator = 0,$pagination = 0; $iterator < $end && $pagination < count($assetData); $iterator++,$pagination++ ){
                     if($assetData[$pagination]['is_active'] == true){
                         $asset_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
                         $status = 'Disable';
@@ -403,8 +410,8 @@ use InventoryTrait;
                     ];
                 }
                 $records["draw"] = intval($request->draw);
-                $records["recordsTotal"] = $iTotalRecords;
-                $records["recordsFiltered"] = $iTotalRecords;
+                $records["recordsTotal"] = $totalRecordCount;
+                $records["recordsFiltered"] = $totalRecordCount;
             }
         }catch (Exception $e){
             $records = array();
