@@ -116,6 +116,13 @@
 <script>
     $(document).ready(function() {
         $('#projectSiteTable').DataTable();
+        
+        $("#project_name").on('keyup',function(){
+            if ($("#project_name").val().length > 3 ) {
+                $(".filter-submit").trigger('click');
+            }
+        });
+
     });
 </script>
 @endsection

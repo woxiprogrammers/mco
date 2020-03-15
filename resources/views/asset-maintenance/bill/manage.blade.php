@@ -121,7 +121,9 @@
 <script>
     $(document).ready(function() {
         $("input[name='vendor_name']").on('keyup',function(){
-            $(".filter-submit").trigger('click');
+            if ($("input[name='vendor_name']").val().length > 3) {
+                $(".filter-submit").trigger('click');
+            }
         });
     });
 </script>

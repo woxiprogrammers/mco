@@ -165,10 +165,10 @@ var BillListing = function () {
                 },
 
                 "lengthMenu": [
-                    [50, 100, 150],
-                    [50, 100, 150] // change per page values here
+                    [20, 100, 150],
+                    [20, 100, 150] // change per page values here
                 ],
-                "pageLength": 50, // default record count per page
+                "pageLength": 20, // default record count per page
                 "ajax": {
                     "url": "/subcontractor/bill/listing/"+subcontractorStructureId+"/"+bill_status, // ajax source
                     "data" :{

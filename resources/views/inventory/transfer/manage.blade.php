@@ -130,25 +130,34 @@
             RequestComponentListing.init();
 
             $("#search_to, #search_from, #search_name, #search_qty, #search_amt,#search_grn_out, #search_grn_in").on('keyup',function() {
-                var searchName= $('#search_name').val();
-                var searchFrom = $('#search_from').val();
-                var searchTo = $('#search_to').val();
-                var searchQty = $('#search_qty').val();
-                var searchAmt = $('#search_amt').val();
-                var searchGrnOut = $('#search_grn_out').val();
-                var searchGrnIn = $('#search_grn_in').val();
-                var searchUnitStatus = $('#unit_id').val();
-                var searchStatus = $('#status_id').val();
-                $("input[name='search_name']").val(searchName)
-                $("input[name='search_from']").val(searchFrom);
-                $("input[name='search_to']").val(searchTo);
-                $("input[name='search_amt']").val(searchAmt);
-                $("input[name='search_qty']").val(searchQty);
-                $("input[name='search_grn_out']").val(searchGrnOut);
-                $("input[name='search_grn_in']").val(searchGrnIn);
-                $("input[name='unit_status']").val(searchUnitStatus);
-                $("input[name='status']").val(searchStatus);
-                $(".filter-submit").trigger('click');
+                if (    $("#search_to").val().length > 3 ||
+                        $("#search_from").val().length > 3 ||
+                        $("#search_name").val().length > 3 ||
+                        $("#search_qty").val().length > 0 ||
+                        $("#search_amt").val().length > 0 ||
+                        $("#search_grn_out").val().length > 3 ||
+                        $("#search_grn_in").val().length > 3
+                ) {
+                    var searchName= $('#search_name').val();
+                    var searchFrom = $('#search_from').val();
+                    var searchTo = $('#search_to').val();
+                    var searchQty = $('#search_qty').val();
+                    var searchAmt = $('#search_amt').val();
+                    var searchGrnOut = $('#search_grn_out').val();
+                    var searchGrnIn = $('#search_grn_in').val();
+                    var searchUnitStatus = $('#unit_id').val();
+                    var searchStatus = $('#status_id').val();
+                    $("input[name='search_name']").val(searchName)
+                    $("input[name='search_from']").val(searchFrom);
+                    $("input[name='search_to']").val(searchTo);
+                    $("input[name='search_amt']").val(searchAmt);
+                    $("input[name='search_qty']").val(searchQty);
+                    $("input[name='search_grn_out']").val(searchGrnOut);
+                    $("input[name='search_grn_in']").val(searchGrnIn);
+                    $("input[name='unit_status']").val(searchUnitStatus);
+                    $("input[name='status']").val(searchStatus);
+                    $(".filter-submit").trigger('click');
+                }
             });
 
             $("#status_id, #unit_id").on('change',function() {

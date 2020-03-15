@@ -249,6 +249,9 @@ trait ProductTrait{
 
     public function productListing(Request $request){
         try{
+            $skip = $request->start;
+            $take = $request->length;
+            $totalRecordCount = 0;
             $user = Auth::user();
             $productData = array();
             $ids = Product::pluck('id')->toArray();
@@ -275,14 +278,19 @@ trait ProductTrait{
             if($filterFlag == true) {
                 $productData = Product::whereIn('id',$ids)
                     ->orderBy('name','asc')
+                    ->skip($skip)->take($take)
                     ->get()->toArray();
+
+                $totalRecordCount = Product::whereIn('id',$ids)
+                    ->orderBy('name','asc')
+                    ->count();
             }
 
             $iTotalRecords = count($productData);
             $records = array();
             $records['data'] = array();
             $end = $request->length < 0 ? count($productData) : $request->length;
-            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($productData); $iterator++,$pagination++ ){
+            for($iterator = 0,$pagination = 0; $iterator < $end && $pagination < count($productData); $iterator++,$pagination++ ){
                 $productVersion = ProductVersion::where('product_id',$productData[$pagination]['id'])->select('rate_per_unit')->orderBy('created_at','desc')->first();
                 if($productData[$pagination]['is_active'] == true){
                     $product_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
@@ -427,8 +435,8 @@ trait ProductTrait{
 
             }
             $records["draw"] = intval($request->draw);
-            $records["recordsTotal"] = $iTotalRecords;
-            $records["recordsFiltered"] = $iTotalRecords;
+            $records["recordsTotal"] = $totalRecordCount;
+            $records["recordsFiltered"] = $totalRecordCount;
         }catch(\Exception $e){
             $records = array();
             $data = [

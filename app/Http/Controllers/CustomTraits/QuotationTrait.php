@@ -389,11 +389,16 @@ trait QuotationTrait{
 
     public function quotationListing(Request $request, $status){
         try{
+            $skip = $request->start;
+            $take = $request->length;
             $records = array();
             $records['data'] = array();
-            $quotations = Quotation::where('quotation_status_id','=', $status)->orderBy('updated_at','desc')->get();
+            $quotations = Quotation::where('quotation_status_id','=', $status)
+                            ->skip($skip)->take($take)
+                            ->orderBy('updated_at','desc')->get();
+            $totalRecordCount = Quotation::where('quotation_status_id','=', $status)->count();
             $end = $request->length < 0 ? count($quotations) : $request->length;
-            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($quotations); $iterator++,$pagination++ ){
+            for($iterator = 0,$pagination = 0; $iterator < $end && $pagination < count($quotations); $iterator++,$pagination++ ){
                 if($quotations[$pagination]->quotation_status->slug == 'draft'){
                     $quotationStatus = '<td><span class="btn btn-xs btn-warning"> Draft </span></td>';
                 }elseif($quotations[$pagination]->quotation_status->slug == 'approved'){
@@ -465,8 +470,8 @@ trait QuotationTrait{
 
             }
             $records["draw"] = intval($request->draw);
-            $records["recordsTotal"] = count($quotations);
-            $records["recordsFiltered"] = count($quotations);
+            $records["recordsTotal"] = $totalRecordCount;
+            $records["recordsFiltered"] = $totalRecordCount;
         }catch(\Exception $e){
             $records = array();
             $data = [

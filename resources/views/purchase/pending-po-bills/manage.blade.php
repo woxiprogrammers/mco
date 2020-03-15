@@ -101,7 +101,13 @@
     <script>
         $(document).ready(function() {
             $('.search_filter').on('keyup',function(){
-                $(".filter-submit").trigger('click');
+                if ( $("#project_name").val().length > 3 ||
+                     $("#po_number").val().length > 3 ||
+                     $("#grn_number").val().length > 3 ||
+                     $("#vendor_name").val().length > 3
+                    ) {
+                    $(".filter-submit").trigger('click');
+                }
             });
         });
     </script>

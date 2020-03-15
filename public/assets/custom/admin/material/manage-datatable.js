@@ -13,10 +13,10 @@ var MaterialListing = function () {
             loadingMessage: 'Loading...',
             dataTable: {
                 "lengthMenu": [
-                    [ 50, 100, 150],
-                    [ 50, 100, 150]
+                    [ 30, 100, 150],
+                    [ 30, 100, 150]
                 ],
-                "pageLength": 50,
+                "pageLength": 30,
                 "ajax": {
                     "url": "/material/listing",
                 },
@@ -71,15 +71,21 @@ var MaterialListing = function () {
 jQuery(document).ready(function() {
     MaterialListing.init();
     $("input[name='search_name']").on('keyup',function(){
-        $(".filter-submit").trigger('click');
+        if ($("input[name='search_name']").val().length > 3) {
+            $(".filter-submit").trigger('click');
+        }
     });
 
     $("input[name='search_rate']").on('keyup',function(){
-        $(".filter-submit").trigger('click');
+        if ($("input[name='search_rate']").val().length > 0) {
+            $(".filter-submit").trigger('click');
+        }
     });
 
     $("input[name='search_name_cat']").on('keyup',function(){
-        $(".filter-submit").trigger('click');
+        if ($("input[name='search_name_cat']").val().length > 3) {
+            $(".filter-submit").trigger('click');
+        }
     });
 
     $("#changeStatusButton").on('click',function(){

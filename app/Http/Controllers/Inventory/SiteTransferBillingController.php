@@ -142,6 +142,10 @@ class SiteTransferBillingController extends Controller
 
     public function listing(Request $request){
         try{
+            $skip = $request->start;
+            $take = $request->length;
+            $totalRecordCount = 0;
+            $siteTransferBillData = array();
             $user = Auth::user();
             $records = array();
             $status = 200;
@@ -210,8 +214,14 @@ class SiteTransferBillingController extends Controller
                 }
             }
 
-            $siteTransferBillData = SiteTransferBill::whereIn('id', $siteTransferBillId)
+            if($filterFlag) {
+                $siteTransferBillData = SiteTransferBill::whereIn('id', $siteTransferBillId)
+                                    ->skip($skip)->take($take)
                                     ->orderBy('created_at','desc')->get();
+                $totalRecordCount = SiteTransferBill::whereIn('id', $siteTransferBillId)->count();
+            }
+            
+            $paidAmount = $total = $pendingAmount = 0;
             if ($request->has('get_total')) {
                 if ($filterFlag) {
                     $total = $siteTransferBillData->sum('total');
@@ -222,13 +232,13 @@ class SiteTransferBillingController extends Controller
                 $records['billtotal'] = $paidAmount;
                 $records['paidtotal'] = $pendingAmount;
             } else {
-                $records["recordsFiltered"] = $records["recordsTotal"] = count($siteTransferBillData);
+                $records["recordsFiltered"] = $records["recordsTotal"] = $totalRecordCount;
                 if ($request->length == -1) {
-                    $length = $records["recordsTotal"];
+                    $length = count($siteTransferBillData);
                 } else {
                     $length = $request->length;
                 }
-                for ($iterator = 0, $pagination = $request->start; $iterator < $length && $pagination < count($siteTransferBillData); $iterator++, $pagination++) {
+                for ($iterator = 0, $pagination = 0; $iterator < $length && $pagination < count($siteTransferBillData); $iterator++, $pagination++) {
                     $projectName = $siteTransferBillData[$pagination]->inventoryComponentTransfer->inventoryComponent->projectSite->project->name;
                     $paidAmount = SiteTransferBillPayment::where('site_transfer_bill_id', $siteTransferBillData[$pagination]['id'])->sum('amount');
                     $pendingAmount = $siteTransferBillData[$pagination]['total'] - $paidAmount;

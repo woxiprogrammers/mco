@@ -44,7 +44,6 @@
                                                         <table class="table table-striped table-bordered table-hover order-column" id="inventoryListingTable">
                                                             <thead>
                                                                 <tr>
-                                                                    <th> Sr. No </th>
                                                                     <th> Material Name </th>
                                                                     <th> In</th>
                                                                     <th> Out </th>
@@ -53,7 +52,6 @@
                                                                     <th> Action </th>
                                                                 </tr>
                                                                 <tr class="filter">
-                                                                    <th> </th>
                                                                     <th> <input type="text" class="form-control form-filter search_filter" name="search_name" id="search_name"> </th>
                                                                     <th> </th>
                                                                     <th> </th>
@@ -155,11 +153,15 @@
             });
 
             $('#search_name').on('keyup',function(){
-                $(".filter-submit").trigger('click');
+                if ($("#search_name").val().length > 3 ) {
+                    $(".filter-submit").trigger('click');
+                }
             });
 
             $('.search_filter').on('keyup',function(){
-                $(".filter-submit").trigger('click');
+                if ($("#search_name").val().length > 3 ) {
+                    $(".filter-submit").trigger('click');
+                }
             });
 
             $('#createComponentButton').click(function(){
