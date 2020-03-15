@@ -452,6 +452,9 @@ class PurchaseOrderBillingController extends Controller
 
     public function listing(Request $request){
         try{
+            $skip = $request->start;
+            $take = $request->length;
+            $totalRecordCount = 0;
             if(Session::has('global_project_site')){
                 $projectSiteId = Session::get('global_project_site');
                 $purchaseOrderBillIds = PurchaseOrderBill::join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
@@ -549,13 +552,15 @@ class PurchaseOrderBillingController extends Controller
                 }
             }
             if($filterFlag == true){
-		
+                $totalRecordCount = PurchaseOrderBill::join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
+                                        ->whereIn('purchase_order_bills.id', $purchaseOrderBillIds)
+                                        ->count();
 
                 $purchaseOrderBillData = PurchaseOrderBill::join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
                     ->whereIn('purchase_order_bills.id', $purchaseOrderBillIds)
                     ->select('purchase_orders.id as purchase_order_id','purchase_order_bills.id as id','purchase_order_bills.bill_number as serial_number','purchase_order_bills.created_at as created_at','purchase_order_bills.bill_date as bill_date','purchase_order_bills.vendor_bill_number as vendor_bill_number','purchase_orders.vendor_id as vendor_id','purchase_order_bills.transportation_tax_amount as transportation_tax_amount','purchase_order_bills.extra_tax_amount as extra_tax_amount','purchase_order_bills.tax_amount as tax_amount','purchase_order_bills.amount as amount')
-                    ->orderBy('id','desc')
-		    //->skip($request->start)->take($request->length)
+                    ->orderBy('purchase_order_bills.id','desc')
+		            ->skip($skip)->take($take)
                     ->get();
             }else{
                 $purchaseOrderBillData = array();
@@ -579,15 +584,15 @@ class PurchaseOrderBillingController extends Controller
             } else {
                 
 		$records = array();
-                $records["recordsFiltered"] = $records["recordsTotal"] = count($purchaseOrderBillData);
+                $records["recordsFiltered"] = $records["recordsTotal"] = $totalRecordCount;
                 $records['data'] = array();
                 $records["draw"] = intval($request->draw);
                 if($request->length == -1){
-                    $length = $records["recordsTotal"];
+                    $length = count($purchaseOrderBillData);
                 }else{
                     $length = $request->length;
                 }
-                for($iterator = 0,$pagination = $request->start; $iterator < $length && $pagination < count($purchaseOrderBillData); $iterator++,$pagination++ ){
+                for($iterator = 0,$pagination = 0; $iterator < $length && $pagination < count($purchaseOrderBillData); $iterator++,$pagination++ ){
                     $taxAmount = round(($purchaseOrderBillData[$pagination]['transportation_tax_amount'] + $purchaseOrderBillData[$pagination]['extra_tax_amount'] + $purchaseOrderBillData[$pagination]['tax_amount']),3);
                     $basicAmount = round(($purchaseOrderBillData[$pagination]['amount'] - $taxAmount),3);
                     $paidAmount = round((PurchaseOrderPayment::where('purchase_order_bill_id', $purchaseOrderBillData[$pagination]['id'])->sum('amount')),3);
