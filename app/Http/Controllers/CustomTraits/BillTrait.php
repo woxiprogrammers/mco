@@ -571,6 +571,9 @@ trait BillTrait{
 
     public function ProjectSiteListing(Request $request){
         try{
+            $skip = $request->start;
+            $take = $request->length;
+            $totalRecordCount = 0;
             $user = Auth::user();
             $filterFlag = true;
             $projectSiteIds = Quotation::pluck('project_site_id')->toArray();
@@ -596,7 +599,11 @@ trait BillTrait{
             $iterator = 0;
             $listingData = array();
             $txnStatusApprovedId = TransactionStatus::where('slug','approved')->pluck('id');
-            $projectSiteData = ProjectSite::orderBy('updated_at','desc')->whereIn('id',$projectSiteIds)->get()->toArray();
+            $projectSiteData = ProjectSite::orderBy('updated_at','desc')
+                                            ->whereIn('id',$projectSiteIds)
+                                            ->skip($skip)->take($take)
+                                            ->get()->toArray();
+            $totalRecordCount = ProjectSite::orderBy('updated_at','desc')->whereIn('id',$projectSiteIds)->count();
             $approvedID = BillStatus::where('slug','approved')->pluck('id')->first();
             for($i = 0 ; $i < count($projectSiteData) ; $i++){
                 $projectData = Project::where('id',$projectSiteData[$i]['project_id'])->get()->toArray();
@@ -617,12 +624,12 @@ trait BillTrait{
                         foreach ($bills as $bill){
                             $billData = $this->getBillData($bill['id']);
                             $billAmount += $billData['total_amount_with_tax'];
-                            $paidAmount += BillTransaction::where('bill_id',$bill->id)->whereIn('transaction_status_id',$txnStatusApprovedId)->sum('total')
+                            $paidAmount += (BillTransaction::where('bill_id',$bill->id)->whereIn('transaction_status_id',$txnStatusApprovedId)->sum('total')
                                 + BillTransaction::where('bill_id',$bill->id)->whereIn('transaction_status_id',$txnStatusApprovedId)->sum('retention_amount')
                                 + BillTransaction::where('bill_id',$bill->id)->whereIn('transaction_status_id',$txnStatusApprovedId)->sum('tds_amount')
                                 + BillTransaction::where('bill_id',$bill->id)->whereIn('transaction_status_id',$txnStatusApprovedId)->sum('other_recovery_value')
                                 + BillTransaction::where('bill_id',$bill->id)->whereIn('transaction_status_id',$txnStatusApprovedId)->sum('hold')
-                                + BillTransaction::where('bill_id',$bill->id)->whereIn('transaction_status_id',$txnStatusApprovedId)->sum('debit');
+                                + BillTransaction::where('bill_id',$bill->id)->whereIn('transaction_status_id',$txnStatusApprovedId)->sum('debit'));
                         }
                         $listingData[$iterator]['bill_amount'] = $billAmount;
                         $listingData[$iterator]['paid_amount'] = $paidAmount;
@@ -639,14 +646,14 @@ trait BillTrait{
                     $billPaidAmount = array_sum(array_column($listingData, 'paid_amount'));
                 }
                 $records['billtotal'] = round(array_sum(array_column($listingData, 'bill_amount')),3);
-                $records['paidtotal'] = round(array_sum(array_column($listingData, 'bill_amount')),3);
+                $records['paidtotal'] = round(array_sum(array_column($listingData, 'paid_amount')),3);
                 $records['balancetotal'] = round(($billTotals - $billPaidAmount),3);
             } else {
                 $iTotalRecords = count($listingData);
                 $records = array();
                 $records['data'] = array();
                 $end = $request->length < 0 ? count($listingData) : $request->length;
-                for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($listingData); $iterator++,$pagination++ ){
+                for($iterator = 0,$pagination = 0; $iterator < $end && $pagination < count($listingData); $iterator++,$pagination++ ){
                     $quotationId = Quotation::where('project_site_id', $listingData[$pagination]['project_site_id'])->pluck('id')->first();
                     if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-billing')){
                         $button = '<div class="btn-group">
@@ -701,8 +708,8 @@ trait BillTrait{
 
                 }
                 $records["draw"] = intval($request->draw);
-                $records["recordsTotal"] = $iTotalRecords;
-                $records["recordsFiltered"] = $iTotalRecords;
+                $records["recordsTotal"] = $totalRecordCount;
+                $records["recordsFiltered"] = $totalRecordCount;
             }
 
         }catch(\Exception $e){
