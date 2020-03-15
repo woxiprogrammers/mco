@@ -126,6 +126,7 @@ class PurchaseOrderController extends Controller
         try{
             $skip = $request->start;
             $take = $request->length;
+            $totalRecordCount = 0;
             $user = Auth::user();
             $postdata = null;
             $status = 0;
@@ -136,7 +137,6 @@ class PurchaseOrderController extends Controller
             $po_count = 0;
             $vendor_name = "";
             $po_id = "";
-            $totalRecordCount = 0;
             $postDataArray = array();
             if ($request->has('po_id')) {
                 if ($request['po_id'] != "") {

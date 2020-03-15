@@ -594,6 +594,9 @@ class InventoryManageController extends Controller
 
     public function inventoryListing(Request $request){
         try{
+            $skip = $request->start;
+            $take = $request->length;
+            $totalRecordCount = 0;
             $status = 200;
             $material_name = null;
             if ($request->has('search_name')) {
@@ -602,19 +605,30 @@ class InventoryManageController extends Controller
             if(Session::has('global_project_site')){
                 $projectSiteId = Session::get('global_project_site');
                 if ($material_name != null && $material_name != "") {
+                    $totalRecordCount = InventoryComponent::where('project_site_id', $projectSiteId)
+                    ->where('name', 'ilike', '%' . $request->search_name . '%')
+                    ->count();
+
                     $inventoryData = InventoryComponent::where('project_site_id', $projectSiteId)
                         ->where('name', 'ilike', '%' . $request->search_name . '%')
+                        ->skip($skip)->take($take)
                         ->orderBy('name', 'asc')->get();
                 } else {
+                    $totalRecordCount = InventoryComponent::where('project_site_id', $projectSiteId)->count();
                     $inventoryData = InventoryComponent::where('project_site_id', $projectSiteId)
+                        ->skip($skip)->take($take)
                         ->orderBy('name', 'asc')->get();
                 }
             }else{
                 if ($material_name != null && $material_name != "") {
+                    $totalRecordCount = InventoryComponent::where('name', 'ilike', '%' . $request->search_name . '%')
+                                        ->count();
                     $inventoryData = InventoryComponent::where('name', 'ilike', '%' . $request->search_name . '%')
+                        ->skip($skip)->take($take)
                         ->orderBy('name', 'asc')->get();
                 } else {
-                    $inventoryData = InventoryComponent::orderBy('name', 'asc')->get();
+                    $totalRecordCount = InventoryComponent::count();
+                    $inventoryData = InventoryComponent::orderBy('name', 'asc')->skip($skip)->take($take)->get();
                 }
             }
             $iTotalRecords = count($inventoryData);
@@ -622,7 +636,7 @@ class InventoryManageController extends Controller
             $records['data'] = array();
             $end = $request->length < 0 ? count($inventoryData) : $request->length;
             $sr_no = $opening_stock = 0;
-            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($inventoryData); $iterator++,$pagination++ ){
+            for($iterator = 0,$pagination = 0; $iterator < $end && $pagination < count($inventoryData); $iterator++,$pagination++ ){
                 $opening_stock = $inventoryData[$pagination]->opening_stock;
                 if($inventoryData[$pagination]->is_material == true){
                     $materialUnit = Material::where('id',$inventoryData[$iterator]['reference_id'])->pluck('unit_id')->first();
@@ -630,7 +644,7 @@ class InventoryManageController extends Controller
                         $materialUnit = Material::where('name','ilike',$inventoryData[$iterator]['name'])->pluck('unit_id')->first();
                     }
                     $unitName = Unit::where('id', $materialUnit)->pluck('name')->first();
-		    $inTransferQuantities = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
+		            $inTransferQuantities = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
                         ->where('inventory_transfer_types.type','ilike','in')
                         ->where('inventory_component_transfers.inventory_component_id',$inventoryData[$pagination]->id)
                         ->where('inventory_component_transfers.inventory_component_transfer_status_id',InventoryComponentTransferStatus::where('slug','approved')->pluck('id')->first())
@@ -680,7 +694,6 @@ class InventoryManageController extends Controller
                 }
                 $availableQuantity = ($inQuantity + $openQty) - $outQuantity;
                 $records['data'][$iterator] = [
-                    ++$sr_no,
                     ucwords(strtolower($inventoryData[$pagination]->name)),
                     ($inQuantity + $openQty).' '.$unitName,
                     $outQuantity.' '.$unitName,
@@ -694,8 +707,8 @@ class InventoryManageController extends Controller
                 ];
             }
             $records["draw"] = intval($request->draw);
-            $records["recordsTotal"] = $iTotalRecords;
-            $records["recordsFiltered"] = $iTotalRecords;
+            $records["recordsTotal"] = $totalRecordCount;
+            $records["recordsFiltered"] = $totalRecordCount;
             $user = Auth::user();
             $userLastLogin = UserLastLogin::join('modules','modules.id','=','user_last_logins.module_id')
                 ->where('modules.slug','component-transfer')
