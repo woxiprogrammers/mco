@@ -100,6 +100,9 @@ class LabourController extends Controller
 
     public function labourListing(Request $request){
         try{
+            $skip = $request->start;
+            $take = $request->length;
+            $totalRecordCount = 0;
             $user = Auth::user();
             $empStatus = 1;
             if ($request->has('emp_status')) {
@@ -159,12 +162,13 @@ class LabourController extends Controller
                                         ->where('projects.name','ilike','%'.$request->employee_project.'%')
                                         ->pluck('employees.id');
             }
-            $listingData = Employee::whereIn('id',$employeeIds)->orderBy('name','asc')->get();
+            $listingData = Employee::whereIn('id',$employeeIds)->orderBy('name','asc')->skip($skip)->take($take)->get();
+            $totalRecordCount = Employee::whereIn('id',$employeeIds)->count();
             $iTotalRecords = count($listingData);
             $records = array();
             $records['data'] = array();
             $end = $request->length < 0 ? count($listingData) : $request->length;
-            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($listingData); $iterator++,$pagination++ ){
+            for($iterator = 0,$pagination = 0; $iterator < $end && $pagination < count($listingData); $iterator++,$pagination++ ){
                 if( $listingData[$pagination]['is_active'] == true){
                     $labourStatus = '<td><span class="label label-sm label-success"> Enabled </span></td>';
                     $status = 'Disable';
@@ -227,8 +231,8 @@ class LabourController extends Controller
                 ];
             }
             $records["draw"] = intval($request->draw);
-            $records["recordsTotal"] = $iTotalRecords;
-            $records["recordsFiltered"] = $iTotalRecords;
+            $records["recordsTotal"] = $totalRecordCount;
+            $records["recordsFiltered"] = $totalRecordCount;
         }catch(\Exception $e){
             $records = array();
             $data = [
