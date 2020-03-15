@@ -13,10 +13,10 @@ var MaterialListing = function () {
             loadingMessage: 'Loading...',
             dataTable: {
                 "lengthMenu": [
-                    [ 20, 100, 150],
-                    [ 20, 100, 150]
+                    [ 30, 100, 150],
+                    [ 30, 100, 150]
                 ],
-                "pageLength": 20,
+                "pageLength": 30,
                 "ajax": {
                     "url": "/material/listing",
                 },

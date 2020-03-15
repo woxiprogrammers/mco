@@ -309,6 +309,9 @@ trait MaterialTrait{
 
     public function materialListing(Request $request){
         try{
+            $skip = $request->start;
+            $take = $request->length;
+            $totalRecordCount = 0;
             $user = Auth::user();
             $materialData = array();
             $ids = Material::pluck('id')->toArray();
@@ -346,14 +349,18 @@ trait MaterialTrait{
             if($filterFlag == true) {
                 $materialData = Material::whereIn('id',$ids)
                                 ->orderBy('name','asc')
+                                ->skip($skip)->take($take)
                                 ->get()->toArray();
+
+                $totalRecordCount = Material::whereIn('id',$ids)
+                                ->count();
             }
 
             $iTotalRecords = count($materialData);
             $records = array();
             $records['data'] = array();
             $end = $request->length < 0 ? count($materialData) : $request->length;
-            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($materialData); $iterator++,$pagination++ ){
+            for($iterator = 0,$pagination = 0; $iterator < $end && $pagination < count($materialData); $iterator++,$pagination++ ){
                 if($materialData[$pagination]['is_active'] == true){
                     $material_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
                     $status = 'Disable';
@@ -414,8 +421,8 @@ trait MaterialTrait{
 
             }
             $records["draw"] = intval($request->draw);
-            $records["recordsTotal"] = $iTotalRecords;
-            $records["recordsFiltered"] = $iTotalRecords;
+            $records["recordsTotal"] = $totalRecordCount;
+            $records["recordsFiltered"] = $totalRecordCount;
         }catch(\Exception $e){
             $records = array();
             $data = [
