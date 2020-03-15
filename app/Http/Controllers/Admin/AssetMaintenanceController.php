@@ -224,14 +224,20 @@ class AssetMaintenanceController extends Controller{
 
     public function getMaintenanceRequestListing(Request $request){
         try{
+            $skip = $request->start;
+            $take = $request->length;
+            $totalRecordCount = 0;
             $projectSiteId = Session::get('global_project_site');
-            $listingData = AssetMaintenance::where('project_site_id',$projectSiteId)->orderby('created_at','desc')->get();
+            $listingData = AssetMaintenance::where('project_site_id',$projectSiteId)
+                            ->orderby('created_at','desc')
+                            ->skip($skip)->take($take)->get();
+            $totalRecordCount = AssetMaintenance::where('project_site_id',$projectSiteId)->count();
             $status = 200;
             $iTotalRecords = count($listingData);
             $records = array();
             $records['data'] = array();
             $end = $request->length < 0 ? count($listingData) : $request->length;
-            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($listingData); $iterator++,$pagination++ ){
+            for($iterator = 0,$pagination = 0; $iterator < $end && $pagination < count($listingData); $iterator++,$pagination++ ){
                 $records['data'][$iterator] = [
                     $listingData[$pagination]['id'],
                     ucwords($listingData[$pagination]->asset->name." (<b>".$listingData[$pagination]->asset->id."</b>)"),
@@ -245,8 +251,8 @@ class AssetMaintenanceController extends Controller{
                 ];
             }
             $records["draw"] = intval($request->draw);
-            $records["recordsTotal"] = $iTotalRecords;
-            $records["recordsFiltered"] = $iTotalRecords;
+            $records["recordsTotal"] = $totalRecordCount;
+            $records["recordsFiltered"] = $totalRecordCount;
         }catch(\Exception $e){
             $records = array();
             $status = 500;
@@ -304,6 +310,9 @@ class AssetMaintenanceController extends Controller{
 
     public function getMaintenanceRequestApprovalListing(Request $request){
         try{
+            $skip = $request->start;
+            $take = $request->length;
+            $totalRecordCount = 0;
             $user = Auth::user();
             $projectSiteId = Session::get('global_project_site');
             $vendorAssignedAssetMaintenance = AssetMaintenanceVendorRelation::join('asset_maintenance','asset_maintenance_vendor_relation.asset_maintenance_id','=','asset_maintenance.id')
@@ -311,14 +320,22 @@ class AssetMaintenanceController extends Controller{
                 ->where('asset_maintenance.asset_maintenance_status_id',AssetMaintenanceStatus::where('slug','vendor-assigned')->pluck('id')->first())
                 ->select('asset_maintenance_vendor_relation.id','asset_maintenance_vendor_relation.asset_maintenance_id','asset_maintenance_vendor_relation.vendor_id','asset_maintenance_vendor_relation.quotation_amount','asset_maintenance_vendor_relation.user_id','asset_maintenance_vendor_relation.is_approved')
                 ->orderBy('asset_maintenance_vendor_relation.id', 'DESC')
+                ->skip($skip)->take($take)
                 ->get();
+
+            $totalRecordCount = AssetMaintenanceVendorRelation::join('asset_maintenance','asset_maintenance_vendor_relation.asset_maintenance_id','=','asset_maintenance.id')
+                ->where('asset_maintenance.project_site_id',$projectSiteId)
+                ->where('asset_maintenance.asset_maintenance_status_id', AssetMaintenanceStatus::where('slug','vendor-assigned')->pluck('id')->first())
+                ->count();
+
+
             $status = 200;
             $iTotalRecords = count($vendorAssignedAssetMaintenance);
             $records = array();
             $records['data'] = array();
             $end = $request->length < 0 ? count($vendorAssignedAssetMaintenance) : $request->length;
 
-            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($vendorAssignedAssetMaintenance); $iterator++,$pagination++ ){
+            for($iterator = 0,$pagination = 0; $iterator < $end && $pagination < count($vendorAssignedAssetMaintenance); $iterator++,$pagination++ ){
                 if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-asset-maintenance-approval')){
                     $actionDropDown =  '
                                         <form action="/asset/maintenance/request/approval/change-status/approve/'.$vendorAssignedAssetMaintenance[$pagination]->id.'" method="post">
@@ -344,8 +361,8 @@ class AssetMaintenanceController extends Controller{
                 ];
             }
             $records["draw"] = intval($request->draw);
-            $records["recordsTotal"] = $iTotalRecords;
-            $records["recordsFiltered"] = $iTotalRecords;
+            $records["recordsTotal"] = $totalRecordCount;
+            $records["recordsFiltered"] = $totalRecordCount;
         }catch(\Exception $e){
             $records = array();
             $status = 500;
@@ -621,6 +638,9 @@ class AssetMaintenanceController extends Controller{
 
     public function getBillListing(Request $request){
         try{
+            $skip = $request->start;
+            $take = $request->length;
+            $totalRecordCount = 0;
             $records = array();
             $status = 200;
             $records['data'] = array();
@@ -646,6 +666,7 @@ class AssetMaintenanceController extends Controller{
                     ->where('vendors.company','ilike','%'.$request->vendor_name.'%')
                     ->pluck('asset_maintenance_bills.id')->toArray();
             }
+            
             $assetMaintenanceBillData = AssetMaintenanceBill::join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
                 ->whereIn('asset_maintenance_bills.id',$assetMaintenanceBillIds)
                 ->select('asset_maintenance_bills.cgst_amount',
@@ -658,7 +679,12 @@ class AssetMaintenanceController extends Controller{
                     'asset_maintenance_bills.assets_bill_number',
                     'asset_maintenance_bills.extra_amount')
                 ->orderBy('id','desc')
+                ->skip($skip)->take($take)
                 ->get();
+
+            $totalRecordCount = AssetMaintenanceBill::join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
+                ->whereIn('asset_maintenance_bills.id',$assetMaintenanceBillIds)
+                ->count();
             if ($request->has('get_total')) {
                 $total = 0;
                 $paidTotal = 0;
@@ -683,13 +709,13 @@ class AssetMaintenanceController extends Controller{
                 $records['pending_total'] = $pendingTotal;
                 $records['paid_total'] = $paidTotal;
             } else {
-                $records["recordsFiltered"] = $records["recordsTotal"] = count($assetMaintenanceBillData);
+                $records["recordsFiltered"] = $records["recordsTotal"] = $totalRecordCount;
                 if($request->length == -1){
-                    $length = $records["recordsTotal"];
+                    $length = count($assetMaintenanceBillData);
                 }else{
                     $length = $request->length;
                 }
-                for($iterator = 0,$pagination = $request->start; $iterator < $length && $pagination < count($assetMaintenanceBillData); $iterator++,$pagination++ ){
+                for($iterator = 0,$pagination = 0; $iterator < $length && $pagination < count($assetMaintenanceBillData); $iterator++,$pagination++ ){
                     if($assetMaintenanceBillData[$pagination]['assets_bill_number'] != null){
                         $assetsBill = $assetMaintenanceBillData[$pagination]['assets_bill_number'];
                     }else{

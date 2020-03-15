@@ -110,10 +110,10 @@ var AssetMaintenanceBillListing = function () {
                         }});
                 },
                 "lengthMenu": [
-                    [50, 100, 150],
-                    [50, 100, 150] // change per page values here
+                    [30, 100, 150],
+                    [30, 100, 150] // change per page values here
                 ],
-                "pageLength": 50, // default record count per page
+                "pageLength": 30, // default record count per page
                 "ajax": {
                     "url": "/asset/maintenance/request/bill/listing?_token="+$("input[name='_token']").val() // ajax source
                 },

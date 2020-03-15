@@ -145,10 +145,10 @@ var ExpensesListing = function () {
                 },
                 "processing": true,
                 "lengthMenu": [
-                    [100, 200],
-                    [100, 200] // change per page values here
+                    [20, 100, 200],
+                    [20, 100, 200] // change per page values here
                 ],
-                "pageLength": 100, // default record count per page
+                "pageLength": 20, // default record count per page
                 "ajax": {
                     "url": "/reports/listing/expense", // ajax source
                 },
@@ -370,10 +370,10 @@ var AdvExpensesListing = function () {
                 },
                 "processing": true,
                 "lengthMenu": [
-                    [100, 200],
-                    [100, 200] // change per page values here
+                    [20, 100, 200],
+                    [20, 100, 200] // change per page values here
                 ],
-                "pageLength": 100, // default record count per page
+                "pageLength": 20, // default record count per page
                 "ajax": {
                     "url": "/reports/listing/advance-expense", // ajax source
                 },
@@ -562,10 +562,10 @@ var SalesListing = function () {
                 },
                 "processing": true,
                 "lengthMenu": [
-                    [100, 200],
-                    [100, 200] // change per page values here
+                    [20, 100, 200],
+                    [20, 100, 200] // change per page values here
                 ],
-                "pageLength": 100, // default record count per page
+                "pageLength": 20, // default record count per page
                 "ajax": {
                     "url": "/reports/listing/sales", // ajax source
                 },

@@ -39,11 +39,14 @@ class VendorMailController extends Controller
     }
 
     public function listing(Request $request){
-        try{
+        try {
+            $skip = $request->start;
+            $take = $request->length;
             $status = 200;
             $vendor_name = null;
             $statusId = null;
             $vendorMailData = array();
+            $totalRecordCount = 0;
             if ($request->has('vendor_name')) {
                 if ($request['vendor_name'] != "") {
                     $vendor_name = $request['vendor_name'];
@@ -82,8 +85,12 @@ class VendorMailController extends Controller
             }
 
             if ($filterFlag) {
-                $vendorMailData = PurchaseRequestComponentVendorMailInfo::
-                whereIn('id',$ids)->orderBy('created_at','desc')->get();
+                $totalRecordCount = PurchaseRequestComponentVendorMailInfo::
+                                    whereIn('id',$ids)->count();
+                $vendorMailData = PurchaseRequestComponentVendorMailInfo::whereIn('id',$ids)
+                                ->orderBy('created_at','desc')
+                                ->skip($skip)->take($take)
+                                ->get();
             }
 
             $iTotalRecords = count($vendorMailData);
@@ -95,10 +102,10 @@ class VendorMailController extends Controller
             $records = [
                 'data' => array(),
                 'draw' => intval($request->draw),
-                'recordsTotal' => $iTotalRecords,
-                'recordsFiltered' => $iTotalRecords
+                'recordsTotal' => $totalRecordCount,
+                'recordsFiltered' => $totalRecordCount
             ];
-            for($iterator = 0,$pagination = $request->start; $iterator < $length && $pagination < count($vendorMailData); $iterator++,$pagination++ ){
+            for($iterator = 0,$pagination = 0; $iterator < $length && $pagination < count($vendorMailData); $iterator++,$pagination++ ){
                 switch($vendorMailData[$pagination]['type_slug']){
                     case 'for-quotation':
                         $slug = 'For Quotation';
@@ -143,7 +150,7 @@ class VendorMailController extends Controller
                 }
                 $createdAt = date('d M Y h:i:s',strtotime($vendorMailData[$pagination]['created_at']));
                 $records['data'][] = [
-                    ($pagination+1),
+                    $vendorMailData[$pagination]['id'],
                     $name,
                     $slug,
                     $createdAt,

@@ -71,6 +71,8 @@ class PurchaseController extends Controller
 
     public function getMaterialRequestListing(Request $request){
         try{
+            $skip = $request->start;
+            $take = $request->length;
             $postdata = null;
             $m_name = "";
             $m_id = "";
@@ -79,6 +81,7 @@ class PurchaseController extends Controller
             $month = 0;
             $year = 0;
             $m_count = 0;
+            $totalrecordsCount = 0;
             $postDataArray = array();
             if ($request->has('m_name')) {
                 if ($request['m_name'] != "") {
@@ -115,7 +118,14 @@ class PurchaseController extends Controller
                 $site_id = $request->site_id;
             }
             $materialRequestComponentArray = array();
-            $materialRequestComponentIds = MaterialRequestComponents::all()->pluck('id');
+            if (Session::has('global_project_site')){
+                $projectSiteId = Session::get('global_project_site');
+                $materialRequestComponentIds = MaterialRequestComponents::join('material_requests', 'material_request_components.material_request_id','=','material_requests.id')
+                                           ->where('material_requests.project_site_id','=', $projectSiteId)
+                                           ->pluck('material_request_components.id');
+            } else {
+                $materialRequestComponentIds = MaterialRequestComponents::pluck('id');
+            }
             $filterFlag = true;
             if ($site_id != 0 && $filterFlag == true) {
                 $materialRequestComponentIds = MaterialRequestComponents::join('material_requests','material_requests.id','=','material_request_components.material_request_id')
@@ -175,7 +185,11 @@ class PurchaseController extends Controller
             }
 
             if ($filterFlag) {
-                $materialRequestComponentArray = MaterialRequestComponents::whereIn('id',$materialRequestComponentIds)->orderBy('id','desc')->get();
+                $totalrecordsCount = MaterialRequestComponents::whereIn('id',$materialRequestComponentIds)->count();
+                $materialRequestComponentArray = MaterialRequestComponents::whereIn('id',$materialRequestComponentIds)
+                                                ->skip($skip)->take($take)
+                                                ->orderBy('id','desc')
+                                                ->get();
             }
 
             $materialRequestList = array();
@@ -216,7 +230,7 @@ class PurchaseController extends Controller
             $user = Auth::user();
             $records['data'] = array();
             $assetComponentTypeIds = MaterialRequestComponentTypes::whereIn('slug',['system-asset','new-asset'])->pluck('id')->toArray();
-            for($iterator = 0,$pagination = $request->start; $iterator < $length && $pagination < count($materialRequestList); $iterator++,$pagination++ ){
+            for($iterator = 0,$pagination = 0; $iterator < $length && $pagination < count($materialRequestList); $iterator++,$pagination++ ){
                 switch(strtolower($materialRequestList[$pagination]['component_status'])){
                     case 'pending':
                         if(in_array($materialRequestList[$pagination]['component_type_id'],$assetComponentTypeIds)){
@@ -323,8 +337,8 @@ class PurchaseController extends Controller
                 ];
             }
             $records["draw"] = intval($request->draw);
-            $records["recordsTotal"] = $iTotalRecords;
-            $records["recordsFiltered"] = $iTotalRecords;
+            $records["recordsTotal"] = $totalrecordsCount;
+            $records["recordsFiltered"] = $totalrecordsCount;
             $status = 200;
         }catch(\Exception $e){
             $data = [

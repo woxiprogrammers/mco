@@ -241,7 +241,10 @@ class UserController extends Controller
     }
 
     public function userListing(Request $request){
-        try{
+        try {
+            $skip = $request->start;
+            $take = $request->length;
+            $totalRecordCount = 0;
             $user = Auth::user();
             $userId = User::join('user_has_roles','user_has_roles.user_id','=','users.id')
                 ->join('roles','roles.id','=','user_has_roles.role_id')
@@ -272,7 +275,13 @@ class UserController extends Controller
                             ->whereIn('users.id',$userId)
                             ->orderBy('users.first_name','asc')
                             ->select('users.id as id','users.first_name as first_name','users.last_name as last_name','users.email as email','users.mobile as mobile','users.created_at as created_at','users.is_active as is_active','roles.name as role_name')
+                            ->skip($skip)->take($take)
                             ->get();
+            
+            $totalRecordCount = User::join('user_has_roles','user_has_roles.user_id','=','users.id')
+                            ->join('roles','roles.id','=','user_has_roles.role_id')
+                            ->whereIn('users.id',$userId)
+                            ->count();
             $iTotalRecords = count($userData);
             $records = array();
             if(count($userData) > 0){
@@ -281,7 +290,7 @@ class UserController extends Controller
                 $userData = array();
             }
             $records['data'] = array();
-            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $pagination < count($userData); $iterator++,$pagination++ ){
+            for($iterator = 0,$pagination = 0; $iterator < $request->length && $pagination < count($userData); $iterator++,$pagination++ ){
                 if($userData[$pagination]['is_active'] == true){
                     $user_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
                     $status = 'Disable';
@@ -336,8 +345,8 @@ class UserController extends Controller
                 ];
             }
             $records["draw"] = intval($request->draw);
-            $records["recordsTotal"] = $iTotalRecords;
-            $records["recordsFiltered"] = $iTotalRecords;
+            $records["recordsTotal"] = $totalRecordCount;
+            $records["recordsFiltered"] = $totalRecordCount;
         }catch(\Exception $e){
             $records = array();
             $data = [

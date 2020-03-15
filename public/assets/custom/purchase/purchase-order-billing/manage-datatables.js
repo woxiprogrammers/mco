@@ -110,10 +110,10 @@ var PurchaseOrderListing = function () {
                 },
 
                 "lengthMenu": [
-                    [50, 100, 150],
-                    [50, 100, 150] // change per page values here
+                    [20, 100, 150],
+                    [20, 100, 150] // change per page values here
                 ],
-                "pageLength": 50, // default record count per page
+                "pageLength": 20, // default record count per page
                 "ajax": {
                     "url": "/purchase/purchase-order-bill/listing?_token="+$("input[name='_token']").val(), // ajax source
                 },
@@ -162,6 +162,13 @@ var PurchaseOrderListing = function () {
 jQuery(document).ready(function() {
     PurchaseOrderListing.init();
     $(".search_filter").on('keyup', function(){
-        $(".filter-submit").trigger('click');
+        if( $("#project_name").val().length > 3 ||
+            $("#system_bill_number").val().length > 3 ||
+            $("#bill_number").val().length > 0  ||
+            $("#grn").val().length > 3 ||
+            $("#vendor_name").val().length > 3 
+        ) {
+            $(".filter-submit").trigger('click');
+        }
     });
 });
