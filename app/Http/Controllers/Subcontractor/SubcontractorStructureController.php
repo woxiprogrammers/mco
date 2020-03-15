@@ -124,6 +124,9 @@ class SubcontractorStructureController extends Controller
 
     public function structureListing(Request $request){
         try{
+            $skip = $request->start;
+            $take = $request->length;
+            $totalRecordCount = 0;
             $user = Auth::user();
             $filterFlag = true;
             $subcontractor_name = null;
@@ -161,7 +164,9 @@ class SubcontractorStructureController extends Controller
 
             $listingData = array();
             if ($filterFlag) {
-                $listingData = SubcontractorStructure::whereIn('id',$ids)->orderBy('id', 'desc')->get();
+                $listingData = SubcontractorStructure::whereIn('id',$ids)->orderBy('id', 'desc')
+                                ->skip($skip)->take($take)->get();
+                $totalRecordCount = SubcontractorStructure::whereIn('id',$ids)->count();
             }
             if ($request->has('get_total')) {
                 $billTotals = 0;
@@ -195,7 +200,7 @@ class SubcontractorStructureController extends Controller
                 $records = array();
                 $records['data'] = array();
                 $end = $request->length < 0 ? count($listingData) : $request->length;
-                for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($listingData); $iterator++, $pagination++) {
+                for ($iterator = 0, $pagination = 0; $iterator < $end && $pagination < count($listingData); $iterator++, $pagination++) {
                     $subcontractorBillIds = $listingData[$pagination]->subcontractorBill->where('subcontractor_bill_status_id', SubcontractorBillStatus::where('slug', 'approved')->pluck('id')->first())->pluck('id');
                     $billTotals = 0;
                     $billPaidAmount = 0;
@@ -249,8 +254,8 @@ class SubcontractorStructureController extends Controller
                     ];
                 }
                 $records["draw"] = intval($request->draw);
-                $records["recordsTotal"] = $iTotalRecords;
-                $records["recordsFiltered"] = $iTotalRecords;
+                $records["recordsTotal"] = $totalRecordCount;
+                $records["recordsFiltered"] = $totalRecordCount;
             }
             $status = 200;
         }catch (\Exception $e){

@@ -256,11 +256,11 @@
                                     </li>
                                 @endif
                                 @if(($user->roles[0]->role->slug == 'superadmin') || ($user->roles[0]->role->slug == 'admin'))
-                                <li aria-haspopup="true">
+                                <!--<li aria-haspopup="true">
                                     <a href="/salary-distribution/manage" class="nav-link nav-toggle ">
                                         <i class="fa fa-plus"></i> Salary Distribution
                                     </a>
-                                </li>
+                                </li>-->
                                 @endif
                             </ul>
                         </li>
