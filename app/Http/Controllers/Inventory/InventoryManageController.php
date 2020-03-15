@@ -84,6 +84,9 @@ class InventoryManageController extends Controller
 
     public function getSiteTransferRequestListing(Request $request){
         try{
+            $skip = $request->start;
+            $take = $request->length;
+            $totalRecordCount = 0;
             $user = Auth::user();
             $status = 200;
             $search_from = null;
@@ -245,14 +248,20 @@ class InventoryManageController extends Controller
                 $SiteOutTransferId = InventoryTransferTypes::where('slug','site')->where('type','OUT')->pluck('id');
                 $inventoryTransferData = InventoryComponentTransfers::where('transfer_type_id',$SiteOutTransferId)
                     ->whereIn('id',$ids)
-                    ->orderBy('created_at','desc')->get();
+                    ->orderBy('created_at','desc')
+                    ->skip($skip)->take($take)
+                    ->get();
+                
+                $totalRecordCount = InventoryComponentTransfers::where('transfer_type_id',$SiteOutTransferId)
+                    ->whereIn('id',$ids)
+                    ->count();
             }
             $iTotalRecords = count($inventoryTransferData);
             $records = array();
             $records['data'] = array();
             $end = $request->length < 0 ? count($inventoryTransferData) : $request->length;
 
-            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($inventoryTransferData); $iterator++,$pagination++ ){
+            for($iterator = 0,$pagination = 0; $iterator < $end && $pagination < count($inventoryTransferData); $iterator++,$pagination++ ){
                 if ($inventoryTransferData[$pagination]->inventoryComponentTransferStatus->slug == 'approved') {
                     $actionDropDownStatus = '<i class="fa fa-check-circle" title="Approved" style="font-size:24px;color:green">&nbsp;&nbsp;</i>';
                 } elseif ($inventoryTransferData[$pagination]->inventoryComponentTransferStatus->slug == 'disapproved') {
@@ -335,8 +344,8 @@ class InventoryManageController extends Controller
                 ];
             }
             $records["draw"] = intval($request->draw);
-            $records["recordsTotal"] = $iTotalRecords;
-            $records["recordsFiltered"] = $iTotalRecords;
+            $records["recordsTotal"] = $totalRecordCount;
+            $records["recordsFiltered"] = $totalRecordCount;
         }catch (\Exception $e){
             $data = [
                 'action' => 'Request Component listing',
