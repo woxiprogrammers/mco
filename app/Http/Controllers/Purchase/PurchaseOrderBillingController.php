@@ -91,7 +91,8 @@ class PurchaseOrderBillingController extends Controller
 
     public function getManageViewForPendingPOBillListing(Request $request){
         try{
-
+            $skip = $request->start;
+            $take = $request->length;
             $status = 200;
             $billPendingTransactions = array();
             $ids = PurchaseOrderTransaction::join('purchase_order_transaction_statuses', 'purchase_order_transactions.purchase_order_transaction_status_id', '=', 'purchase_order_transaction_statuses.id')
@@ -101,7 +102,7 @@ class PurchaseOrderBillingController extends Controller
                 ->pluck('purchase_order_transactions.id');
 
             $filterFlag = true;
-
+            $totalRecordCount = 0;
             if($request->has('project_name') && $request->project_name != '' && $filterFlag == true){
                 $ids = PurchaseOrderTransaction::join('purchase_orders','purchase_orders.id','=','purchase_order_transactions.purchase_order_id')
                     ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
@@ -150,11 +151,18 @@ class PurchaseOrderBillingController extends Controller
             }
 
            if($filterFlag) {
+                $totalRecordCount = PurchaseOrderTransaction::join('purchase_order_transaction_statuses', 'purchase_order_transactions.purchase_order_transaction_status_id', '=', 'purchase_order_transaction_statuses.id')
+                                ->join('purchase_orders', 'purchase_orders.id', '=', 'purchase_order_transactions.purchase_order_id')
+                                ->where('purchase_orders.is_client_order', '!=', true)
+                                ->where('purchase_order_transaction_statuses.slug', 'bill-pending')
+                                ->whereIn('purchase_order_transactions.id',$ids)
+                                ->count();
                 $billPendingTransactions = PurchaseOrderTransaction::join('purchase_order_transaction_statuses', 'purchase_order_transactions.purchase_order_transaction_status_id', '=', 'purchase_order_transaction_statuses.id')
                     ->join('purchase_orders', 'purchase_orders.id', '=', 'purchase_order_transactions.purchase_order_id')
                     ->where('purchase_orders.is_client_order', '!=', true)
                     ->where('purchase_order_transaction_statuses.slug', 'bill-pending')
                     ->whereIn('purchase_order_transactions.id',$ids)
+                    ->skip($skip)->take($take)
                     ->get()->toArray();
             }
 
@@ -164,7 +172,7 @@ class PurchaseOrderBillingController extends Controller
             $end = $request->length < 0 ? count($billPendingTransactions) : $request->length;
 
             if(count($billPendingTransactions) > 0){
-                    for($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($billPendingTransactions); $iterator++,$pagination++ ){
+                    for($iterator = 0, $pagination = 0; $iterator < $end && $pagination < count($billPendingTransactions); $iterator++,$pagination++ ){
                         $purchaseOrder = PurchaseOrder::where('id',($billPendingTransactions[$iterator]['purchase_order_id']))->first()->toArray();
                         $clientvendorInfo = Vendor::where('id',$purchaseOrder['vendor_id'])->first(['company','mobile'])->toArray();
                         $projectSite = PurchaseRequest::join('project_sites','project_sites.id','=','purchase_requests.project_site_id')
@@ -196,8 +204,8 @@ class PurchaseOrderBillingController extends Controller
             }
 
             $records["draw"] = intval($request->draw);
-            $records["recordsTotal"] = $iTotalRecords;
-            $records["recordsFiltered"] = $iTotalRecords;
+            $records["recordsTotal"] = $totalRecordCount;
+            $records["recordsFiltered"] = $totalRecordCount;
         }catch (\Exception $e){
             $data = [
                 'action' => 'Get PO billing listings',

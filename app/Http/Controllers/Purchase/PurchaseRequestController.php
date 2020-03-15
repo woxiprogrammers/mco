@@ -291,6 +291,7 @@ class PurchaseRequestController extends Controller
             $year = 0;
             $pr_count = 0;
             $pr_name = null;
+            $totalrecordsCount = 0;
             $postDataArray = array();
             if ($request->has('pr_name')) {
                 if ($request['pr_name'] != "") {

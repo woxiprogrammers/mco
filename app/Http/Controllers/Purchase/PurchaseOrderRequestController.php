@@ -216,6 +216,7 @@ class PurchaseOrderRequestController extends Controller
         try{
             $skip = $request->start;
             $take = $request->length;
+            $totalRecordCount = 0;
             $loggedInUser = Auth::user();
             if(Session::has('global_project_site')){
                 $projectSiteId = Session::get('global_project_site');

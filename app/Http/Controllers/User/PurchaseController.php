@@ -81,6 +81,7 @@ class PurchaseController extends Controller
             $month = 0;
             $year = 0;
             $m_count = 0;
+            $totalrecordsCount = 0;
             $postDataArray = array();
             if ($request->has('m_name')) {
                 if ($request['m_name'] != "") {
@@ -185,9 +186,6 @@ class PurchaseController extends Controller
 
             if ($filterFlag) {
                 $totalrecordsCount = MaterialRequestComponents::whereIn('id',$materialRequestComponentIds)->count();
-            }
-
-            if ($filterFlag) {
                 $materialRequestComponentArray = MaterialRequestComponents::whereIn('id',$materialRequestComponentIds)
                                                 ->skip($skip)->take($take)
                                                 ->orderBy('id','desc')
