@@ -124,6 +124,8 @@ class PurchaseOrderController extends Controller
     
     public function getListing(Request $request){
         try{
+            $skip = $request->start;
+            $take = $request->length;
             $user = Auth::user();
             $postdata = null;
             $status = 0;
@@ -180,11 +182,12 @@ class PurchaseOrderController extends Controller
                 $projectSiteId = Session::get('global_project_site');
                 $site_id = $projectSiteId;
             }
-            $ids = PurchaseOrder::all()->pluck('id');
+
             $filterFlag = true;
             if ($site_id != 0 && $filterFlag == true) {
                 $ids = PurchaseOrder::join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
-                    ->where('purchase_requests.project_site_id',$site_id)->whereIn('purchase_orders.id',$ids)->pluck('purchase_orders.id');
+                    ->where('purchase_requests.project_site_id',$site_id)
+                    ->pluck('purchase_orders.id');
                 if(count($ids) <= 0) {
                     $filterFlag = false;
                 }
@@ -248,7 +251,10 @@ class PurchaseOrderController extends Controller
             }
 
             if ($filterFlag) {
-                $purchaseOrderDetail = PurchaseOrder::whereIn('id',$ids)->orderBy('created_at','desc')->get();
+                $totalRecordCount = PurchaseOrder::whereIn('id',$ids)->count();
+                $purchaseOrderDetail = PurchaseOrder::whereIn('id',$ids)
+                                        ->skip($skip)->take($take)
+                                        ->orderBy('created_at','desc')->get();
             }
             $purchaseOrderList = array();
             $iterator = 0;
@@ -308,7 +314,7 @@ class PurchaseOrderController extends Controller
             }else{
                 $length = $request->length;
             }
-            for($iterator = 0,$pagination = $request->start; $iterator < $length && $pagination < count($purchaseOrderList); $iterator++,$pagination++ ){
+            for($iterator = 0,$pagination = 0; $iterator < $length && $pagination < count($purchaseOrderList); $iterator++,$pagination++ ){
                 $actionData = "";
                 if ($purchaseOrderList[$pagination]['chk_status'] == true) {
                     if($purchaseOrderList[$pagination]['is_email_sent'] == true || !isset($purchaseOrderList[$pagination]['is_email_sent'])){
@@ -359,8 +365,8 @@ class PurchaseOrderController extends Controller
                 ];
             }
             $records["draw"] = intval($request->draw);
-            $records["recordsTotal"] = $iTotalRecords;
-            $records["recordsFiltered"] = $iTotalRecords;
+            $records["recordsTotal"] = $totalRecordCount;
+            $records["recordsFiltered"] = $totalRecordCount;
             $responseStatus = 200;
             return response()->json($records,$responseStatus);
         }catch(\Exception $e){

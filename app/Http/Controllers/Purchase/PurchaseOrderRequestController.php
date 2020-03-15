@@ -214,6 +214,8 @@ class PurchaseOrderRequestController extends Controller
 
     public function listing(Request $request){
         try{
+            $skip = $request->start;
+            $take = $request->length;
             $loggedInUser = Auth::user();
             if(Session::has('global_project_site')){
                 $projectSiteId = Session::get('global_project_site');
@@ -239,37 +241,57 @@ class PurchaseOrderRequestController extends Controller
                 if ($request->por_status_id == "por_created") {
                     $purchaseOrderRequestsData = PurchaseOrderRequest::where('ready_to_approve', false)
                         ->whereIn('id', $purchaseOrderRequestIds)
+                        ->skip($skip)->take($take)
                         ->orderBy('id','desc')->get();
                     $status = "Pending for Ready to Approve";
+                    $totalRecordCount = PurchaseOrderRequest::where('ready_to_approve', false)
+                    ->whereIn('id', $purchaseOrderRequestIds)->count();
                 } elseif ($request->por_status_id == "pending_for_approval") {
                     $purchaseOrderRequestsData = PurchaseOrderRequest::where('ready_to_approve', true)
                         ->whereIn('id',$draftPurchaseOrderRequestIds)
                         ->whereIn('id', $purchaseOrderRequestIds)
+                        ->skip($skip)->take($take)
                         ->orderBy('id','desc')->get();
+                    
+                    $totalRecordCount = PurchaseOrderRequest::where('ready_to_approve', true)
+                        ->whereIn('id',$draftPurchaseOrderRequestIds)
+                        ->whereIn('id', $purchaseOrderRequestIds)
+                        ->count();
                     $status = "Pending for Director Approval";
                 } elseif($request->por_status_id == "po_created"){
                     if($draftPurchaseOrderRequestIds > 0){
                         $diffIds = array_diff($purchaseOrderRequestIds->toArray(),$draftPurchaseOrderRequestIds);
                         $purchaseOrderRequestsData = PurchaseOrderRequest::where('ready_to_approve', true)
                             ->whereIn('id',$diffIds)
+                            ->skip($skip)->take($take)
                             ->orderBy('id','desc')->get();
+                        
+                        $totalRecordCount = PurchaseOrderRequest::where('ready_to_approve', true)
+                            ->whereIn('id',$diffIds)
+                            ->count();
                         $status = "PO Created";
                     }else{
+                        $totalRecordCount = 0;
                         $purchaseOrderRequestsData = array();
                         $status = "";
                     }
                 }
             } else {
+                $totalRecordCount = PurchaseOrderRequest::where('ready_to_approve', false)
+                                            ->whereIn('id', $purchaseOrderRequestIds)->count();
                 $status = "Pending for Ready to Approve";
-                $purchaseOrderRequestsData = PurchaseOrderRequest::where('ready_to_approve', false)->whereIn('id', $purchaseOrderRequestIds)->orderBy('id','desc')->get();
+                $purchaseOrderRequestsData = PurchaseOrderRequest::where('ready_to_approve', false)
+                        ->whereIn('id', $purchaseOrderRequestIds)
+                        ->skip($skip)->take($take)
+                        ->orderBy('id','desc')->get();
             }
 
             $records = array();
             $records['data'] = array();
             $records["draw"] = intval($request->draw);
-            $records["recordsTotal"] = $records["recordsFiltered"] = count($purchaseOrderRequestsData);
+            $records["recordsTotal"] = $records["recordsFiltered"] = $totalRecordCount;
             $end = $request->length < 0 ? count($purchaseOrderRequestsData) : $request->length;
-            for($iterator = 0,$pagination = $request->start; $iterator < $end && $pagination < count($purchaseOrderRequestsData); $iterator++,$pagination++ ){
+            for($iterator = 0,$pagination = 0; $iterator < $end && $pagination < count($purchaseOrderRequestsData); $iterator++,$pagination++ ){
                 $user = User::where('id',$purchaseOrderRequestsData[$pagination]['user_id'])->select('first_name','last_name')->first();
                 $purchaseRequestFormat = $purchaseOrderRequestsData[$pagination]->purchaseRequest->format_id;
                 $actionDropdown = '<div class="btn-group">
