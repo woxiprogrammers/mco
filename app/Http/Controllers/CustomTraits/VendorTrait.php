@@ -298,6 +298,9 @@ trait VendorTrait
 
     public function vendorListing(Request $request){
         try {
+            $skip = $request->start;
+            $take = $request->length;
+            $totalRecordCount = 0;
             $user = Auth::user();
             $vendorId = Vendor::pluck('id')->toArray();
             if($request->has('search_company')){
@@ -306,12 +309,13 @@ trait VendorTrait
             if ($request->has('search_name')) {
                 $vendorId = Vendor::whereIn('id',$vendorId)->where('name','ilike','%'.$request->search_name.'%')->pluck('id')->toArray();
             }
-            $vendorsData = Vendor::whereIn('id', $vendorId)->orderBy('company','asc')->get();
+            $vendorsData = Vendor::whereIn('id', $vendorId)->orderBy('company','asc')->skip($skip)->take($take)->get();
+            $totalRecordCount = Vendor::whereIn('id', $vendorId)->count();
             $iTotalRecords = count($vendorsData);
             $records = array();
             $records['data'] = array();
             $end = $request->length < 0 ? count($vendorsData) : $request->length;
-            for ($iterator = 0, $pagination = $request->start; $iterator < $end && $pagination < count($vendorsData); $iterator++, $pagination++) {
+            for ($iterator = 0, $pagination = 0; $iterator < $end && $pagination < count($vendorsData); $iterator++, $pagination++) {
                 if ($vendorsData[$pagination]['is_active'] == true) {
                     $vendor_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
                     $status = 'Disable';
@@ -361,8 +365,8 @@ trait VendorTrait
                 ];
             }
             $records["draw"] = intval($request->draw);
-            $records["recordsTotal"] = $iTotalRecords;
-            $records["recordsFiltered"] = $iTotalRecords;
+            $records["recordsTotal"] = $totalRecordCount;
+            $records["recordsFiltered"] = $totalRecordCount;
         } catch (\Exception $e) {
             $records = array();
             $data = [
