@@ -1705,7 +1705,7 @@ class ReportManagementController extends Controller{
                     $billNo = 1;
                     $row = 1;
                     $billTypesModel = new BillTypes();
-                    $billTypes = $billTypesModel->get()->toArray();
+                    $billTypes = $billTypesModel->orderBy('name','asc')->get()->toArray();
                     $billTypesData = array();
                     foreach($billTypes as $btypes) {
                         $billTypesData[$btypes['id']] = 0;
@@ -3648,7 +3648,7 @@ class ReportManagementController extends Controller{
             $billData['date'] = $bill['date'];
             $billData['bill_type_id'] = $bill['bill_types_id'];
             $billTypesModel = new BillTypes();
-            $billTypes = $billTypesModel->get()->toArray();
+            $billTypes = $billTypesModel->orderBy('name','asc')->get()->toArray();
             $billData['bill_type_name'] = $billTypesModel->where('id',$bill['bill_types_id'])->value('name');
             $billData['created_at'] = $bill['created_at'];
             $billData['basic_amount'] = $total_rounded['current_bill_amount'];
