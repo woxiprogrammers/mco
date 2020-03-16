@@ -56,7 +56,7 @@ trait BillTrait{
             $quotationBankInfo = new QuotationBankInfo();
             $tax = new Tax();
             $billTypesModel = new BillTypes();
-            $billTypes = $billTypesModel->get()->toArray();
+            $billTypes = $billTypesModel->orderBy('name','asc')->get()->toArray();
             $unitModel = new Unit();
             $quotation = $quotationModel->where('project_site_id',$project_site['id'])->first();
             $cancelBillStatusId = $billStatusModel->where('slug','cancelled')->pluck('id')->first();
@@ -277,7 +277,7 @@ trait BillTrait{
     public function billListing(Request $request,$project_site,$status){
         try{
             $billTypesModel = new BillTypes();
-            $billTypes = $billTypesModel->get()->toArray();
+            $billTypes = $billTypesModel->orderBy('name','asc')->get()->toArray();
             $listingData = $currentTaxes = array();
             $iterator = $i = 0;
             $array_no = 1;
@@ -861,7 +861,7 @@ trait BillTrait{
             $selectedBillId = $bill['id'];
             $billStatusModel = new BillStatus();
             $billTypesModel = new BillTypes();
-            $billTypes = $billTypesModel->get()->toArray();
+            $billTypes = $billTypesModel->orderBy('name','asc')->get()->toArray();
             $billModel = new Bill();
             $cancelBillStatusId = $billStatusModel->where('slug','cancelled')->pluck('id')->first();
             $bills = $billModel->where('quotation_id',$bill['quotation_id'])->where('bill_status_id','!=',$cancelBillStatusId)->orderBy('created_at','asc')->get()->toArray();
@@ -1317,7 +1317,7 @@ trait BillTrait{
     public function generateCurrentBill(Request $request,$slug,$bill){
         try{
             $billTypesModel = new BillTypes();
-            $billTypes = $billTypesModel->get()->toArray();
+            $billTypes = $billTypesModel->orderBy('name','asc')->get()->toArray();
             $data = array();
             $data['slug'] = $slug;
             $data['bankData'] = ($bill->bankInfo != null) ? $bill->bankInfo : null;
@@ -1456,7 +1456,7 @@ trait BillTrait{
             $billModel = new Bill();
 
             $billTypesModel = new BillTypes();
-            $billTypes = $billTypesModel->get()->toArray();
+            $billTypes = $billTypesModel->orderBy('name','asc')->get()->toArray();
             $currBillType = $bill->bill_types_id;
 
             $data = array();
@@ -1654,7 +1654,7 @@ trait BillTrait{
             $billModel = new Bill();
             $billStatusModel = new BillStatus();
             $billTypesModel = new BillTypes();
-            $billTypes = $billTypesModel->get()->toArray();
+            $billTypes = $billTypesModel->orderBy('name','asc')->get()->toArray();
             $i = 0;
             $quotation = $bill->quotation;
             $quotationProducts = $quotation->quotation_products;
@@ -2096,7 +2096,7 @@ trait BillTrait{
         try{
             $data = array();
             $billTypesModel = new BillTypes();
-            $billTypes = $billTypesModel->get()->toArray();
+            $billTypes = $billTypesModel->orderBy('name','asc')->get()->toArray();
             $currBillType = $bill->bill_types_id;
 
 
