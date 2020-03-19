@@ -4,11 +4,11 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ProjectSiteAdvancePayment extends Model
+class ProjectSiteReceiptPayment extends Model
 {
-    protected $table = 'project_site_advance_payments';
+    protected $table = 'project_site_receipt_payments';
 
-    protected $fillable = ['project_site_id','payment_id','amount','reference_number','bank_id','paid_from_slug','adv_payment_date'];
+    protected $fillable = ['project_site_id','payment_id','amount','reference_number','bank_id','paid_from_slug','adv_receipt_date'];
 
     public function paymentType(){
         return $this->belongsTo('App\PaymentType','payment_id');

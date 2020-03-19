@@ -11,6 +11,7 @@
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->
 <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
+<link href="/assets/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker3.min.css" rel="stylesheet" type="text/css" />
 <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
@@ -52,6 +53,9 @@
                                             </li>
                                             <li>
                                                 <a href="#advancePaymentTab" data-toggle="tab"> Advance Payments </a>
+                                            </li>
+                                            <li>
+                                                <a href="#receiptPaymentTab" data-toggle="tab"> Receipt Payments </a>
                                             </li>
                                             <li>
                                                 <a href="#indirectExpenseTab" data-toggle="tab"> Indirect Expenses </a>
@@ -189,15 +193,59 @@
                                                 <table class="table table-striped table-bordered table-hover table-checkable order-column" id="advancePaymentTable">
                                                     <thead>
                                                     <tr>
-                                                        <th style="width: 25%"> Date </th>
-                                                        <th style="width: 25%"> Amount </th>
-                                                        <th style="width: 25%"> Payment Method </th>
-                                                        <th style="width: 25%"> Reference Number </th>
+                                                        <th>Sr. No</th>
+                                                        <th> Craeted Date </th>
+                                                        <th> Amount </th>
+                                                        <th> Payment Method </th>
+                                                        <th> Reference/Cheque Number </th>
+                                                        <th> Payment Date </th>
                                                     </tr>
                                                     </thead>
                                                     <tbody>
 
                                                     </tbody>
+                                                    <tfoot>
+                                                        <tr>
+                                                            <th></th>
+                                                            <th style="text-align:center">Total : &nbsp;</th>
+                                                            <th style="text-align:center"></th>
+                                                            <th></th>
+                                                            <th></th>
+                                                            <th></th>
+                                                        </tr>
+                                                    </tfoot>
+                                                </table>
+                                            </div>
+                                            <div class="tab-pane fade in" id="receiptPaymentTab">
+                                                <div class="btn-group pull-right margin-top-15">
+                                                    <a id="sample_editable_1_new" class="btn yellow" href="#receiptModal" data-toggle="modal" >
+                                                        <i class="fa fa-plus"></i>  &nbsp; Pay Receipt
+                                                    </a>
+                                                </div>
+                                                <table class="table table-striped table-bordered table-hover table-checkable order-column" id="receiptPaymentTable">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>Sr. no</th>
+                                                        <th> Created Date </th>
+                                                        <th> Amount </th>
+                                                        <th> Payment Method </th>
+                                                        <th> Reference Number </th>
+                                                        <th> Receipt Date </th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+
+                                                    </tbody>
+                                                    <tfoot>
+                                                        <tr>
+                                                            <th></th>
+                                                            <th style="text-align:center">Total : &nbsp;</th>
+                                                            <th style="text-align:center"></th>
+                                                            <th></th>
+                                                            <th></th>
+                                                            <th></th>
+                                                        </tr>
+                                                    </tfoot>
                                                 </table>
                                             </div>
                                             <div class="tab-pane fade in" id="indirectExpenseTab">
@@ -239,9 +287,8 @@
         <div class="modal-content">
             <div class="modal-header" style="padding-bottom:10px">
                 <div class="row">
-                    <div class="col-md-4"></div>
-                    <div class="col-md-4"> Add Advance Payment</div>
-                    <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                    <div class="col-md-10"><h2> Add Advance Payment</h2></div>
+                    <div class="col-md-2"><button type="button" class="close" data-dismiss="modal">X</button></div>
                 </div>
             </div>
             <div class="modal-body" style="padding:40px 50px;">
@@ -318,6 +365,132 @@
                         <div class="col-md-6">
                             <input type="text" class="form-control" name="reference_number" placeholder="Enter Reference Number">
                         </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-4">
+                            <label class="pull-right control-label">
+                                Select Advance Payment Date
+                            </label>
+                        </div>
+                        <div class="col-md-6 date date-picker" data-date-end-date="0d">                              
+                            <input type="text" name="adv_payment_date" value="{{date('m/d/Y')}}" id="adv_payment_date" readonly="" aria-required="true" aria-invalid="false" aria-describedby="date-error">
+                            <span id="date-error" class="help-block"></span>
+                            <button class="btn btn-sm default" type="button" style="">
+                                <i class="fa fa-calendar"></i>
+                            </button>
+                        </div>   
+                    </div>
+                    <div class="form-group row" style="margin-top: 5%">
+                        <div class="col-md-6">
+                            <button type="submit" class="btn red pull-right">
+                                <i class="fa fa-check" style="font-size: large"></i>
+                                Submit
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="receiptModal" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header" style="padding-bottom:10px">
+                <div class="row">
+                    <div class="col-md-10"><h2> Add Receipt Payment</h2></div>
+                    <div class="col-md-2"><button type="button" class="close" data-dismiss="modal">X</button></div>
+                </div>
+            </div>
+            <div class="modal-body" style="padding:40px 50px;">
+                <form id="paymentCreateForm" method="post" action="/project/receipt-payment/create">
+                    {!! csrf_field() !!}
+                    <input type="hidden" name="project_site_id" id="projectSiteId" value="{{$projectData['project_site_id']}}">
+                    <div class="form-group row" id="paidFromSlug">
+                        <div class="col-md-4">
+                            <label class="pull-right control-label">
+                                Paid From:
+                            </label>
+                        </div>
+                        <div class="col-md-6">
+                            <select class="form-control" id="paid_from_slug" name="paid_from_slug" onchange="changePaidFrom(this)">
+                                <option value="bank">Bank</option>
+                                <option value="cash">Cash</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="bankData">
+                        <div class="form-group row" id="bankSelect">
+                            <div class="col-md-4">
+                                <label class="pull-right control-label">
+                                    Bank:
+                                </label>
+                            </div>
+                            <div class="col-md-6">
+                                <select class="form-control" id="bank_id" name="bank_id">
+                                    <option value="">Select Bank</option>
+                                    @foreach($banks as $bank)
+                                        <option value="{{$bank['id']}}">{{$bank['bank_name']}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row"id="paymentSelect">
+                            <div class="col-md-4">
+                                <label class="pull-right control-label">
+                                    Payment Mode:
+                                </label>
+                            </div>
+                            <div class="col-md-6">
+                                <select class="form-control" name="payment_id" >
+                                    <option value="">Select Payment Type</option>
+                                    @foreach($paymentTypes as $paymentType)
+                                        <option value="{{$paymentType['id']}}">{{$paymentType['name']}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="allowedAmount">
+                    @foreach($banks as $bank)
+                        <input type="hidden" id="balance_amount_{{$bank['id']}}" value="{{$bank['balance_amount']}}">
+                    @endforeach
+
+                    <div class="form-group row">
+                        <div class="col-md-4">
+                            <label class="pull-right control-label">
+                                Amount
+                            </label>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" id="amount" name="amount" placeholder="Enter Amount">
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <div class="col-md-4">
+                            <label class="pull-right control-label">
+                                Reference/Cheque Number
+                            </label>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" name="reference_number" placeholder="Enter Reference/Cheque Number">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-4">
+                            <label class="pull-right control-label">
+                                Select Receipt Date
+                            </label>
+                        </div>
+                        <div class="col-md-6 date date-picker" data-date-end-date="0d">                              
+                            <input type="text" name="adv_receipt_date" value="{{date('m/d/Y')}}" id="adv_receipt_date" readonly="" aria-required="true" aria-invalid="false" aria-describedby="date-error">
+                            <span id="date-error" class="help-block"></span>
+                            <button class="btn btn-sm default" type="button" style="">
+                                <i class="fa fa-calendar"></i>
+                            </button>
+                        </div>   
                     </div>
                     <div class="form-group row" style="margin-top: 5%">
                         <div class="col-md-6">
@@ -454,6 +627,9 @@
 <script src="/assets/custom/admin/project/project.js" type="application/javascript"></script>
 <script src="/assets/custom/admin/project/project-site-advance-payment-datatable.js" type="application/javascript"></script>
 <script src="/assets/custom/admin/project/indirect-expenses-datatable.js" type="application/javascript"></script>
+<script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
+    <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
+    <script src="/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script>
 <script>
     $(document).ready(function() {
         EditProject.init();
