@@ -59,9 +59,11 @@
                                                             <option value="sitewise_purchase_report">Purchase Report</option>
                                                             <option value="sitewise_salary_report">Salary Report</option>
                                                             <option value="sitewise_sales_receipt_report">Sales & Receipt Report</option>
+                                                            <option value="sitewise_sr_report_new">Sales & Receipt Report - New</option>
                                                             <option value="sitewise_subcontractor_report">Subcontractor Report</option>
                                                             <option value="sitewise_subcontractor_summary_report">Subcontractor Summary Report</option>
                                                             <option value="sitewise_pNl_report">Site wise Profit & Loss Report</option>
+                                                            <option value="sitewise_pNl_report_new">Site wise Profit & Loss Report - New</option>
                                                         </select>
                                                     </div>
                                                 </div>
@@ -230,7 +232,7 @@
         });
 
         function getDivData(){
-            if($('#report_type').val() == 'sitewise_sales_receipt_report'){
+            if($('#report_type').val() == 'sitewise_sales_receipt_report' || $('#report_type').val() == 'sitewise_sr_report_new'){
                 $('#bill_project_site,#submitButton').show();
                 $('#project_sites').hide();
                 $('#subcontractor').hide();
@@ -255,7 +257,7 @@
                 $('#bill_project_site,#subcontractor_project_site,#subcontractor,#downloadButton,#dateDiv,#project_sites,#indirect_expense_project_site,#asset_rent_project_sites').hide();
                 $('#indirect_expense_project_site,#submitButton,#month,#year').show();
 
-            }else if($('#report_type').val() == 'sitewise_pNl_report'){
+            }else if($('#report_type').val() == 'sitewise_pNl_report' || $('#report_type').val() == 'sitewise_pNl_report_new'){
                 $('#bill_project_site,#subcontractor_project_site,#subcontractor,#downloadButton,#dateDiv,#indirect_expense_project_site,#asset_rent_project_sites').hide();
                 $('#project_sites,#submitButton,#month,#year').show();
 
@@ -274,7 +276,7 @@
         }
 
         function getData(){
-            if($('#report_type').val() == 'sitewise_sales_receipt_report'){
+            if($('#report_type').val() == 'sitewise_sales_receipt_report'  || $('#report_type').val() == 'sitewise_sr_report_new'){
                 var projectSiteId = $('#bill_project_site_id').val();
             }else if($('#report_type').val() == 'sitewise_subcontractor_report' || $('#report_type').val() == 'sitewise_subcontractor_summary_report'){
                 var projectSiteId = $('#subcontractor_project_site_id').val();
