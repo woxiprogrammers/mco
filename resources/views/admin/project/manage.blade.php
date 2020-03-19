@@ -62,12 +62,16 @@
                                                     <th> Company Name </th>
                                                     <th style="width: 30%"> Project Name </th>
                                                     <th> Location </th>
+                                                    <th>Advance Payment Amt</th>
+                                                    <th>Receipt Amt</th>
                                                     <th> Status </th>
                                                     <th> Actions </th>
                                                 </tr>
                                                 <tr>
                                                     <th> <input class="form-control form-filter" name="company_name" id="company_name" type="text"> </th>
                                                     <th> <input class="form-control form-filter" name="project_name" id="project_name" type="text"> </th>
+                                                    <th></th>
+                                                    <th></th>
                                                     <th></th>
                                                     <th></th>
                                                     <th>
