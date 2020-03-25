@@ -52,6 +52,7 @@
                                                     </div>
                                                     <div class="col-md-4">
                                                         <select class="form-control" id="report_type" name="report_type" onchange="getDivData()">
+                                                            <option value="sitewise_sr_report_new">Sales & Receipt Report - (Outstanding Report)</option>
                                                             <option value="sitewise_asset_rent_report">Asset Rent Report</option>
                                                             <option value="sitewise_master_peticash_report">Master Peticash Report</option>
                                                             <option value="sitewise_indirect_expenses_report">Indirect Expenses Report</option>
@@ -59,7 +60,6 @@
                                                             <option value="sitewise_purchase_report">Purchase Report</option>
                                                             <option value="sitewise_salary_report">Salary Report</option>
                                                             <option value="sitewise_sales_receipt_report">Sales & Receipt Report</option>
-                                                            <option value="sitewise_sr_report_new">Sales & Receipt Report - New</option>
                                                             <option value="sitewise_subcontractor_report">Subcontractor Report</option>
                                                             <option value="sitewise_subcontractor_summary_report">Subcontractor Summary Report</option>
                                                             <option value="sitewise_pNl_report">Site wise Profit & Loss Report</option>
