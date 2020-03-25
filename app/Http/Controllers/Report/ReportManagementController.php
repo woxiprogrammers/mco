@@ -2226,7 +2226,7 @@ class ReportManagementController extends Controller{
                                         $setBold = true;
                                         unset($rowData['make_bold']);
                                     }else{
-                                        $setBold = false
+                                        $setBold = false;
                                     }
                                     foreach($rowData as $key1 => $cellData){
                                         $current_column = $next_column++;
