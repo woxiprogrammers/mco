@@ -2109,7 +2109,7 @@ class ReportManagementController extends Controller{
                                         $data[$row]['hold'] = $fHold;
                                         $data[$row]['debit'] = $fDebit;
                                         $data[$row]['other_recovery_value'] = $fOtherRecovery;
-                                        $data[$row]['payable'] = $billData['total_amount_with_tax'];
+                                        $data[$row]['payable'] = $billData['total_amount_with_tax'] - ($fMobilization + $fTDS + $fRetention + $fHold + $fDebit + $fOtherRecovery) ;
                                         $totalPayable += $data[$row]['payable'];
                                     }
                             } else {
@@ -2152,7 +2152,7 @@ class ReportManagementController extends Controller{
                             round($totalReceiptAmount,3), null, null, 
                             (round($totalPayable,3) - round($totalReceiptAmount,3)), 
                             round($totalAdvAmount,3), null, null, 
-                            (round($totalPayable,3) - round($totalReceiptAmount,3) - round($totalAdvAmount,3))
+                            ((round($totalPayable,3) + round($totalMobilization,3)) - round($totalReceiptAmount,3) - round($totalAdvAmount,3))
                         );
                         $data[$row] = array_merge($data[$row],$totalRow);
 
@@ -3503,11 +3503,12 @@ class ReportManagementController extends Controller{
                         $quotation = $quotation->where('project_site_id',$project_site_id)->first();
                         $approvedBillStatusId = $billStatus->where('slug','approved')->pluck('id')->first();
                         $subcontractorApprovedBillStatusId = $subcontractorBillStatus->where('slug','approved')->pluck('id')->first();
-                        $startMonth = $month->where('id',$firstParameter)->first();
-                        $endMonth = $month->where('id',$secondParameter)->first();
-                        $selectedYear = $year->where('id',$thirdParameter)->first();
-                        $date = $startMonth['name'].' '.$selectedYear['slug'].' - '.$endMonth['name'].' '.$selectedYear['slug'];
-                        $totalMonths = $month->whereBetween('id',[$firstParameter,$secondParameter])->select('id','name','slug')->get();
+                        //$startMonth = $month->where('id',$firstParameter)->first();
+                        //$endMonth = $month->where('id',$secondParameter)->first();
+                        //$selectedYear = $year->where('id',$thirdParameter)->first();
+                        //$date = $startMonth['name'].' '.$selectedYear['slug'].' - '.$endMonth['name'].' '.$selectedYear['slug'];
+                        $date = "";
+                        //$totalMonths = $month->whereBetween('id',[$firstParameter,$secondParameter])->select('id','name','slug')->get();
                         $sales = $receipt = $total = $totalRetention = $totalHold = $debitAmount = $tdsAmount = $subcontractorTotal =
                         $otherRecoveryAmount = $mobilization = $purchaseAmount = $salaryAmount = $peticashPurchaseAmount =
                         $salesTaxAmount = /*$purchaseOrderGst = $assetMaintenanceGst = $subcontractorGst = $inventorySiteTransfersInGst =
@@ -3518,17 +3519,18 @@ class ReportManagementController extends Controller{
     
                         $inventoryComponentSiteTransferIds = $inventoryTransferTypes->where('slug','site')->get();
                         $approvedComponentTransferStatusId = $inventoryComponentTransferStatus->where('slug','approved')->pluck('id');
-                        $assetRentMonthlyExpenseData = $assetRentMonthlyExpense->where('year_id',$selectedYear['id'])
+                        $assetRentMonthlyExpenseData = $assetRentMonthlyExpense
+                                                        //->where('year_id',$selectedYear['id'])
                                                         ->where('project_site_id',$project_site_id)->get();
                         $officeProjectSiteId = $projectSite->where('name',env('OFFICE_PROJECT_SITE_NAME'))->pluck('id')->first();
                         $otherThanOfficeProjectSiteIds = $projectSite->where('id','!=',$officeProjectSiteId)->pluck('id')->toArray();
                         $approvedStatusId = TransactionStatus::where('slug', 'approved')->pluck('id')->first();
                         $yearlyGst = $purchaseGst = 0;
-                        foreach ($totalMonths as $month){
+                        //foreach ($totalMonths as $month){
                             $billIds = $bill->where('quotation_id',$quotation['id'])
                                 ->where('bill_status_id',$approvedBillStatusId)->orderBy('id')
-                                ->whereMonth('date',$month['id'])
-                                ->whereYear('date',$selectedYear['slug'])
+                                //->whereMonth('date',$month['id'])
+                                //->whereYear('date',$selectedYear['slug'])
                                 ->pluck('id');
                             $billTransactionData = $billTransaction->whereIn('bill_id',$billIds)
                                 ->where('transaction_status_id',$approvedStatusId)
@@ -3552,23 +3554,27 @@ class ReportManagementController extends Controller{
                             $tdsAmount += $billTransactionData->sum('tds_amount');
                             $otherRecoveryAmount += $billTransactionData->sum('other_recovery_value');
     
-                            $purchaseAmount += $purchaseOrderBillMonthlyExpense->where('month_id',$month['id'])
-                                                ->where('year_id',$selectedYear['id'])
+                            $purchaseAmount += $purchaseOrderBillMonthlyExpense
+                                                //->where('month_id',$month['id'])
+                                                //->where('year_id',$selectedYear['id'])
+                                                ->where('project_site_id',$project_site_id)
+                                                ->sum('total_expense');
+                            $salaryAmount += $peticashSalaryTransactionMonthlyExpense
+                                                //->where('month_id',$month['id'])
+                                                //->where('year_id',$selectedYear['id'])
                                                 ->where('project_site_id',$project_site_id)->sum('total_expense');
-                            $salaryAmount += $peticashSalaryTransactionMonthlyExpense->where('month_id',$month['id'])
-                                                ->where('year_id',$selectedYear['id'])
-                                                ->where('project_site_id',$project_site_id)->sum('total_expense');
-                            $peticashPurchaseAmount += $peticashPurchaseTransactionMonthlyExpense->where('month_id',$month['id'])
-                                                ->where('year_id',$selectedYear['id'])
+                            $peticashPurchaseAmount += $peticashPurchaseTransactionMonthlyExpense
+                                                //->where('month_id',$month['id'])
+                                                //->where('year_id',$selectedYear['id'])
                                                 ->where('project_site_id',$project_site_id)->sum('total_expense');
                             $subcontractorBillIds = $subcontractorBill->join('subcontractor_structure','subcontractor_bills.sc_structure_id',
                                                         '=','subcontractor_structure.id')
                                                         ->where('subcontractor_structure.project_site_id',$project_site_id)
                                                         ->where('subcontractor_bills.subcontractor_bill_status_id',$subcontractorApprovedBillStatusId)
-                                                        ->whereMonth('subcontractor_bills.created_at',$month['id'])
-                                                        ->whereYear('subcontractor_bills.created_at',$selectedYear['slug'])
+                                                        //->whereMonth('subcontractor_bills.created_at',$month['id'])
+                                                        //->whereYear('subcontractor_bills.created_at',$selectedYear['slug'])
                                                         ->pluck('subcontractor_bills.id');
-    
+
                             if(count($subcontractorBillIds) > 0){
                                 foreach ($subcontractorBillIds as $subcontractorBillId){
                                     $subcontractorBillData = $subcontractorBill->where('id',$subcontractorBillId)->first();
@@ -3592,9 +3598,13 @@ class ReportManagementController extends Controller{
                                 }
                             }
                             $officeExpense += $projectSiteSalaryDistribution->where('project_site_id',$project_site_id)
-                                ->where('month_id',$month['id'])
-                                ->where('year_id',$selectedYear['id'])
+                                //->where('month_id',$month['id'])
+                                //->where('year_id',$selectedYear['id'])
                                 ->pluck('distributed_amount')->first();
+                            
+                            $totalAssetRent = 0; //// Total Asset rent logic
+
+                            /*
                             foreach ($assetRentMonthlyExpenseData as $assetRentMonthlyExpense){
                                 $assetRent += (json_decode($assetRentMonthlyExpense[$month['slug']]) == null) ? 0 : json_decode($assetRentMonthlyExpense[$month['slug']])->rent_for_month;
                             }
@@ -3606,11 +3616,13 @@ class ReportManagementController extends Controller{
                                 foreach ($allSiteTotalAssetRentExpense as $thisAssetRentExpense){
                                     $totalAssetRent += (json_decode($thisAssetRentExpense[$month['slug']]) == null) ? 0 : json_decode($thisAssetRentExpense[$month['slug']])->rent_for_month;
                                 }
-                            }
+                            }*/
+
+                            //// Total Asset rent logic need to handle
+
                             //indirect Expense logic here
                             $salesGst = $salesTaxAmount;
                             $subcontractorGst = $subcontractorGstTax;
-    
                             $purchaseOrderGst = round($purchaseOrderBill
                                 ->join('purchase_orders','purchase_orders.id','='
                                     ,'purchase_order_bills.purchase_order_id')
@@ -3618,15 +3630,15 @@ class ReportManagementController extends Controller{
                                     ,'purchase_orders.purchase_request_id')
                                 ->join('vendors','vendors.id','=','purchase_orders.vendor_id')
                                 ->where('purchase_requests.project_site_id',$project_site_id)
-                                ->whereMonth('purchase_order_bills.created_at',$month['id'])
-                                ->whereYear('purchase_order_bills.created_at',$selectedYear['slug'])
+                                //->whereMonth('purchase_order_bills.created_at',$month['id'])
+                                //->whereYear('purchase_order_bills.created_at',$selectedYear['slug'])
                                 ->sum(DB::raw('purchase_order_bills.transportation_tax_amount + purchase_order_bills.tax_amount + purchase_order_bills.extra_tax_amount')),3);
                             $assetMaintenanceGst = $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
                                 ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
                                 ->join('assets','assets.id','=','asset_maintenance.asset_id')
                                 ->where('asset_maintenance.project_site_id',$project_site_id)
-                                ->whereMonth('asset_maintenance_bill_payments.created_at',$month['id'])
-                                ->whereYear('asset_maintenance_bill_payments.created_at',$selectedYear['slug'])
+                                //->whereMonth('asset_maintenance_bill_payments.created_at',$month['id'])
+                                //->whereYear('asset_maintenance_bill_payments.created_at',$selectedYear['slug'])
                                 ->sum(DB::raw('asset_maintenance_bills.cgst_amount +asset_maintenance_bills.sgst_amount +asset_maintenance_bills.igst_amount'));
     
                             $inventorySiteTransfersInGst = $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
@@ -3636,8 +3648,8 @@ class ReportManagementController extends Controller{
                                 ->where('inventory_component_transfers.transfer_type_id',
                                     $inventoryComponentSiteTransferIds->where('type','IN')->pluck('id')->first())
                                 ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
-                                ->whereMonth('inventory_component_transfers.created_at',$month['id'])
-                                ->whereYear('inventory_component_transfers.created_at',$selectedYear['slug'])
+                                //->whereMonth('inventory_component_transfers.created_at',$month['id'])
+                                //->whereYear('inventory_component_transfers.created_at',$selectedYear['slug'])
                                 ->sum(DB::raw('inventory_component_transfers.cgst_amount + inventory_component_transfers.sgst_amount + inventory_component_transfers.igst_amount'));
     
                             $inventorySiteTransfersOutGst = $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
@@ -3647,8 +3659,8 @@ class ReportManagementController extends Controller{
                                 ->where('inventory_component_transfers.transfer_type_id',
                                     $inventoryComponentSiteTransferIds->where('type','OUT')->pluck('id')->first())
                                 ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
-                                ->whereMonth('inventory_component_transfers.created_at',$month['id'])
-                                ->whereYear('inventory_component_transfers.created_at',$selectedYear['slug'])
+                                //->whereMonth('inventory_component_transfers.created_at',$month['id'])
+                                //->whereYear('inventory_component_transfers.created_at',$selectedYear['slug'])
                                 ->sum(DB::raw('inventory_component_transfers.cgst_amount + inventory_component_transfers.sgst_amount + inventory_component_transfers.igst_amount'));
     
                             $siteTransferBillGst = $siteTransferBill->join('inventory_component_transfers','inventory_component_transfers.id',
@@ -3656,12 +3668,12 @@ class ReportManagementController extends Controller{
                                 ->join('inventory_components','inventory_components.id'
                                     ,'=','inventory_component_transfers.inventory_component_id')
                                 ->where('inventory_components.project_site_id',$project_site_id)
-                                ->whereMonth('site_transfer_bills.created_at',$month['id'])
-                                ->whereYear('site_transfer_bills.created_at',$selectedYear['slug'])
+                                //->whereMonth('site_transfer_bills.created_at',$month['id'])
+                                //->whereYear('site_transfer_bills.created_at',$selectedYear['slug'])
                                 ->sum(DB::raw('site_transfer_bills.tax_amount + site_transfer_bills.extra_amount_cgst_amount + site_transfer_bills.extra_amount_sgst_amount + site_transfer_bills.extra_amount_igst_amount'));
     
                             $purchaseGst += ($purchaseOrderGst + $assetMaintenanceGst + $inventorySiteTransfersInGst + $siteTransferBillGst - $inventorySiteTransfersOutGst);
-                        }
+                        //} // main month loop end
                         $yearlyGst = $salesGst - $purchaseGst - $subcontractorGst;
                         $openingExpenses = $quotation['opening_expenses'];
     
@@ -3675,18 +3687,18 @@ class ReportManagementController extends Controller{
                             $totalAssetRentOpeningExpense = 0;
                         }
                         
-                        $startDateCreatedAt = date($selectedYear['slug'].'-'.$startMonth['id'].'-01');
-                        $endDateCreatedAt = date('Y-m-t', strtotime($startDateCreatedAt));
+                        //$startDateCreatedAt = date($selectedYear['slug'].'-'.$startMonth['id'].'-01');
+                        //$endDateCreatedAt = date('Y-m-t', strtotime($startDateCreatedAt));
 
                         $subcontractorAdvancePaymentTotal = SubcontractorAdvancePayment::where('project_site_id',$project_site_id)
-                                                            ->whereBetween('created_at', [$startDateCreatedAt, $endDateCreatedAt])
+                                                            //->whereBetween('created_at', [$startDateCreatedAt, $endDateCreatedAt])
                                                             ->sum('amount');
                         $advSCBillTxn = SubcontractorBillTransaction::join('subcontractor_bills','subcontractor_bills.id','=','subcontractor_bill_transactions.subcontractor_bills_id')
                                                 ->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
                                                 ->where('subcontractor_structure.project_site_id',$project_site_id)
                                                 ->where('subcontractor_bill_transactions.is_advance', true)
                                                 ->where('subcontractor_bill_transactions.transaction_status_id', $approvedStatusId)
-                                                ->whereBetween('subcontractor_bill_transactions.created_at', [$startDateCreatedAt, $endDateCreatedAt])
+                                                //->whereBetween('subcontractor_bill_transactions.created_at', [$startDateCreatedAt, $endDateCreatedAt])
                                                 ->sum('total');
     
                         $subcontractorAdvTotal = $subcontractorAdvancePaymentTotal - $advSCBillTxn;
@@ -3694,7 +3706,7 @@ class ReportManagementController extends Controller{
                         $purchaseOrderAdvancePaymentTotal = PurchaseOrderAdvancePayment::join('purchase_orders','purchase_orders.id','=','purchase_order_advance_payments.purchase_order_id')
                             ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
                             ->where('purchase_requests.project_site_id',$project_site_id)
-                            ->whereBetween('purchase_order_advance_payments.created_at', [$startDateCreatedAt, $endDateCreatedAt])
+                            //->whereBetween('purchase_order_advance_payments.created_at', [$startDateCreatedAt, $endDateCreatedAt])
                             ->sum('amount');
     
                         $advPurchaseBilltxn = PurchaseOrderPayment::join('purchase_order_bills','purchase_order_bills.id', '=','purchase_order_payments.purchase_order_bill_id')
@@ -3702,7 +3714,7 @@ class ReportManagementController extends Controller{
                                                 ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
                                                 ->where('purchase_requests.project_site_id','=',$project_site_id)
                                                 ->where('purchase_order_payments.is_advance',true)
-                                                ->whereBetween('purchase_order_payments.created_at', [$startDateCreatedAt, $endDateCreatedAt])
+                                                //->whereBetween('purchase_order_payments.created_at', [$startDateCreatedAt, $endDateCreatedAt])
                                                 ->sum('purchase_order_payments.amount');
     
                         $purchaseAdvTotal = $purchaseOrderAdvancePaymentTotal - $advPurchaseBilltxn;
@@ -3847,7 +3859,7 @@ class ReportManagementController extends Controller{
                                 $sheet->cell('A7', function($cell) use ($projectName){
                                     $cell->setFontWeight('bold');
                                     $cell->setAlignment('center')->setValignment('center');
-                                    $cell->setValue('Sitewise PnL Report - '.$projectName);
+                                    $cell->setValue('Sitewise Profit And Loss Report - '.$projectName);
                                 });
     
                                 $sheet->mergeCells('A8:H8');
