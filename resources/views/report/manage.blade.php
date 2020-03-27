@@ -33,12 +33,24 @@
                             </div>
                         </div>
                     </div>
-                @elseif($reportType == 'sitewise_indirect_expenses_report' || $reportType == 'sitewise_pNl_report' || $reportType == 'sitewise_pNl_report_new')
+                @elseif($reportType == 'sitewise_indirect_expenses_report' || $reportType == 'sitewise_pNl_report')
                     <div class="form-body">
                         <div class="form-group row">
                             <div class="btn-group">
                                 <div class="col-md-offset-3 btn blue" style="margin-left: 350%">
                                     <a href="javascript:window.open('/reports/get-report/{{$reportType}}/{{$project_site_id}}/{{$downloadButton['start_month_id']}}/{{$downloadButton['end_month_id']}}/{{$downloadButton['year_id']}}');" style="color: white"> Download
+                                        <i class="fa fa-download"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @elseif($reportType == 'sitewise_pNl_report_new')
+                    <div class="form-body">
+                        <div class="form-group row">
+                            <div class="btn-group">
+                                <div class="col-md-offset-3 btn blue" style="margin-left: 350%">
+                                    <a href="javascript:window.open('/reports/get-report/{{$reportType}}/{{$project_site_id}}/null/null/null');" style="color: white"> Download
                                         <i class="fa fa-download"></i>
                                     </a>
                                 </div>

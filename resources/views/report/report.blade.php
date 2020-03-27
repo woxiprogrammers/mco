@@ -276,7 +276,7 @@
         }
 
         function getData(){
-            if($('#report_type').val() == 'sitewise_sales_receipt_report'  || $('#report_type').val() == 'sitewise_sr_report_new'){
+            if($('#report_type').val() == 'sitewise_sales_receipt_report'  || $('#report_type').val() == 'sitewise_sr_report_new' || $('#report_type').val() == "sitewise_pNl_report_new"){
                 var projectSiteId = $('#bill_project_site_id').val();
             }else if($('#report_type').val() == 'sitewise_subcontractor_report' || $('#report_type').val() == 'sitewise_subcontractor_summary_report'){
                 var projectSiteId = $('#subcontractor_project_site_id').val();
