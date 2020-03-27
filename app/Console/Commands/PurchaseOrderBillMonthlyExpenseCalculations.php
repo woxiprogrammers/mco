@@ -91,11 +91,19 @@ class PurchaseOrderBillMonthlyExpenseCalculations extends Command
                                     ->where('purchase_requests.project_site_id',$projectSiteId)
                                     ->whereMonth('purchase_order_bills.created_at',$thisMonth)
                                     ->whereYear('purchase_order_bills.created_at',$thisYear)
-                                    ->select('purchase_order_bills.amount as basic_amount','purchase_order_bills.transportation_tax_amount as transportation_tax_amount','purchase_order_bills.tax_amount as tax_amount','purchase_order_bills.extra_tax_amount as extra_tax_amount')
-                                    ->get();
-                                $purchaseOrderBillAmount =  round($purchaseOrderBillData
-                                    ->sum('basic_amount'),3);
-                                $purchaseOrderBillTotalAmount = $purchaseOrderBillAmount;
+                                    // ->select('purchase_order_bills.amount as basic_amount',
+                                    // 'purchase_order_bills.transportation_tax_amount as transportation_tax_amount',
+                                    // 'purchase_order_bills.tax_amount as tax_amount',
+                                    // 'purchase_order_bills.extra_tax_amount as extra_tax_amount')
+                                    // ->get();
+                                    ->sum(DB::raw('purchase_order_bills.amount
+                                    + purchase_order_bills.tax_amount +
+                                     + purchase_order_bills.extra_amount +
+                                      purchase_order_bills.transportation_tax_amount + 
+                                      purchase_order_bills.transportation_total_amount + 
+                                      purchase_order_bills.extra_tax_amount'));
+                                $purchaseOrderBillTotalAmount =  round($purchaseOrderBillData,3);
+                                // $purchaseOrderBillTotalAmount = $purchaseOrderBillAmount;
 
                                 $inventorySiteTransfersInTotal = $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
                                     ,'=','inventory_component_transfers.inventory_component_id')
@@ -140,7 +148,9 @@ class PurchaseOrderBillMonthlyExpenseCalculations extends Command
                                 $totalAmount = $purchaseOrderBillTotalAmount + $inventorySiteTransfersTotal + $assetMaintenanceBillPaymentTotal + $siteTransferBillTotal;
 
                                 if($totalAmount != 0){
-                                    $alreadyExist = $purchaseOrderBillMonthlyExpenses->where('project_site_id',$projectSiteId)->where('month_id',$thisMonth)->where('year_id',$thisYearId)->first();
+                                    $alreadyExist = $purchaseOrderBillMonthlyExpenses->where('project_site_id',$projectSiteId)
+                                                    ->where('month_id',$thisMonth)
+                                                    ->where('year_id',$thisYearId)->first();
                                     if($alreadyExist != null){
                                         $alreadyExist->update([
                                             'purchase_expense' => round($purchaseOrderBillTotalAmount,3),
@@ -186,12 +196,18 @@ class PurchaseOrderBillMonthlyExpenseCalculations extends Command
                                         ->where('purchase_requests.project_site_id',$projectSiteId)
                                         ->whereMonth('purchase_order_bills.created_at',$thisMonth)
                                         ->whereYear('purchase_order_bills.created_at',$thisYear)
-                                        ->select('purchase_order_bills.amount as basic_amount','purchase_order_bills.transportation_tax_amount as transportation_tax_amount','purchase_order_bills.tax_amount as tax_amount','purchase_order_bills.extra_tax_amount as extra_tax_amount')
-                                        ->get();
-
-                                    $purchaseOrderBillAmount =  round($purchaseOrderBillData
-                                        ->sum('basic_amount'),3);
-                                    $purchaseOrderBillTotalAmount = $purchaseOrderBillAmount;
+                                          // ->select('purchase_order_bills.amount as basic_amount',
+                                    // 'purchase_order_bills.transportation_tax_amount as transportation_tax_amount',
+                                    // 'purchase_order_bills.tax_amount as tax_amount',
+                                    // 'purchase_order_bills.extra_tax_amount as extra_tax_amount')
+                                    // ->get();
+                                    ->sum(DB::raw('purchase_order_bills.amount
+                                    + purchase_order_bills.tax_amount +
+                                     + purchase_order_bills.extra_amount +
+                                      purchase_order_bills.transportation_tax_amount + 
+                                      purchase_order_bills.transportation_total_amount + 
+                                      purchase_order_bills.extra_tax_amount'));
+                                $purchaseOrderBillTotalAmount =  round($purchaseOrderBillData,3);
 
                                     $inventorySiteTransfersInTotal = $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
                                         ,'=','inventory_component_transfers.inventory_component_id')
@@ -278,14 +294,18 @@ class PurchaseOrderBillMonthlyExpenseCalculations extends Command
                             ->join('vendors','vendors.id','=','purchase_orders.vendor_id')
                             ->where('purchase_requests.project_site_id',$projectSiteId)
                             ->whereDate('purchase_order_bills.created_at','=',$todayDate)
-                            ->select('purchase_order_bills.amount as basic_amount','purchase_order_bills.transportation_tax_amount as transportation_tax_amount'
-                                ,'purchase_order_bills.tax_amount as tax_amount','purchase_order_bills.extra_tax_amount as extra_tax_amount',
-                                'purchase_order_bills')
-                            ->get();
-
-                        $purchaseOrderBillAmount =  round($purchaseOrderBillData
-                            ->sum('basic_amount'),3);
-                        $purchaseOrderBillTotalAmount = $purchaseOrderBillAmount;
+                              // ->select('purchase_order_bills.amount as basic_amount',
+                                    // 'purchase_order_bills.transportation_tax_amount as transportation_tax_amount',
+                                    // 'purchase_order_bills.tax_amount as tax_amount',
+                                    // 'purchase_order_bills.extra_tax_amount as extra_tax_amount')
+                                    // ->get();
+                            ->sum(DB::raw('purchase_order_bills.amount
+                                    + purchase_order_bills.tax_amount +
+                                     + purchase_order_bills.extra_amount +
+                                      purchase_order_bills.transportation_tax_amount + 
+                                      purchase_order_bills.transportation_total_amount + 
+                                      purchase_order_bills.extra_tax_amount'));
+                            $purchaseOrderBillTotalAmount =  round($purchaseOrderBillData,3);
 
                         $inventorySiteTransfersInTotal = $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
                             ,'=','inventory_component_transfers.inventory_component_id')
@@ -372,14 +392,18 @@ class PurchaseOrderBillMonthlyExpenseCalculations extends Command
                                     ->where('purchase_requests.project_site_id',$projectSiteId)
                                     ->whereMonth('purchase_order_bills.created_at',$thisMonth)
                                     ->whereYear('purchase_order_bills.created_at',$thisYear)
-                                    ->select('purchase_order_bills.amount as basic_amount','purchase_order_bills.transportation_tax_amount as transportation_tax_amount'
-                                        ,'purchase_order_bills.tax_amount as tax_amount','purchase_order_bills.extra_tax_amount as extra_tax_amount'
-                                        ,'purchase_order_bills.created_at')
-                                    ->orderBy('created_at','desc')
-                                    ->get();
-                                $purchaseOrderBillAmount =  round($purchaseOrderBillData
-                                    ->sum('basic_amount'),3);
-                                $purchaseOrderBillTotalAmount = $purchaseOrderBillAmount;
+                                      // ->select('purchase_order_bills.amount as basic_amount',
+                                    // 'purchase_order_bills.transportation_tax_amount as transportation_tax_amount',
+                                    // 'purchase_order_bills.tax_amount as tax_amount',
+                                    // 'purchase_order_bills.extra_tax_amount as extra_tax_amount')
+                                    // ->get();
+                                    ->sum(DB::raw('purchase_order_bills.amount
+                                    + purchase_order_bills.tax_amount +
+                                     + purchase_order_bills.extra_amount +
+                                      purchase_order_bills.transportation_tax_amount + 
+                                      purchase_order_bills.transportation_total_amount + 
+                                      purchase_order_bills.extra_tax_amount'));
+                                $purchaseOrderBillTotalAmount =  round($purchaseOrderBillData,3);
 
                                 $inventorySiteTransfersInTotal = $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
                                     ,'=','inventory_component_transfers.inventory_component_id')

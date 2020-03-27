@@ -3539,11 +3539,14 @@ class ReportManagementController extends Controller{
                             foreach ($billIds as $billId) {
                                 $billData = $this->getBillData($billId);
                                 $salesTaxAmount += $billData['tax_amount'];
-                                $sales += $billData['total_amount_with_tax'];
+                                $sales += $billData['basic_amount'];
                             }
-                            $transactionTotal = $billTransactionData->sum('total');
+                            
+                            $receiptPayment = new ProjectSiteReceiptPayment();
+                            $transactionTotal = 0;
+                            $transactionTotal = $receiptPayment->where('project_site_id', $project_site_id)->sum('amount');
                             $mobilization += $billTransactionData->where('paid_from_advanced',true)->sum('amount');
-                            $receipt += ($transactionTotal != null) ? $transactionTotal : 0;
+                            $receipt += ($transactionTotal != null) ? ($transactionTotal/1.18) : 0; // dividing receipt by 1.18
                             $retentionAmount = $billTransactionData->sum('retention_amount');
                             $reconciledRetentionAmount = $billReconcileTransactionData->where('transaction_slug','retention')->sum('amount');
                             $totalRetention += $retentionAmount - $reconciledRetentionAmount;
@@ -3674,7 +3677,7 @@ class ReportManagementController extends Controller{
     
                             $purchaseGst += ($purchaseOrderGst + $assetMaintenanceGst + $inventorySiteTransfersInGst + $siteTransferBillGst - $inventorySiteTransfersOutGst);
                         //} // main month loop end
-                        $yearlyGst = $salesGst - $purchaseGst - $subcontractorGst;
+                        //$yearlyGst = $salesGst - $purchaseGst - $subcontractorGst;
                         $openingExpenses = $quotation['opening_expenses'];
     
                         if($officeProjectSiteId == $project_site_id){
@@ -3719,14 +3722,16 @@ class ReportManagementController extends Controller{
     
                         $purchaseAdvTotal = $purchaseOrderAdvancePaymentTotal - $advPurchaseBilltxn;
     
-                        $indirectExpenses = $yearlyGst;
+                        //$indirectExpenses = $yearlyGst;
                         $receipt = $receipt - $mobilization;
                         $outstanding = $sales - $debitAmount - $tdsAmount - $totalRetention - $otherRecoveryAmount - $totalHold - $receipt - $mobilization;
                         $total = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount
-                                + $officeExpense + $subcontractorTotal + $openingExpenses + $indirectExpenses + $totalAssetRentOpeningExpense;
+                                //+ $officeExpense + $subcontractorTotal + $openingExpenses + $indirectExpenses + $totalAssetRentOpeningExpense;
+                                + $officeExpense + $subcontractorTotal + $openingExpenses  + $totalAssetRentOpeningExpense;
     
                         $totalWithAdvance = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount + $officeExpense + $subcontractorTotal + $openingExpenses
-                                            + $subcontractorAdvTotal + $purchaseAdvTotal + $indirectExpenses + $totalAssetRentOpeningExpense;
+                                            //+ $subcontractorAdvTotal + $purchaseAdvTotal + $indirectExpenses + $totalAssetRentOpeningExpense;
+                                            + $subcontractorAdvTotal + $purchaseAdvTotal  + $totalAssetRentOpeningExpense;
                         $salesPnL = $sales - $debitAmount - $tdsAmount - $totalHold - $otherRecoveryAmount - $mobilization;
                         $salesWisePnL = $salesPnL - $total;
                         $receiptWisePnL = $receipt - $total;
@@ -3734,17 +3739,17 @@ class ReportManagementController extends Controller{
     
                         $data = array(
                             array_merge(array(null,null, null, null, null, null, null, 'Billwise Expense', null,'Billwise + Advance Expense')),
-                            array_merge(array(null,'Sales', 'Retention', 'Receipt', 'Mobilization', 'Outstanding', 'Category', 'Amount', 'Category','Amount')),
+                            array_merge(array(null,'Sales (Basic)', 'Retention', 'Receipt (Basic) / 1.18', 'Mobilization', 'Outstanding', 'Category', 'Amount', 'Category','Amount')),
                             array_merge(array(
                                                 null,
                                                 round($sales,3),
                                                 round($totalRetention,3),
-                                                round($receipt,3),
+                                                round($receipt, 3),
                                                 round($mobilization,3),
                                                 round($outstanding,3),
-                                                'Purchase',
+                                                'Purchase (Basic)',
                                                 round($purchaseAmount,3),
-                                                'Purchase',
+                                                'Purchase (Basic)',
                                                 round($purchaseAmount,3)
                                             )
                                         ),
@@ -3777,19 +3782,31 @@ class ReportManagementController extends Controller{
                                         array('Opening Balance', round($openingExpenses,3))
                                     ),
                             array_merge(array_fill(0,6,null),
-                                        array('Subcontractor', round($subcontractorTotal,3)),
-                                        array('Subcontractor', round($subcontractorTotal,3))
+                                        array('Subcontractor (Basic)', round($subcontractorTotal,3)),
+                                        array('Subcontractor (Basic)', round($subcontractorTotal,3))
                                     ),
+
+                            array_merge(array_fill(0,8,null),
+                                    array('Subcontractor Advance', round($subcontractorAdvTotal,3))
+                                ),
+                            array_merge(array_fill(0,8,null),
+                                    array('Purchase Advance', round($purchaseAdvTotal,3))
+                                ),
+                            
                             array_merge(array_fill(0,6,null),
-                                array('Indirect Expenses', round($indirectExpenses,3)),
-                                array('Indirect Expenses', round($indirectExpenses,3))
+                                    array('Purchase GST', round(0,3)),
+                                    array('Purchase GST', round(0,3))
+                                ),
+                            array_merge(array_fill(0,6,null),
+                                array('Subcontractor GST', round(0,3)),
+                                array('Subcontractor GST', round(0,3))
                             ),
-                            array_merge(array_fill(0,8,null),
-                                array('Subcontractor Advance', round($subcontractorAdvTotal,3))
-                            ),
-                            array_merge(array_fill(0,8,null),
-                                array('Purchase Advance', round($purchaseAdvTotal,3))
-                            ),
+
+                            // array_merge(array_fill(0,6,null),
+                            //     array('Indirect Expenses', round($indirectExpenses,3)),
+                            //     array('Indirect Expenses', round($indirectExpenses,3))
+                            // ),
+                
                             array_merge(array_fill(0,5,null) ,
                                         array(round($outstanding,3)),
                                         array_fill(0,1,null),
@@ -3798,6 +3815,9 @@ class ReportManagementController extends Controller{
                                         array(round($totalWithAdvance,3))
                                     )
                         );
+
+                        //dd($data);
+
                         $summaryData = array(
                             array_merge(array(null,'Total Bill/Receipt (A)','Total Expense (B)' , 'P/L (A-B)')),
                             array_merge(array('Sales P/L',round(($salesPnL),3) , round($total,3) , round(($salesWisePnL),3))),
