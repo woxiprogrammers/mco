@@ -3514,6 +3514,7 @@ class ReportManagementController extends Controller{
                         $salesTaxAmount = /*$purchaseOrderGst = $assetMaintenanceGst = $subcontractorGst = $inventorySiteTransfersInGst =
                         $inventorySiteTransfersOutGst = $siteTransferBillGst =*/ $subcontractorGstTax = $officeExpense = 0;
                         $assetRent = 0;
+                        $subcontractorTotalBasicNew = $subcontractorTotalGSTNew = $purchaseBasic = 0;
                         $projectSiteAdvancePayment = new ProjectSiteAdvancePayment();
                         $outstandingMobilization = $projectSiteAdvancePayment->where('project_site_id',$project_site_id)->sum('amount');
     
@@ -3557,11 +3558,11 @@ class ReportManagementController extends Controller{
                             $tdsAmount += $billTransactionData->sum('tds_amount');
                             $otherRecoveryAmount += $billTransactionData->sum('other_recovery_value');
     
-                            $purchaseAmount += $purchaseOrderBillMonthlyExpense
-                                                //->where('month_id',$month['id'])
-                                                //->where('year_id',$selectedYear['id'])
-                                                ->where('project_site_id',$project_site_id)
-                                                ->sum('total_expense');
+                            // $purchaseAmount += $purchaseOrderBillMonthlyExpense
+                            //                     //->where('month_id',$month['id'])
+                            //                     //->where('year_id',$selectedYear['id'])
+                            //                     ->where('project_site_id',$project_site_id)
+                            //                     ->sum('total_expense');
                             $salaryAmount += $peticashSalaryTransactionMonthlyExpense
                                                 //->where('month_id',$month['id'])
                                                 //->where('year_id',$selectedYear['id'])
@@ -3581,7 +3582,7 @@ class ReportManagementController extends Controller{
                             if(count($subcontractorBillIds) > 0){
                                 foreach ($subcontractorBillIds as $subcontractorBillId){
                                     $subcontractorBillData = $subcontractorBill->where('id',$subcontractorBillId)->first();
-                                    $subcontractorGstTax += $subcontractorBillData['grand_total']
+                                    //$subcontractorGstTax += $subcontractorBillData['grand_total']
                                         - (($subcontractorBillData['subtotal'] - $subcontractorBillData['discount']) +
                                             $subcontractorBillData['round_off_amount']);
                                     /*$subcontractorStructureData = $subcontractorStructure->where('id',$subcontractorBillData['sc_structure_id'])->first();
@@ -3597,7 +3598,13 @@ class ReportManagementController extends Controller{
                                         $taxTotal += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
                                     }
                                     $subcontractorTotal += round(($subTotal + $taxTotal),3);*/
-                                    $subcontractorTotal += $subcontractorBillData['grand_total'];
+                                    //$subcontractorTotal += $subcontractorBillData['grand_total'];
+                                   
+                                    $subcontractorTotalBasicNew += (($subcontractorBillData['subtotal'] - $subcontractorBillData['discount']) +
+                                    $subcontractorBillData['round_off_amount']);
+                                    $subcontractorTotalGSTNew += $subcontractorBillData['grand_total']
+                                    - (($subcontractorBillData['subtotal'] - $subcontractorBillData['discount']) +
+                                        $subcontractorBillData['round_off_amount']);
                                 }
                             }
                             $officeExpense += $projectSiteSalaryDistribution->where('project_site_id',$project_site_id)
@@ -3605,27 +3612,44 @@ class ReportManagementController extends Controller{
                                 //->where('year_id',$selectedYear['id'])
                                 ->pluck('distributed_amount')->first();
                             
-                            $totalAssetRent = 0; //// Total Asset rent logic
+                            //$totalAssetRent = 0; //// Total Asset rent logic
 
-                            /*
-                            foreach ($assetRentMonthlyExpenseData as $assetRentMonthlyExpense){
-                                $assetRent += (json_decode($assetRentMonthlyExpense[$month['slug']]) == null) ? 0 : json_decode($assetRentMonthlyExpense[$month['slug']])->rent_for_month;
-                            }
-                            if($officeProjectSiteId == $project_site_id){
-                                $allSiteTotalAssetRentExpense = $assetRentMonthlyExpense
-                                    ->where('year_id',$selectedYear['id'])
-                                    ->whereIn('project_site_id',$otherThanOfficeProjectSiteIds)
-                                    ->get();
-                                foreach ($allSiteTotalAssetRentExpense as $thisAssetRentExpense){
-                                    $totalAssetRent += (json_decode($thisAssetRentExpense[$month['slug']]) == null) ? 0 : json_decode($thisAssetRentExpense[$month['slug']])->rent_for_month;
+                            $totalMonths = $month->whereBetween('id',[1,12])->select('id','name','slug')->get()->toArray();
+                            foreach ($totalMonths as $month) {
+                                foreach ($assetRentMonthlyExpenseData as $assetRentMonthlyExpense){
+                                    $assetRent += (json_decode($assetRentMonthlyExpense[$month['slug']]) == null) ? 0 : json_decode($assetRentMonthlyExpense[$month['slug']])->rent_for_month;
                                 }
-                            }*/
+                                if($officeProjectSiteId == $project_site_id){
+                                    $allSiteTotalAssetRentExpense = $assetRentMonthlyExpense
+                                        //->where('year_id',$selectedYear['id'])
+                                        ->whereIn('project_site_id',$otherThanOfficeProjectSiteIds)
+                                        ->get();
+                                    foreach ($allSiteTotalAssetRentExpense as $thisAssetRentExpense){
+                                        $totalAssetRent += (json_decode($thisAssetRentExpense[$month['slug']]) == null) ? 0 : json_decode($thisAssetRentExpense[$month['slug']])->rent_for_month;
+                                    }
+                                }
+                            }
 
                             //// Total Asset rent logic need to handle
 
                             //indirect Expense logic here
                             $salesGst = $salesTaxAmount;
-                            $subcontractorGst = $subcontractorGstTax;
+                            //$subcontractorGst = $subcontractorGstTax;
+
+                            $subcontractorBasicGst = $subcontractorTotalGSTNew;
+                            $subcontractorBasicTotal = $subcontractorTotalBasicNew;
+
+                            $purchaseOrderBillDataBasic = round($purchaseOrderBill
+                                    ->join('purchase_orders','purchase_orders.id','='
+                                        ,'purchase_order_bills.purchase_order_id')
+                                    ->join('purchase_requests','purchase_requests.id','='
+                                        ,'purchase_orders.purchase_request_id')
+                                    ->join('vendors','vendors.id','=','purchase_orders.vendor_id')
+                                    ->where('purchase_requests.project_site_id',$project_site_id)
+                                    ->sum(DB::raw('purchase_order_bills.amount +
+                                      purchase_order_bills.extra_amount +
+                                      purchase_order_bills.transportation_total_amount')),3);
+   
                             $purchaseOrderGst = round($purchaseOrderBill
                                 ->join('purchase_orders','purchase_orders.id','='
                                     ,'purchase_order_bills.purchase_order_id')
@@ -3633,17 +3657,34 @@ class ReportManagementController extends Controller{
                                     ,'purchase_orders.purchase_request_id')
                                 ->join('vendors','vendors.id','=','purchase_orders.vendor_id')
                                 ->where('purchase_requests.project_site_id',$project_site_id)
-                                //->whereMonth('purchase_order_bills.created_at',$month['id'])
-                                //->whereYear('purchase_order_bills.created_at',$selectedYear['slug'])
-                                ->sum(DB::raw('purchase_order_bills.transportation_tax_amount + purchase_order_bills.tax_amount + purchase_order_bills.extra_tax_amount')),3);
+                                ->sum(DB::raw('purchase_order_bills.transportation_tax_amount +
+                                 purchase_order_bills.tax_amount +
+                                 purchase_order_bills.extra_tax_amount')),3);
+
+                            
+                            $assetMaintenanceBillPaymentTotalBasic = AssetMaintenanceBill::join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
+                                 ->join('assets','assets.id','=','asset_maintenance.asset_id')
+                                 ->where('asset_maintenance.project_site_id',$project_site_id)
+                                 ->sum(DB::raw('asset_maintenance_bills.amount +
+                                                asset_maintenance_bills.extra_amount'));
+
                             $assetMaintenanceGst = $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
                                 ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
                                 ->join('assets','assets.id','=','asset_maintenance.asset_id')
                                 ->where('asset_maintenance.project_site_id',$project_site_id)
-                                //->whereMonth('asset_maintenance_bill_payments.created_at',$month['id'])
-                                //->whereYear('asset_maintenance_bill_payments.created_at',$selectedYear['slug'])
-                                ->sum(DB::raw('asset_maintenance_bills.cgst_amount +asset_maintenance_bills.sgst_amount +asset_maintenance_bills.igst_amount'));
+                                ->sum(DB::raw('asset_maintenance_bills.cgst_amount + 
+                                            asset_maintenance_bills.sgst_amount + 
+                                            asset_maintenance_bills.igst_amount'));
     
+                            $inventorySiteTransfersInTotal = $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
+                                            ,'=','inventory_component_transfers.inventory_component_id')
+                                            ->where('inventory_components.project_site_id',$project_site_id)
+                                            ->where('inventory_components.is_material',true)
+                                            ->where('inventory_component_transfers.transfer_type_id',
+                                                $inventoryComponentSiteTransferIds->where('type','IN')->pluck('id')->first())
+                                            ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
+                                            ->sum('inventory_component_transfers.total');
+
                             $inventorySiteTransfersInGst = $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
                                 ,'=','inventory_component_transfers.inventory_component_id')
                                 ->where('inventory_components.project_site_id',$project_site_id)
@@ -3651,10 +3692,17 @@ class ReportManagementController extends Controller{
                                 ->where('inventory_component_transfers.transfer_type_id',
                                     $inventoryComponentSiteTransferIds->where('type','IN')->pluck('id')->first())
                                 ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
-                                //->whereMonth('inventory_component_transfers.created_at',$month['id'])
-                                //->whereYear('inventory_component_transfers.created_at',$selectedYear['slug'])
                                 ->sum(DB::raw('inventory_component_transfers.cgst_amount + inventory_component_transfers.sgst_amount + inventory_component_transfers.igst_amount'));
-    
+   
+                            $inventorySiteTransfersOutTotal = $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
+                                        ,'=','inventory_component_transfers.inventory_component_id')
+                                        ->where('inventory_components.project_site_id',$project_site_id)
+                                        ->where('inventory_components.is_material',true)
+                                        ->where('inventory_component_transfers.transfer_type_id',
+                                            $inventoryComponentSiteTransferIds->where('type','OUT')->pluck('id')->first())
+                                        ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
+                                        ->sum('inventory_component_transfers.total');
+
                             $inventorySiteTransfersOutGst = $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
                                 ,'=','inventory_component_transfers.inventory_component_id')
                                 ->where('inventory_components.project_site_id',$project_site_id)
@@ -3662,19 +3710,31 @@ class ReportManagementController extends Controller{
                                 ->where('inventory_component_transfers.transfer_type_id',
                                     $inventoryComponentSiteTransferIds->where('type','OUT')->pluck('id')->first())
                                 ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
-                                //->whereMonth('inventory_component_transfers.created_at',$month['id'])
-                                //->whereYear('inventory_component_transfers.created_at',$selectedYear['slug'])
                                 ->sum(DB::raw('inventory_component_transfers.cgst_amount + inventory_component_transfers.sgst_amount + inventory_component_transfers.igst_amount'));
     
+                            $inventorySiteTransfersInTotalBasic = $inventorySiteTransfersInTotal - $inventorySiteTransfersInGst;
+                            $inventorySiteTransfersOutTotalBasic = $inventorySiteTransfersOutTotal - $inventorySiteTransfersOutGst;
+
+                            $inventorySiteTransfersTotalBasic = $inventorySiteTransfersInTotalBasic - $inventorySiteTransfersOutTotalBasic;
+
+
+                            $siteTransferBillTotal = $siteTransferBill->join('inventory_component_transfers','inventory_component_transfers.id',
+                            '=','site_transfer_bills.inventory_component_transfer_id')
+                            ->join('inventory_components','inventory_components.id'
+                                ,'=','inventory_component_transfers.inventory_component_id')
+                            ->where('inventory_components.project_site_id', $project_site_id)
+                            ->sum('site_transfer_bills.total');
+
                             $siteTransferBillGst = $siteTransferBill->join('inventory_component_transfers','inventory_component_transfers.id',
                                 '=','site_transfer_bills.inventory_component_transfer_id')
                                 ->join('inventory_components','inventory_components.id'
                                     ,'=','inventory_component_transfers.inventory_component_id')
                                 ->where('inventory_components.project_site_id',$project_site_id)
-                                //->whereMonth('site_transfer_bills.created_at',$month['id'])
-                                //->whereYear('site_transfer_bills.created_at',$selectedYear['slug'])
                                 ->sum(DB::raw('site_transfer_bills.tax_amount + site_transfer_bills.extra_amount_cgst_amount + site_transfer_bills.extra_amount_sgst_amount + site_transfer_bills.extra_amount_igst_amount'));
+
+                            $siteTransferBillTotalBasic = $siteTransferBillTotal - $siteTransferBillGst;
     
+                            $purchaseBasic += ($siteTransferBillTotalBasic + $inventorySiteTransfersTotalBasic + $purchaseOrderBillDataBasic + $assetMaintenanceBillPaymentTotalBasic);
                             $purchaseGst += ($purchaseOrderGst + $assetMaintenanceGst + $inventorySiteTransfersInGst + $siteTransferBillGst - $inventorySiteTransfersOutGst);
                         //} // main month loop end
                         //$yearlyGst = $salesGst - $purchaseGst - $subcontractorGst;
@@ -3723,13 +3783,15 @@ class ReportManagementController extends Controller{
                         $purchaseAdvTotal = $purchaseOrderAdvancePaymentTotal - $advPurchaseBilltxn;
     
                         //$indirectExpenses = $yearlyGst;
-                        $receipt = $receipt - $mobilization;
+                        //$receipt = $receipt - $mobilization;
+                        $purchaseAmount = $purchaseBasic;
                         $outstanding = $sales - $debitAmount - $tdsAmount - $totalRetention - $otherRecoveryAmount - $totalHold - $receipt - $mobilization;
                         $total = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount
                                 //+ $officeExpense + $subcontractorTotal + $openingExpenses + $indirectExpenses + $totalAssetRentOpeningExpense;
-                                + $officeExpense + $subcontractorTotal + $openingExpenses  + $totalAssetRentOpeningExpense;
+                                + $officeExpense + $subcontractorBasicTotal + $openingExpenses  + $totalAssetRentOpeningExpense;
     
-                        $totalWithAdvance = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount + $officeExpense + $subcontractorTotal + $openingExpenses
+                        $totalWithAdvance = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount + $officeExpense
+                                                 + $subcontractorBasicTotal + $openingExpenses
                                             //+ $subcontractorAdvTotal + $purchaseAdvTotal + $indirectExpenses + $totalAssetRentOpeningExpense;
                                             + $subcontractorAdvTotal + $purchaseAdvTotal  + $totalAssetRentOpeningExpense;
                         $salesPnL = $sales - $debitAmount - $tdsAmount - $totalHold - $otherRecoveryAmount - $mobilization;
@@ -3782,8 +3844,8 @@ class ReportManagementController extends Controller{
                                         array('Opening Balance', round($openingExpenses,3))
                                     ),
                             array_merge(array_fill(0,6,null),
-                                        array('Subcontractor (Basic)', round($subcontractorTotal,3)),
-                                        array('Subcontractor (Basic)', round($subcontractorTotal,3))
+                                        array('Subcontractor (Basic)', round($subcontractorBasicTotal,3)),
+                                        array('Subcontractor (Basic)', round($subcontractorBasicTotal,3))
                                     ),
 
                             array_merge(array_fill(0,8,null),
@@ -3794,12 +3856,12 @@ class ReportManagementController extends Controller{
                                 ),
                             
                             array_merge(array_fill(0,6,null),
-                                    array('Purchase GST', round(0,3)),
-                                    array('Purchase GST', round(0,3))
+                                    array('Purchase GST', round($purchaseGst,3)),
+                                    array('Purchase GST', round($purchaseGst,3))
                                 ),
                             array_merge(array_fill(0,6,null),
-                                array('Subcontractor GST', round(0,3)),
-                                array('Subcontractor GST', round(0,3))
+                                array('Subcontractor GST', round($subcontractorBasicGst,3)),
+                                array('Subcontractor GST', round($subcontractorBasicGst,3))
                             ),
 
                             // array_merge(array_fill(0,6,null),
@@ -3816,7 +3878,6 @@ class ReportManagementController extends Controller{
                                     )
                         );
 
-                        //dd($data);
 
                         $summaryData = array(
                             array_merge(array(null,'Total Bill/Receipt (A)','Total Expense (B)' , 'P/L (A-B)')),
@@ -3888,6 +3949,16 @@ class ReportManagementController extends Controller{
                                     $cell->setAlignment('center')->setValignment('center');
                                     $cell->setValue($date);
                                 });
+
+                                $sheet->cell('G22:J22', function($cell) use($date) {
+                                    $cell->setBackground('EA4335');
+                                });
+
+                                $sheet->cell('G23:J23', function($cell) use($date) {
+                                    $cell->setBackground('EA4335');
+                                });
+
+
                                 $row = 9;
                                 $headerRow =  $row+1;
                                 foreach($data as $key => $rowData){
