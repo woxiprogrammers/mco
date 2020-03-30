@@ -52,6 +52,8 @@
                                                     </div>
                                                     <div class="col-md-4">
                                                         <select class="form-control" id="report_type" name="report_type" onchange="getDivData()">
+                                                            <option value="sitewise_pNl_report_new">Site wise Profit & Loss Report - New</option>
+                                                            <option value="sitewise_sr_report_new">Sales & Receipt Report - (Outstanding Report)</option>
                                                             <option value="sitewise_asset_rent_report">Asset Rent Report</option>
                                                             <option value="sitewise_master_peticash_report">Master Peticash Report</option>
                                                             <option value="sitewise_indirect_expenses_report">Indirect Expenses Report</option>
@@ -230,7 +232,7 @@
         });
 
         function getDivData(){
-            if($('#report_type').val() == 'sitewise_sales_receipt_report'){
+            if($('#report_type').val() == 'sitewise_sales_receipt_report' || $('#report_type').val() == 'sitewise_sr_report_new' || $('#report_type').val() == 'sitewise_pNl_report_new'){
                 $('#bill_project_site,#submitButton').show();
                 $('#project_sites').hide();
                 $('#subcontractor').hide();
@@ -274,7 +276,7 @@
         }
 
         function getData(){
-            if($('#report_type').val() == 'sitewise_sales_receipt_report'){
+            if($('#report_type').val() == 'sitewise_sales_receipt_report'  || $('#report_type').val() == 'sitewise_sr_report_new' || $('#report_type').val() == "sitewise_pNl_report_new"){
                 var projectSiteId = $('#bill_project_site_id').val();
             }else if($('#report_type').val() == 'sitewise_subcontractor_report' || $('#report_type').val() == 'sitewise_subcontractor_summary_report'){
                 var projectSiteId = $('#subcontractor_project_site_id').val();

@@ -15,6 +15,7 @@ use App\PaymentType;
 use App\Project;
 use App\ProjectSite;
 use App\ProjectSiteAdvancePayment;
+use App\ProjectSiteReceiptPayment;
 use App\ProjectSiteIndirectExpense;
 use Illuminate\Http\Request;
 use App\City;
@@ -74,6 +75,7 @@ trait ProjectTrait{
             if($request->has('project_name')) {
                 $project_name = $request->project_name;
             }
+
             $k = 0;
             $clientData = Client::where('company','ilike','%'.$company_name.'%')
                           ->where('is_active',true)->orderBy('company','asc')->get()->toArray();
@@ -83,12 +85,16 @@ trait ProjectTrait{
                 for($j = 0 ; $j < count($project) ; $j++){
                     $project_site = ProjectSite::where('project_id',$project[$j]['id'])->orderBy('updated_at','desc')->get()->toArray();
                     for($l = 0 ; $l < count($project_site) ; $l++){
+                        $advpaymentData = ProjectSiteAdvancePayment::where('project_site_id',$project_site[$l]['id'])->sum('amount');
+                        $receiptData = ProjectSiteReceiptPayment::where('project_site_id',$project_site[$l]['id'])->sum('amount');
                         $listingData[$k]['company'] = ucwords($clientData[$i]['company']);
                         $listingData[$k]['project_name'] = ucwords($project[$j]['name']);
                         $listingData[$k]['project_id'] = $project[$j]['id'];
                         $listingData[$k]['project_is_active'] = $project[$j]['is_active'];
                         $listingData[$k]['project_site_id'] = $project_site[$l]['id'];
                         $listingData[$k]['project_site_name'] = ucwords($project_site[$l]['name']);
+                        $listingData[$k]['adv_payment_amt'] = ($advpaymentData) ? $advpaymentData : 0;
+                        $listingData[$k]['receipt_amt'] = ($receiptData) ? $receiptData : 0;
                         $k++;
                     }
 
@@ -142,6 +148,8 @@ trait ProjectTrait{
                     ucwords($listingData[$pagination]['company']),
                     ucwords($listingData[$pagination]['project_name']),
                     ucwords($listingData[$pagination]['project_site_name']),
+                    ucwords($listingData[$pagination]['adv_payment_amt']),
+                    ucwords($listingData[$pagination]['receipt_amt']),
                     $projectStatus,
                     $button
                 ];
@@ -298,8 +306,11 @@ trait ProjectTrait{
 
     public function addAdvancePayment(Request $request){
         try{
+            $getAdvDate = $request->adv_payment_date;
+            $formatedDate = date("Y-m-d", strtotime($getAdvDate) );
             $projectSite = ProjectSite::findOrFail($request['project_site_id']);
-            $advancePaymentData = $request->except('_token');
+            $advancePaymentData = $request->except('_token','adv_payment_date');
+            $advancePaymentData['adv_payment_date'] = $formatedDate;
             $advancePayment = ProjectSiteAdvancePayment::create($advancePaymentData);
             if($projectSite->advanced_amount == null){
                 $advanceAmount = $request['amount'];
@@ -348,12 +359,15 @@ trait ProjectTrait{
             }else{
                 $length = $request->length;
             }
+            $count = 0;
             for($iterator = 0,$pagination = $request->start; $iterator < $length && $pagination < count($paymentData); $iterator++,$pagination++ ){
                 $records['data'][] = [
+                    ++$count,
                     date('d M Y',strtotime($paymentData[$pagination]['created_at'])),
                     $paymentData[$pagination]['amount'],
                     ($paymentData[$pagination]->paymentType != null) ? ucfirst($paymentData[$pagination]->paid_from_slug).' - '.$paymentData[$pagination]->paymentType->name : ucfirst($paymentData[$pagination]->paid_from_slug),
-                    $paymentData[$pagination]['reference_number']
+                    $paymentData[$pagination]['reference_number'],
+                    date('d M Y',strtotime($paymentData[$pagination]['adv_payment_date'])),
                 ];
             }
             $records["draw"] = intval($request->draw);
@@ -362,6 +376,89 @@ trait ProjectTrait{
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Project Site Advance Payment Listing',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $status = 500;
+            $records = [];
+        }
+        return response()->json($records,$status);
+    }
+
+
+    public function addReceiptPayment(Request $request){
+        try{
+            $getAdvDate = $request->adv_receipt_date;
+            $formatedDate = date("Y-m-d", strtotime($getAdvDate) );
+            $projectSite = ProjectSite::findOrFail($request['project_site_id']);
+            $advancePaymentData = $request->except('_token','adv_receipt_date');
+            $advancePaymentData['adv_receipt_date'] = $formatedDate;
+            $advancePayment = ProjectSiteReceiptPayment::create($advancePaymentData);
+            /*if($projectSite->advanced_amount == null){
+                $advanceAmount = $request['amount'];
+            }else{
+                $advanceAmount = ((float)$projectSite->advanced_amount) + $request['amount'];
+            }
+            if($projectSite->advanced_balance == null){
+                $advanceBalance = $request['amount'];
+            }else{
+                $advanceBalance = ((float)$projectSite->advanced_balance) + $request['amount'];
+            }
+            $projectSite->update([
+                'advanced_balance' => $advanceBalance,
+                'advanced_amount' => $advanceAmount
+            ]);*/
+            if($request['paid_from_slug'] == 'bank'){
+                $bank = BankInfo::where('id',$request['bank_id'])->first();
+                $bankData['balance_amount'] = $bank['balance_amount'] + $request['amount'];
+                $bankData['total_amount'] = $bank['total_amount'] + $request['amount'];
+                $bank->update($bankData);
+            }
+            $request->session()->flash('success','Receipt Payment Added Successfully.');
+
+            return redirect('/project/edit/'.$projectSite->project_id);
+
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Add project site receipt payment',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function receiptPaymentListing(Request $request){
+        try{
+            $status = 200;
+            $paymentData = ProjectSiteReceiptPayment::where('project_site_id',$request->project_site_id)->orderBy('created_at','desc')->get();
+            $iTotalRecords = count($paymentData);
+            $records = array();
+            $records['data'] = array();
+            if($request->length == -1){
+                $length = $iTotalRecords;
+            }else{
+                $length = $request->length;
+            }
+            $count = 0;
+            for($iterator = 0,$pagination = $request->start; $iterator < $length && $pagination < count($paymentData); $iterator++,$pagination++ ){
+                $records['data'][] = [
+                    ++$count,
+                    date('d M Y',strtotime($paymentData[$pagination]['created_at'])),
+                    $paymentData[$pagination]['amount'],
+                    ($paymentData[$pagination]->paymentType != null) ? ucfirst($paymentData[$pagination]->paid_from_slug).' - '.$paymentData[$pagination]->paymentType->name : ucfirst($paymentData[$pagination]->paid_from_slug),
+                    $paymentData[$pagination]['reference_number'],
+                    date('d M Y',strtotime($paymentData[$pagination]['adv_receipt_date'])),
+                ];
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $iTotalRecords;
+            $records["recordsFiltered"] = $iTotalRecords;
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get Project Site receipt Payment Listing',
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];

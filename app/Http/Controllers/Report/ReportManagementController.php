@@ -9,66 +9,67 @@
 namespace App\Http\Controllers\Report;
 
 
-use App\Asset;
-use App\AssetMaintenanceBill;
-use App\AssetMaintenanceBillPayment;
-use App\AssetMaintenanceVendorRelation;
-use App\AssetRentMonthlyExpenses;
 use App\Bill;
-use App\BillTypes;
-use App\BillQuotationExtraItem;
-use App\BillQuotationProducts;
-use App\BillQuotationSummary;
-use App\BillReconcileTransaction;
-use App\BillStatus;
-use App\BillTax;
-use App\BillTransaction;
-use App\Helper\MaterialProductHelper;
-use App\Http\Controllers\Controller;
-use App\InventoryComponent;
-use App\InventoryComponentTransfers;
-use App\InventoryComponentTransferStatus;
-use App\InventoryTransferTypes;
-use App\Month;
-use App\PeticashPurchaseTransactionMonthlyExpense;
-use App\PeticashSalaryTransaction;
-use App\PeticashSalaryTransactionMonthlyExpense;
-use App\PeticashSiteTransfer;
-use App\PeticashStatus;
-use App\PeticashTransactionType;
-use App\Product;
-use App\ProductDescription;
-use App\ProjectSite;
-use App\ProjectSiteAdvancePayment;
-use App\ProjectSiteIndirectExpense;
-use App\ProjectSiteSalaryDistribution;
-use App\PurcahsePeticashTransaction;
-use App\PurchaseOrderAdvancePayment;
-use App\PurchaseOrderBill;
-use App\PurchaseOrderBillMonthlyExpense;
-use App\PurchaseOrderBillTransactionRelation;
-use App\PurchaseOrderPayment;
-use App\QuotationSummary;
-use App\SiteTransferBill;
-use App\SiteTransferBillPayment;
-use App\Subcontractor;
-use App\SubcontractorAdvancePayment;
-use App\SubcontractorBill;
-use App\SubcontractorBillReconcileTransaction;
-use App\SubcontractorBillStatus;
-use App\Quotation;
-use App\QuotationProduct;
-use App\SubcontractorBillTransaction;
-use App\SubcontractorStructure;
-use App\TransactionStatus;
 use App\Unit;
 use App\Year;
+use App\Asset;
+use App\Month;
+use App\BillTax;
+use App\Product;
+use App\BillTypes;
+use App\Quotation;
 use Carbon\Carbon;
+use App\BillStatus;
+use App\ProjectSite;
+use App\Subcontractor;
+use App\PeticashStatus;
+use App\BillTransaction;
+use App\QuotationProduct;
+use App\QuotationSummary;
+use App\SiteTransferBill;
+use App\PurchaseOrderBill;
+use App\SubcontractorBill;
+use App\TransactionStatus;
+use App\InventoryComponent;
+use App\ProductDescription;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Maatwebsite\Excel\Facades\Excel;
+use App\AssetMaintenanceBill;
+use App\BillQuotationSummary;
+use App\PeticashSiteTransfer;
+use App\PurchaseOrderPayment;
+use App\BillQuotationProducts;
+use App\BillQuotationExtraItem;
+use App\InventoryTransferTypes;
+use App\SubcontractorStructure;
+use App\PeticashTransactionType;
+use App\SiteTransferBillPayment;
+use App\SubcontractorBillStatus;
+use App\AssetRentMonthlyExpenses;
+use App\BillReconcileTransaction;
+use App\PeticashSalaryTransaction;
+use App\ProjectSiteAdvancePayment;
+use App\ProjectSiteReceiptPayment;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use App\ProjectSiteIndirectExpense;
+use Illuminate\Support\Facades\Log;
+use App\AssetMaintenanceBillPayment;
+use App\Http\Controllers\Controller;
+use App\InventoryComponentTransfers;
+use App\PurcahsePeticashTransaction;
+use App\PurchaseOrderAdvancePayment;
+use App\SubcontractorAdvancePayment;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Helper\MaterialProductHelper;
+use App\SubcontractorBillTransaction;
+use App\ProjectSiteSalaryDistribution;
+use App\AssetMaintenanceVendorRelation;
+use App\PurchaseOrderBillMonthlyExpense;
+use App\InventoryComponentTransferStatus;
+use App\PurchaseOrderBillTransactionRelation;
+use App\SubcontractorBillReconcileTransaction;
+use App\PeticashSalaryTransactionMonthlyExpense;
+use App\PeticashPurchaseTransactionMonthlyExpense;
 
 class ReportManagementController extends Controller{
 
@@ -285,6 +286,23 @@ class ReportManagementController extends Controller{
                         }
                     break;
 
+                    case 'sitewise_sr_report_new' :
+                        $iterator = 0;
+                        $bill = new Bill();
+                        $billStatus = new BillStatus();
+                        $approvedBillStatusId = $billStatus->where('slug','approved')->pluck('id')->first();
+                        $billCreatedDate = $bill->join('quotations','quotations.id','=','bills.quotation_id')
+                                        ->where('quotations.project_site_id',$globalProjectSiteId)
+                                        ->where('bills.bill_status_id',$approvedBillStatusId)
+                                        ->orderBy('bills.date','asc')
+                                        ->pluck('bills.date');
+                        if(count($billCreatedDate) > 0){
+                            $downloadButtonDetails[$iterator]['start_date'] = $billCreatedDate->last();
+                            $downloadButtonDetails[$iterator]['end_date'] = $billCreatedDate->first();
+
+                        }
+                    break;
+
                 case 'sitewise_subcontractor_report' :
                     $subcontractorBill = new SubcontractorBill();
                     $subcontractorBillStatus = new SubcontractorBillStatus();
@@ -321,6 +339,12 @@ class ReportManagementController extends Controller{
                     $downloadButtonDetails[0]['end_month_id'] = $request['end_month_id'];
                     $downloadButtonDetails[0]['year_id'] = $request['year_id'];
                     break;
+
+                case 'sitewise_pNl_report_new' :
+                        $downloadButtonDetails[0]['start_month_id'] = $request['start_month_id'];
+                        $downloadButtonDetails[0]['end_month_id'] = $request['end_month_id'];
+                        $downloadButtonDetails[0]['year_id'] = $request['year_id'];
+                        break;
             }
             $subcontractorId = $request['subcontractor_id'];
             $reportType = $request['report_name'];
@@ -1955,6 +1979,278 @@ class ReportManagementController extends Controller{
                     })->export('xls');
                     break;
 
+                    case 'sitewise_sr_report_new':
+                        $projectSite = new ProjectSite();
+                        $quotation = new Quotation();
+                        $bill = new Bill();
+                        $advancePayment = new ProjectSiteAdvancePayment();
+                        $receiptPayment = new ProjectSiteReceiptPayment();
+                        $billStatus = new BillStatus();
+                        $billTransaction = new BillTransaction();
+                        $data[$row] = array(
+                            'Bill Date : (Created Date)', 'Bill No.', 'Basic Amount', 'GST', 
+                            'With Tax Amount', 'Mobilization', 'TDS', 'Retention',
+                            'Hold', 'Debit', 'Other Recovery', 'Payable Amount',
+                            'Paid Amount', 'Cheque Number', 'Cheque Date', 'Outstanding',
+                            'Advance Payment', 'Cheque Number','Cheque Date', 'Outstanding With Advance'
+                        );
+                        
+                        $projectName = $projectSite->join('projects','projects.id','=','project_sites.project_id')
+                            ->where('project_sites.id',$project_site_id)->pluck('projects.name')->first();
+                        $quotationId = $quotation->where('project_site_id',$project_site_id)->pluck('id')->first();
+                        $statusId = $billStatus->whereIn('slug',['approved','draft'])->get();
+                        $totalBillData = $bill->where('quotation_id',$quotationId)
+                                        ->whereIn('bill_status_id',array_column($statusId->toArray(),'id'))->orderBy('id')
+                                        ->select('id','bill_status_id')->get();
+                        $date = date('l, d F Y',strtotime($secondParameter)) .' - '. date('l, d F Y',strtotime($firstParameter));
+                        $approvedStatusId = TransactionStatus::where('slug', 'approved')->pluck('id')->first();
+                        $billNo = 1;
+                        $row = 1;
+                        $billTypesModel = new BillTypes();
+                        $billTypes = $billTypesModel->orderBy('name','asc')->get()->toArray();
+                        $billTypesData = array();
+                        foreach($billTypes as $btypes) {
+                            $billTypesData[$btypes['id']] = 0;
+                        }           
+                        $totalAdvAmount = $totalReceiptAmount =  $totalBasicAmount = $totalGst = $totalWithTaxAmount = $totalTransactionAmount = $totalMobilization = $totalTds =
+                        $totalRetention = $totalHold = $totalDebit = $totalOtherRecovery = $totalPayable = $totalReceipt = $totalPaid = $totalRemaining = 0;
+                        $billCountLength = $totalBillData->count();
+                        $advanceCountLength = $advancePayment->where('project_site_id', $project_site_id)->count();
+                        $receiptCountLength = $receiptPayment->where('project_site_id', $project_site_id)->count();
+                        $advanceBillData = $advancePayment->where('project_site_id', $project_site_id)->get();
+                        $receiptBillData = $receiptPayment->where('project_site_id', $project_site_id)->get();
+                        $highest_number = max($billCountLength, $advanceCountLength, $receiptCountLength);
+                        for ($dRow = 0; $dRow < $highest_number; $dRow++) {
+                            if($dRow < $billCountLength) {
+                                $thisBill =  $totalBillData[$dRow];
+                                if($thisBill['bill_status_id'] == $statusId->where('slug','approved')->pluck('id')->first()){
+                                    $billData = $this->getBillData($thisBill['id']);
+                                    if (array_key_exists($billData['bill_type_id'], $billTypesData)) {
+                                        $billTypesData[$billData['bill_type_id']] +=  1;
+                                    }
+                                    $billName = $billData['bill_type_name']." ".$billTypesData[$billData['bill_type_id']];
+                                    $thisMonth = (int)date('n',strtotime($billData['date']));
+                                    
+                                    $totalBasicAmount += $billData['basic_amount']; 
+                                    $totalGst += $billData['tax_amount'];
+                                    $totalWithTaxAmount += $billData['total_amount_with_tax']; 
+                                    
+                                    $billTransactionData = $billTransaction->where('transaction_status_id',$approvedStatusId)
+                                                                ->where('bill_id',$thisBill['id'])
+                                                                ->orderBy('created_at','asc')->get();
+                                        $billRow = $row;
+                                        $data[$row]['date'] = date('d/n/Y',strtotime($billData['date'])) .' : ('. date('d/n/Y',strtotime($billData['created_at'])) .')';
+                                        $data[$row]['bill_no'] = $billName;
+                                        $data[$row]['basic_amount'] = round($billData['basic_amount'], 3);
+                                        $data[$row]['gst'] = round($billData['tax_amount'], 3);
+                                        $data[$row]['total_amount'] = round($billData['total_amount_with_tax'], 3);
+                                        $receiptCount = 1;
+                                        $payableDeductComponent = 0;
+                                        $mobilizationComponentCheck = 0;
+                                        $mobilizationComponentCheckSum = 0;
+                                        $data1 = array();
+                                        $row1 = 0;
+                                        $billRow1 = 0;
+                                        $totalpaid = $fTDS = $fRetention = $fMobilization = $fHold = $fDebit = $fOtherRecovery = 0;
+                                        foreach($billTransactionData as $key => $billTransaction){
+                                            if($billTransaction['paid_from_advanced'] == true){
+                                                $data1[$row1]['transaction_amount'] = 0;
+                                                $data1[$row1]['mobilisation'] = round($billTransaction['amount'], 3);
+                                                $totalMobilization += $billTransaction['amount'];
+                                                $mobilizationComponentCheck = $data1[$row1]['mobilisation'];
+                                            }else{
+                                                $data1[$row1]['transaction_amount'] = round($billTransaction['amount'], 3);
+                                                $data1[$row1]['mobilisation'] = 0;
+                                                $totalTransactionAmount += $billTransaction['amount'];
+                                                $mobilizationComponentCheck = 0;
+                                            }
+                                            $data1[$row1]['tds'] = round($billTransaction['tds_amount'], 3);
+                                            $data1[$row1]['retention'] = round($billTransaction['retention_amount'], 3);
+                                            $data1[$row1]['hold'] = round($billTransaction['hold'], 3);
+                                            $data1[$row1]['debit'] = round($billTransaction['debit'], 3);
+                                            $data1[$row1]['other_recovery'] = round($billTransaction['other_recovery_value'], 3);
+                                            $data1[$row1]['payable_amount'] = null;
+                                            $receipt = $billTransaction['total'];
+                                            if($billTransaction['paid_from_advanced'] == true){
+                                                $data1[$row1]['receipt'] = 0;
+                                            } else {
+                                                $data1[$row1]['receipt'] = round($receipt, 3);
+                                            }
+                                            $totalpaid += $receipt;
+                                            $row1++;
+                                            $receiptCount++;
+                                            $totalTds += $billTransaction['tds_amount'];
+                                            $fTDS += $billTransaction['tds_amount'];
+    
+                                            $totalRetention += $billTransaction['retention_amount'];
+                                            $fRetention += $billTransaction['retention_amount'];
+    
+                                            $totalHold += $billTransaction['hold'];
+                                            $fHold += $billTransaction['hold'];
+    
+                                            $totalDebit += $billTransaction['debit'];
+                                            $fDebit += $billTransaction['debit'];
+    
+                                            $totalOtherRecovery += $billTransaction['other_recovery_value'];
+                                            $fOtherRecovery += $billTransaction['other_recovery_value'];
+    
+                                            $totalReceipt += $receipt;
+                                            $payableDeductComponent += ($billTransaction['tds_amount'] + $billTransaction['retention_amount']
+                                                 + $billTransaction['hold'] + $billTransaction['debit'] + $billTransaction['other_recovery_value']
+                                                 + $mobilizationComponentCheck);
+    
+                                            $mobilizationComponentCheckSum += $mobilizationComponentCheck;
+                                            $fMobilization += $mobilizationComponentCheck;
+                                        }
+                                        
+                                        $data[$row]['mobilisation'] = $fMobilization;
+                                        $data[$row]['tds'] = $fTDS;
+                                        $data[$row]['retention_amount'] = $fRetention;
+                                        $data[$row]['hold'] = $fHold;
+                                        $data[$row]['debit'] = $fDebit;
+                                        $data[$row]['other_recovery_value'] = $fOtherRecovery;
+                                        $data[$row]['payable'] = $billData['total_amount_with_tax'] - ($fMobilization + $fTDS + $fRetention + $fHold + $fDebit + $fOtherRecovery) ;
+                                        $totalPayable += $data[$row]['payable'];
+                                    }
+                            } else {
+                                $data[$row] = array();
+                                $data[$row] = array_merge($data[$row],array_fill(2,12,null));
+                            }
+                            if($dRow < $receiptCountLength) {
+                                $thisReceiptBill =  $receiptBillData[$dRow];
+                                $data[$row]['amount'] = $thisReceiptBill['amount'];
+                                $data[$row]['reference_number'] = ($thisReceiptBill['reference_number'] != "") ? $thisReceiptBill['reference_number'] : " - ";
+                                $data[$row]['adv_receipt_date'] = ($thisReceiptBill['adv_receipt_date'] != "") ? $thisReceiptBill['adv_receipt_date'] : " - ";
+                                $totalReceiptAmount += $thisReceiptBill['amount'];
+                            } else {
+                                $data[$row] = array_merge($data[$row],array_fill(2,3,null));
+                            }
+
+                            $data[$row]['outstanding'] = "";
+
+                            if($dRow < $advanceCountLength) {
+                                $thisAdvanceBill =  $advanceBillData[$dRow];
+                                $data[$row]['amount_adv'] = $thisAdvanceBill['amount'];                                                                                                 
+                                $data[$row]['reference_number_adv'] = ($thisAdvanceBill['reference_number'] != "") ? $thisAdvanceBill['reference_number'] : " - ";
+                                $data[$row]['adv_payment_date'] = ($thisAdvanceBill['adv_payment_date'] != "") ? $thisAdvanceBill['adv_payment_date'] : " - ";
+                                $totalAdvAmount += $thisAdvanceBill['amount'];
+                            } else {
+                                $data[$row] = array_merge($data[$row],array_fill(2,3,null));
+                            }
+                            
+                            $data[$row]['outstanding_with_tax'] = "";
+
+                            $row++; 
+                        }
+
+                        $data[$row]['make_bold'] = true;
+                        $totalRow = array(
+                            'Total', null, round($totalBasicAmount,3), round($totalGst,3), 
+                            round($totalWithTaxAmount,3), round($totalMobilization,3), round($totalTds,3),
+                            round($totalRetention,3),round($totalHold,3),
+                            round($totalDebit,3),round($totalOtherRecovery,3), round($totalPayable,3),
+                            round($totalReceiptAmount,3), null, null, 
+                            (round($totalPayable,3) - round($totalReceiptAmount,3)), 
+                            round($totalAdvAmount,3), null, null, 
+                            ((round($totalPayable,3) + round($totalMobilization,3)) - round($totalReceiptAmount,3) - round($totalAdvAmount,3))
+                        );
+                        $data[$row] = array_merge($data[$row],$totalRow);
+
+                        $projectSiteAdvancePayment = new ProjectSiteAdvancePayment();
+                        $mobilizeAdvance = $projectSiteAdvancePayment->where('project_site_id',$project_site_id)->sum('amount');
+                        Excel::create($reportType."_".$currentDate, function($excel) use($monthlyTotal, $data, $reportType, $header, $companyHeader, $date, $projectName, $mobilizeAdvance) {
+                            $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(10);
+                            $excel->sheet($reportType, function($sheet) use($monthlyTotal, $data, $header, $companyHeader, $date, $projectName, $mobilizeAdvance) {
+                                $objDrawing = new \PHPExcel_Worksheet_Drawing();
+                                $objDrawing->setPath(public_path('/assets/global/img/logo.jpg')); //your image path
+                                $objDrawing->setWidthAndHeight(148,74);
+                                $objDrawing->setResizeProportional(true);
+                                $objDrawing->setCoordinates('A1');
+                                $objDrawing->setWorksheet($sheet);
+    
+                                $sheet->mergeCells('A2:H2');
+                                $sheet->cell('A2', function($cell) use($companyHeader) {
+                                    $cell->setFontWeight('bold');
+                                    $cell->setAlignment('center')->setValignment('center');
+                                    $cell->setValue($companyHeader['company_name']);
+                                });
+    
+                                $sheet->mergeCells('A3:H3');
+                                $sheet->cell('A3', function($cell) use($companyHeader) {
+                                    $cell->setFontWeight('bold');
+                                    $cell->setAlignment('center')->setValignment('center');
+                                    $cell->setValue($companyHeader['designation']);
+                                });
+    
+                                $sheet->mergeCells('A4:H4');
+                                $sheet->cell('A4', function($cell) use($companyHeader) {
+                                    $cell->setFontWeight('bold');
+                                    $cell->setAlignment('center')->setValignment('center');
+                                    $cell->setValue($companyHeader['address']);
+                                });
+    
+                                $sheet->mergeCells('A5:H5');
+                                $sheet->cell('A5', function($cell) use($companyHeader) {
+                                    $cell->setFontWeight('bold');
+                                    $cell->setAlignment('center')->setValignment('center');
+                                    $cell->setValue($companyHeader['contact_no']);
+                                });
+    
+                                $sheet->mergeCells('A6:H6');
+                                $sheet->cell('A6', function($cell) use($companyHeader) {
+                                    $cell->setFontWeight('bold');
+                                    $cell->setAlignment('center')->setValignment('center');
+                                    $cell->setValue($companyHeader['gstin_number']);
+                                });
+    
+                                $sheet->mergeCells('A7:H7');
+                                $sheet->cell('A7', function($cell) use ($projectName){
+                                    $cell->setFontWeight('bold');
+                                    $cell->setAlignment('center')->setValignment('center');
+                                    $cell->setValue('Sales/Receipt Outsatnding Report - '.$projectName);
+                                });
+    
+                                $sheet->mergeCells('A8:H8');
+                                $sheet->cell('A8', function($cell) use($date) {
+                                    $cell->setFontWeight('bold');
+                                    $cell->setAlignment('center')->setValignment('center');
+                                    $cell->setValue($date);
+                                });
+                                $row = 10;
+                                $row++;
+                                $headerRow = $row+1;
+                                foreach($data as $key => $rowData){
+                                    $next_column = 'A';
+                                    $row++;
+                                    if(array_key_exists('make_bold',$rowData)){
+                                        $setBold = true;
+                                        unset($rowData['make_bold']);
+                                    }else{
+                                        $setBold = false;
+                                    }
+                                    foreach($rowData as $key1 => $cellData){
+                                        $current_column = $next_column++;
+                                        $sheet->cell($current_column.($row), function($cell) use($cellData,$row,$sheet,$headerRow,$setBold,$current_column,$key1) {
+                                            $sheet->getRowDimension($row)->setRowHeight(20);
+                                            ($row == $headerRow || $setBold) ? $cell->setFontWeight('bold') : null;
+                                            //($current_column == 'N') ? $cell->setBackground('#d7f442') : null;
+                                            //($current_column == 'P') ? $cell->setFontColor('#d82517') : null;
+                                            $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                                            $cell->setAlignment('center')->setValignment('center');
+                                            if($key1 === 'monthly_total' && $cellData !== null){
+                                                $cell->setValue(round($cellData,3));
+                                            }else{
+                                                $cell->setValue($cellData);
+    
+                                            }
+                                        });
+                                    }
+                                }
+    
+                            });
+                        })->export('xls');
+                        break;
+
                 case 'sitewise_subcontractor_report':
                     $projectSite = new ProjectSite();
                     $subcontractorStructure = new SubcontractorStructure();
@@ -2958,7 +3254,7 @@ class ReportManagementController extends Controller{
                     }
 
                     $startDateCreatedAt = date($selectedYear['slug'].'-'.$startMonth['id'].'-01');
-                    $endDateCreatedAt = date($selectedYear['slug'].'-'.$endMonth['id'].'-t');
+                    $endDateCreatedAt = date('Y-m-t', strtotime($startDateCreatedAt));
 
                     $subcontractorAdvancePaymentTotal = SubcontractorAdvancePayment::where('project_site_id',$project_site_id)
                                                         ->whereBetween('created_at', [$startDateCreatedAt, $endDateCreatedAt])
@@ -3174,6 +3470,532 @@ class ReportManagementController extends Controller{
                         });
                     })->export('xls');
                     break;
+
+                    case 'sitewise_pNl_report_new' :
+                        $totalAssetRent = $totalAssetRentOpeningExpense = 0;
+                        $projectSite = new ProjectSite();
+                        $officeProjectSiteId = $projectSite->where('name',env('OFFICE_PROJECT_SITE_NAME'))->pluck('id')->first();
+                        $quotation = new Quotation();
+                        $bill = new Bill();
+                        $billStatus = new BillStatus();
+                        $billTransaction = new BillTransaction();
+                        $billReconcileTransaction = new BillReconcileTransaction();
+                        $subcontractorStructure = new SubcontractorStructure();
+                        $purchaseOrderBill = new PurchaseOrderBill();
+                        $subcontractorBill = new SubcontractorBill();
+                        $subcontractorBillStatus = new SubcontractorBillStatus();
+                        $assetRentMonthlyExpense = new AssetRentMonthlyExpenses();
+                        $assetMaintenanceBillPayment = new AssetMaintenanceBillPayment();
+                        $inventoryComponentTransfer = new InventoryComponentTransfers();
+                        $inventoryComponentTransferStatus = new InventoryComponentTransferStatus();
+                        $siteTransferBill = new SiteTransferBill();
+                        $inventoryTransferTypes = new InventoryTransferTypes();
+                        /* $assetMaintenanceBillPayment = new AssetMaintenanceBillPayment();
+                         $purchaseOrderBill = new PurchaseOrderBill();
+                         $inventoryComponentTransfer = new InventoryComponentTransfers();
+                         $inventoryTransferTypes = new InventoryTransferTypes();
+                         $inventoryComponentTransferStatus = new InventoryComponentTransferStatus();
+                         $siteTransferBill = new SiteTransferBill();*/
+                        $purchaseOrderBillMonthlyExpense = new PurchaseOrderBillMonthlyExpense();
+                        $peticashSalaryTransactionMonthlyExpense = new PeticashSalaryTransactionMonthlyExpense();
+                        $peticashPurchaseTransactionMonthlyExpense = new PeticashPurchaseTransactionMonthlyExpense();
+                        $projectSiteSalaryDistribution = new ProjectSiteSalaryDistribution();
+                        $quotation = $quotation->where('project_site_id',$project_site_id)->first();
+                        $approvedBillStatusId = $billStatus->where('slug','approved')->pluck('id')->first();
+                        $subcontractorApprovedBillStatusId = $subcontractorBillStatus->where('slug','approved')->pluck('id')->first();
+                        //$startMonth = $month->where('id',$firstParameter)->first();
+                        //$endMonth = $month->where('id',$secondParameter)->first();
+                        //$selectedYear = $year->where('id',$thirdParameter)->first();
+                        //$date = $startMonth['name'].' '.$selectedYear['slug'].' - '.$endMonth['name'].' '.$selectedYear['slug'];
+                        $date = "";
+                        //$totalMonths = $month->whereBetween('id',[$firstParameter,$secondParameter])->select('id','name','slug')->get();
+                        $sales = $receipt = $total = $totalRetention = $totalHold = $debitAmount = $tdsAmount = $subcontractorTotal =
+                        $otherRecoveryAmount = $mobilization = $purchaseAmount = $salaryAmount = $peticashPurchaseAmount =
+                        $salesTaxAmount = /*$purchaseOrderGst = $assetMaintenanceGst = $subcontractorGst = $inventorySiteTransfersInGst =
+                        $inventorySiteTransfersOutGst = $siteTransferBillGst =*/ $subcontractorGstTax = $officeExpense = 0;
+                        $assetRent = 0;
+                        $subcontractorTotalBasicNew = $subcontractorTotalGSTNew = $purchaseBasic = 0;
+                        $projectSiteAdvancePayment = new ProjectSiteAdvancePayment();
+                        $outstandingMobilization = $projectSiteAdvancePayment->where('project_site_id',$project_site_id)->sum('amount');
+    
+                        $inventoryComponentSiteTransferIds = $inventoryTransferTypes->where('slug','site')->get();
+                        $approvedComponentTransferStatusId = $inventoryComponentTransferStatus->where('slug','approved')->pluck('id');
+                        $assetRentMonthlyExpenseData = $assetRentMonthlyExpense
+                                                        //->where('year_id',$selectedYear['id'])
+                                                        ->where('project_site_id',$project_site_id)->get();
+                        $officeProjectSiteId = $projectSite->where('name',env('OFFICE_PROJECT_SITE_NAME'))->pluck('id')->first();
+                        $otherThanOfficeProjectSiteIds = $projectSite->where('id','!=',$officeProjectSiteId)->pluck('id')->toArray();
+                        $approvedStatusId = TransactionStatus::where('slug', 'approved')->pluck('id')->first();
+                        $yearlyGst = $purchaseGst = 0;
+                        //foreach ($totalMonths as $month){
+                            $billIds = $bill->where('quotation_id',$quotation['id'])
+                                ->where('bill_status_id',$approvedBillStatusId)->orderBy('id')
+                                //->whereMonth('date',$month['id'])
+                                //->whereYear('date',$selectedYear['slug'])
+                                ->pluck('id');
+                            $billTransactionData = $billTransaction->whereIn('bill_id',$billIds)
+                                ->where('transaction_status_id',$approvedStatusId)
+                                ->get();
+                            $billReconcileTransactionData = $billReconcileTransaction->whereIn('bill_id',$billIds)->get();
+                            foreach ($billIds as $billId) {
+                                $billData = $this->getBillData($billId);
+                                $salesTaxAmount += $billData['tax_amount'];
+                                $sales += $billData['basic_amount'];
+                            }
+                            
+                            $receiptPayment = new ProjectSiteReceiptPayment();
+                            $transactionTotal = 0;
+                            $transactionTotal = $receiptPayment->where('project_site_id', $project_site_id)->sum('amount');
+                            $mobilization += $billTransactionData->where('paid_from_advanced',true)->sum('amount');
+                            $receipt += ($transactionTotal != null) ? ($transactionTotal/1.18) : 0; // dividing receipt by 1.18
+                            $retentionAmount = $billTransactionData->sum('retention_amount');
+                            $reconciledRetentionAmount = $billReconcileTransactionData->where('transaction_slug','retention')->sum('amount');
+                            $totalRetention += $retentionAmount - $reconciledRetentionAmount;
+                            $holdAmount = $billTransactionData->sum('hold');
+                            $reconciledHoldAmount = $billReconcileTransactionData->where('transaction_slug','hold')->sum('amount');
+                            $totalHold += $holdAmount - $reconciledHoldAmount;
+                            $debitAmount += $billTransactionData->sum('debit');
+                            $tdsAmount += $billTransactionData->sum('tds_amount');
+                            $otherRecoveryAmount += $billTransactionData->sum('other_recovery_value');
+    
+                            // $purchaseAmount += $purchaseOrderBillMonthlyExpense
+                            //                     //->where('month_id',$month['id'])
+                            //                     //->where('year_id',$selectedYear['id'])
+                            //                     ->where('project_site_id',$project_site_id)
+                            //                     ->sum('total_expense');
+                            $salaryAmount += $peticashSalaryTransactionMonthlyExpense
+                                                //->where('month_id',$month['id'])
+                                                //->where('year_id',$selectedYear['id'])
+                                                ->where('project_site_id',$project_site_id)->sum('total_expense');
+                            $peticashPurchaseAmount += $peticashPurchaseTransactionMonthlyExpense
+                                                //->where('month_id',$month['id'])
+                                                //->where('year_id',$selectedYear['id'])
+                                                ->where('project_site_id',$project_site_id)->sum('total_expense');
+                            $subcontractorBillIds = $subcontractorBill->join('subcontractor_structure','subcontractor_bills.sc_structure_id',
+                                                        '=','subcontractor_structure.id')
+                                                        ->where('subcontractor_structure.project_site_id',$project_site_id)
+                                                        ->where('subcontractor_bills.subcontractor_bill_status_id',$subcontractorApprovedBillStatusId)
+                                                        //->whereMonth('subcontractor_bills.created_at',$month['id'])
+                                                        //->whereYear('subcontractor_bills.created_at',$selectedYear['slug'])
+                                                        ->pluck('subcontractor_bills.id');
+
+                            if(count($subcontractorBillIds) > 0){
+                                foreach ($subcontractorBillIds as $subcontractorBillId){
+                                    $subcontractorBillData = $subcontractorBill->where('id',$subcontractorBillId)->first();
+                                    //$subcontractorGstTax += $subcontractorBillData['grand_total']
+                                        - (($subcontractorBillData['subtotal'] - $subcontractorBillData['discount']) +
+                                            $subcontractorBillData['round_off_amount']);
+                                    /*$subcontractorStructureData = $subcontractorStructure->where('id',$subcontractorBillData['sc_structure_id'])->first();
+                                    if($subcontractorStructureData->contractType->slug == 'sqft'){
+                                        $rate = $subcontractorStructureData['rate'];
+                                    }else{
+                                        $rate = $subcontractorStructureData['rate'] * $subcontractorStructureData['total_work_area'];
+                                    }
+                                    $subcontractorBillTaxes = $subcontractorBillData->subcontractorBillTaxes;
+                                    $subTotal = $subcontractorBillData['qty'] * $rate;
+                                    $taxTotal = 0;
+                                    foreach($subcontractorBillTaxes as $key => $subcontractorBillTaxData){
+                                        $taxTotal += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
+                                    }
+                                    $subcontractorTotal += round(($subTotal + $taxTotal),3);*/
+                                    //$subcontractorTotal += $subcontractorBillData['grand_total'];
+                                   
+                                    $subcontractorTotalBasicNew += (($subcontractorBillData['subtotal'] - $subcontractorBillData['discount']) +
+                                    $subcontractorBillData['round_off_amount']);
+                                    $subcontractorTotalGSTNew += $subcontractorBillData['grand_total']
+                                    - (($subcontractorBillData['subtotal'] - $subcontractorBillData['discount']) +
+                                        $subcontractorBillData['round_off_amount']);
+                                }
+                            }
+                            $officeExpense += $projectSiteSalaryDistribution->where('project_site_id',$project_site_id)
+                                //->where('month_id',$month['id'])
+                                //->where('year_id',$selectedYear['id'])
+                                ->pluck('distributed_amount')->first();
+                            
+                            //$totalAssetRent = 0; //// Total Asset rent logic
+
+                            $totalMonths = $month->whereBetween('id',[1,12])->select('id','name','slug')->get()->toArray();
+                            foreach ($totalMonths as $month) {
+                                foreach ($assetRentMonthlyExpenseData as $assetRentMonthlyExpense){
+                                    $assetRent += (json_decode($assetRentMonthlyExpense[$month['slug']]) == null) ? 0 : json_decode($assetRentMonthlyExpense[$month['slug']])->rent_for_month;
+                                }
+                                if($officeProjectSiteId == $project_site_id){
+                                    $allSiteTotalAssetRentExpense = $assetRentMonthlyExpense
+                                        //->where('year_id',$selectedYear['id'])
+                                        ->whereIn('project_site_id',$otherThanOfficeProjectSiteIds)
+                                        ->get();
+                                    foreach ($allSiteTotalAssetRentExpense as $thisAssetRentExpense){
+                                        $totalAssetRent += (json_decode($thisAssetRentExpense[$month['slug']]) == null) ? 0 : json_decode($thisAssetRentExpense[$month['slug']])->rent_for_month;
+                                    }
+                                }
+                            }
+
+                            //// Total Asset rent logic need to handle
+
+                            //indirect Expense logic here
+                            $salesGst = $salesTaxAmount;
+                            //$subcontractorGst = $subcontractorGstTax;
+
+                            $subcontractorBasicGst = $subcontractorTotalGSTNew;
+                            $subcontractorBasicTotal = $subcontractorTotalBasicNew;
+
+                            $purchaseOrderBillDataBasic = round($purchaseOrderBill
+                                    ->join('purchase_orders','purchase_orders.id','='
+                                        ,'purchase_order_bills.purchase_order_id')
+                                    ->join('purchase_requests','purchase_requests.id','='
+                                        ,'purchase_orders.purchase_request_id')
+                                    ->join('vendors','vendors.id','=','purchase_orders.vendor_id')
+                                    ->where('purchase_requests.project_site_id',$project_site_id)
+                                    ->sum(DB::raw('purchase_order_bills.amount +
+                                      purchase_order_bills.extra_amount +
+                                      purchase_order_bills.transportation_total_amount')),3);
+   
+                            $purchaseOrderGst = round($purchaseOrderBill
+                                ->join('purchase_orders','purchase_orders.id','='
+                                    ,'purchase_order_bills.purchase_order_id')
+                                ->join('purchase_requests','purchase_requests.id','='
+                                    ,'purchase_orders.purchase_request_id')
+                                ->join('vendors','vendors.id','=','purchase_orders.vendor_id')
+                                ->where('purchase_requests.project_site_id',$project_site_id)
+                                ->sum(DB::raw('purchase_order_bills.transportation_tax_amount +
+                                 purchase_order_bills.tax_amount +
+                                 purchase_order_bills.extra_tax_amount')),3);
+
+                            
+                            $assetMaintenanceBillPaymentTotalBasic = AssetMaintenanceBill::join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
+                                 ->join('assets','assets.id','=','asset_maintenance.asset_id')
+                                 ->where('asset_maintenance.project_site_id',$project_site_id)
+                                 ->sum(DB::raw('asset_maintenance_bills.amount +
+                                                asset_maintenance_bills.extra_amount'));
+
+                            $assetMaintenanceGst = $assetMaintenanceBillPayment->join('asset_maintenance_bills','asset_maintenance_bills.id','=','asset_maintenance_bill_payments.asset_maintenance_bill_id')
+                                ->join('asset_maintenance','asset_maintenance.id','=','asset_maintenance_bills.asset_maintenance_id')
+                                ->join('assets','assets.id','=','asset_maintenance.asset_id')
+                                ->where('asset_maintenance.project_site_id',$project_site_id)
+                                ->sum(DB::raw('asset_maintenance_bills.cgst_amount + 
+                                            asset_maintenance_bills.sgst_amount + 
+                                            asset_maintenance_bills.igst_amount'));
+    
+                            $inventorySiteTransfersInTotal = $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
+                                            ,'=','inventory_component_transfers.inventory_component_id')
+                                            ->where('inventory_components.project_site_id',$project_site_id)
+                                            ->where('inventory_components.is_material',true)
+                                            ->where('inventory_component_transfers.transfer_type_id',
+                                                $inventoryComponentSiteTransferIds->where('type','IN')->pluck('id')->first())
+                                            ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
+                                            ->sum('inventory_component_transfers.total');
+
+                            $inventorySiteTransfersInGst = $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
+                                ,'=','inventory_component_transfers.inventory_component_id')
+                                ->where('inventory_components.project_site_id',$project_site_id)
+                                ->where('inventory_components.is_material',true)
+                                ->where('inventory_component_transfers.transfer_type_id',
+                                    $inventoryComponentSiteTransferIds->where('type','IN')->pluck('id')->first())
+                                ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
+                                ->sum(DB::raw('inventory_component_transfers.cgst_amount + inventory_component_transfers.sgst_amount + inventory_component_transfers.igst_amount'));
+   
+                            $inventorySiteTransfersOutTotal = $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
+                                        ,'=','inventory_component_transfers.inventory_component_id')
+                                        ->where('inventory_components.project_site_id',$project_site_id)
+                                        ->where('inventory_components.is_material',true)
+                                        ->where('inventory_component_transfers.transfer_type_id',
+                                            $inventoryComponentSiteTransferIds->where('type','OUT')->pluck('id')->first())
+                                        ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
+                                        ->sum('inventory_component_transfers.total');
+
+                            $inventorySiteTransfersOutGst = $inventoryComponentTransfer->join('inventory_components','inventory_components.id'
+                                ,'=','inventory_component_transfers.inventory_component_id')
+                                ->where('inventory_components.project_site_id',$project_site_id)
+                                ->where('inventory_components.is_material',true)
+                                ->where('inventory_component_transfers.transfer_type_id',
+                                    $inventoryComponentSiteTransferIds->where('type','OUT')->pluck('id')->first())
+                                ->where('inventory_component_transfers.inventory_component_transfer_status_id',$approvedComponentTransferStatusId)
+                                ->sum(DB::raw('inventory_component_transfers.cgst_amount + inventory_component_transfers.sgst_amount + inventory_component_transfers.igst_amount'));
+    
+                            $inventorySiteTransfersInTotalBasic = $inventorySiteTransfersInTotal - $inventorySiteTransfersInGst;
+                            $inventorySiteTransfersOutTotalBasic = $inventorySiteTransfersOutTotal - $inventorySiteTransfersOutGst;
+
+                            $inventorySiteTransfersTotalBasic = $inventorySiteTransfersInTotalBasic - $inventorySiteTransfersOutTotalBasic;
+
+
+                            $siteTransferBillTotal = $siteTransferBill->join('inventory_component_transfers','inventory_component_transfers.id',
+                            '=','site_transfer_bills.inventory_component_transfer_id')
+                            ->join('inventory_components','inventory_components.id'
+                                ,'=','inventory_component_transfers.inventory_component_id')
+                            ->where('inventory_components.project_site_id', $project_site_id)
+                            ->sum('site_transfer_bills.total');
+
+                            $siteTransferBillGst = $siteTransferBill->join('inventory_component_transfers','inventory_component_transfers.id',
+                                '=','site_transfer_bills.inventory_component_transfer_id')
+                                ->join('inventory_components','inventory_components.id'
+                                    ,'=','inventory_component_transfers.inventory_component_id')
+                                ->where('inventory_components.project_site_id',$project_site_id)
+                                ->sum(DB::raw('site_transfer_bills.tax_amount + site_transfer_bills.extra_amount_cgst_amount + site_transfer_bills.extra_amount_sgst_amount + site_transfer_bills.extra_amount_igst_amount'));
+
+                            $siteTransferBillTotalBasic = $siteTransferBillTotal - $siteTransferBillGst;
+    
+                            $purchaseBasic += ($siteTransferBillTotalBasic + $inventorySiteTransfersTotalBasic + $purchaseOrderBillDataBasic + $assetMaintenanceBillPaymentTotalBasic);
+                            $purchaseGst += ($purchaseOrderGst + $assetMaintenanceGst + $inventorySiteTransfersInGst + $siteTransferBillGst - $inventorySiteTransfersOutGst);
+                        //} // main month loop end
+                        //$yearlyGst = $salesGst - $purchaseGst - $subcontractorGst;
+                        $openingExpenses = $quotation['opening_expenses'];
+    
+                        if($officeProjectSiteId == $project_site_id){
+                            $allSiteTotalAssetRentOpeningExpense = $projectSite->sum('asset_rent_opening_expense');
+                            $assetRent = $salaryAmount = $officeExpense = 0;
+                            $sales = $receipt = $totalAssetRent + $allSiteTotalAssetRentOpeningExpense;
+                        }
+                        $totalAssetRentOpeningExpense = $projectSite->where('id',$project_site_id)->pluck('asset_rent_opening_expense')->first();
+                        if($totalAssetRentOpeningExpense == null){
+                            $totalAssetRentOpeningExpense = 0;
+                        }
+                        
+                        //$startDateCreatedAt = date($selectedYear['slug'].'-'.$startMonth['id'].'-01');
+                        //$endDateCreatedAt = date('Y-m-t', strtotime($startDateCreatedAt));
+
+                        $subcontractorAdvancePaymentTotal = SubcontractorAdvancePayment::where('project_site_id',$project_site_id)
+                                                            //->whereBetween('created_at', [$startDateCreatedAt, $endDateCreatedAt])
+                                                            ->sum('amount');
+                        $advSCBillTxn = SubcontractorBillTransaction::join('subcontractor_bills','subcontractor_bills.id','=','subcontractor_bill_transactions.subcontractor_bills_id')
+                                                ->join('subcontractor_structure','subcontractor_structure.id','=','subcontractor_bills.sc_structure_id')
+                                                ->where('subcontractor_structure.project_site_id',$project_site_id)
+                                                ->where('subcontractor_bill_transactions.is_advance', true)
+                                                ->where('subcontractor_bill_transactions.transaction_status_id', $approvedStatusId)
+                                                //->whereBetween('subcontractor_bill_transactions.created_at', [$startDateCreatedAt, $endDateCreatedAt])
+                                                ->sum('total');
+    
+                        $subcontractorAdvTotal = $subcontractorAdvancePaymentTotal - $advSCBillTxn;
+    
+                        $purchaseOrderAdvancePaymentTotal = PurchaseOrderAdvancePayment::join('purchase_orders','purchase_orders.id','=','purchase_order_advance_payments.purchase_order_id')
+                            ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
+                            ->where('purchase_requests.project_site_id',$project_site_id)
+                            //->whereBetween('purchase_order_advance_payments.created_at', [$startDateCreatedAt, $endDateCreatedAt])
+                            ->sum('amount');
+    
+                        $advPurchaseBilltxn = PurchaseOrderPayment::join('purchase_order_bills','purchase_order_bills.id', '=','purchase_order_payments.purchase_order_bill_id')
+                                                ->join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
+                                                ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
+                                                ->where('purchase_requests.project_site_id','=',$project_site_id)
+                                                ->where('purchase_order_payments.is_advance',true)
+                                                //->whereBetween('purchase_order_payments.created_at', [$startDateCreatedAt, $endDateCreatedAt])
+                                                ->sum('purchase_order_payments.amount');
+    
+                        $purchaseAdvTotal = $purchaseOrderAdvancePaymentTotal - $advPurchaseBilltxn;
+    
+                        //$indirectExpenses = $yearlyGst;
+                        //$receipt = $receipt - $mobilization;
+                        $purchaseAmount = $purchaseBasic;
+                        $outstanding = $sales - $debitAmount - $tdsAmount - $totalRetention - $otherRecoveryAmount - $totalHold - $receipt - $mobilization;
+                        $total = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount
+                                //+ $officeExpense + $subcontractorTotal + $openingExpenses + $indirectExpenses + $totalAssetRentOpeningExpense;
+                                + $officeExpense + $subcontractorBasicTotal + $openingExpenses  + $totalAssetRentOpeningExpense;
+    
+                        $totalWithAdvance = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount + $officeExpense
+                                                 + $subcontractorBasicTotal + $openingExpenses
+                                            //+ $subcontractorAdvTotal + $purchaseAdvTotal + $indirectExpenses + $totalAssetRentOpeningExpense;
+                                            + $subcontractorAdvTotal + $purchaseAdvTotal  + $totalAssetRentOpeningExpense;
+                        $salesPnL = $sales - $debitAmount - $tdsAmount - $totalHold - $otherRecoveryAmount - $mobilization;
+                        $salesWisePnL = $salesPnL - $total;
+                        $receiptWisePnL = $receipt - $total;
+                        $advreceiptWisePnL = (($outstandingMobilization - $mobilization) + $receipt) - $totalWithAdvance;
+    
+                        $data = array(
+                            array_merge(array(null,null, null, null, null, null, null, 'Billwise Expense', null,'Billwise + Advance Expense')),
+                            array_merge(array(null,'Sales (Basic)', 'Retention', 'Receipt (Basic) / 1.18', 'Mobilization', 'Outstanding', 'Category', 'Amount', 'Category','Amount')),
+                            array_merge(array(
+                                                null,
+                                                round($sales,3),
+                                                round($totalRetention,3),
+                                                round($receipt, 3),
+                                                round($mobilization,3),
+                                                round($outstanding,3),
+                                                'Purchase (Basic)',
+                                                round($purchaseAmount,3),
+                                                'Purchase (Basic)',
+                                                round($purchaseAmount,3)
+                                            )
+                                        ),
+                            array_merge(array('Debit Note', round($debitAmount,3)),
+                                        array_fill(0,4,null) ,
+                                        array('Salary', round($salaryAmount,3)),
+                                        array('Salary', round($salaryAmount,3))
+                                        ),
+                            array_merge(array('TDS', round($tdsAmount,3)),
+                                        array_fill(0,4,null),
+                                        array('Asset Rent', round($assetRent,3)),
+                                        array('Asset Rent', round($assetRent,3))
+                                    ),
+                            array_merge(array('Hold', round($totalHold,3)),
+                                        array_fill(0,4,null),
+                                        array('Asset Rent Opening Expense', $totalAssetRentOpeningExpense),
+                                        array('Asset Rent Opening Expense', $totalAssetRentOpeningExpense)
+                                    ),
+                            array_merge(array('Other Recovery', round($otherRecoveryAmount,3)),
+                                        array_fill(0,4,null),
+                                        array('Misc. Purchase', round($peticashPurchaseAmount,3)),
+                                        array('Misc. Purchase', round($peticashPurchaseAmount,3))
+                                    ),
+                            array_merge(array_fill(0,6,null),
+                                        array('Office expenses', round($officeExpense,3)),
+                                        array('Office expenses', round($officeExpense,3))
+                                    ),
+                            array_merge(array_fill(0,6,null),
+                                        array('Opening Balance', round($openingExpenses,3)),
+                                        array('Opening Balance', round($openingExpenses,3))
+                                    ),
+                            array_merge(array_fill(0,6,null),
+                                        array('Subcontractor (Basic)', round($subcontractorBasicTotal,3)),
+                                        array('Subcontractor (Basic)', round($subcontractorBasicTotal,3))
+                                    ),
+
+                            array_merge(array_fill(0,8,null),
+                                    array('Subcontractor Advance', round($subcontractorAdvTotal,3))
+                                ),
+                            array_merge(array_fill(0,8,null),
+                                    array('Purchase Advance', round($purchaseAdvTotal,3))
+                                ),
+                            
+                            array_merge(array_fill(0,6,null),
+                                    array('Purchase GST', round($purchaseGst,3)),
+                                    array('Purchase GST', round($purchaseGst,3))
+                                ),
+                            array_merge(array_fill(0,6,null),
+                                array('Subcontractor GST', round($subcontractorBasicGst,3)),
+                                array('Subcontractor GST', round($subcontractorBasicGst,3))
+                            ),
+
+                            // array_merge(array_fill(0,6,null),
+                            //     array('Indirect Expenses', round($indirectExpenses,3)),
+                            //     array('Indirect Expenses', round($indirectExpenses,3))
+                            // ),
+                
+                            array_merge(array_fill(0,5,null) ,
+                                        array(round($outstanding,3)),
+                                        array_fill(0,1,null),
+                                        array(round($total,3)),
+                                        array_fill(0,1,null),
+                                        array(round($totalWithAdvance,3))
+                                    )
+                        );
+
+
+                        $summaryData = array(
+                            array_merge(array(null,'Total Bill/Receipt (A)','Total Expense (B)' , 'P/L (A-B)')),
+                            array_merge(array('Sales P/L',round(($salesPnL),3) , round($total,3) , round(($salesWisePnL),3))),
+                            array_merge(array('Receipt P/L',round($receipt,3) , round($total,3) , round(($receiptWisePnL),3))),
+                            array_merge(array('Advance/Receipt P/L',round(($outstandingMobilization - $mobilization) + $receipt ,3) , round($totalWithAdvance,3) , round(($advreceiptWisePnL),3))),
+                            array_merge(array_fill(0,4,null)),
+                            array_merge(array_fill(0,4,null)),
+                            array_merge(array(null,'Total Mobilization Given','Total Deducted','Balance')),
+                            array_merge(array('Outstanding Mobilization P/L',round($outstandingMobilization,3) , round($mobilization,3) , round(($outstandingMobilization - $mobilization),3))),
+                        );
+                        $projectName = $projectSite->join('projects','projects.id','=','project_sites.project_id')
+                            ->where('project_sites.id',$project_site_id)->pluck('projects.name')->first();
+                        Excel::create($reportType."_".$currentDate, function($excel) use($monthlyTotal, $data, $reportType, $header, $companyHeader, $date, $projectName, $summaryData) {
+                            $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(10);
+                            $excel->sheet($reportType, function($sheet) use($monthlyTotal, $data, $header, $companyHeader, $date, $projectName, $summaryData) {
+                                $objDrawing = new \PHPExcel_Worksheet_Drawing();
+                                $objDrawing->setPath(public_path('/assets/global/img/logo.jpg')); //your image path
+                                $objDrawing->setWidthAndHeight(148,74);
+                                $objDrawing->setResizeProportional(true);
+                                $objDrawing->setCoordinates('A1');
+                                $objDrawing->setWorksheet($sheet);
+    
+                                $sheet->mergeCells('A2:H2');
+                                $sheet->cell('A2', function($cell) use($companyHeader) {
+                                    $cell->setFontWeight('bold');
+                                    $cell->setAlignment('center')->setValignment('center');
+                                    $cell->setValue($companyHeader['company_name']);
+                                });
+    
+                                $sheet->mergeCells('A3:H3');
+                                $sheet->cell('A3', function($cell) use($companyHeader) {
+                                    $cell->setFontWeight('bold');
+                                    $cell->setAlignment('center')->setValignment('center');
+                                    $cell->setValue($companyHeader['designation']);
+                                });
+    
+                                $sheet->mergeCells('A4:H4');
+                                $sheet->cell('A4', function($cell) use($companyHeader) {
+                                    $cell->setFontWeight('bold');
+                                    $cell->setAlignment('center')->setValignment('center');
+                                    $cell->setValue($companyHeader['address']);
+                                });
+    
+                                $sheet->mergeCells('A5:H5');
+                                $sheet->cell('A5', function($cell) use($companyHeader) {
+                                    $cell->setFontWeight('bold');
+                                    $cell->setAlignment('center')->setValignment('center');
+                                    $cell->setValue($companyHeader['contact_no']);
+                                });
+    
+                                $sheet->mergeCells('A6:H6');
+                                $sheet->cell('A6', function($cell) use($companyHeader) {
+                                    $cell->setFontWeight('bold');
+                                    $cell->setAlignment('center')->setValignment('center');
+                                    $cell->setValue($companyHeader['gstin_number']);
+                                });
+    
+                                $sheet->mergeCells('A7:H7');
+                                $sheet->cell('A7', function($cell) use ($projectName){
+                                    $cell->setFontWeight('bold');
+                                    $cell->setAlignment('center')->setValignment('center');
+                                    $cell->setValue('Sitewise Profit And Loss Report - '.$projectName);
+                                });
+    
+                                $sheet->mergeCells('A8:H8');
+                                $sheet->cell('A8', function($cell) use($date) {
+                                    $cell->setFontWeight('bold');
+                                    $cell->setAlignment('center')->setValignment('center');
+                                    $cell->setValue($date);
+                                });
+
+                                $sheet->cell('G22:J22', function($cell) use($date) {
+                                    $cell->setBackground('EA4335');
+                                });
+
+                                $sheet->cell('G23:J23', function($cell) use($date) {
+                                    $cell->setBackground('EA4335');
+                                });
+
+
+                                $row = 9;
+                                $headerRow =  $row+1;
+                                foreach($data as $key => $rowData){
+                                    $next_column = 'A';
+                                    $row++;
+                                    foreach($rowData as $key1 => $cellData){
+                                        $current_column = $next_column++;
+                                        $sheet->cell($current_column.($row), function($cell) use($cellData,$row,$sheet,$headerRow,$key1) {
+                                            $sheet->getRowDimension($row)->setRowHeight(20);
+                                            $cell->setFontWeight('bold');
+                                            $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                                            $cell->setAlignment('center')->setValignment('center');
+                                            $cell->setValue($cellData);
+    
+                                        });
+                                    }
+                                }
+                                $row++;$row++;
+                                foreach($summaryData as $key => $rowData){
+                                    $next_column = 'A';
+                                    $row++;
+                                    foreach($rowData as $key1 => $cellData){
+                                        $current_column = $next_column++;
+                                        $sheet->cell($current_column.($row), function($cell) use($cellData,$row,$sheet,$headerRow,$key1) {
+                                            $sheet->getRowDimension($row)->setRowHeight(20);
+                                            $cell->setFontWeight('bold');
+                                            $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                                            $cell->setAlignment('center')->setValignment('center');
+                                            $cell->setValue($cellData);
+    
+                                        });
+                                    }
+                                }
+                            });
+                        })->export('xls');
+                        break;
+    
 
                 default :
                     break;
