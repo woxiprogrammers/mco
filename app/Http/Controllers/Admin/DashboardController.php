@@ -35,8 +35,7 @@ class DashboardController extends Controller
         $this->middleware('custom.auth');
     }
 
-    public function index()
-    {
+    public function index() {
         /*
          * Quotation Status Wise Chart
          */

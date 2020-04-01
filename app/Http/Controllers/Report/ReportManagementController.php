@@ -4564,7 +4564,7 @@ class ReportManagementController extends Controller{
                             number_format($salesAmount['outstanding_mobilization'], 3),
                             number_format($salesAmount['sitewise_pNl'], 3),
                             number_format($salesAmount['receiptwise_pNl'], 3),
-                            number_format($salesAmount['advReceipt_pNL'], 3)
+                            //number_format($salesAmount['advReceipt_pNL'], 3)
 
                         ];
                     }
@@ -4590,7 +4590,7 @@ class ReportManagementController extends Controller{
                             number_format($salesAmount['outstanding_mobilization'], 3),
                             number_format($salesAmount['sitewise_pNl'], 3),
                             number_format($salesAmount['receiptwise_pNl'], 3),
-                            number_format($salesAmount['advReceipt_pNL'], 3)
+                            //number_format($salesAmount['advReceipt_pNL'], 3)
                         ];
                     }
                     break;
@@ -4615,7 +4615,7 @@ class ReportManagementController extends Controller{
                             number_format($salesAmount['outstanding_mobilization'], 3),
                             number_format($salesAmount['sitewise_pNl'], 3),
                             number_format($salesAmount['receiptwise_pNl'], 3),
-                            number_format($salesAmount['advReceipt_pNL'], 3)
+                            //number_format($salesAmount['advReceipt_pNL'], 3)
                         ];
                     }
                     break;
@@ -4638,7 +4638,7 @@ class ReportManagementController extends Controller{
                             number_format($salesAmount['outstanding_mobilization'], 3),
                             number_format($salesAmount['sitewise_pNl'], 3),
                             number_format($salesAmount['receiptwise_pNl'], 3),
-                            number_format($salesAmount['advReceipt_pNL'], 3)
+                            //number_format($salesAmount['advReceipt_pNL'], 3)
                         ];
                     }
                     break;
@@ -4663,7 +4663,7 @@ class ReportManagementController extends Controller{
                             number_format($salesAmount['outstanding_mobilization'], 3),
                             number_format($salesAmount['sitewise_pNl'], 3),
                             number_format($salesAmount['receiptwise_pNl'], 3),
-                            number_format($salesAmount['advReceipt_pNL'], 3)
+                            //number_format($salesAmount['advReceipt_pNL'], 3)
                         ];
                     }
                 break;
@@ -4690,7 +4690,7 @@ class ReportManagementController extends Controller{
                             number_format($salesAmount['outstanding_mobilization'], 3),
                             number_format($salesAmount['sitewise_pNl'], 3),
                             number_format($salesAmount['receiptwise_pNl'], 3),
-                            number_format($salesAmount['advReceipt_pNL'], 3)
+                            //number_format($salesAmount['advReceipt_pNL'], 3)
                         ];
                     }
                 break;
@@ -4717,7 +4717,7 @@ class ReportManagementController extends Controller{
                             number_format($salesAmount['outstanding_mobilization'], 3),
                             number_format($salesAmount['sitewise_pNl'], 3),
                             number_format($salesAmount['receiptwise_pNl'], 3),
-                            number_format($salesAmount['advReceipt_pNL'], 3)
+                            //number_format($salesAmount['advReceipt_pNL'], 3)
                         ];
                     }
                 break;
@@ -4742,7 +4742,7 @@ class ReportManagementController extends Controller{
                             number_format($salesAmount['outstanding_mobilization'], 3),
                             number_format($salesAmount['sitewise_pNl'], 3),
                             number_format($salesAmount['receiptwise_pNl'], 3),
-                            number_format($salesAmount['advReceipt_pNL'], 3)
+                            //number_format($salesAmount['advReceipt_pNL'], 3)
 
                         ];
                     }
@@ -4813,8 +4813,10 @@ class ReportManagementController extends Controller{
                             number_format($expenseAmount['misc_purchase'],3),
                             number_format($expenseAmount['office_expense'],3),
                             number_format($expenseAmount['opening_balance'],3),
-                            number_format($expenseAmount['indirect_expense'],3),
+                            //number_format($expenseAmount['indirect_expense'],3),
                             number_format($expenseAmount['total_expense'],3),
+                            number_format($expenseAmount['subcontractor_gst'],3),
+                            number_format($expenseAmount['purchase_gst'],3),
                         ];
                     }
                     break;
@@ -4841,8 +4843,10 @@ class ReportManagementController extends Controller{
                             number_format($expenseAmount['misc_purchase'],3),
                             number_format($expenseAmount['office_expense'],3),
                             number_format($expenseAmount['opening_balance'],3),
-                            number_format($expenseAmount['indirect_expense'],3),
+                            //number_format($expenseAmount['indirect_expense'],3),
                             number_format($expenseAmount['total_expense'],3),
+                            number_format($expenseAmount['subcontractor_gst'],3),
+                            number_format($expenseAmount['purchase_gst'],3),
                         ];
                     }
                     break;
@@ -4869,8 +4873,10 @@ class ReportManagementController extends Controller{
                             number_format($expenseAmount['misc_purchase'],3),
                             number_format($expenseAmount['office_expense'],3),
                             number_format($expenseAmount['opening_balance'],3),
-                            number_format($expenseAmount['indirect_expense'],3),
+                            //number_format($expenseAmount['indirect_expense'],3),
                             number_format($expenseAmount['total_expense'],3),
+                            number_format($expenseAmount['subcontractor_gst'],3),
+                            number_format($expenseAmount['purchase_gst'],3),
                         ];
                     }
                     break;
@@ -4895,8 +4901,10 @@ class ReportManagementController extends Controller{
                             number_format($expenseAmount['misc_purchase'],3),
                             number_format($expenseAmount['office_expense'],3),
                             number_format($expenseAmount['opening_balance'],3),
-                            number_format($expenseAmount['indirect_expense'],3),
+                            //number_format($expenseAmount['indirect_expense'],3),
                             number_format($expenseAmount['total_expense'],3),
+                            number_format($expenseAmount['subcontractor_gst'],3),
+                            number_format($expenseAmount['purchase_gst'],3),
                         ];
                     }
                     break;
@@ -4923,8 +4931,10 @@ class ReportManagementController extends Controller{
                             number_format($expenseAmount['misc_purchase'],3),
                             number_format($expenseAmount['office_expense'],3),
                             number_format($expenseAmount['opening_balance'],3),
-                            number_format($expenseAmount['indirect_expense'],3),
+                            //number_format($expenseAmount['indirect_expense'],3),
                             number_format($expenseAmount['total_expense'],3),
+                            number_format($expenseAmount['subcontractor_gst'],3),
+                            number_format($expenseAmount['purchase_gst'],3),
                         ];
                     }
                     break;
@@ -4953,8 +4963,10 @@ class ReportManagementController extends Controller{
                             number_format($expenseAmount['misc_purchase'],3),
                             number_format($expenseAmount['office_expense'],3),
                             number_format($expenseAmount['opening_balance'],3),
-                            number_format($expenseAmount['indirect_expense'],3),
+                           // number_format($expenseAmount['indirect_expense'],3),
                             number_format($expenseAmount['total_expense'],3),
+                            number_format($expenseAmount['subcontractor_gst'],3),
+                            number_format($expenseAmount['purchase_gst'],3),
                         ];
                     }
                     break;
@@ -4983,8 +4995,10 @@ class ReportManagementController extends Controller{
                             number_format($expenseAmount['misc_purchase'],3),
                             number_format($expenseAmount['office_expense'],3),
                             number_format($expenseAmount['opening_balance'],3),
-                            number_format($expenseAmount['indirect_expense'],3),
+                            //number_format($expenseAmount['indirect_expense'],3),
                             number_format($expenseAmount['total_expense'],3),
+                            number_format($expenseAmount['subcontractor_gst'],3),
+                            number_format($expenseAmount['purchase_gst'],3),
                         ];
                     }
                     break;
@@ -5011,8 +5025,10 @@ class ReportManagementController extends Controller{
                             number_format($expenseAmount['misc_purchase'],3),
                             number_format($expenseAmount['office_expense'],3),
                             number_format($expenseAmount['opening_balance'],3),
-                            number_format($expenseAmount['indirect_expense'],3),
+                            //number_format($expenseAmount['indirect_expense'],3),
                             number_format($expenseAmount['total_expense'],3),
+                            number_format($expenseAmount['subcontractor_gst'],3),
+                            number_format($expenseAmount['purchase_gst'],3),
                         ];
                     }
                     break;
@@ -5357,6 +5373,8 @@ class ReportManagementController extends Controller{
             $salesTaxAmount = $officeExpense /*$purchaseOrderGst = $assetMaintenanceGst = $subcontractorGst = $inventorySiteTransfersInGst =
             $inventorySiteTransfersOutGst = $siteTransferBillGst*/ = 0;
             $assetRent = 0;
+            $subcontractorTotalBasicNew = $subcontractorBasicTotal = $subcontractorTotalGSTNew = $purchaseBasic = 0;
+
             $quotation = $quotation->where('project_site_id',$projectSiteId)->first();
             $subcontractorApprovedBillStatusId = $subcontractorBillStatus->where('slug','approved')->pluck('id')->first();
             $officeProjectSiteId = $projectSite->where('name',env('OFFICE_PROJECT_SITE_NAME'))->pluck('id')->first();
@@ -5364,7 +5382,7 @@ class ReportManagementController extends Controller{
             $inventoryComponentSiteTransferIds = $inventoryTransferTypes->where('slug','site')->get();
             $approvedComponentTransferStatusId = $inventoryComponentTransferStatus->where('slug','approved')->pluck('id');
 
-            $yearlyGst = $subcontractorGstTax = $purchaseAdvTotal = $subcontractorAdvTotal = 0;
+            $purchaseGst = $yearlyGst = $subcontractorGstTax = $purchaseAdvTotal = $subcontractorAdvTotal = 0;
             $approvedStatusId = TransactionStatus::where('slug', 'approved')->pluck('id')->first();
             switch(true){
                 case ($yearId == 'null' && $startMonthId == 'null')  :
@@ -5377,11 +5395,13 @@ class ReportManagementController extends Controller{
                     foreach ($billIds as $billId) {
                         $billData = $this->getBillData($billId);
                         $salesTaxAmount += $billData['tax_amount'];
-                        $sales += $billData['total_amount_with_tax'];
+                        $sales += $billData['basic_amount'];
                     }
-                    $transactionTotal = $billTransactionData->sum('total');
+                    $receiptPayment = new ProjectSiteReceiptPayment();
+                    $transactionTotal = 0;
+                    $transactionTotal = $receiptPayment->where('project_site_id', $projectSiteId)->sum('amount');
                     $mobilization += $billTransactionData->where('paid_from_advanced',true)->sum('amount');
-                    $receipt += ($transactionTotal != null) ? $transactionTotal : 0;
+                    $receipt += ($transactionTotal != null) ? ($transactionTotal/1.18) : 0; // dividing receipt by 1.18
                     $retentionAmount = $billTransactionData->sum('retention_amount');
                     $reconciledRetentionAmount = $billReconcileTransactionData->where('transaction_slug','retention')->sum('amount');
                     $totalRetention += $retentionAmount - $reconciledRetentionAmount;
@@ -5393,7 +5413,8 @@ class ReportManagementController extends Controller{
                     $otherRecoveryAmount += $billTransactionData->sum('other_recovery_value');
 
                     $purchaseAmount += $purchaseOrderBillMonthlyExpense
-                        ->where('project_site_id',$projectSiteId)->sum('total_expense');
+                         ->where('project_site_id',$projectSiteId)->sum('total_expense');
+
                     $salaryAmount += $peticashSalaryTransactionMonthlyExpense
                         ->where('project_site_id',$projectSiteId)->sum('total_expense');
                     $peticashPurchaseAmount += $peticashPurchaseTransactionMonthlyExpense
@@ -5425,7 +5446,12 @@ class ReportManagementController extends Controller{
                                // $subcontractorGst += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
                             }
                             $subcontractorTotal += round(($subTotal + $taxTotal),3);*/
-                            $subcontractorTotal += $subcontractorBillData['grand_total'];
+                            //$subcontractorTotal += $subcontractorBillData['grand_total'];
+                            $subcontractorTotalBasicNew += (($subcontractorBillData['subtotal'] - $subcontractorBillData['discount']) +
+                            $subcontractorBillData['round_off_amount']);
+                            $subcontractorTotalGSTNew += $subcontractorBillData['grand_total']
+                                    - (($subcontractorBillData['subtotal'] - $subcontractorBillData['discount']) +
+                                        $subcontractorBillData['round_off_amount']);
                         }
                     }
                     $officeExpense = $projectSiteSalaryDistribution->where('project_site_id',$projectSiteId)
@@ -5481,7 +5507,8 @@ class ReportManagementController extends Controller{
 
                     //indirect Expense logic here
                     $salesGst = $salesTaxAmount;
-                    $subcontractorGst = $subcontractorGstTax;
+                    $subcontractorBasicGst = $subcontractorTotalGSTNew;
+                    $subcontractorBasicTotal = $subcontractorTotalBasicNew;
 
                     $purchaseOrderGst = round($purchaseOrderBill
                         ->join('purchase_orders','purchase_orders.id','='
@@ -5525,7 +5552,8 @@ class ReportManagementController extends Controller{
                         ->sum(DB::raw('site_transfer_bills.tax_amount + site_transfer_bills.extra_amount_cgst_amount + site_transfer_bills.extra_amount_sgst_amount + site_transfer_bills.extra_amount_igst_amount'));
 
                     $purchaseGst = $purchaseOrderGst + $assetMaintenanceGst + $inventorySiteTransfersInGst + $siteTransferBillGst - $inventorySiteTransfersOutGst;
-                    $yearlyGst = $salesGst - $purchaseGst - $subcontractorGst;
+                    $yearlyGst = $salesGst - $purchaseGst - $subcontractorBasicGst;
+                    //$yearlyGst = $salesGst - $purchaseGst - $subcontractorGst;
                     break;
 
                 case ($yearId === 'null') :
@@ -5533,7 +5561,6 @@ class ReportManagementController extends Controller{
                         ->select('id','name','slug')->get();
                     $assetRentMonthlyExpenseData = $assetRentMonthlyExpense
                         ->where('project_site_id',$projectSiteId)->get();
-                    $purchaseGst = 0;
                     foreach ($totalMonths as $month){
                         $billIds = $bill->where('quotation_id',$quotation['id'])
                             ->where('bill_status_id',$approvedBillStatusId)->orderBy('id')
@@ -5545,11 +5572,13 @@ class ReportManagementController extends Controller{
                         foreach ($billIds as $billId) {
                             $billData = $this->getBillData($billId);
                             $salesTaxAmount += $billData['tax_amount'];
-                            $sales += $billData['total_amount_with_tax'];
+                            $sales += $billData['basic_amount'];
                         }
-                        $transactionTotal = $billTransactionData->sum('total');
+                        $receiptPayment = new ProjectSiteReceiptPayment();
+                        $transactionTotal = 0;
+                        $transactionTotal = $receiptPayment->where('project_site_id', $projectSiteId)->sum('amount');
                         $mobilization += $billTransactionData->where('paid_from_advanced',true)->sum('amount');
-                        $receipt += ($transactionTotal != null) ? $transactionTotal : 0;
+                        $receipt += ($transactionTotal != null) ? ($transactionTotal/1.18) : 0; // dividing receipt by 1.18
                         $retentionAmount = $billTransactionData->sum('retention_amount');
                         $reconciledRetentionAmount = $billReconcileTransactionData->where('transaction_slug','retention')->sum('amount');
                         $totalRetention += $retentionAmount - $reconciledRetentionAmount;
@@ -5594,7 +5623,12 @@ class ReportManagementController extends Controller{
                                  //   $subcontractorGst += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
                                 }
                                 $subcontractorTotal += round(($subTotal + $taxTotal),3);*/
-                                $subcontractorTotal += $subcontractorBillData['grand_total'];
+                                //$subcontractorTotal += $subcontractorBillData['grand_total'];
+                                $subcontractorTotalBasicNew += (($subcontractorBillData['subtotal'] - $subcontractorBillData['discount']) +
+                                $subcontractorBillData['round_off_amount']);
+                                $subcontractorTotalGSTNew += $subcontractorBillData['grand_total']
+                                    - (($subcontractorBillData['subtotal'] - $subcontractorBillData['discount']) +
+                                        $subcontractorBillData['round_off_amount']);
                             }
                         }
                         $officeExpense += $projectSiteSalaryDistribution->where('project_site_id',$projectSiteId)
@@ -5649,7 +5683,9 @@ class ReportManagementController extends Controller{
 
                         //indirect Expense logic here
                         $salesGst = $salesTaxAmount;
-                        $subcontractorGst = $subcontractorGstTax;
+                        //$subcontractorGst = $subcontractorGstTax;
+                        $subcontractorBasicGst = $subcontractorTotalGSTNew;
+                        $subcontractorBasicTotal = $subcontractorTotalBasicNew;
 
                         $purchaseOrderGst = round($purchaseOrderBill
                             ->join('purchase_orders','purchase_orders.id','='
@@ -5699,7 +5735,7 @@ class ReportManagementController extends Controller{
 
                         $purchaseGst += ($purchaseOrderGst + $assetMaintenanceGst + $inventorySiteTransfersInGst + $siteTransferBillGst - $inventorySiteTransfersOutGst);
                     }
-                    $yearlyGst = $salesGst - $purchaseGst - $subcontractorGst;
+                    $yearlyGst = $salesGst - $purchaseGst - $subcontractorBasicGst;
                     break;
 
                 case ($yearId != 'null') :
@@ -5741,7 +5777,6 @@ class ReportManagementController extends Controller{
                         ->sum('purchase_order_payments.amount');
 
                     $purchaseAdvTotal += $purchaseOrderAdvancePaymentTotal - $advPurchaseBilltxn;
-                    $purchaseGst = 0;
                     foreach ($totalMonths as $month){
                         $billIds = $bill->where('quotation_id',$quotation['id'])
                             ->where('bill_status_id',$approvedBillStatusId)->orderBy('id')
@@ -5755,11 +5790,14 @@ class ReportManagementController extends Controller{
                         foreach ($billIds as $billId) {
                             $billData = $this->getBillData($billId);
                             $salesTaxAmount += $billData['tax_amount'];
-                            $sales += $billData['total_amount_with_tax'];
+                            $sales += $billData['basic_amount'];
                         }
-                        $transactionTotal = $billTransactionData->sum('total');
+                        $receiptPayment = new ProjectSiteReceiptPayment();
+                        $transactionTotal = 0;
+                        $transactionTotal = $receiptPayment->where('project_site_id', $projectSiteId)
+                            ->sum('amount');
                         $mobilization += $billTransactionData->where('paid_from_advanced',true)->sum('amount');
-                        $receipt += ($transactionTotal != null) ? $transactionTotal : 0;
+                        $receipt += ($transactionTotal != null) ? ($transactionTotal/1.18) : 0; // dividing receipt by 1.18
                         $retentionAmount = $billTransactionData->sum('retention_amount');
                         $reconciledRetentionAmount = $billReconcileTransactionData->where('transaction_slug','retention')->sum('amount');
                         $totalRetention += $retentionAmount - $reconciledRetentionAmount;
@@ -5808,7 +5846,11 @@ class ReportManagementController extends Controller{
                                     //$subcontractorGst += round((($subcontractorBillTaxData['percentage'] * $subTotal) / 100),3);
                                 }
                                 $subcontractorTotal += round(($subTotal + $taxTotal),3);*/
-                                $subcontractorTotal += $subcontractorBillData['grand_total'];
+                                $subcontractorTotalBasicNew += (($subcontractorBillData['subtotal'] - $subcontractorBillData['discount']) +
+                                    $subcontractorBillData['round_off_amount']);
+                                    $subcontractorTotalGSTNew += $subcontractorBillData['grand_total']
+                                    - (($subcontractorBillData['subtotal'] - $subcontractorBillData['discount']) +
+                                        $subcontractorBillData['round_off_amount']);
                             }
                         }
                         $officeExpense += $projectSiteSalaryDistribution->where('project_site_id',$projectSiteId)
@@ -5837,7 +5879,8 @@ class ReportManagementController extends Controller{
 
                         //indirect Expense logic here
                         $salesGst = $salesTaxAmount;
-                        $subcontractorGst = $subcontractorGstTax;
+                        $subcontractorBasicGst = $subcontractorTotalGSTNew;
+                            $subcontractorBasicTotal = $subcontractorTotalBasicNew;
 
                     $purchaseOrderGst = round($purchaseOrderBill
                         ->join('purchase_orders','purchase_orders.id','='
@@ -5890,7 +5933,7 @@ class ReportManagementController extends Controller{
 
                         $purchaseGst += ($purchaseOrderGst + $assetMaintenanceGst + $inventorySiteTransfersInGst + $siteTransferBillGst - $inventorySiteTransfersOutGst);
                     }
-                    $yearlyGst = $salesGst - $purchaseGst - $subcontractorGst;
+                    $yearlyGst = $salesGst - $purchaseGst - $subcontractorBasicGst;
                     break;
             }
 
@@ -5902,23 +5945,26 @@ class ReportManagementController extends Controller{
                 $totalAssetRentOpeningExpense = 0;
             }
 
-            $indirectExpense = $yearlyGst;
+            ///$indirectExpense = $yearlyGst;
             $receipt = $receipt - $mobilization;
             $outstanding = $sales - $debitAmount - $tdsAmount - $totalRetention - $otherRecoveryAmount - $totalHold - $receipt- $mobilization;
             $totalExpense = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount
-                + $officeExpense + $subcontractorTotal + $openingExpenses + $indirectExpense + $totalAssetRentOpeningExpense;
+                //+ $officeExpense + $subcontractorTotal + $openingExpenses + $indirectExpense + $totalAssetRentOpeningExpense;
+                + $officeExpense + $subcontractorBasicTotal + $openingExpenses  + $totalAssetRentOpeningExpense;
             $totalExpenseWithAdv = $purchaseAmount + $salaryAmount + $assetRent + $peticashPurchaseAmount
-                                    + $officeExpense + $subcontractorTotal + $openingExpenses
-                                    + $subcontractorAdvTotal + $purchaseAdvTotal + $indirectExpense + $totalAssetRentOpeningExpense;
+                                    + $officeExpense + $subcontractorBasicTotal + $openingExpenses
+                                    //+ $officeExpense + $subcontractorTotal + $openingExpenses
+                                    + $subcontractorAdvTotal + $purchaseAdvTotal + $totalAssetRentOpeningExpense;
             $salesPnL = $sales - $debitAmount - $tdsAmount - $totalHold - $otherRecoveryAmount - $mobilization - $totalRetention;
             $salesWisePnL = $salesPnL - $totalExpense;
             $receiptWisePnL = $receipt - $totalExpense;
             $advanceReceiptPnl = (($outstandingMobilization - $mobilization) + $receipt) - $totalExpenseWithAdv;
 
-            $salesData['indirect_expense'] = $indirectExpense;
+            //$salesData['indirect_expense'] = $indirectExpense;
             $salesData['sales'] = $salesPnL + $mobilization;
-	    //$salesData['sales'] = $sales;
-
+            //$salesData['sales'] = $sales;
+            $salesData['subcontractor_gst'] = $subcontractorBasicGst;
+            $salesData['purchase_gst'] = $purchaseGst;
             $salesData['receipt'] = $receipt + $mobilization;
             $salesData['outstanding'] = $outstanding;
             $salesData['total_expense'] = $totalExpense;
@@ -5930,7 +5976,7 @@ class ReportManagementController extends Controller{
             $salesData['salary'] = $salaryAmount;
             $salesData['asset_rent'] = $assetRent;
             $salesData['asset_opening_balance'] = $totalAssetRentOpeningExpense;
-            $salesData['subcontractor'] = $subcontractorTotal;
+            $salesData['subcontractor'] = $subcontractorBasicTotal;
             $salesData['misc_purchase'] = $peticashPurchaseAmount;
             $salesData['office_expense'] = $officeExpense;
             $salesData['opening_balance'] = $openingExpenses;
