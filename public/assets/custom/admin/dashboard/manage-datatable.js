@@ -119,8 +119,20 @@ var ExpensesListing = function () {
                         openingBalanceTotal.toFixed(3)
                     );
 
-                    indirectExp2Total = api
-                        .column( 9, { page: 'current'} )
+                    // indirectExp2Total = api
+                    //     .column( 9, { page: 'current'} )
+                    //     .data()
+                    //     .reduce( function (a, b) {
+                    //         return intVal(a) + intVal(b);
+                    //     }, 0 );
+
+                    // // Update footer
+                    // $( api.column( 9 ).footer() ).html(
+                    //     indirectExp2Total.toFixed(3)
+                    // );
+
+                    totalExpense = api
+                        .column( 9 , { page: 'current'} )
                         .data()
                         .reduce( function (a, b) {
                             return intVal(a) + intVal(b);
@@ -128,11 +140,11 @@ var ExpensesListing = function () {
 
                     // Update footer
                     $( api.column( 9 ).footer() ).html(
-                        indirectExp2Total.toFixed(3)
+                        totalExpense.toFixed(3)
                     );
 
-                    totalExpense = api
-                        .column( 10, { page: 'current'} )
+                    totalSubGST = api
+                        .column( 10 , { page: 'current'} )
                         .data()
                         .reduce( function (a, b) {
                             return intVal(a) + intVal(b);
@@ -140,15 +152,27 @@ var ExpensesListing = function () {
 
                     // Update footer
                     $( api.column( 10 ).footer() ).html(
-                        totalExpense.toFixed(3)
+                        totalSubGST.toFixed(3)
+                    );
+
+                    totalPurchaseGST = api
+                        .column( 11 , { page: 'current'} )
+                        .data()
+                        .reduce( function (a, b) {
+                            return intVal(a) + intVal(b);
+                        }, 0 );
+
+                    // Update footer
+                    $( api.column( 11 ).footer() ).html(
+                        totalPurchaseGST.toFixed(3)
                     );
                 },
                 "processing": true,
                 "lengthMenu": [
-                    [20, 100, 200],
-                    [20, 100, 200] // change per page values here
+                    [75, 100, 200],
+                    [75, 100, 200] // change per page values here
                 ],
-                "pageLength": 20, // default record count per page
+                "pageLength": 75, // default record count per page
                 "ajax": {
                     "url": "/reports/listing/expense", // ajax source
                 },
@@ -370,10 +394,10 @@ var AdvExpensesListing = function () {
                 },
                 "processing": true,
                 "lengthMenu": [
-                    [20, 100, 200],
-                    [20, 100, 200] // change per page values here
+                    [75, 100, 200],
+                    [75, 100, 200] // change per page values here
                 ],
-                "pageLength": 20, // default record count per page
+                "pageLength": 75, // default record count per page
                 "ajax": {
                     "url": "/reports/listing/advance-expense", // ajax source
                 },
@@ -545,27 +569,27 @@ var SalesListing = function () {
                     var number3 = (receiptwisePnL.toFixed(2)  < 0) ? receiptwisePnL.toFixed(2)  * -1 : receiptwisePnL.toFixed(2)
                     $("#receiptValueWords").text(inWords(number3)).digits();
 
-                    advReceiptwisePnL = api
-                        .column( 8, { page: 'current'} )
-                        .data()
-                        .reduce( function (a, b) {
-                            return intVal(a) + intVal(b);
-                        }, 0 );
+                    // advReceiptwisePnL = api
+                    //     .column( 8, { page: 'current'} )
+                    //     .data()
+                    //     .reduce( function (a, b) {
+                    //         return intVal(a) + intVal(b);
+                    //     }, 0 );
 
-                    // Update footer
-                    $( api.column( 8 ).footer() ).html(
-                        advReceiptwisePnL.toFixed(3)
-                    );
-                    $("#advReceiptValue").text((advReceiptwisePnL.toFixed(3))).digits();
-                    var number3 = (advReceiptwisePnL.toFixed(2)  < 0) ? advReceiptwisePnL.toFixed(2)  * -1 : advReceiptwisePnL.toFixed(2)
-                    $("#advReceiptValueWords").text(inWords(number3)).digits();
+                    // // Update footer
+                    // $( api.column( 8 ).footer() ).html(
+                    //     advReceiptwisePnL.toFixed(3)
+                    // );
+                    // $("#advReceiptValue").text((advReceiptwisePnL.toFixed(3))).digits();
+                    // var number3 = (advReceiptwisePnL.toFixed(2)  < 0) ? advReceiptwisePnL.toFixed(2)  * -1 : advReceiptwisePnL.toFixed(2)
+                    // $("#advReceiptValueWords").text(inWords(number3)).digits();
                 },
                 "processing": true,
                 "lengthMenu": [
-                    [20, 100, 200],
-                    [20, 100, 200] // change per page values here
+                    [75, 100, 200],
+                    [75, 100, 200] // change per page values here
                 ],
-                "pageLength": 20, // default record count per page
+                "pageLength": 75, // default record count per page
                 "ajax": {
                     "url": "/reports/listing/sales", // ajax source
                 },
