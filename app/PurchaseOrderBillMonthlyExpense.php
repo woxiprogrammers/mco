@@ -8,7 +8,7 @@ class PurchaseOrderBillMonthlyExpense extends Model
 {
     protected $table = 'purchase_order_bill_monthly_expenses';
 
-    protected $fillable = ['project_site_id','month_id','year_id','purchase_expense','site_transfer_expense','site_transfer_bill_expense','asset_maintenance_expense','total_expense'];
+    protected $fillable = ['project_site_id','month_id','year_id','purchase_expense','site_transfer_expense','site_transfer_bill_expense','asset_maintenance_expense','total_expense', 'purchase_gst', 'site_transfer_gst', 'asset_maintenance_gst', 'site_transfer_bill_gst'];
 
     public function projectSite(){
         $this->belongsTo('App\ProjectSite','project_site_id');

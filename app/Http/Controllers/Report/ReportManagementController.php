@@ -5413,7 +5413,8 @@ class ReportManagementController extends Controller{
                     $otherRecoveryAmount += $billTransactionData->sum('other_recovery_value');
 
                     $purchaseAmount += $purchaseOrderBillMonthlyExpense
-                         ->where('project_site_id',$projectSiteId)->sum('total_expense');
+                         ->where('project_site_id',$projectSiteId)
+                         ->sum(DB::raw('purchase_expense + site_transfer_expense + asset_maintenance_expense + site_transfer_bill_expense'));
 
                     $salaryAmount += $peticashSalaryTransactionMonthlyExpense
                         ->where('project_site_id',$projectSiteId)->sum('total_expense');
@@ -5590,7 +5591,8 @@ class ReportManagementController extends Controller{
                         $otherRecoveryAmount += $billTransactionData->sum('other_recovery_value');
 
                         $purchaseAmount += $purchaseOrderBillMonthlyExpense->where('month_id',$month['id'])
-                            ->where('project_site_id',$projectSiteId)->sum('total_expense');
+                            ->where('project_site_id',$projectSiteId)
+                            ->sum(DB::raw('purchase_expense + site_transfer_expense + asset_maintenance_expense + site_transfer_bill_expense'));
                         $salaryAmount += $peticashSalaryTransactionMonthlyExpense->where('month_id',$month['id'])
                             ->where('project_site_id',$projectSiteId)->sum('total_expense');
                         $peticashPurchaseAmount += $peticashPurchaseTransactionMonthlyExpense->where('month_id',$month['id'])
@@ -5810,7 +5812,8 @@ class ReportManagementController extends Controller{
 
                         $purchaseAmount += $purchaseOrderBillMonthlyExpense->where('month_id',$month['id'])
                             ->where('year_id',$selectedYear['id'])
-                            ->where('project_site_id',$projectSiteId)->sum('total_expense');
+                            ->where('project_site_id',$projectSiteId)
+                            ->sum(DB::raw('purchase_expense + site_transfer_expense + asset_maintenance_expense + site_transfer_bill_expense'));
                         $salaryAmount += $peticashSalaryTransactionMonthlyExpense->where('month_id',$month['id'])
                             ->where('year_id',$selectedYear['id'])
                             ->where('project_site_id',$projectSiteId)->sum('total_expense');
