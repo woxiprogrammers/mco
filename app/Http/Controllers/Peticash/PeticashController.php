@@ -1653,7 +1653,13 @@ class PeticashController extends Controller
         try{
             $clients = Client::where('is_active', true)->get();
             $paymenttypes = PaymentType::get(['id','name'])->toArray();
-            return view('peticash.peticash-management.salary.manage')->with(compact('clients','paymenttypes'));
+            $employeeType = EmployeeType::where('slug','delete-employee-map-salary')->first();
+            $specialEmployees = Employee::where('employee_type_id',$employeeType->id)->get();
+
+            $projectSiteId = Session::get('global_project_site');
+            $paymentTypes = PaymentType::select('id','name')->whereIn('slug',['cheque','neft','rtgs','internet-banking'])->get();
+            $transactionTypes = PeticashTransactionType::where('type','PAYMENT')->select('id','name','slug')->get();
+            return view('peticash.peticash-management.salary.manage')->with(compact('clients','paymenttypes','specialEmployees','paymentTypes','transactionTypes'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get Salary Management View',
@@ -2428,5 +2434,13 @@ class PeticashController extends Controller
             Log::critical(json_encode($data));
         }
         return response()->json($records,$status);
+    }
+
+    public function deleteSalary(Request $request){
+        try{
+
+        } catch(\Exception $e) {
+            dd($e);
+        }
     }
 }
