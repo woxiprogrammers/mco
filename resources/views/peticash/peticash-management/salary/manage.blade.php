@@ -309,7 +309,9 @@
     </div>
     <div class="modal fade" tabindex="-1" role="dialog" id="salary-delete-modal">
         <div class="modal-dialog" role="document">
-            <form action="/">
+            <form action="/peticash/peticash-management/salary/delete" id="salary-delete-form" method="POST">
+                {!! csrf_field() !!}
+                <input name="_method" type="hidden" value="DELETE">
                 <div class="modal-content">
                     <div class="modal-header btn-primary">
                         <h5 class="modal-title">Delete Selected Records</h5>
@@ -350,7 +352,7 @@
                                     <span>*</span>
                                 </div>
                                 <div class="col-md-6">
-                                    <select class="form-control" id="employee_name" name="employee_name">
+                                    <select class="form-control" id="employee_id" name="employee_id">
                                         @if(!$specialEmployees->isEmpty())
                                             @foreach($specialEmployees as $specialEmployee)
                                                 <option value="{{$specialEmployee['id']}}">{{$specialEmployee['name']}}</option>
@@ -371,6 +373,15 @@
                                     </button>
                                 </div>
                             </div>
+                            <div class="form-group row" style="display: none">
+                                <div class="col-md-4" style="text-align: right">
+                                    <label for="working_days" class="control-label">Working Days</label>
+                                    <span>*</span>
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="hidden" class="form-control" id="working_days" name="working_days" value="30">
+                                </div>
+                            </div>
                             <div class="form-group row">
                                 <div class="col-md-4" style="text-align: right">
                                     <label for="amount" class="control-label">Amount</label>
@@ -382,17 +393,18 @@
                             </div>
                             <div class="form-group row">
                                 <div class="col-md-4" style="text-align: right">
-                                    <label for="amount" class="control-label">Remark</label>
+                                    <label for="remark" class="control-label">Remark</label>
                                     <span>*</span>
                                 </div>
                                 <div class="col-md-6">
                                     <input type="text" class="form-control" id="remark" name="remark">
                                 </div>
                             </div>
+                            <input type="hidden" name="selected_delete_id" id="selected_delete_id" />
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary" data-dismiss="modal">Delete</button>
+                        <button type="submit" class="btn btn-primary">Delete</button>
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                     </div>
                 </div>
@@ -409,8 +421,10 @@
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
     <script src="/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script>
     <script src="/assets/custom/peticash/salary-manage-datatable.js"></script>
+    <script src="/assets/custom/peticash/delete-salary.js" type="text/javascript"></script>
     <script>
         $(document).ready(function(){
+            DeleteSalary.init();
             $('#date').attr("readonly", "readonly");
             var date = new Date();
             $('#date').val((date.getMonth()+1)+"/"+date.getDate()+"/"+date.getFullYear());
@@ -431,24 +445,7 @@
                     $('#salary-delete-warning').modal('show');
                 } else {
                     $('#salary-delete-modal').modal('show');
-                    // var value = confirm('Are you sure?');
-                    // if(value) {
-                    //     $.ajax({
-                    //         url:'/peticash/change-status-purchase',
-                    //         type: "POST",
-                    //         data: {
-                    //             _token: $("input[name='_token']").val(),
-                    //             purchasetxn_ids: val,
-                    //             type : 'salary'
-                    //         },
-                    //         success: function(data, textStatus, xhr){
-                    //             $(".filter-submit").trigger('click');
-                    //         },
-                    //         error: function(data){
-
-                    //         }
-                    //     });
-                    // }
+                    $("#selected_delete_id").val(val);
                 }
             });
 

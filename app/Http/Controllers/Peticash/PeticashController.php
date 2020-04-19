@@ -2438,9 +2438,80 @@ class PeticashController extends Controller
 
     public function deleteSalary(Request $request){
         try{
+            $deleteIds = explode(',',$request->selected_delete_id);
+            $deleteRecords = PeticashSalaryTransaction::whereIn('id',$deleteIds)->get();
+            $yearMonthArray = $deleteRecords->pluck('date');
+            $projectSiteId = Session::get('global_project_site');
+            $user = Auth::user();
+            $transactionTypeId = PeticashTransactionType::where('slug',$request['transaction_type'])->pluck('id')->first();
+            $requestedSalary = PeticashRequestedSalaryTransaction::where('employee_id',$request['employee_id'])
+                ->where('project_site_id',$projectSiteId)
+                ->where('peticash_status_id',PeticashStatus::where('slug','approved')->pluck('id')->first())
+                ->where('peticash_transaction_type_id',$transactionTypeId)
+                ->sum('amount');
+            if($requestedSalary != null){
+                $salaryTransactionAmountAfterLastRequest = PeticashSalaryTransaction::where('employee_id',$request['employee_id'])
+                    ->where('project_site_id',$projectSiteId)
+                    ->where('peticash_transaction_type_id',$transactionTypeId)->sum('amount');
+                $approvedAmount = ($salaryTransactionAmountAfterLastRequest < $requestedSalary) ? ($requestedSalary - $salaryTransactionAmountAfterLastRequest) : 0;
+            }else{
+                $approvedAmount = 0;
+            }
 
-        } catch(\Exception $e) {
+            $salaryData = $request->only('employee_id','amount','date','payable_amount','pf','pt','esic','tds','remark');
+            $salaryData['reference_user_id'] = $user['id'];
+            $salaryData['project_site_id'] = $projectSiteId;
+            $salaryData['peticash_transaction_type_id'] = PeticashTransactionType::where('slug','ilike',$request['transaction_type'])->pluck('id')->first();
+            $salaryData['date'] = date('Y-m-d H:i:s',strtotime($request->date));
+            if($request['transaction_type'] == 'salary'){
+                $salaryData['days'] = $request['working_days'];
+            }else{
+                $salaryData['days'] = 0;
+            }
+            $salaryData['peticash_status_id'] = PeticashStatus::where('slug','approved')->pluck('id')->first();
+            $salaryData['created_at'] = $salaryData['updated_at'] = Carbon::now();
+
+            $salaryTransaction = PeticashSalaryTransaction::create($salaryData);
+
+            $peticashSiteApprovedAmount = PeticashSiteApprovedAmount::where('project_site_id',$projectSiteId)->first();
+            $updatedPeticashSiteApprovedAmount = $peticashSiteApprovedAmount['salary_amount_approved'] - $request['amount'];
+            $peticashSiteApprovedAmount->update(['salary_amount_approved' => $updatedPeticashSiteApprovedAmount]);
+            $officeSiteId = ProjectSite::where('name',env('OFFICE_PROJECT_SITE_NAME'))->pluck('id')->first();
+            if($projectSiteId == $officeSiteId){
+                $activeProjectSites = ProjectSite::join('projects','projects.id','=','project_sites.project_id')
+                    ->where('projects.is_active',true)
+                    ->where('project_sites.id','!=',$officeSiteId)->get();
+                if($request['transaction_type'] == 'advance'){
+                    $distributedSiteWiseAmount =  $salaryTransaction['amount'] / count($activeProjectSites);
+                }else{
+                    $distributedSiteWiseAmount = ($salaryTransaction['payable_amount'] + $salaryTransaction['pf'] + $salaryTransaction['pt'] + $salaryTransaction['tds'] + $salaryTransaction['esic']) / count($activeProjectSites) ;
+                }
+                foreach ($activeProjectSites as $key => $projectSite){
+                    $distributedSalaryAmount = $projectSite['distributed_salary_amount'] + $distributedSiteWiseAmount;
+                    $projectSite->update([
+                        'distributed_salary_amount' => $distributedSalaryAmount
+                    ]);
+                }
+            }
+            $yearMonthArray->push($salaryTransaction->date);
+            /* Queue Job To Run Artisan Command Manually */
+            foreach($yearMonthArray as $year) {
+                //$dates[date('Y',strtotime(($year)))] = date('n',strtotime(($year)));
+                \Artisan::queue('custom:peticash-salary-transaction-monthly-expense-calculation', [
+                    '--month' => date('n',strtotime(($year))), '--year' => date('Y',strtotime(($year)))
+                ])->onQueue('default')->delay(0);;
+            }
+            DB::table('peticash_salary_transactions')->whereIn('id', $deleteIds)->delete(); 
+            $request->session()->flash('success', 'New Salary added against selected records.');
+            return redirect('peticash/peticash-management/salary/manage');
+        }catch(\Exception $e){
             dd($e);
+            $data = [
+                'action' => 'Create Salary',
+                'exception' => $e->getMessage(),
+                'request' => $request->all()
+            ];
+            Log::critical(json_encode($data));
         }
     }
 }
