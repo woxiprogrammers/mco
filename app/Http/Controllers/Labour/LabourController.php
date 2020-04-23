@@ -361,6 +361,10 @@ class LabourController extends Controller
                     $labourCount = Employee::where('employee_type_id',$employeeTypeId)->count();
                     $employeeID = 'CL'.($labourCount + 1);
                     break;
+                case 'delete-employee-map-salary' :
+                    $labourCount = Employee::where('employee_type_id',$employeeTypeId)->count();
+                    $employeeID = 'ST'.($labourCount + 1);
+                    break;
             }
         }catch(\Exception $e){
             $data = [
