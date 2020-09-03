@@ -377,12 +377,29 @@ use InventoryTrait;
                         $assetType = $assetData[$pagination]->assetTypes->name;
 
                     }
+                    $assetImagetag = $profilePicAddress = null;
+                    $assetImages = AssetImage::where('asset_id',$assetData[$pagination]['id'])->select('id','name')->get();
+                    if($assetImages != null){
+                        $assetImage = $this->getImagePath($assetData[$pagination]['id'],$assetImages);
+                        if($assetImage != null) {
+                            $profilePicAddress = env('APP_URL').$assetImage[0]['path'];
+                            $assetImagetag = '<a href="'.$profilePicAddress.'" target="_blank"><img src="'.$profilePicAddress.'" height="60" width="60" style="border-radius: 50%;box-shadow: 2px 2px 1px 1px #888888;"></a>';
+                        } else {
+                            $profilePicAddress = env('APP_URL').'/assets/layouts/layout3/img/no-image.png';
+                            $assetImagetag = '<img src="'.$profilePicAddress.'" height="60" width="60" style="border-radius: 50%;box-shadow: 2px 2px 1px 1px #888888;">';
+                        }
+                    } else {
+                        $profilePicAddress = env('APP_URL').'/assets/layouts/layout3/img/no-image.png';
+                        $assetImagetag = '<img src="'.$profilePicAddress.'" height="60" width="60" style="border-radius: 50%;box-shadow: 2px 2px 1px 1px #888888;">';
+                    }
+
                     $qty = $assetData[$pagination]['quantity'];
                     $asset_price = $assetData[$pagination]['price'];
                     $asset_cost = $assetData[$pagination]['price']*$assetData[$pagination]['quantity'];
                     $rent_per_day = $assetData[$pagination]['rent_per_day'];
                     $records['data'][$iterator] = [
                         $assetData[$pagination]['id'],
+                        $assetImagetag,
                         $assetData[$pagination]['name'],
                         $assetData[$pagination]['model_number'],
                         $qty,
