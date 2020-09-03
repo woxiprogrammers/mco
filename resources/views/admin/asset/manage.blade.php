@@ -46,6 +46,7 @@
                                                             <thead>
                                                             <tr>
                                                                 <th> Asset ID </th>
+                                                                <th> Image </th>
                                                                 <th> Asset Name</th>
                                                                 <th> Model Number</th>
                                                                 <th> Qty </th>
@@ -57,6 +58,7 @@
                                                                 <th> Actions </th>
                                                             </tr>
                                                             <tr class="filter">
+                                                                <th> </th>
                                                                 <th> </th>
                                                                 <th> <input type="text" class="form-control form-filter" name="asset_name" id ="asset_name"> </th>
                                                                 <th> </th>
