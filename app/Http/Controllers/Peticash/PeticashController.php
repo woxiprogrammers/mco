@@ -2460,6 +2460,7 @@ class PeticashController extends Controller
 
             $salaryData = $request->only('employee_id','amount','date','payable_amount','pf','pt','esic','tds','remark');
             $salaryData['reference_user_id'] = $user['id'];
+            $salaryData['payable_amount'] = $salaryData['amount'];
             $salaryData['project_site_id'] = $projectSiteId;
             $salaryData['peticash_transaction_type_id'] = PeticashTransactionType::where('slug','ilike',$request['transaction_type'])->pluck('id')->first();
             $salaryData['date'] = date('Y-m-d H:i:s',strtotime($request->date));
@@ -2499,13 +2500,12 @@ class PeticashController extends Controller
                 //$dates[date('Y',strtotime(($year)))] = date('n',strtotime(($year)));
                 \Artisan::queue('custom:peticash-salary-transaction-monthly-expense-calculation', [
                     '--month' => date('n',strtotime(($year))), '--year' => date('Y',strtotime(($year)))
-                ])->onQueue('default')->delay(0);;
+                ])->onQueue('default')->delay(0);
             }
             DB::table('peticash_salary_transactions')->whereIn('id', $deleteIds)->delete(); 
             $request->session()->flash('success', 'New Salary added against selected records.');
             return redirect('peticash/peticash-management/salary/manage');
         }catch(\Exception $e){
-            dd($e);
             $data = [
                 'action' => 'Create Salary',
                 'exception' => $e->getMessage(),
