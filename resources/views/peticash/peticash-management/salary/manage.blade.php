@@ -96,11 +96,14 @@
                                                                 </a>
                                                             </div>
                                                         </div>
+                                                        @php $user = Auth::user();@endphp
+                                                        @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('remove-salary-request-handler'))
                                                         <div class="col-md-2 pull-right">
                                                             <div >
                                                                 <button type="button" class="btn btn-danger" id="salary-delete"><i class="fa fa-trash-o"></i>DELETE</button>
                                                             </div>
                                                         </div>
+                                                        @endif
                                                     </div>
                                                     <div class="table-container">
                                                         <table class="table table-striped table-bordered table-hover order-column" id="peticashSalaryManage">
