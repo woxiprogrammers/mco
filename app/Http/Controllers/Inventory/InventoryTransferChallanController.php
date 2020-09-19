@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Inventory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use App\InventoryComponentTransfers;
 use App\InventoryComponentTransferStatus;
 use App\InventoryTransferChallan;
+use App\InventoryTransferTypes;
 use App\ProjectSite;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -41,26 +43,33 @@ class InventoryTransferChallanController extends Controller
         try {
             $skip = $request->start;
             $take = $request->length;
-            $totalRecordCount = 0;
-            $user = Auth::user();
             $status = 200;
-            $search_from = null;
-            $search_to = null;
-            $search_challan = null;
-            $search_qty = null;
-            $search_amt = null;
-            $search_grn_out = null;
-            $search_grn_in = null;
-            $search_status = 'all';
 
+            $challanData = new InventoryTransferChallan();
+            $totalRecords = $challanData->count();
 
+            if ($request->has('search_challan') && $request['search_challan'] != null) {
+                $challanData = $challanData->where('challan_number', 'ilike', '%' . $request['search_challan'] . '%');
+            }
 
-            $inventoryTransferData = array();
+            if ($request->has('search_site_from') && $request['search_site_from'] != null) {
+                $projectSiteIds = ProjectSite::join('projects', 'projects.id', 'project_sites.project_id')
+                    ->where('projects.name', 'ilike', '%' . $request['search_site_from'] . '%')->pluck('project_sites.id')->toArray();
+                $challanData = $challanData->whereIn('project_site_out_id', $projectSiteIds);
+            }
 
-            $challanData = InventoryTransferChallan::orderBy('created_at', 'desc')->skip($skip)->take($take)->get();
+            if ($request->has('search_site_in') && $request['search_site_in'] != null) {
+                $projectSiteIds = ProjectSite::join('projects', 'projects.id', 'project_sites.project_id')
+                    ->where('projects.name', 'ilike', '%' . $request['search_site_in'] . '%')->pluck('id')->toArray();
+                $challanData = $challanData->whereIn('project_site_in_id', $projectSiteIds);
+            }
 
-            $iTotalRecords = count($challanData);
-            $records = array();
+            if ($request->has('status') && $request['status'] != null && $request['status'] != 'all') {
+                $challanData = $challanData->where('inventory_component_transfer_status_id', $request['status']);
+            }
+
+            $challanData = $challanData->orderBy('created_at', 'desc')->skip($skip)->take($take)->get();
+
             $records['data'] = array();
             $end = $request->length < 0 ? count($challanData) : $request->length;
 
@@ -72,7 +81,7 @@ class InventoryTransferChallanController extends Controller
                     $actionDropDownStatus = '<i class="fa fa-times-circle" title="Close" style="font-size:24px;color:red">&nbsp;&nbsp;</i>';
                 }
                 $actionDropDown =  '<div id="sample_editable_1_new" class="btn btn-small blue">
-                                            <a href="/inventory/pdf/' . $challanData[$pagination]['id'] . '" style="color: white"> 
+                                            <a href="/inventory/transfer/challan/pdf/' . $challanData[$pagination]['id'] . '" style="color: white"> 
                                                 PDF <i class="fa fa-download" aria-hidden="true"></i>
                                             </a>
                                         </div>';
@@ -85,16 +94,14 @@ class InventoryTransferChallanController extends Controller
                     $challanData[$pagination]->projectSiteIn->project->name,
                     $challanRelatedData['transportation_amount'],
                     $challanRelatedData['transportation_tax_total'],
-                    $challanRelatedData['transportation_total'],
                     $actionDropDownStatus,
                     $actionDropDown
                 ];
             }
             $records["draw"] = intval($request->draw);
-            $records["recordsTotal"] = count($challanData);
-            $records["recordsFiltered"] = count($challanData);
-        } catch (\Exception $e) {
-            dd($e->getMessage());
+            $records["recordsTotal"] = $totalRecords;
+            $records["recordsFiltered"] = $totalRecords;
+        } catch (Exception $e) {
             $data = [
                 'action' => 'Request Component listing',
                 'params' => $request->all(),
@@ -102,8 +109,40 @@ class InventoryTransferChallanController extends Controller
             ];
             Log::critical(json_encode($data));
             $status = 500;
-            $response = array();
+            $records = [];
         }
         return response()->json($records, $status);
+    }
+
+    public function show(Request $request, $challanId)
+    {
+        try {
+            $challan = InventoryTransferChallan::find($challanId);
+            $outTransferType = InventoryTransferTypes::where('slug', 'site')->where('type', 'OUT')->first();
+            $inventoryComponentOutTransfers = $outTransferType->inventoryComponentTransfers->where('inventory_transfer_challan_id', $challan['id']);
+            foreach ($inventoryComponentOutTransfers as $outTransferComponent) {
+                $siteInQuantity = '-';
+                if ($outTransferComponent['related_transfer_id'] != null) {
+                    $inTransferComponent = InventoryComponentTransfers::find($outTransferComponent['related_transfer_id']);
+                    $siteInQuantity = $inTransferComponent->quantity;
+                }
+                $components[] = [
+                    'name'  => $outTransferComponent->inventoryComponent->name,
+                    'is_material'   => $outTransferComponent->inventoryComponent->is_material,
+                    'unit'  =>    $outTransferComponent->unit->name,
+                    'site_out_quantity' => $outTransferComponent->quantity,
+                    'site_in_quantity'  => $siteInQuantity
+                ];
+            }
+            return view('inventory/transfer/challan/view')->with(compact('challan', 'projectSites', 'challanStatus', 'components'));
+        } catch (Exception $e) {
+            dd($e->getMessage());
+            $data = [
+                'action'    => 'Inventory Transfer Challan view',
+                'params'    => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+        }
     }
 }
