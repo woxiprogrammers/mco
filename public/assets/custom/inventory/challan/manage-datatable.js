@@ -1,5 +1,5 @@
 var ChallanList = function () {
-    var handleInventory = function () {
+    var handleChallanList = function () {
         var grid = new Datatable();
         grid.init({
             src: $("#challanListTable"),
@@ -62,7 +62,7 @@ var ChallanList = function () {
     return {
         //main function to initiate the module
         init: function () {
-            handleInventory();
+            handleChallanList();
         }
     };
 }();

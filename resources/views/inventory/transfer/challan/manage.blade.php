@@ -42,16 +42,14 @@
                                                                 <th>Site In</th>
                                                                 <th>Transportation Amount</th>
                                                                 <th>Transportation Tax Amount</th>
-                                                                <th>Total Transportation Amount</th>
                                                                 <th>Status</th>
                                                                 <th>Action</th>
                                                             </tr>
                                                             <tr class="filter">
                                                                 <th></th>
-                                                                <th> <input type="text" class="form-control form-filter" name="search_from" id="search_challan"></th>
-                                                                <th> <input type="text" class="form-control form-filter" name="search_from" id="search_site_from"></th>
-                                                                <th> <input type="text" class="form-control form-filter" name="search_to" id="search_site_to"></th>
-                                                                <th> </th>
+                                                                <th> <input type="text" class="form-control form-filter" name="search_challan" id="search_challan"></th>
+                                                                <th> <input type="text" class="form-control form-filter" name="search_site_from" id="search_site_from"></th>
+                                                                <th> <input type="text" class="form-control form-filter" name="search_site_to" id="search_site_to"></th>
                                                                 <th> </th>
                                                                 <th> </th>
 
@@ -101,7 +99,7 @@
     $(document).ready(function() {
         ChallanList.init();
 
-        $("#search_to, #search_from, #search_name, #search_qty, #search_amt,#search_grn_out, #search_grn_in").on('keyup', function() {
+        $("#search_site_to, #search_site_from, #search_challan").on('keyup', function() {
             if ($("#search_site_to").val().length > 3 ||
                 $("#search_site_from").val().length > 3 ||
                 $("#search_challan").val().length > 3
