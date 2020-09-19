@@ -4,6 +4,7 @@ namespace App\Console;
 
 use App\Console\Commands\AssetRentCalculations;
 use App\Console\Commands\BillModuleChanges;
+use App\Console\Commands\ChallanCreate;
 use App\Console\Commands\PeticashPurchaseTransactionMonthlyExpenseCalculations;
 use App\Console\Commands\PeticashSalaryTransactionMonthlyExpense;
 use App\Console\Commands\PeticashSalaryTransactionMonthlyExpenseCalculations;
@@ -29,7 +30,8 @@ class Kernel extends ConsoleKernel
         SalaryDistributionInSites::class,
         AssetRentCalculations::class,
         BillModuleChanges::class,
-        SubcontractorModuleMerge::class
+        SubcontractorModuleMerge::class,
+        ChallanCreate::class
     ];
 
     /**
@@ -44,7 +46,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('inspire')
         //          ->hourly();
         $schedule->command('custom:send-purchase-order-email')
-                ->everyFiveMinutes();
+            ->everyFiveMinutes();
         // $schedule->command('custom:purchase-order-bill-monthly-expense-calculation')->dailyAt('23:00');
         // $schedule->command('custom:peticash-salary-transaction-monthly-expense-calculation')->dailyAt('23:00');
         // $schedule->command('custom:peticash-purchase-transaction-monthly-expense-calculation')->dailyAt('23:00');
