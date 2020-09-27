@@ -4,6 +4,18 @@
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->
 <!-- END PAGE LEVEL PLUGINS -->
+<style>
+    #icon-text {
+        display: none;
+        position: absolute;
+    }
+
+    .icon-button:hover+#icon-text {
+        position: relative;
+        display: inline-block;
+        border-bottom: 1px dotted black;
+    }
+</style>
 @endsection
 @section('content')
 <div class="page-wrapper">
