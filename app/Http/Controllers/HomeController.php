@@ -65,7 +65,7 @@ class HomeController extends Controller
             }
             if (!$outTransfer->inventory_transfer_challan_id) {
                 $challan = new InventoryTransferChallan([
-                    'challan_number'                        => 'ch',
+                    'challan_number'                        => 'CH',
                     'project_site_out_id'                   => $outTransfer->inventoryComponent->project_site_id,
                     'project_site_in_id'                    => $inTransfer->inventoryComponent->project_site_id ?? null,
                     'project_site_out_date'                 => $outTransfer['date'] ?? null,
@@ -74,7 +74,7 @@ class HomeController extends Controller
                 ]);
                 $challan->save();
                 $challan->fresh();
-                $challan->update(['challan_number'  => 'ch' . $challan->id]);
+                $challan->update(['challan_number'  => 'CH' . $challan->id]);
             } else {
                 $challan = $outTransfer->inventoryTransferChallan;
             }

@@ -11,6 +11,7 @@ use App\InventoryTransferChallan;
 use App\InventoryTransferTypes;
 use App\ProjectSite;
 use Exception;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 
 class InventoryTransferChallanController extends Controller
@@ -150,6 +151,8 @@ class InventoryTransferChallanController extends Controller
                 ];
             }
             $challan['other_data'] = $challan->otherData()->toArray();
+            $challan['from_site'] = $challan->projectSiteOut->project->name;
+            $challan['to_site'] = $challan->projectSiteIn->project->name ?? '-';
             return view('inventory/transfer/challan/edit')->with(compact('challan', 'projectSites', 'challanStatus', 'components'));
         } catch (Exception $e) {
             dd($e->getMessage());
@@ -159,6 +162,33 @@ class InventoryTransferChallanController extends Controller
                 'exception' => $e->getMessage()
             ];
             Log::critical(json_encode($data));
+        }
+    }
+
+    public function generatePDF(Request $request, $challanId)
+    {
+        try {
+            $challan = InventoryTransferChallan::find($challanId);
+            $challan['from_site'] = $challan->projectSiteOut->project->name;
+            $challan['to_site'] = $challan->projectSiteIn->project->name ?? '-';
+            $challan['from_site'] = $challan->projectSiteOut->project->name;
+            $challan['to_site'] = $challan->projectSiteIn->project->name ?? '-';
+            $data = [
+                'challan'       => $challan,
+                'other_data'    => $challan->otherData()->toArray()
+            ];
+            $pdf = App::make('dompdf.wrapper');
+            $pdf->loadHTML(view('inventory/transfer/challan/pdf/challan', $data));
+            // $pdf->setPaper('A4', 'landscape');
+            return $pdf->stream();
+        } catch (\Exception $e) {
+            $data = [
+                'actions' => 'Generate Challan PDF',
+                'params' => [],
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500, $e->getMessage());
         }
     }
 }

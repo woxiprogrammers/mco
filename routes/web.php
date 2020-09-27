@@ -14,8 +14,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(['domain' => env('DOMAIN_NAME')], function () {
 
-
-
     Route::get('/', array('uses' => 'Admin\AdminController@viewLogin'));
     Route::post('/authenticate', array('uses' => 'Auth\LoginController@login'));
     Route::get('/logout', array('uses' => 'Auth\LoginController@logout'));
@@ -24,6 +22,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function () {
 
     Route::post('/change-project-site', array('uses' => 'Auth\LoginController@changeProjectSite'));
     Route::get('/home', array('uses' => 'HomeController@handlee'));
+
     Route::group(['prefix' => 'user'], function () {
         Route::get('change-password', array('uses' => 'User\UserController@getChangePasswordView'));
         Route::post('change-password', array('uses' => 'User\UserController@changePassword'));
@@ -461,6 +460,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function () {
                 Route::get('manage', array('uses' => 'Inventory\InventoryTransferChallanController@getManageView'));
                 Route::post('listing', array('uses' => 'Inventory\InventoryTransferChallanController@getChallanListing'));
                 Route::get('edit/{challanId}', array('uses' => 'Inventory\InventoryTransferChallanController@show'));
+                Route::get('pdf/{challanId}', array('uses' => 'Inventory\InventoryTransferChallanController@generatePDF'));
             });
         });
     });
