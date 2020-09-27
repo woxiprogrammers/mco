@@ -13,9 +13,6 @@
 use Illuminate\Support\Facades\Route;
 
 Route::group(['domain' => env('DOMAIN_NAME')], function () {
-
-
-
     Route::get('/', array('uses' => 'Admin\AdminController@viewLogin'));
     Route::post('/authenticate', array('uses' => 'Auth\LoginController@login'));
     Route::get('/logout', array('uses' => 'Auth\LoginController@logout'));
@@ -23,7 +20,6 @@ Route::group(['domain' => env('DOMAIN_NAME')], function () {
     Route::get('/dashboard', array('uses' => 'Admin\DashboardController@index'));
 
     Route::post('/change-project-site', array('uses' => 'Auth\LoginController@changeProjectSite'));
-    Route::get('/home', array('uses' => 'HomeController@handlee'));
     Route::group(['prefix' => 'user'], function () {
         Route::get('change-password', array('uses' => 'User\UserController@getChangePasswordView'));
         Route::post('change-password', array('uses' => 'User\UserController@changePassword'));
@@ -416,6 +412,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function () {
     });
 
     Route::group(['prefix' => 'inventory'], function () {
+        Route::get('challan', array('uses' => 'Inventory\InventoryManageController@generateChallanView'));
         Route::get('pdf/{inventoryComponentTransferId}', array('uses' => 'Inventory\InventoryManageController@getInventoryComponentTransferPDF'));
         Route::get('manage', array('uses' => 'Inventory\InventoryManageController@getManageView'));
         Route::post('listing', array('uses' => 'Inventory\InventoryManageController@inventoryListing'));

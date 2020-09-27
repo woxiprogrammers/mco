@@ -145,4 +145,31 @@ class InventoryTransferChallanController extends Controller
             Log::critical(json_encode($data));
         }
     }
+
+    public function getInventoryCartComponents(Request $request)
+    {
+        try {
+        } catch (Exception $e) {
+            $data = [
+                'action'    => 'Get Inventory cart components.',
+                'params'    => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+        }
+    }
+
+    public function addInventoryCartComponents(Request $request)
+    {
+        try {
+            dd('in add inventory Component....');
+        } catch (Exception $e) {
+            $data = [
+                'action'    => 'Add Inventory cart components.',
+                'params'    => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+        }
+    }
 }
