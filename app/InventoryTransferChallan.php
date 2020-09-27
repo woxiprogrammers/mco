@@ -42,7 +42,8 @@ class InventoryTransferChallan extends Model
                 'driver_name',
                 'mobile'
             )->first();
-        $data['transportation_total'] = 0;
+        $data['vendor_name'] = Vendor::where('id', $data['vendor_id'])->pluck('name')->first();
+        $data['transportation_total'] = $data['transportation_tax_total'] = 0;
         if ($data['transportation_amount'] != null && $data['transportation_amount'] != "0") {
             $transportation_amount = $data['transportation_amount'];
             $cgstAmount = $transportation_amount * ($data['transportation_cgst_percent'] / 100) ?? 0;
@@ -50,6 +51,8 @@ class InventoryTransferChallan extends Model
             $igstAmount = $transportation_amount * ($data['transportation_igst_percent'] / 100) ?? 0;
             $data['transportation_tax_total'] = $cgstAmount + $sgstAmount + $igstAmount;
             $data['transportation_total'] = $transportation_amount + $cgstAmount + $sgstAmount + $igstAmount;
+        } else {
+            $data['transportation_amount'] = $data['transportation_cgst_percent'] = $data['transportation_sgst_percent'] = $data['transportation_igst_percent'] = 0;
         }
         return $data;
     }

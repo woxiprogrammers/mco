@@ -1,5 +1,5 @@
 @extends('layout.master')
-@section('title','Constro | View Challan')
+@section('title','Constro | Edit Challan')
 @include('partials.common.navbar')
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->
@@ -20,7 +20,7 @@
                         <div class="container">
                             <!-- BEGIN PAGE TITLE -->
                             <div class="page-title">
-                                <h1>Edit Purchase Order</h1>
+                                <h1>Edit Challan</h1>
                             </div>
                             @if($challan->inventoryComponentTransferStatus->slug != 'close')
                             <div class="form-group " style="text-align: center">
@@ -87,34 +87,98 @@
                                                             <!-- BEGIN VALIDATION STATES-->
                                                             <div class="portlet light ">
                                                                 <div class="portlet-body form">
-                                                                    <div class="row">
-                                                                        <div class="col-md-12">
-                                                                            <table class="table table-striped table-bordered table-hover order-column" id="purchaseRequest" style="margin-top: 1%;">
-                                                                                <thead>
-                                                                                    <tr>
-                                                                                        <th> Material Name </th>
-                                                                                        <th> Site Out Quantity</th>
-                                                                                        <th> Site In Quantity</th>
-                                                                                        <th> Unit </th>
-                                                                                        <th> Action
-                                                                                        <th>
-                                                                                    </tr>
-                                                                                </thead>
-                                                                                <tbody>
-                                                                                    @foreach($components as $key => $materialData)
-                                                                                    <tr>
-                                                                                        <td> {{$materialData['name']}} </td>
-                                                                                        <td> {{$materialData['site_out_quantity']}} </td>
-                                                                                        <td> {{$materialData['site_in_quantity']}} </td>
-                                                                                        <td> {{$materialData['unit']}} </td>
-                                                                                        <td><button class="component-view" value="{{$materialData['name']}}">View</button>
-                                                                                        </td>
-                                                                                    </tr>
-                                                                                    @endforeach
-                                                                                </tbody>
-                                                                            </table>
+                                                                    <form role="form" id="edit-challan" class="form-horizontal" method="post" action="/inventory/transfer/challan/edit/{{$challan['id']}}">
+                                                                        {!! csrf_field() !!}
+                                                                        <div class="form-body">
+                                                                            <div class="row">
+                                                                                <div class="col-md-12">
+                                                                                    <table class="table table-striped table-bordered table-hover order-column" id="purchaseRequest" style="margin-top: 1%;">
+                                                                                        <thead>
+                                                                                            <tr>
+                                                                                                <th> Material Name </th>
+                                                                                                <th> Site Out Quantity</th>
+                                                                                                <th> Site In Quantity</th>
+                                                                                                <th> Unit </th>
+                                                                                                <th> Action</th>
+                                                                                            </tr>
+                                                                                        </thead>
+                                                                                        <tbody>
+                                                                                            @foreach($components as $key => $materialData)
+                                                                                            <tr>
+                                                                                                <td> {{$materialData['name']}} </td>
+                                                                                                <td> {{$materialData['site_out_quantity']}} </td>
+                                                                                                <td> {{$materialData['site_in_quantity']}} </td>
+                                                                                                <td> {{$materialData['unit']}} </td>
+                                                                                                <td><button class="component-view" value="{{$materialData['name']}}">View</button>
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                            @endforeach
+                                                                                        </tbody>
+                                                                                    </table>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="form-group row">
+                                                                                <div class="col-md-3" style="text-align: right">
+                                                                                    <label class="control-label">Transportation Amount</label>
+                                                                                    <span>*</span>
+                                                                                </div>
+                                                                                <div class="col-md-6">
+                                                                                    <input type="text" class="form-control" id="transportation_amount" name="transportation_amount" value="{{$challan['other_data']['transportation_amount']}}">
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="form-group row">
+                                                                                <div class="col-md-3" style="text-align: right">
+                                                                                    <label class="control-label">Transportation Tax Amount</label>
+                                                                                    <span>*</span>
+                                                                                </div>
+                                                                                <div class="col-md-6">
+                                                                                    <input type="text" class="form-control" id="transportation_tax_total" name="transportation_tax_total" value="{{$challan['other_data']['transportation_tax_total']}}" disabled>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="form-group row">
+                                                                                <div class="col-md-3" style="text-align: right">
+                                                                                    <label class="control-label">Transportation Total</label>
+                                                                                    <span>*</span>
+                                                                                </div>
+                                                                                <div class="col-md-6">
+                                                                                    <input type="text" class="form-control" id="transportation_total" name="transportation_total" value="{{$challan['other_data']['transportation_total']}}" disabled>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="form-group row">
+                                                                                <div class="col-md-3" style="text-align: right">
+                                                                                    <label class="control-label">Vendor</label>
+                                                                                    <span>*</span>
+                                                                                </div>
+                                                                                <div class="col-md-6">
+                                                                                    <input type="text" class="form-control" id="vendor" name="vendor" value="{{$challan['other_data']['vendor_name']}}" disabled>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="form-group row">
+                                                                                <div class="col-md-3" style="text-align: right">
+                                                                                    <label class="control-label">Driver Name</label>
+                                                                                    <span>*</span>
+                                                                                </div>
+                                                                                <div class="col-md-6">
+                                                                                    <input type="text" class="form-control" id="driver_name" name="driver_name" value="{{$challan['other_data']['driver_name']}}" disabled>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="form-group row">
+                                                                                <div class="col-md-3" style="text-align: right">
+                                                                                    <label class="control-label">Mobile</label>
+                                                                                    <span>*</span>
+                                                                                </div>
+                                                                                <div class="col-md-6">
+                                                                                    <input type="text" class="form-control" id="mobile" name="mobile" value="{{$challan['other_data']['mobile']}}" disabled>
+                                                                                </div>
+                                                                            </div>
+
+                                                                            <div class="form-actions noborder row">
+                                                                                <div class="col-md-offset-11">
+                                                                                    <button type="submit" class="btn red" id="submit"><i class="fa fa-check"></i> Submit</button>
+                                                                                </div>
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
+                                                                    </form>
                                                                 </div>
                                                             </div>
                                                         </div>

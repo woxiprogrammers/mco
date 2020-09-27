@@ -26,7 +26,7 @@ class InventoryTransferChallanController extends Controller
         try {
             $projectSites  = ProjectSite::join('projects', 'projects.id', '=', 'project_sites.project_id')
                 ->where('project_sites.name', '!=', env('OFFICE_PROJECT_SITE_NAME'))->where('projects.is_active', true)->select('project_sites.id', 'project_sites.name', 'projects.name as project_name')->get()->toArray();
-            $challanStatus = InventoryComponentTransferStatus::whereIn('slug', ['open', 'close'])->select('id', 'name', 'slug')->get()->toArray();
+            $challanStatus = InventoryComponentTransferStatus::whereIn('slug', ['requested', 'open', 'close', 'disapproved'])->select('id', 'name', 'slug')->get()->toArray();
             return view('inventory/transfer/challan/manage')->with(compact('projectSites', 'challanStatus'));
         } catch (Exception $e) {
             $data = [
@@ -75,25 +75,39 @@ class InventoryTransferChallanController extends Controller
 
             for ($iterator = 0, $pagination = 0; $iterator < $end && $pagination < count($challanData); $iterator++, $pagination++) {
                 $challanRelatedData = $challanData[$pagination]->otherData();
-                if ($challanData[$pagination]->inventoryComponentTransferStatus->slug == 'open') {
-                    $actionDropDownStatus = '<i class="fa fa-check-circle" title="Open" style="font-size:24px;color:green">&nbsp;&nbsp;</i>';
-                } else {
-                    $actionDropDownStatus = '<i class="fa fa-times-circle" title="Close" style="font-size:24px;color:red">&nbsp;&nbsp;</i>';
+                switch ($challanData[$pagination]->inventoryComponentTransferStatus->slug) {
+                    case 'requested':
+                        $actionDropDownStatus = '<i class="fa fa-circle-o" title="Requested" style="font-size:24px;color:orange">&nbsp;&nbsp;</i>';
+                        break;
+                    case 'disapproved':
+                        $actionDropDownStatus = '<i class="fa fas fa-ban" title="Disapproved" style="font-size:24px;color:red">&nbsp;&nbsp;</i>';
+                        break;
+                    case 'open':
+                        $actionDropDownStatus = '<i class="fa fa-check-circle" title="Open" style="font-size:24px;color:green">&nbsp;&nbsp;</i>';
+                        break;
+                    case 'close':
+                        $actionDropDownStatus = '<i class="fa fa-times-circle" title="Close" style="font-size:24px;color:red">&nbsp;&nbsp;</i>';
+                        break;
                 }
-                $actionDropDown =  '<div id="sample_editable_1_new" class="btn btn-small blue">
+
+                $actionDropDown =  '<div class="btn btn-small blue" title="PDF">
                                             <a href="/inventory/transfer/challan/pdf/' . $challanData[$pagination]['id'] . '" style="color: white"> 
-                                                PDF <i class="fa fa-download" aria-hidden="true"></i>
+                                                <i class="fa fa-download" aria-hidden="true"></i>
+                                            </a>
+                                        </div>
+                                        <div class="btn btn-small blue" title="EDIT">
+                                            <a href="/inventory/transfer/challan/edit/' . $challanData[$pagination]['id'] . '" style="color: white">
+                                                <i class="fa fa-edit" aria-hidden="true"></i>
                                             </a>
                                         </div>';
-
 
                 $records['data'][$iterator] = [
                     date('d M Y', strtotime($challanData[$pagination]->created_at)),
                     $challanData[$pagination]->challan_number,
                     $challanData[$pagination]->projectSiteOut->project->name,
-                    $challanData[$pagination]->projectSiteIn->project->name,
-                    $challanRelatedData['transportation_amount'],
-                    $challanRelatedData['transportation_tax_total'],
+                    $challanData[$pagination]->projectSiteIn->project->name ?? '-',
+                    $challanRelatedData['transportation_amount'] ?? 0,
+                    $challanRelatedData['transportation_tax_total'] ?? 0,
                     $actionDropDownStatus,
                     $actionDropDown
                 ];
@@ -102,8 +116,9 @@ class InventoryTransferChallanController extends Controller
             $records["recordsTotal"] = $totalRecords;
             $records["recordsFiltered"] = $totalRecords;
         } catch (Exception $e) {
+            dd($e->getMessage());
             $data = [
-                'action' => 'Request Component listing',
+                'action' => 'Challan listing',
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];
@@ -124,21 +139,22 @@ class InventoryTransferChallanController extends Controller
                 $siteInQuantity = '-';
                 if ($outTransferComponent['related_transfer_id'] != null) {
                     $inTransferComponent = InventoryComponentTransfers::find($outTransferComponent['related_transfer_id']);
-                    $siteInQuantity = $inTransferComponent->quantity;
+                    $siteInQuantity = $inTransferComponent->quantity ?? '-';
                 }
                 $components[] = [
-                    'name'  => $outTransferComponent->inventoryComponent->name,
-                    'is_material'   => $outTransferComponent->inventoryComponent->is_material,
-                    'unit'  =>    $outTransferComponent->unit->name,
+                    'name'              => $outTransferComponent->inventoryComponent->name,
+                    'is_material'       => $outTransferComponent->inventoryComponent->is_material,
+                    'unit'              => $outTransferComponent->unit->name,
                     'site_out_quantity' => $outTransferComponent->quantity,
                     'site_in_quantity'  => $siteInQuantity
                 ];
             }
-            return view('inventory/transfer/challan/view')->with(compact('challan', 'projectSites', 'challanStatus', 'components'));
+            $challan['other_data'] = $challan->otherData()->toArray();
+            return view('inventory/transfer/challan/edit')->with(compact('challan', 'projectSites', 'challanStatus', 'components'));
         } catch (Exception $e) {
             dd($e->getMessage());
             $data = [
-                'action'    => 'Inventory Transfer Challan view',
+                'action'    => 'Inventory Transfer Challan Edit view',
                 'params'    => $request->all(),
                 'exception' => $e->getMessage()
             ];
