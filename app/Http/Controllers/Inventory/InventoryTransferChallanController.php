@@ -12,6 +12,7 @@ use App\InventoryTransferTypes;
 use App\ProjectSite;
 use Exception;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class InventoryTransferChallanController extends Controller
 {
@@ -159,6 +160,46 @@ class InventoryTransferChallanController extends Controller
                 'exception' => $e->getMessage()
             ];
             Log::critical(json_encode($data));
+        }
+    }
+
+    public function generatePDF(Request $request, $challanId)
+    {
+        try {
+            $challan = InventoryTransferChallan::find($challanId);
+            $challan['from_site'] = $challan->projectSiteOut->project->name;
+            $challan['to_site'] = $challan->projectSiteIn->project->name ?? '-';
+            $challan['from_site'] = $challan->projectSiteOut->project->name;
+            $challan['to_site'] = $challan->projectSiteIn->project->name ?? '-';
+            $data = [
+                'challan'       => $challan,
+                'other_data'    => $challan->otherData()->toArray()
+            ];
+            // add condition of transfer type
+            $outTransferComponents = InventoryComponentTransfers::join('inventory_components', 'inventory_components.id', '=', 'inventory_component_transfers.inventory_component_id')
+                ->join('units', 'units.id', '=', 'inventory_component_transfers.unit_id')
+                ->where('inventory_component_transfers.inventory_transfer_challan_id', $challan['id'])
+                ->select('inventory_components.name as inventory_component_name', 'inventory_components.is_material', 'inventory_component_transfers.quantity', 'units.name as unit_name', 'inventory_component_transfers.rate_per_unit', 'inventory_component_transfers.cgst_amount', 'inventory_component_transfers.sgst_amount', 'inventory_component_transfers.igst_amount', DB::raw('COALESCE((cgst_amount+sgst_amount+igst_amount),0) as gst'), DB::raw('(rate_per_unit+COALESCE((cgst_amount+sgst_amount+igst_amount),0)) as total'))->get();
+            $data['materials'] = $outTransferComponents->where('is_material', true)->toArray();
+            $data['materialTotal'] = [
+                'quantity_total' => array_sum(array_column($data['materials'], 'quantity')),
+                'rate_per_unit'  => array_sum(array_column($data['materials'], 'rate_per_unit')),
+                'gst_total'      => array_sum(array_column($data['materials'], 'gst')),
+                'total'          => array_sum(array_column($data['materials'], 'total'))
+            ];
+            $data['assets'] = $outTransferComponents->where('is_material', false);
+            $pdf = App::make('dompdf.wrapper');
+            $pdf->loadHTML(view('inventory/transfer/challan/pdf/challan', $data));
+            // $pdf->setPaper('A4', 'landscape');
+            return $pdf->stream();
+        } catch (\Exception $e) {
+            $data = [
+                'actions' => 'Generate Challan PDF',
+                'params' => [],
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500, $e->getMessage());
         }
     }
 }
