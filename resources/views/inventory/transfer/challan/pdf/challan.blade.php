@@ -79,7 +79,11 @@
             <td colspan="4">Driver Name - {{$other_data['driver_name']}}</td>
             <td colspan="6">Mobile No - {{$other_data['mobile']}}</td>
         </tr>
+        <tr>
+            <td colspan=" 10"> &nbsp; </td>
+        </tr>
 
+        @if(count($assets) > 0)
         <tr style="font-size: 16px">
             <td colspan="10" style="text-align: center; height: 3%; background-color:#81A1D1; "><b>Asset </b></td>
         </tr>
@@ -90,74 +94,47 @@
             <td colspan="2" style="width: 10%; text-align: center;"> <b> Unit </b> </td>
             <td colspan="2" style="width: 20%; text-align: center;"> <b> Rent </b> </td>
         </tr>
-        <tr style="font-size: 14px;">
-            <td colspan="2" style="width: 10%; text-align: center;">1.</td>
-            <td colspan="2" style="width: 40%; text-align: center;">A</td>
-            <td colspan="2" style="width: 10%; text-align: center;">1.00</td>
-            <td colspan="2" style="width: 10%; text-align: center;">Nos</td>
-            <td colspan="2" style="width: 20%; text-align: center;">0.25</td>
-        </tr>
-        <tr style="font-size: 14px;">
-            <td colspan="2" style="width: 10%; text-align: center;">2.</td>
-            <td colspan="2" style="width: 40%; text-align: center;">B</td>
-            <td colspan="2" style="width: 10%; text-align: center;">1.00</td>
-            <td colspan="2" style="width: 10%; text-align: center;">Nos</td>
-            <td colspan="2" style="width: 20%; text-align: center;">0.25</td>
-        </tr>
-        <tr style="font-size: 14px;">
-            <td colspan="2" style="width: 10%; text-align: center;">3.</td>
-            <td colspan="2" style="width: 40%; text-align: center;">C</td>
-            <td colspan="2" style="width: 10%; text-align: center;">1.00</td>
-            <td colspan="2" style="width: 10%; text-align: center;">Nos</td>
-            <td colspan="2" style="width: 20%; text-align: center;">0.25</td>
-        </tr>
-        <tr style="font-size: 16px">
-            <td colspan="10" style="text-align: center; height: 3%; background-color:#81A1D1; "><b>Material</b></td>
-        </tr>
-        <tr style="text-align: center; font-size: 14px;">
-            <td colspan="2"> <b> S. No. </b> </td>
-            <td colspan="2"> <b> Product Description </b> </td>
-            <td> <b> QTY </b> </td>
-            <td> <b> Unit </b> </td>
-            <td> <b> Rate </b> </td>
-            <td> <b> GST </b> </td>
-            <td colspan="2"> <b> Amount </b> </td>
-        </tr>
-        <tr style="font-size: 14px;">
-            <td colspan="2" style="text-align: center;">1.</td>
-            <td colspan="2">A</td>
-            <td style="text-align: right;">1.00</td>
-            <td style="text-align: center;">MT</td>
-            <td style="text-align: right;">10.00</td>
-            <td style="text-align: right;">1.80</td>
-            <td colspan="2" style="text-align: right;">11.80</td>
-        </tr>
-        <tr style="font-size: 14px;">
-            <td colspan="2" style="text-align: center;">1.</td>
-            <td colspan="2">B</td>
-            <td style="text-align: right;">1.00</td>
-            <td style="text-align: center;">MT</td>
-            <td style="text-align: right;">10.00</td>
-            <td style="text-align: right;">1.80</td>
-            <td colspan="2" style="text-align: right;">11.80</td>
-        </tr>
-        <tr style="font-size: 14px;">
-            <td colspan="2" style="text-align: center;">1.</td>
-            <td colspan="2">C</td>
-            <td style="text-align: right;">1.00</td>
-            <td style="text-align: center;">MT</td>
-            <td style="text-align: right;"> 10.00</td>
-            <td style="text-align: right;">1.80</td>
-            <td colspan="2" style="text-align: right;">11.80</td>
-        </tr>
-        <tr style="font-size: 14px;">
-            <td colspan="4" style="text-align: center;"> <b> Total </b> </td>
-            <td style="text-align: right;"> <b> 39.00 </b> </td>
-            <td> </td>
-            <td style="text-align: right;"> <b> 51.00 </b> </td>
-            <td style="text-align: right;"> <b> 9.18 </b> </td>
-            <td colspan="2" style="text-align: right;"> <b> 60.18 </b> </td>
-        </tr>
+        @for($iterator = 0 ; $iterator < count($assets); $iterator++) <tr style="font-size: 14px;">
+            <td colspan="2" style="text-align: center;">{{$iterator+1}}.</td>
+            <td colspan="2">{{$assets[$iterator]['inventory_component_name']}}</td>
+            <td style="text-align: right;">{{$assets[$iterator]['quantity']}}</td>
+            <td style="text-align: center;">{{$assets[$iterator]['unit_name']}}</td>
+            <td style="text-align: right;">{{$assets[$iterator]['rate_per_unit']}}</td>
+            </tr>
+            @endfor
+            @endif
+            @if(count($materials) > 0)
+            <tr style="font-size: 16px">
+                <td colspan="10" style="text-align: center; height: 3%; background-color:#81A1D1; "><b>Material</b></td>
+            </tr>
+            <tr style="text-align: center; font-size: 14px;">
+                <td colspan="2"> <b> S. No. </b> </td>
+                <td colspan="2"> <b> Product Description </b> </td>
+                <td> <b> QTY </b> </td>
+                <td> <b> Unit </b> </td>
+                <td> <b> Rate </b> </td>
+                <td> <b> GST </b> </td>
+                <td colspan="2"> <b> Amount </b> </td>
+            </tr>
+            @for($iterator = 0 ; $iterator < count($materials); $iterator++) <tr style="font-size: 14px;">
+                <td colspan="2" style="text-align: center;">{{$iterator+1}}.</td>
+                <td colspan="2">{{$materials[$iterator]['inventory_component_name']}}</td>
+                <td style="text-align: right;">{{$materials[$iterator]['quantity']}}</td>
+                <td style="text-align: center;">{{$materials[$iterator]['unit_name']}}</td>
+                <td style="text-align: right;">{{$materials[$iterator]['rate_per_unit']}}</td>
+                <td style="text-align: right;">{{$materials[$iterator]['gst']}}</td>
+                <td colspan="2" style="text-align: right;">{{$materials[$iterator]['total']}}</td>
+                </tr>
+                @endfor
+                <tr style="font-size: 14px;">
+                    <td colspan="4" style="text-align: center;"> <b> Total </b> </td>
+                    <td style="text-align: right;"> <b> {{$materialTotal['quantity_total']}} </b> </td>
+                    <td> </td>
+                    <td style="text-align: right;"> <b> {{$materialTotal['rate_per_unit']}} </b> </td>
+                    <td style="text-align: right;"> <b> {{$materialTotal['gst_total']}} </b> </td>
+                    <td colspan="2" style="text-align: right;"> <b> {{$materialTotal['total']}} </b> </td>
+                </tr>
+                @endif
     </table>
 
 </body>
