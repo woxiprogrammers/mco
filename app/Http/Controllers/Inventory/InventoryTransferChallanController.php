@@ -12,7 +12,9 @@ use App\InventoryTransferTypes;
 use App\ProjectSite;
 use Exception;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class InventoryTransferChallanController extends Controller
 {
@@ -175,9 +177,10 @@ class InventoryTransferChallanController extends Controller
                 'challan'       => $challan,
                 'other_data'    => $challan->otherData()->toArray()
             ];
-            // add condition of transfer type
             $outTransferComponents = InventoryComponentTransfers::join('inventory_components', 'inventory_components.id', '=', 'inventory_component_transfers.inventory_component_id')
                 ->join('units', 'units.id', '=', 'inventory_component_transfers.unit_id')
+                ->join('inventory_transfer_types', 'inventory_transfer_types.id', '=', 'inventory_component_transfers.transfer_type_id')
+                ->where('inventory_transfer_types.slug', 'site')->where('inventory_transfer_types.type', 'OUT')
                 ->where('inventory_component_transfers.inventory_transfer_challan_id', $challan['id'])
                 ->select('inventory_components.name as inventory_component_name', 'inventory_components.is_material', 'inventory_component_transfers.quantity', 'units.name as unit_name', 'inventory_component_transfers.rate_per_unit', 'inventory_component_transfers.cgst_amount', 'inventory_component_transfers.sgst_amount', 'inventory_component_transfers.igst_amount', DB::raw('COALESCE((cgst_amount+sgst_amount+igst_amount),0) as gst'), DB::raw('(rate_per_unit+COALESCE((cgst_amount+sgst_amount+igst_amount),0)) as total'))->get();
             $data['materials'] = $outTransferComponents->where('is_material', true)->toArray();
@@ -201,5 +204,59 @@ class InventoryTransferChallanController extends Controller
             Log::critical(json_encode($data));
             abort(500, $e->getMessage());
         }
+    }
+
+    /**
+     * Authenticate password for challan close
+     */
+    public function authenticateChallanClose(Request $request)
+    {
+        try {
+            $password = $request->password;
+            if (Hash::check($password, env('CLOSE_INVENTORY_CHALLAN_PASSWORD'))) {
+                $status = 200;
+                $message = 'Authentication successful !!';
+            } else {
+                $status = 401;
+                $message = 'You are not authorised to close this purchase order.';
+            }
+        } catch (\Exception $e) {
+            $message = 'Fail';
+            $status = 500;
+            $data = [
+                'action' => 'Authenticate Challan Close',
+                'exception' => $e->getMessage(),
+                'params' => $request->all()
+            ];
+            Log::critical(json_encode($data));
+        }
+        $response = [
+            'message' => $message,
+        ];
+        return response()->json($response, $status);
+    }
+
+    /**
+     * Close Challan
+     */
+    public function closeChallan(Request $request)
+    {
+        try {
+            $closeStatusId = InventoryComponentTransferStatus::where('slug', 'close')->pluck('id')->first();
+            $challan = InventoryTransferChallan::find($request['challan_id']);
+            if ($challan) {
+                $challan->update(['inventory_component_transfer_status_id' => $closeStatusId]);
+            }
+            $message = "Challan closed successfully !";
+        } catch (\Exception $e) {
+            $data = [
+                'action' => 'Close Challan',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $message = "Something went wrong" . $e->getMessage();
+        }
+        return response()->json($message);
     }
 }
