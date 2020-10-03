@@ -461,6 +461,8 @@ Route::group(['domain' => env('DOMAIN_NAME')], function () {
                 Route::post('listing', array('uses' => 'Inventory\InventoryTransferChallanController@getChallanListing'));
                 Route::get('edit/{challanId}', array('uses' => 'Inventory\InventoryTransferChallanController@show'));
                 Route::get('pdf/{challanId}', array('uses' => 'Inventory\InventoryTransferChallanController@generatePDF'));
+                Route::post('authenticate-challan-close', array('uses' => 'Inventory\InventoryTransferChallanController@authenticateChallanClose'));
+                Route::post('close', array('uses' => 'Inventory\InventoryTransferChallanController@closeChallan'));
             });
         });
     });

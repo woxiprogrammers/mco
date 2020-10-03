@@ -24,7 +24,7 @@
                             </div>
                             @if($challan->inventoryComponentTransferStatus->slug != 'close')
                             <div class="form-group " style="text-align: center">
-                                <a class="btn red pull-right margin-top-15" data-toggle="modal" href="#closePOAuthModal">
+                                <a class="btn red pull-right margin-top-15" data-toggle="modal" href="#closeChallan">
                                     <i class="fa fa-close" style="font-size: large"></i>
                                     Close Challan
                                 </a>
@@ -68,7 +68,7 @@
                                                 <div class="col-md-4">
                                                     <div class="form-group">
                                                         <label style="color: darkblue;">To Site</label>
-                                                        <input type="text" class="form-control" name="client_name" value="{{$challan->projectSiteIn->project->name}}" readonly tabindex="-1">
+                                                        <input type="text" class="form-control" name="client_name" value="{{$challan->projectSiteIn->project->name ?? '-'}}" readonly tabindex="-1">
                                                     </div>
                                                 </div>
                                             </div>
@@ -197,7 +197,7 @@
     </div>
 </div>
 </div>
-<div class="modal fade " id="closePOAuthModal" role="dialog">
+<div class="modal fade " id="closeChallan" role="dialog">
     <div class="modal-dialog">
         <!-- Modal content-->
         <div class="modal-content">
@@ -220,7 +220,7 @@
                 </div>
                 <div class="form-group row">
                     <div class="col-md-3 col-md-offset-4">
-                        <a class="btn btn-set red" href="javascript:void(0);" onclick="submitPOPassword()">
+                        <a class="btn btn-set red" href="javascript:void(0);" onclick="submitChallanPassword()">
                             <i class="fa fa-check" style="font-size: large"></i>
                             Submit &nbsp; &nbsp; &nbsp;
                         </a>
@@ -467,6 +467,44 @@
             $('#bankData').show();
         }
 
+    }
+
+    function submitChallanPassword() {
+        var challan_id = $('#challan_id').val();
+        var password = $.trim($("#POPassword").val());
+        if (password.length > 0) {
+            $.ajax({
+                type: "POST",
+                url: "/inventory/transfer/challan/authenticate-challan-close",
+                data: {
+                    password: password,
+                    challan_id: challan_id,
+                    _token: $("input[name='_token']").val()
+                },
+                success: function(data) {
+                    $.ajax({
+                        type: "POST",
+                        url: "/inventory/transfer/challan/close",
+                        data: {
+                            challan_id: challan_id,
+                            _token: $("input[name='_token']").val()
+                        },
+                        beforeSend: function() {},
+                        success: function(data) {
+                            location.reload();
+                            alert("Challan closed successfully.");
+                        }
+                    });
+                },
+                error: function(xhr) {
+                    if (xhr.status == 401) {
+                        alert("You are not authorised to close this purchase order.");
+                    }
+                }
+            });
+        } else {
+            alert('Please enter valid password');
+        }
     }
 </script>
 @endsection
