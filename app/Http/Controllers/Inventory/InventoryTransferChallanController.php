@@ -14,6 +14,7 @@ use Exception;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Session;
 
 class InventoryTransferChallanController extends Controller
 {
@@ -21,6 +22,26 @@ class InventoryTransferChallanController extends Controller
     public function __construct()
     {
         $this->middleware('custom.auth');
+    }
+
+    public function showSiteIn()
+    {
+        try {
+            $projectSiteId = Session::get('global_project_site');
+            // $challan = InventoryTransferChallan::join('inventory_component_transfers', 'inventory_component_transfers.inventory_transfer_challan_id', '=', 'inventory_transfer_challan.id')
+            //     ->join('inventory_component_transfer_statuses', 'inventory_transfer_challan.inventory_component_transfer_status_id', '=', 'inventory_component_transfer_statuses.id')
+            //     ->where('inventory_component_transfer_statuses.slug', 'open')
+            //     ->where('inventory_component_transfers.challan_id')->where('project_site_in_id', $projectSiteId);
+            $challans = InventoryTransferChallan::select('id', 'challan_number')->limit(10)->get()->toArray();
+            return view('inventory/transfer/challan/site/in')->with(compact('challans'));
+        } catch (Exception $e) {
+            $data = [
+                'action' => 'Inventory Transfer Challan Site In Show',
+                'params' => [],
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+        }
     }
 
     public function getManageView(Request $request)
@@ -259,5 +280,66 @@ class InventoryTransferChallanController extends Controller
             $message = "Something went wrong" . $e->getMessage();
         }
         return response()->json($message);
+    }
+
+    /**
+     * Get Challan Detail
+     */
+    public function getChallanDetail(Request $request)
+    {
+        try {
+            //$challan = InventoryTransferChallan::find($request['challan_id']);
+            $challan = InventoryTransferChallan::find(4);
+            $outTransferType = InventoryTransferTypes::where('slug', 'site')->where('type', 'OUT')->first();
+            $inventoryComponentOutTransfers = $outTransferType->inventoryComponentTransfers->where('inventory_transfer_challan_id', $challan['id']);
+            foreach ($inventoryComponentOutTransfers as $outTransferComponent) {
+                $siteInQuantity = '-';
+                if ($outTransferComponent['related_transfer_id'] != null) {
+                    $inTransferComponent = InventoryComponentTransfers::find($outTransferComponent['related_transfer_id']);
+                    $siteInQuantity = $inTransferComponent->quantity ?? '-';
+                }
+                $components[] = [
+                    'site_out_transfer_id'  => $outTransferComponent->id,
+                    'name'              => $outTransferComponent->inventoryComponent->name,
+                    'is_material'       => $outTransferComponent->inventoryComponent->is_material,
+                    'reference_id'      => $outTransferComponent->inventoryComponent->reference_id,
+                    'unit'              => $outTransferComponent->unit->name,
+                    'site_out_quantity' => $outTransferComponent->quantity,
+                    'site_in_quantity'  => $siteInQuantity
+                ];
+            }
+            $challan['other_data'] = $challan->otherData()->toArray();
+            $challan['from_site'] = $challan->projectSiteOut->project->name;
+            $challan['to_site'] = $challan->projectSiteIn->project->name ?? '-';
+            $status = 200;
+            return view('partials.inventory.transfer.challan.detail')->with(compact('challan', 'components'));
+        } catch (Exception $e) {
+            $data = [
+                'action' => 'Get Challan Details',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            $status = 500;
+            $challan = array();
+            Log::critical(json_encode($data));
+        }
+        return response()->json($challan, $status);
+    }
+
+    public function createSiteIn(Request $request)
+    {
+        try {
+            dd($request->all());
+        } catch (Exception $e) {
+            dd($e->getMessage());
+            $data = [
+                'action' => 'Create Site In for Challan',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            $status = 500;
+            $challan = array();
+            Log::critical(json_encode($data));
+        }
     }
 }
