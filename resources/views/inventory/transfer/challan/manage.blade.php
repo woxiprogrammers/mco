@@ -44,6 +44,16 @@
                                         {!! csrf_field() !!}
                                         <div class="portlet-body">
                                             <div class="portlet-body">
+                                                <div class="row">
+                                                    <div class="col-md-offset-11 col-md-2">
+                                                        <div class="btn-group">
+                                                            <a class="btn red pull-right" href="/inventory/transfer/challan/site/in" id="siteIn">
+                                                                <i class="fa fa-check"></i>Site In
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr />
                                                 <div class="table-container">
                                                     <table class="table table-striped table-bordered table-hover order-column" id="challanListTable">
                                                         <thead>
