@@ -51,7 +51,7 @@
                                     <div class="col-md-12">
                                         <!-- BEGIN EXAMPLE TABLE PORTLET-->
                                         <div class="portlet light ">
-                                            <span style="color: red">(Note : Only Global Sites data displayed)</span>
+                                            <span style="color: red">{{$globalMessage}}</span>
                                             {!! csrf_field() !!}
                                                 <div class="portlet-body">
                                                     <div class="table-container">
