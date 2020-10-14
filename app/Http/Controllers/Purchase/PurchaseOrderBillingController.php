@@ -40,7 +40,13 @@ class PurchaseOrderBillingController extends Controller
 
     public function getManageView(Request $request){
         try{
-            return view('purchase.purchase-order-billing.manage');
+            $user = Auth::user();
+            if ( $user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('view-purchase-order-bill-listing')) {
+                $globalMessage = '(Note : All Sites data displayed)';
+            } else {
+                $globalMessage = '(Note : Only Global Sites data displayed)';
+            }
+            return view('purchase.purchase-order-billing.manage')->with(compact('globalMessage'));
         }catch(\Exception $e){
             $data = [
                 'action' => 'Get PO billing Manage View',
@@ -265,6 +271,52 @@ class PurchaseOrderBillingController extends Controller
         return response()->json($response,$status);
     }
 
+    public function getPurchaseOrdersByBillNumber(Request $request){
+        try{
+            if(Session::has('global_project_site')){
+                $projectSiteId = Session::get('global_project_site');
+                $purchaseOrders = PurchaseOrder::join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
+                    ->join('purchase_order_transactions','purchase_order_transactions.purchase_order_id','=','purchase_orders.id')
+                    ->join('purchase_order_transaction_statuses','purchase_order_transaction_statuses.id','=','purchase_order_transactions.purchase_order_transaction_status_id')
+                    ->where('purchase_order_transaction_statuses.slug','bill-pending')
+                    ->where('purchase_requests.project_site_id',$projectSiteId)
+                    ->where('purchase_order_transactions.bill_number','ilike','%'.$request->keyword)
+                    ->where(function($query){
+                        $query->where('purchase_orders.is_client_order','=',null)
+                              ->orWhere('purchase_orders.is_client_order','=',false);
+                    })
+                    ->select('purchase_order_transactions.bill_number as bill_number', 'purchase_orders.id as id','purchase_orders.format_id as format_id','purchase_order_transactions.id as purchase_order_transaction_id','purchase_order_transactions.grn as grn')
+                    ->distinct('bill_number')
+                    ->get();
+            }else{
+                $purchaseOrders = [];
+            }
+
+            $response = array();
+            $status = 200;
+            $iterator = 0;
+            foreach ($purchaseOrders as $purchaseOrder){
+                if(!array_key_exists($purchaseOrder['id'], $response)){
+                    $response[$purchaseOrder['id']]['format'] = $purchaseOrder['bill_number'];
+                    $response[$purchaseOrder['id']]['id'] = $purchaseOrder['id'];
+                    $response[$purchaseOrder['id']]['grn'] = '';
+                }
+                $response[$purchaseOrder['id']]['grn'] .= '<li><input type="checkbox" class="transaction-select" name="transaction_id[]" value="'.$purchaseOrder['purchase_order_transaction_id'].'"><label class="control-label" style="margin-left: 0.5%;">'. $purchaseOrder['grn'].' </label> <a href="javascript:void(0);" onclick="viewTransactionDetails('.$purchaseOrder['purchase_order_transaction_id'].')" class="btn blue btn-xs" style="margin-left: 2%">View Details </a></li>';
+                $iterator++;
+            }
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Get PO billing Purchase orders by bill_number',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $response = array();
+            $status = 500;
+        }
+        return response()->json($response,$status);
+    }
+
     public function getBillPendingTransactions(Request $request){
         try{
             $status = 200;
@@ -455,16 +507,17 @@ class PurchaseOrderBillingController extends Controller
             $skip = $request->start;
             $take = $request->length;
             $totalRecordCount = 0;
-            if(Session::has('global_project_site')){
+            $user = Auth::user();
+            if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('view-purchase-order-bill-listing')) {
+                $purchaseOrderBillIds = PurchaseOrderBill::pluck('id')->toArray();
+            } else {
                 $projectSiteId = Session::get('global_project_site');
                 $purchaseOrderBillIds = PurchaseOrderBill::join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
                 ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
                 ->where('purchase_requests.project_site_id', $projectSiteId)
                 ->pluck('purchase_order_bills.id')
                 ->toArray();
-            } else {
-                $purchaseOrderBillIds = PurchaseOrderBill::pluck('id')->toArray();
-            }
+            }        
             $records = array();
             $status = 200;
 
@@ -515,7 +568,7 @@ class PurchaseOrderBillingController extends Controller
             }
             if($request->has('bill_number') && $request->bill_number != '' && $filterFlag == true){
                 $purchaseOrderBillIds = PurchaseOrderBill::join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
-                    ->where('purchase_order_bills.vendor_bill_number','ilike','%'.$request->bill_number.'%')
+                    ->where('purchase_order_bills.vendor_bill_number','ilike', $request->bill_number)
                     ->whereIn('purchase_order_bills.id', $purchaseOrderBillIds)
                     ->pluck('purchase_order_bills.id')->toArray();
                 if(count($purchaseOrderBillIds) <= 0){
@@ -566,8 +619,6 @@ class PurchaseOrderBillingController extends Controller
                 $purchaseOrderBillData = array();
             }
 
-
-            $user = Auth::user();
             $total = 0;
             $billTotals = 0;
             $billPaidAmount = 0;

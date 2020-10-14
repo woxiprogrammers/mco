@@ -369,6 +369,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
             Route::post('create',array('uses' => 'Purchase\PurchaseOrderBillingController@createBill'));
             Route::post('get-project-sites',array('uses' => 'Purchase\PurchaseOrderBillingController@getProjectSites'));
             Route::get('get-purchase-orders',array('uses' => 'Purchase\PurchaseOrderBillingController@getPurchaseOrders'));
+            Route::get('get-purchase-orders-bill-number',array('uses' => 'Purchase\PurchaseOrderBillingController@getPurchaseOrdersByBillNumber'));
             Route::get('get-bill-pending-transactions',array('uses' => 'Purchase\PurchaseOrderBillingController@getBillPendingTransactions'));
             Route::post('get-transaction-subtotal',array('uses' => 'Purchase\PurchaseOrderBillingController@getTransactionSubtotal'));
             Route::post('listing',array('uses' => 'Purchase\PurchaseOrderBillingController@listing'));
