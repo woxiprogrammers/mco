@@ -23,6 +23,11 @@ use App\Module;
 use App\Project;
 use App\ProjectSite;
 use App\PurchaseOrderComponent;
+// use App\MaterialRequestComponents;
+// use App\ProjectSiteUserCheckpoint;
+// use App\PurchaseRequestComponentStatuses;
+// use App\Quotation;
+// use App\QuotationMaterial;
 use App\Unit;
 use App\UnitConversion;
 use App\User;
@@ -45,6 +50,38 @@ class InventoryManageController extends Controller
     public function __construct()
     {
         $this->middleware('custom.auth');
+    }
+
+    public function generateChallanView(Request $request)
+    {
+        try {
+            $transportationVendors = Vendor::where('is_active', true)->where('for_transportation', true)->select('id', 'name')->get()->toArray();
+            $clients = Client::join('projects', 'projects.client_id', '=', 'clients.id')
+                ->join('project_sites', 'project_sites.project_id', '=', 'projects.id')
+                ->join('quotations', 'quotations.project_site_id', '=', 'project_sites.id')
+                ->select('clients.company as name', 'clients.id as id')
+                ->distinct('name')
+                ->get();
+            $user = Auth::user();
+            $userData = array(
+                "id" => $user['id'],
+                "username" => $user['first_name'] . " " . $user['last_name']
+            );
+            $nosUnitId = Unit::where('slug', 'nos')->pluck('id')->first();
+            $units = Unit::select('id', 'name')->get()->toArray();
+            $unitOptions = '';
+            foreach ($units as $unit) {
+                $unitOptions .= '<option value="' . $unit['id'] . '">' . $unit['name'] . '</option>';
+            }
+            return view('inventory/generate-challan')->with(compact('clients', 'transportationVendors', 'nosUnitId', 'units', 'unitOptions', 'userData'));
+        } catch (\Exception $e) {
+            $data = [
+                'action' => 'Generate Challan view.',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+        }
     }
 
     public function getManageView(Request $request)
@@ -610,40 +647,29 @@ class InventoryManageController extends Controller
             $take = $request->length;
             $totalRecordCount = 0;
             $status = 200;
-            $material_name = null;
-            if ($request->has('search_name')) {
-                $material_name = $request->search_name;
-            }
+
+            $conditions = array();
             if (Session::has('global_project_site')) {
                 $projectSiteId = Session::get('global_project_site');
-                if ($material_name != null && $material_name != "") {
-                    $totalRecordCount = InventoryComponent::where('project_site_id', $projectSiteId)
-                        ->where('name', 'ilike', '%' . $request->search_name . '%')
-                        ->count();
-
-                    $inventoryData = InventoryComponent::where('project_site_id', $projectSiteId)
-                        ->where('name', 'ilike', '%' . $request->search_name . '%')
-                        ->skip($skip)->take($take)
-                        ->orderBy('name', 'asc')->get();
-                } else {
-                    $totalRecordCount = InventoryComponent::where('project_site_id', $projectSiteId)->count();
-                    $inventoryData = InventoryComponent::where('project_site_id', $projectSiteId)
-                        ->skip($skip)->take($take)
-                        ->orderBy('name', 'asc')->get();
-                }
-            } else {
-                if ($material_name != null && $material_name != "") {
-                    $totalRecordCount = InventoryComponent::where('name', 'ilike', '%' . $request->search_name . '%')
-                        ->count();
-                    $inventoryData = InventoryComponent::where('name', 'ilike', '%' . $request->search_name . '%')
-                        ->skip($skip)->take($take)
-                        ->orderBy('name', 'asc')->get();
-                } else {
-                    $totalRecordCount = InventoryComponent::count();
-                    $inventoryData = InventoryComponent::orderBy('name', 'asc')->skip($skip)->take($take)->get();
-                }
+                $conditions[] = ['project_site_id', '=', $projectSiteId];
             }
-            $iTotalRecords = count($inventoryData);
+
+            if ($request->has('search_name')) {
+                $conditions[] = ['name', 'ilike', '%' . $request->search_name . '%'];
+            }
+
+
+            if ($request->has('search_component_id') && count(explode(',', $request->search_component_id)) > 0) {
+                $totalRecordCount = InventoryComponent::whereIn('id', (explode(',', $request->search_component_id)))->orWhere($conditions)->count();
+                $inventoryData = InventoryComponent::whereIn('id', (explode(',', $request->search_component_id)))->orWhere($conditions)
+                    ->skip($skip)->take($take)
+                    ->orderBy('name', 'asc')->get();
+            } else {
+                $totalRecordCount = InventoryComponent::where($conditions)->count();
+                $inventoryData = InventoryComponent::where($conditions)
+                    ->skip($skip)->take($take)
+                    ->orderBy('name', 'asc')->get();
+            }
             $records = array();
             $records['data'] = array();
             $end = $request->length < 0 ? count($inventoryData) : $request->length;
@@ -706,6 +732,9 @@ class InventoryManageController extends Controller
                 }
                 $availableQuantity = ($inQuantity + $openQty) - $outQuantity;
                 $records['data'][$iterator] = [
+                    ($availableQuantity != 0) ? ($request->has('search_component_id') && in_array($inventoryData[$pagination]->id, explode(',', $request->search_component_id)) ? '<input type="checkbox" class="multiple-select-checkbox-mti" value="' . $inventoryData[$pagination]->id . '" checked>'
+                        : '<input type="checkbox" class="multiple-select-checkbox-mti" value="' . $inventoryData[$pagination]->id . '">')
+                        : '<input type="checkbox" class="multiple-select-checkbox-mti" value="' . $inventoryData[$pagination]->id . '" disabled>',
                     ucwords(strtolower($inventoryData[$pagination]->name)),
                     ($inQuantity + $openQty) . ' ' . $unitName,
                     $outQuantity . ' ' . $unitName,
