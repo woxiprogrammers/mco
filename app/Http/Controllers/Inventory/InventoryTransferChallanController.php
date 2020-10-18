@@ -342,4 +342,17 @@ class InventoryTransferChallanController extends Controller
             Log::critical(json_encode($data));
         }
     }
+
+    public function editChallan(Request $request, InventoryTransferChallan $challan)
+    {
+        try {
+            dd($request->all());
+        } catch (Exception $e) {
+            $data = [
+                'action'    => 'Edit Challan',
+                'exception' => $e->getMessage(),
+                'data'      => $request->all()
+            ];
+        }
+    }
 }

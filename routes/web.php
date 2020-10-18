@@ -466,6 +466,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function () {
                 Route::get('site/in', array('uses' => 'Inventory\InventoryTransferChallanController@showSiteIn'));
                 Route::post('site/in', array('uses' => 'Inventory\InventoryTransferChallanController@createSiteIn'));
                 Route::get('detail/{challanId}', array('uses' => 'Inventory\InventoryTransferChallanController@getChallanDetail'));
+                Route::post('edit/{challanId}', array('uses' => 'Inventory\InventoryTransferChallanController@editChallan'));
             });
         });
     });
