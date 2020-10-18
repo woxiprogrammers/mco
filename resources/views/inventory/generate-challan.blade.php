@@ -6,9 +6,8 @@
 <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
-<input type="hidden" id="unitOptions" value="{{$unitOptions}}">
 <input id="nosUnitId" type="hidden" value="{{$nosUnitId}}">
-<form role="form" id="generate_challan" class="form-horizontal" action="/purchase/material-request/create" method="post">
+<form role="form" id="generate_challan" class="form-horizontal" action="/inventory/transfer/challan/create" method="post">
     <input type="hidden" id="component_id">
     <input type="hidden" id="iterator">
     {!! csrf_field() !!}
@@ -75,7 +74,7 @@
                                         <div class="portlet light ">
                                             <div class="row">
                                                 <div class="col-md-12">
-                                                    <a href="#" class="btn btn-set yellow pull-right" style="margin-left: 10px;" id="assetBtn">
+                                                    <a href="#" class="btn btn-set yellow pull-right" id="cart-submit" style="margin-left: 10px;" id="assetBtn">
                                                         Save
                                                     </a>
                                                 </div>
@@ -105,7 +104,46 @@
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody id="materialRows">
-
+                                                                    @foreach ($materials as $material)
+                                                                    <tr class="cart-materials">
+                                                                        <td>
+                                                                            <input type="hidden" id="{{$material['id']}}" name="cart_id" class="cart-id" value="{{$material['id']}}">
+                                                                            <input type="checkbox" id="id_{{$material['id']}}" name="inventory_cart[{{$material['id']}}]" value="{{$material['id']}}" class="component-checkbox">
+                                                                        </td>
+                                                                        <td>
+                                                                            <span>{{$material['inventory_component']['name']}}</span>
+                                                                        </td>
+                                                                        <td>
+                                                                            <input type="number" max="${element.availQuantity}" class="form-control cart-quantity" name="inventory_cart[{{$material['id']}}][quantity]" id="current_quantity_{{$material['id']}}" value="{{$material['quantity']}}" />
+                                                                        </td>
+                                                                        <td>
+                                                                            <select name="inventory_cart[{{$material['id']}}][unit_id]" class="form-control unit" id="unit_id">
+                                                                                @foreach($material['units'] as $unit)
+                                                                                @if($material['unit_id'] == $unit['id'])
+                                                                                <option value="{{$unit['id']}}" selected>{{$unit['name']}}</option>
+                                                                                @else
+                                                                                <option value="{{$unit['id']}}">{{$unit['name']}}</option>
+                                                                                @endif
+                                                                                @endforeach
+                                                                            </select>
+                                                                        </td>
+                                                                        <td>
+                                                                            <input type="number" class="form-control cart-rate" id="rate_per_unit_{{$material['id']}}" name="inventory_cart[{{$material['id']}}][rate_per_unit]" disabled />
+                                                                        </td>
+                                                                        <td>
+                                                                            <input class="form-control cart-gst" type="number" id="gst_{{$material['id']}}" name="inventory_cart[{{$material['id']}}][gst_percent]" disabled>
+                                                                        </td>
+                                                                        <td>
+                                                                            <span class="cart-cgst_amount" id="cgst_amount_{{$material['id']}}"></span>
+                                                                        </td>
+                                                                        <td>
+                                                                            <span class="cart-sgst_amount" id="sgst_amount_{{$material['id']}}"></span>
+                                                                        </td>
+                                                                        <td>
+                                                                            <span class="cart-total" id="total_{{$material['id']}}"></span>
+                                                                        </td>
+                                                                    </tr>
+                                                                    @endforeach
                                                                 </tbody>
                                                             </table>
                                                         </div>
@@ -291,80 +329,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="modal fade" id="myModal" role="dialog">
-                                <div class="modal-dialog">
-                                    <!-- Modal content-->
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <div class="row">
-                                                <div class="col-md-4"></div>
-                                                <div class="col-md-4"> Material</div>
-                                                <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
-                                            </div>
-                                        </div>
-                                        <div class="modal-body" style="padding:40px 50px;">
-                                            <input type="hidden" id="materialModalComponentSlug">
-                                            <div class="form-group">
-                                                <label for="name" class="control-label">Material Name:</label>
-                                                <input type="text" class="form-control empty" id="searchbox" placeholder="Enter material name">
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="name" class="control-label">Quantity:</label>
-                                                <input type="number" class="form-control empty" id="qty" placeholder="Enter quantity">
-                                            </div>
-                                            <div class="form-group" id="unitDrpdn">
-                                                <label for="name" class="control-label">Unit:</label>
-                                                <select id="materialUnit" class="form-control">
-                                                    @foreach($units as $unit)
-                                                    <option value="{{$unit['id']}}">{{$unit['name']}}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                            <article>
-                                                <label for="files">Select multiple files:</label>
-                                                <input id="files" type="file" multiple="multiple" />
-                                                <output id="result" />
-                                            </article>
-                                            <div class="btn red pull-right" id="createMaterial"> Create</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="modal fade" id="myModal1" role="dialog">
-                                <div class="modal-dialog">
-                                    <!-- Modal content-->
-                                    <div class="modal-content">
-                                        <div class="modal-header" style="padding-bottom:10px">
-                                            <div class="row">
-                                                <div class="col-md-4"></div>
-                                                <div class="col-md-4"> Asset</div>
-                                                <div class="col-md-4"><button type="button" class="close" data-dismiss="modal">X</button></div>
-                                            </div>
-                                        </div>
-                                        <div class="modal-body" style="padding:40px 50px;">
-                                            <div class="form-group">
-                                                <label for="name" class="control-label">Asset Name :</label>
-                                                <input type="text" class="form-control empty" id="Assetsearchbox" placeholder="Enter asset name">
-                                                <div id="asset_suggesstion-box"></div>
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="name" class="control-label">Quantity :</label>
-                                                <input type="number" class="form-control empty" id="Assetqty" value="1" readonly>
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="name" class="control-label">Unit :</label>
-                                                <input type="text" class="form-control empty" id="AssetUnitsearchbox" value="Nos" readonly>
-                                            </div>
-                                            <article>
-                                                <label for="filesAsset">Select multiple files:</label>
-                                                <input id="filesAsset" type="file" multiple="multiple" />
-                                                <output id="resultAsset" />
-                                            </article>
-                                            <div class="btn red pull-right" id="createAsset"> Create</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -378,10 +342,82 @@
 <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
 <link rel="stylesheet" href="/assets/global/plugins/bootstrap-select/css/bootstrap-select.min.css" />
 <link rel="stylesheet" href="/assets/global/css/app.css" />
-<!-- <link rel="stylesheet" href="/assets/custom/purchase/material-request/material-request.css" />
-<script src="/assets/custom/purchase/material-request/material-request.js" type="text/javascript"></script>-->
-<script src="/assets/custom/inventory/generate-challan.js" type="text/javascript"></script>
+<!-- <script src="/assets/custom/inventory/generate-challan.js" type="text/javascript"></script> -->
 <script>
+    $(document).ready(function() {
+        $('.cart-quantity, .cart-rate, .cart-gst').on('change', function() {
+            var id = $(this).closest('.cart-materials').find('.cart-id').attr('id');
+            calculateTax(id);
+        });
 
+        $('input:checkbox.component-checkbox').click(function() {
+            var id = $(this).val();
+            var quantity = $('#current_quantity_' + id);
+            if ($(this).prop("checked") == false) {
+                $('#gst_' + id + ',#rate_per_unit_' + id).prop('disabled', true);
+                $('#cgst_amount_' + id + ',#sgst_amount_' + id + ',#total_' + id).text('');
+                $('#rate_per_unit_' + id + ',#gst_' + id).val('');
+            } else {
+                $('#gst_' + id + ',#rate_per_unit_' + id).prop('disabled', false);
+            }
+        });
+    });
+
+    $(".unit").change(function() {
+        // AJAX call to fetch available quantity and then show eerorr
+    })
+    $('#cart-submit').click(function() {
+        var materials = [];
+        var assets = [];
+        $(".cart-materials").each(function(index, elemnt) {
+            let quantity = $(elemnt).find(".cart-quantity").val();
+            let unit_id = $(elemnt).find(".unit").val();
+            materials.push({
+                cart_id: $(elemnt).find(".cart-id").val(),
+                quantity,
+                unit_id
+            })
+        })
+        $.ajax({
+            url: '/inventory/transfer/challan/cart',
+            type: 'POST',
+            async: true,
+            data: {
+                _token: $("input[name='_token']").val(),
+                'materials': materials,
+                'assets': assets
+            },
+            success: function(data, textStatus, xhr) {
+                if (xhr.status == 200) {
+                    alert("Products saved successfully");
+                }
+            },
+            error: function(data, textStatus, xhr) {
+
+            }
+        });
+        console.log(arr);
+    });
+
+    function calculateTax(id) {
+        var quantity = $('#current_quantity_' + id).val();
+        var rate_per_unit = $('#rate_per_unit_' + id).val();
+        var gst = $('#gst_' + id).val();
+        if (isNaN(quantity) || quantity == "") {
+            quantity = 0;
+        }
+        if (isNaN(gst) || gst == "") {
+            gst = 0;
+        }
+        if (isNaN(rate_per_unit) || rate_per_unit == "") {
+            rate_per_unit = 0;
+        }
+        var rate = parseFloat(rate_per_unit) * parseFloat(quantity);
+        var tax_amount = (parseFloat(gst) * rate) / 100;
+        var total = rate + tax_amount + tax_amount;
+        $('#cgst_amount_' + id).text(tax_amount.toFixed(2));
+        $('#sgst_amount_' + id).text(tax_amount.toFixed(2));
+        $('#total_' + id).text(total.toFixed(2));
+    }
 </script>
 @endsection

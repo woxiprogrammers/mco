@@ -23,11 +23,6 @@ use App\Module;
 use App\Project;
 use App\ProjectSite;
 use App\PurchaseOrderComponent;
-// use App\MaterialRequestComponents;
-// use App\ProjectSiteUserCheckpoint;
-// use App\PurchaseRequestComponentStatuses;
-// use App\Quotation;
-// use App\QuotationMaterial;
 use App\Unit;
 use App\UnitConversion;
 use App\User;
@@ -41,6 +36,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
+use App\InventoryCart;
 
 class InventoryManageController extends Controller
 {
@@ -55,6 +51,7 @@ class InventoryManageController extends Controller
     public function generateChallanView(Request $request)
     {
         try {
+            $projectSiteId = Session::get('global_project_site');
             $transportationVendors = Vendor::where('is_active', true)->where('for_transportation', true)->select('id', 'name')->get()->toArray();
             $clients = Client::join('projects', 'projects.client_id', '=', 'clients.id')
                 ->join('project_sites', 'project_sites.project_id', '=', 'projects.id')
@@ -67,13 +64,31 @@ class InventoryManageController extends Controller
                 "id" => $user['id'],
                 "username" => $user['first_name'] . " " . $user['last_name']
             );
-            $nosUnitId = Unit::where('slug', 'nos')->pluck('id')->first();
-            $units = Unit::select('id', 'name')->get()->toArray();
-            $unitOptions = '';
-            foreach ($units as $unit) {
-                $unitOptions .= '<option value="' . $unit['id'] . '">' . $unit['name'] . '</option>';
+            $components = InventoryCart::where('project_site_id', $projectSiteId)->with('inventoryComponent', 'inventoryComponent.material')->get();
+            $materials = $components->where('inventoryComponent.is_material', true)->toArray();
+            foreach ($materials as $key => $material) {
+                $unit1Array = UnitConversion::join('units', 'units.id', '=', 'unit_conversions.unit_2_id')
+                    ->where('unit_conversions.unit_1_id', $material['inventory_component']['material']['unit_id'])
+                    ->select('units.id as id', 'units.name as name')
+                    ->get()
+                    ->toArray();
+
+                $units2Array = UnitConversion::join('units', 'units.id', '=', 'unit_conversions.unit_1_id')
+                    ->where('unit_conversions.unit_2_id', $material['inventory_component']['material']['unit_id'])
+                    ->whereNotIn('unit_conversions.unit_1_id', array_column($unit1Array, 'id'))
+                    ->select('units.id as id', 'units.name as name')
+                    ->get()
+                    ->toArray();
+                $units = array_merge($unit1Array, $units2Array);
+                $units[] = [
+                    'id'    => $material['inventory_component']['material']['unit_id'],
+                    'name'  => Unit::where('id', $material['inventory_component']['material']['unit_id'])->pluck('name')->first(),
+                ];
+                $materials[$key]['units'] = $units;
             }
-            return view('inventory/generate-challan')->with(compact('clients', 'transportationVendors', 'nosUnitId', 'units', 'unitOptions', 'userData'));
+            $assets = $components->where('inventoryComponent.is_material', false)->toArray();
+            $nosUnitId = Unit::where('slug', 'nos')->select('id', 'name')->first();
+            return view('inventory/generate-challan')->with(compact('clients', 'transportationVendors', 'nosUnitId', 'units', 'unitOptions', 'userData', 'materials', 'assets'));
         } catch (\Exception $e) {
             $data = [
                 'action' => 'Generate Challan view.',

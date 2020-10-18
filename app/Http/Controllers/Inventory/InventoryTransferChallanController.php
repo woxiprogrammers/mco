@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Inventory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use App\InventoryCart;
 use App\InventoryComponentTransfers;
 use App\InventoryComponentTransferStatus;
 use App\InventoryTransferChallan;
@@ -23,6 +24,60 @@ class InventoryTransferChallanController extends Controller
     public function __construct()
     {
         $this->middleware('custom.auth');
+    }
+
+    public function updateCart(Request $request)
+    {
+        try {
+            if ($request->has('materials')) {
+                foreach ($request['materials'] as $material) {
+                    InventoryCart::where('id', $material['cart_id'])->update([
+                        'quantity'  => $material['quantity'],
+                        'unit_id'  => $material['unit_id']
+                    ]);
+                }
+            }
+            if ($request->has('assets')) {
+                foreach ($request['materials'] as $material) {
+                    InventoryCart::where('id', $material['cart_id'])->update([
+                        'quantity'  => $material['quantity'],
+                        'unit_id'  => $material['unit_id']
+                    ]);
+                }
+            }
+            return response()->json([
+                "message"   => "success"
+            ], 200);
+        } catch (Exception $e) {
+            dd($e->getMessage());
+            $data = [
+                'action' => 'Inventory Challan cart save',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            return false;
+        }
+    }
+
+
+    public function createChallan(Request $request)
+    {
+        try {
+            dd($request->all());
+            $projectSites  = ProjectSite::join('projects', 'projects.id', '=', 'project_sites.project_id')
+                ->where('project_sites.name', '!=', env('OFFICE_PROJECT_SITE_NAME'))->where('projects.is_active', true)->select('project_sites.id', 'project_sites.name', 'projects.name as project_name')->get()->toArray();
+            $challanStatus = InventoryComponentTransferStatus::whereIn('slug', ['requested', 'open', 'close', 'disapproved'])->select('id', 'name', 'slug')->get()->toArray();
+            return view('inventory/transfer/challan/manage')->with(compact('projectSites', 'challanStatus'));
+        } catch (Exception $e) {
+            dd($e->getMessage());
+            $data = [
+                'action' => 'Inventory Transfer Challan manage',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+        }
     }
 
     public function showSiteIn()
