@@ -1341,7 +1341,9 @@ class InventoryManageController extends Controller
             $response = array();
             $alreadyExitMaterialsIds = InventoryComponent::where('project_site_id',$projectSiteId)->pluck('reference_id');
             if($type == 'material'){
-                $response = Material::where('name','ilike','%'.$keyword.'%')->whereNotIn('id',$alreadyExitMaterialsIds)->distinct('name')->select('name','id as reference_id')->get();
+                // not checking alreadyExitMaterialsIds
+                //$response = Material::where('name','ilike','%'.$keyword.'%')->whereNotIn('id',$alreadyExitMaterialsIds)->distinct('name')->select('name','id as reference_id')->get();
+                $response = Material::where('name','ilike','%'.$keyword.'%')->distinct('name')->select('name','id as reference_id')->get();
             }else{
                 $response = InventoryComponent::where('name','ilike','%'.$keyword.'%')->where('is_material',false)->whereNotIn('reference_id',$alreadyExitMaterialsIds)->distinct('name')->select('name','reference_id')->get();
             }
