@@ -155,6 +155,29 @@
 <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
 <script src="/assets/custom/inventory/manage-datatable.js" type="text/javascript"></script>
 <script>
-
+    $('#updateCart').click(function() {
+        if ($(".inventory-component-select:checkbox:checked").length > 0) {
+            var componentIds = [];
+            $(".inventory-component-select:checkbox:checked").each(function() {
+                componentIds.push($(this).val());
+            });
+            $.ajax({
+                url: '/inventory/transfer/challan/cart/create?_token=' + $("input[name='_token']").val(),
+                type: "POST",
+                data: {
+                    component_ids: componentIds
+                },
+                success: function(data, textStatus, xhr) {
+                    location.reload();
+                    alert("Components added successfully to cart");
+                },
+                error: function(errorData) {
+                    alert('Something went wrong.');
+                }
+            })
+        } else {
+            alert("Please select components to add to cart");
+        }
+    })
 </script>
 @endsection

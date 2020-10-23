@@ -456,7 +456,9 @@ Route::group(['domain' => env('DOMAIN_NAME')], function () {
                 });
             });
             Route::group(['prefix' => 'challan'], function () {
-                Route::post('cart', array('uses' => 'Inventory\InventoryTransferChallanController@updateCart'));
+                Route::post('cart/create', array('uses' => 'Inventory\InventoryTransferChallanController@createCartItems'));
+                Route::post('cart/update', array('uses' => 'Inventory\InventoryTransferChallanController@updateCartItems'));
+                Route::post('cart/delete', array('uses' => 'Inventory\InventoryTransferChallanController@deleteCartItems'));
                 Route::post('create', array('uses' => 'Inventory\InventoryTransferChallanController@createChallan'));
                 Route::get('manage', array('uses' => 'Inventory\InventoryTransferChallanController@getManageView'));
                 Route::post('listing', array('uses' => 'Inventory\InventoryTransferChallanController@getChallanListing'));

@@ -6,7 +6,6 @@
 <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')
-<input id="nosUnitId" type="hidden" value="{{$nosUnitId}}">
 <form role="form" id="generate_challan" class="form-horizontal" action="/inventory/transfer/challan/create" method="post">
     <input type="hidden" id="component_id">
     <input type="hidden" id="iterator">
@@ -77,6 +76,9 @@
                                                     <a href="#" class="btn btn-set yellow pull-right" id="cart-submit" style="margin-left: 10px;" id="assetBtn">
                                                         Save
                                                     </a>
+                                                    <a href="#" class="btn btn-set yellow pull-right" id="cart-delete" style="margin-left: 10px;" id="assetBtn">
+                                                        Delete
+                                                    </a>
                                                 </div>
                                             </div>
                                             <div class="portlet-body form">
@@ -96,11 +98,11 @@
                                                                         <th style="width: 12%;"> Name </th>
                                                                         <th style="width: 12%;"> Quantity </th>
                                                                         <th style="width: 12%;"> Unit </th>
-                                                                        <th style="width: 12%;">Rate</th>
-                                                                        <th style="width: 12%;">GST % </th>
-                                                                        <th style="width: 12%;">CGST Amount</th>
-                                                                        <th style="width: 12%;">SGST Amount</th>
-                                                                        <th style="width: 12%;">Total</th>
+                                                                        <th style="width: 12%;"> Rate </th>
+                                                                        <th style="width: 12%;"> GST % </th>
+                                                                        <th style="width: 12%;"> CGST Amount </th>
+                                                                        <th style="width: 12%;"> SGST Amount </th>
+                                                                        <th style="width: 12%;"> Total </th>
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody id="materialRows">
@@ -159,18 +161,50 @@
                                                             <table class="table table-hover table-light">
                                                                 <thead>
                                                                     <tr>
-                                                                        <th></th>
-                                                                        <th> Name </th>
-                                                                        <th> Quantity </th>
-                                                                        <th> Unit </th>
-                                                                        <th>Rate</th>
-                                                                        <th>GST % </th>
-                                                                        <th>CGST Amount</th>
-                                                                        <th>SGST Amount</th>
-                                                                        <th>Total</th>
+                                                                        <th style="width: 4%;"></th>
+                                                                        <th style="width: 12%;"> Name </th>
+                                                                        <th style="width: 12%;"> Quantity </th>
+                                                                        <th style="width: 12%;"> Unit </th>
+                                                                        <th style="width: 12%;"> Rate </th>
+                                                                        <th style="width: 12%;"> GST % </th>
+                                                                        <th style="width: 12%;"> CGST Amount </th>
+                                                                        <th style="width: 12%;"> SGST Amount </th>
+                                                                        <th style="width: 12%;"> Total </th>
                                                                     </tr>
                                                                 </thead>
-                                                                <tbody id="Assetrows">
+                                                                <tbody id="assetrows">
+                                                                    @foreach ($assets as $asset)
+                                                                    <tr class="cart-assets">
+                                                                        <td>
+                                                                            <input type="hidden" id="{{$asset['id']}}" name="cart_id" class="cart-id" value="{{$asset['id']}}">
+                                                                            <input type="checkbox" id="id_{{$asset['id']}}" name="inventory_cart[{{$asset['id']}}]" value="{{$asset['id']}}" class="component-checkbox">
+                                                                        </td>
+                                                                        <td>
+                                                                            <span>{{$material['inventory_component']['name']}}</span>
+                                                                        </td>
+                                                                        <td>
+                                                                            <input type="number" max="${element.availQuantity}" class="form-control cart-asset-quantity" name="inventory_cart[{{$asset['id']}}][quantity]" id="current_quantity_{{$asset['id']}}" value="{{$asset['quantity']}}" />
+                                                                        </td>
+                                                                        <td>
+                                                                            <input class="form-control unit" id="unit_id_{{$asset['id']}}" name="inventory_cart[{{$asset['id']}}][nosUnit['id]]" value="{{$nosUnit['name']}}" disabled />
+                                                                        </td>
+                                                                        <td>
+                                                                            <input type="number" class="form-control cart-asset-rate" id="rate_per_unit_{{$asset['id']}}" name="inventory_cart[{{$asset['id']}}][rate_per_unit]" disabled />
+                                                                        </td>
+                                                                        <td>
+                                                                            <input class="form-control cart-asset-gst" type="number" id="gst_{{$asset['id']}}" name="inventory_cart[{{$asset['id']}}][gst_percent]" disabled>
+                                                                        </td>
+                                                                        <td>
+                                                                            <span class="cart-cgst_amount" id="cgst_amount_{{$asset['id']}}"></span>
+                                                                        </td>
+                                                                        <td>
+                                                                            <span class="cart-sgst_amount" id="sgst_amount_{{$asset['id']}}"></span>
+                                                                        </td>
+                                                                        <td>
+                                                                            <span class="cart-total" id="total_{{$asset['id']}}"></span>
+                                                                        </td>
+                                                                    </tr>
+                                                                    @endforeach
                                                                 </tbody>
                                                             </table>
                                                         </div>
@@ -350,6 +384,11 @@
             calculateTax(id);
         });
 
+        $('.cart-asset-quantity, .cart-asset-rate, .cart-asset-gst').on('change', function() {
+            var id = $(this).closest('.cart-assets').find('.cart-id').attr('id');
+            calculateTax(id);
+        });
+
         $('input:checkbox.component-checkbox').click(function() {
             var id = $(this).val();
             var quantity = $('#current_quantity_' + id);
@@ -378,8 +417,17 @@
                 unit_id
             })
         })
+        $(".cart-assets").each(function(index, elemnt) {
+            let quantity = $(elemnt).find(".cart-asset-quantity").val();
+            let unit_id = $(elemnt).find(".unit").val();
+            assets.push({
+                cart_id: $(elemnt).find(".cart-id").val(),
+                quantity,
+                unit_id
+            })
+        })
         $.ajax({
-            url: '/inventory/transfer/challan/cart',
+            url: '/inventory/transfer/challan/cart/update',
             type: 'POST',
             async: true,
             data: {
@@ -389,7 +437,7 @@
             },
             success: function(data, textStatus, xhr) {
                 if (xhr.status == 200) {
-                    alert("Products saved successfully");
+                    alert("Items saved successfully");
                 }
             },
             error: function(data, textStatus, xhr) {
@@ -397,6 +445,30 @@
             }
         });
         console.log(arr);
+    });
+    $('#cart-delete').click(function() {
+        if ($(".component-checkbox:checkbox:checked").length > 0) {
+            var cartIds = [];
+            $(".component-checkbox:checkbox:checked").each(function() {
+                cartIds.push($(this).val());
+            });
+            $.ajax({
+                url: '/inventory/transfer/challan/cart/delete?_token=' + $("input[name='_token']").val(),
+                type: "POST",
+                data: {
+                    cart_ids: cartIds
+                },
+                success: function(data, textStatus, xhr) {
+                    location.reload();
+                    alert("Components deleted successfully from cart");
+                },
+                error: function(errorData) {
+                    alert('Something went wrong.');
+                }
+            })
+        } else {
+            alert("Please select components to delete from cart");
+        }
     });
 
     function calculateTax(id) {

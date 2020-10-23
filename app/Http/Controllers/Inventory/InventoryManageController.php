@@ -87,8 +87,8 @@ class InventoryManageController extends Controller
                 $materials[$key]['units'] = $units;
             }
             $assets = $components->where('inventoryComponent.is_material', false)->toArray();
-            $nosUnitId = Unit::where('slug', 'nos')->select('id', 'name')->first();
-            return view('inventory/generate-challan')->with(compact('clients', 'transportationVendors', 'nosUnitId', 'units', 'unitOptions', 'userData', 'materials', 'assets'));
+            $nosUnit = Unit::where('slug', 'nos')->select('id', 'name')->first();
+            return view('inventory/generate-challan')->with(compact('clients', 'transportationVendors', 'nosUnit', 'units', 'unitOptions', 'userData', 'materials', 'assets'));
         } catch (\Exception $e) {
             $data = [
                 'action' => 'Generate Challan view.',
@@ -748,8 +748,8 @@ class InventoryManageController extends Controller
                 $availableQuantity = ($inQuantity + $openQty) - $outQuantity;
                 $records['data'][$iterator] = [
                     ($availableQuantity != 0) ? ($request->has('search_component_id') && in_array($inventoryData[$pagination]->id, explode(',', $request->search_component_id)) ? '<input type="checkbox" class="multiple-select-checkbox-mti" value="' . $inventoryData[$pagination]->id . '" checked>'
-                        : '<input type="checkbox" class="multiple-select-checkbox-mti" value="' . $inventoryData[$pagination]->id . '">')
-                        : '<input type="checkbox" class="multiple-select-checkbox-mti" value="' . $inventoryData[$pagination]->id . '" disabled>',
+                        : '<input type="checkbox" class="multiple-select-checkbox-mti inventory-component-select" value="' . $inventoryData[$pagination]->id . '">')
+                        : '<input type="checkbox" class="multiple-select-checkbox-mti inventory-component-select" value="' . $inventoryData[$pagination]->id . '" disabled>',
                     ucwords(strtolower($inventoryData[$pagination]->name)),
                     ($inQuantity + $openQty) . ' ' . $unitName,
                     $outQuantity . ' ' . $unitName,

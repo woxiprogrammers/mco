@@ -6,11 +6,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\InventoryCart;
+use App\InventoryComponent;
 use App\InventoryComponentTransfers;
 use App\InventoryComponentTransferStatus;
 use App\InventoryTransferChallan;
 use App\InventoryTransferTypes;
+use App\Material;
 use App\ProjectSite;
+use App\Unit;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\App;
@@ -20,13 +23,85 @@ use Illuminate\Support\Facades\Session;
 
 class InventoryTransferChallanController extends Controller
 {
-
     public function __construct()
     {
         $this->middleware('custom.auth');
     }
 
-    public function updateCart(Request $request)
+    /**
+     * Delete Cart items
+     */
+    public function deleteCartItems(Request $request)
+    {
+        try {
+            foreach ($request['cart_ids'] as $cartId) {
+                $cartItem = InventoryCart::find($cartId);
+                if ($cartItem) {
+                    $cartItem->delete();
+                }
+            }
+            return response()->json([
+                "message"   => "success"
+            ], 200);
+        } catch (Exception $e) {
+            $data = [
+                'action' => 'Inventory Challan cart delete',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            return false;
+        }
+    }
+
+    /**
+     * Create Cart items
+     */
+    public function createCartItems(Request $request)
+    {
+        try {
+            $projectSiteId = Session::get('global_project_site');
+            foreach ($request['component_ids'] as $componentId) {
+                $inventoryComponent = InventoryComponent::where('id', $componentId)->where('project_site_id', $projectSiteId)->first();
+                if ($inventoryComponent) {
+                    $alreadyPresentCount = InventoryCart::where('inventory_component_id', $inventoryComponent['id'])->where('project_site_id', $inventoryComponent['project_site_id'])->count();
+                    if ($alreadyPresentCount <= 0) {
+                        if ($inventoryComponent->is_material == true) {
+                            $materialUnit = Material::where('id', $inventoryComponent['reference_id'])->pluck('unit_id')->first();
+                            if ($materialUnit == null) {
+                                $materialUnit = Material::where('name', 'ilike', $inventoryComponent['name'])->pluck('unit_id')->first();
+                            }
+                            $unitId = $materialUnit->unit->id ?? null;
+                        } else {
+                            $unitId = Unit::where('slug', 'nos')->pluck('id')->first();
+                        }
+                        InventoryCart::create([
+                            'inventory_component_id'    => $inventoryComponent['id'],
+                            'project_site_id'           => $inventoryComponent['project_site_id'],
+                            'unit_id'                   => $unitId,
+                            'quantity'                  => 0
+                        ]);
+                    }
+                }
+            }
+            return response()->json([
+                "message"   => "success"
+            ], 200);
+        } catch (Exception $e) {
+            $data = [
+                'action' => 'Inventory Challan cart save',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            return false;
+        }
+    }
+
+    /**
+     * Update Cart items
+     */
+    public function updateCartItems(Request $request)
     {
         try {
             if ($request->has('materials')) {
@@ -38,10 +113,9 @@ class InventoryTransferChallanController extends Controller
                 }
             }
             if ($request->has('assets')) {
-                foreach ($request['materials'] as $material) {
-                    InventoryCart::where('id', $material['cart_id'])->update([
-                        'quantity'  => $material['quantity'],
-                        'unit_id'  => $material['unit_id']
+                foreach ($request['assets'] as $asset) {
+                    InventoryCart::where('id', $asset['cart_id'])->update([
+                        'quantity'  => $asset['quantity'],
                     ]);
                 }
             }
@@ -49,9 +123,8 @@ class InventoryTransferChallanController extends Controller
                 "message"   => "success"
             ], 200);
         } catch (Exception $e) {
-            dd($e->getMessage());
             $data = [
-                'action' => 'Inventory Challan cart save',
+                'action' => 'Inventory Challan cart update',
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];
@@ -60,7 +133,9 @@ class InventoryTransferChallanController extends Controller
         }
     }
 
-
+    /**
+     * Create Challan
+     */
     public function createChallan(Request $request)
     {
         try {
