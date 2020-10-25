@@ -1116,8 +1116,11 @@ class InventoryManageController extends Controller
     public function addComponentTransfer(Request $request, $inventoryComponent)
     {
         try {
+            dd($request->all());
+            Log::info('Inside add component transfer');
             $user = Auth::user();
             if ($request['transfer_type'] == 'site' && $request['in_or_out'] == 'on') {
+                Log::info('Inside if');
                 $inventoryComponentTransfer = InventoryComponentTransfers::where('id', $request['inventory_component_transfer_id'])->first();
                 $now = Carbon::now();
                 $inventoryComponentTransfer->update([
@@ -1168,6 +1171,7 @@ class InventoryManageController extends Controller
                 $request->session()->flash('success', 'Inventory Component Transfer Saved Successfully!!');
                 return redirect('/inventory/component/manage/' . $inventoryComponent->id);
             } else {
+                Log::info('Inside else');
                 $data = $request->except(['_token', 'work_order_images', 'project_site_id', 'grn']);
                 $data['inventory_component_id'] = $inventoryComponent->id;
                 $data['user_id'] = $user['id'];
@@ -1180,11 +1184,15 @@ class InventoryManageController extends Controller
                     $request->session()->flash('success', 'Insufficient Quantity for this transaction. Available quantity is ' . $quantityCheck['available_quantity']);
                     return redirect('/inventory/component/manage/' . $inventoryComponent->id);
                 }
+                //dd($data);
                 if ($request->has('project_site_id') && $request->transfer_type == 'site') {
                     $projectSite = ProjectSite::where('id', $request['project_site_id'])->first();
                     $data['source_name'] = $projectSite->project->name . '-' . $projectSite->name;
                     if ($request->has('in_or_out')) {
+                        dd('Inside if');
+                        dd(InventoryComponentTransferStatus::where('slug', 'approved')->pluck('id')->first());
                         $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug', 'approved')->pluck('id')->first();
+                        dd($data);
                         $baseInventoryComponentTransfer = InventoryComponentTransfers::where('grn', $request['grn'])->first();
                         if ($inventoryComponent['is_material'] == true) {
                             $data['rate_per_unit'] = $baseInventoryComponentTransfer['rate_per_unit'];
@@ -1200,6 +1208,7 @@ class InventoryManageController extends Controller
                             $data['rate_per_unit'] = $baseInventoryComponentTransfer['rate_per_unit'];
                         }
                     } else {
+                        // dd('Inside els');
                         $data = array_merge($data, $request->only('rate_per_unit', 'cgst_percentage', 'sgst_percentage', 'igst_percentage', 'cgst_amount', 'sgst_amount', 'igst_amount', 'total', 'transfer_type'));
                         $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug', 'requested')->pluck('id')->first();
                         $data['rate_per_unit'] = $request['rate_per_unit'];
@@ -1210,6 +1219,7 @@ class InventoryManageController extends Controller
                 } else {
                     $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug', 'approved')->pluck('id')->first();
                 }
+                dd($data);
                 $inventoryComponentTransfer = $this->createInventoryComponentTransfer($data);
                 if ($request->has('work_order_images')) {
                     $imageUploads = $this->uploadInventoryComponentTransferImages($request->work_order_images, $inventoryComponent->id, $inventoryComponentTransfer->id);

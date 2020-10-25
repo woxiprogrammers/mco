@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Inventory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\CustomTraits\Inventory\InventoryTrait;
 use App\InventoryCart;
 use App\InventoryComponent;
 use App\InventoryComponentTransfers;
@@ -14,6 +15,7 @@ use App\InventoryTransferTypes;
 use App\Material;
 use App\ProjectSite;
 use App\Unit;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\App;
@@ -23,9 +25,10 @@ use Illuminate\Support\Facades\Session;
 
 class InventoryTransferChallanController extends Controller
 {
+    use InventoryTrait;
     public function __construct()
     {
-        $this->middleware('custom.auth');
+        //$this->middleware('custom.auth');
     }
 
     /**
@@ -140,6 +143,27 @@ class InventoryTransferChallanController extends Controller
     {
         try {
             dd($request->all());
+            $now = Carbon::now();
+            $challan = new InventoryTransferChallan([
+                'challan_number'                        => 'CH',
+                'project_site_out_id'                   => $request->out_project_site_id,
+                'project_site_in_id'                    => $request->in_project_site_id,
+                'project_site_out_date'                 => $now,
+                'inventory_component_transfer_status_id' => InventoryComponentTransferStatus::where('slug', 'requested')->pluck('id')->first()
+            ]);
+            // $challan->save();
+            // $challan->fresh();
+            // $challan->update(['challan_number'  => 'CH' . $challan->id]);
+            $additionalData = $request->only(['out_project_site_id', 'user_id', 'in_project_site_id', 'vendor_id', 'transportation_amount', 'transportation_cgst_percent', 'transportation_sgst_percent', 'transportation_igst_percent', 'driver_name', 'mobile', 'vehicle_number', 'remark']);
+            foreach ($request['inventory_cart'] as $cartId => $requestCartItem) {
+                if (array_key_exists('quantity', $requestCartItem)) {
+                    $cartItem = InventoryCart::find($cartId);
+                    if ($cartItem) {
+                        $inventoryComponentOutTransfer = $this->createSiteOutTransferData($requestCartItem, $now, $additionalData, $cartItem->inventoryComponent);
+                        //$cartItem->delete();
+                    }
+                }
+            }
             $projectSites  = ProjectSite::join('projects', 'projects.id', '=', 'project_sites.project_id')
                 ->where('project_sites.name', '!=', env('OFFICE_PROJECT_SITE_NAME'))->where('projects.is_active', true)->select('project_sites.id', 'project_sites.name', 'projects.name as project_name')->get()->toArray();
             $challanStatus = InventoryComponentTransferStatus::whereIn('slug', ['requested', 'open', 'close', 'disapproved'])->select('id', 'name', 'slug')->get()->toArray();
@@ -155,14 +179,63 @@ class InventoryTransferChallanController extends Controller
         }
     }
 
+    public function createSiteOutTransferData($requestedCartData, $timestamp, $additionalData, $inventoryComponent)
+    {
+        try {
+            $projectSite = ProjectSite::where('id', $additionalData['out_project_site_id'])->first();
+            $inventoryComponentOutTransfer = [
+                'transfer_type'                 => 'site',
+                'unit_id'                       => $requestedCartData['unit_id'],
+                'quantity'                      => $requestedCartData['quantity'],
+                'source_name'                   => $projectSite->project->name . '-' . $projectSite->name,
+                'rate_per_unit'                 => $requestedCartData['rate_per_unit'],
+                // 'cgst_percentage'               => $requestedCartData['gst_percent'] / 2,
+                // 'cgst_amount'                   => $requestedCartData['cgst_amount'],
+                // 'sgst_percentage'               => $requestedCartData['gst_percent'] / 2,
+                // 'sgst_amount'                   => $requestedCartData['sgst_amount'],
+                'igst_percentage'               => '0',
+                'igst_amount'                   => '0.00',
+                'vendor_id'                     => $additionalData['vendor_id'],
+                'transportation_amount'         => $additionalData['transportation_amount'] ?? 0,
+                'transportation_cgst_percent'   => $additionalData['transportation_cgst_percent'] ?? 0,
+                'transportation_sgst_percent'   => $additionalData['transportation_sgst_percent'] ?? 0,
+                'transportation_igst_percent'   => $additionalData['transportation_igst_percent'] ?? 0,
+                'driver_name'                   => $additionalData['driver_name'] ?? '',
+                'mobile'                        => $additionalData['mobile'] ?? '',
+                'vehicle_number'                => $additionalData['vehicle_number'] ?? '',
+                'remark'                        => $additionalData['remark'] ?? '',
+                'inventory_component_id'        => $inventoryComponent['id'],
+                'user_id'                       => $additionalData['user_id'],
+                'date'                          => $timestamp,
+                'in_time'                       => $timestamp,
+                'out_time'                      => $timestamp,
+                'inventory_component_transfer_status_id'    =>  InventoryComponentTransferStatus::where('slug', 'requested')->pluck('id')->first()
+            ];
+            dd($inventoryComponentOutTransfer);
+            $inventoryComponentTransfer = $this->createInventoryComponentTransfer($inventoryComponentOutTransfer);
+            // if ($request->has('work_order_images')) {
+            //     $imageUploads = $this->uploadInventoryComponentTransferImages($request->work_order_images, $inventoryComponent->id, $inventoryComponentTransfer->id);
+            // }
+        } catch (Exception $e) {
+            $data = [
+                'action' => 'Add site out transfer',
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+        }
+    }
+
     public function showSiteIn()
     {
         try {
             $projectSiteId = Session::get('global_project_site');
-            // $challan = InventoryTransferChallan::join('inventory_component_transfers', 'inventory_component_transfers.inventory_transfer_challan_id', '=', 'inventory_transfer_challan.id')
-            //     ->join('inventory_component_transfer_statuses', 'inventory_transfer_challan.inventory_component_transfer_status_id', '=', 'inventory_component_transfer_statuses.id')
-            //     ->where('inventory_component_transfer_statuses.slug', 'open')
-            //     ->where('inventory_component_transfers.challan_id')->where('project_site_in_id', $projectSiteId);
+            $challan = InventoryTransferChallan::join('inventory_component_transfers', 'inventory_component_transfers.inventory_transfer_challan_id', '=', 'inventory_transfer_challan.id')
+                ->join('inventory_component_transfer_statuses', 'inventory_transfer_challan.inventory_component_transfer_status_id', '=', 'inventory_component_transfer_statuses.id')
+                ->where('inventory_component_transfer_statuses.slug', 'open')
+                ->whereIsNull('project_site_in_date')
+                ->where('inventory_component_transfers.challan_id')->where('project_site_in_id', $projectSiteId)
+                ->get()->toArray();
+            dd($challan);
             $challans = InventoryTransferChallan::select('id', 'challan_number')->limit(10)->get()->toArray();
             return view('inventory/transfer/challan/site/in')->with(compact('challans'));
         } catch (Exception $e) {
