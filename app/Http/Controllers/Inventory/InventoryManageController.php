@@ -64,8 +64,12 @@ class InventoryManageController extends Controller
                 "id" => $user['id'],
                 "username" => $user['first_name'] . " " . $user['last_name']
             );
-            $components = InventoryCart::where('project_site_id', $projectSiteId)->with('inventoryComponent', 'inventoryComponent.material')->get();
-            $materials = $components->where('inventoryComponent.is_material', true)->toArray();
+            $materials = InventoryCart::where('project_site_id', $projectSiteId)->whereHas('inventoryComponent', function ($query) {
+                $query->where('is_material', true);
+            })->with('inventoryComponent.material')->get()->toArray();
+            $assets = InventoryCart::where('project_site_id', $projectSiteId)->whereHas('inventoryComponent', function ($query) {
+                $query->where('is_material', false);
+            })->with('inventoryComponent.asset')->get()->toArray();
             foreach ($materials as $key => $material) {
                 $unit1Array = UnitConversion::join('units', 'units.id', '=', 'unit_conversions.unit_2_id')
                     ->where('unit_conversions.unit_1_id', $material['inventory_component']['material']['unit_id'])
@@ -86,7 +90,6 @@ class InventoryManageController extends Controller
                 ];
                 $materials[$key]['units'] = $units;
             }
-            $assets = $components->where('inventoryComponent.is_material', false)->toArray();
             $nosUnit = Unit::where('slug', 'nos')->select('id', 'name')->first();
             return view('inventory/generate-challan')->with(compact('clients', 'transportationVendors', 'nosUnit', 'units', 'unitOptions', 'userData', 'materials', 'assets'));
         } catch (\Exception $e) {

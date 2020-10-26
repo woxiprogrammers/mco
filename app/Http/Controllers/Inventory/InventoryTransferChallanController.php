@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\CustomTraits\Inventory\InventoryTrait;
+use App\Http\Controllers\CustomTraits\Notification\NotificationTrait;
 use App\InventoryCart;
 use App\InventoryComponent;
 use App\InventoryComponentTransfers;
@@ -26,9 +27,10 @@ use Illuminate\Support\Facades\Session;
 class InventoryTransferChallanController extends Controller
 {
     use InventoryTrait;
+    use NotificationTrait;
     public function __construct()
     {
-        //$this->middleware('custom.auth');
+        $this->middleware('custom.auth');
     }
 
     /**
@@ -142,7 +144,7 @@ class InventoryTransferChallanController extends Controller
     public function createChallan(Request $request)
     {
         try {
-            dd($request->all());
+            //dd($request->all());
             $now = Carbon::now();
             $challan = new InventoryTransferChallan([
                 'challan_number'                        => 'CH',
@@ -151,16 +153,16 @@ class InventoryTransferChallanController extends Controller
                 'project_site_out_date'                 => $now,
                 'inventory_component_transfer_status_id' => InventoryComponentTransferStatus::where('slug', 'requested')->pluck('id')->first()
             ]);
-            // $challan->save();
-            // $challan->fresh();
-            // $challan->update(['challan_number'  => 'CH' . $challan->id]);
+            $challan->save();
+            $challan->fresh();
+            $challan->update(['challan_number'  => 'CH' . $challan->id]);
             $additionalData = $request->only(['out_project_site_id', 'user_id', 'in_project_site_id', 'vendor_id', 'transportation_amount', 'transportation_cgst_percent', 'transportation_sgst_percent', 'transportation_igst_percent', 'driver_name', 'mobile', 'vehicle_number', 'remark']);
             foreach ($request['inventory_cart'] as $cartId => $requestCartItem) {
                 if (array_key_exists('quantity', $requestCartItem)) {
                     $cartItem = InventoryCart::find($cartId);
                     if ($cartItem) {
                         $inventoryComponentOutTransfer = $this->createSiteOutTransferData($requestCartItem, $now, $additionalData, $cartItem->inventoryComponent);
-                        //$cartItem->delete();
+                        $cartItem->delete();
                     }
                 }
             }
@@ -189,10 +191,10 @@ class InventoryTransferChallanController extends Controller
                 'quantity'                      => $requestedCartData['quantity'],
                 'source_name'                   => $projectSite->project->name . '-' . $projectSite->name,
                 'rate_per_unit'                 => $requestedCartData['rate_per_unit'],
-                // 'cgst_percentage'               => $requestedCartData['gst_percent'] / 2,
-                // 'cgst_amount'                   => $requestedCartData['cgst_amount'],
-                // 'sgst_percentage'               => $requestedCartData['gst_percent'] / 2,
-                // 'sgst_amount'                   => $requestedCartData['sgst_amount'],
+                'cgst_percentage'               => $requestedCartData['gst_percent'] / 2,
+                'cgst_amount'                   => $requestedCartData['cgst_amount'],
+                'sgst_percentage'               => $requestedCartData['gst_percent'] / 2,
+                'sgst_amount'                   => $requestedCartData['sgst_amount'],
                 'igst_percentage'               => '0',
                 'igst_amount'                   => '0.00',
                 'vendor_id'                     => $additionalData['vendor_id'],
@@ -211,7 +213,6 @@ class InventoryTransferChallanController extends Controller
                 'out_time'                      => $timestamp,
                 'inventory_component_transfer_status_id'    =>  InventoryComponentTransferStatus::where('slug', 'requested')->pluck('id')->first()
             ];
-            dd($inventoryComponentOutTransfer);
             $inventoryComponentTransfer = $this->createInventoryComponentTransfer($inventoryComponentOutTransfer);
             // if ($request->has('work_order_images')) {
             //     $imageUploads = $this->uploadInventoryComponentTransferImages($request->work_order_images, $inventoryComponent->id, $inventoryComponentTransfer->id);

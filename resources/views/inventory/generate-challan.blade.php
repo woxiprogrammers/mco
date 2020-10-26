@@ -109,44 +109,59 @@
                                                                     @foreach ($materials as $material)
                                                                     <tr class="cart-materials">
                                                                         <td>
-                                                                            <input type="hidden" id="inventory_component_id_{{$material['id']}}" name="inventory_cart[{{$material['id']}}][inventory_component_id]" class="cart-inventory-component-id" value="{{$material['inventory_component_id']}}">
-                                                                            <input type="hidden" id="{{$material['id']}}" name="cart_id" class="cart-id" value="{{$material['id']}}">
-                                                                            <input type="checkbox" id="id_{{$material['id']}}" name="inventory_cart[{{$material['id']}}]" value="{{$material['id']}}" class="component-checkbox">
+                                                                            <div class="form-group" style="width: 80%; margin-left: 10%">
+                                                                                <input type="hidden" id="inventory_component_id_{{$material['id']}}" name="inventory_cart[{{$material['id']}}][inventory_component_id]" class="cart-inventory-component-id" value="{{$material['inventory_component_id']}}">
+                                                                                <input type="hidden" id="{{$material['id']}}" name="cart_id" class="cart-id" value="{{$material['id']}}">
+                                                                                <input type="checkbox" id="id_{{$material['id']}}" name="inventory_cart[{{$material['id']}}]" value="{{$material['id']}}" class="component-checkbox">
+                                                                            </div>
                                                                         </td>
                                                                         <td>
-                                                                            <span>{{$material['inventory_component']['name']}}</span>
+                                                                            <div class="form-group" style="width: 80%; margin-left: 10%">
+                                                                                <span>{{$material['inventory_component']['name']}}</span>
+                                                                            </div>
                                                                         </td>
                                                                         <td>
-                                                                            <input type="number" max="${element.availQuantity}" class="form-control cart-quantity" name="inventory_cart[{{$material['id']}}][quantity]" id="current_quantity_{{$material['id']}}" value="{{$material['quantity']}}" onchange="checkAllowedQuantity()" />
+                                                                            <div class="form-group" style="width: 80%; margin-left: 10%">
+                                                                                <input type="number" class="form-control cart-quantity" name="inventory_cart[{{$material['id']}}][quantity]" id="current_quantity_{{$material['id']}}" value="{{$material['quantity']}}" onchange="checkAllowedQuantity(event, 'material')" />
+                                                                            </div>
                                                                         </td>
                                                                         <td>
-                                                                            <select name="inventory_cart[{{$material['id']}}][unit_id]" class="form-control unit" id="unit_id" onchange="checkAllowedQuantity()">
-                                                                                @foreach($material['units'] as $unit)
-                                                                                @if($material['unit_id'] == $unit['id'])
-                                                                                <option value="{{$unit['id']}}" selected>{{$unit['name']}}</option>
-                                                                                @else
-                                                                                <option value="{{$unit['id']}}">{{$unit['name']}}</option>
-                                                                                @endif
-                                                                                @endforeach
-                                                                            </select>
+                                                                            <div class="form-group" style="width: 80%; margin-left: 10%">
+                                                                                <select name="inventory_cart[{{$material['id']}}][unit_id]" class="form-control unit" id="unit_id_{{$material['id']}}" onchange="checkAllowedQuantity(event, 'material')">
+                                                                                    @foreach($material['units'] as $unit)
+                                                                                    @if($material['unit_id'] == $unit['id'])
+                                                                                    <option value="{{$unit['id']}}" selected>{{$unit['name']}}</option>
+                                                                                    @else
+                                                                                    <option value="{{$unit['id']}}">{{$unit['name']}}</option>
+                                                                                    @endif
+                                                                                    @endforeach
+                                                                                </select>
+                                                                            </div>
                                                                         </td>
                                                                         <td>
-                                                                            <input type="number" class="form-control cart-rate" id="rate_per_unit_{{$material['id']}}" name="inventory_cart[{{$material['id']}}][rate_per_unit]" value="{{$material['inventory_component']['material']['rate_per_unit']}}" disabled />
+                                                                            <div class="form-group" style="width: 80%; margin-left: 10%">
+                                                                                <input type="number" class="form-control cart-rate" id="rate_per_unit_{{$material['id']}}" name="inventory_cart[{{$material['id']}}][rate_per_unit]" value="{{$material['inventory_component']['material']['rate_per_unit']}}" readonly />
+                                                                            </div>
                                                                         </td>
                                                                         <td>
-                                                                            <input class="form-control cart-gst" type="number" id="gst_{{$material['id']}}" name="inventory_cart[{{$material['id']}}][gst_percent]" disabled>
+                                                                            <div class="form-group" style="width: 80%; margin-left: 10%">
+                                                                                <input class="form-control cart-gst" type="number" id="gst_{{$material['id']}}" name="inventory_cart[{{$material['id']}}][gst_percent]" value="{{($material['inventory_component']['material']['gst'] != null) ? $material['inventory_component']['material']['gst'] : 0}}" readonly>
+                                                                            </div>
                                                                         </td>
                                                                         <td>
-                                                                            <input class="form-control cart-cgst_amount" type="number" id="cgst_amount_{{$material['id']}}" name="inventory_cart[{{$material['id']}}][cgst_amount]" disabled>
-                                                                            <!-- <span class="cart-cgst_amount" name="inventory_cart[{{$material['id']}}][cgst_amount]" id="cgst_amount_{{$material['id']}}"></span> -->
+                                                                            <div class="form-group" style="width: 80%; margin-left: 10%">
+                                                                                <input class="form-control cart-cgst_amount" type="number" id="cgst_amount_{{$material['id']}}" name="inventory_cart[{{$material['id']}}][cgst_amount]" readonly>
+                                                                            </div>
                                                                         </td>
                                                                         <td>
-                                                                            <input class="form-control cart-sgst_amount" type="number" id="sgst_amount_{{$material['id']}}" name="inventory_cart[{{$material['id']}}][sgst_amount]" disabled>
-                                                                            <!-- <span class="cart-sgst_amount" name="inventory_cart[{{$material['id']}}][sgst_amount]" id="sgst_amount_{{$material['id']}}"></span> -->
+                                                                            <div class="form-group" style="width: 80%; margin-left: 10%">
+                                                                                <input class="form-control cart-sgst_amount" type="number" id="sgst_amount_{{$material['id']}}" name="inventory_cart[{{$material['id']}}][sgst_amount]" readonly>
+                                                                            </div>
                                                                         </td>
                                                                         <td>
-                                                                            <!-- <span class="cart-total" name="inventory_cart[{{$material['id']}}][total]" id="total_{{$material['id']}}"></span> -->
-                                                                            <input class="form-control cart-total" type="number" id="total_{{$material['id']}}" name="inventory_cart[{{$material['id']}}][total]" disabled>
+                                                                            <div class="form-group" style="width: 80%; margin-left: 10%">
+                                                                                <input class="form-control cart-total" type="number" id="total_{{$material['id']}}" name="inventory_cart[{{$material['id']}}][total]" readonly>
+                                                                            </div>
                                                                         </td>
                                                                     </tr>
                                                                     @endforeach
@@ -180,33 +195,52 @@
                                                                     @foreach ($assets as $asset)
                                                                     <tr class="cart-assets">
                                                                         <td>
-                                                                            <input type="hidden" id="inventory_component_id_{{$asset['id']}}" name="inventory_cart[{{$asset['id']}}][inventory_component_id]" class="cart-inventory-component-id" value="{{$asset['inventory_component_id']}}">
-                                                                            <input type="hidden" id="{{$asset['id']}}" name="cart_id" class="cart-id" value="{{$asset['id']}}">
-                                                                            <input type="checkbox" id="id_{{$asset['id']}}" name="inventory_cart[{{$asset['id']}}]" value="{{$asset['id']}}" class="component-checkbox">
+                                                                            <div class="form-group" style="width: 80%; margin-left: 10%">
+                                                                                <input type="hidden" id="inventory_component_id_{{$asset['id']}}" name="inventory_cart[{{$asset['id']}}][inventory_component_id]" class="cart-inventory-component-id" value="{{$asset['inventory_component_id']}}">
+                                                                                <input type="hidden" id="{{$asset['id']}}" name="cart_id" class="cart-id" value="{{$asset['id']}}">
+                                                                                <input type="checkbox" id="id_{{$asset['id']}}" name="inventory_cart[{{$asset['id']}}]" value="{{$asset['id']}}" class="component-checkbox">
+                                                                            </div>
                                                                         </td>
                                                                         <td>
-                                                                            <span>{{$material['inventory_component']['name']}}</span>
+                                                                            <div class="form-group" style="width: 80%; margin-left: 10%">
+                                                                                <span>{{$asset['inventory_component']['name']}}</span>
+                                                                            </div>
                                                                         </td>
                                                                         <td>
-                                                                            <input type="number" max="${element.availQuantity}" class="form-control cart-asset-quantity" name="inventory_cart[{{$asset['id']}}][quantity]" id="current_quantity_{{$asset['id']}}" value="{{$asset['quantity']}}" onchange="checkAllowedQuantity()" />
+                                                                            <div class="form-group" style="width: 80%; margin-left: 10%">
+                                                                                <input type="number" class="form-control cart-asset-quantity" name="inventory_cart[{{$asset['id']}}][quantity]" id="current_quantity_{{$asset['id']}}" value="{{$asset['quantity']}}" onchange="checkAllowedQuantity(event, 'asset')" />
+                                                                            </div>
                                                                         </td>
                                                                         <td>
-                                                                            <input class="form-control unit" id="unit_id_{{$asset['id']}}" name="inventory_cart[{{$asset['id']}}][nosUnit['id]]" value="{{$nosUnit['name']}}" disabled />
+                                                                            <div class="form-group" style="width: 80%; margin-left: 10%">
+                                                                                <input class="form-control unit" value="{{$nosUnit['name']}}" readonly />
+                                                                                <input type="hidden" class="form-control unit" id="unit_id_{{$asset['id']}}" name="inventory_cart[{{$asset['id']}}][$nosUnit[id]]" value="{{$nosUnit['id']}}" readonly />
+                                                                            </div>
                                                                         </td>
                                                                         <td>
-                                                                            <input type="number" class="form-control cart-asset-rate" id="rate_per_unit_{{$asset['id']}}" name="inventory_cart[{{$asset['id']}}][rate_per_unit]" disabled />
+                                                                            <div class="form-group" style="width: 80%; margin-left: 10%">
+                                                                                <input type="number" class="form-control cart-asset-rate" id="rate_per_unit_{{$asset['id']}}" name="inventory_cart[{{$asset['id']}}][rate_per_unit]" value="{{$asset['inventory_component']['asset']['rent_per_day']}}" readonly />
+                                                                            </div>
                                                                         </td>
                                                                         <td>
-                                                                            <input class="form-control cart-asset-gst" type="number" id="gst_{{$asset['id']}}" name="inventory_cart[{{$asset['id']}}][gst_percent]" disabled>
+                                                                            <div class="form-group" style="width: 80%; margin-left: 10%">
+                                                                                <input class="form-control cart-asset-gst" type="number" id="gst_{{$asset['id']}}" name="inventory_cart[{{$asset['id']}}][gst_percent]" value="0" readonly>
+                                                                            </div>
                                                                         </td>
                                                                         <td>
-                                                                            <input class="form-control cart-cgst_amount" type="number" id="cgst_amount_{{$asset['id']}}" name="inventory_cart[{{$asset['id']}}][cgst_amount]" disabled>
+                                                                            <div class="form-group" style="width: 80%; margin-left: 10%">
+                                                                                <input class="form-control cart-cgst_amount" type="number" id="cgst_amount_{{$asset['id']}}" name="inventory_cart[{{$asset['id']}}][cgst_amount]" readonly>
+                                                                            </div>
                                                                         </td>
                                                                         <td>
-                                                                            <input class="form-control cart-sgst_amount" type="number" id="sgst_amount_{{$asset['id']}}" name="inventory_cart[{{$asset['id']}}][sgst_amount]" disabled>
+                                                                            <div class="form-group" style="width: 80%; margin-left: 10%">
+                                                                                <input class="form-control cart-sgst_amount" type="number" id="sgst_amount_{{$asset['id']}}" name="inventory_cart[{{$asset['id']}}][sgst_amount]" readonly>
+                                                                            </div>
                                                                         </td>
                                                                         <td>
-                                                                            <input class="form-control cart-total" type="number" id="total_{{$asset['id']}}" name="inventory_cart[{{$asset['id']}}][total]" disabled>
+                                                                            <div class="form-group" style="width: 80%; margin-left: 10%">
+                                                                                <input class="form-control cart-total" type="number" id="total_{{$asset['id']}}" name="inventory_cart[{{$asset['id']}}][total]" readonly>
+                                                                            </div>
                                                                         </td>
                                                                     </tr>
                                                                     @endforeach
@@ -383,26 +417,109 @@
 <link rel="stylesheet" href="/assets/global/css/app.css" />
 <!-- <script src="/assets/custom/inventory/generate-challan.js" type="text/javascript"></script> -->
 
-<link rel="stylesheet" href="/assets/global/plugins/datatables/datatables.min.css" />
-<link rel="stylesheet" href="/assets/global/plugins/bootstrap-select/css/bootstrap-select.min.css" />
-<script src="/assets/global/plugins/datatables/datatables.min.js"></script>
-<script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
-<script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
-<script src="/assets/global/plugins/moment.min.js" type="text/javascript"></script>
-<script src="/assets/global/plugins/bootstrap-daterangepicker/daterangepicker.min.js" type="text/javascript"></script>
-<script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
-<script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
-<script src="/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script>
-<script src="/assets/global/plugins/fancybox/source/jquery.fancybox.pack.js" type="text/javascript"></script>
-<script src="/assets/global/plugins/clockface/js/clockface.js" type="text/javascript"></script>
-<script src="/assets/global/plugins/plupload/js/plupload.full.min.js" type="text/javascript"></script>
-<script src="/assets/global/plugins/jstree/dist/jstree.min.js" type="text/javascript"></script>
-<script src="/assets/custom/inventory/component-manage-datatable.js" type="text/javascript"></script>
-<script src="/assets/custom/inventory/component-reading-manage-datatable.js" type="text/javascript"></script>
-<script src="/assets/custom/inventory/image-datatable.js"></script>
-<script src="/assets/custom/inventory/image-upload.js"></script>
 <script>
     $(document).ready(function() {
+
+        var CreateInventoryComponentTransfer = function() {
+            var handleCreate = function() {
+                var form = $('#generate_challan');
+                var error = $('.alert-danger', form);
+                var success = $('.alert-success', form);
+                form.validate({
+                    errorElement: 'span', //default input error message container
+                    errorClass: 'help-block', // default input error message class
+                    focusInvalid: false, // do not focus the last invalid input
+                    rules: {
+                        in_client_id: {
+                            required: true
+                        },
+                        in_project_id: {
+                            required: true
+                        },
+                        in_project_site_id: {
+                            required: true
+                        },
+                        vendor_id: {
+                            required: true
+                        },
+                        transportation_amount: {
+                            required: true
+                        },
+                        driver_name: {
+                            required: true
+                        },
+                        mobile: {
+                            required: true
+                        },
+                        vehicle_number: {
+                            required: true
+                        }
+                    },
+                    messages: {
+                        in_client_id: {
+                            required: "Client is required"
+                        },
+                        in_project_id: {
+                            required: "Project is required"
+                        },
+                        in_project_site_id: {
+                            required: "Project site is required"
+                        },
+                        vendor_id: {
+                            required: "Vendor is required"
+                        },
+                        transportation_amount: {
+                            required: "Transportation amount is required"
+                        },
+                        driver_name: {
+                            required: "Driver name is required"
+                        },
+                        mobile: {
+                            required: "Mobile is required"
+                        },
+                        vehicle_number: {
+                            required: "Vehicle number is required"
+                        }
+                    },
+                    invalidHandler: function(event, validator) { //display error alert on form submit
+                        success.hide();
+                        error.show();
+                    },
+                    highlight: function(element) { // hightlight error inputs
+                        $(element)
+                            .closest('.form-group').addClass('has-error'); // set error class to the control group
+                    },
+                    unhighlight: function(element) { // revert the change done by hightlight
+                        $(element)
+                            .closest('.form-group').removeClass('has-error'); // set error class to the control group
+                    },
+                    success: function(label) {
+                        label
+                            .closest('.form-group').addClass('has-success');
+                    },
+                    submitHandler: function(form) {
+                        $("button[type='submit']").prop('disabled', true);
+                        success.show();
+                        error.hide();
+                        form.submit();
+                    }
+                });
+            }
+            return {
+                init: function() {
+                    handleCreate();
+                }
+            };
+        }();
+        CreateInventoryComponentTransfer.init();
+        $('.cart-gst').each(function() {
+            var id = $(this).closest('.cart-materials').find('.cart-id').attr('id');
+            calculateTax(id);
+        });
+        $('.cart-asset-gst').each(function() {
+            var id = $(this).closest('.cart-assets').find('.cart-id').attr('id');
+            calculateTax(id);
+        });
         $('.cart-quantity, .cart-gst').on('change', function() {
             var id = $(this).closest('.cart-materials').find('.cart-id').attr('id');
             calculateTax(id);
@@ -468,7 +585,6 @@
 
             }
         });
-        console.log(arr);
     });
     $('#cart-delete').click(function() {
         if ($(".component-checkbox:checkbox:checked").length > 0) {
@@ -610,26 +726,25 @@
         $('.transportation-total').val(transportationTotal);
     }
 
-    function checkAllowedQuantity() {
-        console.log(this);
-        var id = $(this).closest('.cart-materials').find('.cart-id').attr('id');
-        console.log(id);
-        // $('#current_quantity_' + id).rules('remove');
-        // $('#current_quantity_' + id).removeClass('has-error');
+    function checkAllowedQuantity(event, slug) {
+        if (slug == 'material') {
+            var id = $(event.target).closest('.cart-materials').find('.cart-id').attr('id');
+        } else {
+            var id = $(event.target).closest('.cart-assets').find('.cart-id').attr('id');
+        }
+        $('#current_quantity_' + id).rules('remove');
+        $('#current_quantity_' + id).removeClass('has-error');
         var quantity = $('#current_quantity_' + id).val();
-        var unitId = $('#unit_id_' + id).val();
-        console.log(quantity);
-        console.log(unitId);
+        var unitId = $('#unit_id_' + id).val()
         var inventoryComponentId = $('#inventory_component_id_' + id).val();
         if (typeof quantity != 'undefined' && quantity != '' && !(isNaN(quantity)) && typeof unitId != 'undefined' && unitId != '' && !(isNaN(unitId))) {
-            alert('Inside if');
             $.ajax({
                 url: '/inventory/transfer/check-quantity',
                 type: 'POST',
                 async: true,
                 data: {
                     _token: $("input[name='_token']").val(),
-                    inventoryComponentId: $('#inventoryComponentId').val(),
+                    inventoryComponentId: inventoryComponentId,
                     quantity: quantity,
                     unitId: unitId
                 },
@@ -641,6 +756,7 @@
                                 max: "Available quantity is " + data.available_quantity
                             }
                         });
+                        $('#current_quantity_' + id).valid();
                     } else {
                         $('#current_quantity_' + id).rules('remove');
                         $('#current_quantity_' + id).removeClass('has-error');
@@ -651,7 +767,6 @@
                 }
             });
         } else {
-            alert('Inside else');
             $('#current_quantity_' + id).rules('add', {
                 required: true
             });
