@@ -22,12 +22,26 @@
                             <div class="page-title">
                                 <h1>Edit Challan</h1>
                             </div>
-                            @if($challan->inventoryComponentTransferStatus->slug != 'close')
+                            @if($challan->inventoryComponentTransferStatus->slug == 'open')
                             <div class="form-group " style="text-align: center">
                                 <a class="btn red pull-right margin-top-15" data-toggle="modal" href="#closeChallan">
                                     <i class="fa fa-close" style="font-size: large"></i>
                                     Close Challan
                                 </a>
+                            </div>
+                            @elseif($challan->inventoryComponentTransferStatus->slug == 'requested')
+                            <div class="form-group " style="text-align: center">
+                                <button id="poReopenBtn" type="submit" class="btn red pull-right margin-top-15">
+                                    <i class="fa fa-open" style="font-size: large"></i>
+                                    Approve / Disapprove
+                                </button>
+                            </div>
+                            @elseif($challan->inventoryComponentTransferStatus->slug == 'close')
+                            <div class="form-group " style="text-align: center">
+                                <button id="poReopenBtn" type="submit" class="btn red pull-right margin-top-15">
+                                    <i class="fa fa-open" style="font-size: large"></i>
+                                    Reopen
+                                </button>
                             </div>
                             @endif
                         </div>

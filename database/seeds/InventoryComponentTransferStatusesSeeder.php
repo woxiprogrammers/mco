@@ -68,5 +68,16 @@ class InventoryComponentTransferStatusesSeeder extends Seeder
                 'updated_at'    => $now
             ]
         );
+
+        InventoryComponentTransferStatus::updateOrCreate(
+            [
+                'slug' => 're-open',
+            ],
+            [
+                'name'          => 'Re-open',
+                'created_at'    => $now,
+                'updated_at'    => $now
+            ]
+        );
     }
 }

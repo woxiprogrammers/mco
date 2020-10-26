@@ -161,7 +161,7 @@ class InventoryTransferChallanController extends Controller
                 if (array_key_exists('quantity', $requestCartItem)) {
                     $cartItem = InventoryCart::find($cartId);
                     if ($cartItem) {
-                        $inventoryComponentOutTransfer = $this->createSiteOutTransferData($requestCartItem, $now, $additionalData, $cartItem->inventoryComponent);
+                        $inventoryComponentOutTransfer = $this->createSiteOutTransferData($requestCartItem, $now, $additionalData, $cartItem->inventoryComponent, $challan);
                         $cartItem->delete();
                     }
                 }
@@ -181,7 +181,7 @@ class InventoryTransferChallanController extends Controller
         }
     }
 
-    public function createSiteOutTransferData($requestedCartData, $timestamp, $additionalData, $inventoryComponent)
+    public function createSiteOutTransferData($requestedCartData, $timestamp, $additionalData, $inventoryComponent, $challan)
     {
         try {
             $projectSite = ProjectSite::where('id', $additionalData['out_project_site_id'])->first();
@@ -211,7 +211,8 @@ class InventoryTransferChallanController extends Controller
                 'date'                          => $timestamp,
                 'in_time'                       => $timestamp,
                 'out_time'                      => $timestamp,
-                'inventory_component_transfer_status_id'    =>  InventoryComponentTransferStatus::where('slug', 'requested')->pluck('id')->first()
+                'inventory_component_transfer_status_id'    =>  InventoryComponentTransferStatus::where('slug', 'requested')->pluck('id')->first(),
+                'inventory_transfer_challan_id' => $challan['id']
             ];
             $inventoryComponentTransfer = $this->createInventoryComponentTransfer($inventoryComponentOutTransfer);
             // if ($request->has('work_order_images')) {
@@ -328,7 +329,6 @@ class InventoryTransferChallanController extends Controller
                                                 <i class="fa fa-edit" aria-hidden="true"></i>
                                             </a>
                                         </div>';
-
                 $records['data'][$iterator] = [
                     date('d M Y', strtotime($challanData[$pagination]->created_at)),
                     $challanData[$pagination]->challan_number,
