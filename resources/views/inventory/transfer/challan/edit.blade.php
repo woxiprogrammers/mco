@@ -31,9 +31,13 @@
                             </div>
                             @elseif($challan->inventoryComponentTransferStatus->slug == 'requested')
                             <div class="form-group " style="text-align: center">
-                                <button id="poReopenBtn" type="submit" class="btn red pull-right margin-top-15">
-                                    <i class="fa fa-open" style="font-size: large"></i>
-                                    Approve / Disapprove
+                                <button style="width:130px" id="disapproveChallan" type="submit" value="disapproved" class="btn red pull-right margin-top-15 approveDisapproveChallan">
+                                    <i class="fa fas fa-ban" style="font-size: large"></i>
+                                    Disapprove
+                                </button>
+                                <button style="width:130px" id="approveChallan" type="submit" value="approved" class="btn green pull-right margin-top-15 approveDisapproveChallan">
+                                    <i class="fa fa-check-square-o" style="font-size: large"></i>
+                                    Approve
                                 </button>
                             </div>
                             @elseif($challan->inventoryComponentTransferStatus->slug == 'close')
@@ -287,6 +291,31 @@
 </style>
 <script>
     $(document).ready(function() {
+
+        $(".approveDisapproveChallan").click(function() {
+            var status = $(this).val();
+            var challan_id = $('#challan_id').val();
+            $.ajax({
+                url: '/inventory/transfer/challan/' + challan_id + '/change-status?_token=' + $("input[name='_token']").val() + '&status=' + status,
+                type: "GET",
+                success: function(data, textStatus, xhr) {
+                    if (data.success) {
+                        location.reload();
+                        alert("Challan " + status + " successfully");
+                    } else {
+                        alert('Something went wrong.');
+                    }
+
+                },
+                error: function(errorData) {
+                    alert('Something went wrong.');
+                }
+            })
+        });
+
+
+
+
         EditPurchaseOrder.init();
 
 

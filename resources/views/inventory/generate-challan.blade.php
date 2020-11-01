@@ -214,7 +214,7 @@
                                                                         <td>
                                                                             <div class="form-group" style="width: 80%; margin-left: 10%">
                                                                                 <input class="form-control unit" value="{{$nosUnit['name']}}" readonly />
-                                                                                <input type="hidden" class="form-control unit" id="unit_id_{{$asset['id']}}" name="inventory_cart[{{$asset['id']}}][$nosUnit[id]]" value="{{$nosUnit['id']}}" readonly />
+                                                                                <input type="hidden" class="form-control unit" id="unit_id_{{$asset['id']}}" name="inventory_cart[{{$asset['id']}}][unit_id]" value="{{$nosUnit['id']}}" readonly />
                                                                             </div>
                                                                         </td>
                                                                         <td>

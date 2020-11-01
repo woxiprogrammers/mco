@@ -144,7 +144,6 @@ class InventoryTransferChallanController extends Controller
     public function createChallan(Request $request)
     {
         try {
-            //dd($request->all());
             $now = Carbon::now();
             $challan = new InventoryTransferChallan([
                 'challan_number'                        => 'CH',
@@ -558,17 +557,36 @@ class InventoryTransferChallanController extends Controller
         }
     }
 
-    public function addInventoryCartComponents(Request $request)
+    public function approveDisapproveChallan(Request $request, $challanId)
     {
         try {
-            dd('in add inventory Component....');
+            $challan = InventoryTransferChallan::find($challanId);
+            if ($challan) {
+                $statusSlug = ($request['status'] === 'approved') ? 'open' : $request['status'];
+                $statusId = InventoryComponentTransferStatus::where('slug', $statusSlug)->pluck('id')->first();
+                if ($statusId) {
+                    $challan->update(['inventory_component_transfer_status_id' => $statusId]);
+                    return response()->json([
+                        "message"   => "Success",
+                        "success"   => true
+                    ], 200);
+                }
+            }
+            return response()->json([
+                "message"   => "Not found",
+                "success"   => false
+            ], 422);
         } catch (Exception $e) {
             $data = [
-                'action'    => 'Add Inventory cart components.',
+                'action'    => 'Approve Disapprove Challan',
                 'params'    => $request->all(),
                 'exception' => $e->getMessage()
             ];
             Log::critical(json_encode($data));
+            return response()->json([
+                "message"   => "Internal Server error",
+                "success"   => false
+            ], 500);
         }
     }
 }
