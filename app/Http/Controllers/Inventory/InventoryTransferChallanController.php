@@ -230,14 +230,13 @@ class InventoryTransferChallanController extends Controller
     {
         try {
             $projectSiteId = Session::get('global_project_site');
-            $challan = InventoryTransferChallan::join('inventory_component_transfers', 'inventory_component_transfers.inventory_transfer_challan_id', '=', 'inventory_transfer_challan.id')
+            $challans = InventoryTransferChallan::join('inventory_component_transfers', 'inventory_component_transfers.inventory_transfer_challan_id', '=', 'inventory_transfer_challan.id')
                 ->join('inventory_component_transfer_statuses', 'inventory_transfer_challan.inventory_component_transfer_status_id', '=', 'inventory_component_transfer_statuses.id')
                 ->where('inventory_component_transfer_statuses.slug', 'open')
-                ->whereIsNull('project_site_in_date')
-                ->where('inventory_component_transfers.challan_id')->where('project_site_in_id', $projectSiteId)
+                ->whereNull('project_site_in_date')
+                ->where('project_site_in_id', $projectSiteId)
+                ->select('inventory_transfer_challan.id', 'inventory_transfer_challan.challan_number')
                 ->get()->toArray();
-            dd($challan);
-            $challans = InventoryTransferChallan::select('id', 'challan_number')->limit(10)->get()->toArray();
             return view('inventory/transfer/challan/site/in')->with(compact('challans'));
         } catch (Exception $e) {
             $data = [
@@ -490,8 +489,7 @@ class InventoryTransferChallanController extends Controller
     public function getChallanDetail(Request $request)
     {
         try {
-            //$challan = InventoryTransferChallan::find($request['challan_id']);
-            $challan = InventoryTransferChallan::find(4);
+            $challan = InventoryTransferChallan::find($request['challan_id']);
             $outTransferType = InventoryTransferTypes::where('slug', 'site')->where('type', 'OUT')->first();
             $inventoryComponentOutTransfers = $outTransferType->inventoryComponentTransfers->where('inventory_transfer_challan_id', $challan['id']);
             foreach ($inventoryComponentOutTransfers as $outTransferComponent) {

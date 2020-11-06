@@ -1119,7 +1119,6 @@ class InventoryManageController extends Controller
     public function addComponentTransfer(Request $request, $inventoryComponent)
     {
         try {
-            dd($request->all());
             Log::info('Inside add component transfer');
             $user = Auth::user();
             if ($request['transfer_type'] == 'site' && $request['in_or_out'] == 'on') {
@@ -1222,7 +1221,6 @@ class InventoryManageController extends Controller
                 } else {
                     $data['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug', 'approved')->pluck('id')->first();
                 }
-                dd($data);
                 $inventoryComponentTransfer = $this->createInventoryComponentTransfer($data);
                 if ($request->has('work_order_images')) {
                     $imageUploads = $this->uploadInventoryComponentTransferImages($request->work_order_images, $inventoryComponent->id, $inventoryComponentTransfer->id);
