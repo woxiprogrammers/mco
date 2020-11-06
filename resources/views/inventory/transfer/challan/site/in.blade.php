@@ -59,13 +59,38 @@
                                                 <div id="siteInDetailForm">
 
                                                 </div>
-                                                <div class="form-group row postImageUpload" hidden>
-                                                    <label class="control-label">Select Images :</label>
-                                                    <input id="postImageUpload" type="file" class="btn blue" multiple />
-                                                    <br />
+                                                <div class="row form-group col-md-offset-2 col-md-10 preImageUpload" hidden>
+                                                    <label class="control-label">Select Images For Generating GRN :</label>
+                                                    <input id="imageupload" type="file" class="btn blue" />
+                                                    <br>
                                                     <div class="row">
-                                                        <div id="postPreviewImage" class="row">
+                                                        <div id="preview-image" class="row">
 
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-md-3" id="grnImageUplaodButton" style="margin-top: 1%;" hidden>
+                                                            <a href="javascript:void(0);" class="btn blue"> Upload Images</a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="afterImageUploadDiv" hidden>
+                                                    <div class="row form-group">
+                                                        <div class="col-md-3">
+                                                            <label class="control-label pull-right">Remark : </label>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input class="form-control" type="text" id="remark" name="remark" placeholder="Enter Remark">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row postImageUpload">
+                                                        <label class="control-label">Select Images :</label>
+                                                        <input id="postImageUpload" type="file" class="btn blue" multiple />
+                                                        <br />
+                                                        <div class="row">
+                                                            <div id="postPreviewImage" class="row">
+
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -125,8 +150,9 @@
                         alert(data.message);
                     } else {
                         $("#siteInDetailForm").html(data);
-                        $(".postImageUpload").show();
-                        $(".site-in-submit").show();
+                        $(".preImageUpload").show();
+                        //   $(".postImageUpload").show();
+                        //$(".site-in-submit").show();
                     }
                 },
                 error: function(errorData) {
@@ -138,6 +164,70 @@
 
     }
     $(document).ready(function() {
+        $("#imageupload").on('change', function() {
+            var countFiles = $(this)[0].files.length;
+            var imgPath = $(this)[0].value;
+            var extn = imgPath.substring(imgPath.lastIndexOf('.') + 1).toLowerCase();
+            var image_holder = $("#preview-image");
+            image_holder.empty();
+            if (extn == "gif" || extn == "png" || extn == "jpg" || extn == "jpeg") {
+                if (typeof(FileReader) != "undefined") {
+                    for (var i = 0; i < countFiles; i++) {
+                        var reader = new FileReader()
+                        reader.onload = function(e) {
+                            var imagePreview = '<div class="col-md-2"><input class="grn-images" type="hidden" name="pre_grn_image[]" value="' + e.target.result + '"><img src="' + e.target.result + '" class="thumbimage" /></div>';
+                            image_holder.append(imagePreview);
+                        };
+                        image_holder.show();
+                        reader.readAsDataURL($(this)[0].files[i]);
+                        $("#grnImageUplaodButton").show();
+                    }
+                } else {
+                    alert("It doesn't supports");
+                }
+            } else {
+                alert("Select Only images");
+            }
+        });
+
+        $("#grnImageUplaodButton a").on('click', function() {
+            var imageArray = $(".grn-images").val();
+            let items = []
+            $('#challanComponentTable .component-row').each((index, tr) => {
+                const reference_id = $(tr).attr('id').split("componentRow-")[1];
+                items[index] = {
+                    'related_inventory_component_transfer_id': $('#challanComponentTable #componentRow-' + reference_id + ' #componentRow-' + reference_id + '-site-out-id').val(),
+                    'site-in-quantity': $('#challanComponentTable #componentRow-' + reference_id + ' #componentRow-' + reference_id + '-site-in-quantity').val(),
+                };
+            });
+            $.ajax({
+                url: '/inventory/transfer/upload-pre-grn-images',
+                type: 'POST',
+                data: {
+                    imageArray,
+                    items
+                },
+                success: function(data, textStatus, xhr) {
+                    for (inventoryComponentTransfer of data) {
+                        $('#challanComponentTable #componentRow-' + inventoryComponentTransfer.reference_id + ' #componentRow-' + inventoryComponentTransfer.reference_id + '-site-in-id').val(inventoryComponentTransfer.inventory_component_transfer_id);
+                        $('#challanComponentTable #componentRow-' + inventoryComponentTransfer.reference_id + ' #componentRow-' + inventoryComponentTransfer.reference_id + '-site-in-grn').text(inventoryComponentTransfer.grn);
+                    }
+                    console.log('in sucess');
+                    $("#imageupload").hide();
+                    $("#grnImageUplaodButton").hide();
+                    // $("#inventoryComponentTransferId").val(data.inventory_component_transfer_id);
+                    // TODO: Add newly genetaed inventoryComponentTransferId in the LISt
+                    $("#afterImageUploadDiv").show();
+                    $(".site-in-submit").show();
+                    //$("#afterImageUploadDiv input[name='grn']").val(data.grn);
+                    // TODO: Add newly genetaed GRN in the LISt
+                },
+                error: function(errorData) {
+
+                }
+            });
+        });
+
 
         $("#postImageUpload").on('change', function() {
             var countFiles = $(this)[0].files.length;
