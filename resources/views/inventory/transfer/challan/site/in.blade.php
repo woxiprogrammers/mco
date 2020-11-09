@@ -163,7 +163,60 @@
 
 
     }
+    var CreateSiteInForChallan = function() {
+        var handleCreate = function() {
+            var form = $('#createTransferSiteIn');
+            var error = $('.alert-danger', form);
+            var success = $('.alert-success', form);
+            form.validate({
+                errorElement: 'span', //default input error message container
+                errorClass: 'help-block', // default input error message class
+                focusInvalid: false, // do not focus the last invalid input
+                rules: {
+
+                },
+
+                messages: {
+
+                },
+
+                invalidHandler: function(event, validator) { //display error alert on form submit
+                    success.hide();
+                    error.show();
+                },
+
+                highlight: function(element) { // hightlight error inputs
+                    $(element)
+                        .closest('.form-group').addClass('has-error'); // set error class to the control group
+                },
+
+                unhighlight: function(element) { // revert the change done by hightlight
+                    $(element)
+                        .closest('.form-group').removeClass('has-error'); // set error class to the control group
+                },
+
+                success: function(label) {
+                    label
+                        .closest('.form-group').addClass('has-success');
+                },
+
+                submitHandler: function(form) {
+                    $("button[type='submit']").prop('disabled', true);
+                    success.show();
+                    error.hide();
+                    form.submit();
+                }
+            });
+        }
+
+        return {
+            init: function() {
+                handleCreate();
+            }
+        };
+    }();
     $(document).ready(function() {
+        CreateSiteInForChallan.init();
         $("#imageupload").on('change', function() {
             var countFiles = $(this)[0].files.length;
             var imgPath = $(this)[0].value;
@@ -175,7 +228,7 @@
                     for (var i = 0; i < countFiles; i++) {
                         var reader = new FileReader()
                         reader.onload = function(e) {
-                            var imagePreview = '<div class="col-md-2"><input class="grn-images" type="hidden" name="pre_grn_image[]" value="' + e.target.result + '"><img src="' + e.target.result + '" class="thumbimage" /></div>';
+                            var imagePreview = '<div class="col-md-2"><input class="grn-images" type="hidden" name="pre_grn_image[]" value="' + e.target.result + '"><img src="' + e.target.result + '" class="thumbimage" width="500" height="300" /></div>';
                             image_holder.append(imagePreview);
                         };
                         image_holder.show();
@@ -191,43 +244,50 @@
         });
 
         $("#grnImageUplaodButton a").on('click', function() {
+            validQuantity = true;
             var imageArray = $(".grn-images").val();
-            let items = []
+            let items = [];
+            var challan_id = $('#challan_number').val();
             $('#challanComponentTable .component-row').each((index, tr) => {
                 const reference_id = $(tr).attr('id').split("componentRow-")[1];
+                if (!($('#challanComponentTable #componentRow-' + reference_id + ' #componentRow-' + reference_id + '-site-in-quantity').valid())) {
+                    validQuantity = false
+                }
+                $('#challanComponentTable #componentRow-' + reference_id + ' #componentRow-' + reference_id + '-site-in-quantity').valid();
                 items[index] = {
                     'related_inventory_component_transfer_id': $('#challanComponentTable #componentRow-' + reference_id + ' #componentRow-' + reference_id + '-site-out-id').val(),
-                    'site-in-quantity': $('#challanComponentTable #componentRow-' + reference_id + ' #componentRow-' + reference_id + '-site-in-quantity').val(),
+                    'site_in_quantity': $('#challanComponentTable #componentRow-' + reference_id + ' #componentRow-' + reference_id + '-site-in-quantity').val(),
                 };
             });
-            $.ajax({
-                url: '/inventory/transfer/upload-pre-grn-images',
-                type: 'POST',
-                data: {
-                    imageArray,
-                    items
-                },
-                success: function(data, textStatus, xhr) {
-                    for (inventoryComponentTransfer of data) {
-                        $('#challanComponentTable #componentRow-' + inventoryComponentTransfer.reference_id + ' #componentRow-' + inventoryComponentTransfer.reference_id + '-site-in-id').val(inventoryComponentTransfer.inventory_component_transfer_id);
-                        $('#challanComponentTable #componentRow-' + inventoryComponentTransfer.reference_id + ' #componentRow-' + inventoryComponentTransfer.reference_id + '-site-in-grn').text(inventoryComponentTransfer.grn);
+            if (validQuantity) {
+                $.ajax({
+                    url: '/inventory/transfer/challan/site/in/upload-pre-grn-images',
+                    type: 'POST',
+                    data: {
+                        _token: $("input[name='_token']").val(),
+                        imageArray,
+                        items,
+                        challan_id
+                    },
+                    success: function(data, textStatus, xhr) {
+                        for (inventoryComponentTransfer of data) {
+                            $('#challanComponentTable #componentRow-' + inventoryComponentTransfer.reference_id + ' #componentRow-' + inventoryComponentTransfer.reference_id + '-site-in-id').val(inventoryComponentTransfer.inventory_component_transfer_id);
+                            $('#challanComponentTable #componentRow-' + inventoryComponentTransfer.reference_id + ' #componentRow-' + inventoryComponentTransfer.reference_id + '-site-in-grn').text(inventoryComponentTransfer.grn);
+                        }
+                        $("#imageupload").hide();
+                        $("#grnImageUplaodButton").hide();
+                        $("#afterImageUploadDiv").show();
+                        $(".site-in-submit").show();
+                    },
+                    error: function(errorData) {
+
                     }
-                    console.log('in sucess');
-                    $("#imageupload").hide();
-                    $("#grnImageUplaodButton").hide();
-                    // $("#inventoryComponentTransferId").val(data.inventory_component_transfer_id);
-                    // TODO: Add newly genetaed inventoryComponentTransferId in the LISt
-                    $("#afterImageUploadDiv").show();
-                    $(".site-in-submit").show();
-                    //$("#afterImageUploadDiv input[name='grn']").val(data.grn);
-                    // TODO: Add newly genetaed GRN in the LISt
-                },
-                error: function(errorData) {
+                });
+            } else {
+                alert('Please check Quantity');
+            }
 
-                }
-            });
         });
-
 
         $("#postImageUpload").on('change', function() {
             var countFiles = $(this)[0].files.length;

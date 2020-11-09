@@ -748,6 +748,9 @@ class InventoryManageController extends Controller
                 if ($opening_stock != null) {
                     $openQty = $opening_stock;
                 }
+                $inQuantity = (int)$inQuantity;
+                $openQty = (int) $openQty;
+                $outQuantity = (int)$outQuantity;
                 $availableQuantity = ($inQuantity + $openQty) - $outQuantity;
                 $records['data'][$iterator] = [
                     ($availableQuantity != 0) ? ($request->has('search_component_id') && in_array($inventoryData[$pagination]->id, explode(',', $request->search_component_id)) ? '<input type="checkbox" class="multiple-select-checkbox-mti" value="' . $inventoryData[$pagination]->id . '" checked>'

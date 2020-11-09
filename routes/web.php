@@ -470,6 +470,7 @@ Route::group(['domain' => env('DOMAIN_NAME')], function () {
                 Route::post('close', array('uses' => 'Inventory\InventoryTransferChallanController@closeChallan'));
                 Route::get('site/in', array('uses' => 'Inventory\InventoryTransferChallanController@showSiteIn'));
                 Route::post('site/in', array('uses' => 'Inventory\InventoryTransferChallanController@createSiteIn'));
+                Route::post('site/in/upload-pre-grn-images', array('uses' => 'Inventory\InventoryTransferChallanController@preUploadSIteInImages'));
                 Route::get('detail/{challanId}', array('uses' => 'Inventory\InventoryTransferChallanController@getChallanDetail'));
             });
         });

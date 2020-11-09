@@ -25,6 +25,9 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 
 use App\GRNCount;
+use App\InventoryComponentOpeningStockHistory;
+use App\User;
+use Illuminate\Support\Facades\File;
 
 class InventoryTransferChallanController extends Controller
 {
@@ -232,8 +235,7 @@ class InventoryTransferChallanController extends Controller
     {
         try {
             $projectSiteId = Session::get('global_project_site');
-            $challans = InventoryTransferChallan::join('inventory_component_transfers', 'inventory_component_transfers.inventory_transfer_challan_id', '=', 'inventory_transfer_challan.id')
-                ->join('inventory_component_transfer_statuses', 'inventory_transfer_challan.inventory_component_transfer_status_id', '=', 'inventory_component_transfer_statuses.id')
+            $challans = InventoryTransferChallan::join('inventory_component_transfer_statuses', 'inventory_transfer_challan.inventory_component_transfer_status_id', '=', 'inventory_component_transfer_statuses.id')
                 ->where('inventory_component_transfer_statuses.slug', 'open')
                 ->whereNull('project_site_in_date')
                 ->where('project_site_in_id', $projectSiteId)
@@ -506,6 +508,7 @@ class InventoryTransferChallanController extends Controller
                     'is_material'       => $outTransferComponent->inventoryComponent->is_material,
                     'reference_id'      => $outTransferComponent->inventoryComponent->reference_id,
                     'unit'              => $outTransferComponent->unit->name,
+                    'site_out_grn'      => $outTransferComponent->grn,
                     'site_out_quantity' => $outTransferComponent->quantity,
                     'site_in_quantity'  => $siteInQuantity
                 ];
@@ -528,30 +531,91 @@ class InventoryTransferChallanController extends Controller
         return response()->json($challan, $status);
     }
 
+    /**
+     * Challan Site IN Post GRN generation
+     */
     public function createSiteIn(Request $request)
     {
         try {
-            dd($request->all());
+            $updateChallanStatusToClose = true;
+            $now = Carbon::now();
+            $approvedStatusId = InventoryComponentTransferStatus::where('slug', 'approved')->pluck('id')->first();
+            foreach ($request['component'] as $transferComponent) {
+                $inventoryComponentInTransfer = InventoryComponentTransfers::find($transferComponent['site_in_transfer_id']);
+                if ($inventoryComponentInTransfer) {
+                    $inventoryComponentOutTransfer = InventoryComponentTransfers::find($inventoryComponentInTransfer['related_transfer_id']);
+                    $inventoryComponentInTransfer->update([
+                        'quantity'                              => $transferComponent['site_in_quantity'],
+                        'out_time'                              => $now,
+                        'date'                                  => $now,
+                        'inventory_component_transfer_status_id' => $approvedStatusId,
+                        'remark'                                => $request['remark'] ?? ''
+                    ]);
+                    if ($updateChallanStatusToClose && ($inventoryComponentOutTransfer['quantity'] != $inventoryComponentInTransfer['quantity'])) {
+                        $updateChallanStatusToClose = false;
+                    }
+                    $inventoryComponentTransferImages[] = [
+                        'inventory_component_transfer_id'   => $inventoryComponentInTransfer['id'],
+                    ];
+
+                    $webTokens = [$inventoryComponentOutTransfer->user->web_fcm_token];
+                    $mobileTokens = [$inventoryComponentOutTransfer->user->mobile_fcm_token];
+                    $notificationString = 'From ' . $inventoryComponentInTransfer->source_name . ' stock received to ';
+                    $notificationString .= $inventoryComponentInTransfer->inventoryComponent->projectSite->project->name . ' - ' . $inventoryComponentInTransfer->inventoryComponent->projectSite->name . ' ';
+                    $notificationString .= $inventoryComponentInTransfer->inventoryComponent->name . ' - ' . $inventoryComponentInTransfer->quantity . ' and ' . $inventoryComponentInTransfer->unit->name;
+                    $this->sendPushNotification('Manisha Construction', $notificationString, $webTokens, $mobileTokens, 'c-m-s-i-t');
+                }
+            }
+            if ($request->has('post_grn_image') && count($request->post_grn_image) > 0) {
+                $sha1challanId = sha1($request['challan_id']);
+                $imageUploadPath = public_path() . env('INVENTORY_COMPONENT_IMAGE_UPLOAD');
+                $newInUploadPath = $imageUploadPath . DIRECTORY_SEPARATOR . $sha1challanId . DIRECTORY_SEPARATOR . 'in';
+                if (!file_exists($newInUploadPath)) {
+                    File::makeDirectory($newInUploadPath, $mode = 0777, true, true);
+                }
+                foreach ($request['post_grn_image'] as $key1 => $imageName) {
+                    $imageArray = explode(';', $imageName);
+                    $image = explode(',', $imageArray[1])[1];
+                    $pos  = strpos($imageName, ';');
+                    $type = explode(':', substr($imageName, 0, $pos))[1];
+                    $extension = explode('/', $type)[1];
+                    $filename = mt_rand(1, 10000000000) . sha1(time()) . ".{$extension}";
+                    $fileFullPath = $newInUploadPath . DIRECTORY_SEPARATOR . $filename;
+                    file_put_contents($fileFullPath, base64_decode($image));
+                    data_fill($inventoryComponentTransferImages, '*.name', $filename);
+                    data_fill($inventoryComponentTransferImages, '*.created_at', $now);
+                    data_fill($inventoryComponentTransferImages, '*.updated_at', $now);
+                    DB::table('inventory_component_transfer_images')->insert($inventoryComponentTransferImages);
+                }
+            }
+
+            $request->session()->flash('success', 'Inventory Component In Transfer for Challan Saved Successfully!!');
+            return redirect('/inventory/transfer/challan/manage');
         } catch (Exception $e) {
-            dd($e->getMessage());
             $data = [
                 'action' => 'Create Site In for Challan',
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];
-            $status = 500;
-            $challan = array();
+            $request->session()->flash('fail', 'Something went wrong');
+            return redirect('/inventory/transfer/challan/manage');
         }
     }
 
-    public function preGRNSiteIn(Request $request)
+    /**
+     * Challan Site In Pre GRN
+     */
+    public function preUploadSIteInImages(Request $request)
     {
         try {
             $user = Auth::user();
             $updateChallanStatusToClose = true;
             $currentDate = Carbon::now();
+            $challan = InventoryTransferChallan::find($request['challan_id']);
+            $grnGeneratedStatusId = InventoryComponentTransferStatus::where('slug', 'grn-generated')->pluck('id')->first();
+            $siteInTypeId = InventoryTransferTypes::where('slug', 'site')->where('type', 'ilike', 'IN')->pluck('id')->first();
             foreach ($request['items'] as $transferComponent) {
-                $relatedInventoryComponentOutTransferData = InventoryComponentTransfers::where('id', $request['related_inventory_component_transfer_id'])->first();
+                $relatedInventoryComponentOutTransferData = InventoryComponentTransfers::where('id', $transferComponent['related_inventory_component_transfer_id'])->first();
                 $outInventoryComponent = $relatedInventoryComponentOutTransferData->inventoryComponent;
                 $projectSite = ProjectSite::where('id', $outInventoryComponent->project_site_id)->first();
                 $sourceName = $projectSite->project->name . '-' . $projectSite->name;
@@ -562,22 +626,35 @@ class InventoryTransferChallanController extends Controller
                     $serialNumber = 1;
                 }
                 $grn = "GRN" . date('Ym') . ($serialNumber);
-                //TODO : Check if $outInventoryComponent->reference_id is present for this project site id
-                //If not create inventory component first
-                $inInventoryComponent = [];
+                $inInventoryComponent = InventoryComponent::where('project_site_id', $challan['project_site_in_id'])->where('reference_id', $outInventoryComponent['reference_id'])
+                    ->where('is_material', $outInventoryComponent['is_material'])->first();
+                if (!$inInventoryComponent) {
+                    $inInventoryComponent = InventoryComponent::create([
+                        'name'              => $outInventoryComponent['name'],
+                        'project_site_id'   => $challan['project_site_in_id'],
+                        'is_material'       => $outInventoryComponent['is_material'],
+                        'reference_id'      => $outInventoryComponent['reference_id'],
+                        'opening_stock'     => 0
+                    ]);
+                    InventoryComponentOpeningStockHistory::create([
+                        'inventory_component_id' => $inInventoryComponent['id'],
+                        'opening_stock' => $inInventoryComponent['opening_stock']
+                    ]);
+                }
                 $inventoryComponentInTransfer = InventoryComponentTransfers::create([
                     'inventory_component_id'                    => $inInventoryComponent['id'],
-                    'transfer_type_id'                          => InventoryTransferTypes::where('slug', 'site')->where('type', 'ilike', 'IN')->pluck('id')->first(),
-                    'quantity'                                  => $request['quantity'],
+                    'transfer_type_id'                          => $siteInTypeId,
+                    'quantity'                                  => $transferComponent['site_in_quantity'],
                     'unit_id'                                   => $relatedInventoryComponentOutTransferData['unit_id'],
                     'source_name'                               => $sourceName,
                     'bill_number'                               => $relatedInventoryComponentOutTransferData['bill_number'],
                     'bill_amount'                               => $relatedInventoryComponentOutTransferData['bill_amount'],
                     'vehicle_number'                            => $relatedInventoryComponentOutTransferData['vehicle_number'],
                     'in_time'                                   => $currentDate,
+                    'date'                                      => $currentDate,
                     'user_id'                                   => $user['id'],
                     'grn'                                       => $grn,
-                    'inventory_component_transfer_status_id'    => InventoryComponentTransferStatus::where('slug', 'grn-generated')->pluck('id')->first(),
+                    'inventory_component_transfer_status_id'    => $grnGeneratedStatusId,
                     'rate_per_unit'                             => $relatedInventoryComponentOutTransferData['rate_per_unit'],
                     'cgst_percentage'                           => $relatedInventoryComponentOutTransferData['cgst_percentage'],
                     'sgst_percentage'                           => $relatedInventoryComponentOutTransferData['sgst_percentage'],
@@ -603,25 +680,30 @@ class InventoryTransferChallanController extends Controller
                 } else {
                     GRNCount::create(['month' => $currentDate->month, 'year' => $currentDate->year, 'count' => $serialNumber]);
                 }
-
-                // Check if out quantity is not equal to request.quantity and $updateChallanStatusToClose is false then $updateChallanStatusToClose = true
+                if ($updateChallanStatusToClose && ($relatedInventoryComponentOutTransferData['quantity'] != $inventoryComponentInTransfer['quantity'])) {
+                    $updateChallanStatusToClose = false;
+                }
                 $response[] = [
                     'inventory_component_transfer_id'   => $inventoryComponentInTransfer['id'],
                     'grn'                               => $grn,
                     'reference_id'                      => $outInventoryComponent['reference_id']
                 ];
+                $inventoryComponentTransferImages[] = [
+                    'inventory_component_transfer_id'   => $inventoryComponentInTransfer['id'],
+                ];
             }
+            $challanUpdateData['project_site_in_date'] = $currentDate;
             if ($updateChallanStatusToClose) {
-                //  do not change challan status to close, update site out date to $currentDate
-            } else {
+                $challanUpdateData['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug', 'close')->pluck('id')->first();
             }
+            $challan->update($challanUpdateData);
 
             if ($request->has('imageArray')) {
-                $sha1InventoryComponentId = sha1($inventoryComponentId);
-                $sha1InventoryTransferId = sha1($inventoryComponentTransfer['id']);
-                $imageUploadPath = public_path() . env('INVENTORY_COMPONENT_IMAGE_UPLOAD') . DIRECTORY_SEPARATOR . $sha1InventoryComponentId . DIRECTORY_SEPARATOR . 'transfers' . DIRECTORY_SEPARATOR . $sha1InventoryTransferId;
-                if (!file_exists($imageUploadPath)) {
-                    File::makeDirectory($imageUploadPath, $mode = 0777, true, true);
+                $sha1challanId = sha1($challan['id']);
+                $imageUploadPath = public_path() . env('INVENTORY_COMPONENT_IMAGE_UPLOAD');
+                $newInUploadPath = $imageUploadPath . DIRECTORY_SEPARATOR . $sha1challanId . DIRECTORY_SEPARATOR . 'in';
+                if (!file_exists($newInUploadPath)) {
+                    File::makeDirectory($newInUploadPath, $mode = 0777, true, true);
                 }
                 $imageArray = explode(';', $request['imageArray']);
                 $image = explode(',', $imageArray[1])[1];
@@ -629,22 +711,15 @@ class InventoryTransferChallanController extends Controller
                 $type = explode(':', substr($request['imageArray'], 0, $pos))[1];
                 $extension = explode('/', $type)[1];
                 $filename = mt_rand(1, 10000000000) . sha1(time()) . ".{$extension}";
-                $fileFullPath = $imageUploadPath . DIRECTORY_SEPARATOR . $filename;
+                $fileFullPath = $newInUploadPath . DIRECTORY_SEPARATOR . $filename;
                 file_put_contents($fileFullPath, base64_decode($image));
-                InventoryComponentTransferImage::create(['name' => $filename, 'inventory_component_transfer_id' => $inventoryComponentTransfer['id']]);
+                data_fill($inventoryComponentTransferImages, '*.name', $filename);
+                data_fill($inventoryComponentTransferImages, '*.created_at', $currentDate);
+                data_fill($inventoryComponentTransferImages, '*.updated_at', $currentDate);
+                DB::table('inventory_component_transfer_images')->insert($inventoryComponentTransferImages);
             }
-            $response = [
-                'inventory_component_transfer_id' => $inventoryComponentTransfer['id'],
-                'grn' => $grn
-            ];
-            $response[] = [
-                'inventory_component_transfer_id' => 12,
-                'grn' => 1111111,
-                'reference_id' => 2375
-            ];
             $status = 200;
         } catch (Exception $e) {
-            dd($e->getMessage());
             $data = [
                 'action' => 'Generate Pre GRN Site In and image upload',
                 'params' => $request->all(),
@@ -655,19 +730,6 @@ class InventoryTransferChallanController extends Controller
             $status = 500;
         }
         return response()->json($response, $status);
-    }
-
-    public function getInventoryCartComponents(Request $request)
-    {
-        try {
-        } catch (Exception $e) {
-            $data = [
-                'action'    => 'Get Inventory cart components.',
-                'params'    => $request->all(),
-                'exception' => $e->getMessage()
-            ];
-            Log::critical(json_encode($data));
-        }
     }
 
     public function approveDisapproveChallan(Request $request, $challanId)

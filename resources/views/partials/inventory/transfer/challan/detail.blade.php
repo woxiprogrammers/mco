@@ -61,6 +61,8 @@
                 <th> Material/Asset Name </th>
                 <th> Site In GRN </th>
                 <th> Quantity </th>
+                <th> Site Out Quantity </th>
+                <th> Site Out GRN </th>
                 <th> Unit </th>
             </tr>
         </thead>
@@ -72,7 +74,13 @@
                 <input type="hidden" id="componentRow-{{$component['reference_id']}}-site-in-id" name="component[{{$component['reference_id']}}][site_in_transfer_id]">
                 <td><span> {{$component['name']}}</span></td>
                 <td><span id="componentRow-{{$component['reference_id']}}-site-in-grn"> - </span></td>
-                <td><input type="number" id="componentRow-{{$component['reference_id']}}-site-in-quantity" name="component[{{$component['reference_id']}}][site_in_quantity]" value="{{$component['site_out_quantity']}}"></td>
+                <td>
+                    <div class="form-group" style="width: 80%; margin-left: 10%">
+                        <input type="number" class="form-control" id="componentRow-{{$component['reference_id']}}-site-in-quantity" name="component[{{$component['reference_id']}}][site_in_quantity]" max="{{$component['site_out_quantity']}}" value="{{$component['site_out_quantity']}}">
+                    </div>
+                </td>
+                <td><span> {{$component['site_out_quantity']}} </span></td>
+                <td><span> {{$component['site_out_grn']}} </span></td>
                 <td><span> {{$component['unit']}} </span></td>
             </tr>
             @endforeach
