@@ -488,22 +488,32 @@ class SubcontractorStructureController extends Controller
             }
 
             $listingData = array();
-            if ($filterFlag) {
-                $listingData = SubcontractorBillTransaction::join('subcontractor_bills','subcontractor_bill_transactions.subcontractor_bills_id','=','subcontractor_bills.id')
-                                                            ->join('subcontractor_structure','subcontractor_bills.sc_structure_id','=','subcontractor_structure.id')
-                                                            ->where('paid_from_slug', 'cash')
-                                                            ->where('debit','<>', 0)
-                                                            ->whereIn('subcontractor_structure.id',$ids)
-                                                            ->with('subcontractorBill.subcontractorStructure','subcontractorBill.subcontractorStructure.projectSite.project','subcontractorBill.subcontractorStructure.subcontractor','subcontractorBill.subcontractorStructure.contractType')
-                                                            ->orderBy('subcontractor_bill_transactions.id', 'desc')
-                                                            ->skip($skip)->take($take)->get();
+            if($request->has('project_name') || $request->has('subcontractor_name') || $request->has('contract_type_id')) {
+                if ($filterFlag) {
+                    $listingData = SubcontractorBillTransaction::join('subcontractor_bills','subcontractor_bill_transactions.subcontractor_bills_id','=','subcontractor_bills.id')
+                                                                ->join('subcontractor_structure','subcontractor_bills.sc_structure_id','=','subcontractor_structure.id')
+                                                                ->where('paid_from_slug', 'cash')
+                                                                ->where('debit','<>', 0)
+                                                                ->whereIn('subcontractor_structure.id',$ids)
+                                                                ->with('subcontractorBill.subcontractorStructure','subcontractorBill.subcontractorStructure.projectSite.project','subcontractorBill.subcontractorStructure.subcontractor','subcontractorBill.subcontractorStructure.contractType')
+                                                                ->orderBy('subcontractor_bill_transactions.id', 'desc')
+                                                                ->skip($skip)->take($take)->get();
+                    $totalRecordCount = SubcontractorBillTransaction::join('subcontractor_bills','subcontractor_bill_transactions.subcontractor_bills_id','=','subcontractor_bills.id')
+                                        ->join('subcontractor_structure','subcontractor_bills.sc_structure_id','=','subcontractor_structure.id')->where('paid_from_slug', 'cash')->whereIn('subcontractor_structure.id',$ids)->where('debit','<>', 0)->count();
+                }
+            }else{
+                $listingData = SubcontractorBillTransaction::where('paid_from_slug', 'cash')
+                                                                ->where('debit','<>', 0)
+                                                                ->with('subcontractorBill.subcontractorStructure','subcontractorBill.subcontractorStructure.projectSite.project','subcontractorBill.subcontractorStructure.subcontractor','subcontractorBill.subcontractorStructure.contractType')
+                                                                ->orderBy('subcontractor_bill_transactions.id', 'desc')
+                                                                ->skip($skip)->take($take)->get();
                 $totalRecordCount = SubcontractorBillTransaction::where('paid_from_slug', 'cash')->where('debit','<>', 0)->count();
             }
+            
             $records = array();
             $records['data'] = array();
             $end = $request->length < 0 ? count($listingData) : $request->length;
             for ($iterator = 0, $pagination = 0; $iterator < $end && $pagination < count($listingData); $iterator++, $pagination++) {
-                
                 $summaryArray = $listingData[$pagination]->subcontractorBill->subcontractorStructure->summaries;    
                 $totalRate = array_sum(array_column($summaryArray->toArray(),'rate'));
                 $totalWorkArea = array_sum(array_column($summaryArray->toArray(),'total_work_area'));;
