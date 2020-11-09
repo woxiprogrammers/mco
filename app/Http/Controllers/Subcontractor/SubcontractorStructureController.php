@@ -19,6 +19,8 @@ use App\TransactionStatus;
 use App\Unit;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\SubcontractorCashEditRequest;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
@@ -429,5 +431,207 @@ class SubcontractorStructureController extends Controller
             Log::critical(json_encode($data));
             abort(500);
         }
+    }
+
+    public function cashentryManage(Request $request){
+        try{
+            $contractTypes = SubcontractorStructureType::select('id', 'name')->get()->toArray();
+            return view('subcontractor.new_structure.manage-cash-entries')->with(compact('contractTypes'));
+        }catch (\Exception $e){
+            $data = [
+                'action' => 'Get Subcontractor structure manage view',
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function cashEntryListing(Request $request){
+        try{
+            $skip = $request->start;
+            $take = $request->length;
+            $totalRecordCount = 0;
+            $user = Auth::user();
+            $filterFlag = true;
+            $subcontractor_name = null;
+            $project_name = null;
+            $ids = SubcontractorStructure::pluck('id');
+            
+            if($request->has('project_name') && $filterFlag == true){
+                $projectSites = Project::join('project_sites','project_sites.project_id','=','projects.id')->where('projects.name','ilike','%'.$request['project_name'].'%')->select('project_sites.id')->get()->toArray();
+                $ids = SubcontractorStructure::where('project_site_id','!=', 0)
+                    ->whereIn('id',$ids)
+                    ->whereIn('project_site_id',$projectSites)
+                    ->orderBy('created_at','desc')->pluck('id');
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+            if($request->has('subcontractor_name') && $filterFlag == true){
+                $subContractorid = Subcontractor::where('company_name','ilike','%'.$request['subcontractor_name'].'%')->select('id')->get()->toArray();
+                $ids = SubcontractorStructure::whereIn('subcontractor_id',$subContractorid)
+                    ->whereIn('id',$ids)->orderBy('created_at','desc')->pluck('id');
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+            if($request->has('contract_type_id') && $request->contract_type_id != "" && $filterFlag == true){
+                $ids = SubcontractorStructure::whereIn('id',$ids)
+                                    ->where('sc_structure_type_id', $request->contract_type_id)
+                                    ->orderBy('created_at','desc')->pluck('id');
+                if(count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+            $listingData = array();
+            if ($filterFlag) {
+                $listingData = SubcontractorBillTransaction::join('subcontractor_bills','subcontractor_bill_transactions.subcontractor_bills_id','=','subcontractor_bills.id')
+                                                            ->join('subcontractor_structure','subcontractor_bills.sc_structure_id','=','subcontractor_structure.id')
+                                                            ->where('paid_from_slug', 'cash')
+                                                            ->where('debit','<>', 0)
+                                                            ->whereIn('subcontractor_structure.id',$ids)
+                                                            ->with('subcontractorBill.subcontractorStructure','subcontractorBill.subcontractorStructure.projectSite.project','subcontractorBill.subcontractorStructure.subcontractor','subcontractorBill.subcontractorStructure.contractType')
+                                                            ->orderBy('subcontractor_bill_transactions.id', 'desc')
+                                                            ->skip($skip)->take($take)->get();
+                $totalRecordCount = SubcontractorBillTransaction::where('paid_from_slug', 'cash')->where('debit','<>', 0)->count();
+            }
+            $records = array();
+            $records['data'] = array();
+            $end = $request->length < 0 ? count($listingData) : $request->length;
+            for ($iterator = 0, $pagination = 0; $iterator < $end && $pagination < count($listingData); $iterator++, $pagination++) {
+                
+                $summaryArray = $listingData[$pagination]->subcontractorBill->subcontractorStructure->summaries;    
+                $totalRate = array_sum(array_column($summaryArray->toArray(),'rate'));
+                $totalWorkArea = array_sum(array_column($summaryArray->toArray(),'total_work_area'));;
+                $totalAmount = $summaryArray->sum(function($summary){
+                    return $summary->rate * $summary->total_work_area;
+                });
+                $cashTransactionCount = SubcontractorBillTransaction::where('subcontractor_bills_id',$listingData[$pagination]->subcontractorBill->id)->count();
+                $action = '<div class="btn-group">
+                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                            Actions
+                            <i class="fa fa-angle-down"></i>
+                        </button>
+                        <ul class="dropdown-menu pull-left" role="menu">';
+                if ($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-subcontractor-structure') || $user->customHasPermission('view-subcontractor-structure')) {
+                    $action .= '<li>
+                                    <a href="/subcontractor/structure/edit/'.$listingData[$pagination]->subcontractorBill->subcontractorStructure->id.'">
+                                            <i class="icon-docs"></i>Edit
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="javascript:void(0);" onclick="getSummaries('
+                                    ."'".$listingData[$pagination]->subcontractorBill->subcontractorStructure->id."',"
+                                    ."'".$listingData[$pagination]->id."',"
+                                    ."'".$listingData[$pagination]->debit."',"
+                                    ."'".$cashTransactionCount."')".'">
+                                        <i class="icon-docs"></i>PriceEdit</a>
+                                </li>';
+                }
+                if ($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('create-subcontractor-billing') || $user->customHasPermission('edit-subcontractor-billing') || $user->customHasPermission('view-subcontractor-billing') || $user->customHasPermission('approve-subcontractor-billing')) {
+                    $action .= '<li><a href="/subcontractor/bill/manage/'.$listingData[$pagination]->subcontractorBill->subcontractorStructure->id.'">
+                                        <i class="icon-docs"></i> Manage
+                                    </a></li>';
+                }
+                $action .= '</ul>
+                    </div>';
+                
+                
+
+                $records['data'][$iterator] = [
+                    ucwords($listingData[$pagination]->subcontractorBill->subcontractorStructure->subcontractor->company_name),
+                    $listingData[$pagination]->subcontractorBill->subcontractorStructure->projectSite->project->name,
+                    $listingData[$pagination]->subcontractorBill->subcontractorStructure->contractType->name,
+                    $totalRate,
+                    $totalWorkArea,
+                    $totalAmount,
+                    $listingData[$pagination]->debit,
+                    $listingData[$pagination]->is_modified,
+                    date('d M Y', strtotime($listingData[$pagination]['modified_at'])),
+                    date('d M Y', strtotime($listingData[$pagination]['created_at'])),
+                    $action
+                ];
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $totalRecordCount;
+            $records["recordsFiltered"] = $totalRecordCount;
+            $status = 200;
+        }catch (\Exception $e){
+            $records = [];
+            $status = 500;
+            $data = [
+                'action' => 'subcontractor structure listing',
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+        }
+        return response()->json($records, $status);
+    }
+
+    public function cashEntryEdit(SubcontractorCashEditRequest $request, $id)
+    {
+        try{
+            if($request->debit == 0) {
+                $request->session()->flash('error', 'Amount cant be 0!');
+                return redirect('/subcontractor/cashentry/manage');
+            }
+            $subcontractorBillTransaction = SubcontractorBillTransaction::where('id', $id)
+            ->with('subcontractorBill.subcontractorStructure',
+                   'subcontractorBill.subcontractorBillSummaries',
+                   'subcontractorBill.subcontractorStructure.projectSite.project',
+                   'subcontractorBill.subcontractorStructure.subcontractor',
+                   'subcontractorBill.subcontractorStructure.contractType')->first();
+
+            if(!is_null($subcontractorBillTransaction)) {
+
+                $contractType = $subcontractorBillTransaction->subcontractorBill->subcontractorStructure->contractType->slug;
+                $debit = $request->debit/$subcontractorBillTransaction->debit;
+
+                if($contractType == 'itemwise' || $contractType == 'sqft') {
+                    $billCount = $subcontractorBillTransaction->subcontractorBill->subcontractorBillSummaries->count();
+
+                    $quantity = $debit / $billCount;
+                    $subTotal = 0;
+                    foreach($subcontractorBillTransaction->subcontractorBill->subcontractorBillSummaries as $billSummary) {
+                        $billSummary->quantity = $quantity;
+                        $billSummary->save();
+                        $subTotal += $billSummary->subcontractorStructureSummary['rate']* $billSummary->quantity;
+                    }
+                }elseif($contractType == 'amountwise') {
+                    $billCount = $subcontractorBillTransaction->subcontractorBill->subcontractorBillSummaries->count();
+
+                    $quantity = $debit / $billCount;
+                    $subTotal = 0;
+                    foreach($subcontractorBillTransaction->subcontractorBill->subcontractorBillSummaries as $billSummary) {
+                        $billSummary->quantity = $quantity;
+                        $billSummary->save();
+                        $subTotal += $billSummary['total_work_area'] * $billSummary->subcontractorStructureSummary['rate']* $billSummary->quantity;
+                    }
+                }
+                $subcontractorBillTransaction->subcontractorBill->subtotal = $subTotal;
+                $subcontractorBillTransaction->subcontractorBill->grand_total = $subTotal;
+                $subcontractorBillTransaction->subcontractorBill->save(); 
+                $subcontractorBillTransaction->debit = $request->debit;
+                $subcontractorBillTransaction->is_modified = true;
+                $subcontractorBillTransaction->modified_at = Carbon::now();
+                $subcontractorBillTransaction->modified_by = $request->user()->id;
+                $subcontractorBillTransaction->save();
+                $request->session()->flash('success', 'Amount updated successfully.');
+            } else {
+                $request->session()->flash('error', 'Record Not Found');
+            }
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'subcontractor cash edit',
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $request->session()->flash('error', 'Something went wrong.');
+        }
+        return redirect('/subcontractor/cashentry/manage');
     }
 }

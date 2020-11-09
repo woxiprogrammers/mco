@@ -366,6 +366,25 @@
                             </div>
                             <div class="form-group row">
                                 <div class="col-md-4" style="text-align: right">
+                                    <label for="selected_employee_name" class="control-label">Selected Employee Name</label>
+                                    <span>*</span>
+                                </div>
+                                <div class="col-md-6">
+                                    <select class="form-control" id="selected_employee_name" name="selected_employee_name">
+                                       
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-4" style="text-align: right">
+                                    <label for="salary_total" class="control-label">Salary Total of selected employee</label>
+                                </div>
+                                <div class="col-md-6">
+                                    <span id="salary_total"></span>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-4" style="text-align: right">
                                     <label for="name" class="control-label">Date:</label>
                                     <span>*</span>
                                 </div>
@@ -447,8 +466,31 @@
                 if(val.length <= 0) {
                     $('#salary-delete-warning').modal('show');
                 } else {
-                    $('#salary-delete-modal').modal('show');
-                    $("#selected_delete_id").val(val);
+                    $.ajax({
+                        url:'/peticash/peticash-management/salary/delete/show',
+                        type: "POST",
+                        data: {
+                            _token: $("input[name='_token']").val(),
+                            salary_ids: val,
+                        },
+                        success: function(data, textStatus, xhr){
+                            var jsonObject = JSON.parse(data);
+                            if(typeof jsonObject =='object'){
+                                $("#salary_total").html(jsonObject.sum);
+                                var option = '';
+                                $.each(jsonObject.data, function (key, val) {
+                                    option += '<option>' + jsonObject.data[key].employee.name+' - ' + jsonObject.data[key].payable_amount + '</option>';
+                                });
+                                console.log(option);
+                                $("#selected_employee_name").html(option);
+                                $("#selected_delete_id").val(val);
+                                $('#salary-delete-modal').modal('show');
+                            }
+                        },
+                        error: function(data){
+
+                        }
+                    });
                 }
             });
 
