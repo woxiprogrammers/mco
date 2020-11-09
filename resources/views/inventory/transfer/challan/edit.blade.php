@@ -256,13 +256,10 @@
 <script src="/assets/global/plugins/datatables/datatables.min.js"></script>
 <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
-<script src="/assets/custom/purchase/purchase-order/purchase-order.js" type="text/javascript"></script>
-<script src="/assets/custom/purchase/purchase-order/purchase-order-advance-payment-datatable.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
 <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
-<script src="/assets/custom/purchase/purchase-order/purchase-order-validations.js"></script>
 <style>
     @-webkit-keyframes zoom {
         from {

@@ -58,4 +58,22 @@ class InventoryTransferChallan extends Model
         }
         return $data;
     }
+
+    public function getRemark()
+    {
+        $outTransferTypeId = InventoryTransferTypes::where('slug', 'site')->where('type', 'OUT')->pluck('id')->first();
+        $remark = InventoryComponentTransfers::where('inventory_transfer_challan_id', $this['id'])->where('transfer_type_id', $outTransferTypeId)->pluck('remark')->first();
+        return $remark;
+    }
+
+    public function getCreatedBy()
+    {
+        $outTransferTypeId = InventoryTransferTypes::where('slug', 'site')->where('type', 'OUT')->pluck('id')->first();
+        $outTransfer = InventoryComponentTransfers::where('inventory_transfer_challan_id', $this['id'])->where('transfer_type_id', $outTransferTypeId)->first();
+        $user = [
+            'id'    => $outTransfer['user_id'],
+            'name'  => $outTransfer->user->first_name . ' ' . $outTransfer->user->last_name
+        ];
+        return $user;
+    }
 }

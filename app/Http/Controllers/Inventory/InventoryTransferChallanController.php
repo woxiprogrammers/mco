@@ -402,7 +402,9 @@ class InventoryTransferChallanController extends Controller
             $challan['to_site'] = $challan->projectSiteIn->project->name ?? '-';
             $data = [
                 'challan'       => $challan,
-                'other_data'    => $challan->otherData()->toArray()
+                'other_data'    => $challan->otherData()->toArray(),
+                'remark'        => $challan->getRemark(),
+                'user'          => $challan->getCreatedBy()
             ];
             $outTransferComponents = InventoryComponentTransfers::join('inventory_components', 'inventory_components.id', '=', 'inventory_component_transfers.inventory_component_id')
                 ->join('units', 'units.id', '=', 'inventory_component_transfers.unit_id')
@@ -410,14 +412,14 @@ class InventoryTransferChallanController extends Controller
                 ->where('inventory_transfer_types.slug', 'site')->where('inventory_transfer_types.type', 'OUT')
                 ->where('inventory_component_transfers.inventory_transfer_challan_id', $challan['id'])
                 ->select('inventory_components.name as inventory_component_name', 'inventory_components.is_material', 'inventory_component_transfers.quantity', 'units.name as unit_name', 'inventory_component_transfers.rate_per_unit', 'inventory_component_transfers.cgst_amount', 'inventory_component_transfers.sgst_amount', 'inventory_component_transfers.igst_amount', DB::raw('COALESCE((cgst_amount+sgst_amount+igst_amount),0) as gst'), DB::raw('(rate_per_unit+COALESCE((cgst_amount+sgst_amount+igst_amount),0)) as total'))->get();
-            $data['materials'] = $outTransferComponents->where('is_material', true)->toArray();
+            $data['materials'] = array_values($outTransferComponents->where('is_material', true)->toArray());
             $data['materialTotal'] = [
                 'quantity_total' => array_sum(array_column($data['materials'], 'quantity')),
                 'rate_per_unit'  => array_sum(array_column($data['materials'], 'rate_per_unit')),
                 'gst_total'      => array_sum(array_column($data['materials'], 'gst')),
                 'total'          => array_sum(array_column($data['materials'], 'total'))
             ];
-            $data['assets'] = $outTransferComponents->where('is_material', false);
+            $data['assets'] = array_values($outTransferComponents->where('is_material', false)->toArray());
             $pdf = App::make('dompdf.wrapper');
             $pdf->loadHTML(view('inventory/transfer/challan/pdf/challan', $data));
             // $pdf->setPaper('A4', 'landscape');
