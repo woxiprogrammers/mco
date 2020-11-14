@@ -11,6 +11,7 @@ use App\Console\Commands\PurchaseOrderBillMonthlyExpenseCalculations;
 use App\Console\Commands\SalaryDistributionInSites;
 use App\Console\Commands\SendPurchaseOrderEmails;
 use App\Console\Commands\SubcontractorModuleMerge;
+use App\Console\Commands\InventoryAssetMaterialScript;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -29,7 +30,8 @@ class Kernel extends ConsoleKernel
         SalaryDistributionInSites::class,
         AssetRentCalculations::class,
         BillModuleChanges::class,
-        SubcontractorModuleMerge::class
+        SubcontractorModuleMerge::class,
+        InventoryAssetMaterialScript::class
     ];
 
     /**
