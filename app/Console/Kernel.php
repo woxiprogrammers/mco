@@ -11,6 +11,7 @@ use App\Console\Commands\PeticashSalaryTransactionMonthlyExpenseCalculations;
 use App\Console\Commands\PurchaseOrderBillMonthlyExpenseCalculations;
 use App\Console\Commands\SalaryDistributionInSites;
 use App\Console\Commands\SendPurchaseOrderEmails;
+use App\Console\Commands\SiteTranferChallanBill;
 use App\Console\Commands\SubcontractorModuleMerge;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -31,7 +32,8 @@ class Kernel extends ConsoleKernel
         AssetRentCalculations::class,
         BillModuleChanges::class,
         SubcontractorModuleMerge::class,
-        ChallanCreate::class
+        ChallanCreate::class,
+        SiteTranferChallanBill::class
     ];
 
     /**

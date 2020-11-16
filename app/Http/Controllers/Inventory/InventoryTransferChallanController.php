@@ -568,6 +568,9 @@ class InventoryTransferChallanController extends Controller
                     $this->sendPushNotification('Manisha Construction', $notificationString, $webTokens, $mobileTokens, 'c-m-s-i-t');
                 }
             }
+            if ($updateChallanStatusToClose) {
+                $challanUpdateData['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug', 'close')->pluck('id')->first();
+            }
             if ($request->has('post_grn_image') && count($request->post_grn_image) > 0) {
                 $sha1challanId = sha1($request['challan_id']);
                 $imageUploadPath = public_path() . env('INVENTORY_COMPONENT_IMAGE_UPLOAD');
