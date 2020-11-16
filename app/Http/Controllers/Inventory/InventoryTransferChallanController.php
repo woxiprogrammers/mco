@@ -162,11 +162,16 @@ class InventoryTransferChallanController extends Controller
             $challan->update(['challan_number'  => 'CH' . $challan->id]);
             $additionalData = $request->only(['out_project_site_id', 'user_id', 'in_project_site_id', 'vendor_id', 'transportation_amount', 'transportation_cgst_percent', 'transportation_sgst_percent', 'transportation_igst_percent', 'driver_name', 'mobile', 'vehicle_number', 'remark']);
             foreach ($request['inventory_cart'] as $cartId => $requestCartItem) {
-                if (array_key_exists('quantity', $requestCartItem)) {
-                    $cartItem = InventoryCart::find($cartId);
-                    if ($cartItem) {
+                $cartItem = InventoryCart::find($cartId);
+                if ($cartItem) {
+                    if (array_key_exists('checkbox', $requestCartItem)) {
                         $inventoryComponentOutTransfer = $this->createSiteOutTransferData($requestCartItem, $now, $additionalData, $cartItem->inventoryComponent, $challan);
                         $cartItem->delete();
+                    } else {
+                        $cartItem->update([
+                            'quantity'  => $requestCartItem['quantity'],
+                            'unit_id'  => $requestCartItem['unit_id']
+                        ]);
                     }
                 }
             }
@@ -175,7 +180,6 @@ class InventoryTransferChallanController extends Controller
             $challanStatus = InventoryComponentTransferStatus::whereIn('slug', ['requested', 'open', 'close', 'disapproved'])->select('id', 'name', 'slug')->get()->toArray();
             return view('inventory/transfer/challan/manage')->with(compact('projectSites', 'challanStatus'));
         } catch (Exception $e) {
-            dd($e->getMessage());
             $data = [
                 'action' => 'Inventory Transfer Challan manage',
                 'params' => $request->all(),

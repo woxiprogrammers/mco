@@ -112,7 +112,7 @@
                                                                             <div class="form-group" style="width: 80%; margin-left: 10%">
                                                                                 <input type="hidden" id="inventory_component_id_{{$material['id']}}" name="inventory_cart[{{$material['id']}}][inventory_component_id]" class="cart-inventory-component-id" value="{{$material['inventory_component_id']}}">
                                                                                 <input type="hidden" id="{{$material['id']}}" name="cart_id" class="cart-id" value="{{$material['id']}}">
-                                                                                <input type="checkbox" id="id_{{$material['id']}}" name="inventory_cart[{{$material['id']}}]" value="{{$material['id']}}" class="component-checkbox">
+                                                                                <input type="checkbox" id="id_{{$material['id']}}" name="inventory_cart[{{$material['id']}}][checkbox]" value="{{$material['id']}}" class="component-checkbox">
                                                                             </div>
                                                                         </td>
                                                                         <td>
