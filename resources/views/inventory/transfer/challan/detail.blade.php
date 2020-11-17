@@ -20,7 +20,7 @@
                         <div class="container">
                             <!-- BEGIN PAGE TITLE -->
                             <div class="page-title">
-                                <h1>Edit Challan</h1>
+                                <h1>Detail Challan</h1>
                             </div>
                             @if($challan->inventoryComponentTransferStatus->slug == 'open')
                             <div class="form-group " style="text-align: center">
@@ -110,34 +110,26 @@
                                                                         <div class="form-body">
                                                                             <div class="row">
                                                                                 <div class="col-md-12">
-                                                                                    <table class="table table-striped table-bordered table-hover order-column" id="challanMaterials" style="margin-top: 1%;">
+                                                                                    <table class="table table-striped table-bordered table-hover order-column" id="purchaseRequest" style="margin-top: 1%;">
                                                                                         <thead>
                                                                                             <tr>
                                                                                                 <th> Material Name </th>
                                                                                                 <th> Site Out Quantity</th>
+                                                                                                @if($challan['project_site_in_date'])
                                                                                                 <th> Site In Quantity</th>
+                                                                                                @endif
                                                                                                 <th> Unit </th>
-                                                                                                <th> Action</th>
                                                                                             </tr>
                                                                                         </thead>
                                                                                         <tbody>
                                                                                             @foreach($components as $key => $materialData)
                                                                                             <tr>
-                                                                                                <input type="hidden" class="out-transfer" id="{{$materialData['out_transfer_id']}}" value="{{$materialData['out_transfer_id']}}">
                                                                                                 <td> {{$materialData['name']}} </td>
-                                                                                                <td>
-                                                                                                    <div class="form-group" style="width: 80%; margin-left: 10%">
-                                                                                                        <input type="number" class="form-control site-out-transfer" id="componentRow-{{$materialData['out_transfer_id']}}-site-out-quantity" name="component[{{$materialData['out_transfer_id']}}][site_out_quantity]" value="{{$materialData['site_out_quantity']}}" onchange="checkQuantity({{$materialData['out_transfer_id']}})">
-                                                                                                    </div>
-                                                                                                </td>
-                                                                                                <td>
-                                                                                                    <div class="form-group" style="width: 80%; margin-left: 10%">
-                                                                                                        <input type="number" class="form-control site-in-transfer" id="componentRow-{{$materialData['out_transfer_id']}}-site-in-quantity" name="component[{{$materialData['out_transfer_id']}}][site_in_quantity]" value="{{$materialData['site_in_quantity']}}">
-                                                                                                    </div>
-                                                                                                </td>
+                                                                                                <td> {{$materialData['site_out_quantity']}} </td>
+                                                                                                @if($challan['project_site_in_date'])
+                                                                                                <td> {{$materialData['site_in_quantity']}} </td>
+                                                                                                @endif
                                                                                                 <td> {{$materialData['unit']}} </td>
-                                                                                                <td><button class="component-view" value="{{$materialData['name']}}">View</button>
-                                                                                                </td>
                                                                                             </tr>
                                                                                             @endforeach
                                                                                         </tbody>
@@ -199,11 +191,75 @@
                                                                                 </div>
                                                                             </div>
 
-                                                                            <div class="form-actions noborder row">
-                                                                                <div class="col-md-offset-11">
-                                                                                    <button type="submit" class="btn red" id="submit"><i class="fa fa-check"></i> Submit</button>
+                                                                            <div class="form-group row">
+                                                                                <div class="col-md-3" style="text-align: right">
+                                                                                    <label class="control-label">Site Out Remark</label>
+                                                                                    <span>*</span>
+                                                                                </div>
+                                                                                <div class="col-md-6">
+                                                                                    <input type="text" class="form-control" value="{{$out_remark}}" disabled>
                                                                                 </div>
                                                                             </div>
+                                                                            @if($challan['project_site_in_date'])
+                                                                            <div class="form-group row">
+                                                                                <div class="col-md-3" style="text-align: right">
+                                                                                    <label class="control-label">Site In Remark</label>
+                                                                                    <span>*</span>
+                                                                                </div>
+                                                                                <div class="col-md-6">
+                                                                                    <input type="text" class="form-control" value="{{$in_remark}}" disabled>
+                                                                                </div>
+                                                                            </div>
+                                                                            @endif
+                                                                            <div class="form-group row">
+                                                                                <div class="col-md-3" style="text-align: right">
+                                                                                    <label class="control-label">Mobile</label>
+                                                                                    <span>*</span>
+                                                                                </div>
+                                                                                <div class="col-md-6">
+                                                                                    <input type="text" class="form-control" id="mobile" name="mobile" value="{{$challan['other_data']['mobile']}}" disabled>
+                                                                                </div>
+                                                                            </div>
+                                                                            @if(count($outImages) > 0)
+                                                                            <table class="table table-bordered table-hover">
+                                                                                <thead>
+                                                                                    <tr>
+                                                                                        <th> Out Images </th>
+                                                                                    </tr>
+                                                                                </thead>
+                                                                                <tbody>
+                                                                                    @foreach($outImages as $imagePath)
+                                                                                    <tr>
+                                                                                        <td>
+                                                                                            <a href="{{$imagePath}}" target="_blank">
+                                                                                                <img class="img-responsive" src="{{$imagePath}}" alt="" style="width:400px; height:200px;">
+                                                                                            </a>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                    @endforeach
+                                                                                </tbody>
+                                                                            </table>
+                                                                            @endif
+                                                                            @if(count($inImages) > 0 && $challan['project_site_in_date'])
+                                                                            <table class="table table-bordered table-hover">
+                                                                                <thead>
+                                                                                    <tr>
+                                                                                        <th> In Images </th>
+                                                                                    </tr>
+                                                                                </thead>
+                                                                                <tbody>
+                                                                                    @foreach($inImages as $imagePath)
+                                                                                    <tr>
+                                                                                        <td>
+                                                                                            <a href="{{$imagePath}}" target="_blank">
+                                                                                                <img class="img-responsive" src="{{$imagePath}}" alt="" style="width:400px; height:200px;">
+                                                                                            </a>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                    @endforeach
+                                                                                </tbody>
+                                                                            </table>
+                                                                            @endif
                                                                         </div>
                                                                     </form>
                                                                 </div>
@@ -297,12 +353,6 @@
 </style>
 <script>
     $(document).ready(function() {
-        EditChallan.init();
-        $('#challanMaterials tbody tr').each(function(index, tr) {
-            var outTransferId = $(this).find(".out-transfer").attr('id');
-            checkQuantity(outTransferId);
-        });
-
 
         $(".approveDisapproveChallan").click(function() {
             var status = $(this).val();
@@ -324,6 +374,7 @@
                 }
             })
         });
+
 
 
 
@@ -557,66 +608,5 @@
             alert('Please enter valid password');
         }
     }
-
-    function checkQuantity(outTransferId) {
-        $("#componentRow-" + outTransferId + "-site-out-quantity").rules('add', {
-            min: $("#componentRow-" + outTransferId + "-site-in-quantity").val()
-        });
-        $("#componentRow-" + outTransferId + "-site-in-quantity").rules('add', {
-            max: $("#componentRow-" + outTransferId + "-site-out-quantity").val()
-        });
-    }
-
-    var EditChallan = function() {
-        var handleCreate = function() {
-            var form = $('#edit-challan');
-            var error = $('.alert-danger', form);
-            var success = $('.alert-success', form);
-            form.validate({
-                errorElement: 'span', //default input error message container
-                errorClass: 'help-block', // default input error message class
-                focusInvalid: false, // do not focus the last invalid input
-                rules: {
-                    transportation_amount: {
-                        required: true,
-                        max: 5
-                    }
-                },
-                messages: {
-
-                },
-                invalidHandler: function(event, validator) { //display error alert on form submit
-                    success.hide();
-                    error.show();
-                },
-
-                highlight: function(element) { // hightlight error inputs
-                    $(element)
-                        .closest('.form-group').addClass('has-error'); // set error class to the control group
-                },
-
-                unhighlight: function(element) { // revert the change done by hightlight
-                    $(element)
-                        .closest('.form-group').removeClass('has-error'); // set error class to the control group
-                },
-
-                success: function(label) {
-                    label
-                        .closest('.form-group').addClass('has-success');
-                },
-
-                submitHandler: function(form) {
-                    success.show();
-                    error.hide();
-                    form.submit();
-                }
-            });
-        };
-        return {
-            init: function() {
-                handleCreate();
-            }
-        };
-    }();
 </script>
 @endsection

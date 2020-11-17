@@ -368,6 +368,7 @@ class InventoryTransferChallanController extends Controller
         try {
             $challan = InventoryTransferChallan::find($challanId);
             $outTransferType = InventoryTransferTypes::where('slug', 'site')->where('type', 'OUT')->first();
+            $inTransferType = InventoryTransferTypes::where('slug', 'site')->where('type', 'IN')->first();
             $inventoryComponentOutTransfers = $outTransferType->inventoryComponentTransfers->where('inventory_transfer_challan_id', $challan['id']);
             foreach ($inventoryComponentOutTransfers as $outTransferComponent) {
                 $siteInQuantity = '-';
@@ -376,6 +377,7 @@ class InventoryTransferChallanController extends Controller
                     $siteInQuantity = $inTransferComponent->quantity ?? '-';
                 }
                 $components[] = [
+                    'out_transfer_id'   => $outTransferComponent->id,
                     'name'              => $outTransferComponent->inventoryComponent->name,
                     'is_material'       => $outTransferComponent->inventoryComponent->is_material,
                     'unit'              => $outTransferComponent->unit->name,
@@ -383,16 +385,47 @@ class InventoryTransferChallanController extends Controller
                     'site_in_quantity'  => $siteInQuantity
                 ];
             }
+            $firstInTransfer = $inTransferType->inventoryComponentTransfers->where('inventory_transfer_challan_id', $challan['id'])->first();
+            $firstOutTransfer = $outTransferType->inventoryComponentTransfers->where('inventory_transfer_challan_id', $challan['id'])->first();
+            $out_remark = $firstOutTransfer['remark'];
+            $in_remark = $firstInTransfer['remark'];
+            $inImages = $firstInTransfer ? $this->getTransferImages($firstInTransfer) : [];
+            $outImages = $this->getTransferImages($firstOutTransfer);
             $challan['other_data'] = $challan->otherData()->toArray();
-            return view('inventory/transfer/challan/edit')->with(compact('challan', 'projectSites', 'challanStatus', 'components'));
+            return view('inventory/transfer/challan/detail')->with(compact('challan', 'projectSites', 'challanStatus', 'components', 'out_remark', 'in_remark', 'inImages', 'outImages'));
         } catch (Exception $e) {
-            dd($e->getMessage());
             $data = [
                 'action'    => 'Inventory Transfer Challan Edit view',
                 'params'    => $request->all(),
                 'exception' => $e->getMessage()
             ];
             Log::critical(json_encode($data));
+        }
+    }
+
+    public function getTransferImages($inventoryComponentTransfer)
+    {
+        try {
+            $paths = array();
+            $sha1challanId = sha1($inventoryComponentTransfer['inventory_transfer_challan_id']);
+            $imageUploadPath = env('INVENTORY_COMPONENT_IMAGE_UPLOAD');
+            if ($inventoryComponentTransfer->transferType->type === 'IN') {
+                $newInUploadPath = $imageUploadPath . DIRECTORY_SEPARATOR . $sha1challanId . DIRECTORY_SEPARATOR . 'in';
+            } else {
+                $newInUploadPath = $imageUploadPath . DIRECTORY_SEPARATOR . $sha1challanId . DIRECTORY_SEPARATOR . 'out';
+            }
+            foreach ($inventoryComponentTransfer->images as $image) {
+                $paths[] = $newInUploadPath . DIRECTORY_SEPARATOR . $image->name;
+            }
+            return $paths;
+        } catch (\Exception $e) {
+            $data = [
+                'action' => 'Get Inventory Component Transfer Images',
+                'component' => $inventoryComponentTransfer,
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
         }
     }
 
@@ -771,6 +804,15 @@ class InventoryTransferChallanController extends Controller
                 "message"   => "Internal Server error",
                 "success"   => false
             ], 500);
+        }
+    }
+
+    public function editChallan(Request $request)
+    {
+        try {
+            dd($request->all());
+        } catch (Exception $e) {
+            dd($e->getMessage());
         }
     }
 }
