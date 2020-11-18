@@ -149,6 +149,7 @@ class InventoryTransferChallanController extends Controller
     public function createChallan(Request $request)
     {
         try {
+            dd($request->all());
             $now = Carbon::now();
             $challan = new InventoryTransferChallan([
                 'challan_number'                        => 'CH',
@@ -310,31 +311,42 @@ class InventoryTransferChallanController extends Controller
 
             for ($iterator = 0, $pagination = 0; $iterator < $end && $pagination < count($challanData); $iterator++, $pagination++) {
                 $challanRelatedData = $challanData[$pagination]->otherData();
+                $detailDiv = '<div class="btn btn-small blue" title="DETAIL">
+                                <a href="/inventory/transfer/challan/info/' . $challanData[$pagination]['id'] . '" style="color: white">
+                                    <i class="fa fa-info" aria-hidden="true"></i>
+                                </a>
+                            </div>';
+                $editDiv = '<div class="btn btn-small blue" title="EDIT">
+                            <a href="/inventory/transfer/challan/edit/' . $challanData[$pagination]['id'] . '" style="color: white">
+                                <i class="fa fa-edit" aria-hidden="true"></i>
+                            </a>
+                        </div>';
                 switch ($challanData[$pagination]->inventoryComponentTransferStatus->slug) {
                     case 'requested':
                         $actionDropDownStatus = '<i class="fa fa-circle-o" title="Requested" style="font-size:24px;color:orange">&nbsp;&nbsp;</i>';
+                        $secondDiv = $editDiv;
                         break;
                     case 'disapproved':
                         $actionDropDownStatus = '<i class="fa fas fa-ban" title="Disapproved" style="font-size:24px;color:red">&nbsp;&nbsp;</i>';
+                        $secondDiv = $detailDiv;
                         break;
                     case 'open':
                         $actionDropDownStatus = '<i class="fa fa-check-circle" title="Open" style="font-size:24px;color:green">&nbsp;&nbsp;</i>';
+                        $secondDiv = $editDiv;
                         break;
                     case 'close':
                         $actionDropDownStatus = '<i class="fa fa-times-circle" title="Close" style="font-size:24px;color:red">&nbsp;&nbsp;</i>';
+                        $secondDiv = $detailDiv;
                         break;
                 }
+                $pdfDiv =   '<div class="btn btn-small blue" title="PDF">
+                                <a href="/inventory/transfer/challan/pdf/' . $challanData[$pagination]['id'] . '" style="color: white"> 
+                                    <i class="fa fa-download" aria-hidden="true"></i>
+                                </a>
+                            </div>';
 
-                $actionDropDown =  '<div class="btn btn-small blue" title="PDF">
-                                            <a href="/inventory/transfer/challan/pdf/' . $challanData[$pagination]['id'] . '" style="color: white"> 
-                                                <i class="fa fa-download" aria-hidden="true"></i>
-                                            </a>
-                                        </div>
-                                        <div class="btn btn-small blue" title="EDIT">
-                                            <a href="/inventory/transfer/challan/edit/' . $challanData[$pagination]['id'] . '" style="color: white">
-                                                <i class="fa fa-edit" aria-hidden="true"></i>
-                                            </a>
-                                        </div>';
+
+                $actionDropDown =  $pdfDiv . $secondDiv;
                 $records['data'][$iterator] = [
                     date('d M Y', strtotime($challanData[$pagination]->created_at)),
                     $challanData[$pagination]->challan_number,
@@ -379,6 +391,49 @@ class InventoryTransferChallanController extends Controller
                 $components[] = [
                     'out_transfer_id'   => $outTransferComponent->id,
                     'name'              => $outTransferComponent->inventoryComponent->name,
+                    'out_inventory_component_id'    => $outTransferComponent->inventoryComponent->id,
+                    'is_material'       => $outTransferComponent->inventoryComponent->is_material,
+                    'unit'              => $outTransferComponent->unit->name,
+                    'unit_id'              => $outTransferComponent->unit->id,
+                    'site_out_quantity' => $outTransferComponent->quantity,
+                    'site_in_quantity'  => $siteInQuantity
+                ];
+            }
+            $firstInTransfer = $inTransferType->inventoryComponentTransfers->where('inventory_transfer_challan_id', $challan['id'])->first();
+            $firstOutTransfer = $outTransferType->inventoryComponentTransfers->where('inventory_transfer_challan_id', $challan['id'])->first();
+            $out_remark = $firstOutTransfer['remark'];
+            $in_remark = $firstInTransfer['remark'];
+            $inImages = $firstInTransfer ? $this->getTransferImages($firstInTransfer) : [];
+            $outImages = $this->getTransferImages($firstOutTransfer);
+            $challan['other_data'] = $challan->otherData()->toArray();
+            $isSiteInDone = ($challan['project_site_in_date']) ? true : false;
+            return view('inventory/transfer/challan/edit')->with(compact('challan', 'projectSites', 'challanStatus', 'components', 'out_remark', 'in_remark', 'inImages', 'outImages', 'isSiteInDone'));
+        } catch (Exception $e) {
+            $data = [
+                'action'    => 'Inventory Transfer Challan Edit view',
+                'params'    => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+        }
+    }
+
+    public function getDetail(Request $request, $challanId)
+    {
+        try {
+            $challan = InventoryTransferChallan::find($challanId);
+            $outTransferType = InventoryTransferTypes::where('slug', 'site')->where('type', 'OUT')->first();
+            $inTransferType = InventoryTransferTypes::where('slug', 'site')->where('type', 'IN')->first();
+            $inventoryComponentOutTransfers = $outTransferType->inventoryComponentTransfers->where('inventory_transfer_challan_id', $challan['id']);
+            foreach ($inventoryComponentOutTransfers as $outTransferComponent) {
+                $siteInQuantity = '-';
+                if ($outTransferComponent['related_transfer_id'] != null) {
+                    $inTransferComponent = InventoryComponentTransfers::find($outTransferComponent['related_transfer_id']);
+                    $siteInQuantity = $inTransferComponent->quantity ?? '-';
+                }
+                $components[] = [
+                    'out_transfer_id'   => $outTransferComponent->id,
+                    'name'              => $outTransferComponent->inventoryComponent->name,
                     'is_material'       => $outTransferComponent->inventoryComponent->is_material,
                     'unit'              => $outTransferComponent->unit->name,
                     'site_out_quantity' => $outTransferComponent->quantity,
@@ -395,7 +450,7 @@ class InventoryTransferChallanController extends Controller
             return view('inventory/transfer/challan/detail')->with(compact('challan', 'projectSites', 'challanStatus', 'components', 'out_remark', 'in_remark', 'inImages', 'outImages'));
         } catch (Exception $e) {
             $data = [
-                'action'    => 'Inventory Transfer Challan Edit view',
+                'action'    => 'Inventory Transfer Challan Detail view',
                 'params'    => $request->all(),
                 'exception' => $e->getMessage()
             ];
@@ -810,9 +865,42 @@ class InventoryTransferChallanController extends Controller
     public function editChallan(Request $request)
     {
         try {
-            dd($request->all());
+            foreach ($request['component'] as $outTransferId => $quantityData) {
+                $outTransfer = InventoryComponentTransfers::find($outTransferId);
+                $outTransfer->update([
+                    'quantity'                      => $quantityData['site_out_quantity'],
+                    'transportation_amount'         => $request['transportation_amount'],
+                    'transportation_cgst_percent'   => $request['transportation_cgst_percent'],
+                    'transportation_sgst_percent'   => $request['transportation_sgst_percent'],
+                    'transportation_igst_percent'   => $request['transportation_igst_percent'],
+                    'mobile'                        => $request['mobile'],
+                    'driver_name'                   => $request['driver_name'],
+                    'remark'                        => $request['out_remark'] ?? $outTransfer['remark']
+                ]);
+                if ($outTransfer['related_transfer_id'] != null) {
+                    $inTransferComponent = InventoryComponentTransfers::find($outTransfer['related_transfer_id']);
+                    $inTransferComponent->update([
+                        'quantity'                      => $quantityData['site_in_quantity'],
+                        'transportation_amount'         => $request['transportation_amount'],
+                        'transportation_cgst_percent'   => $request['transportation_cgst_percent'],
+                        'transportation_sgst_percent'   => $request['transportation_sgst_percent'],
+                        'transportation_igst_percent'   => $request['transportation_igst_percent'],
+                        'mobile'                        => $request['mobile'],
+                        'driver_name'                   => $request['driver_name'],
+                        'remark'                        => $request['in_remark'] ?? $outTransfer['remark']
+                    ]);
+                }
+            }
+            $request->session()->flash('success', 'Challan Edited Successfully!!');
+            return redirect('/inventory/transfer/challan/edit/' . $request['challan_id']);
         } catch (Exception $e) {
-            dd($e->getMessage());
+            $data = [
+                'action' => 'Challan edit',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            $request->session()->flash('fail', 'Something went wrong');
+            return redirect('/inventory/transfer/challan/edit/' . $request['challan_id']);
         }
     }
 }

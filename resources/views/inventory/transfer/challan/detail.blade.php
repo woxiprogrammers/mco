@@ -20,7 +20,12 @@
                         <div class="container">
                             <!-- BEGIN PAGE TITLE -->
                             <div class="page-title">
+
+                                @if($challan['project_site_in_date'] == null && $challan->inventoryComponentTransferStatus->slug == 'open')
+                                <h1>Detail Challan <label style="color: darkred;">(Note: Site In pending)</label></h1>
+                                @else
                                 <h1>Detail Challan</h1>
+                                @endif
                             </div>
                             @if($challan->inventoryComponentTransferStatus->slug == 'open')
                             <div class="form-group " style="text-align: center">
@@ -107,6 +112,7 @@
                                                                 <div class="portlet-body form">
                                                                     <form role="form" id="edit-challan" class="form-horizontal" method="post" action="/inventory/transfer/challan/edit/{{$challan['id']}}">
                                                                         {!! csrf_field() !!}
+
                                                                         <div class="form-body">
                                                                             <div class="row">
                                                                                 <div class="col-md-12">
@@ -142,7 +148,7 @@
                                                                                     <span>*</span>
                                                                                 </div>
                                                                                 <div class="col-md-6">
-                                                                                    <input type="text" class="form-control" id="transportation_amount" name="transportation_amount" value="{{$challan['other_data']['transportation_amount']}}">
+                                                                                    <input type="text" class="form-control" id="transportation_amount" name="transportation_amount" value="{{$challan['other_data']['transportation_amount']}}" disabled>
                                                                                 </div>
                                                                             </div>
                                                                             <div class="form-group row">

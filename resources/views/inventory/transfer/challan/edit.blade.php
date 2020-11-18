@@ -64,7 +64,7 @@
                                     <i class="fa fa-circle"></i>
                                 </li>
                             </ul>
-                            <input type="hidden" id="challan_id" value="{{$challan['id']}}">
+
                             <div class="row">
                                 <div class="col-md-12">
                                     <!-- BEGIN VALIDATION STATES-->
@@ -74,7 +74,7 @@
                                                 <div class="col-md-4">
                                                     <div class="form-group">
                                                         <label style="color: darkblue;">Challan Number</label>
-                                                        <input type="text" class="form-control" name="challan_id" value="{{$challan['challan_number']}}" readonly tabindex="-1">
+                                                        <input type="text" class="form-control" value="{{$challan['challan_number']}}" readonly tabindex="-1">
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
@@ -107,6 +107,7 @@
                                                                 <div class="portlet-body form">
                                                                     <form role="form" id="edit-challan" class="form-horizontal" method="post" action="/inventory/transfer/challan/edit/{{$challan['id']}}">
                                                                         {!! csrf_field() !!}
+                                                                        <input type="hidden" id="challan_id" name="challan_id" value="{{$challan['id']}}">
                                                                         <div class="form-body">
                                                                             <div class="row">
                                                                                 <div class="col-md-12">
@@ -115,60 +116,101 @@
                                                                                             <tr>
                                                                                                 <th> Material Name </th>
                                                                                                 <th> Site Out Quantity</th>
+                                                                                                @if ($isSiteInDone)
                                                                                                 <th> Site In Quantity</th>
+                                                                                                @endif
                                                                                                 <th> Unit </th>
-                                                                                                <th> Action</th>
                                                                                             </tr>
                                                                                         </thead>
                                                                                         <tbody>
                                                                                             @foreach($components as $key => $materialData)
                                                                                             <tr>
+                                                                                                <input type="hidden" id="componentRow-{{$materialData['out_transfer_id']}}-component-id" value="{{$materialData['out_inventory_component_id']}}">
                                                                                                 <input type="hidden" class="out-transfer" id="{{$materialData['out_transfer_id']}}" value="{{$materialData['out_transfer_id']}}">
                                                                                                 <td> {{$materialData['name']}} </td>
                                                                                                 <td>
                                                                                                     <div class="form-group" style="width: 80%; margin-left: 10%">
-                                                                                                        <input type="number" class="form-control site-out-transfer" id="componentRow-{{$materialData['out_transfer_id']}}-site-out-quantity" name="component[{{$materialData['out_transfer_id']}}][site_out_quantity]" value="{{$materialData['site_out_quantity']}}" onchange="checkQuantity({{$materialData['out_transfer_id']}})">
+                                                                                                        <input type="number" class="form-control site-out-transfer" id="componentRow-{{$materialData['out_transfer_id']}}-site-out-quantity" name="component[{{$materialData['out_transfer_id']}}][site_out_quantity]" value="{{$materialData['site_out_quantity']}}" onchange="checkQuantity(this, 'out-transfer')">
                                                                                                     </div>
                                                                                                 </td>
+                                                                                                @if ($isSiteInDone)
                                                                                                 <td>
                                                                                                     <div class="form-group" style="width: 80%; margin-left: 10%">
-                                                                                                        <input type="number" class="form-control site-in-transfer" id="componentRow-{{$materialData['out_transfer_id']}}-site-in-quantity" name="component[{{$materialData['out_transfer_id']}}][site_in_quantity]" value="{{$materialData['site_in_quantity']}}">
+                                                                                                        <input type="number" class="form-control site-in-transfer" id="componentRow-{{$materialData['out_transfer_id']}}-site-in-quantity" name="component[{{$materialData['out_transfer_id']}}][site_in_quantity]" value="{{$materialData['site_in_quantity']}}" onchange="checkQuantity(this, 'in-transfer')">
                                                                                                     </div>
                                                                                                 </td>
-                                                                                                <td> {{$materialData['unit']}} </td>
-                                                                                                <td><button class="component-view" value="{{$materialData['name']}}">View</button>
+                                                                                                @else
+                                                                                                <td hidden>
+                                                                                                    <div class="form-group" style="width: 80%; margin-left: 10%">
+                                                                                                        <input type="number" class="form-control site-in-transfer" id="componentRow-{{$materialData['out_transfer_id']}}-site-in-quantity" name="component[{{$materialData['out_transfer_id']}}][site_in_quantity]" value="0">
+                                                                                                    </div>
                                                                                                 </td>
+                                                                                                @endif
+                                                                                                <td> {{$materialData['unit']}} </td>
+                                                                                                <input type="hidden" id="componentRow-{{$materialData['out_transfer_id']}}-unit-id" value="{{$materialData['unit_id']}}">
                                                                                             </tr>
                                                                                             @endforeach
                                                                                         </tbody>
                                                                                     </table>
                                                                                 </div>
                                                                             </div>
-                                                                            <div class="form-group row">
-                                                                                <div class="col-md-3" style="text-align: right">
-                                                                                    <label class="control-label">Transportation Amount</label>
+                                                                            <div class="row form-group" id="transportation_amount">
+                                                                                <div class="col-md-3">
+                                                                                    <label class="control-label pull-right">Transportation Amount</label>
                                                                                     <span>*</span>
                                                                                 </div>
                                                                                 <div class="col-md-6">
-                                                                                    <input type="text" class="form-control" id="transportation_amount" name="transportation_amount" value="{{$challan['other_data']['transportation_amount']}}">
+                                                                                    <input type="text" class="form-control transportation-amount" name="transportation_amount" value="{{$challan['other_data']['transportation_amount']}}" onkeyup="calculateTransportationTaxes()">
                                                                                 </div>
                                                                             </div>
-                                                                            <div class="form-group row">
-                                                                                <div class="col-md-3" style="text-align: right">
-                                                                                    <label class="control-label">Transportation Tax Amount</label>
-                                                                                    <span>*</span>
+                                                                            <div class=" row form-group" id="transportation_cgst">
+                                                                                <div class="col-md-3">
+                                                                                    <label class="control-label pull-right">CGST</label>
                                                                                 </div>
-                                                                                <div class="col-md-6">
-                                                                                    <input type="text" class="form-control" id="transportation_tax_total" name="transportation_tax_total" value="{{$challan['other_data']['transportation_tax_total']}}" disabled>
+                                                                                <div class="col-md-3">
+                                                                                    <div class="input-group">
+                                                                                        <input type="text" class="form-control transportation-cgst-percentage" name="transportation_cgst_percent" value="{{$challan['other_data']['transportation_cgst_percent']}}" onkeyup="calculateTransportationTaxes()">
+                                                                                        <span class="input-group-addon">%</span>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-md-3">
+                                                                                    <input type="text" class="form-control transportation-cgst-amount" readonly>
                                                                                 </div>
                                                                             </div>
-                                                                            <div class="form-group row">
-                                                                                <div class="col-md-3" style="text-align: right">
-                                                                                    <label class="control-label">Transportation Total</label>
-                                                                                    <span>*</span>
+                                                                            <div class="row form-group" id="transportation_sgst">
+                                                                                <div class="col-md-3">
+                                                                                    <label class="control-label pull-right">SGST</label>
+                                                                                </div>
+                                                                                <div class="col-md-3">
+                                                                                    <div class="input-group">
+                                                                                        <input type="text" class="form-control transportation-sgst-percentage" name="transportation_sgst_percent" value="{{$challan['other_data']['transportation_sgst_percent']}}" onkeyup="calculateTransportationTaxes()">
+                                                                                        <span class="input-group-addon">%</span>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-md-3">
+                                                                                    <input type="text" class="form-control transportation-sgst-amount" readonly>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="row form-group" id="transportation_igst">
+                                                                                <div class="col-md-3">
+                                                                                    <label class="control-label pull-right">IGST</label>
+                                                                                </div>
+                                                                                <div class="col-md-3">
+                                                                                    <div class="input-group">
+                                                                                        <input type="text" class="form-control transportation-igst-percentage" name="transportation_igst_percent" value="{{$challan['other_data']['transportation_igst_percent']}}" onkeyup="calculateTransportationTaxes()">
+                                                                                        <span class="input-group-addon">%</span>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-md-3">
+                                                                                    <input type="text" class="form-control transportation-igst-amount" readonly>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="row form-group" id="transportation_total">
+                                                                                <div class="col-md-3">
+                                                                                    <label class="control-label pull-right">Transportation Total</label>
                                                                                 </div>
                                                                                 <div class="col-md-6">
-                                                                                    <input type="text" class="form-control" id="transportation_total" name="transportation_total" value="{{$challan['other_data']['transportation_total']}}" disabled>
+                                                                                    <input type="text" class="form-control transportation-total" value="{{$challan['other_data']['transportation_total']}}" readonly>
                                                                                 </div>
                                                                             </div>
                                                                             <div class="form-group row">
@@ -186,7 +228,7 @@
                                                                                     <span>*</span>
                                                                                 </div>
                                                                                 <div class="col-md-6">
-                                                                                    <input type="text" class="form-control" id="driver_name" name="driver_name" value="{{$challan['other_data']['driver_name']}}" disabled>
+                                                                                    <input type="text" class="form-control" id="driver_name" name="driver_name" value="{{$challan['other_data']['driver_name']}}">
                                                                                 </div>
                                                                             </div>
                                                                             <div class="form-group row">
@@ -195,10 +237,29 @@
                                                                                     <span>*</span>
                                                                                 </div>
                                                                                 <div class="col-md-6">
-                                                                                    <input type="text" class="form-control" id="mobile" name="mobile" value="{{$challan['other_data']['mobile']}}" disabled>
+                                                                                    <input type="text" class="form-control" id="mobile" name="mobile" value="{{$challan['other_data']['mobile']}}">
                                                                                 </div>
                                                                             </div>
-
+                                                                            <div class="form-group row">
+                                                                                <div class="col-md-3" style="text-align: right">
+                                                                                    <label class="control-label">Site Out Remark</label>
+                                                                                    <span>*</span>
+                                                                                </div>
+                                                                                <div class="col-md-6">
+                                                                                    <input type="text" class="form-control" name="out_remark" value="{{$out_remark}}">
+                                                                                </div>
+                                                                            </div>
+                                                                            @if($isSiteInDone)
+                                                                            <div class="form-group row">
+                                                                                <div class="col-md-3" style="text-align: right">
+                                                                                    <label class="control-label">Site In Remark</label>
+                                                                                    <span>*</span>
+                                                                                </div>
+                                                                                <div class="col-md-6">
+                                                                                    <input type="text" class="form-control" name="in_remark" value="{{$in_remark}}">
+                                                                                </div>
+                                                                            </div>
+                                                                            @endif
                                                                             <div class="form-actions noborder row">
                                                                                 <div class="col-md-offset-11">
                                                                                     <button type="submit" class="btn red" id="submit"><i class="fa fa-check"></i> Submit</button>
@@ -267,8 +328,6 @@
 <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
-<script src="/assets/global/plugins/typeahead/typeahead.bundle.min.js"></script>
-<script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
 <style>
     @-webkit-keyframes zoom {
         from {
@@ -298,11 +357,7 @@
 <script>
     $(document).ready(function() {
         EditChallan.init();
-        $('#challanMaterials tbody tr').each(function(index, tr) {
-            var outTransferId = $(this).find(".out-transfer").attr('id');
-            checkQuantity(outTransferId);
-        });
-
+        calculateTransportationTaxes();
 
         $(".approveDisapproveChallan").click(function() {
             var status = $(this).val();
@@ -325,32 +380,6 @@
             })
         });
 
-
-
-        $("#componentSelectButton").on('click', function() {
-            if ($(".component-select:checkbox:checked").length > 0) {
-                var componentIds = [];
-                $(".component-select:checkbox:checked").each(function() {
-                    componentIds.push($(this).val());
-                });
-                $.ajax({
-                    url: '/purchase/purchase-order/get-component-details?_token=' + $("input[name='_token']").val(),
-                    type: "POST",
-                    data: {
-                        purchase_order_component_id: componentIds
-                    },
-                    success: function(data, textStatus, xhr) {
-                        GenerateGRN.init();
-                        $("#componentDetailsDiv").html(data);
-                        $("#componentDetailsDiv").show();
-                        $("#transactionCommonFieldDiv").show();
-                    },
-                    error: function(errorData) {
-                        alert('Something went wrong.');
-                    }
-                })
-            }
-        });
         $("#imageupload").on('change', function() {
             var countFiles = $(this)[0].files.length;
             var imgPath = $(this)[0].value;
@@ -401,90 +430,7 @@
                 alert("Select Only images");
             }
         });
-
-        $("#grnImageUplaodButton a").on('click', function() {
-            var imageArray = $("#transactionForm").serializeArray();
-            $.ajax({
-                url: '/purchase/purchase-order/transaction/upload-pre-grn-images',
-                type: 'POST',
-                data: imageArray,
-                beforeSend: function() {
-                    $("#imageupload").hide();
-                    $("#grnImageUplaodButton").hide();
-                },
-                success: function(data, textStatus, xhr) {
-                    $("#imageupload").hide();
-                    $("#grnImageUplaodButton").hide();
-                    $("#purchaseOrderTransactionId").val(data.purchase_order_transaction_id);
-                    $("#transactionForm input[name='grn']").val(data.grn);
-                    $("#afterImageUploadDiv").show();
-                },
-                error: function(errorData) {
-
-                }
-            });
-        });
-
-        $(".transaction-edit-btn").on('click', function() {
-            var transactionId = $(this).closest('tr').find('input[type="hidden"]').val();
-            $.ajax({
-                url: '/purchase/purchase-order/transaction/edit/' + transactionId + "?_token=" + $('input[name="_token"]').val() + "&isShowTax=false",
-                type: 'GET',
-                success: function(data, textStatus, xhr) {
-                    $("#editTransactionModal .modal-body").html(data);
-                    $("#editTransactionModal").modal('show');
-                },
-                error: function(errorStatus) {
-
-                }
-            });
-        });
-
-        $("#transactionButton").on('click', function() {
-            var purchaseOrderId = $("#po_id").val();
-            $.ajax({
-                url: '/purchase/purchase-order/transaction/check-generated-grn/' + purchaseOrderId + '?_token=' + $("input[name='_token']").val(),
-                type: 'GET',
-                success: function(data, textStatus, xhr) {
-                    console.log(data);
-                    if (xhr.status == 200) {
-                        $.each(data.images, function(k, v) {
-                            var imagePreview = '<div class="col-md-2"><img src="' + v + '" class="thumbimage" /></div>';
-                            $("#preview-image").append(imagePreview);
-                        });
-                        $("#imageupload").hide();
-                        $("#grnImageUplaodButton").hide();
-                        $("#purchaseOrderTransactionId").val(data.purchase_order_transaction_id);
-                        $("#transactionForm input[name='grn']").val(data.grn);
-                        $("#afterImageUploadDiv").show();
-                    }
-                    $("#transactionModal").modal('show');
-                },
-                error: function(errorData) {
-
-                }
-            });
-        });
     });
-
-    function submitComponentForm() {
-        var minQuantity = $("#ImageUpload .modal-body #minQuantity").val();
-        var quantity = $("#ImageUpload .modal-body .quantity").val();
-        if ($.isNumeric(quantity) == true) {
-            minQuantity = parseFloat(minQuantity);
-            quantity = parseFloat(quantity);
-            if (minQuantity > quantity) {
-                $("#ImageUpload .modal-body .quantity").closest('.form-group').addClass('has-error').removeClass('has-success');
-                alert('Minimum allowed quantity is ' + minQuantity);
-            } else {
-                $("#ImageUpload .modal-body .quantity").closest('.form-group').removeClass('has-error').addClass('has-success');
-                $("#PurchaseOrderComponentEditForm").submit();
-            }
-        } else {
-            $("#ImageUpload .modal-body .quantity").closest('.form-group').addClass('has-error').removeClass('has-success');
-            alert('Please Enter digit only.');
-        }
-    }
 
     function checkAmount() {
         var paidFromSlug = $('#paid_from_slug').val();
@@ -549,7 +495,7 @@
                 },
                 error: function(xhr) {
                     if (xhr.status == 401) {
-                        alert("You are not authorised to close this purchase order.");
+                        alert("You are not authorised to close this Challan.");
                     }
                 }
             });
@@ -558,13 +504,83 @@
         }
     }
 
-    function checkQuantity(outTransferId) {
+    function checkQuantity(element, slug) {
+        var outTransferId = $(element).closest('tr').find(".out-transfer").attr('id');
+        var outQuantity = parseFloat($("#componentRow-" + outTransferId + "-site-out-quantity").val());
+        var inQuantity = parseFloat($("#componentRow-" + outTransferId + "-site-in-quantity").val());
+        var inventoryComponentId = parseFloat($("#componentRow-" + outTransferId + "-component-id").val());
+        var unitId = parseFloat($("#componentRow-" + outTransferId + "-unit-id").val());
+        var availableQuantity = 0;
+        $.ajax({
+            url: '/inventory/transfer/check-quantity',
+            type: 'POST',
+            async: false,
+            data: {
+                _token: $("input[name='_token']").val(),
+                inventoryComponentId: inventoryComponentId,
+                quantity: outQuantity,
+                unitId: unitId
+            },
+            success: function(data, textStatus, xhr) {
+                console.log('response');
+                availableQuantity = data.available_quantity;
+            },
+            error: function() {
+                alert("Something went wrong");
+            }
+        });
         $("#componentRow-" + outTransferId + "-site-out-quantity").rules('add', {
-            min: $("#componentRow-" + outTransferId + "-site-in-quantity").val()
+            min: inQuantity,
+            max: availableQuantity,
+            messages: {
+                max: "Available quantity is " + availableQuantity,
+                min: "Min quantity should be " + inQuantity
+            }
         });
         $("#componentRow-" + outTransferId + "-site-in-quantity").rules('add', {
-            max: $("#componentRow-" + outTransferId + "-site-out-quantity").val()
+            max: outQuantity,
+            min: 0,
+            messages: {
+                max: "Out Quantity is " + outQuantity,
+                min: "Min Quantity should be 0"
+            }
         });
+    }
+
+    function calculateTransportationTaxes() {
+        var transportationAmount = $('.transportation-amount').val();
+        if (typeof transportationAmount == 'undefined' || transportationAmount == '' || isNaN(transportationAmount)) {
+            transportationAmount = 0;
+        }
+
+        var transportationCGSTPercent = $('.transportation-cgst-percentage').val();
+        if (typeof transportationCGSTPercent == 'undefined' || transportationCGSTPercent == '' || isNaN(transportationCGSTPercent)) {
+            transportationCGSTPercent = 0;
+        }
+
+        var transportationSGSTPercent = $('.transportation-sgst-percentage').val();
+        if (typeof transportationSGSTPercent == 'undefined' || transportationSGSTPercent == '' || isNaN(transportationSGSTPercent)) {
+            transportationSGSTPercent = 0;
+        }
+
+        var transportationIGSTPercent = $('.transportation-igst-percentage').val();
+        if (typeof transportationIGSTPercent == 'undefined' || transportationIGSTPercent == '' || isNaN(transportationIGSTPercent)) {
+            transportationIGSTPercent = 0;
+        }
+
+        var transportationTotalAmount = $('.transportation-total').val();
+        if (typeof transportationTotalAmount == 'undefined' || transportationTotalAmount == '' || isNaN(transportationTotalAmount)) {
+            transportationTotalAmount = 0;
+        }
+
+        var cgstAmount = ((parseFloat(transportationCGSTPercent) * parseFloat(transportationAmount)) / 100).toFixed(3);
+        var sgstAmount = ((parseFloat(transportationSGSTPercent) * parseFloat(transportationAmount)) / 100).toFixed(3);
+        var igstAmount = ((parseFloat(transportationIGSTPercent) * parseFloat(transportationAmount)) / 100).toFixed(3);
+        $('.transportation-cgst-amount').val(cgstAmount);
+        $('.transportation-sgst-amount').val(sgstAmount);
+        $('.transportation-igst-amount').val(igstAmount);
+        var transportationTotal = parseFloat(parseFloat(transportationAmount) + parseFloat(cgstAmount) + parseFloat(sgstAmount) + parseFloat(igstAmount)).toFixed(3);
+        $('.transportation-total').val(transportationTotal);
     }
 
     var EditChallan = function() {
@@ -579,7 +595,6 @@
                 rules: {
                     transportation_amount: {
                         required: true,
-                        max: 5
                     }
                 },
                 messages: {
