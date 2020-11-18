@@ -39,7 +39,7 @@ class SiteTranferChallanBill extends Command
      */
     public function handle()
     {
-        $siteTransfers = SiteTransferBill::get();
+        $siteTransfers = SiteTransferBill::whereNull('inventory_transfer_challan_id')->get();
         foreach ($siteTransfers as $siteTransfer) {
             Log::info($siteTransfer . ' - ' . $siteTransfer->inventoryComponentTransfer->inventory_transfer_challan_id);
             $siteTransfer->update([

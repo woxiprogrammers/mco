@@ -12,6 +12,7 @@ use App\SiteTransferBillPayment;
 use App\Vendor;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\InventoryComponentTransferStatus;
 use App\InventoryTransferChallan;
 use App\InventoryTransferTypes;
 use App\Project;
@@ -60,26 +61,18 @@ class SiteTransferBillingController extends Controller
     {
         try {
             $projectSiteId = Session::get('global_project_site');
-            $approvedTransferIds = InventoryComponentTransfers::join('inventory_transfer_types', 'inventory_transfer_types.id', '=', 'inventory_component_transfers.transfer_type_id')
-                ->join('inventory_components', 'inventory_components.id', '=', 'inventory_component_transfers.inventory_component_id')
-                ->join('inventory_component_transfer_statuses', 'inventory_component_transfer_statuses.id', '=', 'inventory_component_transfers.inventory_component_transfer_status_id')
-
-                ->where('inventory_component_transfer_statuses.slug', 'approved')
-                ->where('inventory_components.project_site_id', $projectSiteId)
-                ->where('inventory_component_transfers.grn', 'ilike', '%' . $request->keyword . '%')
-                ->where('inventory_transfer_types.slug', 'site')
-                ->where('inventory_transfer_types.type', 'ilike', 'IN')
-                ->pluck('inventory_component_transfers.id')
-                ->toArray();
-            $billCreatedTransferIds = SiteTransferBill::pluck('inventory_component_transfer_id')->toArray();
-            $approvedBillPendingTransferIds = array_diff($approvedTransferIds, $billCreatedTransferIds);
-            $siteTransfersInfo = InventoryComponentTransfers::whereIn('inventory_component_transfers.id', $approvedBillPendingTransferIds)
-                ->whereNotNull('inventory_component_transfers.transportation_amount')
-                ->where('inventory_component_transfers.transportation_amount', '!=', 0)
-                ->get()->toArray();
             $iterator = 0;
             $response = array();
-            $challans = InventoryTransferChallan::where('id', 5307)->select('id', 'challan_number')->get();
+            $alreadyGeneratedBillChallanIds = SiteTransferBill::whereNotNull('inventory_transfer_challan_id')->pluck('inventory_transfer_challan_id')->toArray();
+            $closeStatusId = InventoryComponentTransferStatus::where('slug', 'close')->pluck('id')->first();
+            $challans = InventoryTransferChallan::join('inventory_component_transfers', 'inventory_component_transfers.inventory_transfer_challan_id', '=', 'inventory_transfer_challan.id')
+                ->join('inventory_transfer_types', 'inventory_transfer_types.id', '=', 'inventory_component_transfers.transfer_type_id')
+                ->where('inventory_transfer_types.type', 'ilike', 'IN')
+                ->where('inventory_transfer_challan.inventory_component_transfer_status_id', $closeStatusId)
+                ->whereNotNull('inventory_component_transfers.transportation_amount')
+                ->where('inventory_component_transfers.transportation_amount', '!=', 0)
+                ->where('inventory_transfer_challan.project_site_in_id', $projectSiteId)
+                ->whereNotIn('inventory_transfer_challan.id', $alreadyGeneratedBillChallanIds)->distinct('inventory_transfer_challan.id')->select('inventory_transfer_challan.id', 'inventory_transfer_challan.challan_number')->get();
             foreach ($challans as $challan) {
                 $response[$iterator]['challan_id'] = $challan['id'];
                 $otherdata = $challan->otherData();
@@ -273,6 +266,7 @@ class SiteTransferBillingController extends Controller
                     }
 
                     $records['data'][$iterator] = [
+                        $challan['challan_number'],
                         $projectName,
                         date('j M Y', strtotime($siteTransferBillData[$pagination]['created_at'])),
                         date('j M Y', strtotime($siteTransferBillData[$pagination]['bill_date'])),

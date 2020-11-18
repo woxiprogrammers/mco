@@ -498,10 +498,15 @@
                             .closest('.form-group').addClass('has-success');
                     },
                     submitHandler: function(form) {
-                        $("button[type='submit']").prop('disabled', true);
-                        success.show();
-                        error.hide();
-                        form.submit();
+                        if ($(".component-checkbox:checkbox:checked").length > 0) {
+                            $("button[type='submit']").prop('disabled', true);
+                            success.show();
+                            error.hide();
+                            form.submit();
+                        } else {
+                            alert("Please select material/asset to generate challan")
+                        }
+
                     }
                 });
             }
@@ -537,7 +542,13 @@
                 $('#gst_' + id).prop('disabled', true);
                 $('#cgst_amount_' + id + ',#sgst_amount_' + id + ',#total_' + id).val('');
                 $(',#gst_' + id).val('');
+                $('#current_quantity_' + id).rules('remove');
+                $('#current_quantity_' + id).removeClass('has-error');
             } else {
+                $('#current_quantity_' + id).rules('add', {
+                    min: 1,
+                });
+                $('#current_quantity_' + id).valid();
                 $('#gst_' + id).prop('disabled', false);
             }
         });
@@ -753,14 +764,15 @@
                         $('#current_quantity_' + id).rules('add', {
                             max: data.available_quantity,
                             messages: {
-                                max: "Available quantity is " + data.available_quantity
+                                max: "Available quantity is " + data.available_quantity,
+                                min: 1
                             }
                         });
-                        $('#current_quantity_' + id).valid();
-                    } else {
-                        $('#current_quantity_' + id).rules('remove');
-                        $('#current_quantity_' + id).removeClass('has-error');
                     }
+                    $('#current_quantity_' + id).rules('add', {
+                        min: 1,
+                    });
+                    $('#current_quantity_' + id).valid();
                 },
                 error: function() {
 

@@ -464,12 +464,13 @@ Route::group(['domain' => env('DOMAIN_NAME')], function () {
                 Route::post('listing', array('uses' => 'Inventory\InventoryTransferChallanController@getChallanListing'));
                 Route::get('{challanId}/change-status', array('uses' => 'Inventory\InventoryTransferChallanController@approveDisapproveChallan'));
                 Route::get('info/{challanId}', array('uses' => 'Inventory\InventoryTransferChallanController@getDetail'));
+                Route::get('reopen/{challanId}', array('uses' => 'Inventory\InventoryTransferChallanController@reopenChallan'));
                 Route::get('edit/{challanId}', array('uses' => 'Inventory\InventoryTransferChallanController@show'));
                 Route::post('edit/{challanId}', array('uses' => 'Inventory\InventoryTransferChallanController@editChallan'));
 
                 Route::get('pdf/{challanId}', array('uses' => 'Inventory\InventoryTransferChallanController@generatePDF'));
                 Route::post('authenticate-challan-close', array('uses' => 'Inventory\InventoryTransferChallanController@authenticateChallanClose'));
-                Route::post('close', array('uses' => 'Inventory\InventoryTransferChallanController@closeChallan'));
+                Route::get('close/{challanId}', array('uses' => 'Inventory\InventoryTransferChallanController@closeChallan'));
                 Route::get('site/in', array('uses' => 'Inventory\InventoryTransferChallanController@showSiteIn'));
                 Route::post('site/in', array('uses' => 'Inventory\InventoryTransferChallanController@createSiteIn'));
                 Route::post('site/in/upload-pre-grn-images', array('uses' => 'Inventory\InventoryTransferChallanController@preUploadSIteInImages'));

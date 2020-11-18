@@ -20,16 +20,22 @@
                         <div class="container">
                             <!-- BEGIN PAGE TITLE -->
                             <div class="page-title">
+                                @if($challan['project_site_in_date'] == null && $challan->inventoryComponentTransferStatus->slug == 'open')
+                                <h1>Edit Challan <label style="color: darkred;">(Note: Site In pending)</label></h1>
+                                @elseif ($isbillGenerated)
+                                <h1>Edit Challan <label style="color: darkred;">(Note: Bill is already generated)</label></h1>
+                                @else
                                 <h1>Edit Challan</h1>
+                                @endif
                             </div>
-                            @if($challan->inventoryComponentTransferStatus->slug == 'open')
+                            @if($challan->inventoryComponentTransferStatus->slug == 'open' || $challan->inventoryComponentTransferStatus->slug == 're-open' && $userRole == 'superadmin')
                             <div class="form-group " style="text-align: center">
                                 <a class="btn red pull-right margin-top-15" data-toggle="modal" href="#closeChallan">
                                     <i class="fa fa-close" style="font-size: large"></i>
                                     Close Challan
                                 </a>
                             </div>
-                            @elseif($challan->inventoryComponentTransferStatus->slug == 'requested')
+                            @elseif($challan->inventoryComponentTransferStatus->slug == 'requested' && $userRole == 'superadmin')
                             <div class="form-group " style="text-align: center">
                                 <button style="width:130px" id="disapproveChallan" type="submit" value="disapproved" class="btn red pull-right margin-top-15 approveDisapproveChallan">
                                     <i class="fa fas fa-ban" style="font-size: large"></i>
@@ -40,12 +46,12 @@
                                     Approve
                                 </button>
                             </div>
-                            @elseif($challan->inventoryComponentTransferStatus->slug == 'close')
+                            @elseif($challan->inventoryComponentTransferStatus->slug == 'close' && $userRole == 'superadmin')
                             <div class="form-group " style="text-align: center">
-                                <button id="poReopenBtn" type="submit" class="btn red pull-right margin-top-15">
-                                    <i class="fa fa-open" style="font-size: large"></i>
-                                    Reopen
-                                </button>
+                                <a class="btn red pull-right margin-top-15" data-toggle="modal" onclick="reopenChallan(this);">
+                                    <i class=" fa fa-close" style="font-size: large"></i>
+                                    Reopen Challan
+                                </a>
                             </div>
                             @endif
                         </div>
@@ -157,7 +163,6 @@
                                                                             <div class="row form-group" id="transportation_amount">
                                                                                 <div class="col-md-3">
                                                                                     <label class="control-label pull-right">Transportation Amount</label>
-                                                                                    <span>*</span>
                                                                                 </div>
                                                                                 <div class="col-md-6">
                                                                                     <input type="text" class="form-control transportation-amount" name="transportation_amount" value="{{$challan['other_data']['transportation_amount']}}" onkeyup="calculateTransportationTaxes()">
@@ -303,12 +308,46 @@
                         </label>
                     </div>
                     <div class="col-md-6">
-                        <input type="password" id="POPassword" class="form-control" name="password">
+                        <input type="password" id="challanClosePassword" class="form-control" name="password">
                     </div>
                 </div>
                 <div class="form-group row">
                     <div class="col-md-3 col-md-offset-4">
                         <a class="btn btn-set red" href="javascript:void(0);" onclick="submitChallanPassword()">
+                            <i class="fa fa-check" style="font-size: large"></i>
+                            Submit &nbsp; &nbsp; &nbsp;
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade " id="reopenChallan" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-4" style="font-size: 18px"> Reopen Challan</div>
+                    <div class="col-md-4 "><button type="button" class="close" data-dismiss="modal">X</button></div>
+                </div>
+            </div>
+            <div class="modal-body" style="padding:40px 50px;">
+                <div class="form-group row">
+                    <div class="col-md-4">
+                        <label class="control-label pull-right">
+                            Enter Password :
+                        </label>
+                    </div>
+                    <div class="col-md-6">
+                        <input type="password" id="ReopenPassword" class="form-control" name="password">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-3 col-md-offset-4">
+                        <a class="btn btn-set red" href="javascript:void(0);" onclick="submitReopenChallanPassword()">
                             <i class="fa fa-check" style="font-size: large"></i>
                             Submit &nbsp; &nbsp; &nbsp;
                         </a>
@@ -468,7 +507,7 @@
 
     function submitChallanPassword() {
         var challan_id = $('#challan_id').val();
-        var password = $.trim($("#POPassword").val());
+        var password = $.trim($("#challanClosePassword").val());
         if (password.length > 0) {
             $.ajax({
                 type: "POST",
@@ -480,16 +519,46 @@
                 },
                 success: function(data) {
                     $.ajax({
-                        type: "POST",
-                        url: "/inventory/transfer/challan/close",
-                        data: {
-                            challan_id: challan_id,
-                            _token: $("input[name='_token']").val()
-                        },
-                        beforeSend: function() {},
+                        type: "GET",
+                        url: "/inventory/transfer/challan/close/" + challan_id + "?_token=" + $("input[name='_token']").val(),
                         success: function(data) {
-                            location.reload();
-                            alert("Challan closed successfully.");
+                            $('#closeChallan').modal('hide');
+                            alert("Challan closed successfully");
+                            window.location.href = window.location.origin + '/inventory/transfer/challan/info/' + challan_id
+                        }
+                    });
+                },
+                error: function(xhr) {
+                    if (xhr.status == 401) {
+                        alert("You are not authorised to close this Challan.");
+                    }
+                }
+            });
+        } else {
+            alert('Please enter valid password');
+        }
+    }
+
+    function submitReopenChallanPassword() {
+        var challan_id = $('#challan_id').val();
+        var password = $.trim($("#ReopenPassword").val());
+        if (password.length > 0) {
+            $.ajax({
+                type: "POST",
+                url: "/inventory/transfer/challan/authenticate-challan-close",
+                data: {
+                    password: password,
+                    challan_id: challan_id,
+                    _token: $("input[name='_token']").val()
+                },
+                success: function(data) {
+                    $.ajax({
+                        type: "GET",
+                        url: "/inventory/transfer/challan/reopen/" + challan_id + "?_token=" + $("input[name='_token']").val(),
+                        success: function(data) {
+                            $('#reopenChallan').modal('hide');
+                            alert("Challan reopen successfully");
+                            window.location.href = window.location.origin + '/inventory/transfer/challan/edit/' + challan_id
                         }
                     });
                 },
@@ -633,5 +702,11 @@
             }
         };
     }();
+
+    function reopenChallan(element) {
+        if (confirm("Are you sure you want to reopen this Challan? Bill is already generated for this challan.")) {
+            $('#reopenChallan').modal('show');
+        }
+    }
 </script>
 @endsection

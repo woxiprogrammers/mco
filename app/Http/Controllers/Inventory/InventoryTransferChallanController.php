@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Session;
 
 use App\GRNCount;
 use App\InventoryComponentOpeningStockHistory;
+use App\SiteTransferBill;
 use App\User;
 use Illuminate\Support\Facades\File;
 
@@ -149,7 +150,6 @@ class InventoryTransferChallanController extends Controller
     public function createChallan(Request $request)
     {
         try {
-            dd($request->all());
             $now = Carbon::now();
             $challan = new InventoryTransferChallan([
                 'challan_number'                        => 'CH',
@@ -294,9 +294,9 @@ class InventoryTransferChallanController extends Controller
                 $challanData = $challanData->whereIn('project_site_out_id', $projectSiteIds);
             }
 
-            if ($request->has('search_site_in') && $request['search_site_in'] != null) {
+            if ($request->has('search_site_to') && $request['search_site_to'] != null) {
                 $projectSiteIds = ProjectSite::join('projects', 'projects.id', 'project_sites.project_id')
-                    ->where('projects.name', 'ilike', '%' . $request['search_site_in'] . '%')->pluck('id')->toArray();
+                    ->where('projects.name', 'ilike', '%' . $request['search_site_to'] . '%')->pluck('project_sites.id')->toArray();
                 $challanData = $challanData->whereIn('project_site_in_id', $projectSiteIds);
             }
 
@@ -362,7 +362,6 @@ class InventoryTransferChallanController extends Controller
             $records["recordsTotal"] = $totalRecords;
             $records["recordsFiltered"] = $totalRecords;
         } catch (Exception $e) {
-            dd($e->getMessage());
             $data = [
                 'action' => 'Challan listing',
                 'params' => $request->all(),
@@ -378,6 +377,8 @@ class InventoryTransferChallanController extends Controller
     public function show(Request $request, $challanId)
     {
         try {
+            $user = Auth::user();
+            $userRole = $user->roles[0]->role->slug;
             $challan = InventoryTransferChallan::find($challanId);
             $outTransferType = InventoryTransferTypes::where('slug', 'site')->where('type', 'OUT')->first();
             $inTransferType = InventoryTransferTypes::where('slug', 'site')->where('type', 'IN')->first();
@@ -407,7 +408,9 @@ class InventoryTransferChallanController extends Controller
             $outImages = $this->getTransferImages($firstOutTransfer);
             $challan['other_data'] = $challan->otherData()->toArray();
             $isSiteInDone = ($challan['project_site_in_date']) ? true : false;
-            return view('inventory/transfer/challan/edit')->with(compact('challan', 'projectSites', 'challanStatus', 'components', 'out_remark', 'in_remark', 'inImages', 'outImages', 'isSiteInDone'));
+            $billCount = SiteTransferBill::where('inventory_transfer_challan_id', $challan['id'])->count();
+            $isbillGenerated = ($billCount > 0) ? true : false;
+            return view('inventory/transfer/challan/edit')->with(compact('userRole', 'challan', 'projectSites', 'challanStatus', 'components', 'out_remark', 'in_remark', 'inImages', 'outImages', 'isSiteInDone', 'isbillGenerated'));
         } catch (Exception $e) {
             $data = [
                 'action'    => 'Inventory Transfer Challan Edit view',
@@ -421,6 +424,8 @@ class InventoryTransferChallanController extends Controller
     public function getDetail(Request $request, $challanId)
     {
         try {
+            $user = Auth::user();
+            $userRole = $user->roles[0]->role->slug;
             $challan = InventoryTransferChallan::find($challanId);
             $outTransferType = InventoryTransferTypes::where('slug', 'site')->where('type', 'OUT')->first();
             $inTransferType = InventoryTransferTypes::where('slug', 'site')->where('type', 'IN')->first();
@@ -447,7 +452,9 @@ class InventoryTransferChallanController extends Controller
             $inImages = $firstInTransfer ? $this->getTransferImages($firstInTransfer) : [];
             $outImages = $this->getTransferImages($firstOutTransfer);
             $challan['other_data'] = $challan->otherData()->toArray();
-            return view('inventory/transfer/challan/detail')->with(compact('challan', 'projectSites', 'challanStatus', 'components', 'out_remark', 'in_remark', 'inImages', 'outImages'));
+            $billCount = SiteTransferBill::where('inventory_transfer_challan_id', $challan['id'])->count();
+            $isbillGenerated = ($billCount > 0) ? true : false;
+            return view('inventory/transfer/challan/detail')->with(compact('userRole', 'challan', 'projectSites', 'challanStatus', 'components', 'out_remark', 'in_remark', 'inImages', 'outImages', 'isbillGenerated'));
         } catch (Exception $e) {
             $data = [
                 'action'    => 'Inventory Transfer Challan Detail view',
@@ -560,11 +567,11 @@ class InventoryTransferChallanController extends Controller
     /**
      * Close Challan
      */
-    public function closeChallan(Request $request)
+    public function closeChallan(Request $request, $challanId)
     {
         try {
             $closeStatusId = InventoryComponentTransferStatus::where('slug', 'close')->pluck('id')->first();
-            $challan = InventoryTransferChallan::find($request['challan_id']);
+            $challan = InventoryTransferChallan::find($challanId);
             if ($challan) {
                 $challan->update(['inventory_component_transfer_status_id' => $closeStatusId]);
             }
@@ -582,11 +589,39 @@ class InventoryTransferChallanController extends Controller
     }
 
     /**
+     * Reopen Challan
+     */
+    public function reopenChallan(Request $request, $challanId)
+    {
+        try {
+            $closeStatusId = InventoryComponentTransferStatus::where('slug', 're-open')->pluck('id')->first();
+            $challan = InventoryTransferChallan::find($challanId);
+            if ($challan) {
+                $challan->update(['inventory_component_transfer_status_id' => $closeStatusId]);
+                $message = "Challan reopened successfully !";
+            } else {
+                $message = "Challan not found !";
+            }
+        } catch (Exception $e) {
+            $data = [
+                'action' => 'Reopen Challan',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $message = "Something went wrong";
+        }
+        return response()->json($message);
+    }
+
+    /**
      * Get Challan Detail
      */
     public function getChallanDetail(Request $request)
     {
         try {
+            $user = Auth::user();
+            $userRole = $user->roles[0]->role->slug;
             $challan = InventoryTransferChallan::find($request['challan_id']);
             $outTransferType = InventoryTransferTypes::where('slug', 'site')->where('type', 'OUT')->first();
             $inventoryComponentOutTransfers = $outTransferType->inventoryComponentTransfers->where('inventory_transfer_challan_id', $challan['id']);
@@ -611,7 +646,7 @@ class InventoryTransferChallanController extends Controller
             $challan['from_site'] = $challan->projectSiteOut->project->name;
             $challan['to_site'] = $challan->projectSiteIn->project->name ?? '-';
             $status = 200;
-            return view('partials.inventory.transfer.challan.detail')->with(compact('challan', 'components'));
+            return view('partials.inventory.transfer.challan.detail')->with(compact('userRole', 'challan', 'components'));
         } catch (Exception $e) {
             $data = [
                 'action' => 'Get Challan Details',
