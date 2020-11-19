@@ -295,6 +295,11 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         Route::get('projects/{client_id}',array('uses' => 'User\PurchaseController@getProjects'));
         Route::get('project-sites/{project_id}',array('uses' => 'User\PurchaseController@getProjectSites'));
 
+        Route::group(['prefix' => 'purchase-order-delete'], function(){
+            Route::get('manage',array('uses' => 'Purchase\PurchaseOrderController@getManageGRNDeleteView'));
+            Route::post('listing',array('uses' => 'Purchase\PurchaseOrderController@grnDeleteListing'));
+        });
+
         Route::group(['prefix' => 'material-request'], function(){
             Route::get('manage',array('uses'=> 'User\PurchaseController@getManageView'));
             Route::get('create',array('uses'=> 'User\PurchaseController@getCreateView'));

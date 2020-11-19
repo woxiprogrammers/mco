@@ -1775,4 +1775,151 @@ class PurchaseOrderController extends Controller
         ];
         return response()->json($response,$status);
     }
+
+    public function getManageGRNDeleteView(Request $request) {
+        try{
+            $categories = null;
+            $categories = Category::where('is_active',true)->select('id','name')->orderBy('name','asc')->get()->toArray();
+            $data['categories'] = $categories;
+            return view('admin.material.manage', $data);
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Get material manage view',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function grnDeleteListing(Request $request) {
+        try{
+            $skip = $request->start;
+            $take = $request->length;
+            $totalRecordCount = 0;
+            $user = Auth::user();
+            $materialData = array();
+            $ids = Material::pluck('id')->toArray();
+            $filterFlag = true;
+            if($request->has('search_name') && $request->search_name != '' && $filterFlag == true){
+                $ids = Material::whereIn('id',$ids)
+                                ->where('name','ilike','%'.$request->search_name.'%')
+                                ->pluck('id')->toArray();
+                if(count($ids) <= 0){
+                    $filterFlag = false;
+                }
+            }
+
+            if($request->has('search_rate') && $request->search_rate != '' && $filterFlag == true){
+                $ids = Material::whereIn('id',$ids)
+                    ->where('rate_per_unit',$request->search_rate)
+                    ->pluck('id')->toArray();
+                if(count($ids) <= 0){
+                    $filterFlag = false;
+                }
+            }
+
+            if($request->has('search_name_cat') && $request->search_name_cat != '' && $filterFlag == true){
+                $ids = Material::join('category_material_relations','category_material_relations.material_id','=','materials.id')
+                    ->join('categories','categories.id','=','category_material_relations.category_id')
+                    ->where('categories.name','ilike','%'.$request->search_name_cat.'%')
+                    ->whereIn('materials.id',$ids)
+                    ->pluck('materials.id')->toArray();
+                if(count($ids) <= 0){
+                    $filterFlag = false;
+                }
+            }
+
+
+            if($filterFlag == true) {
+                $materialData = Material::whereIn('id',$ids)
+                                ->orderBy('name','asc')
+                                ->skip($skip)->take($take)
+                                ->get()->toArray();
+
+                $totalRecordCount = Material::whereIn('id',$ids)
+                                ->count();
+            }
+
+            $iTotalRecords = count($materialData);
+            $records = array();
+            $records['data'] = array();
+            $end = $request->length < 0 ? count($materialData) : $request->length;
+            for($iterator = 0,$pagination = 0; $iterator < $end && $pagination < count($materialData); $iterator++,$pagination++ ){
+                if($materialData[$pagination]['is_active'] == true){
+                    $material_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
+                    $status = 'Disable';
+                }else{
+                    $material_status = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
+                    $status = 'Enable';
+                }
+                if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('edit-material')){
+                    $categoryname = CategoryMaterialRelation::join('categories','categories.id','=','category_material_relations.category_id')
+                                    ->where('category_material_relations.material_id','=',$materialData[$pagination]['id'])
+                                    ->get(['categories.name'])->toArray();
+                    $catNameArr = array();
+                    if(count($categoryname) > 1) {
+                        foreach ($categoryname as $catname) {
+                            $catNameArr[] = $catname['name'];
+                        }
+                        $catNameStr = implode(" , ", $catNameArr);
+                    } else {
+                        $catNameStr = $categoryname[0]['name'];
+                    }
+                    $records['data'][$iterator] = [
+                        '<input type="checkbox" name="material_ids" value="'.$materialData[$pagination]['id'].'">',
+                        ucwords($catNameStr),
+                        ucwords($materialData[$pagination]['name']),
+                        round($materialData[$pagination]['rate_per_unit'],3),
+                        Unit::where('id',$materialData[$pagination]['unit_id'])->pluck('name')->first(),
+                        $material_status,
+                        date('d M Y',strtotime($materialData[$pagination]['created_at'])),
+                        '<div class="btn-group">
+                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                            Actions
+                            <i class="fa fa-angle-down"></i>
+                        </button>
+                        <ul class="dropdown-menu pull-left" role="menu">
+                            <li>
+                                <a href="/material/edit/'.$materialData[$pagination]['id'].'">
+                                    <i class="icon-docs"></i> Edit </a>
+                            </li>
+                        </ul>
+                    </div>'
+                    ];
+                }else{
+                    $records['data'][$iterator] = [
+                        '<input type="checkbox" name="material_ids" value="'.$materialData[$pagination]['id'].'">',
+                        $materialData[$pagination]['name'],
+                        Unit::where('id',$materialData[$pagination]['unit_id'])->pluck('name')->first(),
+                        round($materialData[$pagination]['rate_per_unit'],3),
+                        $material_status,
+                        date('d M Y',strtotime($materialData[$pagination]['created_at'])),
+                        '<div class="btn-group">
+                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                                Actions
+                                <i class="fa fa-angle-down"></i>
+                            </button>
+                        </div>'
+                    ];
+                }
+
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $totalRecordCount;
+            $records["recordsFiltered"] = $totalRecordCount;
+        }catch(\Exception $e){
+            $records = array();
+            $data = [
+                'action' => 'Material Listing',
+                'params' => $request->all(),
+                'exception'=> $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+
+        return response()->json($records,200);
+    }
 }

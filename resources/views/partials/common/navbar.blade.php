@@ -371,6 +371,15 @@
                                 </a>
                             </li>
                             @endif
+
+                            <?php $hasPurchaseOrderBillPermission = \App\Helper\ACLHelper::checkModuleAcl('delete-purchase-order-grn');?>
+                            @if(($user->roles[0]->role->slug == 'superadmin') || ($user->roles[0]->role->slug == 'admin') || $hasPurchaseOrderBillPermission)
+                                <li aria-haspopup="true">
+                                    <a href="/purchase/purchase-order-delete/manage" class="nav-link nav-toggle ">
+                                        <i class="fa fa-calculator"></i> GRN Delete
+                                    </a>
+                                </li>
+                            @endif
                         </ul>
                     </li>
                     @endif
