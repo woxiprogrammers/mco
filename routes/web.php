@@ -20,7 +20,6 @@ Route::group(['domain' => env('DOMAIN_NAME')], function () {
     Route::get('/dashboard', array('uses' => 'Admin\DashboardController@index'));
 
     Route::post('/change-project-site', array('uses' => 'Auth\LoginController@changeProjectSite'));
-    Route::get('/home', array('uses' => 'HomeController@transferBills'));
     Route::group(['prefix' => 'user'], function () {
         Route::get('change-password', array('uses' => 'User\UserController@getChangePasswordView'));
         Route::post('change-password', array('uses' => 'User\UserController@changePassword'));
