@@ -244,7 +244,6 @@ $(document).ready(function () {
             'asset': []
         }
         $("#inventoryListingTable input[type='checkbox']:checked").each(function () {
-            // console.log('...', this.value, $(this).closest('tr').find(".inventory-type").html())
 
             var data = {
                 id: this.value,
@@ -258,24 +257,7 @@ $(document).ready(function () {
                 itemData['asset'].push(data);
             }
         })
-        console.log('after......', itemData)
         localStorage.setItem('inventoryData', JSON.stringify(itemData))
         window.location = "/inventory/challan";
-
-        // if ($("#inventoryListingTable input[type='checkbox']:checked").length > 0) {
-        //     var cartData = [];
-        //     $("#inventoryListingTable input[type='checkbox']:checked").each((index, elemnt) => {
-        //         console.log('in each...', elemnt);
-        //         cartData.push({
-        //             id: this.value,
-        //             unit_id: '',
-        //             quantity: 0
-        //         });
-        //         // var data = 
-        //     });
-        //     localStorage.setItem('inven')
-
-        // }
-
     });
 });

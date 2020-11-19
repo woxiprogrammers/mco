@@ -415,7 +415,6 @@
 <script src="/assets/global/plugins/typeahead/handlebars.min.js"></script>
 <link rel="stylesheet" href="/assets/global/plugins/bootstrap-select/css/bootstrap-select.min.css" />
 <link rel="stylesheet" href="/assets/global/css/app.css" />
-<!-- <script src="/assets/custom/inventory/generate-challan.js" type="text/javascript"></script> -->
 
 <script>
     $(document).ready(function() {
