@@ -666,6 +666,7 @@ class InventoryTransferChallanController extends Controller
     public function createSiteIn(Request $request)
     {
         try {
+            $challan = InventoryTransferChallan::find($request['challan_id']);
             $updateChallanStatusToClose = true;
             $now = Carbon::now();
             $approvedStatusId = InventoryComponentTransferStatus::where('slug', 'approved')->pluck('id')->first();
@@ -696,7 +697,7 @@ class InventoryTransferChallanController extends Controller
                 }
             }
             if ($updateChallanStatusToClose) {
-                $challanUpdateData['inventory_component_transfer_status_id'] = InventoryComponentTransferStatus::where('slug', 'close')->pluck('id')->first();
+                $challan->update(['inventory_component_transfer_status_id' => InventoryComponentTransferStatus::where('slug', 'close')->pluck('id')->first()]);
             }
             if ($request->has('post_grn_image') && count($request->post_grn_image) > 0) {
                 $sha1challanId = sha1($request['challan_id']);
@@ -897,9 +898,11 @@ class InventoryTransferChallanController extends Controller
         }
     }
 
-    public function editChallan(Request $request)
+    public function editChallan(Request $request, $challanId)
     {
         try {
+            $challan = InventoryTransferChallan::find($challanId);
+            $updateChallanStatusToClose = true;
             foreach ($request['component'] as $outTransferId => $quantityData) {
                 $outTransfer = InventoryComponentTransfers::find($outTransferId);
                 $outTransfer->update([
@@ -924,7 +927,13 @@ class InventoryTransferChallanController extends Controller
                         'driver_name'                   => $request['driver_name'],
                         'remark'                        => $request['in_remark'] ?? $outTransfer['remark']
                     ]);
+                    if ($updateChallanStatusToClose && ($inTransferComponent['quantity'] != $outTransfer['quantity'])) {
+                        $updateChallanStatusToClose = false;
+                    }
                 }
+            }
+            if ($updateChallanStatusToClose) {
+                $challan->update(['inventory_component_transfer_status_id' => InventoryComponentTransferStatus::where('slug', 'close')->pluck('id')->first()]);
             }
             $request->session()->flash('success', 'Challan Edited Successfully!!');
             return redirect('/inventory/transfer/challan/edit/' . $request['challan_id']);
