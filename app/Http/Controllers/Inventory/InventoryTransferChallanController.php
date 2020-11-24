@@ -304,6 +304,10 @@ class InventoryTransferChallanController extends Controller
                 $challanData = $challanData->where('inventory_component_transfer_status_id', $request['status']);
             }
 
+            if ($request->has('start_date') && $request->has('end_date') && $request['start_date'] != null && $request['end_date'] != null) {
+                $challanData = $challanData->whereBetween('created_at', [$request['start_date'], $request['end_date']]);
+            }
+
             $challanData = $challanData->orderBy('created_at', 'desc')->skip($skip)->take($take)->get();
 
             $records['data'] = array();
