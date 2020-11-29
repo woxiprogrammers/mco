@@ -493,7 +493,7 @@ class SubcontractorStructureController extends Controller
                     $listingData = SubcontractorBillTransaction::join('subcontractor_bills','subcontractor_bill_transactions.subcontractor_bills_id','=','subcontractor_bills.id')
                                                                 ->join('subcontractor_structure','subcontractor_bills.sc_structure_id','=','subcontractor_structure.id')
                                                                 ->where('paid_from_slug', 'cash')
-                                                                ->where('debit','<>', 0)
+                                                                //->where('debit','<>', 0)
                                                                 ->whereIn('subcontractor_structure.id',$ids)
                                                                 ->with('subcontractorBill.subcontractorStructure','subcontractorBill.subcontractorStructure.projectSite.project','subcontractorBill.subcontractorStructure.subcontractor','subcontractorBill.subcontractorStructure.contractType')
                                                                 ->orderBy('subcontractor_bill_transactions.id', 'desc')
@@ -503,11 +503,11 @@ class SubcontractorStructureController extends Controller
                 }
             }else{
                 $listingData = SubcontractorBillTransaction::where('paid_from_slug', 'cash')
-                                                                ->where('debit','<>', 0)
+                                                                //->where('debit','<>', 0)
                                                                 ->with('subcontractorBill.subcontractorStructure','subcontractorBill.subcontractorStructure.projectSite.project','subcontractorBill.subcontractorStructure.subcontractor','subcontractorBill.subcontractorStructure.contractType')
                                                                 ->orderBy('subcontractor_bill_transactions.id', 'desc')
                                                                 ->skip($skip)->take($take)->get();
-                $totalRecordCount = SubcontractorBillTransaction::where('paid_from_slug', 'cash')->where('debit','<>', 0)->count();
+                $totalRecordCount = SubcontractorBillTransaction::where('paid_from_slug', 'cash')->count();
             }
             
             $records = array();
@@ -537,7 +537,7 @@ class SubcontractorStructureController extends Controller
                                     <a href="javascript:void(0);" onclick="getSummaries('
                                     ."'".$listingData[$pagination]->subcontractorBill->subcontractorStructure->id."',"
                                     ."'".$listingData[$pagination]->id."',"
-                                    ."'".$listingData[$pagination]->debit."',"
+                                    ."'".$listingData[$pagination]->total."',"
                                     ."'".$cashTransactionCount."')".'">
                                         <i class="icon-docs"></i>PriceEdit</a>
                                 </li>';
@@ -559,7 +559,7 @@ class SubcontractorStructureController extends Controller
                     $totalRate,
                     $totalWorkArea,
                     $totalAmount,
-                    $listingData[$pagination]->debit,
+                    $listingData[$pagination]->total,
                     $listingData[$pagination]->is_modified,
                     date('d M Y', strtotime($listingData[$pagination]['modified_at'])),
                     date('d M Y', strtotime($listingData[$pagination]['created_at'])),
@@ -599,24 +599,20 @@ class SubcontractorStructureController extends Controller
             if(!is_null($subcontractorBillTransaction)) {
 
                 $contractType = $subcontractorBillTransaction->subcontractorBill->subcontractorStructure->contractType->slug;
-                $debit = $request->debit/$subcontractorBillTransaction->debit;
+                $debit = $request->debit/$subcontractorBillTransaction->total;
 
-                if($contractType == 'itemwise' || $contractType == 'sqft') {
-                    $billCount = $subcontractorBillTransaction->subcontractorBill->subcontractorBillSummaries->count();
-
-                    $quantity = $debit / $billCount;
+                if($contractType == 'itemwise' || $contractType == 'sqft') {               
                     $subTotal = 0;
                     foreach($subcontractorBillTransaction->subcontractorBill->subcontractorBillSummaries as $billSummary) {
+                        $quantity = $debit * $billSummary->quantity;
                         $billSummary->quantity = $quantity;
                         $billSummary->save();
                         $subTotal += $billSummary->subcontractorStructureSummary['rate']* $billSummary->quantity;
                     }
                 }elseif($contractType == 'amountwise') {
-                    $billCount = $subcontractorBillTransaction->subcontractorBill->subcontractorBillSummaries->count();
-
-                    $quantity = $debit / $billCount;
                     $subTotal = 0;
                     foreach($subcontractorBillTransaction->subcontractorBill->subcontractorBillSummaries as $billSummary) {
+                        $quantity = $debit * $billSummary->quantity;
                         $billSummary->quantity = $quantity;
                         $billSummary->save();
                         $subTotal += $billSummary['total_work_area'] * $billSummary->subcontractorStructureSummary['rate']* $billSummary->quantity;
@@ -625,7 +621,7 @@ class SubcontractorStructureController extends Controller
                 $subcontractorBillTransaction->subcontractorBill->subtotal = $subTotal;
                 $subcontractorBillTransaction->subcontractorBill->grand_total = $subTotal;
                 $subcontractorBillTransaction->subcontractorBill->save(); 
-                $subcontractorBillTransaction->debit = $request->debit;
+                $subcontractorBillTransaction->total = $request->debit;
                 $subcontractorBillTransaction->is_modified = true;
                 $subcontractorBillTransaction->modified_at = Carbon::now();
                 $subcontractorBillTransaction->modified_by = $request->user()->id;
