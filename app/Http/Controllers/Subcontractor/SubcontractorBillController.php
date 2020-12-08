@@ -296,6 +296,7 @@ class SubcontractorBillController extends Controller
     }
 
     public function getBillView(Request $request, $subcontractorBill){
+        // dd($subcontractorBill);
         try{
             $subcontractorStructure = $subcontractorBill->subcontractorStructure;
             $subcontractorBillTaxes = $subcontractorBill->subcontractorBillTaxes;

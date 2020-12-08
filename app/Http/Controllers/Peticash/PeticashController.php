@@ -2514,4 +2514,16 @@ class PeticashController extends Controller
             Log::critical(json_encode($data));
         }
     }
+
+    public function showdeleteSalary(Request $request){
+        $deleteRecords = PeticashSalaryTransaction::whereIn('id',$request->salary_ids)->with('employee')->get();
+        if(!$deleteRecords->isEmpty()) {
+            $final['sum'] = $deleteRecords->sum('payable_amount');
+            $final['data'] = $deleteRecords;
+
+            return json_encode($final);
+        }
+
+        return '';
+    }
 }

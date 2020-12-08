@@ -722,6 +722,12 @@ Route::group(['domain' => env('DOMAIN_NAME')], function () {
             Route::get('delete-extra-item/{id}/{structureId}', array('uses' => 'Subcontractor\SubcontractorStructureController@deleteExtraItem'));
         });
 
+        Route::group(['prefix' => 'cashentry'], function(){
+            Route::get('manage', array('uses' => 'Subcontractor\SubcontractorStructureController@cashentryManage'));
+            Route::get('listing', array('uses' => 'Subcontractor\SubcontractorStructureController@cashEntryListing'));
+            Route::post('edit/{id}', array('uses' => 'Subcontractor\SubcontractorStructureController@cashEntryEdit'));
+        });
+
         Route::group(['prefix' => 'bill'], function () {
             Route::get('manage/{subcontractorStructure}', array('uses' => 'Subcontractor\SubcontractorBillController@getManageView'));
             Route::post('listing/{subcontractorStructure}/{billStatusSlug}', array('uses' => 'Subcontractor\SubcontractorBillController@billListing'));
@@ -793,14 +799,17 @@ Route::group(['domain' => env('DOMAIN_NAME')], function () {
                 Route::get('manage', array('uses' => 'Peticash\PeticashController@getPurchaseManageView'));
                 Route::post('listing', array('uses' => 'Peticash\PeticashController@purchaseTransactionListing'));
             });
-            Route::group(['prefix' => 'salary'], function () {
-                Route::get('create', array('uses' => 'Peticash\PeticashController@getSalaryCreateView'));
-                Route::get('auto-suggest/{type}/{keyword}', array('uses' => 'Peticash\PeticashController@autoSuggest'));
-                Route::post('create', array('uses' => 'Peticash\PeticashController@createSalaryCreate'));
-                Route::get('manage', array('uses' => 'Peticash\PeticashController@getSalaryManageView'));
-                Route::delete('delete', array('uses' => 'Peticash\PeticashController@deleteSalary'));
-                Route::post('listing', array('uses' => 'Peticash\PeticashController@salaryTransactionListing'));
-                Route::get('payment-voucher-pdf/{salaryTransactionId}', array('uses' => 'Peticash\PeticashController@getPaymentVoucherPdf'));
+            Route::group(['prefix' => 'salary'], function(){
+                Route::get('create',array('uses' => 'Peticash\PeticashController@getSalaryCreateView'));
+                Route::get('auto-suggest/{type}/{keyword}',array('uses' => 'Peticash\PeticashController@autoSuggest'));
+                Route::post('create',array('uses' => 'Peticash\PeticashController@createSalaryCreate'));
+                Route::get('manage',array('uses' => 'Peticash\PeticashController@getSalaryManageView'));
+                Route::group(['prefix' => 'delete'], function(){
+                    Route::delete('/',array('uses' => 'Peticash\PeticashController@deleteSalary'));
+                    Route::post('show',array('uses' => 'Peticash\PeticashController@showdeleteSalary'));
+                });
+                Route::post('listing',array('uses' => 'Peticash\PeticashController@salaryTransactionListing'));
+                Route::get('payment-voucher-pdf/{salaryTransactionId}',array('uses' => 'Peticash\PeticashController@getPaymentVoucherPdf'));
             });
             Route::group(['prefix' => 'cash-transaction'], function () {
                 Route::get('manage', array('uses' => 'Peticash\PeticashController@getCashTransactionManage'));
