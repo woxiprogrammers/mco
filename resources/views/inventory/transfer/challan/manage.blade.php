@@ -3,6 +3,11 @@
 @include('partials.common.navbar')
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->
+
+<link href="/assets/global/plugins/bootstrap-daterangepicker/daterangepicker.min.css" rel="stylesheet" type="text/css" />
+<link href="/assets/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker3.min.css" rel="stylesheet" type="text/css" />
+<link href="/assets/global/plugins/bootstrap-timepicker/css/bootstrap-timepicker.min.css" rel="stylesheet" type="text/css" />
+<link href="/assets/global/plugins/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css" rel="stylesheet" type="text/css" />
 <!-- END PAGE LEVEL PLUGINS -->
 <style>
     #icon-text {
@@ -58,24 +63,27 @@
                                                     <table class="table table-striped table-bordered table-hover order-column" id="challanListTable">
                                                         <thead>
                                                             <tr>
-                                                                <th>Transaction Date</th>
-                                                                <th>Challan Number</th>
-                                                                <th>Site Out</th>
-                                                                <th>Site In</th>
-                                                                <th>Transportation Amount</th>
-                                                                <th>Transportation Tax Amount</th>
-                                                                <th>Status</th>
-                                                                <th>Action</th>
+                                                                <th width="15%">Transaction Date</th>
+                                                                <th width="15%">Challan Number</th>
+                                                                <th width="25%">Site Out</th>
+                                                                <th width="20%">Site In</th>
+                                                                <th width="5%">Transportation Amount</th>
+                                                                <th width="5%">Transportation Tax Amount</th>
+                                                                <th width="5%">Status</th>
+                                                                <th width="10%">Action</th>
                                                             </tr>
                                                             <tr class="filter">
-                                                                <th></th>
+                                                                <th>
+                                                                    <div class="input-group input-large date-picker input-daterange" data-date-format="yyyy-mm-dd">
+                                                                        <input type="text" style="margin-left: 30%;width: 70%" class="form-control form-filter" name="start_date" id="start_date" required="required">
+                                                                        <span class="input-group-addon" style="margin-left: 0%;width: 10%"> to </span>
+                                                                        <input type="text" style="margin-left: 0%;width: 70%" class="form-control form-filter" name="end_date" id="end_date" required="required"> </div>
+                                                                </th>
                                                                 <th> <input type="text" class="form-control form-filter" name="search_challan" id="search_challan"></th>
                                                                 <th> <input type="text" class="form-control form-filter" name="search_site_from" id="search_site_from"></th>
                                                                 <th> <input type="text" class="form-control form-filter" name="search_site_to" id="search_site_to"></th>
                                                                 <th> </th>
                                                                 <th> </th>
-
-
                                                                 <th>
                                                                     <select class="form-control" id="status_id" name="status_id">
                                                                         <option value="all">ALL</option>
@@ -114,8 +122,11 @@
 <script src="/assets/global/plugins/datatables/datatables.min.js"></script>
 <script src="/assets/global/scripts/datatable.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
-<script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/bootstrap-daterangepicker/daterangepicker.min.js" type="text/javascript"></script>
 <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/bootstrap-timepicker/js/bootstrap-timepicker.min.js" type="text/javascript"></script>
+<script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
+<script src="/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script>
 <script src="/assets/custom/inventory/challan/manage-datatable.js" type="text/javascript"></script>
 <script>
     $(document).ready(function() {
