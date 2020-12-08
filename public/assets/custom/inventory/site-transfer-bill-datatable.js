@@ -48,21 +48,6 @@ var SiteTransferBillListing = function () {
 
                             // Total over this page
                             pageTotal = api
-                                .column( 7, { page: 'current'} )
-                                .data()
-                                .reduce( function (a, b) {
-                                    return intVal(a) + intVal(b);
-                                }, 0 );
-
-                            // Update footer
-                            $( api.column( 7 ).footer() ).html(
-                                pageTotal.toFixed(3) +' ( '+ total.toFixed(3) +' total)'
-                            );
-
-                            billtotal = result['billtotal'];
-
-                            // Total over this page
-                            pageBillTotal = api
                                 .column( 8, { page: 'current'} )
                                 .data()
                                 .reduce( function (a, b) {
@@ -71,13 +56,13 @@ var SiteTransferBillListing = function () {
 
                             // Update footer
                             $( api.column( 8 ).footer() ).html(
-                                pageBillTotal.toFixed(3) +' ( '+ billtotal.toFixed(3) +' total)'
+                                pageTotal.toFixed(3) +' ( '+ total.toFixed(3) +' total)'
                             );
 
-                            paidtotal = result['paidtotal'];
+                            billtotal = result['billtotal'];
 
                             // Total over this page
-                            pagePaidTotal = api
+                            pageBillTotal = api
                                 .column( 9, { page: 'current'} )
                                 .data()
                                 .reduce( function (a, b) {
@@ -86,6 +71,21 @@ var SiteTransferBillListing = function () {
 
                             // Update footer
                             $( api.column( 9 ).footer() ).html(
+                                pageBillTotal.toFixed(3) +' ( '+ billtotal.toFixed(3) +' total)'
+                            );
+
+                            paidtotal = result['paidtotal'];
+
+                            // Total over this page
+                            pagePaidTotal = api
+                                .column( 10, { page: 'current'} )
+                                .data()
+                                .reduce( function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0 );
+
+                            // Update footer
+                            $( api.column( 10 ).footer() ).html(
                                 pagePaidTotal.toFixed(3) +' ( '+ paidtotal.toFixed(3) +' total)'
                             );
                         }});

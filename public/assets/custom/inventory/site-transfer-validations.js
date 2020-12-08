@@ -12,10 +12,10 @@ var  CreateSiteTransferBill = function () {
             errorClass: 'help-block', // default input error message class
             focusInvalid: false, // do not focus the last invalid input
             rules: {
-                transfer_component_transfer_id: {
+                challan_number: {
                     required: true
                 },
-                transfer_grn: {
+                challan_id: {
                     required: true
                 },
                 total:{

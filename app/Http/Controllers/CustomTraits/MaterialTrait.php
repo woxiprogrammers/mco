@@ -355,12 +355,27 @@ trait MaterialTrait{
                 $totalRecordCount = Material::whereIn('id',$ids)
                                 ->count();
             }
-
             $iTotalRecords = count($materialData);
             $records = array();
             $records['data'] = array();
+            $profilePicAddress = null;
             $end = $request->length < 0 ? count($materialData) : $request->length;
             for($iterator = 0,$pagination = 0; $iterator < $end && $pagination < count($materialData); $iterator++,$pagination++ ){
+                $materialImagetag = null;
+                $materialImages = MaterialImages::where('material_id',$materialData[$pagination]['id'])->select('id','name')->get();
+                if($materialImages != null){
+                    $profilePicAddress = $this->getImagePath($materialData[$pagination]['id'],$materialImages);
+                    if($profilePicAddress != null) {
+                        $profilePicAddress = env('APP_URL').$profilePicAddress[0]['path'];
+                        $materialImagetag = '<a href="'.$profilePicAddress.'" target="_blank"><img src="'.$profilePicAddress.'" height="60" width="60" style="border-radius: 50%;box-shadow: 2px 2px 1px 1px #888888;"></a>';
+                    } else {
+                        $profilePicAddress = env('APP_URL').'/assets/layouts/layout3/img/no-image.png';
+                        $materialImagetag = '<img src="'.$profilePicAddress.'" height="60" width="60" style="border-radius: 50%;box-shadow: 2px 2px 1px 1px #888888;">';
+                    }
+                } else {
+                    $profilePicAddress = env('APP_URL').'/assets/layouts/layout3/img/no-image.png';
+                    $materialImagetag = '<img src="'.$profilePicAddress.'" height="60" width="60" style="border-radius: 50%;box-shadow: 2px 2px 1px 1px #888888;">';
+                }
                 if($materialData[$pagination]['is_active'] == true){
                     $material_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
                     $status = 'Disable';
@@ -383,6 +398,7 @@ trait MaterialTrait{
                     }
                     $records['data'][$iterator] = [
                         '<input type="checkbox" name="material_ids" value="'.$materialData[$pagination]['id'].'">',
+                        $materialImagetag,
                         ucwords($catNameStr),
                         ucwords($materialData[$pagination]['name']),
                         round($materialData[$pagination]['rate_per_unit'],3),
@@ -405,6 +421,7 @@ trait MaterialTrait{
                 }else{
                     $records['data'][$iterator] = [
                         '<input type="checkbox" name="material_ids" value="'.$materialData[$pagination]['id'].'">',
+                        $materialImagetag,
                         $materialData[$pagination]['name'],
                         Unit::where('id',$materialData[$pagination]['unit_id'])->pluck('name')->first(),
                         round($materialData[$pagination]['rate_per_unit'],3),

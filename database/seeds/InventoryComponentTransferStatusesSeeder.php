@@ -1,5 +1,6 @@
 <?php
 
+use App\InventoryComponentTransferStatus;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -15,25 +16,68 @@ class InventoryComponentTransferStatusesSeeder extends Seeder
     public function run()
     {
         $now = Carbon::now();
-        DB::table('inventory_component_transfer_statuses')->insert([
+        InventoryComponentTransferStatus::updateOrCreate(
             [
-                'name' => 'Requested',
                 'slug' => 'requested',
-                'created_at' => $now,
-                'updated_at' => $now
             ],
             [
-                'name' => 'Approved',
+                'name'          => 'Requested',
+                'created_at'    => $now,
+                'updated_at'    => $now
+            ]
+        );
+        InventoryComponentTransferStatus::updateOrCreate(
+            [
                 'slug' => 'approved',
-                'created_at' => $now,
-                'updated_at' => $now
             ],
             [
-                'name' => 'Disapproved',
+                'name'          => 'Approved',
+                'created_at'    => $now,
+                'updated_at'    => $now
+            ]
+        );
+        InventoryComponentTransferStatus::updateOrCreate(
+            [
                 'slug' => 'disapproved',
-                'created_at' => $now,
-                'updated_at' => $now
             ],
-        ]);
+            [
+                'name'          => 'Disapproved',
+                'created_at'    => $now,
+                'updated_at'    => $now
+            ]
+        );
+
+        InventoryComponentTransferStatus::updateOrCreate(
+            [
+                'slug' => 'open',
+            ],
+            [
+                'name'          => 'Open',
+                'created_at'    => $now,
+                'updated_at'    => $now
+            ]
+        );
+
+        InventoryComponentTransferStatus::updateOrCreate(
+            [
+                'slug' => 'close',
+            ],
+            [
+                'name'          => 'Close',
+                'created_at'    => $now,
+                'updated_at'    => $now
+            ]
+        );
+
+        InventoryComponentTransferStatus::updateOrCreate(
+            [
+                'slug' => 're-open',
+            ],
+            [
+                'name'          => 'Re-open',
+                'created_at'    => $now,
+                'updated_at'    => $now
+            ]
+        );
     }
 }

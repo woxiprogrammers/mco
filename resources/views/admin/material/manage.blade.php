@@ -62,6 +62,7 @@
                                                 <thead>
                                                 <tr>
                                                     <th  style="width: 5%"> </th>
+                                                    <th> Image</th>
                                                     <th> Category</th>
                                                     <th style="width: 25%"> Name </th>
                                                     <th> Rate </th>
@@ -72,6 +73,7 @@
                                                 </tr>
                                                 <tr>
                                                     <th  style="width: 5%"> </th>
+                                                    <th> </th>
                                                     <th > <input type="text" class="form-control form-filter" name="search_name_cat"> </th>
                                                     <th style="width: 25%"> <input type="text" class="form-control form-filter" name="search_name"> </th>
                                                     <th> <input type="text" class="form-control form-filter search_filter" name="search_rate"> </th>
