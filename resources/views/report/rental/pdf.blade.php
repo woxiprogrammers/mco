@@ -36,6 +36,9 @@
                                 <tr>
                                     <td style="font-size: 15px">{!! env('CONTACT_NO') !!}</td>
                                 </tr>
+                                <tr>
+                                    <td style="font-size: 15px">{!! env('GSTIN_NUMBER') !!}</td>
+                                </tr>
                             </table>
                         </td>
                     </tr>
@@ -43,50 +46,74 @@
             </td>
         </tr>
     </table>
-    <p style="text-align: center"><b>Value Sheet</b></p>
-    <table border="1" width="100%" style="font-size: 12px;">
-        @foreach($value_sheet as $key => $data)
+    <br>
+    <table border=" 1" width="100%" style="font-size: 12px;">
+        <tr style="background-color:#81A1D1">
+            <td colspan='8' style="text-align: center;height: 35px; font-weight: bold; font-size: 16px;"> Monthly Rent Bill </td>
+        </tr>
         <tr>
-            @foreach($data as $key => $value)
-            <td style="text-align: center;height: 25px;">{!! $value !!}</td>
-            @endforeach
+            <td colspan='8' style="text-align: left;height: 30px; font-weight: bold; font-size: 14px;"> Billing for the month - {!! $bill_month !!}</td>
+        </tr>
+        <tr>
+            <td colspan='8' style="text-align: left;height: 30px; font-weight: bold; font-size: 14px;"> Site Name - {!! $projectSite['name'] !!}</td>
+        </tr>
+        <tr>
+            <td colspan='8' style="text-align: left;height: 30px; font-weight: bold; font-size: 14px;"> Site Address - {!! $projectSite['address'] !!} </td>
+        </tr>
+        <tr>
+            <td colspan='3' style="text-align: left;height: 30px; font-weight: bold; font-size: 14px;"> Invoice No - Rent </td>
+            <td colspan='5' style="text-align: left;height: 30px; font-weight: bold; font-size: 14px;"> Date - </td>
+        </tr>
+        <tr style="background-color:#81A1D1">
+            <td style="text-align: center; height: 25px; font-weight: bold">Sr no.</td>
+            <td style="text-align: center; height: 25px; font-weight: bold">Name</td>
+            <td style="text-align: center; height: 25px; font-weight: bold">Transfer Date</td>
+            <td style="text-align: center; height: 25px; font-weight: bold">Days</td>
+            <td style="text-align: center; height: 25px; font-weight: bold">Rent</td>
+            <td style="text-align: center; height: 25px; font-weight: bold">Qty</td>
+            <td style="text-align: center; height: 25px; font-weight: bold">Unit</td>
+            <td style="text-align: center; height: 25px; font-weight: bold">Amount</td>
+        </tr>
+        @foreach($rows as $key => $row)
+        <tr>
+            <?php
+            if ($row['make_bold']) {
+                $makeBold = true;
+            } else {
+                $makeBold = false;
+            }
+            unset($row['make_bold']);
+            ?>
+            @if ($makeBold)
+            <td style="text-align: center; height: 20px; font-weight: bold">{!! $row[0] !!}</td>
+            <td style="text-align: center; height: 20px; font-weight: bold">{!! $row[1] !!}</td>
+            <td style="text-align: center; height: 20px; font-weight: bold">{!! $row[2] !!}</td>
+            <td style="text-align: right; height: 20px; font-weight: bold">{!! $row[3] !!}</td>
+            <td style="text-align: right; height: 20px; font-weight: bold">{!! $row[4] !!}</td>
+            <td style="text-align: right; height: 20px; font-weight: bold">{!! $row[5] !!}</td>
+            <td style="text-align: left; height: 20px; font-weight: bold">{!! $row[6] !!}</td>
+            <td style="text-align: right; height: 20px; font-weight: bold">{!! $row[7] !!}</td>
+            @else
+            <td style="text-align: center; height: 20px">{!! $row[0] !!}</td>
+            <td style="text-align: center; height: 20px">{!! $row[1] !!}</td>
+            <td style="text-align: center; height: 20px">{!! $row[2] !!}</td>
+            <td style="text-align: right; height: 20px;">{!! $row[3] !!}</td>
+            <td style="text-align: right; height: 20px">{!! $row[4] !!}</td>
+            <td style="text-align: right; height: 20px">{!! $row[5] !!}</td>
+            <td style="text-align: left; height: 20px">{!! $row[6] !!}</td>
+            <td style="text-align: right; height: 20px">{!! $row[7] !!}</td>
+            @endif
         </tr>
         @endforeach
+        <tr>
+            <td colspan='7' style="text-align: center;height: 25px; font-weight: bold">
+                Final Rent total
+            </td>
+            <td colspan='1' style="text-align: right;height: 25px; font-weight: bold">
+                {!! $projectSiteRentTotal !!}
+            </td>
+        </tr>
     </table>
-    @if($set_drought_sheet)
-    <p style="text-align: center"><b>Drought Sheet</b></p>
-    <table border="1" width="100%" style="font-size: 12px;">
-        <tr>
-            @foreach($drought_titles as $title)
-            <td style="width: 50%;text-align: center">{!! $title !!}</td>
-            @endforeach
-        </tr>
-        @foreach($drought_sheet as $key => $data)
-        <tr>
-            @foreach($data as $key => $value)
-            <td style="text-align: center;height: 25px;">{!! $value !!}</td>
-            @endforeach
-        </tr>
-        @endforeach
-    </table>
-    @endif
-    @if($set_vci_sheet)
-    <p style="text-align: center"><b>VCI Sheet</b></p>
-    <table border="1" width="100%" style="font-size: 12px;">
-        <tr>
-            @foreach($vci_titles as $title)
-            <td style="width: 50%;text-align: center">{!! $title !!}</td>
-            @endforeach
-        </tr>
-        @foreach($vci_sheet as $key => $data)
-        <tr>
-            @foreach($data as $key => $value)
-            <td style="text-align: center;height: 25px;">{!! $value !!}</td>
-            @endforeach
-        </tr>
-        @endforeach
-    </table>
-    @endif
 </body>
 
 </html>
