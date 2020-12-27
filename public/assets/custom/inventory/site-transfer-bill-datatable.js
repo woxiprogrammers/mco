@@ -44,7 +44,7 @@ var SiteTransferBillListing = function () {
                             "bill_date" : $('#bill_date').val()
                         },
                         success: function(result){
-                            total = result['total'];
+                            total = result['total'] ?? 0;;
 
                             // Total over this page
                             pageTotal = api
@@ -59,7 +59,7 @@ var SiteTransferBillListing = function () {
                                 pageTotal.toFixed(3) +' ( '+ total.toFixed(3) +' total)'
                             );
 
-                            billtotal = result['billtotal'];
+                            billtotal = result['billtotal'] ?? 0;
 
                             // Total over this page
                             pageBillTotal = api
@@ -74,7 +74,7 @@ var SiteTransferBillListing = function () {
                                 pageBillTotal.toFixed(3) +' ( '+ billtotal.toFixed(3) +' total)'
                             );
 
-                            paidtotal = result['paidtotal'];
+                            paidtotal = result['paidtotal'] ?? 0;
 
                             // Total over this page
                             pagePaidTotal = api

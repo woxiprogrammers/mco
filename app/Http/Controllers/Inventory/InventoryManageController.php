@@ -52,12 +52,13 @@ class InventoryManageController extends Controller
     {
         try {
             $projectSiteId = Session::get('global_project_site');
-            $transportationVendors = Vendor::where('is_active', true)->where('for_transportation', true)->select('id', 'name')->get()->toArray();
+            $transportationVendors = Vendor::where('is_active', true)->where('for_transportation', true)->select('id', 'name')->orderBy('name', 'asc')->get()->toArray();
             $clients = Client::join('projects', 'projects.client_id', '=', 'clients.id')
                 ->join('project_sites', 'project_sites.project_id', '=', 'projects.id')
                 ->join('quotations', 'quotations.project_site_id', '=', 'project_sites.id')
                 ->select('clients.company as name', 'clients.id as id')
                 ->distinct('name')
+                ->orderBy('name')
                 ->get();
             $user = Auth::user();
             $userData = array(
@@ -66,30 +67,10 @@ class InventoryManageController extends Controller
             );
             $materials = InventoryCart::where('project_site_id', $projectSiteId)->whereHas('inventoryComponent', function ($query) {
                 $query->where('is_material', true);
-            })->with('inventoryComponent.material')->get()->toArray();
+            })->with('inventoryComponent.material.unit', 'unit')->get()->toArray();
             $assets = InventoryCart::where('project_site_id', $projectSiteId)->whereHas('inventoryComponent', function ($query) {
                 $query->where('is_material', false);
             })->with('inventoryComponent.asset')->get()->toArray();
-            foreach ($materials as $key => $material) {
-                $unit1Array = UnitConversion::join('units', 'units.id', '=', 'unit_conversions.unit_2_id')
-                    ->where('unit_conversions.unit_1_id', $material['inventory_component']['material']['unit_id'])
-                    ->select('units.id as id', 'units.name as name')
-                    ->get()
-                    ->toArray();
-
-                $units2Array = UnitConversion::join('units', 'units.id', '=', 'unit_conversions.unit_1_id')
-                    ->where('unit_conversions.unit_2_id', $material['inventory_component']['material']['unit_id'])
-                    ->whereNotIn('unit_conversions.unit_1_id', array_column($unit1Array, 'id'))
-                    ->select('units.id as id', 'units.name as name')
-                    ->get()
-                    ->toArray();
-                $units = array_merge($unit1Array, $units2Array);
-                $units[] = [
-                    'id'    => $material['inventory_component']['material']['unit_id'],
-                    'name'  => Unit::where('id', $material['inventory_component']['material']['unit_id'])->pluck('name')->first(),
-                ];
-                $materials[$key]['units'] = $units;
-            }
             $nosUnit = Unit::where('slug', 'nos')->select('id', 'name')->first();
             return view('inventory/generate-challan')->with(compact('clients', 'transportationVendors', 'nosUnit', 'units', 'unitOptions', 'userData', 'materials', 'assets'));
         } catch (\Exception $e) {
@@ -572,6 +553,7 @@ class InventoryManageController extends Controller
     {
         try {
             $inventoryComponent = InventoryComponent::where('id', $requestData['inventoryComponentId'])->first();
+            $opening_stock = $inventoryComponent->opening_stock ?? 0;
             if ($inventoryComponent->is_material == true) {
                 $materialUnit = Material::where('id', $inventoryComponent['reference_id'])->pluck('unit_id')->first();
                 $unitID = Unit::where('id', $materialUnit)->pluck('id')->first();
@@ -613,8 +595,15 @@ class InventoryManageController extends Controller
                     ->where('inventory_component_transfers.inventory_component_transfer_status_id', InventoryComponentTransferStatus::where('slug', 'approved')->pluck('id')->first())
                     ->sum('inventory_component_transfers.quantity');
             }
-            $availableQuantity = ($inQuantity + $inventoryComponent['opening_stock']) - $outQuantity;
-            if ($unitID != $requestData['unitId']) {
+            $openQty = 0;
+            if ($opening_stock != null) {
+                $openQty = $opening_stock;
+            }
+            $inQuantity = (int)$inQuantity;
+            $openQty = (int) $openQty;
+            $outQuantity = (int)$outQuantity;
+            $availableQuantity = ($inQuantity + $openQty) - $outQuantity;
+            if (array_key_exists('unitId', $requestData) && $unitID != $requestData['unitId']) {
                 $availableQuantity = UnitHelper::unitQuantityConversion($requestData['unitId'], $unitID, $availableQuantity);
             }
             if ($requestData['quantity'] <= $availableQuantity) {
@@ -802,9 +791,7 @@ class InventoryManageController extends Controller
     public function inventoryComponentListing(Request $request, $inventoryComponent)
     {
         try {
-            // $inventoryComponentTransfers = ($inventoryComponent->inventoryComponentTransfers->sortByDesc('id'));
-            $inventoryComponentTransfers = InventoryComponentTransfers::where('inventory_component_id', $inventoryComponent['id'])
-                ->orderBy('created_at', 'desc')->get();
+            $inventoryComponentTransfers = InventoryComponentTransfers::where('inventory_component_id', $inventoryComponent['id'])->orderBy('created_at', 'desc')->get();
             $status = 200;
             $iTotalRecords = count($inventoryComponentTransfers);
             $records = array();
