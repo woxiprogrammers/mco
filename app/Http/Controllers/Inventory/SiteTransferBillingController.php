@@ -233,9 +233,9 @@ class SiteTransferBillingController extends Controller
                     $paidAmount = SiteTransferBillPayment::whereIn('site_transfer_bill_id', $siteTransferBillData->pluck('id'))->sum('amount');
                     $pendingAmount = $total - $paidAmount;
                 }
-                $records['total'] = $total;
-                $records['billtotal'] = $paidAmount;
-                $records['paidtotal'] = $pendingAmount;
+                $records['total'] = (float)$total;
+                $records['billtotal'] = (float)$paidAmount;
+                $records['paidtotal'] = (float)$pendingAmount;
             } else {
                 $records["recordsFiltered"] = $records["recordsTotal"] = $totalRecordCount;
                 if ($request->length == -1) {
