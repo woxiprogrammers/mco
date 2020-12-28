@@ -46,7 +46,7 @@
                                                 <div class="table-container">
                                                     <div class="row">
                                                         <div class="col-md-2 pull-right">
-                                                            <button type="button" class="btn btn-small blue" id="updateCart"> Cart </button>
+                                                            <button type="button" class="btn btn-small blue" id="updateCart"> Add to Cart </button>
                                                         </div>
                                                     </div>
                                                     <table class="table table-striped table-bordered table-hover order-column" id="inventoryListingTable">

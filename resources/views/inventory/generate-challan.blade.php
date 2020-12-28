@@ -94,7 +94,7 @@
                                                             <table class="table table-hover table-light">
                                                                 <thead>
                                                                     <tr>
-                                                                        <th style="width: 4%;"></th>
+                                                                        <th style="width: 4%;"><input type="checkbox" id="all_material_checkbox" name="all_material_checkbox" class="material-component-checkbox" onchange="changeCheckboxStatus(this, 'material')"></th>
                                                                         <th style="width: 12%;"> Name </th>
                                                                         <th style="width: 12%;"> Quantity </th>
                                                                         <th style="width: 12%;"> Unit </th>
@@ -127,15 +127,8 @@
                                                                         </td>
                                                                         <td>
                                                                             <div class="form-group" style="width: 80%; margin-left: 10%">
-                                                                                <select name="inventory_cart[{{$material['id']}}][unit_id]" class="form-control unit" id="unit_id_{{$material['id']}}" onchange="checkAllowedQuantity(event, 'material')">
-                                                                                    @foreach($material['units'] as $unit)
-                                                                                    @if($material['unit_id'] == $unit['id'])
-                                                                                    <option value="{{$unit['id']}}" selected>{{$unit['name']}}</option>
-                                                                                    @else
-                                                                                    <option value="{{$unit['id']}}">{{$unit['name']}}</option>
-                                                                                    @endif
-                                                                                    @endforeach
-                                                                                </select>
+                                                                                <input class="form-control unit" value="{{$material['unit']['name']}}" readonly />
+                                                                                <input type="hidden" class="form-control unit" id="unit_id_{{$material['id']}}" name="inventory_cart[{{$material['id']}}][unit_id]" value="{{$material['unit_id']}}" readonly />
                                                                             </div>
                                                                         </td>
                                                                         <td>
@@ -180,7 +173,7 @@
                                                             <table class="table table-hover table-light">
                                                                 <thead>
                                                                     <tr>
-                                                                        <th style="width: 4%;"></th>
+                                                                        <th style="width: 4%;"><input type="checkbox" id="all_asset_checkbox" name="all_asset_checkbox" class="asset-component-checkbox" onchange="changeCheckboxStatus(this, 'asset')"></th>
                                                                         <th style="width: 12%;"> Name </th>
                                                                         <th style="width: 12%;"> Quantity </th>
                                                                         <th style="width: 12%;"> Unit </th>
@@ -198,7 +191,7 @@
                                                                             <div class="form-group" style="width: 80%; margin-left: 10%">
                                                                                 <input type="hidden" id="inventory_component_id_{{$asset['id']}}" name="inventory_cart[{{$asset['id']}}][inventory_component_id]" class="cart-inventory-component-id" value="{{$asset['inventory_component_id']}}">
                                                                                 <input type="hidden" id="{{$asset['id']}}" name="cart_id" class="cart-id" value="{{$asset['id']}}">
-                                                                                <input type="checkbox" id="id_{{$asset['id']}}" name="inventory_cart[{{$asset['id']}}]" value="{{$asset['id']}}" class="component-checkbox">
+                                                                                <input type="checkbox" id="id_{{$asset['id']}}" name="inventory_cart[{{$asset['id']}}][checkbox]" value="{{$asset['id']}}" class="component-checkbox">
                                                                             </div>
                                                                         </td>
                                                                         <td>
@@ -498,6 +491,9 @@
                     },
                     submitHandler: function(form) {
                         if ($(".component-checkbox:checkbox:checked").length > 0) {
+                            $(".component-checkbox:checkbox:checked").each(function() {
+
+                            })
                             $("button[type='submit']").prop('disabled', true);
                             success.show();
                             error.hide();
@@ -537,18 +533,15 @@
         $('input:checkbox.component-checkbox').click(function() {
             var id = $(this).val();
             var quantity = $('#current_quantity_' + id);
-            if ($(this).prop("checked") == false) {
-                $('#gst_' + id).prop('disabled', true);
-                $('#cgst_amount_' + id + ',#sgst_amount_' + id + ',#total_' + id).val('');
-                $(',#gst_' + id).val('');
-                $('#current_quantity_' + id).rules('remove');
-                $('#current_quantity_' + id).removeClass('has-error');
-            } else {
+            if ($(this).prop("checked")) {
                 $('#current_quantity_' + id).rules('add', {
                     min: 1,
                 });
                 $('#current_quantity_' + id).valid();
-                $('#gst_' + id).prop('disabled', false);
+
+            } else {
+                $('#current_quantity_' + id).closest('form-group').removeClass('has-error');
+                $('#current_quantity_' + id).rules('remove');
             }
         });
     });
@@ -734,6 +727,14 @@
         $('.transportation-igst-amount').val(igstAmount);
         var transportationTotal = parseFloat(parseFloat(transportationAmount) + parseFloat(cgstAmount) + parseFloat(sgstAmount) + parseFloat(igstAmount)).toFixed(3);
         $('.transportation-total').val(transportationTotal);
+    }
+
+    function changeCheckboxStatus(element, slug) {
+        if (slug == 'material') {
+            $(".cart-materials .component-checkbox").prop("checked", !$(element).prop("checked")).trigger("click");
+        } else {
+            $(".cart-assets .component-checkbox").prop("checked", !$(element).prop("checked")).trigger("click");
+        }
     }
 
     function checkAllowedQuantity(event, slug) {

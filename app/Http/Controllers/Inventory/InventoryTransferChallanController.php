@@ -82,7 +82,7 @@ class InventoryTransferChallanController extends Controller
                             if ($materialUnit == null) {
                                 $materialUnit = Material::where('name', 'ilike', $inventoryComponent['name'])->pluck('unit_id')->first();
                             }
-                            $unitId = $materialUnit->unit->id ?? null;
+                            $unitId = $materialUnit ?? null;
                         } else {
                             $unitId = Unit::where('slug', 'nos')->pluck('id')->first();
                         }
@@ -341,6 +341,10 @@ class InventoryTransferChallanController extends Controller
                     case 'close':
                         $actionDropDownStatus = '<i class="fa fa-times-circle" title="Close" style="font-size:24px;color:red">&nbsp;&nbsp;</i>';
                         $secondDiv = $detailDiv;
+                        break;
+                    case 're-open':
+                        $actionDropDownStatus = '<i class="fa fa-times-circle" title="Close" style="font-size:24px;color:red">&nbsp;&nbsp;</i>';
+                        $secondDiv = $editDiv;
                         break;
                 }
                 $pdfDiv =   '<div class="btn btn-small blue" title="PDF">
