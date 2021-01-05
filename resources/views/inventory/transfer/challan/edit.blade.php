@@ -134,15 +134,24 @@
                                                                                                 <input type="hidden" id="componentRow-{{$materialData['out_transfer_id']}}-component-id" value="{{$materialData['out_inventory_component_id']}}">
                                                                                                 <input type="hidden" class="out-transfer" id="{{$materialData['out_transfer_id']}}" value="{{$materialData['out_transfer_id']}}">
                                                                                                 <td> {{$materialData['name']}} </td>
+                                                                                                @if ($challan->inventoryComponentTransferStatus->slug == 'requested')
                                                                                                 <td>
                                                                                                     <div class="form-group" style="width: 80%; margin-left: 10%">
                                                                                                         <input type="number" class="form-control site-out-transfer" id="componentRow-{{$materialData['out_transfer_id']}}-site-out-quantity" name="component[{{$materialData['out_transfer_id']}}][site_out_quantity]" value="{{$materialData['site_out_quantity']}}" onchange="checkQuantity(this, 'out-transfer')">
                                                                                                     </div>
                                                                                                 </td>
+                                                                                                @else
+                                                                                                <td>
+                                                                                                    <div class="form-group" style="width: 80%; margin-left: 10%">
+                                                                                                        <input type="number" class="form-control site-out-transfer" id="componentRow-{{$materialData['out_transfer_id']}}-site-out-quantity" name="component[{{$materialData['out_transfer_id']}}][site_out_quantity]" value="{{$materialData['site_out_quantity']}}" readonly>
+                                                                                                    </div>
+                                                                                                </td>
+                                                                                                @endif
+
                                                                                                 @if ($isSiteInDone)
                                                                                                 <td>
                                                                                                     <div class="form-group" style="width: 80%; margin-left: 10%">
-                                                                                                        <input type="number" class="form-control site-in-transfer" id="componentRow-{{$materialData['out_transfer_id']}}-site-in-quantity" name="component[{{$materialData['out_transfer_id']}}][site_in_quantity]" value="{{$materialData['site_in_quantity']}}" onchange="checkQuantity(this, 'in-transfer')">
+                                                                                                        <input type="number" class="form-control site-in-transfer" id="componentRow-{{$materialData['out_transfer_id']}}-site-in-quantity" name="component[{{$materialData['out_transfer_id']}}][site_in_quantity]" value="{{$materialData['site_in_quantity']}}" onchange="checkQuantity(this, 'in-transfer')" readonly>
                                                                                                     </div>
                                                                                                 </td>
                                                                                                 @else
