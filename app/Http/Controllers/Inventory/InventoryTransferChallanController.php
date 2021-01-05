@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Session;
 
 use App\GRNCount;
 use App\InventoryComponentOpeningStockHistory;
+use App\RentalInventoryTransfer;
 use App\SiteTransferBill;
 use App\User;
 use Illuminate\Support\Facades\File;
@@ -689,6 +690,13 @@ class InventoryTransferChallanController extends Controller
                         'inventory_component_transfer_status_id' => $approvedStatusId,
                         'remark'                                => $request['remark'] ?? ''
                     ]);
+                    $rentalInventoryTransfer = RentalInventoryTransfer::where('inventory_component_transfer_id', $inventoryComponentInTransfer['id'])->first();
+                    if ($rentalInventoryTransfer) {
+                        $rentalInventoryTransfer->update([
+                            'quantity'  => $inventoryComponentInTransfer['quantity'],
+                            'rent_per_day' => $inventoryComponentInTransfer['rate_per_unit'],
+                        ]);
+                    }
                     if ($updateChallanStatusToClose && ($inventoryComponentOutTransfer['quantity'] != $inventoryComponentInTransfer['quantity'])) {
                         $updateChallanStatusToClose = false;
                     }
@@ -815,6 +823,14 @@ class InventoryTransferChallanController extends Controller
                     'inventory_transfer_challan_id'             => $relatedInventoryComponentOutTransferData['inventory_transfer_challan_id']
                 ]);
 
+                // Create site in entry for rental report
+                RentalInventoryTransfer::create([
+                    'inventory_component_transfer_id'   => $inventoryComponentInTransfer['id'],
+                    'quantity'                          => $inventoryComponentInTransfer['quantity'],
+                    'rent_per_day'                      => $inventoryComponentInTransfer['rate_per_unit'],
+                    'rent_start_date'                   => $currentDate
+                ]);
+
                 $relatedInventoryComponentOutTransferData->update(['related_transfer_id' => $inventoryComponentInTransfer['id']]);
                 if ($monthlyGrnGeneratedCount != null) {
                     GRNCount::where('month', $currentDate->month)->where('year', $currentDate->year)->update(['count' => $serialNumber]);
@@ -878,12 +894,23 @@ class InventoryTransferChallanController extends Controller
         try {
             $challan = InventoryTransferChallan::find($challanId);
             if ($challan) {
-                if ($request['status'] === 'approved') {
-                    $statusSlug = 'open';
-                    //RentalInventoryTransfer::create('inventory_component_transfer_id', 'quantity', 'rent_per_day', 'rent_start_date');
-                }
-                $statusSlug = $request['status'];
+                $statusSlug = ($request['status'] === 'approved') ? 'open' : $request['status'];
                 $statusId = InventoryComponentTransferStatus::where('slug', $statusSlug)->pluck('id')->first();
+                if ($request['status'] === 'approved') {
+                    $rentApplicableDate = Carbon::tomorrow();
+                    $inventoryComponentTransfers = InventoryComponentTransfers::where('inventory_transfer_challan_id', $challan['id'])->get();
+                    // Create inventory component transfer for rental report
+                    foreach ($inventoryComponentTransfers as $inventoryComponentTransfer) {
+                        RentalInventoryTransfer::create([
+                            'inventory_component_transfer_id'   => $inventoryComponentTransfer['id'],
+                            'quantity'                          => $inventoryComponentTransfer['quantity'],
+                            'rent_per_day'                      => $inventoryComponentTransfer['rate_per_unit'],
+                            'rent_start_date'                   => $rentApplicableDate
+                        ]);
+                    }
+                }
+                // Update inventory component transfers status
+                $inventoryComponentTransfers = InventoryComponentTransfers::where('inventory_transfer_challan_id', $challan['id'])->update(['inventory_component_transfer_status_id' => $statusId]);
                 if ($statusId) {
                     $challan->update(['inventory_component_transfer_status_id' => $statusId]);
                     return response()->json([
