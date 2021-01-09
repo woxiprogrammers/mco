@@ -50,6 +50,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redirect;
 use App\PurchaseOrderComponentImage;
+use App\PurchaseOrderTransactionBackup;
 use App\PurchaseRequestComponent;
 use App\PurchaseRequestComponentVendorRelation;
 use Illuminate\Support\Facades\Auth;
@@ -1776,15 +1777,32 @@ class PurchaseOrderController extends Controller
         return response()->json($response,$status);
     }
 
-    public function getManageGRNDeleteView(Request $request) {
+    public function grnDelete(Request $request) {
         try{
-            $categories = null;
-            $categories = Category::where('is_active',true)->select('id','name')->orderBy('name','asc')->get()->toArray();
-            $data['categories'] = $categories;
-            return view('admin.material.manage', $data);
+            if($request->has('grnIds') && !empty($request->grnIds)) {
+                $grnData = PurchaseOrderTransaction::whereIn('id',$request->grnIds)->get();
+                foreach($grnData as $grn) {
+                    PurchaseOrderTransactionBackup::create($grn->toArray());
+                    $grn->delete();
+                }
+            }
         }catch(\Exception $e){
             $data = [
-                'action' => 'Get material manage view',
+                'action' => 'Delete GRN',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function grnDeleteView(Request $request) {
+        try{
+            return view('admin.grn.delete');
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'GRN Delete manage view',
                 'params' => $request->all(),
                 'exception' => $e->getMessage()
             ];
@@ -1798,112 +1816,33 @@ class PurchaseOrderController extends Controller
             $skip = $request->start;
             $take = $request->length;
             $totalRecordCount = 0;
-            $user = Auth::user();
-            $materialData = array();
-            $ids = Material::pluck('id')->toArray();
-            $filterFlag = true;
-            if($request->has('search_name') && $request->search_name != '' && $filterFlag == true){
-                $ids = Material::whereIn('id',$ids)
-                                ->where('name','ilike','%'.$request->search_name.'%')
-                                ->pluck('id')->toArray();
-                if(count($ids) <= 0){
-                    $filterFlag = false;
-                }
-            }
+            
+            
+            if($request->has('search_grn') && $request->search_grn != ''){
+                $grnData = PurchaseOrderTransaction::where('grn',trim($request->search_grn))->get()->toArray();
+                $totalRecordCount = PurchaseOrderTransaction::where('grn',$request->search_grn)->count();
+            }else {
+                $grnData = PurchaseOrderTransaction::orderBy('created_at','desc')
+                                ->skip($skip)->take($take)->get()->toArray();
 
-            if($request->has('search_rate') && $request->search_rate != '' && $filterFlag == true){
-                $ids = Material::whereIn('id',$ids)
-                    ->where('rate_per_unit',$request->search_rate)
-                    ->pluck('id')->toArray();
-                if(count($ids) <= 0){
-                    $filterFlag = false;
-                }
-            }
-
-            if($request->has('search_name_cat') && $request->search_name_cat != '' && $filterFlag == true){
-                $ids = Material::join('category_material_relations','category_material_relations.material_id','=','materials.id')
-                    ->join('categories','categories.id','=','category_material_relations.category_id')
-                    ->where('categories.name','ilike','%'.$request->search_name_cat.'%')
-                    ->whereIn('materials.id',$ids)
-                    ->pluck('materials.id')->toArray();
-                if(count($ids) <= 0){
-                    $filterFlag = false;
-                }
+                $totalRecordCount = PurchaseOrderTransaction::count();
             }
 
 
-            if($filterFlag == true) {
-                $materialData = Material::whereIn('id',$ids)
-                                ->orderBy('name','asc')
-                                ->skip($skip)->take($take)
-                                ->get()->toArray();
-
-                $totalRecordCount = Material::whereIn('id',$ids)
-                                ->count();
-            }
-
-            $iTotalRecords = count($materialData);
+            $iTotalRecords = count($grnData);
             $records = array();
             $records['data'] = array();
-            $end = $request->length < 0 ? count($materialData) : $request->length;
-            for($iterator = 0,$pagination = 0; $iterator < $end && $pagination < count($materialData); $iterator++,$pagination++ ){
-                if($materialData[$pagination]['is_active'] == true){
-                    $material_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
-                    $status = 'Disable';
-                }else{
-                    $material_status = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
-                    $status = 'Enable';
-                }
-                if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('edit-material')){
-                    $categoryname = CategoryMaterialRelation::join('categories','categories.id','=','category_material_relations.category_id')
-                                    ->where('category_material_relations.material_id','=',$materialData[$pagination]['id'])
-                                    ->get(['categories.name'])->toArray();
-                    $catNameArr = array();
-                    if(count($categoryname) > 1) {
-                        foreach ($categoryname as $catname) {
-                            $catNameArr[] = $catname['name'];
-                        }
-                        $catNameStr = implode(" , ", $catNameArr);
-                    } else {
-                        $catNameStr = $categoryname[0]['name'];
-                    }
-                    $records['data'][$iterator] = [
-                        '<input type="checkbox" name="material_ids" value="'.$materialData[$pagination]['id'].'">',
-                        ucwords($catNameStr),
-                        ucwords($materialData[$pagination]['name']),
-                        round($materialData[$pagination]['rate_per_unit'],3),
-                        Unit::where('id',$materialData[$pagination]['unit_id'])->pluck('name')->first(),
-                        $material_status,
-                        date('d M Y',strtotime($materialData[$pagination]['created_at'])),
-                        '<div class="btn-group">
-                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                            Actions
-                            <i class="fa fa-angle-down"></i>
-                        </button>
-                        <ul class="dropdown-menu pull-left" role="menu">
-                            <li>
-                                <a href="/material/edit/'.$materialData[$pagination]['id'].'">
-                                    <i class="icon-docs"></i> Edit </a>
-                            </li>
-                        </ul>
-                    </div>'
-                    ];
-                }else{
-                    $records['data'][$iterator] = [
-                        '<input type="checkbox" name="material_ids" value="'.$materialData[$pagination]['id'].'">',
-                        $materialData[$pagination]['name'],
-                        Unit::where('id',$materialData[$pagination]['unit_id'])->pluck('name')->first(),
-                        round($materialData[$pagination]['rate_per_unit'],3),
-                        $material_status,
-                        date('d M Y',strtotime($materialData[$pagination]['created_at'])),
-                        '<div class="btn-group">
-                            <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                                Actions
-                                <i class="fa fa-angle-down"></i>
-                            </button>
-                        </div>'
-                    ];
-                }
+            $end = $request->length < 0 ? count($grnData) : $request->length;
+            for($iterator = 0,$pagination = 0; $iterator < $end && $pagination < count($grnData); $iterator++,$pagination++ ){
+                $records['data'][$iterator] = [
+                    '<input type="checkbox" name="material_ids" value="'.$grnData[$pagination]['id'].'">',
+                    $grnData[$pagination]['grn'],
+                    $grnData[$pagination]['in_time'],
+                    $grnData[$pagination]['out_time'],
+                    $grnData[$pagination]['vehicle_number'],
+                    $grnData[$pagination]['remark'],
+                    $grnData[$pagination]['created_at'],
+                ];
 
             }
             $records["draw"] = intval($request->draw);
@@ -1912,7 +1851,107 @@ class PurchaseOrderController extends Controller
         }catch(\Exception $e){
             $records = array();
             $data = [
-                'action' => 'Material Listing',
+                'action' => 'GRN Delete Listing',
+                'params' => $request->all(),
+                'exception'=> $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+
+        return response()->json($records,200);
+    }
+
+    public function grnRestore(Request $request) {
+        try{
+            if($request->has('grnIds') && !empty($request->grnIds)) {
+                $grnData = PurchaseOrderTransactionBackup::whereIn('id',$request->grnIds)->get();
+                foreach($grnData as $grn) {
+                    //PurchaseOrderTransaction::create($grn->toArray());
+                    $grnInfo = $grn->toArray();
+                    $newGrn = PurchaseOrderTransaction::firstOrNew(['id' => $grnInfo['id']]);
+                    $newGrn->id = $grnInfo['id'];
+                    $newGrn->purchase_order_id = $grnInfo['purchase_order_id'];
+                    $newGrn->purchase_order_transaction_status_id = $grnInfo['purchase_order_transaction_status_id'];
+                    $newGrn->bill_number = $grnInfo['bill_number'];
+                    $newGrn->vehicle_number = $grnInfo['vehicle_number'];
+                    $newGrn->grn = $grnInfo['grn'];
+                    $newGrn->in_time = $grnInfo['in_time'];
+                    $newGrn->out_time = $grnInfo['out_time'];
+                    $newGrn->created_at = $grnInfo['created_at'];
+                    $newGrn->updated_at = $grnInfo['updated_at'];
+                    $newGrn->remark = $grnInfo['remark'];
+                    $newGrn->bill_amount = $grnInfo['bill_amount'];
+                    $newGrn->save();
+                    $grn->delete();
+                }
+            }
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Restore GRN',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function grnRestoreView(Request $request) {
+        try{
+            return view('admin.grn.restore');
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'GRN Restore manage view',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function grnRestoreListing(Request $request) {
+        try{
+            $skip = $request->start;
+            $take = $request->length;
+            $totalRecordCount = 0;
+            
+            
+            if($request->has('search_grn') && $request->search_grn != ''){
+                $grnData = PurchaseOrderTransactionBackup::where('grn',trim($request->search_grn))->get()->toArray();
+                $totalRecordCount = PurchaseOrderTransactionBackup::where('grn',$request->search_grn)->count();
+            }else {
+                $grnData = PurchaseOrderTransactionBackup::orderBy('created_at','desc')
+                                ->skip($skip)->take($take)->get()->toArray();
+
+                $totalRecordCount = PurchaseOrderTransactionBackup::count();
+            }
+
+
+            $iTotalRecords = count($grnData);
+            $records = array();
+            $records['data'] = array();
+            $end = $request->length < 0 ? count($grnData) : $request->length;
+            for($iterator = 0,$pagination = 0; $iterator < $end && $pagination < count($grnData); $iterator++,$pagination++ ){
+                $records['data'][$iterator] = [
+                    '<input type="checkbox" name="material_ids" value="'.$grnData[$pagination]['id'].'">',
+                    $grnData[$pagination]['grn'],
+                    $grnData[$pagination]['in_time'],
+                    $grnData[$pagination]['out_time'],
+                    $grnData[$pagination]['vehicle_number'],
+                    $grnData[$pagination]['remark'],
+                    $grnData[$pagination]['created_at'],
+                ];
+
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $totalRecordCount;
+            $records["recordsFiltered"] = $totalRecordCount;
+        }catch(\Exception $e){
+            $records = array();
+            $data = [
+                'action' => 'GRN Restore Listing',
                 'params' => $request->all(),
                 'exception'=> $e->getMessage()
             ];

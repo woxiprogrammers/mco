@@ -15,15 +15,20 @@ class CreatePoTransactionBackupTable extends Migration
     {
         Schema::create('purchase_order_transactions_backup', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedBigInteger('po_txn_id');
             $table->unsignedBigInteger('purchase_order_id');
             $table->unsignedBigInteger('purchase_order_transaction_status_id');
             $table->string('bill_number',255)->nullable();
             $table->string('vehicle_number',255)->nullable();
-            $table->string('grn',255);
+            $table->string('grn',255)->index();
             $table->timestamp('in_time')->nullable();
             $table->timestamp('out_time')->nullable();
+            $table->text('remark')->nullable();
+            $table->double('bill_amount')->nullable();
             $table->timestamps();
+        });
+
+        Schema::table('purchase_order_transactions', function (Blueprint $table) {   
+            $table->index('grn');
         });
     }
 
@@ -35,5 +40,9 @@ class CreatePoTransactionBackupTable extends Migration
     public function down()
     {
         Schema::dropIfExists('purchase_order_transactions_backup');
+
+        Schema::table('purchase_order_transactions', function (Blueprint $table) {   
+            $table->dropIndex(['grn']);
+        });
     }
 }

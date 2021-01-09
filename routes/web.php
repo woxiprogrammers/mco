@@ -290,6 +290,19 @@ Route::group(['domain' => env('DOMAIN_NAME')], function(){
         });
     });
 
+    Route::group(['prefix' => 'grn'], function(){
+        Route::group(['prefix' => 'delete'], function(){
+            Route::get('/',array('uses' => 'Purchase\PurchaseOrderController@grnDeleteView'));
+            Route::post('/',array('uses' => 'Purchase\PurchaseOrderController@grnDelete'));
+            Route::get('/listing',array('uses' => 'Purchase\PurchaseOrderController@grnDeleteListing'));
+        });
+        Route::group(['prefix' => 'restore'], function(){
+            Route::get('/',array('uses' => 'Purchase\PurchaseOrderController@grnRestoreView'));
+            Route::post('/',array('uses' => 'Purchase\PurchaseOrderController@grnRestore'));
+            Route::get('/listing',array('uses' => 'Purchase\PurchaseOrderController@grnRestoreListing'));
+        });
+    });
+
     Route::group(['prefix' => 'purchase'], function(){
         Route::get('get-detail/{materialRequestComponentID}',array('uses' => 'User\PurchaseController@getPurchaseDetails'));
         Route::get('projects/{client_id}',array('uses' => 'User\PurchaseController@getProjects'));
