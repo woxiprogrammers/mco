@@ -68,9 +68,17 @@ class InventoryManageController extends Controller
             $materials = InventoryCart::where('project_site_id', $projectSiteId)->whereHas('inventoryComponent', function ($query) {
                 $query->where('is_material', true);
             })->with('inventoryComponent.material.unit', 'unit')->get()->toArray();
+            foreach ($materials as $key => $material) {
+                $inventoryComponent = InventoryComponent::find($material['inventory_component']['id']);
+                $materials[$key]['available_quantity'] = $inventoryComponent->getAvailableQuantity();
+            }
             $assets = InventoryCart::where('project_site_id', $projectSiteId)->whereHas('inventoryComponent', function ($query) {
                 $query->where('is_material', false);
             })->with('inventoryComponent.asset')->get()->toArray();
+            foreach ($assets as $key => $asset) {
+                $inventoryComponent = InventoryComponent::find($asset['inventory_component']['id']);
+                $assets[$key]['available_quantity'] = $inventoryComponent->getAvailableQuantity();
+            }
             $nosUnit = Unit::where('slug', 'nos')->select('id', 'name')->first();
             return view('inventory/generate-challan')->with(compact('clients', 'transportationVendors', 'nosUnit', 'units', 'unitOptions', 'userData', 'materials', 'assets'));
         } catch (\Exception $e) {
@@ -366,8 +374,8 @@ class InventoryManageController extends Controller
                     ucwords(explode("-", $inventoryTransferData[$pagination]->source_name)[0]),
                     ucwords($inventoryTransferData[$pagination]->inventoryComponent->name),
                     $inventoryTransferData[$pagination]->quantity,
-                    ($inventoryTransferData[$pagination]->rate_per_unit) ? $inventoryTransferData[$pagination]->rate_per_unit : '-',
-                    ($inventoryTransferData[$pagination]->total) ? $inventoryTransferData[$pagination]->total : '-',
+                    ($inventoryTransferData[$pagination]->rate_per_unit) ?? '-',
+                    ($inventoryTransferData[$pagination]->total) ?? '-',
                     $inventoryTransferData[$pagination]->unit->name,
                     $transportation_amount,
                     $grnOut,
@@ -1243,12 +1251,15 @@ class InventoryManageController extends Controller
     {
         try {
             $paths = array();
+            $sha1challanId = sha1($inventoryComponentTransfer['inventory_transfer_challan_id']);
             $imageUploadPath = env('INVENTORY_COMPONENT_IMAGE_UPLOAD');
-            $inventoryComponentDirectoryName = sha1($inventoryComponentTransfer->inventoryComponent->id);
-            $inventoryComponentTransferDirectoryName = sha1($inventoryComponentTransfer->id);
-            $imageUploadDirectoryPath = $imageUploadPath . DIRECTORY_SEPARATOR . $inventoryComponentDirectoryName . DIRECTORY_SEPARATOR . 'transfers' . DIRECTORY_SEPARATOR . $inventoryComponentTransferDirectoryName;
+            if ($inventoryComponentTransfer->transferType->type === 'IN') {
+                $newInUploadPath = $imageUploadPath . DIRECTORY_SEPARATOR . $sha1challanId . DIRECTORY_SEPARATOR . 'in';
+            } else {
+                $newInUploadPath = $imageUploadPath . DIRECTORY_SEPARATOR . $sha1challanId . DIRECTORY_SEPARATOR . 'out';
+            }
             foreach ($inventoryComponentTransfer->images as $image) {
-                $paths[] = $imageUploadDirectoryPath . DIRECTORY_SEPARATOR . $image->name;
+                $paths[] = $newInUploadPath . DIRECTORY_SEPARATOR . $image->name;
             }
             return $paths;
         } catch (\Exception $e) {

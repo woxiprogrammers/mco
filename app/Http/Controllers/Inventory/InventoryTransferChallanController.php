@@ -194,7 +194,7 @@ class InventoryTransferChallanController extends Controller
     public function createSiteOutTransferData($requestedCartData, $timestamp, $additionalData, $inventoryComponent, $challan)
     {
         try {
-            $projectSite = ProjectSite::where('id', $additionalData['out_project_site_id'])->first();
+            $projectSite = ProjectSite::where('id', $additionalData['in_project_site_id'])->first();
             $inventoryComponentOutTransfer = [
                 'transfer_type'                 => 'site',
                 'unit_id'                       => $requestedCartData['unit_id'],
@@ -418,7 +418,7 @@ class InventoryTransferChallanController extends Controller
             $challan['other_data'] = $challan->otherData()->toArray();
             $isSiteInDone = ($challan['project_site_in_date']) ? true : false;
             $billCount = SiteTransferBill::where('inventory_transfer_challan_id', $challan['id'])->count();
-            $isbillGenerated = ($billCount > 0) ? true : false;
+            $isbillGenerated = ($billCount > 0) ? "true" : "false";
             return view('inventory/transfer/challan/edit')->with(compact('userRole', 'challan', 'projectSites', 'challanStatus', 'components', 'out_remark', 'in_remark', 'inImages', 'outImages', 'isSiteInDone', 'isbillGenerated'));
         } catch (Exception $e) {
             $data = [
@@ -462,7 +462,7 @@ class InventoryTransferChallanController extends Controller
             $outImages = $this->getTransferImages($firstOutTransfer);
             $challan['other_data'] = $challan->otherData()->toArray();
             $billCount = SiteTransferBill::where('inventory_transfer_challan_id', $challan['id'])->count();
-            $isbillGenerated = ($billCount > 0) ? true : false;
+            $isbillGenerated = ($billCount > 0) ? "true" : "false";
             return view('inventory/transfer/challan/detail')->with(compact('userRole', 'challan', 'projectSites', 'challanStatus', 'components', 'out_remark', 'in_remark', 'inImages', 'outImages', 'isbillGenerated'));
         } catch (Exception $e) {
             $data = [

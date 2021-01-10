@@ -96,10 +96,11 @@
                                                                     <tr>
                                                                         <th style="width: 4%;"><input type="checkbox" id="all_material_checkbox" name="all_material_checkbox" class="material-component-checkbox" onchange="changeCheckboxStatus(this, 'material')"></th>
                                                                         <th style="width: 12%;"> Name </th>
+                                                                        <th style="width: 12%;"> Available Quantity </th>
                                                                         <th style="width: 12%;"> Quantity </th>
-                                                                        <th style="width: 12%;"> Unit </th>
-                                                                        <th style="width: 12%;"> Rate </th>
-                                                                        <th style="width: 12%;"> GST % </th>
+                                                                        <th style="width: 8%;"> Unit </th>
+                                                                        <th style="width: 8%;"> Rate </th>
+                                                                        <th style="width: 8%;"> GST % </th>
                                                                         <th style="width: 12%;"> CGST Amount </th>
                                                                         <th style="width: 12%;"> SGST Amount </th>
                                                                         <th style="width: 12%;"> Total </th>
@@ -118,6 +119,11 @@
                                                                         <td>
                                                                             <div class="form-group" style="width: 80%; margin-left: 10%">
                                                                                 <span>{{$material['inventory_component']['name']}}</span>
+                                                                            </div>
+                                                                        </td>
+                                                                        <td>
+                                                                            <div class="form-group" style="width: 80%; margin-left: 10%">
+                                                                                <input type="number" class="form-control cart-available-quantity" name="inventory_cart[{{$material['id']}}][available_quantity]" id="available_quantity_{{$material['id']}}" value="{{$material['available_quantity']}}" readonly />
                                                                             </div>
                                                                         </td>
                                                                         <td>
@@ -175,10 +181,11 @@
                                                                     <tr>
                                                                         <th style="width: 4%;"><input type="checkbox" id="all_asset_checkbox" name="all_asset_checkbox" class="asset-component-checkbox" onchange="changeCheckboxStatus(this, 'asset')"></th>
                                                                         <th style="width: 12%;"> Name </th>
+                                                                        <th style="width: 12%;"> Available Quantity </th>
                                                                         <th style="width: 12%;"> Quantity </th>
-                                                                        <th style="width: 12%;"> Unit </th>
-                                                                        <th style="width: 12%;"> Rate </th>
-                                                                        <th style="width: 12%;"> GST % </th>
+                                                                        <th style="width: 8%;"> Unit </th>
+                                                                        <th style="width: 8%;"> Rate </th>
+                                                                        <th style="width: 8%;"> GST % </th>
                                                                         <th style="width: 12%;"> CGST Amount </th>
                                                                         <th style="width: 12%;"> SGST Amount </th>
                                                                         <th style="width: 12%;"> Total </th>
@@ -197,6 +204,11 @@
                                                                         <td>
                                                                             <div class="form-group" style="width: 80%; margin-left: 10%">
                                                                                 <span>{{$asset['inventory_component']['name']}}</span>
+                                                                            </div>
+                                                                        </td>
+                                                                        <td>
+                                                                            <div class="form-group" style="width: 80%; margin-left: 10%">
+                                                                                <input type="number" class="form-control cart-asset-available-quantity" name="inventory_cart[{{$asset['id']}}][available_quantity]" id="available_quantity_{{$asset['id']}}" value="{{$asset['available_quantity']}}" readonly />
                                                                             </div>
                                                                         </td>
                                                                         <td>

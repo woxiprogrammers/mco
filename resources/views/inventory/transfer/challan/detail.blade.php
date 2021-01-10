@@ -22,7 +22,7 @@
                             <div class="page-title">
                                 @if($challan['project_site_in_date'] == null && $challan->inventoryComponentTransferStatus->slug == 'open')
                                 <h1>Detail Challan <label style="color: darkred;">(Note: Site In pending)</label></h1>
-                                @elseif ($isbillGenerated)
+                                @elseif ($isbillGenerated === 'true')
                                 <h1>Detail Challan <label style="color: darkred;">(Note: Bill is already generated)</label></h1>
                                 @else
                                 <h1>Detail Challan</h1>
@@ -49,6 +49,7 @@
                             @elseif($challan->inventoryComponentTransferStatus->slug == 'close' && $userRole == 'superadmin')
                             <div class="form-group " style="text-align: center">
                                 <div class="form-group " style="text-align: center">
+                                    <input type="hidden" id="is_bill_generated" name="bill_generated_status" value="{!! $isbillGenerated !!}">
                                     <a class="btn red pull-right margin-top-15" data-toggle="modal" onclick="reopenChallan(this);">
                                         <i class=" fa fa-close" style="font-size: large"></i>
                                         Reopen Challan
@@ -683,7 +684,12 @@
     }
 
     function reopenChallan(element) {
-        if (confirm("Are you sure you want to reopen this Challan? Bill is already generated for this challan.")) {
+        if ($('#is_bill_generated').val() === 'true') {
+            message = "Are you sure you want to reopen this Challan? Bill is already generated for this challan.";
+        } else {
+            message = "Are you sure you want to reopen this Challan?";
+        }
+        if (confirm(message)) {
             $('#reopenChallan').modal('show');
         }
     }
