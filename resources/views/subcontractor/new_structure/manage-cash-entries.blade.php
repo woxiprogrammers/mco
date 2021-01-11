@@ -4,7 +4,14 @@
 @section('css')
 <!-- BEGIN PAGE LEVEL PLUGINS -->
 <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
-
+<style>
+    .hoverGrey{
+        background-color:grey!important;
+    }
+    .table-hover>tbody>tr.hoverGrey, .table-hover>tbody>tr.hoverGrey:hover>td  {
+        background-color:grey!important;
+    }
+</style>
 <!-- END PAGE LEVEL PLUGINS -->
 @endsection
 @section('content')

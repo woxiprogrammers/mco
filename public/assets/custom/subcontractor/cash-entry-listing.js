@@ -29,7 +29,8 @@ var SubcontractorStructureListing = function () {
                 },
                 "fnRowCallback": function(nRow, aData, iDisplayIndex, iDisplayIndexFull) {
                     if (aData[7] == true) {
-                      $(nRow).closest('tr').css('background-color', 'grey');
+                    //   $(nRow).closest('tr').css('background-color', 'grey');
+                      $(nRow).closest('tr').addClass('hoverGrey');
                     }
                 },
                 "aoColumnDefs": [{ "bVisible": false, "aTargets": [7,8,9] },{ "bSortable": false, "aTargets": [ 0, 1, 2, 3, 4, 5, 6, 10 ]}],
