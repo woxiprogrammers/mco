@@ -50,6 +50,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redirect;
 use App\PurchaseOrderComponentImage;
+use App\PurchaseOrderTransactionBackup;
 use App\PurchaseRequestComponent;
 use App\PurchaseRequestComponentVendorRelation;
 use Illuminate\Support\Facades\Auth;
@@ -1774,5 +1775,190 @@ class PurchaseOrderController extends Controller
             'allowedQuantity' => $allowedQuantity
         ];
         return response()->json($response,$status);
+    }
+
+    public function grnDelete(Request $request) {
+        try{
+            if($request->has('grnIds') && !empty($request->grnIds)) {
+                $grnData = PurchaseOrderTransaction::whereIn('id',$request->grnIds)->get();
+                foreach($grnData as $grn) {
+                    PurchaseOrderTransactionBackup::create($grn->toArray());
+                    $grn->delete();
+                }
+            }
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Delete GRN',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function grnDeleteView(Request $request) {
+        try{
+            return view('admin.grn.delete');
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'GRN Delete manage view',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function grnDeleteListing(Request $request) {
+        try{
+            $skip = $request->start;
+            $take = $request->length;
+            $totalRecordCount = 0;
+            
+            
+            if($request->has('search_grn') && $request->search_grn != ''){
+                $grnData = PurchaseOrderTransaction::where('grn',trim($request->search_grn))->get()->toArray();
+                $totalRecordCount = PurchaseOrderTransaction::where('grn',$request->search_grn)->count();
+            }else {
+                $grnData = PurchaseOrderTransaction::orderBy('created_at','desc')
+                                ->skip($skip)->take($take)->get()->toArray();
+
+                $totalRecordCount = PurchaseOrderTransaction::count();
+            }
+
+
+            $iTotalRecords = count($grnData);
+            $records = array();
+            $records['data'] = array();
+            $end = $request->length < 0 ? count($grnData) : $request->length;
+            for($iterator = 0,$pagination = 0; $iterator < $end && $pagination < count($grnData); $iterator++,$pagination++ ){
+                $records['data'][$iterator] = [
+                    '<input type="checkbox" name="material_ids" value="'.$grnData[$pagination]['id'].'">',
+                    $grnData[$pagination]['grn'],
+                    $grnData[$pagination]['in_time'],
+                    $grnData[$pagination]['out_time'],
+                    $grnData[$pagination]['vehicle_number'],
+                    $grnData[$pagination]['remark'],
+                    $grnData[$pagination]['created_at'],
+                ];
+
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $totalRecordCount;
+            $records["recordsFiltered"] = $totalRecordCount;
+        }catch(\Exception $e){
+            $records = array();
+            $data = [
+                'action' => 'GRN Delete Listing',
+                'params' => $request->all(),
+                'exception'=> $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+
+        return response()->json($records,200);
+    }
+
+    public function grnRestore(Request $request) {
+        try{
+            if($request->has('grnIds') && !empty($request->grnIds)) {
+                $grnData = PurchaseOrderTransactionBackup::whereIn('id',$request->grnIds)->get();
+                foreach($grnData as $grn) {
+                    //PurchaseOrderTransaction::create($grn->toArray());
+                    $grnInfo = $grn->toArray();
+                    $newGrn = PurchaseOrderTransaction::firstOrNew(['id' => $grnInfo['id']]);
+                    $newGrn->id = $grnInfo['id'];
+                    $newGrn->purchase_order_id = $grnInfo['purchase_order_id'];
+                    $newGrn->purchase_order_transaction_status_id = $grnInfo['purchase_order_transaction_status_id'];
+                    $newGrn->bill_number = $grnInfo['bill_number'];
+                    $newGrn->vehicle_number = $grnInfo['vehicle_number'];
+                    $newGrn->grn = $grnInfo['grn'];
+                    $newGrn->in_time = $grnInfo['in_time'];
+                    $newGrn->out_time = $grnInfo['out_time'];
+                    $newGrn->created_at = $grnInfo['created_at'];
+                    $newGrn->updated_at = $grnInfo['updated_at'];
+                    $newGrn->remark = $grnInfo['remark'];
+                    $newGrn->bill_amount = $grnInfo['bill_amount'];
+                    $newGrn->save();
+                    $grn->delete();
+                }
+            }
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'Restore GRN',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function grnRestoreView(Request $request) {
+        try{
+            return view('admin.grn.restore');
+        }catch(\Exception $e){
+            $data = [
+                'action' => 'GRN Restore manage view',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+    }
+
+    public function grnRestoreListing(Request $request) {
+        try{
+            $skip = $request->start;
+            $take = $request->length;
+            $totalRecordCount = 0;
+            
+            
+            if($request->has('search_grn') && $request->search_grn != ''){
+                $grnData = PurchaseOrderTransactionBackup::where('grn',trim($request->search_grn))->get()->toArray();
+                $totalRecordCount = PurchaseOrderTransactionBackup::where('grn',$request->search_grn)->count();
+            }else {
+                $grnData = PurchaseOrderTransactionBackup::orderBy('created_at','desc')
+                                ->skip($skip)->take($take)->get()->toArray();
+
+                $totalRecordCount = PurchaseOrderTransactionBackup::count();
+            }
+
+
+            $iTotalRecords = count($grnData);
+            $records = array();
+            $records['data'] = array();
+            $end = $request->length < 0 ? count($grnData) : $request->length;
+            for($iterator = 0,$pagination = 0; $iterator < $end && $pagination < count($grnData); $iterator++,$pagination++ ){
+                $records['data'][$iterator] = [
+                    '<input type="checkbox" name="material_ids" value="'.$grnData[$pagination]['id'].'">',
+                    $grnData[$pagination]['grn'],
+                    $grnData[$pagination]['in_time'],
+                    $grnData[$pagination]['out_time'],
+                    $grnData[$pagination]['vehicle_number'],
+                    $grnData[$pagination]['remark'],
+                    $grnData[$pagination]['created_at'],
+                ];
+
+            }
+            $records["draw"] = intval($request->draw);
+            $records["recordsTotal"] = $totalRecordCount;
+            $records["recordsFiltered"] = $totalRecordCount;
+        }catch(\Exception $e){
+            $records = array();
+            $data = [
+                'action' => 'GRN Restore Listing',
+                'params' => $request->all(),
+                'exception'=> $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
+
+        return response()->json($records,200);
     }
 }
