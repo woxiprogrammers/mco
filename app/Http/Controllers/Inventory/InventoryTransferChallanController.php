@@ -761,7 +761,7 @@ class InventoryTransferChallanController extends Controller
             $updateChallanStatusToClose = true;
             $currentDate = Carbon::now();
             $challan = InventoryTransferChallan::find($request['challan_id']);
-            $grnGeneratedStatusId = InventoryComponentTransferStatus::where('slug', 'grn-generated')->pluck('id')->first();
+            $approvedStatusId = InventoryComponentTransferStatus::where('slug', 'approved')->pluck('id')->first();
             $siteInTypeId = InventoryTransferTypes::where('slug', 'site')->where('type', 'ilike', 'IN')->pluck('id')->first();
             foreach ($request['items'] as $transferComponent) {
                 $relatedInventoryComponentOutTransferData = InventoryComponentTransfers::where('id', $transferComponent['related_inventory_component_transfer_id'])->first();
@@ -803,7 +803,7 @@ class InventoryTransferChallanController extends Controller
                     'date'                                      => $currentDate,
                     'user_id'                                   => $user['id'],
                     'grn'                                       => $grn,
-                    'inventory_component_transfer_status_id'    => $grnGeneratedStatusId,
+                    'inventory_component_transfer_status_id'    => $approvedStatusId,
                     'rate_per_unit'                             => $relatedInventoryComponentOutTransferData['rate_per_unit'],
                     'cgst_percentage'                           => $relatedInventoryComponentOutTransferData['cgst_percentage'],
                     'sgst_percentage'                           => $relatedInventoryComponentOutTransferData['sgst_percentage'],
@@ -910,7 +910,7 @@ class InventoryTransferChallanController extends Controller
                     }
                 }
                 // Update inventory component transfers status
-                $inventoryComponentTransfers = InventoryComponentTransfers::where('inventory_transfer_challan_id', $challan['id'])->update(['inventory_component_transfer_status_id' => $statusId]);
+                $inventoryComponentTransfers = InventoryComponentTransfers::where('inventory_transfer_challan_id', $challan['id'])->update(['inventory_component_transfer_status_id' => InventoryComponentTransferStatus::where('slug', $request['status'])->pluck('id')->first()]);
                 if ($statusId) {
                     $challan->update(['inventory_component_transfer_status_id' => $statusId]);
                     return response()->json([
