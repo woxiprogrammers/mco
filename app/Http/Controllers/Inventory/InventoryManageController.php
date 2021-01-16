@@ -315,25 +315,25 @@ class InventoryManageController extends Controller
                                                 PDF <i class="fa fa-download" aria-hidden="true"></i>
                                             </a>
                                         </div>';
-                } elseif ($inventoryTransferData[$pagination]->inventoryComponentTransferStatus->slug == 'disapproved') {
-                    $actionDropDown =  '';
-                } elseif ($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-asset-maintenance-approval')) {
-                    $actionDropDown =  '<button class="btn btn-xs blue"> 
-                                            <form action="/inventory/transfer/change-status/approved/' . $inventoryTransferData[$pagination]->id . '" method="post">
-                                                <a href="javascript:void(0);" onclick="changeStatus(this)" style="color: white">
-                                                     Approve 
-                                                </a>
-                                                <input type="hidden" name="_token">
-                                            </form> 
-                                        </button>
-                                        <button class="btn btn-xs default "> 
-                                            <form action="/inventory/transfer/change-status/disapproved/' . $inventoryTransferData[$pagination]->id . '" method="post">
-                                                <a href="javascript:void(0);" onclick="changeStatus(this)" style="color: grey">
-                                                    Disapprove 
-                                                </a>
-                                                <input type="hidden" name="_token">
-                                            </form>
-                                        </button>';
+                    // } elseif ($inventoryTransferData[$pagination]->inventoryComponentTransferStatus->slug == 'disapproved') {
+                    //     $actionDropDown =  '';
+                    // } elseif ($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-asset-maintenance-approval')) {
+                    //     $actionDropDown =  '<button class="btn btn-xs blue"> 
+                    //                             <form action="/inventory/transfer/change-status/approved/' . $inventoryTransferData[$pagination]->id . '" method="post">
+                    //                                 <a href="javascript:void(0);" onclick="changeStatus(this)" style="color: white">
+                    //                                      Approve 
+                    //                                 </a>
+                    //                                 <input type="hidden" name="_token">
+                    //                             </form> 
+                    //                         </button>
+                    //                         <button class="btn btn-xs default "> 
+                    //                             <form action="/inventory/transfer/change-status/disapproved/' . $inventoryTransferData[$pagination]->id . '" method="post">
+                    //                                 <a href="javascript:void(0);" onclick="changeStatus(this)" style="color: grey">
+                    //                                     Disapprove 
+                    //                                 </a>
+                    //                                 <input type="hidden" name="_token">
+                    //                             </form>
+                    //                         </button>';
                 } else {
                     $actionDropDown = '';
                 }
