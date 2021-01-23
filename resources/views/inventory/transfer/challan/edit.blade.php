@@ -416,8 +416,9 @@
                 type: "GET",
                 success: function(data, textStatus, xhr) {
                     if (data.success) {
-                        location.reload();
+                        //location.reload();
                         alert("Challan " + status + " successfully");
+                        window.location.href = window.location.origin + '/inventory/transfer/challan/manage'
                     } else {
                         alert('Something went wrong.');
                     }

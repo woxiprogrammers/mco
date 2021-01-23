@@ -263,7 +263,7 @@ class InventoryTransferChallanController extends Controller
         try {
             $projectSites  = ProjectSite::join('projects', 'projects.id', '=', 'project_sites.project_id')
                 ->where('project_sites.name', '!=', env('OFFICE_PROJECT_SITE_NAME'))->where('projects.is_active', true)->select('project_sites.id', 'project_sites.name', 'projects.name as project_name')->get()->toArray();
-            $challanStatus = InventoryComponentTransferStatus::whereIn('slug', ['requested', 'open', 'close', 'disapproved'])->select('id', 'name', 'slug')->get()->toArray();
+            $challanStatus = InventoryComponentTransferStatus::whereIn('slug', ['requested', 'open', 'close', 'disapproved', 're-open'])->select('id', 'name', 'slug')->get()->toArray();
             return view('inventory/transfer/challan/manage')->with(compact('projectSites', 'challanStatus'));
         } catch (Exception $e) {
             $data = [
@@ -344,7 +344,7 @@ class InventoryTransferChallanController extends Controller
                         $secondDiv = $detailDiv;
                         break;
                     case 're-open':
-                        $actionDropDownStatus = '<i class="fa fa-times-circle" title="Close" style="font-size:24px;color:red">&nbsp;&nbsp;</i>';
+                        $actionDropDownStatus = '<i class="fa fa-refresh" title="Re-open" style="font-size:24px;color:green">&nbsp;&nbsp;</i>';
                         $secondDiv = $editDiv;
                         break;
                 }
@@ -555,7 +555,7 @@ class InventoryTransferChallanController extends Controller
                 $message = 'Authentication successful !!';
             } else {
                 $status = 401;
-                $message = 'You are not authorised to close this purchase order.';
+                $message = 'You are not authorised to close this challan.';
             }
         } catch (\Exception $e) {
             $message = 'Fail';
@@ -969,6 +969,8 @@ class InventoryTransferChallanController extends Controller
                     if ($updateChallanStatusToClose && ($inTransferComponent['quantity'] != $outTransfer['quantity'])) {
                         $updateChallanStatusToClose = false;
                     }
+                } else {
+                    $updateChallanStatusToClose = false;
                 }
             }
             if ($updateChallanStatusToClose) {
