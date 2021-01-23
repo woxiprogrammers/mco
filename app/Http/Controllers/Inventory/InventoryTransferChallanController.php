@@ -177,10 +177,7 @@ class InventoryTransferChallanController extends Controller
                     }
                 }
             }
-            $projectSites  = ProjectSite::join('projects', 'projects.id', '=', 'project_sites.project_id')
-                ->where('project_sites.name', '!=', env('OFFICE_PROJECT_SITE_NAME'))->where('projects.is_active', true)->select('project_sites.id', 'project_sites.name', 'projects.name as project_name')->get()->toArray();
-            $challanStatus = InventoryComponentTransferStatus::whereIn('slug', ['requested', 'open', 'close', 'disapproved'])->select('id', 'name', 'slug')->get()->toArray();
-            return view('inventory/transfer/challan/manage')->with(compact('projectSites', 'challanStatus'));
+            return redirect('/inventory/transfer/challan/manage');
         } catch (Exception $e) {
             $data = [
                 'action' => 'Inventory Transfer Challan manage',
