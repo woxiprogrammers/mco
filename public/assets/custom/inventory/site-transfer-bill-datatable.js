@@ -44,7 +44,7 @@ var SiteTransferBillListing = function () {
                             "bill_date" : $('#bill_date').val()
                         },
                         success: function(result){
-                            total = result['total'] ?? 0;;
+                            total = result['total'];
 
                             // Total over this page
                             pageTotal = api
