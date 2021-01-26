@@ -17,9 +17,9 @@ class CreateRentBillsTable extends Migration
             $table->increments('id');
             $table->unsignedInteger('project_site_id');
             $table->foreign('project_site_id')->references('id')->on('projects')->onDelete('cascade')->onUpdate('cascade');
-            $table->integer('month');
-            $table->integer('year');
-            $table->string('bill_number');
+            $table->string('month');
+            $table->string('year');
+            //$table->integer('bill_number')->autoIncrement();
             $table->double('total');
             $table->timestamps();
         });

@@ -61,7 +61,7 @@
             <td colspan='8' style="text-align: left;height: 30px; font-weight: bold; font-size: 14px;"> Site Address - {!! $projectSite['address'] !!} </td>
         </tr>
         <tr>
-            <td colspan='3' style="text-align: left;height: 30px; font-weight: bold; font-size: 14px;"> Invoice No - Rent </td>
+            <td colspan='3' style="text-align: left;height: 30px; font-weight: bold; font-size: 14px;"> Invoice No - Rent/{!! $billNumber !!} </td>
             <td colspan='5' style="text-align: left;height: 30px; font-weight: bold; font-size: 14px;"> Date - </td>
         </tr>
         <tr style="background-color:#81A1D1">

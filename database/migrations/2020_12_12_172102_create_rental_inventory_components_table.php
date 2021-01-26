@@ -17,8 +17,8 @@ class CreateRentalInventoryComponentsTable extends Migration
             $table->increments('id');
             $table->unsignedInteger('inventory_component_id')->nullable();
             $table->foreign('inventory_component_id')->references('id')->on('inventory_components')->onDelete('cascade')->onUpdate('cascade');
-            $table->integer('month');
-            $table->integer('year');
+            $table->string('month');
+            $table->string('year');
             $table->unsignedInteger('opening_stock');
             $table->unsignedInteger('closing_stock');
             $table->timestamps();

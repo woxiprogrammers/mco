@@ -2,25 +2,21 @@
 
 namespace App\Http\Controllers\Report;
 
-use App\Client;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Inventory\InventoryManageController;
-use App\InventoryComponent;
-use App\InventoryComponentTransfers;
-use App\InventoryComponentTransferStatus;
 use App\ProjectSite;
 use App\RentalInventoryComponent;
 use App\RentalInventoryTransfer;
+use App\RentBill;
 use App\Unit;
 use Carbon\Carbon;
 use Exception;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 
 use Illuminate\Support\Facades\App;
-use InventoryCart;
+use Illuminate\Support\Facades\DB;
 
 class RentalReportController extends Controller
 {
@@ -29,6 +25,9 @@ class RentalReportController extends Controller
         $this->middleware('custom.auth');
     }
 
+    /**
+     * Rent Bill manage view
+     */
     public function getManageView(Request $request)
     {
         try {
@@ -45,63 +44,54 @@ class RentalReportController extends Controller
         }
     }
 
+    /**
+     * Rent Bill Listing
+     */
     public function listing(Request $request)
     {
         try {
-            $user = Auth::user();
-            $search_name = null;
-            if ($request->has('search_name')) {
-                $search_name = $request->search_name;
+            $rentBill = new RentBill();
+            if ($request->has('project_name')) {
+                $projectSiteIds = ProjectSite::join('projects', 'projects.id', 'project_sites.project_id')
+                    ->where('projects.name', 'ilike', '%' . $request['project_name'] . '%')->pluck('project_sites.id')->toArray();
+                $rentBill = $rentBill->whereIn('project_site_id', $projectSiteIds);
+            }
+            if ($request->has('month') && $request['month'] != 0) {
+                $rentBill = $rentBill->where('month', $request['month']);
+            }
+            if ($request->has('year') && $request['year'] != 0) {
+                $rentBill = $rentBill->where('year', $request['year']);
+            }
+            if ($request->has('bill_number')) {
+                $rentBill = $rentBill->where(DB::raw('id::VARCHAR'), 'ilike', '%' .  $request['bill_number'] . '%');
             }
 
-            $clientData = Client::where('company', 'ilike', '%' . $search_name . '%')
-                ->orderBy('company', 'asc')->get()->toArray();
-            $iTotalRecords = count($clientData);
-            $records = array();
+            $rentBill = $rentBill->orderBy('id', 'asc')->get();
+            $iTotalRecords = count($rentBill->toArray());
+            $records =  array();
             $records['data'] = array();
-            for ($iterator = 0, $pagination = $request->start; $iterator < $request->length && $pagination < count($clientData); $iterator++, $pagination++) {
-                if ($clientData[$pagination]['is_active'] == true) {
-                    $client_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
-                    $status = 'Disable';
-                } else {
-                    $client_status = '<td><span class="label label-sm label-danger"> Disabled</span></td>';
-                    $status = 'Enable';
-                }
-                if ($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('approve-manage-client')) {
-                    $button = '<div class="btn-group">
+            for ($iterator = 0, $pagination = $request->start; $iterator < $request->length && $pagination < count($rentBill); $iterator++, $pagination++) {
+                $button = '<div class="btn-group">
                         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                             Actions
                             <i class="fa fa-angle-down"></i>
                         </button>
                         <ul class="dropdown-menu pull-left" role="menu">
                             <li>
-                                <a href="/reports/rental?type=xls">
+                                <a href="/reports/rental/bill/' . $rentBill[$pagination]->id . '?type=xls">
                                     <i class="icon-docs"></i> XLSX Report </a>
-                                <a href="/reports/rental?type=pdf">
+                                <a href="/reports/rental/bill/' . $rentBill[$pagination]->id . '?type=pdf">
                                     <i class="icon-docs"></i> PDF Report </a>
                             </li>
                         </ul>
                     </div>';
-                } else {
-                    $button = '<div class="btn-group">
-                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                            Actions
-                            <i class="fa fa-angle-down"></i>
-                        </button>
-                        <ul class="dropdown-menu pull-left" role="menu">
-                            <li>
-                                <a href="/client/edit/' . $clientData[$pagination]['id'] . '">
-                                    <i class="icon-docs"></i> Edit </a>
-                            </li>
-                        </ul>
-                    </div>';
-                }
                 $records['data'][$iterator] = [
-                    ucwords($clientData[$pagination]['company']),
-                    $clientData[$pagination]['email'],
-                    $clientData[$pagination]['mobile'],
-                    $client_status,
-                    date('d M Y', strtotime($clientData[$pagination]['created_at'])),
+                    $rentBill[$pagination]->projectSite->project->name,
+                    $rentBill[$pagination]['month'],
+                    $rentBill[$pagination]['year'],
+                    $rentBill[$pagination]['id'],
+                    'Manisha Construction',
+                    $rentBill[$pagination]['total'],
                     $button
                 ];
             }
@@ -122,13 +112,19 @@ class RentalReportController extends Controller
         return response()->json($records, 200);
     }
 
-    public function exportReport(Request $request)
+    /**
+     * Excel / PDF rental report export
+     */
+    public function exportReport(Request $request, $rentBillId)
     {
         try {
-            $thisMonth = date('m');
-            $thisYear = date('y');
-            $user = Auth::user();
-            $projectSite = ProjectSite::first();
+            $rentBill = RentBill::find($rentBillId);
+            $thisMonth = $rentBill->month;
+            $thisYear = $rentBill->year;
+            $projectSite = ProjectSite::find($rentBill->project_site_id);
+            $startOfTheMonth = Carbon::create($rentBill->year, $rentBill->month, 01, 00, 00, 00);
+            $endOfTheMonth = Carbon::create($rentBill->year, $rentBill->month, 01, 00, 00, 00)->endOfMonth();
+
             $projectSiteRentTotal = $inventoryComponentIterator = 0;
             $unit = Unit::where('slug', 'nos')->select('id', 'name')->first();
 
@@ -138,13 +134,12 @@ class RentalReportController extends Controller
             $companyHeader['contact_no'] = env('CONTACT_NO');
             $companyHeader['gstin_number'] = env('GSTIN_NUMBER');
 
-
-            $controller = new InventoryManageController;
+            $noOfDaysInMonth = $endOfTheMonth->diffInDays($startOfTheMonth) + 1;
             $rentalInventoryTransfers = RentalInventoryTransfer::join('inventory_component_transfers', 'inventory_component_transfers.id', '=', 'rental_inventory_transfers.inventory_component_transfer_id')
                 ->join('inventory_transfer_types', 'inventory_transfer_types.id', '=', 'inventory_component_transfers.transfer_type_id')
                 ->join('inventory_components', 'inventory_components.id', '=', 'inventory_component_transfers.inventory_component_id')
                 ->where('project_site_id', $projectSite['id'])
-                ->whereBetween('rental_inventory_transfers.rent_start_date', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])
+                ->whereBetween('rental_inventory_transfers.rent_start_date', [$startOfTheMonth, $endOfTheMonth])
                 ->select(
                     'rental_inventory_transfers.id',
                     'rental_inventory_transfers.inventory_component_transfer_id',
@@ -154,45 +149,26 @@ class RentalReportController extends Controller
                     'inventory_component_transfers.inventory_component_id',
                     'inventory_transfer_types.type as inventory_transfer_type'
                 )->get();
-
             // Headers
             $rows = [
                 ['make_bold' => true, 'Sr No', 'Name', 'Transfer Date', 'Days', 'Rent', 'Qty', 'Unit', 'Amount'],
             ];
-
             $inventoryComponents = $projectSite->inventoryComponents->where('is_material', false);
             foreach ($inventoryComponents as $inventoryComponent) {
                 $inventoryComponentIterator++;
                 $transactions = [];
-                $openingStockForThisMonth = RentalInventoryComponent::where('inventory_component_id', $inventoryComponent['id'])->where('month', $thisMonth - 1)->where('year', $thisYear - 1)->pluck('closing_stock')->first();
-                if (!$openingStockForThisMonth) {
-                    $availableQuantity = $controller->checkInventoryAvailableQuantity(['inventoryComponentId'  => $inventoryComponent['id'], 'quantity' => 0, 'unitId' => $unit['id']]);
-                    $openingStockForThisMonth = $availableQuantity['available_quantity'];
-                }
-                $rentalDataAlreadyExists = RentalInventoryComponent::where('inventory_component_id', $inventoryComponent['id'])->where('month', $thisMonth)->where('year', $thisYear)->first();
-                if ($rentalDataAlreadyExists) {
-                    $rentalDataAlreadyExists->update(['opening_stock' => $openingStockForThisMonth]);
-                    $rentalData = $rentalDataAlreadyExists;
-                } else {
-                    $rentalData = RentalInventoryComponent::create([
-                        'inventory_component_id'  => $inventoryComponent['id'],
-                        'month' => $thisMonth,
-                        'year'  => $thisYear,
-                        'opening_stock' => $openingStockForThisMonth,
-                        'closing_stock' => $openingStockForThisMonth     // Intially closing stock will be same as opening stock but eventually will get updated once trasactions are calculated
-                    ]);
-                }
 
+                $rentalData = RentalInventoryComponent::where('inventory_component_id', $inventoryComponent['id'])->where('month', $thisMonth)->where('year', $thisYear)->first();
+                $openingStockForThisMonth = $rentalData['opening_stock'];
                 $ratePerUnit = $inventoryComponent->asset->rent_per_day;
-                $noOfDays = Carbon::now()->endOfMonth()->diffInDays(Carbon::now()->startOfMonth()) + 1;
 
                 // Opening stock row for a inventry component
                 $transactions[] = [
-                    'make_bold'    => false, $inventoryComponentIterator, $inventoryComponent['name'], 'Opening Stock', $noOfDays, $ratePerUnit, $openingStockForThisMonth, $unit['name'], $noOfDays * $ratePerUnit * $openingStockForThisMonth
+                    'make_bold'    => false, $inventoryComponentIterator, $inventoryComponent['name'], 'Opening Stock', $noOfDaysInMonth, $ratePerUnit, $openingStockForThisMonth, $unit['name'], $noOfDaysInMonth * $ratePerUnit * $openingStockForThisMonth
                 ];
                 $inventoryTraansfers = $rentalInventoryTransfers->where('inventory_component_id', $inventoryComponent['id'])->sortBy('rent_start_date');
                 foreach ($inventoryTraansfers as $inventoryTransfer) {
-                    $noOfDays = Carbon::now()->endOfMonth()->diffInDays($inventoryTransfer['rent_start_date']) + 1;
+                    $noOfDays = $endOfTheMonth->diffInDays($inventoryTransfer['rent_start_date']) + 1;
                     $quantity = ($inventoryTransfer['inventory_transfer_type'] === 'IN') ? -1 * abs($inventoryTransfer['quantity']) : $inventoryTransfer['quantity'];
                     $rentPerDay = (float)$inventoryTransfer['rent_per_day'];
                     $total = $quantity * $rentPerDay * $noOfDays;
@@ -221,14 +197,15 @@ class RentalReportController extends Controller
                     'rows'  => $rows,
                     'projectSiteRentTotal'  => $projectSiteRentTotal,
                     'bill_month'    => $thisMonth . '/' . $thisYear,
-                    'projectSite'   => $projectSite
+                    'projectSite'   => $projectSite,
+                    'billNumber'    => $rentBill->id
                 ];
                 $pdf->loadHTML(view('report.rental.pdf', $data));
                 return $pdf->stream();
             } else {
-                Excel::create('test', function ($excel) use ($rows, $companyHeader, $projectSite, $thisMonth, $thisYear, $projectSiteRentTotal) {
+                Excel::create('test', function ($excel) use ($rows, $companyHeader, $projectSite, $thisMonth, $thisYear, $projectSiteRentTotal, $rentBill) {
                     $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(10);
-                    $excel->sheet('Sheet Name 1', function ($sheet) use ($rows, $companyHeader, $projectSite, $thisMonth, $thisYear, $projectSiteRentTotal) {
+                    $excel->sheet('Sheet Name 1', function ($sheet) use ($rows, $companyHeader, $projectSite, $thisMonth, $thisYear, $projectSiteRentTotal, $rentBill) {
                         $objDrawing = new \PHPExcel_Worksheet_Drawing();
                         $objDrawing->setPath(public_path('/assets/global/img/logo.jpg')); //your image path
                         $objDrawing->setWidthAndHeight(110, 54);
@@ -315,11 +292,11 @@ class RentalReportController extends Controller
                             $cell->setValue('Site Address - ' . $projectSite['address']);
                         });
                         $sheet->mergeCells('A12:D12');
-                        $sheet->cell('A12', function ($cell) {
+                        $sheet->cell('A12', function ($cell) use ($rentBill) {
                             $cell->setFontWeight('bold');
                             $cell->setAlignment('left')->setValignment('left');
                             $cell->setBorder('thin', 'thin', 'thin', 'thin');
-                            $cell->setValue('Invoice No - Rent/'); //TODO add Bill no
+                            $cell->setValue('Invoice No - Rent/' . $rentBill);
                         });
 
                         $sheet->mergeCells('E12:H12');
@@ -393,7 +370,6 @@ class RentalReportController extends Controller
                 })->export('xls');
             }
         } catch (\Exception $e) {
-
             $records = array();
             $data = [
                 'action' => 'Rental report Excel export',
@@ -405,5 +381,104 @@ class RentalReportController extends Controller
         }
 
         return response()->json($records, 200);
+    }
+
+    /**
+     * Rent calculation cron example.
+     * ## TO BE DELETED
+     */
+    public function rentCalculationCron(Request $request)
+    {
+        try {
+            $thisMonth = date('m');
+            $thisYear = date('Y');
+            $firstDayOfTheMonth = Carbon::now()->startOfMonth();
+            $lastDayOfTheMonth = Carbon::now()->endOfMonth();
+            $projectSite = ProjectSite::first();
+            //foreach ($projectSites as $projectSite) {
+            $projectSiteRentTotal = $inventoryComponentIterator = 0;
+            $unit = Unit::where('slug', 'nos')->select('id', 'name')->first();
+            $controller = new InventoryManageController;
+            $rentalInventoryTransfers = RentalInventoryTransfer::join('inventory_component_transfers', 'inventory_component_transfers.id', '=', 'rental_inventory_transfers.inventory_component_transfer_id')
+                ->join('inventory_transfer_types', 'inventory_transfer_types.id', '=', 'inventory_component_transfers.transfer_type_id')
+                ->join('inventory_components', 'inventory_components.id', '=', 'inventory_component_transfers.inventory_component_id')
+                ->where('project_site_id', $projectSite['id'])
+                ->whereBetween('rental_inventory_transfers.rent_start_date', [$firstDayOfTheMonth, $lastDayOfTheMonth])
+                ->select(
+                    'rental_inventory_transfers.id',
+                    'rental_inventory_transfers.inventory_component_transfer_id',
+                    'rental_inventory_transfers.quantity',
+                    'rental_inventory_transfers.rent_per_day',
+                    'rental_inventory_transfers.rent_start_date',
+                    'inventory_component_transfers.inventory_component_id',
+                    'inventory_transfer_types.type as inventory_transfer_type'
+                )->get();
+
+            $inventoryComponents = $projectSite->inventoryComponents->where('is_material', false);
+            foreach ($inventoryComponents as $inventoryComponent) {
+                $inventoryComponentIterator++;
+                $transactionTotal = $transactionQuantity = 0;
+                $openingStockForThisMonth = RentalInventoryComponent::where('inventory_component_id', $inventoryComponent['id'])->where('month', $thisMonth - 1)->where('year', $thisYear - 1)->pluck('closing_stock')->first();
+                if (!$openingStockForThisMonth) {
+                    $availableQuantity = $controller->checkInventoryAvailableQuantity(['inventoryComponentId'  => $inventoryComponent['id'], 'quantity' => 0, 'unitId' => $unit['id']]);
+                    $openingStockForThisMonth = $availableQuantity['available_quantity'];
+                }
+                $rentalDataAlreadyExists = RentalInventoryComponent::where('inventory_component_id', $inventoryComponent['id'])->where('month', $thisMonth)->where('year', $thisYear)->first();
+                if ($rentalDataAlreadyExists) {
+                    $rentalDataAlreadyExists->update(['opening_stock' => $openingStockForThisMonth]);
+                    $rentalData = $rentalDataAlreadyExists;
+                } else {
+                    $rentalData = RentalInventoryComponent::create([
+                        'inventory_component_id'  => $inventoryComponent['id'],
+                        'month' => $thisMonth,
+                        'year'  => $thisYear,
+                        'opening_stock' => $openingStockForThisMonth,
+                        'closing_stock' => $openingStockForThisMonth     // Intially closing stock will be same as opening stock but eventually will get updated once trasactions are calculated
+                    ]);
+                }
+
+                $ratePerUnit = $inventoryComponent->asset->rent_per_day;
+                $noOfDays = $lastDayOfTheMonth->diffInDays($firstDayOfTheMonth) + 1;
+
+                // Opening stock total for a inventry component
+                $openingStockTotal = $noOfDays * $ratePerUnit * $openingStockForThisMonth;
+
+                $inventoryTraansfers = $rentalInventoryTransfers->where('inventory_component_id', $inventoryComponent['id'])->sortBy('rent_start_date');
+                foreach ($inventoryTraansfers as $inventoryTransfer) {
+                    $noOfDays = $lastDayOfTheMonth->diffInDays($inventoryTransfer['rent_start_date']) + 1;
+                    $quantity = ($inventoryTransfer['inventory_transfer_type'] === 'IN') ? -1 * abs($inventoryTransfer['quantity']) : $inventoryTransfer['quantity'];
+                    $rentPerDay = (float)$inventoryTransfer['rent_per_day'];
+                    $total = $quantity * $rentPerDay * $noOfDays;
+
+                    $transactionTotal += $total;
+                    $transactionQuantity +=  $quantity;
+                }
+                // Closing stock row
+                $closingStock = $openingStockForThisMonth + $transactionQuantity;
+                $rentalData->update(['closing_stock'    => $closingStock]);
+                $projectSiteRentTotal += ($openingStockTotal  + $transactionTotal);
+            }
+            $rentBillRecord = RentBill::where('project_site_id', $projectSite['id'])->where('month', $thisMonth)->where('year', $thisYear)->first();
+            if ($rentBillRecord) {
+                $rentBillRecord->update(['total' => $projectSiteRentTotal]);
+            } else {
+                $rentBillRecord = RentBill::create([
+                    'project_site_id'   => $projectSite['id'],
+                    'month'             => $thisMonth,
+                    'year'              => $thisYear,
+                    // 'bill_number'       => 1,
+                    'total'             => $projectSiteRentTotal
+                ]);
+            }
+            // }
+        } catch (Exception $e) {
+            $data = [
+                'action' => 'Rent Calculation Cron',
+                'params' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
     }
 }

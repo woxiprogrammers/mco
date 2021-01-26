@@ -906,7 +906,8 @@ Route::group(['domain' => env('DOMAIN_NAME')], function () {
         Route::group(['prefix' => 'rental'], function () {
             Route::get('manage', array('uses' => 'Report\RentalReportController@getManageView'));
             Route::post('listing', array('uses' => 'Report\RentalReportController@listing'));
-            Route::get('/', array('uses' => 'Report\RentalReportController@exportReport'));
+            Route::get('/bill/{rentBillId}', array('uses' => 'Report\RentalReportController@exportReport'));
+            Route::get('/rent', array('uses' => 'Report\RentalReportController@rentCalculationCron'));
         });
     });
 
