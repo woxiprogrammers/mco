@@ -71,20 +71,31 @@ class RentalReportController extends Controller
             $records =  array();
             $records['data'] = array();
             for ($iterator = 0, $pagination = $request->start; $iterator < $request->length && $pagination < count($rentBill); $iterator++, $pagination++) {
-                $button = '<div class="btn-group">
-                        <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                            Actions
-                            <i class="fa fa-angle-down"></i>
-                        </button>
-                        <ul class="dropdown-menu pull-left" role="menu">
-                            <li>
-                                <a href="/reports/rental/bill/' . $rentBill[$pagination]->id . '?type=xls">
-                                    <i class="icon-docs"></i> XLSX Report </a>
-                                <a href="/reports/rental/bill/' . $rentBill[$pagination]->id . '?type=pdf">
-                                    <i class="icon-docs"></i> PDF Report </a>
-                            </li>
-                        </ul>
-                    </div>';
+
+                $button = '<button class="btn btn-xs default">
+                                <a href="/reports/rental/bill/' . $rentBill[$pagination]->id . '?type=xls" style="color: grey">
+                                <i class="icon-docs"></i> XLSX </a>
+                                <input type="hidden" name="_token">
+                            </button>
+                            <button class="btn btn-xs default ">
+                            <a href="/reports/rental/bill/' . $rentBill[$pagination]->id . '?type=pdf" style="color: grey">
+                            <i class="icon-docs"></i> PDF </a>
+                                <input type="hidden" name="_token">
+                            </button>';
+                // $button = '<div class="btn-group">
+                //         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                //             Actions
+                //             <i class="fa fa-angle-down"></i>
+                //         </button>
+                //         <ul class="dropdown-menu pull-left" role="menu">
+                //             <li>
+                //                 <a href="/reports/rental/bill/' . $rentBill[$pagination]->id . '?type=xls" style="color: white">
+                //                     <i class="icon-docs"></i> XLSX Report </a>
+                //                 <a href="/reports/rental/bill/' . $rentBill[$pagination]->id . '?type=pdf">
+                //                     <i class="icon-docs"></i> PDF Report </a>
+                //             </li>
+                //         </ul>
+                //     </div>';
                 $records['data'][$iterator] = [
                     $rentBill[$pagination]->projectSite->project->name,
                     $rentBill[$pagination]['month'],
