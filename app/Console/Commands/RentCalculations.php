@@ -29,16 +29,19 @@ class RentCalculations extends Command
 
     //php artisan custom:asset-rent-calculate --year=2018  => Executes Case 1
 
-    protected $signature = 'custom:rent-calculate';
+    protected $signature = 'custom:rent-calculate {--year=} {--month=}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'For Asset rent calculation. Two ways to run this command.
-        1. Run the command to calculate rent of assets for all project sites for specified month Eg. php artisan custom:asset-rent-calculate --year=2018
-        2. Through Scheduler that will run first day of every month where it will calculate the asset rent for all project sites of last month.
+    protected $description = 'This is the command to calculate rent for a montn. This can be calculated by either providing a year and month or by default it takes current year and month
+        1. Command to calculate asset rent for all project sites for specified month is -
+            php artisan custom:asset-rent-calculate --year=2018 --month=01
+            Make sure year is 4 digit valid year and valid month 
+        2. To calculate for current month for all project sites - 
+            php artisan custom:asset-rent-calculate
         ';
 
     /**
@@ -59,10 +62,21 @@ class RentCalculations extends Command
     public function handle()
     {
         try {
-            $thisMonth = date('m');
-            $thisYear = date('Y');
-            $firstDayOfTheMonth = Carbon::now()->startOfMonth();
-            $lastDayOfTheMonth = Carbon::now()->endOfMonth();
+            if ($this->option('year') && $this->option('month')) {
+                if (!in_array($this->option('year'), [2021, 2022, 2023])) {
+                    Log::info('Invalid year');
+                }
+                if (!in_array($this->option('month'), ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"])) {
+                    Log::info('Invalid month');
+                }
+                $firstDayOfTheMonth = Carbon::create($this->option('year'), $this->option('month'), 1, 0, 0, 0)->startOfMonth();
+                $lastDayOfTheMonth = Carbon::create($this->option('year'), $this->option('month'), 1, 0, 0, 0)->endOfMonth();
+            } else {
+                $firstDayOfTheMonth = Carbon::now()->startOfMonth();
+                $lastDayOfTheMonth = Carbon::now()->endOfMonth();
+            }
+            $thisMonth = $firstDayOfTheMonth->format('m');
+            $thisYear = $firstDayOfTheMonth->format('Y');
             $projectSites = ProjectSite::all();
             foreach ($projectSites as $projectSite) {
                 $projectSiteRentTotal = $inventoryComponentIterator = 0;

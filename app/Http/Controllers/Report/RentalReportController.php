@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Report;
 
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Inventory\InventoryManageController;
 use App\ProjectSite;
@@ -12,11 +11,11 @@ use App\RentBill;
 use App\Unit;
 use Carbon\Carbon;
 use Exception;
-use Illuminate\Support\Facades\Log;
-use Maatwebsite\Excel\Facades\Excel;
-
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Facades\Excel;
 
 class RentalReportController extends Controller
 {
@@ -72,30 +71,16 @@ class RentalReportController extends Controller
             $records['data'] = array();
             for ($iterator = 0, $pagination = $request->start; $iterator < $request->length && $pagination < count($rentBill); $iterator++, $pagination++) {
 
-                $button = '<button class="btn btn-xs default">
-                                <a href="/reports/rental/bill/' . $rentBill[$pagination]->id . '?type=xls" style="color: grey">
-                                <i class="icon-docs"></i> XLSX </a>
+                $button = '<button class="btn btn-xs blue">
+                                <a href="/reports/rental/bill/' . $rentBill[$pagination]->id . '?type=xls" style="color: white">
+                                <i class="fa fa-file-excel-o"></i> XLSX </a>
                                 <input type="hidden" name="_token">
                             </button>
-                            <button class="btn btn-xs default ">
-                            <a href="/reports/rental/bill/' . $rentBill[$pagination]->id . '?type=pdf" style="color: grey">
-                            <i class="icon-docs"></i> PDF </a>
+                            <button class="btn btn-xs blue">
+                            <a href="/reports/rental/bill/' . $rentBill[$pagination]->id . '?type=pdf" style="color: white">
+                            <i class="fa fa-file-pdf-o"></i> PDF </a>
                                 <input type="hidden" name="_token">
                             </button>';
-                // $button = '<div class="btn-group">
-                //         <button class="btn btn-xs green dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                //             Actions
-                //             <i class="fa fa-angle-down"></i>
-                //         </button>
-                //         <ul class="dropdown-menu pull-left" role="menu">
-                //             <li>
-                //                 <a href="/reports/rental/bill/' . $rentBill[$pagination]->id . '?type=xls" style="color: white">
-                //                     <i class="icon-docs"></i> XLSX Report </a>
-                //                 <a href="/reports/rental/bill/' . $rentBill[$pagination]->id . '?type=pdf">
-                //                     <i class="icon-docs"></i> PDF Report </a>
-                //             </li>
-                //         </ul>
-                //     </div>';
                 $records['data'][$iterator] = [
                     $rentBill[$pagination]->projectSite->project->name,
                     $rentBill[$pagination]['month'],
@@ -394,6 +379,7 @@ class RentalReportController extends Controller
         return response()->json($records, 200);
     }
 
+
     /**
      * Rent calculation cron example.
      * ## TO BE DELETED
@@ -401,10 +387,11 @@ class RentalReportController extends Controller
     public function rentCalculationCron(Request $request)
     {
         try {
-            $thisMonth = date('m');
-            $thisYear = date('Y');
             $firstDayOfTheMonth = Carbon::now()->startOfMonth();
+            $thisMonth = $firstDayOfTheMonth->format('m');
+            $thisYear = $firstDayOfTheMonth->format('Y');
             $lastDayOfTheMonth = Carbon::now()->endOfMonth();
+            dd(Carbon::create(2021, 2, 1, 0, 0, 0), $firstDayOfTheMonth);
             $projectSite = ProjectSite::first();
             //foreach ($projectSites as $projectSite) {
             $projectSiteRentTotal = $inventoryComponentIterator = 0;
