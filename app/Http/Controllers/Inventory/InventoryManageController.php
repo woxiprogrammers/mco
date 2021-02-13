@@ -1408,11 +1408,13 @@ class InventoryManageController extends Controller
         try {
             $projectSiteId = Session::get('global_project_site');
             $response = array();
-            $alreadyExitMaterialsIds = InventoryComponent::where('project_site_id', $projectSiteId)->pluck('reference_id');
-            if ($type == 'material') {
-                $response = Material::where('name', 'ilike', '%' . $keyword . '%')->whereNotIn('id', $alreadyExitMaterialsIds)->distinct('name')->select('name', 'id as reference_id')->get();
-            } else {
-                $response = InventoryComponent::where('name', 'ilike', '%' . $keyword . '%')->where('is_material', false)->whereNotIn('reference_id', $alreadyExitMaterialsIds)->distinct('name')->select('name', 'reference_id')->get();
+            $alreadyExitMaterialsIds = InventoryComponent::where('project_site_id',$projectSiteId)->pluck('reference_id');
+            if($type == 'material'){
+                // not checking alreadyExitMaterialsIds
+                //$response = Material::where('name','ilike','%'.$keyword.'%')->whereNotIn('id',$alreadyExitMaterialsIds)->distinct('name')->select('name','id as reference_id')->get();
+                $response = Material::where('name','ilike','%'.$keyword.'%')->distinct('name')->select('name','id as reference_id')->get();
+            }else{
+                $response = InventoryComponent::where('name','ilike','%'.$keyword.'%')->where('is_material',false)->whereNotIn('reference_id',$alreadyExitMaterialsIds)->distinct('name')->select('name','reference_id')->get();
             }
             $status = 200;
         } catch (\Exception $e) {

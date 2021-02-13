@@ -65,6 +65,9 @@
                                                             <div class="col-md-4">
                                                                 Transaction GRN
                                                             </div>
+                                                            <div class="col-md-4">
+                                                                Bill Number
+                                                            </div>
                                                         </div>
                                                         <div class="row" style="margin-top: 20px;">
                                                             <div class="col-md-4 form-group">
@@ -73,6 +76,9 @@
                                                             </div>
                                                             <div class="col-md-4 form-group">
                                                                 <input type="text" class="form-control transaction-grn-typeahead" name="transaction_grn">
+                                                            </div>
+                                                            <div class="col-md-4 form-group">
+                                                                <input type="text" class="form-control transaction-billnumber-typeahead" name="transaction_billnumber">
                                                             </div>
                                                         </div>
                                                     </fieldset>
@@ -390,6 +396,26 @@
                     wildcard: "%QUERY"
                 }
             });
+            var poBillsNumber = new Bloodhound({
+                datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
+                queryTokenizer: Bloodhound.tokenizers.whitespace,
+                remote: {
+                    url: "/purchase/purchase-order-bill/get-purchase-orders-bill-number?keyword=%QUERY",
+                    filter: function(x) {
+                        if($(window).width()<420){
+                            $("#header").addClass("fixed");
+                        }
+                        return $.map(x, function (data) {
+                            return {
+                                id: data.id,
+                                format: data.format,
+                                grns:data.grn
+                            };
+                        });
+                    },
+                    wildcard: "%QUERY"
+                }
+            });
             var transactionGrnList = new Bloodhound({
                 datumTokenizer: Bloodhound.tokenizers.obj.whitespace('office_name'),
                 queryTokenizer: Bloodhound.tokenizers.whitespace,
@@ -412,6 +438,7 @@
             });
             transactionGrnList.initialize();
             citiList.initialize();
+            poBillsNumber.initialize();
             $('.purchase-order-typeahead').typeahead(null, {
                 displayKey: 'name',
                 engine: Handlebars,
@@ -427,6 +454,7 @@
                 },
             }).on('typeahead:selected', function (obj, datum) {
                 $(".transaction-grn-typeahead").attr('readonly', true);
+                $(".transaction-billnumber-typeahead").attr('readonly', true);
                 var POData = $.parseJSON(JSON.stringify(datum));
                 $("input[name='purchase_order_format']").val(POData.format);
                 $("#purchaseOrderId").val(POData.id);
@@ -436,12 +464,46 @@
             .on('typeahead:open', function (obj, datum) {
                 $(".transaction-grn-typeahead").attr('readonly', false);
                 $(".transaction-grn-typeahead").val('');
+                $(".transaction-billnumber-typeahead").attr('readonly', false);
+                $(".transaction-billnumber-typeahead").val('');
                 $(".purchase-order-typeahead").val('');
                 $("#grnSelectionDiv .list-group").html('');
                 $("#grnSelectionDiv").hide();
                 $("#billData").hide();
             });
 
+            $('.transaction-billnumber-typeahead').typeahead(null, {
+                displayKey: 'name',
+                engine: Handlebars,
+                source: poBillsNumber.ttAdapter(),
+                limit: 30,
+                templates: {
+                    empty: [
+                        '<div class="empty-suggest">',
+                        'Unable to find any Result that match the current query',
+                        '</div>'
+                    ].join('\n'),
+                    suggestion: Handlebars.compile('<div class="autosuggest"><strong>@{{format}}</strong></div>')
+                },
+            }).on('typeahead:selected', function (obj, datum) {
+                $(".transaction-grn-typeahead").attr('readonly', true);
+                $("input[name='purchase_order_format']").attr('readonly', true);
+                var POData = $.parseJSON(JSON.stringify(datum));
+                $("input[name='transaction_billnumber']").val(POData.format);
+                $("#purchaseOrderId").val(POData.id);
+                $("#grnSelectionDiv .list-group").html(POData.grns);
+                $("#grnSelectionDiv").show();
+            })
+            .on('typeahead:open', function (obj, datum) {
+                $(".transaction-grn-typeahead").attr('readonly', false);
+                $(".transaction-grn-typeahead").val('');
+                $("input[name='purchase_order_format']").attr('readonly', false);
+                $("input[name='purchase_order_format']").val('');
+                $(".transaction-billnumber-typeahead").val('');
+                $("#grnSelectionDiv .list-group").html('');
+                $("#grnSelectionDiv").hide();
+                $("#billData").hide();
+            });
 
             $('.transaction-grn-typeahead').typeahead(null, {
                 displayKey: 'name',
@@ -458,6 +520,7 @@
                 },
             }).on('typeahead:selected', function (obj, datum) {
                 $("input[name='purchase_order_format']").attr('readonly', true);
+                $(".transaction-billnumber-typeahead").attr('readonly', true);
                 var POData = $.parseJSON(JSON.stringify(datum));
                 $("input[name='transaction_grn']").val(POData.grn);
                 $("#grnSelectionDiv .list-group").html(POData.list);
@@ -471,6 +534,8 @@
             .on('typeahead:open', function (obj, datum) {
                 $("input[name='purchase_order_format']").attr('readonly', false);
                 $(".transaction-grn-typeahead").val('');
+                $(".transaction-billnumber-typeahead").attr('readonly', false);
+                $(".transaction-billnumber-typeahead").val('');
                 $(".purchase-order-typeahead").val('');
                 $("#grnSelectionDiv .list-group").html('');
                 $("#grnSelectionDiv").hide();

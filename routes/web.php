@@ -290,25 +290,43 @@ Route::group(['domain' => env('DOMAIN_NAME')], function () {
         });
     });
 
-    Route::group(['prefix' => 'purchase'], function () {
-        Route::get('get-detail/{materialRequestComponentID}', array('uses' => 'User\PurchaseController@getPurchaseDetails'));
-        Route::get('projects/{client_id}', array('uses' => 'User\PurchaseController@getProjects'));
-        Route::get('project-sites/{project_id}', array('uses' => 'User\PurchaseController@getProjectSites'));
+    Route::group(['prefix' => 'grn'], function(){
+        Route::group(['prefix' => 'delete'], function(){
+            Route::get('/',array('uses' => 'Purchase\PurchaseOrderController@grnDeleteView'));
+            Route::post('/',array('uses' => 'Purchase\PurchaseOrderController@grnDelete'));
+            Route::get('/listing',array('uses' => 'Purchase\PurchaseOrderController@grnDeleteListing'));
+        });
+        Route::group(['prefix' => 'restore'], function(){
+            Route::get('/',array('uses' => 'Purchase\PurchaseOrderController@grnRestoreView'));
+            Route::post('/',array('uses' => 'Purchase\PurchaseOrderController@grnRestore'));
+            Route::get('/listing',array('uses' => 'Purchase\PurchaseOrderController@grnRestoreListing'));
+        });
+    });
 
-        Route::group(['prefix' => 'material-request'], function () {
-            Route::get('manage', array('uses' => 'User\PurchaseController@getManageView'));
-            Route::get('create', array('uses' => 'User\PurchaseController@getCreateView'));
-            Route::post('listing', array('uses' => 'User\PurchaseController@getMaterialRequestListing'));
-            Route::get('edit', array('uses' => 'User\PurchaseController@editMaterialRequest'));
-            Route::get('get-items', array('uses' => 'User\PurchaseController@autoSuggest'));
-            Route::post('get-units', array('uses' => 'User\PurchaseController@getUnitsList'));
-            Route::post('get-users', array('uses' => 'User\PurchaseController@getUsersList'));
-            Route::post('create', array('uses' => 'User\PurchaseController@createMaterialList'));
-            Route::post('material-requestWise-listing', array('uses' => 'User\PurchaseController@getMaterialRequestWiseListing'));
-            Route::get('material-requestWise-listing-view', array('uses' => 'User\PurchaseController@getMaterialRequestWiseListingView'));
-            Route::post('change-status/{newStatus}/{componentId?}', array('uses' => 'User\PurchaseController@changeMaterialRequestComponentStatus'));
-            Route::post('change-status-mti', array('uses' => 'User\PurchaseController@changeMaterialRequestComponentStatustoMTI'));
-            Route::get('get-material-request-component-details/{materialRequestComponent}', array('uses' => 'User\PurchaseController@getMaterialRequestComponentDetail'));
+    Route::group(['prefix' => 'purchase'], function(){
+        Route::get('get-detail/{materialRequestComponentID}',array('uses' => 'User\PurchaseController@getPurchaseDetails'));
+        Route::get('projects/{client_id}',array('uses' => 'User\PurchaseController@getProjects'));
+        Route::get('project-sites/{project_id}',array('uses' => 'User\PurchaseController@getProjectSites'));
+
+        Route::group(['prefix' => 'purchase-order-delete'], function(){
+            Route::get('manage',array('uses' => 'Purchase\PurchaseOrderController@getManageGRNDeleteView'));
+            Route::post('listing',array('uses' => 'Purchase\PurchaseOrderController@grnDeleteListing'));
+        });
+
+        Route::group(['prefix' => 'material-request'], function(){
+            Route::get('manage',array('uses'=> 'User\PurchaseController@getManageView'));
+            Route::get('create',array('uses'=> 'User\PurchaseController@getCreateView'));
+            Route::post('listing',array('uses'=> 'User\PurchaseController@getMaterialRequestListing'));
+            Route::get('edit',array('uses'=> 'User\PurchaseController@editMaterialRequest'));
+            Route::get('get-items',array('uses'=> 'User\PurchaseController@autoSuggest'));
+            Route::post('get-units',array('uses'=> 'User\PurchaseController@getUnitsList'));
+            Route::post('get-users',array('uses'=> 'User\PurchaseController@getUsersList'));
+            Route::post('create',array('uses'=> 'User\PurchaseController@createMaterialList'));
+            Route::post('material-requestWise-listing',array('uses'=> 'User\PurchaseController@getMaterialRequestWiseListing'));
+            Route::get('material-requestWise-listing-view',array('uses'=> 'User\PurchaseController@getMaterialRequestWiseListingView'));
+            Route::post('change-status/{newStatus}/{componentId?}',array('uses' => 'User\PurchaseController@changeMaterialRequestComponentStatus'));
+            Route::post('change-status-mti',array('uses' => 'User\PurchaseController@changeMaterialRequestComponentStatustoMTI'));
+            Route::get('get-material-request-component-details/{materialRequestComponent}',array('uses' => 'User\PurchaseController@getMaterialRequestComponentDetail'));
             Route::post('validate-quantity', array('uses' => 'User\PurchaseController@validateQuantity'));
         });
 
@@ -363,20 +381,21 @@ Route::group(['domain' => env('DOMAIN_NAME')], function () {
             });
         });
 
-        Route::group(['prefix' => 'purchase-order-bill'], function () {
-            Route::get('manage', array('uses' => 'Purchase\PurchaseOrderBillingController@getManageView'));
-            Route::get('create', array('uses' => 'Purchase\PurchaseOrderBillingController@getCreateView'));
-            Route::post('create', array('uses' => 'Purchase\PurchaseOrderBillingController@createBill'));
-            Route::post('get-project-sites', array('uses' => 'Purchase\PurchaseOrderBillingController@getProjectSites'));
-            Route::get('get-purchase-orders', array('uses' => 'Purchase\PurchaseOrderBillingController@getPurchaseOrders'));
-            Route::get('get-bill-pending-transactions', array('uses' => 'Purchase\PurchaseOrderBillingController@getBillPendingTransactions'));
-            Route::post('get-transaction-subtotal', array('uses' => 'Purchase\PurchaseOrderBillingController@getTransactionSubtotal'));
-            Route::post('listing', array('uses' => 'Purchase\PurchaseOrderBillingController@listing'));
-            Route::get('edit/{purchaseOrderBill}', array('uses' => 'Purchase\PurchaseOrderBillingController@getEditView'));
-            Route::post('edit/{purchaseOrderBill}', array('uses' => 'Purchase\PurchaseOrderBillingController@editPurchaseOrderBill'));
-            Route::group(['prefix' => 'payment'], function () {
-                Route::post('listing/{purchaseOrderBillId}', array('uses' => 'Purchase\PurchaseOrderBillingController@paymentListing'));
-                Route::post('create', array('uses' => 'Purchase\PurchaseOrderBillingController@createPayment'));
+        Route::group(['prefix' => 'purchase-order-bill'],function(){
+            Route::get('manage',array('uses' => 'Purchase\PurchaseOrderBillingController@getManageView'));
+            Route::get('create',array('uses' => 'Purchase\PurchaseOrderBillingController@getCreateView'));
+            Route::post('create',array('uses' => 'Purchase\PurchaseOrderBillingController@createBill'));
+            Route::post('get-project-sites',array('uses' => 'Purchase\PurchaseOrderBillingController@getProjectSites'));
+            Route::get('get-purchase-orders',array('uses' => 'Purchase\PurchaseOrderBillingController@getPurchaseOrders'));
+            Route::get('get-purchase-orders-bill-number',array('uses' => 'Purchase\PurchaseOrderBillingController@getPurchaseOrdersByBillNumber'));
+            Route::get('get-bill-pending-transactions',array('uses' => 'Purchase\PurchaseOrderBillingController@getBillPendingTransactions'));
+            Route::post('get-transaction-subtotal',array('uses' => 'Purchase\PurchaseOrderBillingController@getTransactionSubtotal'));
+            Route::post('listing',array('uses' => 'Purchase\PurchaseOrderBillingController@listing'));
+            Route::get('edit/{purchaseOrderBill}',array('uses' => 'Purchase\PurchaseOrderBillingController@getEditView'));
+            Route::post('edit/{purchaseOrderBill}',array('uses' => 'Purchase\PurchaseOrderBillingController@editPurchaseOrderBill'));
+            Route::group(['prefix' => 'payment'], function(){
+                Route::post('listing/{purchaseOrderBillId}',array('uses' => 'Purchase\PurchaseOrderBillingController@paymentListing'));
+                Route::post('create',array('uses' => 'Purchase\PurchaseOrderBillingController@createPayment'));
             });
             Route::post('check-bill-number', array('uses' => 'Purchase\PurchaseOrderBillingController@checkBillNumber'));
         });

@@ -8,7 +8,7 @@ class PurchaseOrderTransaction extends Model
 {
     protected $table = 'purchase_order_transactions';
 
-    protected $fillable = ['purchase_order_id','purchase_order_transaction_status_id','bill_number','vehicle_number','grn',
+    protected $fillable = ['id','purchase_order_id','purchase_order_transaction_status_id','bill_number','vehicle_number','grn',
         'in_time','out_time','remark','bill_amount'];
 
     public function purchaseOrder(){
