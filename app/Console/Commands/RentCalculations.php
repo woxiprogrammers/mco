@@ -62,15 +62,16 @@ class RentCalculations extends Command
     public function handle()
     {
         try {
+            $this->info('Inside rent calculation');
             $error = false;
             if ($this->option('year') && $this->option('month')) {
                 if (!in_array($this->option('year'), [2021, 2022, 2023])) {
-                    Log::info('Invalid year');
+                    $this->info('Invalid year');
                     $error = true;
                     goto completeProcessing;
                 }
                 if (!in_array($this->option('month'), ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"])) {
-                    Log::info('Invalid month');
+                    $this->info('Invalid month');
                     $error = true;
                     goto completeProcessing;
                 }
@@ -84,7 +85,9 @@ class RentCalculations extends Command
                 $thisMonth = $firstDayOfTheMonth->format('m');
                 $thisYear = $firstDayOfTheMonth->format('Y');
                 $projectSites = ProjectSite::all();
+                $this->info('Rent calculation for year - ' . $thisYear . 'and month - ' . $thisMonth);
                 foreach ($projectSites as $projectSite) {
+                    $this->info('Calculating for project site - ' . $projectSite['name']);
                     $projectSiteRentTotal = $inventoryComponentIterator = 0;
                     $unit = Unit::where('slug', 'nos')->select('id', 'name')->first();
                     $controller = new InventoryManageController;
@@ -158,16 +161,18 @@ class RentCalculations extends Command
                             'total'             => $projectSiteRentTotal
                         ]);
                     }
+                    $this->info('Calculation done for project site - ' . $projectSite['name']);
                 }
             }
 
             completeProcessing:
             if ($error) {
-                Log::info('Error while calculating. Please check logs');
+                $this->info('Error while calculating. Please check logs');
             } else {
-                Log::info('Calculations completed for month - ' . $thisMonth . ' and year - ', $thisYear);
+                $this->info('Calculations completed for month - ' . $thisMonth . ' and year - ' . $thisYear);
             }
         } catch (Exception $e) {
+            $this->info('Server Exception');
             $data = [
                 'action' => 'Rent Calculation Cron',
                 'params' => [],
