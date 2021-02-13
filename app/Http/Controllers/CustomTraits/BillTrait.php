@@ -62,7 +62,10 @@ trait BillTrait{
             $cancelBillStatusId = $billStatusModel->where('slug','cancelled')->pluck('id')->first();
             $bills = $billModel->where('quotation_id',$quotation['id'])->where('bill_status_id','!=',$cancelBillStatusId)->orderBy('created_at','asc')->get()->toArray();
             $extraItems = $quotationExtraItemModel->where('quotation_id',$quotation['id'])->get();
-            $banksAssigned = $quotationBankInfo->where('quotation_id',$quotation['id'])->select('bank_info_id')->get();
+            $bData = BankInfo::where('is_active',true)->pluck('id')->toArray();
+            $banksAssigned = $quotationBankInfo->where('quotation_id',$quotation['id'])
+                            ->whereIn('bank_info_id',$bData)->select('bank_info_id')
+                            ->get();
             $taxes = $tax->where('is_active',true)->where('is_special',false)->get()->toArray();
             $specialTaxes = $tax->where('is_active', true)->where('is_special',true)->get();
             if($bills != null){
@@ -1799,8 +1802,10 @@ trait BillTrait{
                 }
                 $i++;
             }
-
-            $allbankInfoIds = QuotationBankInfo::where('quotation_id',$bill->quotation_id)->select('bank_info_id')->get();
+            $bData = BankInfo::where('is_active',true)->pluck('id')->toArray();
+            $allbankInfoIds = QuotationBankInfo::where('quotation_id',$quotation['id'])
+            ->whereIn('bank_info_id',$bData)->select('bank_info_id')
+            ->get();
             if($bill->quotation->billType->slug == 'sqft' || $bill->quotation->billType->slug == 'amountwise'){
                 return view('admin.bill.edit')->with(compact('billTypes','sQFTUnitName','bill','quotationSummaries','taxes','specialTaxes','quotationExtraItems','allbankInfoIds'));
             }else{

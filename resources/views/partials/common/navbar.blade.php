@@ -371,6 +371,30 @@
                                 </a>
                             </li>
                             @endif
+
+                            <?php $hasGrnDeletePermission = \App\Helper\ACLHelper::checkModuleAcl('remove-purchase-bill');?>
+                            @if(($user->roles[0]->role->slug == 'superadmin') || ($user->roles[0]->role->slug == 'admin') || $hasPurchaseOrderBillPermission)
+                                <li aria-haspopup="true"  class="dropdown-submenu ">
+                                    <a href="javascript:void(0);" class="nav-link nav-toggle ">
+                                        <i class="fa fa-folder"></i> Manage GRN
+                                    </a>
+                                    <ul class="dropdown-menu pull-left">
+                                        <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                                            <a href="/grn/delete">
+                                                <i class="fa fa-users"></i> GRN Delete
+                                                <span class="arrow"></span>
+                                            </a>
+                                        </li>
+
+                                        <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                                            <a href="/grn/restore">
+                                                <i class="fa fa-cubes"></i> GRN Restore
+                                                <span class="arrow"></span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            @endif
                         </ul>
                     </li>
                     @endif
