@@ -472,11 +472,7 @@
                                 </a>
                             </li>
                             @endif
-                            <li aria-haspopup="true">
-                                <a href="/reports/rental/manage" class="nav-link nav-toggle ">
-                                    <i class="fa fa-calculator"></i> Rent Report
-                                </a>
-                            </li>
+
                         </ul>
                     </li>
                     @endif
@@ -705,10 +701,23 @@
                             </a>
                         </li>--}}
                     <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
-                        <a href="/reports/manage"> Reports
+                        <a> Reports
                             <span class="arrow"></span>
                         </a>
+                        <ul class="dropdown-menu pull-left">
+                            <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                                <a href="/reports/manage">
+                                    <i class="fa fa-calculator"></i> Manage Report
+                                </a>
+                            </li>
+                            <li aria-haspopup="true">
+                                <a href="/reports/rental/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-calculator"></i> Rent Report
+                                </a>
+                            </li>
+                        </ul>
                     </li>
+
                     @endif
                     <!--<li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                         <a href="/inventory"> Inventory

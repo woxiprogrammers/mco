@@ -292,16 +292,16 @@ class RentalReportController extends Controller
                             $cell->setFontWeight('bold');
                             $cell->setAlignment('left')->setValignment('left');
                             $cell->setBorder('thin', 'thin', 'thin', 'thin');
-                            $cell->setValue('Invoice No - Rent/' . $rentBill);
+                            $cell->setValue('Invoice No - Rent/' . $rentBill['id']);
                         });
 
-                        $sheet->mergeCells('E12:H12');
-                        $sheet->cell('E12', function ($cell) {
-                            $cell->setFontWeight('bold');
-                            $cell->setAlignment('left')->setValignment('left');
-                            $cell->setBorder('thin', 'thin', 'thin', 'thin');
-                            $cell->setValue('Date - '); //TODO add date
-                        });
+                        // $sheet->mergeCells('E12:H12');
+                        // $sheet->cell('E12', function ($cell) {
+                        //     $cell->setFontWeight('bold');
+                        //     $cell->setAlignment('left')->setValignment('left');
+                        //     $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                        //     $cell->setValue('Date - '); //TODO add date
+                        // });
                         $sheet->mergeCells('A13:H13');
                         $sheet->cell('A13', function ($cell) {
                             $cell->setBorder('thin', 'thin', 'thin', 'thin');

@@ -62,7 +62,7 @@
         </tr>
         <tr>
             <td colspan='3' style="text-align: left;height: 30px; font-weight: bold; font-size: 14px;"> Invoice No - Rent/{!! $billNumber !!} </td>
-            <td colspan='5' style="text-align: left;height: 30px; font-weight: bold; font-size: 14px;"> Date - </td>
+            <td colspan='5' style="text-align: left;height: 30px; font-weight: bold; font-size: 14px;"> </td>
         </tr>
         <tr style="background-color:#81A1D1">
             <td style="text-align: center; height: 25px; font-weight: bold">Sr no.</td>

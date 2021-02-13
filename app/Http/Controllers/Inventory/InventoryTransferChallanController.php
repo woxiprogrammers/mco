@@ -894,10 +894,7 @@ class InventoryTransferChallanController extends Controller
         try {
             $challan = InventoryTransferChallan::find($challanId);
             if ($challan) {
-                if ($request['status'] === 'approved') {
-                    $statusSlug = 'open';
-                }
-                $statusSlug = $request['status'];
+                $statusSlug = ($request['status'] === 'approved') ? 'open' : $request['status'];
                 $statusId = InventoryComponentTransferStatus::where('slug', $statusSlug)->pluck('id')->first();
                 if ($request['status'] === 'approved') {
                     $rentApplicableDate = Carbon::tomorrow();
