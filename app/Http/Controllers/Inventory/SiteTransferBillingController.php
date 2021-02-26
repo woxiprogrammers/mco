@@ -116,6 +116,32 @@ class SiteTransferBillingController extends Controller
                 $response[$iterator]['tax_amount'] = round(($response[$iterator]['subtotal'] * ($otherdata['transportation_cgst_percent'] / 100)), 3);
                 $response[$iterator]['tax_amount'] += round(($response[$iterator]['subtotal'] * ($otherdata['transportation_sgst_percent'] / 100)), 3);
                 $response[$iterator]['tax_amount'] += round(($response[$iterator]['subtotal'] * ($otherdata['transportation_igst_percent'] / 100)), 3);
+                $response[$iterator]['tr_data'] = '<tr>
+                    <td>
+                        <div class="form-group">
+                            <input type="checkbox" class="challan-select" id = "challan_id_' . $challan['id'] . '" name="challans[]" value="' . $challan['id'] . '" checked onchange="calculateSubtotal()">
+                        </div>
+                    </td>
+                    <td>' . $challan['challan_number'] . '</td>
+                    <td>' . $vendorInfo['company'] . '</td>
+                    <td>
+                        <div class="form-group"  style="width: 90%; margin-left: 5%">
+                            <input type="text" class="form-control subtotal" id = "subtotal_' . $challan['id'] . '" value="' . $response[$iterator]['subtotal'] . '" readonly>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="form-group"  style="width: 90%; margin-left: 5%">
+                            <input type="text" class="form-control subtotal" id = "taxAmount' . $challan['id'] . '" value="' . $response[$iterator]['tax_amount'] . '" readonly>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="btn-group open">
+                            <a class="btn btn-xs green dropdown-toggle deleteRowButton" href="javascript:void(0);" onclick="removeTableRow(this)">
+                                Remove
+                            </a>
+                        </div>
+                    </td>
+                </tr>';
                 $iterator++;
             }
             $status = 200;
