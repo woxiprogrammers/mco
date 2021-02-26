@@ -28,4 +28,9 @@ class SiteTransferBill extends Model
     {
         return $this->belongsTo('App\InventoryTransferChallan', 'inventory_transfer_challan_id');
     }
+
+    public function siteTransferBillChallans()
+    {
+        return $this->hasMany('App\SiteTransferBillChallan', 'site_transfer_bill_id');
+    }
 }

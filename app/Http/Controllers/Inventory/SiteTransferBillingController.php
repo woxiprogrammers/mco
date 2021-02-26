@@ -46,7 +46,36 @@ class SiteTransferBillingController extends Controller
     public function getCreateView(Request $request)
     {
         try {
-            return view('inventory.site-transfer-bill.create');
+            $projectSiteId = Session::get('global_project_site');
+            $iterator = 0;
+            $response = array();
+            $alreadyGeneratedBillChallanIds = SiteTransferBill::whereNotNull('inventory_transfer_challan_id')->pluck('inventory_transfer_challan_id')->toArray();
+            $closeStatusId = InventoryComponentTransferStatus::where('slug', 'close')->pluck('id')->first();
+            $challans = InventoryTransferChallan::join('inventory_component_transfers', 'inventory_component_transfers.inventory_transfer_challan_id', '=', 'inventory_transfer_challan.id')
+                ->join('inventory_transfer_types', 'inventory_transfer_types.id', '=', 'inventory_component_transfers.transfer_type_id')
+                ->where('inventory_transfer_types.type', 'ilike', 'IN')
+                ->where('inventory_transfer_challan.inventory_component_transfer_status_id', $closeStatusId)
+                ->whereNotNull('inventory_component_transfers.transportation_amount')
+                ->where('inventory_component_transfers.transportation_amount', '!=', 0)
+                ->where('inventory_transfer_challan.project_site_in_id', $projectSiteId)
+                ->whereNotIn('inventory_transfer_challan.id', $alreadyGeneratedBillChallanIds)->distinct('inventory_transfer_challan.id')->select('inventory_transfer_challan.id', 'inventory_transfer_challan.challan_number')->get();
+            foreach ($challans as $challan) {
+                $response[$iterator]['challan_id'] = $challan['id'];
+                $otherdata = $challan->otherData();
+                $vendorInfo = Vendor::where('id', $otherdata['vendor_id'])->first()->toArray();
+                $contact_no = ($otherdata['mobile'] != "") ? $otherdata['mobile'] : $vendorInfo['alternate_contact'];
+                $response[$iterator]['challan_number'] = $challan['challan_number'] . " : " . $vendorInfo['company'] . " : " . $contact_no;
+                if (isset($otherdata['transportation_amount']) || $otherdata['transportation_amount'] != null) {
+                    $response[$iterator]['subtotal'] = round($otherdata['transportation_amount'], 3);
+                } else {
+                    $response[$iterator]['subtotal'] = 0;
+                }
+                $response[$iterator]['tax_amount'] = round(($response[$iterator]['subtotal'] * ($otherdata['transportation_cgst_percent'] / 100)), 3);
+                $response[$iterator]['tax_amount'] += round(($response[$iterator]['subtotal'] * ($otherdata['transportation_sgst_percent'] / 100)), 3);
+                $response[$iterator]['tax_amount'] += round(($response[$iterator]['subtotal'] * ($otherdata['transportation_igst_percent'] / 100)), 3);
+                $iterator++;
+            }
+            return view('inventory.site-transfer-bill.create')->with(compact('response'));
         } catch (\Exception $e) {
             $data = [
                 'action' => 'Site Transfer Billing get manage view',
@@ -106,6 +135,7 @@ class SiteTransferBillingController extends Controller
     public function createSiteTransferBill(Request $request)
     {
         try {
+            dd($request->all());
             $siteTransferBillData = $request->except('_token', 'transfer_grn', 'extra_amount');
             $siteTransferBillData['extra_amount'] = $request['challan_id'];
             $siteTransferBillData['inventory_transfer_challan_id'] = $request['challan_id'];
@@ -305,7 +335,10 @@ class SiteTransferBillingController extends Controller
             $banks = BankInfo::where('is_active', true)->select('id', 'bank_name', 'balance_amount')->get();
             $statistics = $this->getSiteWiseStatistics();
             $cashAllowedLimit = ($statistics['remainingAmount'] > 0) ? $statistics['remainingAmount'] : 0;
-            return view('inventory.site-transfer-bill.edit')->with(compact('siteTransferBill', 'paymentTypes', 'imageUploadPath', 'totalPaidAmount', 'banks', 'cashAllowedLimit'));
+            $challans = InventoryTransferChallan::join('site_transfer_bill_challans', 'site_transfer_bill_challans.inventory_transfer_challan_id', '=', 'inventory_transfer_challan.id')
+                ->where('site_transfer_bill_challans.site_transfer_bill_id', $siteTransferBill['id'])->pluck('challan_number')->toArray();
+            $challans = implode(', ', $challans);
+            return view('inventory.site-transfer-bill.edit')->with(compact('challans', 'siteTransferBill', 'paymentTypes', 'imageUploadPath', 'totalPaidAmount', 'banks', 'cashAllowedLimit'));
         } catch (\Exception $e) {
             $data = [
                 'action' => 'Get site transfer bill edit view',
