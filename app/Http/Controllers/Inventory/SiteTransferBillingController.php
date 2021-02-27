@@ -47,36 +47,7 @@ class SiteTransferBillingController extends Controller
     public function getCreateView(Request $request)
     {
         try {
-            $projectSiteId = Session::get('global_project_site');
-            $iterator = 0;
-            $response = array();
-            $alreadyGeneratedBillChallanIds = SiteTransferBill::whereNotNull('inventory_transfer_challan_id')->pluck('inventory_transfer_challan_id')->toArray();
-            $closeStatusId = InventoryComponentTransferStatus::where('slug', 'close')->pluck('id')->first();
-            $challans = InventoryTransferChallan::join('inventory_component_transfers', 'inventory_component_transfers.inventory_transfer_challan_id', '=', 'inventory_transfer_challan.id')
-                ->join('inventory_transfer_types', 'inventory_transfer_types.id', '=', 'inventory_component_transfers.transfer_type_id')
-                ->where('inventory_transfer_types.type', 'ilike', 'IN')
-                ->where('inventory_transfer_challan.inventory_component_transfer_status_id', $closeStatusId)
-                ->whereNotNull('inventory_component_transfers.transportation_amount')
-                ->where('inventory_component_transfers.transportation_amount', '!=', 0)
-                ->where('inventory_transfer_challan.project_site_in_id', $projectSiteId)
-                ->whereNotIn('inventory_transfer_challan.id', $alreadyGeneratedBillChallanIds)->distinct('inventory_transfer_challan.id')->select('inventory_transfer_challan.id', 'inventory_transfer_challan.challan_number')->get();
-            foreach ($challans as $challan) {
-                $response[$iterator]['challan_id'] = $challan['id'];
-                $otherdata = $challan->otherData();
-                $vendorInfo = Vendor::where('id', $otherdata['vendor_id'])->first()->toArray();
-                $contact_no = ($otherdata['mobile'] != "") ? $otherdata['mobile'] : $vendorInfo['alternate_contact'];
-                $response[$iterator]['challan_number'] = $challan['challan_number'] . " : " . $vendorInfo['company'] . " : " . $contact_no;
-                if (isset($otherdata['transportation_amount']) || $otherdata['transportation_amount'] != null) {
-                    $response[$iterator]['subtotal'] = round($otherdata['transportation_amount'], 3);
-                } else {
-                    $response[$iterator]['subtotal'] = 0;
-                }
-                $response[$iterator]['tax_amount'] = round(($response[$iterator]['subtotal'] * ($otherdata['transportation_cgst_percent'] / 100)), 3);
-                $response[$iterator]['tax_amount'] += round(($response[$iterator]['subtotal'] * ($otherdata['transportation_sgst_percent'] / 100)), 3);
-                $response[$iterator]['tax_amount'] += round(($response[$iterator]['subtotal'] * ($otherdata['transportation_igst_percent'] / 100)), 3);
-                $iterator++;
-            }
-            return view('inventory.site-transfer-bill.create')->with(compact('response'));
+            return view('inventory.site-transfer-bill.create');
         } catch (\Exception $e) {
             $data = [
                 'action' => 'Site Transfer Billing get manage view',
