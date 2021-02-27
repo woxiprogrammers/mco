@@ -73,11 +73,11 @@
                                                         <div class="form-group row">
                                                             <div class="col-md-2">
                                                                 <label class="control-label pull-right">
-                                                                    Enter Challan
+                                                                    Challans
                                                                 </label>
                                                             </div>
                                                             <div class="col-md-6">
-                                                                <input type="text" class="form-control transfer-grn-typeahead" name="transfer_grn" value="{{$siteTransferBill->inventoryTransferChallan->challan_number}}" readonly>
+                                                                <input type="text" class="form-control transfer-grn-typeahead" name="transfer_grn" value="{{$challans}}" readonly>
                                                             </div>
                                                         </div>
                                                     </fieldset>
