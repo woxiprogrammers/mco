@@ -516,7 +516,7 @@ class InventoryTransferChallanController extends Controller
                 ->join('inventory_transfer_types', 'inventory_transfer_types.id', '=', 'inventory_component_transfers.transfer_type_id')
                 ->where('inventory_transfer_types.slug', 'site')->where('inventory_transfer_types.type', 'OUT')
                 ->where('inventory_component_transfers.inventory_transfer_challan_id', $challan['id'])
-                ->select('inventory_components.name as inventory_component_name', 'inventory_components.is_material', 'inventory_component_transfers.quantity', 'units.name as unit_name', 'inventory_component_transfers.rate_per_unit', 'inventory_component_transfers.cgst_amount', 'inventory_component_transfers.sgst_amount', 'inventory_component_transfers.igst_amount', DB::raw('COALESCE((cgst_amount+sgst_amount+igst_amount),0) as gst'), DB::raw('(rate_per_unit+COALESCE((cgst_amount+sgst_amount+igst_amount),0)) as total'))->get();
+                ->select('inventory_components.name as inventory_component_name', 'inventory_components.is_material', 'inventory_component_transfers.quantity', 'units.name as unit_name', 'inventory_component_transfers.rate_per_unit', 'inventory_component_transfers.cgst_amount', 'inventory_component_transfers.sgst_amount', 'inventory_component_transfers.igst_amount', DB::raw('COALESCE((cgst_amount+sgst_amount+igst_amount),0) as gst'), DB::raw('((rate_per_unit * quantity )+COALESCE((cgst_amount+sgst_amount+igst_amount),0)) as total'))->get();
             $data['materials'] = array_values($outTransferComponents->where('is_material', true)->toArray());
             $data['materialTotal'] = [
                 'quantity_total' => array_sum(array_column($data['materials'], 'quantity')),
