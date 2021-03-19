@@ -69,16 +69,35 @@
                                                     <div class="form-group row">
                                                         <div class="col-md-2">
                                                             <label class="control-label pull-right">
-                                                                Enter Challan
+                                                                Search Challan
                                                             </label>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" class="form-control challan-typeahead" name="challan_number">
+                                                            <input type="text" class="form-control challan-typeahead" placeholder="Enter Challan number" name="challan_number">
                                                             <input type="hidden" name="challan_id" id="challanId">
                                                         </div>
                                                     </div>
                                                 </fieldset>
                                                 <div id="billData" hidden>
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <table class="table table-striped table-bordered table-hover order-column" id="challans" style="margin-top: 1%;">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th style="width: 4%;"></th>
+                                                                        <th> Challan No </th>
+                                                                        <th> Vendor Name</th>
+                                                                        <th> Subtotal </th>
+                                                                        <th> Tax Amount </th>
+                                                                        <th> Action </th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
                                                     <div class="form-group row">
                                                         <div class="col-md-2">
                                                             <label class="control-label pull-right">Bill Number</label>
@@ -132,7 +151,7 @@
                                                         </div>
                                                         <div class="col-md-6 row">
                                                             <div class="col-md-6 input-group" id="inputGroup" style="float: inherit; !important;">
-                                                                <input type="number" class="form-control calculate-amount" id="extra_amount_cgst_percentage" name="extra_amount_cgst_percentage">
+                                                                <input type="number" class="form-control calculate-amount" id="extra_amount_cgst_percentage" name="extra_amount_cgst_percentage" value="0">
                                                                 <span class="input-group-addon" style="font-size: 18px">&nbsp;&nbsp; % &nbsp; &nbsp;</span>
                                                             </div>
                                                             <div class="col-md-6">
@@ -146,7 +165,7 @@
                                                         </div>
                                                         <div class="col-md-6 row">
                                                             <div class="col-md-6 input-group" id="inputGroup" style="float: inherit; !important;">
-                                                                <input type="number" class="form-control calculate-amount" id="extra_amount_sgst_percentage" name="extra_amount_sgst_percentage">
+                                                                <input type="number" class="form-control calculate-amount" id="extra_amount_sgst_percentage" name="extra_amount_sgst_percentage" value="0">
                                                                 <span class="input-group-addon" style="font-size: 18px">&nbsp;&nbsp; % &nbsp; &nbsp;</span>
                                                             </div>
                                                             <div class="col-md-6">
@@ -160,7 +179,7 @@
                                                         </div>
                                                         <div class="col-md-6 row">
                                                             <div class="col-md-6 input-group" id="inputGroup" style="float: inherit; !important;">
-                                                                <input type="number" class="form-control calculate-amount" id="extra_amount_igst_percentage" name="extra_amount_igst_percentage">
+                                                                <input type="number" class="form-control calculate-amount" id="extra_amount_igst_percentage" name="extra_amount_igst_percentage" value="0">
                                                                 <span class="input-group-addon" style="font-size: 18px">&nbsp;&nbsp; % &nbsp; &nbsp;</span>
                                                             </div>
                                                             <div class="col-md-6">
@@ -253,9 +272,8 @@
                     return $.map(x, function(data) {
                         return {
                             challan_id: data.challan_id,
-                            subtotal: data.subtotal,
-                            tax_amount: data.tax_amount,
-                            challan_number: data.challan_number
+                            challan_number: data.challan_number,
+                            tr_data: data.tr_data
                         };
                     });
                 },
@@ -279,11 +297,10 @@
             })
             .on('typeahead:selected', function(obj, datum) {
                 var POData = $.parseJSON(JSON.stringify(datum));
-                console.log(POData);
-                $("#subTotal").val(POData.subtotal);
-                $("#taxAmount").val(POData.tax_amount);
-                $(".challan-typeahead").typeahead('val', POData.challan_number);
-                $("#challanId").attr('value', POData.challan_id);
+                //$(".challan-typeahead").typeahead('val', POData.challan_number);
+                tableBody = $("table tbody");
+                tableBody.append(POData.tr_data);
+                calculateSubtotal();
                 $("#billData").show();
             })
             .on('typeahead:open', function(obj, datum) {
@@ -355,5 +372,27 @@
             }
         });
     });
+
+    function calculateSubtotal() {
+        let subtotal = 0;
+        let taxAmount = 0;
+        $(".challan-select:checkbox:checked").each(function() {
+            challan_id = $(this).val();
+            subtotal += parseFloat($("#subtotal_" + challan_id).val());
+            taxAmount += parseFloat($("#taxAmount" + challan_id).val());
+        });
+        $("#subTotal").val(subtotal);
+        $("#taxAmount").val(taxAmount);
+        $(".calculate-amount").trigger('keyup');
+    }
+
+
+    function removeTableRow(element) {
+        $(element).closest('tr').remove();
+        if ($(".challan-select:checkbox:checked").length <= 0) {
+            $("#billData").hide();
+        }
+        calculateSubtotal();
+    }
 </script>
 @endsection

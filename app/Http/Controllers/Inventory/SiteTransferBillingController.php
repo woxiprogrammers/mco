@@ -16,6 +16,7 @@ use App\InventoryComponentTransferStatus;
 use App\InventoryTransferChallan;
 use App\InventoryTransferTypes;
 use App\Project;
+use App\SiteTransferBillChallan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
@@ -87,6 +88,32 @@ class SiteTransferBillingController extends Controller
                 $response[$iterator]['tax_amount'] = round(($response[$iterator]['subtotal'] * ($otherdata['transportation_cgst_percent'] / 100)), 3);
                 $response[$iterator]['tax_amount'] += round(($response[$iterator]['subtotal'] * ($otherdata['transportation_sgst_percent'] / 100)), 3);
                 $response[$iterator]['tax_amount'] += round(($response[$iterator]['subtotal'] * ($otherdata['transportation_igst_percent'] / 100)), 3);
+                $response[$iterator]['tr_data'] = '<tr>
+                    <td>
+                        <div class="form-group">
+                            <input type="checkbox" class="challan-select" id = "challan_id_' . $challan['id'] . '" name="challans[]" value="' . $challan['id'] . '" checked onchange="calculateSubtotal()">
+                        </div>
+                    </td>
+                    <td>' . $challan['challan_number'] . '</td>
+                    <td>' . $vendorInfo['company'] . '</td>
+                    <td>
+                        <div class="form-group"  style="width: 90%; margin-left: 5%">
+                            <input type="text" class="form-control subtotal" id = "subtotal_' . $challan['id'] . '" value="' . $response[$iterator]['subtotal'] . '" readonly>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="form-group"  style="width: 90%; margin-left: 5%">
+                            <input type="text" class="form-control subtotal" id = "taxAmount' . $challan['id'] . '" value="' . $response[$iterator]['tax_amount'] . '" readonly>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="btn-group open">
+                            <a class="btn btn-xs green dropdown-toggle deleteRowButton" href="javascript:void(0);" onclick="removeTableRow(this)">
+                                Remove
+                            </a>
+                        </div>
+                    </td>
+                </tr>';
                 $iterator++;
             }
             $status = 200;
@@ -106,10 +133,28 @@ class SiteTransferBillingController extends Controller
     public function createSiteTransferBill(Request $request)
     {
         try {
-            $siteTransferBillData = $request->except('_token', 'transfer_grn', 'extra_amount');
-            $siteTransferBillData['extra_amount'] = $request['challan_id'];
-            $siteTransferBillData['inventory_transfer_challan_id'] = $request['challan_id'];
+            $siteTransferBillData = $request->only(
+                'bill_number',
+                'bill_date',
+                'subtotal',
+                'tax_amount',
+                'extra_amount',
+                'extra_amount_cgst_percentage',
+                'extra_amount_sgst_percentage',
+                'extra_amount_igst_percentage',
+                'extra_amount_cgst_amount',
+                'extra_amount_sgst_amount',
+                'extra_amount_igst_amount',
+                'total',
+                'remark'
+            );
             $siteTransferBill = SiteTransferBill::create($siteTransferBillData);
+            foreach ($request['challans'] as $challanId) {
+                SiteTransferBillChallan::create([
+                    'site_transfer_bill_id' => $siteTransferBill['id'],
+                    'inventory_transfer_challan_id' => $challanId
+                ]);
+            }
             $imageUploadPath = public_path() . env('SITE_TRANSFER_IMAGE_UPLOAD') . DIRECTORY_SEPARATOR . sha1($siteTransferBill->id);
             if (!file_exists($imageUploadPath)) {
                 File::makeDirectory($imageUploadPath, 0777, true, true);
@@ -245,18 +290,23 @@ class SiteTransferBillingController extends Controller
                 }
                 $inTransferTypeId = InventoryTransferTypes::where('slug', 'site')->where('type', 'IN')->pluck('id')->first();
                 for ($iterator = 0, $pagination = 0; $iterator < $length && $pagination < count($siteTransferBillData); $iterator++, $pagination++) {
-                    $challan = $siteTransferBillData[$pagination]->inventoryTransferChallan;
-                    $firstInTransfer = InventoryComponentTransfers::where('inventory_transfer_challan_id', $challan['id'])->where('transfer_type_id', $inTransferTypeId)->first();
+                    $challans = InventoryTransferChallan::whereIn('id', $siteTransferBillData[$pagination]->siteTransferBillChallans->pluck('inventory_transfer_challan_id')->toArray())->get();
+                    $challanNumber = implode(', ', $challans->pluck('challan_number')->toArray());
+                    $challan = $challans[0];
+                    $vendors = [];
+                    foreach ($challans as $challan) {
+                        $firstInTransfer = InventoryComponentTransfers::where('inventory_transfer_challan_id', $challan['id'])->where('transfer_type_id', $inTransferTypeId)->first();
+                        if ($firstInTransfer->vendor !== null) {
+                            $vendors[] = $firstInTransfer->vendor->company;
+                        }
+                    }
+                    $vendors = implode(', ', $vendors);
                     $projectName = Project::join('project_sites', 'project_sites.project_id', '=', 'projects.id')
                         ->where('project_sites.id', $challan['project_site_in_id'])
                         ->pluck('projects.name')->first();
                     $paidAmount = SiteTransferBillPayment::where('site_transfer_bill_id', $siteTransferBillData[$pagination]['id'])->sum('amount');
                     $pendingAmount = $siteTransferBillData[$pagination]['total'] - $paidAmount;
-                    if ($firstInTransfer->vendor == null) {
-                        $vendorName = '-';
-                    } else {
-                        $vendorName = $firstInTransfer->vendor->company;
-                    }
+
                     if ($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('edit-asset-maintenance-billing')) {
                         $actionButton = '<div id="sample_editable_1_new" class="btn btn-small blue" >
                         <a href="/inventory/transfer/billing/edit/' . $siteTransferBillData[$pagination]['id'] . '" style="color: white"> Edit
@@ -266,12 +316,12 @@ class SiteTransferBillingController extends Controller
                     }
 
                     $records['data'][$iterator] = [
-                        $challan['challan_number'],
+                        $challanNumber,
                         $projectName,
                         date('j M Y', strtotime($siteTransferBillData[$pagination]['created_at'])),
                         date('j M Y', strtotime($siteTransferBillData[$pagination]['bill_date'])),
                         $siteTransferBillData[$pagination]['bill_number'],
-                        $vendorName,
+                        $vendors,
                         round(($siteTransferBillData[$pagination]['subtotal'] + $siteTransferBillData[$pagination]['extra_amount']), 3),
                         round(($siteTransferBillData[$pagination]['tax_amount'] + $siteTransferBillData[$pagination]['extra_amount_cgst_amount'] + $siteTransferBillData[$pagination]['extra_amount_sgst_amount'] + $siteTransferBillData[$pagination]['extra_amount_igst_amount']), 3),
                         $siteTransferBillData[$pagination]['total'],
@@ -305,7 +355,9 @@ class SiteTransferBillingController extends Controller
             $banks = BankInfo::where('is_active', true)->select('id', 'bank_name', 'balance_amount')->get();
             $statistics = $this->getSiteWiseStatistics();
             $cashAllowedLimit = ($statistics['remainingAmount'] > 0) ? $statistics['remainingAmount'] : 0;
-            return view('inventory.site-transfer-bill.edit')->with(compact('siteTransferBill', 'paymentTypes', 'imageUploadPath', 'totalPaidAmount', 'banks', 'cashAllowedLimit'));
+            $challans = InventoryTransferChallan::whereIn('id', $siteTransferBill->siteTransferBillChallans->pluck('inventory_transfer_challan_id'))->pluck('challan_number')->toArray();
+            $challans = implode(', ', $challans);
+            return view('inventory.site-transfer-bill.edit')->with(compact('challans', 'siteTransferBill', 'paymentTypes', 'imageUploadPath', 'totalPaidAmount', 'banks', 'cashAllowedLimit'));
         } catch (\Exception $e) {
             $data = [
                 'action' => 'Get site transfer bill edit view',

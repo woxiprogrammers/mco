@@ -14,6 +14,7 @@ use App\Console\Commands\SendPurchaseOrderEmails;
 use App\Console\Commands\SiteTranferChallanBill;
 use App\Console\Commands\SubcontractorModuleMerge;
 use App\Console\Commands\InventoryAssetMaterialScript;
+use App\Console\Commands\MultiChallanBillMigration;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -34,7 +35,8 @@ class Kernel extends ConsoleKernel
         BillModuleChanges::class,
         SubcontractorModuleMerge::class,
         ChallanCreate::class,
-        SiteTranferChallanBill::class
+        SiteTranferChallanBill::class,
+        MultiChallanBillMigration::class
     ];
 
     /**

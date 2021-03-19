@@ -12,7 +12,7 @@ var  CreateSiteTransferBill = function () {
             errorClass: 'help-block', // default input error message class
             focusInvalid: false, // do not focus the last invalid input
             rules: {
-                challan_number: {
+                "challans[]": {
                     required: true
                 },
                 challan_id: {
@@ -24,7 +24,7 @@ var  CreateSiteTransferBill = function () {
                 }
             },
             messages: {
-
+                "challans[]": "Please select atleat one Challan",
             },
 
             invalidHandler: function (event, validator) { //display error alert on form submit
@@ -48,10 +48,14 @@ var  CreateSiteTransferBill = function () {
             },
 
             submitHandler: function (form) {
-                $("button[type='submit']").prop('disabled', true);
-                success.show();
-                error.hide();
-                form.submit();
+                if ($(".challan-select:checkbox:checked").length > 0) {
+                    $("button[type='submit']").prop('disabled', true);
+                    success.show();
+                    error.hide();
+                    form.submit();
+                } else {
+                    alert("Please select atleast one challan")
+                }
             }
         });
     }
