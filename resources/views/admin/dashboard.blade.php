@@ -154,7 +154,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                                    <!-- <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
                                         <div class="dashboard-stat2">
                                             <div class="display">
                                                 <div class="number">
@@ -170,7 +170,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    </div> -->
                                     <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12" >
                                         <div class="dashboard-stat2">
                                             <div class="display">
@@ -213,10 +213,9 @@
                                                             <th style="width:10%"> Outstanding Mobilization </th>
                                                             <th style="width:10%"> Saleswise P/L </th>
                                                             <th style="width:10%"> Receipt P/L </th>
-                                                            <th style="width:10%"> Adv/Receipt P/L </th>
+                                                            <!-- <th style="width:10%"> Adv/Receipt P/L </th> -->
                                                         </tr>
                                                         <tr class="filter">
-                                                            <th></th>
                                                             <th></th>
                                                             <th></th>
                                                             <th></th>
@@ -234,6 +233,7 @@
                                                                 <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                                 <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
                                                             </th>
+                                                            <!-- <th></th> -->
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -250,7 +250,7 @@
                                                         <th style="text-align: center"></th>
                                                         <th style="text-align: center"></th>
                                                         <th style="text-align: center"></th>
-                                                        <th style="text-align: center"></th>
+                                                        <!-- <th style="text-align: center"></th> -->
                                                     </tr>
                                                     </tfoot>
                                                 </table>
@@ -281,8 +281,10 @@
                                                     <th style="width:10%"> Misc. Purchase </th>
                                                     <th style="width:10%"> Office Expenses </th>
                                                     <th style="width:10%"> Opening Balance </th>
-                                                    <th style="width:10%"> Indirect Expenses </th>
+                                                    <!-- <th style="width:10%"> Indirect Expenses </th> -->
                                                     <th style="width:10%"> Total Expenses </th>
+                                                    <th style="width:10%;background:#EA4335;"> Subcontractor GST </th>
+                                                    <th style="width:10%;background:#EA4335;"> Purchase GST </th>
                                                 </tr>
                                                     <tr class="filter"><th></th>
                                                         <th></th>
@@ -299,11 +301,12 @@
                                                         <th>
                                                             <input type="hidden" class="form-control form-filter" name="expense_year_id" id="expense_year_id">
                                                         </th>
-                                                        <th></th>
-                                                        <th>
+                                                        <!-- <th></th> -->                                                        <th>
                                                             <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                             <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
                                                         </th>
+                                                        <th></th>
+                                                        <th></th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -321,6 +324,8 @@
                                                         <th style="text-align: center"></th>
                                                         <th style="text-align: center"></th>
                                                         <th style="text-align: center"></th>
+                                                        <!-- <th style="text-align: center"></th> -->
+                                                        <th style="text-align: center"></th>
                                                         <th style="text-align: center"></th>
                                                         <th style="text-align: center"></th>
                                                     </tr>
@@ -329,9 +334,8 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="row">
+                                <!-- <div class="row">
                                     <div class="col-md-12">
-                                        <!-- BEGIN EXAMPLE TABLE PORTLET-->
                                         <div class="portlet light ">
                                             <div class="portlet-title">
                                                 <div class="caption font-dark">
@@ -405,7 +409,7 @@
                                             </table>
                                         </div>
                                     </div>
-                                </div>
+                                </div> -->
                                 <div class="row" style="margin-top: 3%">
                                         <div class="col-md-4">
                                             {!! $quotationStatus->render() !!}

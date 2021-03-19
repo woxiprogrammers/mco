@@ -12,6 +12,11 @@ use App\SiteTransferBillPayment;
 use App\Vendor;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\InventoryComponentTransferStatus;
+use App\InventoryTransferChallan;
+use App\InventoryTransferTypes;
+use App\Project;
+use App\SiteTransferBillChallan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
@@ -20,14 +25,16 @@ use Illuminate\Support\Facades\Session;
 class SiteTransferBillingController extends Controller
 {
     use PeticashTrait;
-    public function __construct(){
+    public function __construct()
+    {
         $this->middleware('custom.auth');
     }
 
-    public function getManageView(Request $request){
-        try{
+    public function getManageView(Request $request)
+    {
+        try {
             return view('inventory.site-transfer-bill.manage');
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
             $data = [
                 'action' => 'Site Transfer Billing get manage view',
                 'exception' => $e->getMessage()
@@ -37,10 +44,11 @@ class SiteTransferBillingController extends Controller
         }
     }
 
-    public function getCreateView(Request $request){
-        try{
+    public function getCreateView(Request $request)
+    {
+        try {
             return view('inventory.site-transfer-bill.create');
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
             $data = [
                 'action' => 'Site Transfer Billing get manage view',
                 'exception' => $e->getMessage()
@@ -50,45 +58,66 @@ class SiteTransferBillingController extends Controller
         }
     }
 
-    public function getApprovedTransaction(Request $request){
-        try{
+    public function getApprovedTransaction(Request $request)
+    {
+        try {
             $projectSiteId = Session::get('global_project_site');
-            $approvedTransferIds = InventoryComponentTransfers::join('inventory_transfer_types','inventory_transfer_types.id','=','inventory_component_transfers.transfer_type_id')
-                                    ->join('inventory_components','inventory_components.id','=','inventory_component_transfers.inventory_component_id')
-                                    ->join('inventory_component_transfer_statuses','inventory_component_transfer_statuses.id','=','inventory_component_transfers.inventory_component_transfer_status_id')
-
-                                    ->where('inventory_component_transfer_statuses.slug', 'approved')
-                                    ->where('inventory_components.project_site_id', $projectSiteId)
-                                    ->where('inventory_component_transfers.grn','ilike','%'.$request->keyword.'%')
-                                    ->where('inventory_transfer_types.slug','site')
-                                    ->where('inventory_transfer_types.type','ilike','IN')
-                                    ->pluck('inventory_component_transfers.id')
-                                    ->toArray();
-            $billCreatedTransferIds = SiteTransferBill::pluck('inventory_component_transfer_id')->toArray();
-            $approvedBillPendingTransferIds = array_diff($approvedTransferIds, $billCreatedTransferIds);
-            $siteTransfersInfo = InventoryComponentTransfers::whereIn('inventory_component_transfers.id', $approvedBillPendingTransferIds)
-                                ->whereNotNull('inventory_component_transfers.transportation_amount')
-                                ->where('inventory_component_transfers.transportation_amount','!=',0)
-                                ->get()->toArray();
             $iterator = 0;
             $response = array();
-            foreach ($siteTransfersInfo as $transferInfo){
-                $response[$iterator]['inventory_component_transfer_id'] = $transferInfo['id'];
-                $vendorInfo = Vendor::where('id',$transferInfo['vendor_id'])->first()->toArray();
-                $contact_no = ($vendorInfo['mobile'] != "") ? $vendorInfo['mobile'] : $vendorInfo['alternate_contact'] ;
-                $response[$iterator]['grn'] = $transferInfo['grn']." : ".$vendorInfo['company']." : ".$contact_no;
-                if(isset($transferInfo['transportation_amount']) || $transferInfo['transportation_amount'] != null){
-                    $response[$iterator]['subtotal'] = round($transferInfo['transportation_amount'],3);
-                }else{
+            $alreadyGeneratedBillChallanIds = SiteTransferBill::whereNotNull('inventory_transfer_challan_id')->pluck('inventory_transfer_challan_id')->toArray();
+            $closeStatusId = InventoryComponentTransferStatus::where('slug', 'close')->pluck('id')->first();
+            $challans = InventoryTransferChallan::join('inventory_component_transfers', 'inventory_component_transfers.inventory_transfer_challan_id', '=', 'inventory_transfer_challan.id')
+                ->join('inventory_transfer_types', 'inventory_transfer_types.id', '=', 'inventory_component_transfers.transfer_type_id')
+                ->where('inventory_transfer_types.type', 'ilike', 'IN')
+                ->where('inventory_transfer_challan.inventory_component_transfer_status_id', $closeStatusId)
+                ->whereNotNull('inventory_component_transfers.transportation_amount')
+                ->where('inventory_component_transfers.transportation_amount', '!=', 0)
+                ->where('inventory_transfer_challan.project_site_in_id', $projectSiteId)
+                ->whereNotIn('inventory_transfer_challan.id', $alreadyGeneratedBillChallanIds)->distinct('inventory_transfer_challan.id')->select('inventory_transfer_challan.id', 'inventory_transfer_challan.challan_number')->get();
+            foreach ($challans as $challan) {
+                $response[$iterator]['challan_id'] = $challan['id'];
+                $otherdata = $challan->otherData();
+                $vendorInfo = Vendor::where('id', $otherdata['vendor_id'])->first()->toArray();
+                $contact_no = ($otherdata['mobile'] != "") ? $otherdata['mobile'] : $vendorInfo['alternate_contact'];
+                $response[$iterator]['challan_number'] = $challan['challan_number'] . " : " . $vendorInfo['company'] . " : " . $contact_no;
+                if (isset($otherdata['transportation_amount']) || $otherdata['transportation_amount'] != null) {
+                    $response[$iterator]['subtotal'] = round($otherdata['transportation_amount'], 3);
+                } else {
                     $response[$iterator]['subtotal'] = 0;
                 }
-                $response[$iterator]['tax_amount'] = round(($response[$iterator]['subtotal'] * ($transferInfo['transportation_cgst_percent'] / 100)),3);
-                $response[$iterator]['tax_amount'] += round(($response[$iterator]['subtotal'] * ($transferInfo['transportation_sgst_percent'] / 100)),3);
-                $response[$iterator]['tax_amount'] += round(($response[$iterator]['subtotal'] * ($transferInfo['transportation_igst_percent'] / 100)),3);
+                $response[$iterator]['tax_amount'] = round(($response[$iterator]['subtotal'] * ($otherdata['transportation_cgst_percent'] / 100)), 3);
+                $response[$iterator]['tax_amount'] += round(($response[$iterator]['subtotal'] * ($otherdata['transportation_sgst_percent'] / 100)), 3);
+                $response[$iterator]['tax_amount'] += round(($response[$iterator]['subtotal'] * ($otherdata['transportation_igst_percent'] / 100)), 3);
+                $response[$iterator]['tr_data'] = '<tr>
+                    <td>
+                        <div class="form-group">
+                            <input type="checkbox" class="challan-select" id = "challan_id_' . $challan['id'] . '" name="challans[]" value="' . $challan['id'] . '" checked onchange="calculateSubtotal()">
+                        </div>
+                    </td>
+                    <td>' . $challan['challan_number'] . '</td>
+                    <td>' . $vendorInfo['company'] . '</td>
+                    <td>
+                        <div class="form-group"  style="width: 90%; margin-left: 5%">
+                            <input type="text" class="form-control subtotal" id = "subtotal_' . $challan['id'] . '" value="' . $response[$iterator]['subtotal'] . '" readonly>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="form-group"  style="width: 90%; margin-left: 5%">
+                            <input type="text" class="form-control subtotal" id = "taxAmount' . $challan['id'] . '" value="' . $response[$iterator]['tax_amount'] . '" readonly>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="btn-group open">
+                            <a class="btn btn-xs green dropdown-toggle deleteRowButton" href="javascript:void(0);" onclick="removeTableRow(this)">
+                                Remove
+                            </a>
+                        </div>
+                    </td>
+                </tr>';
                 $iterator++;
             }
             $status = 200;
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             $response = [];
             $status = 500;
             $data = [
@@ -101,35 +130,55 @@ class SiteTransferBillingController extends Controller
         return response()->json($response, $status);
     }
 
-    public function createSiteTransferBill(Request $request){
-        try{
-            $siteTransferBillData = $request->except('_token','transfer_grn','extra_amount');
-            $siteTransferBillData['extra_amount'] = round($request['extra_amount'],3);
+    public function createSiteTransferBill(Request $request)
+    {
+        try {
+            $siteTransferBillData = $request->only(
+                'bill_number',
+                'bill_date',
+                'subtotal',
+                'tax_amount',
+                'extra_amount',
+                'extra_amount_cgst_percentage',
+                'extra_amount_sgst_percentage',
+                'extra_amount_igst_percentage',
+                'extra_amount_cgst_amount',
+                'extra_amount_sgst_amount',
+                'extra_amount_igst_amount',
+                'total',
+                'remark'
+            );
             $siteTransferBill = SiteTransferBill::create($siteTransferBillData);
-            $imageUploadPath = public_path().env('SITE_TRANSFER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.sha1($siteTransferBill->id);
-            if(!file_exists($imageUploadPath)){
-                File::makeDirectory($imageUploadPath,0777, true, true);
+            foreach ($request['challans'] as $challanId) {
+                SiteTransferBillChallan::create([
+                    'site_transfer_bill_id' => $siteTransferBill['id'],
+                    'inventory_transfer_challan_id' => $challanId
+                ]);
             }
-            if($request->has('bill_images')){
-                foreach($request->bill_images as $billImage){
-                    $imageArray = explode(';',$billImage);
-                    $image = explode(',',$imageArray[1])[1];
+            $imageUploadPath = public_path() . env('SITE_TRANSFER_IMAGE_UPLOAD') . DIRECTORY_SEPARATOR . sha1($siteTransferBill->id);
+            if (!file_exists($imageUploadPath)) {
+                File::makeDirectory($imageUploadPath, 0777, true, true);
+            }
+            if ($request->has('bill_images')) {
+                foreach ($request->bill_images as $billImage) {
+                    $imageArray = explode(';', $billImage);
+                    $image = explode(',', $imageArray[1])[1];
                     $pos  = strpos($billImage, ';');
                     $type = explode(':', substr($billImage, 0, $pos))[1];
-                    $extension = explode('/',$type)[1];
-                    $filename = mt_rand(1,10000000000).sha1(time()).".{$extension}";
-                    $fileFullPath = $imageUploadPath.DIRECTORY_SEPARATOR.$filename;
+                    $extension = explode('/', $type)[1];
+                    $filename = mt_rand(1, 10000000000) . sha1(time()) . ".{$extension}";
+                    $fileFullPath = $imageUploadPath . DIRECTORY_SEPARATOR . $filename;
                     $billImageData = [
                         'site_transfer_bill_id' => $siteTransferBill->id,
                         'name' => $filename,
                     ];
-                    file_put_contents($fileFullPath,base64_decode($image));
+                    file_put_contents($fileFullPath, base64_decode($image));
                     SiteTransferBillImage::create($billImageData);
                 }
             }
-            $request->session()->flash('success','Site transfer bill created successfully. ');
+            $request->session()->flash('success', 'Site transfer bill created successfully. ');
             return redirect('/inventory/transfer/billing/manage');
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
             $data = [
                 'action' => 'Create Site Transfer Bill',
                 'data' => $request->all(),
@@ -140,8 +189,9 @@ class SiteTransferBillingController extends Controller
         }
     }
 
-    public function listing(Request $request){
-        try{
+    public function listing(Request $request)
+    {
+        try {
             $skip = $request->start;
             $take = $request->length;
             $totalRecordCount = 0;
@@ -151,76 +201,76 @@ class SiteTransferBillingController extends Controller
             $status = 200;
             $records['data'] = array();
             $records["draw"] = intval($request->draw);
-            $siteTransferBillId = SiteTransferBill::orderBy('created_at','desc')->pluck('id')->toArray();
+            $siteTransferBillId = SiteTransferBill::orderBy('created_at', 'desc')->pluck('id')->toArray();
             $filterFlag = true;
-            if($request->has('bill_date') && $request->bill_date != ''){
+            if ($request->has('bill_date') && $request->bill_date != '') {
                 $siteTransferBillId = SiteTransferBill::whereDate('bill_date', $request->bill_date)
-                                                        ->whereIn('id',$siteTransferBillId)
-                                                        ->pluck('id')->toArray();
-                if(count($siteTransferBillId) <= 0){
+                    ->whereIn('id', $siteTransferBillId)
+                    ->pluck('id')->toArray();
+                if (count($siteTransferBillId) <= 0) {
                     $filterFlag = false;
                 }
             }
-            if($filterFlag == true && $request->has('vendor_name') && $request->vendor_name != ''){
-                $siteTransferBillId = SiteTransferBill::join('inventory_component_transfers','inventory_component_transfers.id','=','site_transfer_bills.inventory_component_transfer_id')
-                                                ->join('vendors','vendors.id','=','inventory_component_transfers.vendor_id')
-                                                ->whereIn('site_transfer_bills.id', $siteTransferBillId)
-                                                ->where('vendors.company','ilike','%'.$request->vendor_name.'%')
-                                                ->pluck('site_transfer_bills.id')
-                                                ->toArray();
-                if(count($siteTransferBillId) <= 0){
+            if ($filterFlag == true && $request->has('vendor_name') && $request->vendor_name != '') {
+                $siteTransferBillId = SiteTransferBill::join('inventory_component_transfers', 'inventory_component_transfers.inventory_transfer_challan_id', '=', 'site_transfer_bills.inventory_transfer_challan_id')
+                    ->join('vendors', 'vendors.id', '=', 'inventory_component_transfers.vendor_id')
+                    ->whereIn('site_transfer_bills.id', $siteTransferBillId)
+                    ->where('vendors.company', 'ilike', '%' . $request->vendor_name . '%')
+                    ->pluck('site_transfer_bills.id')
+                    ->toArray();
+                if (count($siteTransferBillId) <= 0) {
                     $filterFlag = false;
                 }
             }
 
-            if($filterFlag == true && $request->has('project_name') && $request->project_name != ''){
-                $siteTransferBillId = SiteTransferBill::join('inventory_component_transfers','inventory_component_transfers.id','=','site_transfer_bills.inventory_component_transfer_id')
-                    ->join('inventory_components','inventory_component_transfers.inventory_component_id','=','inventory_components.id')
-                    ->join('project_sites','project_sites.id','=','project_sites.project_id')
-                    ->join('projects','projects.id','=','inventory_components.project_site_id')
-                    ->where('projects.name','ilike','%'.$request->project_name.'%')
+            if ($filterFlag == true && $request->has('project_name') && $request->project_name != '') {
+                $siteTransferBillId = SiteTransferBill::join('inventory_component_transfers', 'inventory_component_transfers.inventory_transfer_challan_id', '=', 'site_transfer_bills.inventory_transfer_challan_id')
+                    ->join('inventory_components', 'inventory_component_transfers.inventory_component_id', '=', 'inventory_components.id')
+                    ->join('project_sites', 'project_sites.id', '=', 'project_sites.project_id')
+                    ->join('projects', 'projects.id', '=', 'inventory_components.project_site_id')
+                    ->where('projects.name', 'ilike', '%' . $request->project_name . '%')
                     ->whereIn('site_transfer_bills.id', $siteTransferBillId)
                     ->pluck('site_transfer_bills.id')
                     ->toArray();
-                if(count($siteTransferBillId) <= 0){
+                if (count($siteTransferBillId) <= 0) {
                     $filterFlag = false;
                 }
             }
 
-            if($filterFlag == true && $request->has('bill_number') && $request->bill_number != ''){
-                $siteTransferBillId = SiteTransferBill::where('bill_number','like', $request->bill_number)
-                    ->whereIn('id',$siteTransferBillId)
+            if ($filterFlag == true && $request->has('bill_number') && $request->bill_number != '') {
+                $siteTransferBillId = SiteTransferBill::where('bill_number', 'like', $request->bill_number)
+                    ->whereIn('id', $siteTransferBillId)
                     ->pluck('id')->toArray();
-                if(count($siteTransferBillId) <= 0){
+                if (count($siteTransferBillId) <= 0) {
                     $filterFlag = false;
                 }
             }
 
-            if($filterFlag == true && $request->has('basic_amt') && $request->basic_amt != ''){
+            if ($filterFlag == true && $request->has('basic_amt') && $request->basic_amt != '') {
                 $siteTransferBillId = SiteTransferBill::whereRaw('(subtotal + extra_amount) = ?', $request->basic_amt)
-                    ->whereIn('id',$siteTransferBillId)
+                    ->whereIn('id', $siteTransferBillId)
                     ->pluck('id')->toArray();
-                if(count($siteTransferBillId) <= 0){
+                if (count($siteTransferBillId) <= 0) {
                     $filterFlag = false;
                 }
             }
 
-            if($filterFlag == true && $request->has('total_amt') && $request->total_amt != ''){
-                $siteTransferBillId = SiteTransferBill::where('total','=',$request->total_amt)
-                    ->whereIn('id',$siteTransferBillId)
+            if ($filterFlag == true && $request->has('total_amt') && $request->total_amt != '') {
+                $siteTransferBillId = SiteTransferBill::where('total', '=', $request->total_amt)
+                    ->whereIn('id', $siteTransferBillId)
                     ->pluck('id')->toArray();
-                if(count($siteTransferBillId) <= 0){
+                if (count($siteTransferBillId) <= 0) {
                     $filterFlag = false;
                 }
             }
 
-            if($filterFlag) {
+            if ($filterFlag) {
                 $siteTransferBillData = SiteTransferBill::whereIn('id', $siteTransferBillId)
-                                    ->skip($skip)->take($take)
-                                    ->orderBy('created_at','desc')->get();
+                    ->skip($skip)->take($take)
+                    ->orderBy('created_at', 'desc')->get();
                 $totalRecordCount = SiteTransferBill::whereIn('id', $siteTransferBillId)->count();
             }
-            
+
             $paidAmount = $total = $pendingAmount = 0;
             if ($request->has('get_total')) {
                 if ($filterFlag) {
@@ -228,9 +278,9 @@ class SiteTransferBillingController extends Controller
                     $paidAmount = SiteTransferBillPayment::whereIn('site_transfer_bill_id', $siteTransferBillData->pluck('id'))->sum('amount');
                     $pendingAmount = $total - $paidAmount;
                 }
-                $records['total'] = $total;
-                $records['billtotal'] = $paidAmount;
-                $records['paidtotal'] = $pendingAmount;
+                $records['total'] = (float)$total;
+                $records['billtotal'] = (float)$paidAmount;
+                $records['paidtotal'] = (float)$pendingAmount;
             } else {
                 $records["recordsFiltered"] = $records["recordsTotal"] = $totalRecordCount;
                 if ($request->length == -1) {
@@ -238,15 +288,25 @@ class SiteTransferBillingController extends Controller
                 } else {
                     $length = $request->length;
                 }
+                $inTransferTypeId = InventoryTransferTypes::where('slug', 'site')->where('type', 'IN')->pluck('id')->first();
                 for ($iterator = 0, $pagination = 0; $iterator < $length && $pagination < count($siteTransferBillData); $iterator++, $pagination++) {
-                    $projectName = $siteTransferBillData[$pagination]->inventoryComponentTransfer->inventoryComponent->projectSite->project->name;
+                    $challans = InventoryTransferChallan::whereIn('id', $siteTransferBillData[$pagination]->siteTransferBillChallans->pluck('inventory_transfer_challan_id')->toArray())->get();
+                    $challanNumber = implode(', ', $challans->pluck('challan_number')->toArray());
+                    $challan = $challans[0];
+                    $vendors = [];
+                    foreach ($challans as $challan) {
+                        $firstInTransfer = InventoryComponentTransfers::where('inventory_transfer_challan_id', $challan['id'])->where('transfer_type_id', $inTransferTypeId)->first();
+                        if ($firstInTransfer->vendor !== null) {
+                            $vendors[] = $firstInTransfer->vendor->company;
+                        }
+                    }
+                    $vendors = implode(', ', $vendors);
+                    $projectName = Project::join('project_sites', 'project_sites.project_id', '=', 'projects.id')
+                        ->where('project_sites.id', $challan['project_site_in_id'])
+                        ->pluck('projects.name')->first();
                     $paidAmount = SiteTransferBillPayment::where('site_transfer_bill_id', $siteTransferBillData[$pagination]['id'])->sum('amount');
                     $pendingAmount = $siteTransferBillData[$pagination]['total'] - $paidAmount;
-                    if ($siteTransferBillData[$pagination]->inventoryComponentTransfer->vendor == null) {
-                        $vendorName = '-';
-                    } else {
-                        $vendorName = $siteTransferBillData[$pagination]->inventoryComponentTransfer->vendor->company;
-                    }
+
                     if ($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('edit-asset-maintenance-billing')) {
                         $actionButton = '<div id="sample_editable_1_new" class="btn btn-small blue" >
                         <a href="/inventory/transfer/billing/edit/' . $siteTransferBillData[$pagination]['id'] . '" style="color: white"> Edit
@@ -256,13 +316,14 @@ class SiteTransferBillingController extends Controller
                     }
 
                     $records['data'][$iterator] = [
+                        $challanNumber,
                         $projectName,
                         date('j M Y', strtotime($siteTransferBillData[$pagination]['created_at'])),
                         date('j M Y', strtotime($siteTransferBillData[$pagination]['bill_date'])),
                         $siteTransferBillData[$pagination]['bill_number'],
-                        $vendorName,
-                        round(($siteTransferBillData[$pagination]['subtotal'] + $siteTransferBillData[$pagination]['extra_amount']),3),
-                        round(($siteTransferBillData[$pagination]['tax_amount'] + $siteTransferBillData[$pagination]['extra_amount_cgst_amount'] + $siteTransferBillData[$pagination]['extra_amount_sgst_amount'] + $siteTransferBillData[$pagination]['extra_amount_igst_amount']),3),
+                        $vendors,
+                        round(($siteTransferBillData[$pagination]['subtotal'] + $siteTransferBillData[$pagination]['extra_amount']), 3),
+                        round(($siteTransferBillData[$pagination]['tax_amount'] + $siteTransferBillData[$pagination]['extra_amount_cgst_amount'] + $siteTransferBillData[$pagination]['extra_amount_sgst_amount'] + $siteTransferBillData[$pagination]['extra_amount_igst_amount']), 3),
                         $siteTransferBillData[$pagination]['total'],
                         $paidAmount,
                         $pendingAmount,
@@ -270,8 +331,7 @@ class SiteTransferBillingController extends Controller
                     ];
                 }
             }
-
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
             $data = [
                 'action' => 'Get site transfer bill listing',
                 'params' => $request->all(),
@@ -286,16 +346,19 @@ class SiteTransferBillingController extends Controller
         return response()->json($records, $status);
     }
 
-    public function getEditView(Request $request,$siteTransferBill){
-        try{
+    public function getEditView(Request $request, $siteTransferBill)
+    {
+        try {
             $totalPaidAmount = SiteTransferBillPayment::where('site_transfer_bill_id', $siteTransferBill->id)->sum('amount');
-            $imageUploadPath = env('SITE_TRANSFER_IMAGE_UPLOAD').DIRECTORY_SEPARATOR.sha1($siteTransferBill->id).DIRECTORY_SEPARATOR;
-            $paymentTypes = PaymentType::select('id','name')->whereIn('slug',['cheque','neft','rtgs','internet-banking'])->get()->toArray();
-            $banks = BankInfo::where('is_active',true)->select('id','bank_name','balance_amount')->get();
+            $imageUploadPath = env('SITE_TRANSFER_IMAGE_UPLOAD') . DIRECTORY_SEPARATOR . sha1($siteTransferBill->id) . DIRECTORY_SEPARATOR;
+            $paymentTypes = PaymentType::select('id', 'name')->whereIn('slug', ['cheque', 'neft', 'rtgs', 'internet-banking'])->get()->toArray();
+            $banks = BankInfo::where('is_active', true)->select('id', 'bank_name', 'balance_amount')->get();
             $statistics = $this->getSiteWiseStatistics();
-            $cashAllowedLimit = ($statistics['remainingAmount'] > 0) ? $statistics['remainingAmount'] : 0 ;
-            return view('inventory.site-transfer-bill.edit')->with(compact('siteTransferBill','paymentTypes','imageUploadPath','totalPaidAmount','banks','cashAllowedLimit'));
-        }catch(\Exception $e){
+            $cashAllowedLimit = ($statistics['remainingAmount'] > 0) ? $statistics['remainingAmount'] : 0;
+            $challans = InventoryTransferChallan::whereIn('id', $siteTransferBill->siteTransferBillChallans->pluck('inventory_transfer_challan_id'))->pluck('challan_number')->toArray();
+            $challans = implode(', ', $challans);
+            return view('inventory.site-transfer-bill.edit')->with(compact('challans', 'siteTransferBill', 'paymentTypes', 'imageUploadPath', 'totalPaidAmount', 'banks', 'cashAllowedLimit'));
+        } catch (\Exception $e) {
             $data = [
                 'action' => 'Get site transfer bill edit view',
                 'site_transfer_bill' => $siteTransferBill,
@@ -306,34 +369,35 @@ class SiteTransferBillingController extends Controller
         }
     }
 
-    public function createPayment(Request $request){
-        try{
+    public function createPayment(Request $request)
+    {
+        try {
             $siteTransferBillPaymentData = $request->except('_token');
-            if($request['paid_from_slug'] == 'bank'){
-                $bank = BankInfo::where('id',$request['bank_id'])->first();
-                if($request['amount'] <= $bank['balance_amount']){
+            if ($request['paid_from_slug'] == 'bank') {
+                $bank = BankInfo::where('id', $request['bank_id'])->first();
+                if ($request['amount'] <= $bank['balance_amount']) {
                     $siteTransferBillPayment = SiteTransferBillPayment::create($siteTransferBillPaymentData);
                     $bankData['balance_amount'] = $bank['balance_amount'] - $request['amount'];
                     $bank->update($bankData);
-                    $request->session()->flash('success','Payment is created successfully.');
-                    return redirect('/inventory/transfer/billing/edit/'.$request->site_transfer_bill_id);
-                }else{
-                    $request->session()->flash('success','Bank Balance Amount is insufficient for this transaction');
-                    return redirect('/inventory/transfer/billing/edit/'.$request->site_transfer_bill_id);
+                    $request->session()->flash('success', 'Payment is created successfully.');
+                    return redirect('/inventory/transfer/billing/edit/' . $request->site_transfer_bill_id);
+                } else {
+                    $request->session()->flash('success', 'Bank Balance Amount is insufficient for this transaction');
+                    return redirect('/inventory/transfer/billing/edit/' . $request->site_transfer_bill_id);
                 }
-            }else{
+            } else {
                 $statistics = $this->getSiteWiseStatistics();
-                $cashAllowedLimit = ($statistics['remainingAmount'] > 0) ? $statistics['remainingAmount'] : 0 ;
-                if($request['amount'] <= $cashAllowedLimit){
+                $cashAllowedLimit = ($statistics['remainingAmount'] > 0) ? $statistics['remainingAmount'] : 0;
+                if ($request['amount'] <= $cashAllowedLimit) {
                     $siteTransferBillPayment = SiteTransferBillPayment::create($siteTransferBillPaymentData);
-                    $request->session()->flash('success','Payment is created successfully.');
-                    return redirect('/inventory/transfer/billing/edit/'.$request->site_transfer_bill_id);
-                }else{
-                    $request->session()->flash('success','Bank Balance Amount is insufficient for this transaction');
-                    return redirect('/inventory/transfer/billing/edit/'.$request->site_transfer_bill_id);
+                    $request->session()->flash('success', 'Payment is created successfully.');
+                    return redirect('/inventory/transfer/billing/edit/' . $request->site_transfer_bill_id);
+                } else {
+                    $request->session()->flash('success', 'Bank Balance Amount is insufficient for this transaction');
+                    return redirect('/inventory/transfer/billing/edit/' . $request->site_transfer_bill_id);
                 }
             }
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             $data = [
                 'action' => 'Create site transfer bill payment',
                 'params' => $request->all(),
@@ -344,28 +408,29 @@ class SiteTransferBillingController extends Controller
         }
     }
 
-    public function paymentListing(Request $request, $siteTransferBill){
-        try{
+    public function paymentListing(Request $request, $siteTransferBill)
+    {
+        try {
             $records = array();
             $status = 200;
             $records['data'] = array();
             $records["draw"] = intval($request->draw);
-            $siteTransferBillPaymentData = SiteTransferBillPayment::where('site_transfer_bill_id', $siteTransferBill->id)->orderBy('id','desc')->get();
+            $siteTransferBillPaymentData = SiteTransferBillPayment::where('site_transfer_bill_id', $siteTransferBill->id)->orderBy('id', 'desc')->get();
             $records["recordsFiltered"] = $records["recordsTotal"] = count($siteTransferBillPaymentData);
-            for($iterator = 0,$pagination = $request->start; $iterator < $request->length && $pagination < count($siteTransferBillPaymentData); $iterator++,$pagination++ ){
-                if($siteTransferBillPaymentData[$pagination]->paymentType == null){
+            for ($iterator = 0, $pagination = $request->start; $iterator < $request->length && $pagination < count($siteTransferBillPaymentData); $iterator++, $pagination++) {
+                if ($siteTransferBillPaymentData[$pagination]->paymentType == null) {
                     $paymentType = '-';
-                }else{
+                } else {
                     $paymentType = $siteTransferBillPaymentData[$pagination]->paymentType->name;
                 }
                 $records['data'][] = [
-                    date('d M Y',strtotime($siteTransferBillPaymentData[$pagination]['created_at'])),
+                    date('d M Y', strtotime($siteTransferBillPaymentData[$pagination]['created_at'])),
                     $siteTransferBillPaymentData[$pagination]['amount'],
-                    ($siteTransferBillPaymentData[$pagination]->paymentType != null) ? ucfirst($siteTransferBillPaymentData[$pagination]->paid_from_slug).' - '.$siteTransferBillPaymentData[$pagination]->paymentType->name : ucfirst($siteTransferBillPaymentData[$pagination]->paid_from_slug),
+                    ($siteTransferBillPaymentData[$pagination]->paymentType != null) ? ucfirst($siteTransferBillPaymentData[$pagination]->paid_from_slug) . ' - ' . $siteTransferBillPaymentData[$pagination]->paymentType->name : ucfirst($siteTransferBillPaymentData[$pagination]->paid_from_slug),
                     $siteTransferBillPaymentData[$pagination]['reference_number'],
                 ];
             }
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             $data = [
                 'action' => 'Get site transfer bill payment listing',
                 'params' => $request->all(),

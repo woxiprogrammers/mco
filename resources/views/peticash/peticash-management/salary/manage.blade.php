@@ -96,6 +96,14 @@
                                                                 </a>
                                                             </div>
                                                         </div>
+                                                        @php $user = Auth::user();@endphp
+                                                        @if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('remove-salary-request-handler'))
+                                                        <div class="col-md-2 pull-right">
+                                                            <div >
+                                                                <button type="button" class="btn btn-danger" id="salary-delete"><i class="fa fa-trash-o"></i>DELETE</button>
+                                                            </div>
+                                                        </div>
+                                                        @endif
                                                     </div>
                                                     <div class="table-container">
                                                         <table class="table table-striped table-bordered table-hover order-column" id="peticashSalaryManage">
@@ -283,6 +291,148 @@
         </div>
     </div>
     </div>
+    <div class="modal fade" tabindex="-1" role="dialog" id="salary-delete-warning">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header btn-danger">
+              <h5 class="modal-title">Warning</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <p>Please select atleast one checkbox</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" tabindex="-1" role="dialog" id="salary-delete-modal">
+        <div class="modal-dialog" role="document">
+            <form action="/peticash/peticash-management/salary/delete" id="salary-delete-form" method="POST">
+                {!! csrf_field() !!}
+                <input name="_method" type="hidden" value="DELETE">
+                <div class="modal-content">
+                    <div class="modal-header btn-primary">
+                        <h5 class="modal-title">Delete Selected Records</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-body">
+                            <div class="form-group row">
+                                <div class="col-md-4" style="text-align: right">
+                                    <label for="transaction_type" class="control-label">Transaction Type</label>
+                                    <span>*</span>
+                                </div>
+                                <div class="col-md-6">
+                                    <select class="form-control" id="transaction_type" name="transaction_type">
+                                        <option value="">Select Transaction Type</option>
+                                        @foreach($transactionTypes as $transactionType)
+                                            <option value="{{$transactionType['slug']}}">{{$transactionType['name']}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-4" style="text-align: right">
+                                    <label for="company" class="control-label">To be paid from</label>
+                                    <span>*</span>
+                                </div>
+                                <div class="col-md-6">
+                                    <select class="form-control" id="paid_from" name="paid_from">
+                                        <option value="peticash">Peticash</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-4" style="text-align: right">
+                                    <label for="employee_name" class="control-label">Employee Name</label>
+                                    <span>*</span>
+                                </div>
+                                <div class="col-md-6">
+                                    <select class="form-control" id="employee_id" name="employee_id">
+                                        @if(!$specialEmployees->isEmpty())
+                                            @foreach($specialEmployees as $specialEmployee)
+                                                <option value="{{$specialEmployee['id']}}">{{$specialEmployee['name']}}</option>
+                                            @endforeach
+                                        @endif
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-4" style="text-align: right">
+                                    <label for="selected_employee_name" class="control-label">Selected Employee Name</label>
+                                    <span>*</span>
+                                </div>
+                                <div class="col-md-6">
+                                    <select class="form-control" id="selected_employee_name" name="selected_employee_name">
+                                       
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-4" style="text-align: right">
+                                    <label for="salary_total" class="control-label">Salary Total of selected employee</label>
+                                </div>
+                                <div class="col-md-6">
+                                    <span id="salary_total"></span>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-4" style="text-align: right">
+                                    <label for="name" class="control-label">Date:</label>
+                                    <span>*</span>
+                                </div>
+                                <div class="col-md-6 date date-picker">
+                                    <input type="text" name="date" id="date"/>
+                                    <button class="btn btn-sm default" type="button">
+                                        <i class="fa fa-calendar"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-group row" style="display: none">
+                                <div class="col-md-4" style="text-align: right">
+                                    <label for="working_days" class="control-label">Working Days</label>
+                                    <span>*</span>
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="hidden" class="form-control" id="working_days" name="working_days" value="30">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-4" style="text-align: right">
+                                    <label for="amount" class="control-label">Amount</label>
+                                    <span>*</span>
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="text" class="form-control calculate-payable-amount" id="amount" name="amount">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-4" style="text-align: right">
+                                    <label for="remark" class="control-label">Remark</label>
+                                    <span>*</span>
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="text" class="form-control" id="remark" name="remark">
+                                </div>
+                            </div>
+                            <input type="hidden" name="selected_delete_id" id="selected_delete_id" />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Delete</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 @endsection
 @section('javascript')
     <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>
@@ -291,10 +441,58 @@
     <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
+    <script src="/assets/pages/scripts/components-date-time-pickers.min.js" type="text/javascript"></script>
     <script src="/assets/custom/peticash/salary-manage-datatable.js"></script>
+    <script src="/assets/custom/peticash/delete-salary.js" type="text/javascript"></script>
     <script>
         $(document).ready(function(){
+            DeleteSalary.init();
+            $('#date').attr("readonly", "readonly");
+            var date = new Date();
+            $('#date').val((date.getMonth()+1)+"/"+date.getDate()+"/"+date.getFullYear());
 
+            $('#paid_from').on('change',function(){
+                if($(this).val() == 'peticash'){
+                    $('#paymentSelect').hide();
+                }else{
+                    $('#paymentSelect').show();
+                }
+            });
+            $('#salary-delete').click(function(){
+                var val = [];
+                $(':checkbox:checked').each(function(i){
+                    val[i] = $(this).val();
+                });
+                if(val.length <= 0) {
+                    $('#salary-delete-warning').modal('show');
+                } else {
+                    $.ajax({
+                        url:'/peticash/peticash-management/salary/delete/show',
+                        type: "POST",
+                        data: {
+                            _token: $("input[name='_token']").val(),
+                            salary_ids: val,
+                        },
+                        success: function(data, textStatus, xhr){
+                            var jsonObject = JSON.parse(data);
+                            if(typeof jsonObject =='object'){
+                                $("#salary_total").html(jsonObject.sum);
+                                var option = '';
+                                $.each(jsonObject.data, function (key, val) {
+                                    option += '<option>' + jsonObject.data[key].employee.name+' - ' + jsonObject.data[key].payable_amount + '</option>';
+                                });
+                                console.log(option);
+                                $("#selected_employee_name").html(option);
+                                $("#selected_delete_id").val(val);
+                                $('#salary-delete-modal').modal('show');
+                            }
+                        },
+                        error: function(data){
+
+                        }
+                    });
+                }
+            });
 
             $('#save_value').click(function(){
                 var val = [];
@@ -322,7 +520,6 @@
                             }
                         });
                     }
-
                 }
             });
 
