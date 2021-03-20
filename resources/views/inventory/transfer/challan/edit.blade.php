@@ -35,7 +35,8 @@
                                     Close Challan
                                 </a>
                             </div>
-                            @elseif($challan->inventoryComponentTransferStatus->slug == 'requested' && $userRole == 'superadmin')
+
+                            @elseif($challan->inventoryComponentTransferStatus->slug == 'requested' && ($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->roles[0]->role->slug == '' || $user->customHasPermission('approve-asset-maintenance-approval')))
                             <div class="form-group " style="text-align: center">
                                 <button style="width:130px" id="disapproveChallan" type="submit" value="disapproved" class="btn red pull-right margin-top-15 approveDisapproveChallan">
                                     <i class="fa fas fa-ban" style="font-size: large"></i>
