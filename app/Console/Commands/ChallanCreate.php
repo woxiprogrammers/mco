@@ -112,6 +112,9 @@ class ChallanCreate extends Command
 
             $inImages = $inTransfer['images'];
             if ($inImages) {
+                $inventoryComponentDirectoryName = sha1($inTransfer->inventoryComponent->id);
+                $inventoryComponentTransferDirectoryName = sha1($inTransfer->id);
+                $originalImageUploadDirectoryPath = $imageUploadPath . DIRECTORY_SEPARATOR . $inventoryComponentDirectoryName . DIRECTORY_SEPARATOR . 'transfers' . DIRECTORY_SEPARATOR . $inventoryComponentTransferDirectoryName;
                 foreach ($inImages as $inImage) {
                     $fileName = $inImage->name;
                     if (file_exists($originalImageUploadDirectoryPath . DIRECTORY_SEPARATOR . $fileName)) {
