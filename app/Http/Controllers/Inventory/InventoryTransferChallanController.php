@@ -503,8 +503,6 @@ class InventoryTransferChallanController extends Controller
             $challan = InventoryTransferChallan::find($challanId);
             $challan['from_site'] = $challan->projectSiteOut->project->name;
             $challan['to_site'] = $challan->projectSiteIn->project->name ?? '-';
-            $challan['from_site'] = $challan->projectSiteOut->project->name;
-            $challan['to_site'] = $challan->projectSiteIn->project->name ?? '-';
             $data = [
                 'challan'       => $challan,
                 'other_data'    => $challan->otherData()->toArray(),
