@@ -65,11 +65,11 @@
         </tr>
         <tr style="font-size: 14px">
             <td colspan="4">Source Name - {{$challan->projectSiteOut->project->name}}</td>
-            <td colspan="6">Destination Name - {{$challan->projectSiteIn->project->name}}</td>
+            <td colspan="6">Destination Name - {{$challan->projectSiteIn->project->name ?? '-'}}</td>
         </tr>
         <tr style="font-size: 14px">
             <td colspan="4">Source Address - {{$challan->projectSiteOut->address}}</td>
-            <td colspan="6">Destination Address - {{$challan->projectSiteIn->address}}</td>
+            <td colspan="6">Destination Address - {{$challan->projectSiteIn->address ?? '-'}}</td>
         </tr>
         <tr style="font-size: 14px">
             <td colspan="4"> &nbsp; </td>
