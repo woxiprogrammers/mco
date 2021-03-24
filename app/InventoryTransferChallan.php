@@ -40,10 +40,12 @@ class InventoryTransferChallan extends Model
                 'transportation_cgst_percent',
                 'transportation_sgst_percent',
                 'transportation_igst_percent',
+		'inventory_component_transfer_status_id',
                 'driver_name',
                 'mobile',
                 'vehicle_number'
             )->first();
+	$data['status_of_challan'] =  InventoryComponentTransferStatus::where('id','=',$data['inventory_component_transfer_status_id'])->pluck('name')->first();
         $data['vendor_name'] = Vendor::where('id', $data['vendor_id'])->pluck('name')->first();
         $data['transportation_total'] = $data['transportation_tax_total'] = 0;
         if ($data['transportation_amount'] != null && $data['transportation_amount'] != "0") {
