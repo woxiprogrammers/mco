@@ -641,9 +641,9 @@
         }
         var rate = parseFloat(rate_per_unit) * parseFloat(quantity);
         var tax_amount = (parseFloat(gst) * rate) / 100;
-        var total = rate + tax_amount + tax_amount;
-        $('#cgst_amount_' + id).val(tax_amount.toFixed(2));
-        $('#sgst_amount_' + id).val(tax_amount.toFixed(2));
+        var total = rate + tax_amount;
+        $('#cgst_amount_' + id).val(tax_amount.toFixed(2) / 2);
+        $('#sgst_amount_' + id).val(tax_amount.toFixed(2) / 2);
         $('#total_' + id).val(total.toFixed(2));
     }
 
