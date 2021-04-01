@@ -73,6 +73,7 @@ class SiteTransferBillingController extends Controller
                 ->whereNotNull('inventory_component_transfers.transportation_amount')
                 ->where('inventory_component_transfers.transportation_amount', '!=', 0)
                 ->where('inventory_transfer_challan.project_site_in_id', $projectSiteId)
+                ->where('inventory_transfer_challan.challan_number', 'ilike', '%' . $request['keyword'] . '%')
                 ->whereNotIn('inventory_transfer_challan.id', $alreadyGeneratedBillChallanIds)->distinct('inventory_transfer_challan.id')->select('inventory_transfer_challan.id', 'inventory_transfer_challan.challan_number')->get();
             foreach ($challans as $challan) {
                 $response[$iterator]['challan_id'] = $challan['id'];
@@ -270,7 +271,6 @@ class SiteTransferBillingController extends Controller
                     ->orderBy('created_at', 'desc')->get();
                 $totalRecordCount = SiteTransferBill::whereIn('id', $siteTransferBillId)->count();
             }
-
             $paidAmount = $total = $pendingAmount = 0;
             if ($request->has('get_total')) {
                 if ($filterFlag) {
