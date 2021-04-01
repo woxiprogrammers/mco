@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\SiteTransferBill;
+use App\SiteTransferBillChallan;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
@@ -39,12 +40,16 @@ class SiteTranferChallanBill extends Command
      */
     public function handle()
     {
-        $siteTransfers = SiteTransferBill::whereNull('inventory_transfer_challan_id')->get();
+        $siteTransfers = SiteTransferBill::whereNotNull('inventory_component_transfer_id')->get();
         foreach ($siteTransfers as $siteTransfer) {
             Log::info($siteTransfer . ' - ' . $siteTransfer->inventoryComponentTransfer->inventory_transfer_challan_id);
-            $siteTransfer->update([
-                'inventory_transfer_challan_id' => $siteTransfer->inventoryComponentTransfer->inventory_transfer_challan_id
-            ]);
+            $siteTransferChallanBill = SiteTransferBillChallan::where('site_transfer_bill_id', $siteTransfer['id'])->where('inventory_transfer_challan_id', $siteTransfer->inventoryComponentTransfer->inventory_transfer_challan_id)->first();
+            if (!$siteTransferChallanBill) {
+                SiteTransferBillChallan::create([
+                    'site_transfer_bill_id' => $siteTransfer['id'],
+                    'inventory_transfer_challan_id' => $siteTransfer->inventoryComponentTransfer->inventory_transfer_challan_id
+                ]);
+            }
         }
     }
 }
