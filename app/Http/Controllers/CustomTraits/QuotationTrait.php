@@ -1450,7 +1450,7 @@ trait QuotationTrait{
                         $is_client_supplied = false;
                     }
                     if(array_key_exists('quotation_material_id',$materialData)){
-                        QuotationMaterial::where('id',$materialData['quotation_material_id'])->update(['quantity' => $materialData['quantity'],'rate_per_unit' => $materialData['rate_per_unit'], 'is_client_supplied' => $is_client_supplied]);
+                        QuotationMaterial::where('id',$materialData['quotation_material_id'])->update(['quantity' => (isset($materialData['quantity'])) ? $materialData['quantity'] : 0, 'rate_per_unit' => $materialData['rate_per_unit'], 'is_client_supplied' => $is_client_supplied]);
                     }else{
                         QuotationMaterial::create([
                             'material_id' => $material_id,
@@ -1458,7 +1458,7 @@ trait QuotationTrait{
                             'unit_id' => $materialData['unit_id'],
                             'is_client_supplied' => $is_client_supplied,
                             'quotation_id' => $request['quotation_id'],
-                            'quantity' => $materialData['quantity']
+                            'quantity' => (isset($materialData['quantity'])) ? $materialData['quantity'] : 0,
                         ]);
                     }
                 }
