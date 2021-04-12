@@ -685,13 +685,16 @@ class InventoryTransferChallanController extends Controller
                         'inventory_component_transfer_status_id' => $approvedStatusId,
                         'remark'                                => $request['remark'] ?? ''
                     ]);
-                    $rentalInventoryTransfer = RentalInventoryTransfer::where('inventory_component_transfer_id', $inventoryComponentInTransfer['id'])->first();
-                    if ($rentalInventoryTransfer) {
-                        $rentalInventoryTransfer->update([
-                            'quantity'  => $inventoryComponentInTransfer['quantity'],
-                            'rent_per_day' => $inventoryComponentInTransfer['rate_per_unit'],
-                        ]);
+                    if (!$inventoryComponentInTransfer->inventoryComponent->is_material) {
+                        $rentalInventoryTransfer = RentalInventoryTransfer::where('inventory_component_transfer_id', $inventoryComponentInTransfer['id'])->first();
+                        if ($rentalInventoryTransfer) {
+                            $rentalInventoryTransfer->update([
+                                'quantity'      => $inventoryComponentInTransfer['quantity'],
+                                'rent_per_day'  => $inventoryComponentInTransfer['rate_per_unit'],
+                            ]);
+                        }
                     }
+
                     if ($updateChallanStatusToClose && ($inventoryComponentOutTransfer['quantity'] != $inventoryComponentInTransfer['quantity'])) {
                         $updateChallanStatusToClose = false;
                     }
@@ -818,13 +821,15 @@ class InventoryTransferChallanController extends Controller
                     'inventory_transfer_challan_id'             => $relatedInventoryComponentOutTransferData['inventory_transfer_challan_id']
                 ]);
 
-                // Create site in entry for rental report
-                RentalInventoryTransfer::create([
-                    'inventory_component_transfer_id'   => $inventoryComponentInTransfer['id'],
-                    'quantity'                          => $inventoryComponentInTransfer['quantity'],
-                    'rent_per_day'                      => $inventoryComponentInTransfer['rate_per_unit'],
-                    'rent_start_date'                   => $currentDate
-                ]);
+                if (!$inventoryComponentInTransfer->inventoryComponent->is_material) {
+                    // Create site in entry for rental report
+                    RentalInventoryTransfer::create([
+                        'inventory_component_transfer_id'   => $inventoryComponentInTransfer['id'],
+                        'quantity'                          => $inventoryComponentInTransfer['quantity'],
+                        'rent_per_day'                      => $inventoryComponentInTransfer['rate_per_unit'],
+                        'rent_start_date'                   => $currentDate
+                    ]);
+                }
 
                 $relatedInventoryComponentOutTransferData->update(['related_transfer_id' => $inventoryComponentInTransfer['id']]);
                 if ($monthlyGrnGeneratedCount != null) {
@@ -896,12 +901,14 @@ class InventoryTransferChallanController extends Controller
                     $inventoryComponentTransfers = InventoryComponentTransfers::where('inventory_transfer_challan_id', $challan['id'])->get();
                     // Create inventory component transfer for rental report
                     foreach ($inventoryComponentTransfers as $inventoryComponentTransfer) {
-                        RentalInventoryTransfer::create([
-                            'inventory_component_transfer_id'   => $inventoryComponentTransfer['id'],
-                            'quantity'                          => $inventoryComponentTransfer['quantity'],
-                            'rent_per_day'                      => $inventoryComponentTransfer['rate_per_unit'],
-                            'rent_start_date'                   => $rentApplicableDate
-                        ]);
+                        if (!$inventoryComponentTransfer->inventoryComponent->is_material) {
+                            RentalInventoryTransfer::create([
+                                'inventory_component_transfer_id'   => $inventoryComponentTransfer['id'],
+                                'quantity'                          => $inventoryComponentTransfer['quantity'],
+                                'rent_per_day'                      => $inventoryComponentTransfer['rate_per_unit'],
+                                'rent_start_date'                   => $rentApplicableDate
+                            ]);
+                        }
                     }
                 }
                 // Update inventory component transfers status

@@ -54,7 +54,7 @@
                                                         <select class="form-control" id="report_type" name="report_type" onchange="getDivData()">
                                                             <option value="sitewise_pNl_report_new">Site wise Profit & Loss Report - New</option>
                                                             <option value="sitewise_sr_report_new">Sales & Receipt Report - (Outstanding Report)</option>
-                                                            <option value="sitewise_asset_rent_report">Asset Rent Report</option>
+                                                            <!-- <option value="sitewise_asset_rent_report">Asset Rent Report</option> -->
                                                             <option value="sitewise_master_peticash_report">Master Peticash Report</option>
                                                             <option value="sitewise_indirect_expenses_report">Indirect Expenses Report</option>
                                                             <option value="sitewise_mis_purchase_report">Mis. Purchase Report</option>

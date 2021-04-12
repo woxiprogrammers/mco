@@ -472,6 +472,7 @@
                                 </a>
                             </li>
                             @endif
+
                         </ul>
                     </li>
                     @endif
@@ -632,23 +633,23 @@
 
                     <?php $hasSubcontractorPermission = \App\Helper\ACLHelper::checkModuleAcl('subcontractor'); ?>
                     @if($hasSubcontractorPermission)
-                        <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
-                            <a> Subcontractor
-                                <span class="arrow"></span>
-                            </a>
-                            <ul class="dropdown-menu pull-left">
-                                <li aria-haspopup="true">
-                                    <a href="/subcontractor/structure/manage"> 
-                                        <i class="fa fa-file" aria-hidden="true"></i> Manage
-                                    </a>
-                                </li>
-                                <li aria-haspopup="true">
-                                    <a href="/subcontractor/cashentry/manage" class="nav-link nav-toggle ">
-                                        <i class="fa fa-file" aria-hidden="true"></i> Manage Cash Entry
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
+                    <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                        <a> Subcontractor
+                            <span class="arrow"></span>
+                        </a>
+                        <ul class="dropdown-menu pull-left">
+                            <li aria-haspopup="true">
+                                <a href="/subcontractor/structure/manage">
+                                    <i class="fa fa-file" aria-hidden="true"></i> Manage
+                                </a>
+                            </li>
+                            <li aria-haspopup="true">
+                                <a href="/subcontractor/cashentry/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-file" aria-hidden="true"></i> Manage Cash Entry
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
                     @endif
 
                     <?php $hasGeneralAwarenessPermission = \App\Helper\ACLHelper::checkModuleAcl('general-awareness'); ?>
@@ -700,10 +701,23 @@
                             </a>
                         </li>--}}
                     <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
-                        <a href="/reports/manage"> Reports
+                        <a> Reports
                             <span class="arrow"></span>
                         </a>
+                        <ul class="dropdown-menu pull-left">
+                            <li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
+                                <a href="/reports/manage">
+                                    <i class="fa fa-calculator"></i> Manage Report
+                                </a>
+                            </li>
+                            <li aria-haspopup="true">
+                                <a href="/reports/rental/manage" class="nav-link nav-toggle ">
+                                    <i class="fa fa-calculator"></i> Rent Report
+                                </a>
+                            </li>
+                        </ul>
                     </li>
+
                     @endif
                     <!--<li aria-haspopup="true" class="menu-dropdown classic-menu-dropdown">
                         <a href="/inventory"> Inventory

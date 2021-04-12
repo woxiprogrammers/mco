@@ -9,6 +9,7 @@ use App\Console\Commands\PeticashPurchaseTransactionMonthlyExpenseCalculations;
 use App\Console\Commands\PeticashSalaryTransactionMonthlyExpense;
 use App\Console\Commands\PeticashSalaryTransactionMonthlyExpenseCalculations;
 use App\Console\Commands\PurchaseOrderBillMonthlyExpenseCalculations;
+use App\Console\Commands\RentCalculations;
 use App\Console\Commands\SalaryDistributionInSites;
 use App\Console\Commands\SendPurchaseOrderEmails;
 use App\Console\Commands\SiteTranferChallanBill;
@@ -36,7 +37,8 @@ class Kernel extends ConsoleKernel
         SubcontractorModuleMerge::class,
         ChallanCreate::class,
         SiteTranferChallanBill::class,
-        MultiChallanBillMigration::class
+        MultiChallanBillMigration::class,
+        RentCalculations::class
     ];
 
     /**
