@@ -64,8 +64,8 @@ class RentalReportController extends Controller
             if ($request->has('bill_number')) {
                 $rentBill = $rentBill->where(DB::raw('id::VARCHAR'), 'ilike', '%' .  $request['bill_number'] . '%');
             }
-
-            $rentBill = $rentBill->orderBy('id', 'asc')->get();
+            $officeProjectSiteId = ProjectSite::where('name', env('OFFICE_PROJECT_SITE_NAME'))->pluck('id')->first();
+            $rentBill = $rentBill->whereNotIn('project_site_id', [$officeProjectSiteId])->orderBy('id', 'asc')->get();
             $iTotalRecords = count($rentBill->toArray());
             $records =  array();
             $records['data'] = array();
@@ -165,7 +165,7 @@ class RentalReportController extends Controller
                 $inventoryTraansfers = $rentalInventoryTransfers->where('inventory_component_id', $inventoryComponent['id'])->sortBy('rent_start_date');
                 foreach ($inventoryTraansfers as $inventoryTransfer) {
                     $noOfDays = $endOfTheMonth->diffInDays($inventoryTransfer['rent_start_date']) + 1;
-                    $quantity = ($inventoryTransfer['inventory_transfer_type'] === 'IN') ? -1 * abs($inventoryTransfer['quantity']) : $inventoryTransfer['quantity'];
+                    $quantity = ($inventoryTransfer['inventory_transfer_type'] === 'OUT') ? -1 * abs($inventoryTransfer['quantity']) : $inventoryTransfer['quantity'];
                     $rentPerDay = (float)$inventoryTransfer['rent_per_day'];
                     $total = $quantity * $rentPerDay * $noOfDays;
 
