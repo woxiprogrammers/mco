@@ -385,7 +385,7 @@ class RentalReportController extends Controller
     }
 
     /**
-     * Excel / PDF rental report export
+     * Excel summary rental report export
      */
     public function exportSummaryReport(Request $request, $rentBillId)
     {
@@ -458,194 +458,175 @@ class RentalReportController extends Controller
                 $projectSiteRentTotal += $inventoryComponentRentTotal;
                 $transactions[] = ['make_bold' => true, '', '', '', '', '', '', '', $inventoryComponentRentTotal];
 
-                // // Blank row after a inventory component rent details
-                // $transactions[] = [
-                //     'make_bold'    => false, $inventoryComponentIterator, $inventoryComponent['name'], $openingStockForThisMonth, $closingStock, $inventoryComponentRentTotal
-                // ];
-                //$transactions[] = ['make_bold' => false, '', '', '', '', '', '', '', ''];
                 $rows[] = [
                     'make_bold'    => false, $inventoryComponentIterator, $inventoryComponent['name'], $openingStockForThisMonth, $closingStock, $inventoryComponentRentTotal
                 ];
             }
-            if ($request['type'] === 'pdf') {
-                unset($rows[0]);
-                $pdf = App::make('dompdf.wrapper');
-                $data = [
-                    'rows'  => $rows,
-                    'projectSiteRentTotal'  => $projectSiteRentTotal,
-                    'bill_month'    => $thisMonth . '/' . $thisYear,
-                    'projectSite'   => $projectSite,
-                    'billNumber'    => $rentBill->id
-                ];
-                $pdf->loadHTML(view('report.rental.pdf', $data));
-                return $pdf->stream();
-            } else {
-                Excel::create('test', function ($excel) use ($rows, $companyHeader, $projectSite, $thisMonth, $thisYear, $projectSiteRentTotal, $rentBill) {
-                    $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(10);
-                    $excel->sheet('Sheet Name 1', function ($sheet) use ($rows, $companyHeader, $projectSite, $thisMonth, $thisYear, $projectSiteRentTotal, $rentBill) {
-                        $objDrawing = new \PHPExcel_Worksheet_Drawing();
-                        $objDrawing->setPath(public_path('/assets/global/img/logo.jpg')); //your image path
-                        $objDrawing->setWidthAndHeight(110, 54);
-                        $objDrawing->setResizeProportional(true);
-                        $objDrawing->setCoordinates('A1');
-                        $objDrawing->setWorksheet($sheet);
+            Excel::create('Summary Report', function ($excel) use ($rows, $companyHeader, $projectSite, $thisMonth, $thisYear, $projectSiteRentTotal, $rentBill) {
+                $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(10);
+                $excel->sheet('Sheet Name 1', function ($sheet) use ($rows, $companyHeader, $projectSite, $thisMonth, $thisYear, $projectSiteRentTotal, $rentBill) {
+                    $objDrawing = new \PHPExcel_Worksheet_Drawing();
+                    $objDrawing->setPath(public_path('/assets/global/img/logo.jpg')); //your image path
+                    $objDrawing->setWidthAndHeight(110, 54);
+                    $objDrawing->setResizeProportional(true);
+                    $objDrawing->setCoordinates('A1');
+                    $objDrawing->setWorksheet($sheet);
 
-                        $sheet->mergeCells('A2:E2');
-                        $sheet->cell('A2', function ($cell) use ($companyHeader) {
-                            $cell->setFontWeight('bold');
-                            $cell->setAlignment('center')->setValignment('center');
-                            $cell->setBorder('thin', 'thin', 'thin', 'thin');
-                            $cell->setValue($companyHeader['company_name']);
-                        });
-
-                        $sheet->mergeCells('A3:E3');
-                        $sheet->cell('A3', function ($cell) use ($companyHeader) {
-                            $cell->setFontWeight('bold');
-                            $cell->setAlignment('center')->setValignment('center');
-                            $cell->setBorder('thin', 'thin', 'thin', 'thin');
-                            $cell->setValue($companyHeader['designation']);
-                        });
-
-                        $sheet->mergeCells('A4:E4');
-                        $sheet->cell('A4', function ($cell) use ($companyHeader) {
-                            $cell->setFontWeight('bold');
-                            $cell->setAlignment('center')->setValignment('center');
-                            $cell->setBorder('thin', 'thin', 'thin', 'thin');
-                            $cell->setValue($companyHeader['address']);
-                        });
-
-                        $sheet->mergeCells('A5:E5');
-                        $sheet->cell('A5', function ($cell) use ($companyHeader) {
-                            $cell->setFontWeight('bold');
-                            $cell->setAlignment('center')->setValignment('center');
-                            $cell->setBorder('thin', 'thin', 'thin', 'thin');
-                            $cell->setValue($companyHeader['contact_no']);
-                        });
-
-                        $sheet->mergeCells('A6:E6');
-                        $sheet->cell('A6', function ($cell) use ($companyHeader) {
-                            $cell->setFontWeight('bold');
-                            $cell->setAlignment('center')->setValignment('center');
-                            $cell->setBorder('thin', 'thin', 'thin', 'thin');
-                            $cell->setValue($companyHeader['gstin_number']);
-                        });
-
-                        $sheet->mergeCells('A7:E7');
-                        $sheet->cell('A7', function ($cell) use ($companyHeader) {
-                            $cell->setBorder('thin', 'thin', 'thin', 'thin');
-                        });
-
-                        $sheet->mergeCells('A8:E8');
-                        $sheet->getRowDimension(8)->setRowHeight(35);
-                        $sheet->cell('A8', function ($cell) use ($projectSite) {
-                            $cell->setFontWeight('bold');
-                            $cell->setAlignment('center')->setValignment('center');
-                            $cell->setBorder('thin', 'thin', 'thin', 'thin');
-                            $cell->setValue('Monthly Rent Bill');
-                            $cell->setBackground('#81A1D1');
-                        });
-
-                        $sheet->mergeCells('A9:E9');
-                        $sheet->cell('A9', function ($cell) use ($thisMonth, $thisYear) {
-                            $cell->setFontWeight('bold');
-                            $cell->setAlignment('left')->setValignment('left');
-                            $cell->setBorder('thin', 'thin', 'thin', 'thin');
-                            $cell->setValue('Billing for the month - ' . $thisMonth . '/' . $thisYear);
-                        });
-                        $sheet->mergeCells('A10:E10');
-                        $sheet->cell('A10', function ($cell) use ($projectSite) {
-                            $cell->setFontWeight('bold');
-                            $cell->setAlignment('left')->setValignment('left');
-                            $cell->setBorder('thin', 'thin', 'thin', 'thin');
-                            $cell->setValue('Site Name - ' . $projectSite['name']);
-                        });
-
-                        $sheet->mergeCells('A11:E11');
-                        $sheet->getRowDimension(11)->setRowHeight(30);
-                        $sheet->cell('A11', function ($cell) use ($projectSite) {
-                            $cell->setFontWeight('bold');
-                            $cell->setAlignment('left');
-                            $cell->setBorder('thin', 'thin', 'thin', 'thin');
-                            $cell->setValue('Site Address - ' . $projectSite['address']);
-                        });
-                        $sheet->mergeCells('A12:D12');
-                        $sheet->cell('A12', function ($cell) use ($rentBill) {
-                            $cell->setFontWeight('bold');
-                            $cell->setAlignment('left')->setValignment('left');
-                            $cell->setBorder('thin', 'thin', 'thin', 'thin');
-                            $cell->setValue('Invoice No - Rent/' . $rentBill['id']);
-                        });
-
-                        // $sheet->mergeCells('E12:H12');
-                        // $sheet->cell('E12', function ($cell) {
-                        //     $cell->setFontWeight('bold');
-                        //     $cell->setAlignment('left')->setValignment('left');
-                        //     $cell->setBorder('thin', 'thin', 'thin', 'thin');
-                        //     $cell->setValue('Date - '); //TODO add date
-                        // });
-                        $sheet->mergeCells('A13:E13');
-                        $sheet->cell('A13', function ($cell) {
-                            $cell->setBorder('thin', 'thin', 'thin', 'thin');
-                        });
-                        $sheet->cells('A14:E14', function ($cells) {
-                            $cells->setBackground('#81A1D1');
-                        });
-                        $row = 13;
-                        foreach ($rows as $key1 => $arow) {
-                            $next_column = 'A';
-                            $row++;
-                            $makeBold = $arow['make_bold'];
-                            unset($arow['make_bold']);
-                            foreach ($arow as $key2 => $cellData) {
-                                $current_column = $next_column++;
-                                $sheet->getRowDimension($row)->setRowHeight(20);
-                                $sheet->cell($current_column . ($row), function ($cell) use ($cellData, $makeBold, $key2) {
-                                    if ($makeBold) {
-                                        $cell->setFontWeight('bold');
-                                    }
-                                    $cell->setBorder('thin', 'thin', 'thin', 'thin');
-                                    switch ($key2) {
-                                        case 3:
-                                            $cell->setAlignment('right')->setValignment('right');
-                                            break;
-                                        case 4:
-                                            $cell->setAlignment('right')->setValignment('right');
-                                            break;
-                                        case 5:
-                                            $cell->setAlignment('right')->setValignment('right');
-                                            break;
-                                        case 7:
-                                            $cell->setAlignment('right')->setValignment('right');
-                                            break;
-                                        case 6:
-                                            $cell->setAlignment('left')->setValignment('left');
-                                            break;
-                                        default:
-                                            $cell->setAlignment('center')->setValignment('center');
-                                            break;
-                                    }
-                                    $cell->setValue($cellData);
-                                });
-                            }
-                        }
-                        $row++;
-                        $sheet->mergeCells('A' . $row . ':D' . $row);
-                        $sheet->cell('A' . $row, function ($cell) {
-                            $cell->setFontWeight('bold');
-                            $cell->setAlignment('center')->setValignment('center');
-                            $cell->setBorder('thin', 'thin', 'thin', 'thin');
-                            $cell->setValue('Final Rent total');
-                        });
-
-                        $sheet->cell('E' . $row, function ($cell) use ($projectSiteRentTotal) {
-                            $cell->setFontWeight('bold');
-                            $cell->setAlignment('right')->setValignment('right');
-                            $cell->setBorder('thin', 'thin', 'thin', 'thin');
-                            $cell->setValue($projectSiteRentTotal);
-                        });
+                    $sheet->mergeCells('A2:E2');
+                    $sheet->cell('A2', function ($cell) use ($companyHeader) {
+                        $cell->setFontWeight('bold');
+                        $cell->setAlignment('center')->setValignment('center');
+                        $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                        $cell->setValue($companyHeader['company_name']);
                     });
-                })->export('xls');
-            }
+
+                    $sheet->mergeCells('A3:E3');
+                    $sheet->cell('A3', function ($cell) use ($companyHeader) {
+                        $cell->setFontWeight('bold');
+                        $cell->setAlignment('center')->setValignment('center');
+                        $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                        $cell->setValue($companyHeader['designation']);
+                    });
+
+                    $sheet->mergeCells('A4:E4');
+                    $sheet->cell('A4', function ($cell) use ($companyHeader) {
+                        $cell->setFontWeight('bold');
+                        $cell->setAlignment('center')->setValignment('center');
+                        $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                        $cell->setValue($companyHeader['address']);
+                    });
+
+                    $sheet->mergeCells('A5:E5');
+                    $sheet->cell('A5', function ($cell) use ($companyHeader) {
+                        $cell->setFontWeight('bold');
+                        $cell->setAlignment('center')->setValignment('center');
+                        $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                        $cell->setValue($companyHeader['contact_no']);
+                    });
+
+                    $sheet->mergeCells('A6:E6');
+                    $sheet->cell('A6', function ($cell) use ($companyHeader) {
+                        $cell->setFontWeight('bold');
+                        $cell->setAlignment('center')->setValignment('center');
+                        $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                        $cell->setValue($companyHeader['gstin_number']);
+                    });
+
+                    $sheet->mergeCells('A7:E7');
+                    $sheet->cell('A7', function ($cell) use ($companyHeader) {
+                        $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                    });
+
+                    $sheet->mergeCells('A8:E8');
+                    $sheet->getRowDimension(8)->setRowHeight(35);
+                    $sheet->cell('A8', function ($cell) use ($projectSite) {
+                        $cell->setFontWeight('bold');
+                        $cell->setAlignment('center')->setValignment('center');
+                        $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                        $cell->setValue('Monthly Rent Bill');
+                        $cell->setBackground('#81A1D1');
+                    });
+
+                    $sheet->mergeCells('A9:E9');
+                    $sheet->cell('A9', function ($cell) use ($thisMonth, $thisYear) {
+                        $cell->setFontWeight('bold');
+                        $cell->setAlignment('left')->setValignment('left');
+                        $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                        $cell->setValue('Billing for the month - ' . $thisMonth . '/' . $thisYear);
+                    });
+                    $sheet->mergeCells('A10:E10');
+                    $sheet->cell('A10', function ($cell) use ($projectSite) {
+                        $cell->setFontWeight('bold');
+                        $cell->setAlignment('left')->setValignment('left');
+                        $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                        $cell->setValue('Site Name - ' . $projectSite['name']);
+                    });
+
+                    $sheet->mergeCells('A11:E11');
+                    $sheet->getRowDimension(11)->setRowHeight(30);
+                    $sheet->cell('A11', function ($cell) use ($projectSite) {
+                        $cell->setFontWeight('bold');
+                        $cell->setAlignment('left');
+                        $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                        $cell->setValue('Site Address - ' . $projectSite['address']);
+                    });
+                    $sheet->mergeCells('A12:D12');
+                    $sheet->cell('A12', function ($cell) use ($rentBill) {
+                        $cell->setFontWeight('bold');
+                        $cell->setAlignment('left')->setValignment('left');
+                        $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                        $cell->setValue('Invoice No - Rent/' . $rentBill['id']);
+                    });
+
+                    // $sheet->mergeCells('E12:H12');
+                    // $sheet->cell('E12', function ($cell) {
+                    //     $cell->setFontWeight('bold');
+                    //     $cell->setAlignment('left')->setValignment('left');
+                    //     $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                    //     $cell->setValue('Date - '); //TODO add date
+                    // });
+                    $sheet->mergeCells('A13:E13');
+                    $sheet->cell('A13', function ($cell) {
+                        $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                    });
+                    $sheet->cells('A14:E14', function ($cells) {
+                        $cells->setBackground('#81A1D1');
+                    });
+                    $row = 13;
+                    foreach ($rows as $key1 => $arow) {
+                        $next_column = 'A';
+                        $row++;
+                        $makeBold = $arow['make_bold'];
+                        unset($arow['make_bold']);
+                        foreach ($arow as $key2 => $cellData) {
+                            $current_column = $next_column++;
+                            $sheet->getRowDimension($row)->setRowHeight(20);
+                            $sheet->cell($current_column . ($row), function ($cell) use ($cellData, $makeBold, $key2) {
+                                if ($makeBold) {
+                                    $cell->setFontWeight('bold');
+                                }
+                                $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                                switch ($key2) {
+                                    case 3:
+                                        $cell->setAlignment('right')->setValignment('right');
+                                        break;
+                                    case 4:
+                                        $cell->setAlignment('right')->setValignment('right');
+                                        break;
+                                    case 5:
+                                        $cell->setAlignment('right')->setValignment('right');
+                                        break;
+                                    case 7:
+                                        $cell->setAlignment('right')->setValignment('right');
+                                        break;
+                                    case 6:
+                                        $cell->setAlignment('left')->setValignment('left');
+                                        break;
+                                    default:
+                                        $cell->setAlignment('center')->setValignment('center');
+                                        break;
+                                }
+                                $cell->setValue($cellData);
+                            });
+                        }
+                    }
+                    $row++;
+                    $sheet->mergeCells('A' . $row . ':D' . $row);
+                    $sheet->cell('A' . $row, function ($cell) {
+                        $cell->setFontWeight('bold');
+                        $cell->setAlignment('center')->setValignment('center');
+                        $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                        $cell->setValue('Final Rent total');
+                    });
+
+                    $sheet->cell('E' . $row, function ($cell) use ($projectSiteRentTotal) {
+                        $cell->setFontWeight('bold');
+                        $cell->setAlignment('right')->setValignment('right');
+                        $cell->setBorder('thin', 'thin', 'thin', 'thin');
+                        $cell->setValue($projectSiteRentTotal);
+                    });
+                });
+            })->export('xls');
         } catch (\Exception $e) {
             $records = array();
             $data = [
