@@ -69,36 +69,34 @@ class RentalReportController extends Controller
             $iTotalRecords = count($rentBill->toArray());
             $records =  array();
             $records['data'] = array();
-            for ($iterator = 0, $pagination = $request->start; $iterator < $request->length && $pagination < count($rentBill); $iterator++, $pagination++) {
 
-                $button = '<button class="btn btn-xs blue">
-                                <a href="/reports/rental/bill/' . $rentBill[$pagination]->id . '?type=xls" style="color: white">
-                                <i class="fa fa-file-excel-o"></i> XLSX </a>
-                                <input type="hidden" name="_token">
-                            </button>
-                            <button class="btn btn-xs blue">
-                            <a href="/reports/rental/bill/' . $rentBill[$pagination]->id . '?type=pdf" style="color: white">
-                            <i class="fa fa-file-pdf-o"></i> PDF </a>
-                                <input type="hidden" name="_token">
-                            </button>
-                            <button class="btn btn-xs blue">
-                                <a href="/reports/rental/summary/' . $rentBill[$pagination]->id . '?type=xls" style="color: white">
-                                <i class="fa fa-file-excel-o"></i> XLSX </a>
-                                <input type="hidden" name="_token">
-                            </button>';
-                $records['data'][$iterator] = [
-                    $rentBill[$pagination]->projectSite->project->name,
-                    $rentBill[$pagination]['month'],
-                    $rentBill[$pagination]['year'],
-                    $rentBill[$pagination]['id'],
-                    'Manisha Construction',
-                    $rentBill[$pagination]['total'],
-                    $button
-                ];
+            if ($request->has('get_total')) {
+                $total = $rentBill->sum('total');
+                $records['total'] = (float)$total;
+            } else {
+                $records["recordsFiltered"] = $records["recordsTotal"] = $iTotalRecords;
+                for ($iterator = 0, $pagination = $request->start; $iterator < $request->length && $pagination < count($rentBill); $iterator++, $pagination++) {
+                    $button = '<button class="btn btn-xs blue">
+                                    <a href="/reports/rental/bill/' . $rentBill[$pagination]->id . '?type=xls" style="color: white">
+                                    <i class="fa fa-file-excel-o"></i> XLSX </a>
+                                    <input type="hidden" name="_token">
+                                </button>
+                                <button class="btn btn-xs blue">
+                                <a href="/reports/rental/bill/' . $rentBill[$pagination]->id . '?type=pdf" style="color: white">
+                                <i class="fa fa-file-pdf-o"></i> PDF </a>
+                                    <input type="hidden" name="_token">
+                                </button>';
+                    $records['data'][$iterator] = [
+                        $rentBill[$pagination]->projectSite->project->name,
+                        $rentBill[$pagination]['month'],
+                        $rentBill[$pagination]['year'],
+                        $rentBill[$pagination]['id'],
+                        'Manisha Construction',
+                        $rentBill[$pagination]['total'],
+                        $button
+                    ];
+                }
             }
-            $records["draw"] = intval($request->draw);
-            $records["recordsTotal"] = $iTotalRecords;
-            $records["recordsFiltered"] = $iTotalRecords;
         } catch (\Exception $e) {
             $records = array();
             $data = [
