@@ -86,6 +86,13 @@
                                                 <tbody>
 
                                                 </tbody>
+                                                <tfoot>
+                                                    <tr>
+                                                        <th colspan="5" style="text-align:right">Total Page Wise: </th>
+                                                        <th></th>
+                                                        <th></th>
+                                                    </tr>
+                                                </tfoot>
                                             </table>
                                         </div>
                                     </div>
@@ -101,7 +108,6 @@
 @endsection
 
 @section('javascript')
-<script src="/public/assets/global/plugins/jquery.min.js" type="text/javascript"></script>
 <script src="/assets/custom/client/client.js" type="application/javascript"></script>
 <link rel="stylesheet" href="/assets/global/plugins/datatables/datatables.min.css" />
 <script src="/assets/global/plugins/datatables/datatables.min.js"></script>
@@ -113,11 +119,6 @@
 <script>
     $(document).ready(function() {
         $('#rentalReportTable').DataTable();
-        // $("input[name='search_name']").on('keyup', function() {
-        //     var search_name = $('#search_name').val();
-        //     $("input[name='search_name']").val(search_name);
-        //     $(".filter-submit").trigger('click');
-        // });
     });
 </script>
 @endsection
