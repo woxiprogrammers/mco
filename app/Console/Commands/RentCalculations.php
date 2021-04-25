@@ -70,7 +70,7 @@ class RentCalculations extends Command
                 // Year validation
                 $year = $this->option('year');
                 $requestMonth = $this->option('month');
-                if (!in_array($year, [2018, 2019, 2020, 2021, 2022, 2023]) || $year > $now->format('Y')) {
+                if (!in_array($year, [2016,2017,2018, 2019, 2020, 2021, 2022, 2023,2024,2025,2026]) || $year > $now->format('Y')) {
                     $this->info('Invalid year');
                     $error = true;
                     goto completeProcessing;

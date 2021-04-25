@@ -85,7 +85,13 @@ class RentalReportController extends Controller
                                 <a href="/reports/rental/bill/' . $rentBill[$pagination]->id . '?type=pdf" style="color: white">
                                 <i class="fa fa-file-pdf-o"></i> PDF </a>
                                     <input type="hidden" name="_token">
-                                </button>';
+                                </button>
+				<button class="btn btn-xs blue">
+                                <a href="/reports/rental/summary/' . $rentBill[$pagination]->id . '?type=xls" style="color: white">
+                                <i class="fa fa-file-excel-o"></i> Summary-XLSX </a>
+                                <input type="hidden" name="_token">
+                            </button>
+			    ';
                     $records['data'][$iterator] = [
                         $rentBill[$pagination]->projectSite->project->name,
                         $rentBill[$pagination]['month'],
