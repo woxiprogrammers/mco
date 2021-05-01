@@ -466,7 +466,8 @@ class RentalReportController extends Controller
                     'make_bold'    => false, $inventoryComponentIterator, $inventoryComponent['name'], $openingStockForThisMonth, $closingStock, $inventoryComponentRentTotal
                 ];
             }
-            Excel::create('Summary Report', function ($excel) use ($rows, $companyHeader, $projectSite, $thisMonth, $thisYear, $projectSiteRentTotal, $rentBill) {
+            $filename = $projectSite['name'] . ' ' . $startOfTheMonth->format('M') . ' ' . $thisYear . ' Summary Report';
+            Excel::create($filename, function ($excel) use ($rows, $companyHeader, $projectSite, $thisMonth, $thisYear, $projectSiteRentTotal, $rentBill) {
                 $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(10);
                 $excel->sheet('Sheet Name 1', function ($sheet) use ($rows, $companyHeader, $projectSite, $thisMonth, $thisYear, $projectSiteRentTotal, $rentBill) {
                     $objDrawing = new \PHPExcel_Worksheet_Drawing();
