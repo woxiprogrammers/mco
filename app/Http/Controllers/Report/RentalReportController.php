@@ -54,10 +54,10 @@ class RentalReportController extends Controller
                     ->where('projects.name', 'ilike', '%' . $request['project_name'] . '%')->pluck('project_sites.id')->toArray();
                 $rentBill = $rentBill->whereIn('project_site_id', $projectSiteIds);
             }
-            if ($request->has('month') && count($request['month']) != 0) {
+            if ($request->has('month') && count($request['month']) != 0 && !in_array(0, $request['month'])) {
                 $rentBill = $rentBill->whereIn('month', $request['month']);
             }
-            if ($request->has('year') && count($request['year']) != 0) {
+            if ($request->has('year') && count($request['year']) != 0 && !in_array(0, $request['year'])) {
                 $rentBill = $rentBill->whereIn('year', $request['year']);
             }
             if ($request->has('bill_number')) {
