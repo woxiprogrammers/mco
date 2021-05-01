@@ -41,17 +41,17 @@
                                             <table class="table table-striped table-bordered table-hover table-checkable order-column" id="rentalReportTable">
                                                 <thead>
                                                     <tr>
-                                                        <th style="width:30%"> Project Name </th>
-                                                        <th> Month </th>
-                                                        <th> Year </th>
-                                                        <th> Bill Number </th>
-                                                        <th> Vendor Name </th>
-                                                        <th> Total </th>
-                                                        <th> Actions </th>
+                                                        <th style="width:20%"> Project Name </th>
+                                                        <th style="width:15%"> Month </th>
+                                                        <th style="width:15%"> Year </th>
+                                                        <th style="width:10%"> Bill Number </th>
+                                                        <th style="width:10%"> Vendor Name </th>
+                                                        <th style="width:10%"> Total </th>
+                                                        <th style="width:20%"> Actions </th>
                                                     </tr>
                                                     <tr>
                                                         <th> <input class="form-control form-filter" name="project_name" id="project_name" type="text"> </th>
-                                                        <th> <select class="form-control form-filter" id="month" name="month">
+                                                        <th> <select class="form-control form-filter" id="month" name="month" multiple>
                                                                 <option value="0">ALL</option>
                                                                 <option value="01">Jan</option>
                                                                 <option value="02">Feb</option>
@@ -66,7 +66,7 @@
                                                                 <option value="11">Nov</option>
                                                                 <option value="12">Dec</option>
                                                             </select></th>
-                                                        <th><select class="form-control form-filter" id="year" name="year">
+                                                        <th><select class="form-control form-filter" id="year" name="year" multiple>
                                                                 <option value="0">ALL</option>
                                                                 <option value="2018">2018</option>
                                                                 <option value="2019">2019</option>

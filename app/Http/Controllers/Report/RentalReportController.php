@@ -31,7 +31,6 @@ class RentalReportController extends Controller
     {
         try {
             return view('report.rental.manage');
-            return view('admin.bill.manage-bill')->with(compact('taxes', 'project_site', 'bill_statuses'));
         } catch (\Exception $e) {
             $data = [
                 'action' => 'Get bill manage view',
@@ -55,11 +54,11 @@ class RentalReportController extends Controller
                     ->where('projects.name', 'ilike', '%' . $request['project_name'] . '%')->pluck('project_sites.id')->toArray();
                 $rentBill = $rentBill->whereIn('project_site_id', $projectSiteIds);
             }
-            if ($request->has('month') && $request['month'] != 0) {
-                $rentBill = $rentBill->where('month', $request['month']);
+            if ($request->has('month') && count($request['month']) != 0) {
+                $rentBill = $rentBill->whereIn('month', $request['month']);
             }
-            if ($request->has('year') && $request['year'] != 0) {
-                $rentBill = $rentBill->where('year', $request['year']);
+            if ($request->has('year') && count($request['year']) != 0) {
+                $rentBill = $rentBill->whereIn('year', $request['year']);
             }
             if ($request->has('bill_number')) {
                 $rentBill = $rentBill->where(DB::raw('id::VARCHAR'), 'ilike', '%' .  $request['bill_number'] . '%');
@@ -69,7 +68,7 @@ class RentalReportController extends Controller
             $iTotalRecords = count($rentBill->toArray());
             $records =  array();
             $records['data'] = array();
-
+            count($rentBill);
             if ($request->has('get_total')) {
                 $total = $rentBill->sum('total');
                 $records['total'] = (float)$total;

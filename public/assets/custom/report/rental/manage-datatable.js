@@ -33,7 +33,11 @@ var RentalReportListing = function () {
                         url: "/reports/rental/listing?_token="+$("input[name='_token']").val(), // ajax source
                         type: 'POST',
                         data :{
-                            "get_total" : true
+                            "get_total" : true,
+                            "project_name" : $("#project_name").val(),
+                            "bill_number" : $("#bill_number").val(),
+                            "month" : $("#month").val(),
+                            "year" : $("#year").val(),
                         },
                         success: function(result){
                             total = result['total'];
