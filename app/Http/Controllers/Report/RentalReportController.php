@@ -68,7 +68,6 @@ class RentalReportController extends Controller
             $iTotalRecords = count($rentBill->toArray());
             $records =  array();
             $records['data'] = array();
-            count($rentBill);
             if ($request->has('get_total')) {
                 $total = $rentBill->sum('total');
                 $records['total'] = (float)$total;
