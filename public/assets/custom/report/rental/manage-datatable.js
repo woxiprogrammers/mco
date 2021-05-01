@@ -111,4 +111,11 @@ var RentalReportListing = function () {
 
 jQuery(document).ready(function() {
     RentalReportListing.init();
+    $("#project_name, input[name='bill_number']").on('keyup', function () {
+        $(".filter-submit").trigger('click');
+    });
+
+    $("#month, #year").on('change', function () {
+        $(".filter-submit").trigger('click');
+    });
 });

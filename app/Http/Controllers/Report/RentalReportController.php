@@ -129,7 +129,6 @@ class RentalReportController extends Controller
             $projectSite = ProjectSite::find($rentBill->project_site_id);
             $startOfTheMonth = Carbon::create($rentBill->year, $rentBill->month, 01, 00, 00, 00);
             $endOfTheMonth = Carbon::create($rentBill->year, $rentBill->month, 01, 00, 00, 00)->endOfMonth();
-
             $projectSiteRentTotal = $inventoryComponentIterator = 0;
             $unit = Unit::where('slug', 'nos')->select('id', 'name')->first();
 
@@ -195,6 +194,7 @@ class RentalReportController extends Controller
                 $transactions[] = ['make_bold' => false, '', '', '', '', '', '', '', ''];
                 $rows = array_merge($rows, $transactions);
             }
+            $filename = $projectSite['name'] . ' ' . $startOfTheMonth->format('M') . ' ' . $thisYear . ' rent report';
             if ($request['type'] === 'pdf') {
                 unset($rows[0]);
                 $pdf = App::make('dompdf.wrapper');
@@ -206,9 +206,9 @@ class RentalReportController extends Controller
                     'billNumber'    => $rentBill->id
                 ];
                 $pdf->loadHTML(view('report.rental.pdf', $data));
-                return $pdf->stream();
+                return $pdf->stream($filename);
             } else {
-                Excel::create('test', function ($excel) use ($rows, $companyHeader, $projectSite, $thisMonth, $thisYear, $projectSiteRentTotal, $rentBill) {
+                Excel::create($filename, function ($excel) use ($rows, $companyHeader, $projectSite, $thisMonth, $thisYear, $projectSiteRentTotal, $rentBill) {
                     $excel->getDefaultStyle()->getFont()->setName('Calibri')->setSize(10);
                     $excel->sheet('Sheet Name 1', function ($sheet) use ($rows, $companyHeader, $projectSite, $thisMonth, $thisYear, $projectSiteRentTotal, $rentBill) {
                         $objDrawing = new \PHPExcel_Worksheet_Drawing();
