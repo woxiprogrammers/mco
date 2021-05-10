@@ -57,6 +57,13 @@
                                                 </a>
                                             </div>
                                         @endif
+                                        @if($user->roles[0]->role->slug == 'superadmin')
+                                            <div class="col-md-2 pull-right">
+                                                <a class="btn btn-danger btn-md pull-right" id="mergeMaterialButton">
+                                                    Merge Material
+                                                </a>
+                                            </div>
+                                        @endif
 
                                             <table class="table table-striped table-bordered table-hover table-checkable order-column" id="materialTable">
                                                 <thead>
@@ -127,6 +134,51 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+    <div class="modal fade" tabindex="-1" role="dialog" id="material-merge-modal">
+        <div class="modal-dialog" role="document">
+            <form action="/material/merge" id="material-merge-form" method="POST">
+                {!! csrf_field() !!}
+                <div class="modal-content">
+                    <div class="modal-header btn-primary">
+                        <h5 class="modal-title">Merge Selected Materials</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-body">
+                            <div class="form-group row">
+                                <div class="col-md-4" style="text-align: right">
+                                    <label for="selected_material" class="control-label">Selected Material</label>
+                                    <span>*</span>
+                                </div>
+                                <div class="col-md-6">
+                                    <select class="form-control" id="selected_material" name="selected_material">
+                                        
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-4" style="text-align: right">
+                                    <label for="merge_to_material" class="control-label">Material To Merge</label>
+                                    <span>*</span>
+                                </div>
+                                <div class="col-md-6">
+                                    <select class="form-control" id="merge_to_material" name="merge_to_material">
+                                        
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Merge</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 </div>

@@ -8,9 +8,13 @@ use Illuminate\Support\Facades\File;
 use App\CategoryMaterialRelation;
 use App\Helper\MaterialProductHelper;
 use App\Http\Requests\MaterialRequest;
+use App\InventoryComponent;
 use App\Material;
 use App\MaterialVersion;
+use App\PurcahsePeticashTransaction;
+use App\QuotationMaterial;
 use App\Unit;
+use App\VendorMaterialRelation;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,6 +22,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use Barryvdh\DomPDF\Facade as PDF;
+use Illuminate\Support\Facades\Session;
 
 trait MaterialTrait{
 
@@ -81,12 +86,17 @@ trait MaterialTrait{
 
     public function getManageView(Request $request) {
        try{
-           $categories = null;
-           $categories = Category::where('is_active',true)->select('id','name')->orderBy('name','asc')->get()->toArray();
-           $data['categories'] = $categories;
-           return view('admin.material.manage', $data);
+            if(Session::has('material-checkbox')){
+                Session::forget('material-checkbox');
+            }
+
+            $categories = null;
+            $categories = Category::where('is_active',true)->select('id','name')->orderBy('name','asc')->get()->toArray();
+            $data['categories'] = $categories;
+            
+            return view('admin.material.manage', $data);
        }catch(\Exception $e){
-           $data = [
+            $data = [
                'action' => 'Get material manage view',
                'params' => $request->all(),
                'exception' => $e->getMessage()
@@ -360,6 +370,11 @@ trait MaterialTrait{
             $records['data'] = array();
             $profilePicAddress = null;
             $end = $request->length < 0 ? count($materialData) : $request->length;
+            $materialCheckbox = null;
+            if(Session::has('material-checkbox')){
+                $materialCheckbox = Session::get('material-checkbox');
+            }
+
             for($iterator = 0,$pagination = 0; $iterator < $end && $pagination < count($materialData); $iterator++,$pagination++ ){
                 $materialImagetag = null;
                 $materialImages = MaterialImages::where('material_id',$materialData[$pagination]['id'])->select('id','name')->get();
@@ -386,6 +401,7 @@ trait MaterialTrait{
                 if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('edit-material')){
                     $categoryname = CategoryMaterialRelation::join('categories','categories.id','=','category_material_relations.category_id')
                                     ->where('category_material_relations.material_id','=',$materialData[$pagination]['id'])
+                                    ->groupBy('categories.name')
                                     ->get(['categories.name'])->toArray();
                     $catNameArr = array();
                     if(count($categoryname) > 1) {
@@ -396,8 +412,16 @@ trait MaterialTrait{
                     } else {
                         $catNameStr = $categoryname[0]['name'];
                     }
+
+                    $checked = '';
+                    if(!is_null($materialCheckbox)) {
+                        if(in_array($materialData[$pagination]['id'],$materialCheckbox)) {
+                            $checked = 'checked=checked';
+                        }
+                    }
+
                     $records['data'][$iterator] = [
-                        '<input type="checkbox" name="material_ids" value="'.$materialData[$pagination]['id'].'">',
+                        '<input type="checkbox"'. $checked .'name="material_ids" class="materialId" value="'.$materialData[$pagination]['id'].'">',
                         $materialImagetag,
                         ucwords($catNameStr),
                         ucwords($materialData[$pagination]['name']),
@@ -452,6 +476,152 @@ trait MaterialTrait{
         }
 
         return response()->json($records,200);
+    }
+
+    public function materialCheckBoxState(Request $request)
+    {
+        $materialCheckbox = Session::get('material-checkbox');
+
+        if(is_null($materialCheckbox)) {
+            if($request->state){
+                $materialCheckbox[] = $request->material_id;
+            }
+        }else {
+            if($request->state == 'true'){
+                $materialCheckbox[] = $request->material_id;
+            }else{
+                if (($key = array_search($request->material_id, $materialCheckbox)) !== false) {
+                    unset($materialCheckbox[$key]);
+                }
+            }
+        }
+        Session::put('material-checkbox',$materialCheckbox);
+    }
+
+    public function materialCheckBoxList(Request $request)
+    {
+        $materialCheckbox = Session::get('material-checkbox');
+        $status = 500;
+        $message = 'Please select record to merge.';
+        $material = null;
+
+        if(!is_null($materialCheckbox) && count($materialCheckbox) > 0) { 
+            $status = 200;
+            $material = Material::with('unit')->whereIn('id',$materialCheckbox)->get();
+        }
+        
+        $count = count($material);
+
+        if($count == 1) {
+            $message = 'Please select more than 1 record to merge.';
+            $status = 500;
+        }
+
+        $response = compact('message', 'material');
+
+        return response($response,$status);
+    }
+
+    public function materialMerge(Request $request)
+    {
+        try{
+            $materialCheckbox = Session::get('material-checkbox');
+            if(!is_null($materialCheckbox) && count($materialCheckbox) > 0) { 
+                $status = 200;
+                $material = Material::with('unit')->whereIn('id',$materialCheckbox)->get();
+            }else {
+                $request->session()->flash('success','Please select material to merge');
+                return redirect('/material/manage');
+            }
+
+            $materialMaster = $material->pluck('id')->toArray();
+
+            if (($key = array_search($request->merge_to_material, $materialMaster)) !== false) {
+                unset($materialMaster[$key]);
+            }
+
+            $materialToMerge = $material->find($request->merge_to_material);
+            $materialToDelete = $material->whereIn('id',$materialMaster);
+            $categoryMaterialRelation = CategoryMaterialRelation::whereIn('material_id',$materialMaster)->get();
+            $inventoryComponent = InventoryComponent::whereIn('reference_id',$materialMaster)->get();
+            $materialVersion = MaterialVersion::whereIn('material_id',$materialMaster)->get();
+            $purcahsePeticashTransaction = PurcahsePeticashTransaction::whereIn('reference_id',$materialMaster)->get();
+            $quotationMaterial = QuotationMaterial::whereIn('material_id',$materialMaster)->get();
+            $vendorMaterialRelation = VendorMaterialRelation::whereIn('material_id',$materialMaster)->get();
+
+            if(!$categoryMaterialRelation->isEmpty()) {
+                foreach($categoryMaterialRelation as $categoryMaterial) {
+                    $categoryMaterial->material_id = $materialToMerge->id;
+                    $categoryMaterial->save();
+                }
+            }
+            
+            if(!$inventoryComponent->isEmpty()) {
+                foreach($inventoryComponent as $inventory) {
+                    $inventory->reference_id = $materialToMerge->id;
+                    $inventory->save();
+                }
+            }
+
+            if(!$materialVersion->isEmpty()) {
+                foreach($materialVersion as $materialVer) {
+                    $materialVer->material_id = $materialToMerge->id;
+                    $materialVer->rate_per_unit = $materialToMerge->rate_per_unit;
+                    $materialVer->unit_id = $materialToMerge->unit_id;
+                    $materialVer->save();
+                }
+            }
+
+            if(!$purcahsePeticashTransaction->isEmpty()) {
+                foreach($purcahsePeticashTransaction as $purcahsePeticash) {
+                    $purcahsePeticash->reference_id = $materialToMerge->id;
+                    $purcahsePeticash->unit_id = $materialToMerge->unit_id;
+                    $purcahsePeticash->save();
+                }
+            }
+
+            if(!$quotationMaterial->isEmpty()) {
+                foreach($quotationMaterial as $quotationMat) {
+                    $quotationMat->material_id = $materialToMerge->id;
+                    $quotationMat->rate_per_unit = $materialToMerge->rate_per_unit;
+                    $quotationMat->unit_id = $materialToMerge->unit_id;
+                    $categoryMaterial->save();
+                }
+            }
+
+            if(!$vendorMaterialRelation->isEmpty()) {
+                foreach($vendorMaterialRelation as $vendorMaterial) {
+                    $vendorMaterial->material_id = $materialToMerge->id;
+                    $vendorMaterial->save();
+                }
+            }
+
+            if(!$materialToDelete->isEmpty()) {
+                foreach($materialToDelete as $materialDelete) {
+                    $materialDelete->delete();
+                }
+            }
+
+            $request->session()->flash('success','Material Merged successfully.');
+            return redirect('/material/manage');
+            $status = 200;
+        }catch(\Exception $e){
+            $message = 'Something went wrong';
+            $status = 500;
+            $data = [
+                'action' => 'Change Material status',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $response = [
+                'message' => $message,
+            ];
+            if(Session::has('material-checkbox')){
+                Session::forget('material-checkbox');
+            }
+            return response($response,$status);
+        }
     }
 
     public function changeMaterialStatus(Request $request){

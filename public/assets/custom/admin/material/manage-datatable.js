@@ -108,4 +108,47 @@ jQuery(document).ready(function() {
             }
         });
     });
+
+    $(document).on('click', '.materialId', function() {        
+        $.ajax({
+            url:'/material/checkbox-state',
+            type: "POST",
+            data: {
+                _token: $("input[name='_token']").val(),
+                material_id: $(this).val(),
+                state:$(this).is(":checked")
+            },
+            success: function(data, textStatus, xhr){
+                //$(".filter-submit").trigger('click');
+            },
+            error: function(data){
+
+            }
+        });
+    });
+
+    $("#mergeMaterialButton").on('click',function(){
+        $.ajax({
+            url:'/material/checkbox-list',
+            type: "GET",
+            success: function(data, textStatus, xhr){
+                $.each(data.material, function(){
+                    $('<option/>', {
+                        'value': this.id,
+                        'text': this.name+'-'+this.unit.name+'-'+this.rate_per_unit
+                    }).appendTo('#selected_material');
+                });
+                $.each(data.material, function(){
+                    $('<option/>', {
+                        'value': this.id,
+                        'text': this.name+'-'+this.unit.name+'-'+this.rate_per_unit
+                    }).appendTo('#merge_to_material');
+                });
+                $('#material-merge-modal').modal('show');
+            },
+            error: function(data){
+                alert(data.responseJSON.message);
+            }
+        });
+    });
 });
