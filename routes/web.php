@@ -116,6 +116,9 @@ Route::group(['domain' => env('DOMAIN_NAME')], function () {
         Route::post('check-name', array('uses' => 'Admin\MaterialController@checkMaterialName'));
         Route::get('auto-suggest/{keyword}', array('uses' => 'Admin\MaterialController@autoSuggest'));
         Route::post('basicrate_material', array('uses' => 'Admin\MaterialController@generateBasicRateMaterialPdf'));
+        Route::post('checkbox-state', array('uses' => 'Admin\MaterialController@materialCheckBoxState'));
+        Route::get('checkbox-list', array('uses' => 'Admin\MaterialController@materialCheckBoxList'));
+        Route::post('merge', array('uses' => 'Admin\MaterialController@materialMerge'));
     });
 
     Route::group(['prefix' => 'product'], function () {
