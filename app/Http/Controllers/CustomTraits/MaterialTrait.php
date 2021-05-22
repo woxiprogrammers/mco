@@ -10,6 +10,7 @@ use App\Helper\MaterialProductHelper;
 use App\Http\Requests\MaterialRequest;
 use App\InventoryComponent;
 use App\Material;
+use App\MaterialRequestComponentTypes;
 use App\MaterialVersion;
 use App\PurcahsePeticashTransaction;
 use App\QuotationMaterial;
@@ -540,12 +541,14 @@ trait MaterialTrait{
                 unset($materialMaster[$key]);
             }
 
+            $componentType = MaterialRequestComponentTypes::where('slug','system-asset')->first();
+
             $materialToMerge = $material->find($request->merge_to_material);
             $materialToDelete = $material->whereIn('id',$materialMaster);
             $categoryMaterialRelation = CategoryMaterialRelation::whereIn('material_id',$materialMaster)->get();
-            $inventoryComponent = InventoryComponent::whereIn('reference_id',$materialMaster)->get();
+            $inventoryComponent = InventoryComponent::whereIn('reference_id',$materialMaster)->where('is_material',true)->get();
             $materialVersion = MaterialVersion::whereIn('material_id',$materialMaster)->get();
-            $purcahsePeticashTransaction = PurcahsePeticashTransaction::whereIn('reference_id',$materialMaster)->get();
+            $purcahsePeticashTransaction = PurcahsePeticashTransaction::whereIn('reference_id',$materialMaster)->where('component_type_id', '<>', $componentType->id)->get();
             $quotationMaterial = QuotationMaterial::whereIn('material_id',$materialMaster)->get();
             $vendorMaterialRelation = VendorMaterialRelation::whereIn('material_id',$materialMaster)->get();
 
@@ -558,8 +561,10 @@ trait MaterialTrait{
             
             if(!$inventoryComponent->isEmpty()) {
                 foreach($inventoryComponent as $inventory) {
-                    $inventory->reference_id = $materialToMerge->id;
-                    $inventory->save();
+                    if($inventory->is_material) {
+                        $inventory->reference_id = $materialToMerge->id;
+                        $inventory->save();
+                    }
                 }
             }
 

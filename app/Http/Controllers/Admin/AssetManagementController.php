@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Asset;
 use App\AssetImage;
+use App\AssetMaintenance;
 use App\AssetType;
 use App\AssetVendorRelation;
 use App\Http\Controllers\CustomTraits\Inventory\InventoryTrait;
@@ -20,6 +21,8 @@ use Illuminate\Support\Facades\File;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\MaterialRequestComponentTypes;
+use App\PurcahsePeticashTransaction;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 
@@ -32,6 +35,9 @@ use InventoryTrait;
     }
 
     public function getManageView(Request $request){
+        if(Session::has('asset-checkbox')){
+            Session::forget('asset-checkbox');
+        }
         return view('admin.asset.manage');
     }
 
@@ -336,6 +342,135 @@ use InventoryTrait;
         return response()->json($response);
     }
 
+    public function assetCheckBoxState(Request $request)
+    {
+        $assetCheckbox = Session::get('asset-checkbox');
+
+        if(is_null($assetCheckbox)) {
+            if($request->state){
+                $assetCheckbox[] = $request->asset_id;
+            }
+        }else {
+            if($request->state == 'true'){
+                $assetCheckbox[] = $request->asset_id;
+            }else{
+                if (($key = array_search($request->asset_id, $assetCheckbox)) !== false) {
+                    unset($assetCheckbox[$key]);
+                }
+            }
+        }
+        Session::put('asset-checkbox',$assetCheckbox);
+    }
+
+    public function assetCheckBoxList(Request $request)
+    {
+        $assetCheckbox = Session::get('asset-checkbox');
+        $status = 500;
+        $message = 'Please select record to merge.';
+        $asset = null;
+
+        if(!is_null($assetCheckbox) && count($assetCheckbox) > 0) { 
+            $status = 200;
+            $asset = Asset::whereIn('id',$assetCheckbox)->get();
+        }
+        
+        $count = count($asset);
+
+        if($count == 1) {
+            $message = 'Please select more than 1 record to merge.';
+            $status = 500;
+        }
+
+        $response = compact('message', 'asset');
+
+        return response($response,$status);
+    }
+
+    public function assetMerge(Request $request)
+    {
+        try{
+            $assetCheckbox = Session::get('asset-checkbox');
+            if(!is_null($assetCheckbox) && count($assetCheckbox) > 0) { 
+                $status = 200;
+                $asset = Asset::whereIn('id',$assetCheckbox)->get();
+            }else {
+                $request->session()->flash('success','Please select asset to merge');
+                return redirect('/asset/manage');
+            }
+
+            $assetMaster = $asset->pluck('id')->toArray();
+
+            if (($key = array_search($request->merge_to_asset, $assetMaster)) !== false) {
+                unset($assetMaster[$key]);
+            }
+
+            $componentType = MaterialRequestComponentTypes::where('slug','system-asset')->first();
+            $assetToMerge = $asset->find($request->merge_to_asset);
+            $assetToDelete = $asset->whereIn('id',$assetMaster);
+            $assetMaintenance = AssetMaintenance::whereIn('asset_id',$assetMaster)->get();
+            $assetVendorRelation = AssetVendorRelation::whereIn('asset_id',$assetMaster)->get();
+            $inventoryComponent = InventoryComponent::whereIn('reference_id',$assetMaster)->where('is_material',false)->get();            
+            $purcahsePeticashTransaction = PurcahsePeticashTransaction::whereIn('reference_id',$assetMaster)->where('component_type_id',$componentType->id)->get();
+            
+
+            if(!$assetMaintenance->isEmpty()) {
+                foreach($assetMaintenance as $assetMaint) {
+                    $assetMaint->asset_id = $assetToMerge->id;
+                    $assetMaint->save();
+                }
+            }
+            
+            if(!$inventoryComponent->isEmpty()) {
+                foreach($inventoryComponent as $inventory) {
+                    if($inventory->is_material == false) {
+                        $inventory->reference_id = $assetToMerge->id;
+                        $inventory->save();
+                    }
+                }
+            }
+
+            if(!$assetVendorRelation->isEmpty()) {
+                foreach($assetVendorRelation as $assetVendor) {
+                    $assetVendor->asset_id = $assetToMerge->id;
+                    $assetVendor->save();
+                }
+            }
+
+            if(!$purcahsePeticashTransaction->isEmpty()) {
+                foreach($purcahsePeticashTransaction as $purcahsePeticash) {
+                    $purcahsePeticash->reference_id = $assetToMerge->id;
+                    $purcahsePeticash->save();
+                }
+            }
+
+            if(!$assetToDelete->isEmpty()) {
+                foreach($assetToDelete as $assetDelete) {
+                    $assetDelete->delete();
+                }
+            }
+
+            $request->session()->flash('success','Asset Merged successfully.');
+            return redirect('/asset/manage');
+            $status = 200;
+        }catch(\Exception $e){
+            $message = 'Something went wrong';
+            $status = 500;
+            $data = [
+                'action' => 'Change Asset status',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            $response = [
+                'message' => $message,
+            ];
+            if(Session::has('asset-checkbox')){
+                Session::forget('asset-checkbox');
+            }
+            return response($response,$status);
+        }
+    }
+
     public function assetListing(Request $request){
         try{
             $skip = $request->start;
@@ -360,6 +495,10 @@ use InventoryTrait;
                 $records['total'] = $total;
             } else {
                 $iTotalRecords = count($assetData);
+                $assetCheckbox = null;
+                if(Session::has('asset-checkbox')){
+                    $assetCheckbox = Session::get('asset-checkbox');
+                }
                 $records = array();
                 $records['data'] = array();
                 $end = $request->length < 0 ? count($assetData) : $request->length;
@@ -392,12 +531,19 @@ use InventoryTrait;
                         $profilePicAddress = env('APP_URL').'/assets/layouts/layout3/img/no-image.png';
                         $assetImagetag = '<img src="'.$profilePicAddress.'" height="60" width="60" style="border-radius: 50%;box-shadow: 2px 2px 1px 1px #888888;">';
                     }
-
+                    $checked = '';
+                    if(!is_null($assetCheckbox)) {
+                        if(in_array($assetData[$pagination]['id'],$assetCheckbox)) {
+                            $checked = 'checked=checked';
+                        }
+                    }
+                    $checkbox = '<input type="checkbox"'. $checked .'name="asset_ids" class="assetId" value="'.$assetData[$pagination]['id'].'">';
                     $qty = $assetData[$pagination]['quantity'];
                     $asset_price = $assetData[$pagination]['price'];
                     $asset_cost = $assetData[$pagination]['price']*$assetData[$pagination]['quantity'];
                     $rent_per_day = $assetData[$pagination]['rent_per_day'];
                     $records['data'][$iterator] = [
+                        $checkbox,
                         $assetData[$pagination]['id'],
                         $assetImagetag,
                         $assetData[$pagination]['name'],

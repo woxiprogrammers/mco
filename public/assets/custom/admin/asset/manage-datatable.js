@@ -113,3 +113,48 @@ var AssetListing = function () {
 jQuery(document).ready(function() {
     AssetListing.init();
 });
+
+$(document).on('click', '.assetId', function() {        
+    $.ajax({
+        url:'/asset/checkbox-state',
+        type: "POST",
+        data: {
+            _token: $("input[name='_token']").val(),
+            asset_id: $(this).val(),
+            state:$(this).is(":checked")
+        },
+        success: function(data, textStatus, xhr){
+            //$(".filter-submit").trigger('click');
+        },
+        error: function(data){
+
+        }
+    });
+});
+
+$("#mergeAssetButton").on('click',function(){
+    $('#selected_asset').find('option').remove();
+    $('#merge_to_asset').find('option').remove();
+    $.ajax({
+        url:'/asset/checkbox-list',
+        type: "GET",
+        success: function(data, textStatus, xhr){
+            $.each(data.asset, function(){
+                $('<option/>', {
+                    'value': this.id,
+                    'text': this.name
+                }).appendTo('#selected_asset');
+            });
+            $.each(data.asset, function(){
+                $('<option/>', {
+                    'value': this.id,
+                    'text': this.name
+                }).appendTo('#merge_to_asset');
+            });
+            $('#asset-merge-modal').modal('show');
+        },
+        error: function(data){
+            alert(data.responseJSON.message);
+        }
+    });
+});
