@@ -41,10 +41,18 @@
                                             {!! csrf_field() !!}
                                             <div class="portlet-body">
                                                 <div class="portlet-body">
+                                                    @if($user->roles[0]->role->slug == 'superadmin')
+                                                        <div class="col-md-2 pull-right">
+                                                            <a class="btn btn-danger btn-md pull-right" id="mergeAssetButton">
+                                                                Merge Asset
+                                                            </a>
+                                                        </div>
+                                                    @endif
                                                     <div class="table-container">
                                                         <table class="table table-striped table-bordered table-hover order-column" id="assetTable">
                                                             <thead>
                                                             <tr>
+                                                                <th> </th>
                                                                 <th> Asset ID </th>
                                                                 <th> Image </th>
                                                                 <th> Asset Name</th>
@@ -58,6 +66,7 @@
                                                                 <th> Actions </th>
                                                             </tr>
                                                             <tr class="filter">
+                                                                <th> </th>
                                                                 <th> </th>
                                                                 <th> </th>
                                                                 <th> <input type="text" class="form-control form-filter" name="asset_name" id ="asset_name"> </th>
@@ -113,12 +122,54 @@
                                                             </form>
                                                         </div>
                                                     </div>
+                                                    <div class="modal fade" tabindex="-1" role="dialog" id="asset-merge-modal">
+                                                        <div class="modal-dialog" role="document">
+                                                            <form action="/asset/merge" id="asset-merge-form" method="POST">
+                                                                {!! csrf_field() !!}
+                                                                <div class="modal-content">
+                                                                    <div class="modal-header btn-primary">
+                                                                        <h5 class="modal-title">Merge Selected Assets</h5>
+                                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                        <span aria-hidden="true">&times;</span>
+                                                                        </button>
+                                                                    </div>
+                                                                    <div class="modal-body">
+                                                                        <div class="form-body">
+                                                                            <div class="form-group row">
+                                                                                <div class="col-md-4" style="text-align: right">
+                                                                                    <label for="selected_asset" class="control-label">Selected Asset</label>
+                                                                                    <span>*</span>
+                                                                                </div>
+                                                                                <div class="col-md-6">
+                                                                                    <select class="form-control" id="selected_asset" name="selected_asset">
+                                                                                        
+                                                                                    </select>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="form-group row">
+                                                                                <div class="col-md-4" style="text-align: right">
+                                                                                    <label for="merge_to_asset" class="control-label">Asset To Merge</label>
+                                                                                    <span>*</span>
+                                                                                </div>
+                                                                                <div class="col-md-6">
+                                                                                    <select class="form-control" id="merge_to_asset" name="merge_to_asset">
+                                                                                        
+                                                                                    </select>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="modal-footer">
+                                                                        <button type="submit" class="btn btn-primary">Merge</button>
+                                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                                    </div>
+                                                                </div>
+                                                            </form>
                                                         </div>
                                                     </div>
-                                                    </form>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
@@ -126,9 +177,12 @@
                     </div>
                 </div>
             </div>
+            </div>
         </div>
     </div>
-    </div>
+</div>
+</div>
+</div>
 @endsection
 @section('javascript')
     <link rel="stylesheet"  href="/assets/global/plugins/datatables/datatables.min.css"/>

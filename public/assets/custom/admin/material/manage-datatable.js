@@ -128,6 +128,8 @@ jQuery(document).ready(function() {
     });
 
     $("#mergeMaterialButton").on('click',function(){
+        $('#selected_material').find('option').remove();
+        $('#merge_to_material').find('option').remove();
         $.ajax({
             url:'/material/checkbox-list',
             type: "GET",
