@@ -19,7 +19,7 @@
                             <div class="container">
                                 <!-- BEGIN PAGE TITLE -->
                                 <div class="page-title">
-                                    <h1>Edit Category Management</h1>
+                                    <h1>Edit Category/Subcategory Management</h1>
                                 </div>
                             </div>
                         </div>
@@ -29,66 +29,26 @@
                                     <div class="col-md-12">
                                         <!-- BEGIN EXAMPLE TABLE PORTLET-->
                                         <div class="portlet light ">
-                                            {!! csrf_field() !!}
                                             <div class="portlet-body">
                                                 <div class="table-toolbar">
                                                     <div class="row" style="text-align: right">
-                                                        <div class="col-md-12">
-                                                            <div class="btn-group">
-
+                                                        <div class="col-md-4">
+                                                            <div class="portlet-body form">
+                                                                <form role="form" id="categoryEdit" class="form-horizontal" method="post" action="/checklist/category-management/edit-category">
+                                                                    {!! csrf_field() !!}
+                                                                    <div class="form-group">
+                                                                        @foreach ($catdata as $cat)
+                                                                        <input type="text" name="category_name" class="form-control" id="category_name" value="{{$cat['name']}}">
+                                                                        <input type="hidden" name="cat_id" class="form-control" id="cat_id" value="{{$cat['id']}}">
+                                                                        @endforeach
+                                                                        <input type="submit" class="btn red pull-right" value="Submit">
+                                                                    </div>
+                                                                </form>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <button class="btn yellow" id="mainCat" ><a href="#" style="color: white">Edit Main Category</a></button>
-                                                <button class="btn yellow"  id="subCat" style="margin-left: 2%"><a href="#" style="color: white">Edit Sub Category</a></button>
                                             </div>
-                                            <div class="modal fade" id="modal1" tabindex="-1" role="dialog" >
-                                                <div class="modal-dialog">
-                                                    <div class="modal-content" style="height: 40%">
-                                                        <div class="modal-header" style="padding-bottom: 10%">
-                                                            <div class="row">
-                                                                <div class="col-md-4"></div>
-                                                                <div class="col-md-6" style="margin-left: -5%"> Edit Sub Category</div>
-                                                                <div class="col-md-2" style="margin-left: 4%"><button type="button" class="close" data-dismiss="modal">X</button></div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <form role="form" id="SubCategoryEdit">
-                                                                <div class="form-group">
-                                                                    <input type="text" name="sname_main" class="form-control" id="main_category" value="Beam">
-                                                                </div>
-                                                                <div class="form-group">
-                                                                    <input type="text" name="sname_sub" class="form-control" id="sub_category"   value="Reinforcement">
-                                                                </div>
-                                                                    <button type="submit"  id="editMainCategory" class="btn red pull-right"><a href="manage" style="color: white"><i class="fa fa-check"></i> Submit </a></button>
-                                                            </form>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="modal fade" id="modal2" tabindex="-1" role="dialog" >
-                                                <div class="modal-dialog">
-                                                    <div class="modal-content" style="height: 30%">
-                                                        <div class="modal-header" style="padding-bottom: 10%">
-                                                            <div class="row">
-                                                                <div class="col-md-4"></div>
-                                                                <div class="col-md-6" style="margin-left: -7%"> Edit Main Category</div>
-                                                                <div class="col-md-2" style="margin-left: 5%"><button type="button" class="close" data-dismiss="modal">X</button></div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <form role="form" id="MainCategoryEdit">
-                                                                <div class="form-group">
-                                                                    <input type="text" name="mname_main" class="form-control" id="main_category" value="Beam">
-                                                                </div>
-                                                                    <button  id="editMainCategory" class="btn red pull-right"> <a href="manage" style="color: white"><i class="fa fa-check"></i> Submit</a> </button>
-                                                            </form>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
                                         </div>
                                     </div>
                                 </div>
@@ -111,23 +71,5 @@
     <script src="/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
     <script src="/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
-    <script src="/assets/custom/checklist/categoryManagement.js"></script>
-    <script>
-        $(document).ready(function(){
-            $("#subCat").click(function(){
-                $("#modal1").modal();
-            });
-            $("#mainCat").click(function(){
-                $("#modal2").modal();
-            });
-            $(document).ready(function() {
-                EditMainCategory.init();
-            });
-            $(document).ready(function() {
-                EditSubCategory.init();
-            });
-        });
-
-
-    </script>
+    <!--<script src="/assets/custom/checklist/categoryManagement.js"></script>-->
 @endsection

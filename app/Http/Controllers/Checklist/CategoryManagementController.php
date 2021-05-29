@@ -32,8 +32,30 @@ class CategoryManagementController extends Controller
 
     }
 
-    public function getEditView(Request $request){
-        return view('checklist/category-management/edit');
+    public function getEditView(Request $request, $id){
+        $cat_id = $id;
+        $catdata = ChecklistCategory::where('id','=',$cat_id)->get(['name','id'])->toArray();
+        return view('checklist/category-management/edit')->with(compact('catdata'));
+    }
+
+    public function editCategoryMaster(Request $request) {
+        try {
+            ChecklistCategory::where('id','=',$request->cat_id)
+            ->update([
+                'name' => $request->category_name,
+                'slug' => strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $request->category_name)))
+            ]);
+            $request->session()->flash('success', 'Category/Subcategory updated.');
+            return redirect('/checklist/category-management/manage');
+        } catch(\Exception $e) {
+            $data = [
+                'action' => 'Category/Subcategory edit',
+                'param' => $request->all(),
+                'exception' => $e->getMessage()
+            ];
+            Log::critical(json_encode($data));
+            abort(500);
+        }
     }
 
     public function getCategoryManagementListing(Request $request,$slug){
@@ -44,7 +66,14 @@ class CategoryManagementController extends Controller
             ];
             switch($slug){
                 case 'main-category':
-                    $categoriesData = ChecklistCategory::whereNull('category_id')->orderBy('created_at','desc')->get();
+                    if($request->search_category != null) {
+                        $categoriesData = ChecklistCategory::whereNull('category_id')
+                        ->where('name','ilike','%'.$request->search_category.'%')
+                        ->orderBy('created_at','desc')->get();
+                    } else {
+                        $categoriesData = ChecklistCategory::whereNull('category_id')
+                            ->orderBy('created_at','desc')->get();
+                    }
                     for ($iterator = 0, $pagination = $request->start; $iterator < $request->length && $iterator < count($categoriesData); $iterator++, $pagination++) {
                         if($categoriesData[$pagination]['is_active'] == true){
                             $category_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
@@ -61,11 +90,11 @@ class CategoryManagementController extends Controller
                                                 </button>
                                                 <ul class="dropdown-menu pull-left" role="menu">
                                                     <li>
-                                                        <a href="javascript:void(0);">
+                                                        <a href="/checklist/category-management/edit/'.($categoriesData[$pagination]['id']).'">
                                                         <i class="icon-docs"></i> Edit </a>
                                                     </li>
                                                     <li>
-                                                        <a href="/checklist/category-management/change-status/'.$categoriesData[$pagination]['id'].'">
+                                                        <a href="/checklist/category-management/change-status/'.($categoriesData[$pagination]['id']).'">
                                                         <i class="icon-tag"></i> '.$status.' </a>
                                                     </li>
                                                 </ul>
@@ -79,7 +108,7 @@ class CategoryManagementController extends Controller
                                             </div>';
                         }
                         $records['data'][$iterator] = [
-                            ($categoriesData[$pagination]['id']+1),
+                            ($categoriesData[$pagination]['id']),
                             $categoriesData[$pagination]['name'],
                             $category_status,
                             date('d M Y',strtotime($categoriesData[$pagination]['created_at'])),
@@ -89,7 +118,14 @@ class CategoryManagementController extends Controller
                     break;
 
                 case 'sub-category':
-                    $categoriesData = ChecklistCategory::whereNotNull('category_id')->orderBy('created_at','desc')->get();
+                    if($request->search_subcategory_sub != null) {
+                        $categoriesData = ChecklistCategory::whereNotNull('category_id')
+                        ->where('name','ilike','%'.$request->search_subcategory_sub.'%')
+                        ->orderBy('created_at','desc')->get();
+                    } else {
+                        $categoriesData = ChecklistCategory::whereNotNull('category_id')
+                            ->orderBy('created_at','desc')->get();
+                    }
                     for ($iterator = 0, $pagination = $request->start; $iterator < $request->length && $iterator < count($categoriesData); $iterator++, $pagination++) {
                         if($categoriesData[$pagination]['is_active'] == true){
                             $category_status = '<td><span class="label label-sm label-success"> Enabled </span></td>';
@@ -106,7 +142,7 @@ class CategoryManagementController extends Controller
                                                 </button>
                                                 <ul class="dropdown-menu pull-left" role="menu">
                                                     <li>
-                                                        <a href="javascript:void(0);">
+                                                    <a href="/checklist/category-management/edit/'.($categoriesData[$pagination]['id']).'">
                                                         <i class="icon-docs"></i> Edit </a>
                                                     </li>
                                                     <li>
@@ -124,7 +160,7 @@ class CategoryManagementController extends Controller
                                             </div>';
                         }
                         $records['data'][$iterator] = [
-                            ($categoriesData[$pagination]['id']+1),
+                            ($categoriesData[$pagination]['id']),
                             ChecklistCategory::where('id',$categoriesData[$pagination]['category_id'])->pluck('name')->first(),
                             $categoriesData[$pagination]['name'],
                             $category_status,
