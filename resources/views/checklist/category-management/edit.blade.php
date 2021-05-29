@@ -38,7 +38,7 @@
                                                                     {!! csrf_field() !!}
                                                                     <div class="form-group">
                                                                         @foreach ($catdata as $cat)
-                                                                        <input type="text" name="category_name" class="form-control" id="category_name" value="{{$cat['name']}}">
+                                                                        <input type="text" name="category_name" class="form-control" id="category_name" value="{{$cat['name']}}" required>
                                                                         <input type="hidden" name="cat_id" class="form-control" id="cat_id" value="{{$cat['id']}}">
                                                                         @endforeach
                                                                         <input type="submit" class="btn red pull-right" value="Submit">
