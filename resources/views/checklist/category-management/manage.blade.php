@@ -62,10 +62,10 @@
                                                         <th> Actions </th>
                                                     </tr>
                                                     <tr class="filter">
-                                                        <th style="width: 30%"> <input type="text" class="form-control form-filter" name="search_id" readonly> </th>
-                                                        <th> <input type="text" class="form-control form-filter" name="search_category" readonly> </th>
-                                                        <th> <input type="text" class="form-control form-filter" name="search_subcategory" readonly> </th>
-                                                        <th> <input type="text" class="form-control form-filter" name="search_subcategory" readonly> </th>
+                                                        <th></th>
+                                                        <th><input type="text" class="form-control form-filter" name="search_category"></th>
+                                                        <th></th>
+                                                        <th></th>
                                                         <th>
                                                             <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                             <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
@@ -91,11 +91,11 @@
                                                         <th> Actions </th>
                                                     </tr>
                                                     <tr class="filter">
-                                                        <th style="width: 30%"> <input type="text" class="form-control form-filter" name="search_id" readonly> </th>
-                                                        <th> <input type="text" class="form-control form-filter" name="search_category" readonly> </th>
-                                                        <th> <input type="text" class="form-control form-filter" name="search_subcategory" readonly> </th>
-                                                        <th> <input type="text" class="form-control form-filter" name="search_subcategory" readonly> </th>
-                                                        <th> <input type="text" class="form-control form-filter" name="search_subcategory" readonly> </th>
+                                                        <th></th>
+                                                        <th></th>
+                                                        <th> <input type="text" class="form-control form-filter" name="search_subcategory_sub"> </th>
+                                                        <th></th>
+                                                        <th></th>
                                                         <th>
                                                             <button class="btn btn-xs blue filter-submit"> Search <i class="fa fa-search"></i> </button>
                                                             <button class="btn btn-xs default filter-cancel"> Reset <i class="fa fa-undo"></i> </button>
@@ -192,6 +192,19 @@
         });
         $(document).ready(function() {
             CreateSubCategory.init();
+        });
+        $(document).ready(function() {
+            $("input[name='search_subcategory_sub']").on('keyup',function(){
+                if($("input[name='search_subcategory_sub']").val().length > 2) {
+                    $(".filter-submit").trigger('click');
+                }
+            });
+
+            $("input[name='search_category']").on('keyup',function(){
+                if($("input[name='search_category']").val().length > 2) {
+                    $(".filter-submit").trigger('click');
+                }
+            });
         });
     </script>
 @endsection

@@ -596,10 +596,12 @@ Route::group(['domain' => env('DOMAIN_NAME')], function () {
         Route::post('get-project-sites', array('uses' => 'Checklist\ChecklistSiteAssignmentController@getProjectSites'));
         Route::group(['prefix' => 'category-management'], function () {
             Route::get('manage', array('uses' => 'Checklist\CategoryManagementController@getManageView'));
-            Route::get('edit', array('uses' => 'Checklist\CategoryManagementController@getEditView'));
+            Route::get('edit/{id}', array('uses' => 'Checklist\CategoryManagementController@getEditView'));
             Route::post('listing/{slug}', array('uses' => 'Checklist\CategoryManagementController@getCategoryManagementListing'));
             Route::post('create/{slug}', array('uses' => 'Checklist\CategoryManagementController@createCategories'));
             Route::get('change-status/{checklistCategory}', array('uses' => 'Checklist\CategoryManagementController@changeStatus'));
+            Route::post('edit-category', array('uses' => 'Checklist\CategoryManagementController@editCategoryMaster'));
+            
         });
 
         Route::group(['prefix' => 'structure'], function () {
