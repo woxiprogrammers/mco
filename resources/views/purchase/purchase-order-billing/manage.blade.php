@@ -61,9 +61,9 @@
                                                             </div>
                                                             <div class="col-md-3">
                                                                 <div class="input-group input-large date-picker input-daterange" data-date-format="yyyy-mm-dd">
-                                                                    <input type="text" class="form-control" name="start_date" id="start_date" required="required">
+                                                                    <input type="text" class="form-control" name="start_date" id="start_date" required="required" value="{{date('Y-m-d', strtotime('-7 days'))}}">
                                                                     <span class="input-group-addon"> to </span>
-                                                                    <input type="text" class="form-control" name="end_date" id="end_date" required="required"> </div>
+                                                                    <input type="text" class="form-control" name="end_date" id="end_date" required="required" value="{{date('Y-m-d')}}"> </div>
                                                                 <!-- /input-group -->
                                                                 <span class="help-block"> Select date range </span>
                                                             </div>
