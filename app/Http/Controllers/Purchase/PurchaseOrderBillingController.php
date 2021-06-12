@@ -508,22 +508,27 @@ class PurchaseOrderBillingController extends Controller
             $take = $request->length;
             $totalRecordCount = 0;
             $user = Auth::user();
-            if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('view-purchase-order-bill-listing')) {
-                $purchaseOrderBillIds = PurchaseOrderBill::pluck('id')->toArray();
-            } else {
-                $projectSiteId = Session::get('global_project_site');
-                $purchaseOrderBillIds = PurchaseOrderBill::join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
-                ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
-                ->where('purchase_requests.project_site_id', $projectSiteId)
-                ->pluck('purchase_order_bills.id')
-                ->toArray();
-            }        
+            $purchaseOrderBillIds = array();
             $records = array();
             $status = 200;
 
             $postDataArray = array();
             $filterFlag = true;
-            if($request->has('postdata')){
+            if(!$request->has('postdata')){
+                $start_date_d = date('Y-m-d', strtotime('-7 days'))." 00:00:01";
+                $end_date_d = date('Y-m-d')." 23:23:59";
+                if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('view-purchase-order-bill-listing')) {
+                    $purchaseOrderBillIds = PurchaseOrderBill::whereBetween('created_at', [$start_date_d, $end_date_d])
+                        ->pluck('id')->toArray();
+                } else {
+                    $projectSiteId = Session::get('global_project_site');
+                    $purchaseOrderBillIds = PurchaseOrderBill::join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
+                    ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
+                    ->where('purchase_requests.project_site_id', $projectSiteId)
+                    ->whereBetween('purchase_order_bills.created_at', [$start_date_d, $end_date_d])
+                    ->pluck('purchase_order_bills.id')->toArray();
+                }
+            } else {
                 $postdata = $request['postdata'];
                 if($postdata != null) {
                     $mstr = explode(",",$request['postdata']);
@@ -537,14 +542,22 @@ class PurchaseOrderBillingController extends Controller
                 }
                 $start_date = $postDataArray['start_date'];
                 $end_date = $postDataArray['end_date'];
-                $purchaseOrderBillIds = PurchaseOrderBill::whereIn('id',$purchaseOrderBillIds)
-                    ->whereBetween('created_at', [$start_date, $end_date])
-                    ->pluck('id')
-                    ->toArray();
+                if($user->roles[0]->role->slug == 'admin' || $user->roles[0]->role->slug == 'superadmin' || $user->customHasPermission('view-purchase-order-bill-listing')) {
+                    $purchaseOrderBillIds = PurchaseOrderBill::whereBetween('created_at', [$start_date, $end_date])
+                        ->pluck('id')->toArray();
+                } else {
+                    $projectSiteId = Session::get('global_project_site');
+                    $purchaseOrderBillIds = PurchaseOrderBill::join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
+                    ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
+                    ->where('purchase_requests.project_site_id', $projectSiteId)
+                    ->whereBetween('purchase_order_bills.created_at', [$start_date, $end_date])
+                    ->pluck('purchase_order_bills.id')->toArray();
+                }
                 if(count($purchaseOrderBillIds) <= 0){
                     $filterFlag = false;
                 }
             }
+
             if($request->has('project_name') && $request->project_name != '' && $filterFlag == true){
                 $purchaseOrderBillIds = PurchaseOrderBill::join('purchase_orders','purchase_orders.id','=','purchase_order_bills.purchase_order_id')
                     ->join('purchase_requests','purchase_requests.id','=','purchase_orders.purchase_request_id')
@@ -623,12 +636,12 @@ class PurchaseOrderBillingController extends Controller
             $billTotals = 0;
             $billPaidAmount = 0;
             if ($request->has('get_total')) {
-                if ($filterFlag) {
-                    $total = $purchaseOrderBillData->sum('amount');
-                    $paidAmount = PurchaseOrderPayment::whereIn('purchase_order_bill_id', $purchaseOrderBillData->pluck('id'))->sum('amount');
-                    $billTotals = $total - $paidAmount;
-                    $billPaidAmount = PurchaseOrderPayment::whereIn('purchase_order_bill_id', $purchaseOrderBillData->pluck('id'))->sum('amount');;
-                }
+                $total = PurchaseOrderBill::sum('amount');
+                $paidAmount = PurchaseOrderPayment::
+                            join('purchase_order_bills','purchase_order_bills.id','=','purchase_order_payments.purchase_order_bill_id')
+                            ->sum('purchase_order_payments.amount');
+                $billTotals = $total - $paidAmount;
+                $billPaidAmount = $paidAmount; 
                 $records['total'] = round($total,3);
                 $records['billtotal'] = round($billTotals,3);
                 $records['paidtotal'] = round($billPaidAmount,3);
