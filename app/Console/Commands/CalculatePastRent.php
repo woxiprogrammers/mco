@@ -6,6 +6,7 @@ use App\AssetRentMonthlyExpenses;
 use App\Http\Controllers\Inventory\InventoryManageController;
 use App\InventoryComponent;
 use App\InventoryComponentTransfers;
+use App\InventoryTransferChallan;
 use App\InventoryTransferTypes;
 use App\Month;
 use App\ProjectSite;
@@ -15,34 +16,27 @@ use App\RentBill;
 use App\Unit;
 use App\Year;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
-class RentCalculations extends Command
+class CalculatePastRent extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-
-    //php artisan custom:asset-rent-calculate --year=2018  => Executes Case 1
-
-    protected $signature = 'custom:rent-calculate {--year=} {--month=}';
+    protected $signature = 'custom:calculate-past-rent';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'This is the command to calculate rent for a montn. This can be calculated by either providing a year and month or by default it takes current year and month
-        1. Command to calculate asset rent for all project sites for specified month is -
-            php artisan custom:asset-rent-calculate --year=2018 --month=01
-            Make sure year is 4 digit valid year and valid month 
-        2. To calculate for current month for all project sites - 
-            php artisan custom:asset-rent-calculate
-        ';
+    protected $description = 'This is the command to save past inventory transaction in rental_inventory_transfer for all project sites other than head office. 
+    Transactions after first head office in to the project site are saved';
 
     /**
      * Create a new command instance.
@@ -62,57 +56,26 @@ class RentCalculations extends Command
     public function handle()
     {
         try {
-            $this->info('Inside rent calculation');
-            $error = false;
-            $now = Carbon::now();
-            if ($this->option('year') && $this->option('month')) {
-                $this->info('Inside year and month check');
-                // Year validation
-                $year = $this->option('year');
-                $requestMonth = $this->option('month');
-                if (!in_array($year, [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026]) || $year > $now->format('Y')) {
-                    $this->info('Invalid year');
-                    $error = true;
-                    goto completeProcessing;
-                }
+            $this->info('Inside Job for calculating past rent');
+            $headOffice = ProjectSite::where('name', env('OFFICE_PROJECT_SITE_NAME'))->first();
+            // fetch all project sites other than headOffice
+            $otherProjectSites = ProjectSite::where('id', '!=', $headOffice['id'])->get();
+            // foreach projectSite save past transactions
+            foreach ($otherProjectSites as $projectSite) {
+                $this->info('calculating for project site ' . $projectSite['name']);
+                $firstSiteInDate = InventoryTransferChallan::where('project_site_out_id', $headOffice['id'])->where('project_site_in_id', $projectSite['id'])->orderBy('project_site_out_date', 'asc')->pluck('project_site_out_date')->first();
+                if ($firstSiteInDate) {
+                    $rentalApplicableDate = Carbon::parse($firstSiteInDate);
+                    $months = [];
+                    foreach (CarbonPeriod::create($rentalApplicableDate, '1 month', Carbon::today()) as $month) {
+                        $months[$month->format('m-Y')] = $month->format('F Y');
+                        $thisYear =  $month->format('Y');
+                        $thisMonth = $month->format('m');
+                        $firstDayOfTheMonth = Carbon::create($thisYear, $thisMonth, 1, 0, 0, 0)->startOfMonth();
+                        $lastDayOfTheMonth = Carbon::create($thisYear, $thisMonth, 1, 0, 0, 0)->endOfMonth();
+                        $lastMonthDate = Carbon::create($thisYear, $thisMonth, 1, 0, 0, 0)->subMonth();
 
-                // Month validation and sverification
-                if ($requestMonth === 'all') {
-                    $month = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
-                    if ($year === $now->format('Y')) {
-                        $currentMonth = $now->format('m');
-                        $month = array_filter($month, function ($m) use ($currentMonth) {
-                            return $m <= $currentMonth;
-                        });
-                    }
-                } else if (in_array($requestMonth, ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"])) {
-                    $month = [$requestMonth];
-                } else {
-                    $this->info('Invalid month');
-                    $error = true;
-                    goto completeProcessing;
-                }
-            } else {
-                $year = $now->format('Y');
-                $month = [$now->format('m')];
-            }
-            foreach ($month as $thisMonth) {
-                $firstDayOfTheMonth = Carbon::create($year, $thisMonth, 1, 0, 0, 0)->startOfMonth();
-                $lastDayOfTheMonth = Carbon::create($year, $thisMonth, 1, 0, 0, 0)->endOfMonth();
-
-                $lastMonthDate = Carbon::create($year, $thisMonth, 1, 0, 0, 0)->subMonth();
-                $lastMonth = $lastMonthDate->format('m');
-                $lastYear = $lastMonthDate->format('Y');
-                if (!$error) {
-                    $thisMonth = $firstDayOfTheMonth->format('m');
-                    $thisYear = $firstDayOfTheMonth->format('Y');
-                    $projectSites = ProjectSite::all();
-                    $this->info('Rent calculation for year - ' . $thisYear . ' and month - ' . $thisMonth);
-                    foreach ($projectSites as $projectSite) {
-                        $this->info('Calculating for project site - ' . $projectSite['name']);
                         $projectSiteRentTotal = $inventoryComponentIterator = 0;
-                        $unit = Unit::where('slug', 'nos')->select('id', 'name')->first();
-                        $controller = new InventoryManageController;
                         $rentalInventoryTransfers = RentalInventoryTransfer::join('inventory_component_transfers', 'inventory_component_transfers.id', '=', 'rental_inventory_transfers.inventory_component_transfer_id')
                             ->join('inventory_transfer_types', 'inventory_transfer_types.id', '=', 'inventory_component_transfers.transfer_type_id')
                             ->join('inventory_components', 'inventory_components.id', '=', 'inventory_component_transfers.inventory_component_id')
@@ -127,15 +90,13 @@ class RentCalculations extends Command
                                 'inventory_component_transfers.inventory_component_id',
                                 'inventory_transfer_types.type as inventory_transfer_type'
                             )->get();
-
                         $inventoryComponents = $projectSite->inventoryComponents->where('is_material', false);
                         foreach ($inventoryComponents as $inventoryComponent) {
                             $inventoryComponentIterator++;
                             $transactionTotal = $transactionQuantity = 0;
-                            $openingStockForThisMonth = RentalInventoryComponent::where('inventory_component_id', $inventoryComponent['id'])->where('month', $lastMonth)->where('year', $lastYear)->pluck('closing_stock')->first();
+                            $openingStockForThisMonth = RentalInventoryComponent::where('inventory_component_id', $inventoryComponent['id'])->where('month', $lastMonthDate->format('m'))->where('year', $lastMonthDate->format('Y'))->pluck('closing_stock')->first();
                             if (!$openingStockForThisMonth) {
-                                $availableQuantity = $controller->checkInventoryAvailableQuantity(['inventoryComponentId'  => $inventoryComponent['id'], 'quantity' => 0, 'unitId' => $unit['id']]);
-                                $openingStockForThisMonth = $availableQuantity['available_quantity'];
+                                $openingStockForThisMonth = 0;
                             }
                             $rentalDataAlreadyExists = RentalInventoryComponent::where('inventory_component_id', $inventoryComponent['id'])->where('month', $thisMonth)->where('year', $thisYear)->first();
                             if ($rentalDataAlreadyExists) {
@@ -143,11 +104,11 @@ class RentCalculations extends Command
                                 $rentalData = $rentalDataAlreadyExists;
                             } else {
                                 $rentalData = RentalInventoryComponent::create([
-                                    'inventory_component_id'  => $inventoryComponent['id'],
-                                    'month' => $thisMonth,
-                                    'year'  => $thisYear,
-                                    'opening_stock' => $openingStockForThisMonth,
-                                    'closing_stock' => $openingStockForThisMonth     // Intially closing stock will be same as opening stock but eventually will get updated once trasactions are calculated
+                                    'inventory_component_id'    => $inventoryComponent['id'],
+                                    'month'                     => $thisMonth,
+                                    'year'                      => $thisYear,
+                                    'opening_stock'             => $openingStockForThisMonth,
+                                    'closing_stock'             => $openingStockForThisMonth     // Intially closing stock will be same as opening stock but eventually will get updated once trasactions are calculated
                                 ]);
                             }
 
@@ -183,22 +144,17 @@ class RentCalculations extends Command
                                 'total'             => $projectSiteRentTotal
                             ]);
                         }
-                        $this->info('Calculation done for project site - ' . $projectSite['name']);
                     }
+                } else {
+                    $this->info('Head office transaction for project site - ' . $projectSite['name'] . ' not found');
                 }
-                $this->info('Calculations completed for month - ' . $thisMonth . ' and year - ' . $thisYear);
             }
-
-            completeProcessing:
-            if ($error) {
-                $this->info('Error while calculating. Please check logs');
-            } else {
-                $this->info('Rental report completed for month - ' . $month . ' and year - ' . $year);
-            }
+            $this->info('Calculating past rent completed');
         } catch (Exception $e) {
             $this->info('Server Exception');
+            dd($e->getMessage());
             $data = [
-                'action' => 'Rent Calculation Cron',
+                'action' => 'Calculate past rent',
                 'params' => [],
                 'exception' => $e->getMessage()
             ];
