@@ -4,6 +4,7 @@ namespace App\Console;
 
 use App\Console\Commands\AssetRentCalculations;
 use App\Console\Commands\BillModuleChanges;
+use App\Console\Commands\CalculatePastRent;
 use App\Console\Commands\ChallanCreate;
 use App\Console\Commands\PeticashPurchaseTransactionMonthlyExpenseCalculations;
 use App\Console\Commands\PeticashSalaryTransactionMonthlyExpense;
@@ -16,6 +17,7 @@ use App\Console\Commands\SiteTranferChallanBill;
 use App\Console\Commands\SubcontractorModuleMerge;
 use App\Console\Commands\InventoryAssetMaterialScript;
 use App\Console\Commands\MultiChallanBillMigration;
+use App\Console\Commands\SaveRentPastTransaction;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -38,7 +40,9 @@ class Kernel extends ConsoleKernel
         ChallanCreate::class,
         SiteTranferChallanBill::class,
         MultiChallanBillMigration::class,
-        RentCalculations::class
+        RentCalculations::class,
+        SaveRentPastTransaction::class,
+        CalculatePastRent::class
     ];
 
     /**
