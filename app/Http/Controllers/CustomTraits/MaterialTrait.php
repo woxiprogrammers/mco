@@ -314,39 +314,64 @@ trait MaterialTrait{
             $totalRecordCount = 0;
             $user = Auth::user();
             $materialData = array();
-            $ids = Material::pluck('id')->toArray();
+            $ids = array();
             $filterFlag = true;
+            $initList = false;
+            if(!($request->has('action'))) {
+                $initList = true;
+            }
+
+            if($request->action[0] == 'filter_cancel') {
+                $initList = true;
+            }
+
+            $isSearchName = false;
             if($request->has('search_name') && $request->search_name != '' && $filterFlag == true){
-                $ids = Material::whereIn('id',$ids)
-                                ->where('name','ilike','%'.$request->search_name.'%')
+                $ids = Material::where('name','ilike','%'.$request->search_name.'%')
                                 ->pluck('id')->toArray();
                 if(count($ids) <= 0){
                     $filterFlag = false;
+                } else {
+                    $isSearchName = true;
                 }
             }
 
+            $isSearchRate = false;
             if($request->has('search_rate') && $request->search_rate != '' && $filterFlag == true){
-                $ids = Material::whereIn('id',$ids)
+                if($isSearchName) {
+                    $ids = Material::whereIn('id',$ids)
                     ->where('rate_per_unit',$request->search_rate)
                     ->pluck('id')->toArray();
+                } else {
+                    $ids = Material::where('rate_per_unit',$request->search_rate)
+                    ->pluck('id')->toArray();
+                }
+                
                 if(count($ids) <= 0){
                     $filterFlag = false;
+                } else {
+                    $isSearchRate = true;
                 }
             }
 
             if($request->has('search_name_cat') && $request->search_name_cat != '' && $filterFlag == true){
-                $ids = Material::join('category_material_relations','category_material_relations.material_id','=','materials.id')
+                if($isSearchRate) {
+                    $ids = Material::join('category_material_relations','category_material_relations.material_id','=','materials.id')
+                        ->join('categories','categories.id','=','category_material_relations.category_id')
+                        ->where('categories.name','ilike','%'.$request->search_name_cat.'%')
+                        ->whereIn('materials.id',$ids)
+                        ->pluck('materials.id')->toArray();
+                } else {
+                    $ids = Material::join('category_material_relations','category_material_relations.material_id','=','materials.id')
                     ->join('categories','categories.id','=','category_material_relations.category_id')
                     ->where('categories.name','ilike','%'.$request->search_name_cat.'%')
-                    ->whereIn('materials.id',$ids)
                     ->pluck('materials.id')->toArray();
+                }
                 if(count($ids) <= 0){
                     $filterFlag = false;
                 }
             }
-
-
-            if($filterFlag == true) {
+            if($filterFlag == true && $initList == false) {
                 $materialData = Material::whereIn('id',$ids)
                                 ->orderBy('name','asc')
                                 ->skip($skip)->take($take)
@@ -354,6 +379,13 @@ trait MaterialTrait{
 
                 $totalRecordCount = Material::whereIn('id',$ids)
                                 ->count();
+            }
+            if ($initList) {
+                $materialData = Material::orderBy('name','asc')
+                                ->skip($skip)->take($take)
+                                ->get()->toArray();
+
+                $totalRecordCount = Material::count();
             }
             $iTotalRecords = count($materialData);
             $records = array();
