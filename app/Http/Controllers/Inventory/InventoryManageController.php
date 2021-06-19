@@ -141,10 +141,16 @@ class InventoryManageController extends Controller
             $search_grn_out = null;
             $search_grn_in = null;
             $search_status = 'all';
+            $search_challan = null;
+
+            if ($request->has('search_challan')) {
+                $search_challan = $request['search_challan'];
+            }
 
             if ($request->has('search_from')) {
                 $search_from = $request['search_from'];
             }
+
 
             if ($request->has('search_to')) {
                 $search_to = $request['search_to'];
@@ -189,6 +195,17 @@ class InventoryManageController extends Controller
                     ->where('projects.name', 'ilike', '%' . $search_from . '%')
                     ->whereIn('inventory_component_transfers.id', $ids)
                     ->pluck('inventory_component_transfers.id')->toArray();
+                if (count($ids) <= 0) {
+                    $filterFlag = false;
+                }
+            }
+
+            if ($search_challan != null && $search_challan != "" && $filterFlag == true) {
+                $ids = InventoryComponentTransfers::join('inventory_transfer_challan','inventory_transfer_challan.id','=','inventory_component_transfers.inventory_transfer_challan_id')
+                    ->where('inventory_transfer_challan.challan_number', 'ilike', '%' . $search_challan . '%')
+                    ->whereIn('inventory_component_transfers.id', $ids)
+                    ->pluck('inventory_component_transfers.id')
+                    ->toArray();
                 if (count($ids) <= 0) {
                     $filterFlag = false;
                 }

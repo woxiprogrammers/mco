@@ -67,7 +67,7 @@
                                                             <tr class="filter">
                                                                 <th></th>
                                                                 <th></th>
-                                                                <th></th>
+                                                                <th> <input type="text" class="form-control form-filter" name="search_challan" id="search_challan"></th>
                                                                 <th> <input type="text" class="form-control form-filter" name="search_from" id="search_from"></th>
                                                                 <th> <input type="text" class="form-control form-filter" name="search_to" id="search_to"></th>
                                                                 <th> <input type="text" class="form-control form-filter" name="search_name" id="search_name"></th>
@@ -138,8 +138,10 @@
                 $("#search_qty").val().length > 0 ||
                 $("#search_amt").val().length > 0 ||
                 $("#search_grn_out").val().length > 3 ||
-                $("#search_grn_in").val().length > 3
+                $("#search_grn_in").val().length > 3 ||
+                $("#search_challan").val().length > 3
             ) {
+                var search_challan = $('#search_challan').val();
                 var searchName = $('#search_name').val();
                 var searchFrom = $('#search_from').val();
                 var searchTo = $('#search_to').val();
@@ -158,11 +160,13 @@
                 $("input[name='search_grn_in']").val(searchGrnIn);
                 $("input[name='unit_status']").val(searchUnitStatus);
                 $("input[name='status']").val(searchStatus);
+                $("input[name='search_challan']").val(search_challan);
                 $(".filter-submit").trigger('click');
             }
         });
 
         $("#status_id, #unit_id").on('change', function() {
+            var search_challan = $('#search_challan').val();
             var searchName = $('#search_name').val();
             var searchFrom = $('#search_from').val();
             var searchTo = $('#search_to').val();
@@ -172,6 +176,7 @@
             var searchGrnIn = $('#search_grn_in').val();
             var searchUnitStatus = $('#unit_id').val();
             var searchStatus = $('#status_id').val();
+            $("input[name='search_challan']").val(search_challan);
             $("input[name='search_name']").val(searchName)
             $("input[name='search_from']").val(searchFrom);
             $("input[name='search_to']").val(searchTo);
