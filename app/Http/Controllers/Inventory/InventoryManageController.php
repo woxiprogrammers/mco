@@ -607,9 +607,9 @@ class InventoryManageController extends Controller
             if ($opening_stock != null) {
                 $openQty = $opening_stock;
             }
-            $inQuantity = (int)$inQuantity;
-            $openQty = (int) $openQty;
-            $outQuantity = (int)$outQuantity;
+            $inQuantity = $inQuantity;
+            $openQty = $openQty;
+            $outQuantity = $outQuantity;
             $availableQuantity = ($inQuantity + $openQty) - $outQuantity;
             if (array_key_exists('unitId', $requestData) && $unitID != $requestData['unitId']) {
                 $availableQuantity = UnitHelper::unitQuantityConversion($requestData['unitId'], $unitID, $availableQuantity);
@@ -745,9 +745,9 @@ class InventoryManageController extends Controller
                 if ($opening_stock != null) {
                     $openQty = $opening_stock;
                 }
-                $inQuantity = (int)$inQuantity;
-                $openQty = (int) $openQty;
-                $outQuantity = (int)$outQuantity;
+                $inQuantity = $inQuantity;
+                $openQty =  $openQty;
+                $outQuantity = $outQuantity;
                 $availableQuantity = ($inQuantity + $openQty) - $outQuantity;
                 $records['data'][$iterator] = [
                     ($availableQuantity != 0) ? ($request->has('search_component_id') && in_array($inventoryData[$pagination]->id, explode(',', $request->search_component_id)) ? '<input type="checkbox" class="multiple-select-checkbox-mti" value="' . $inventoryData[$pagination]->id . '" checked>'
@@ -1408,13 +1408,13 @@ class InventoryManageController extends Controller
         try {
             $projectSiteId = Session::get('global_project_site');
             $response = array();
-            $alreadyExitMaterialsIds = InventoryComponent::where('project_site_id',$projectSiteId)->pluck('reference_id');
-            if($type == 'material'){
+            $alreadyExitMaterialsIds = InventoryComponent::where('project_site_id', $projectSiteId)->pluck('reference_id');
+            if ($type == 'material') {
                 // not checking alreadyExitMaterialsIds
                 //$response = Material::where('name','ilike','%'.$keyword.'%')->whereNotIn('id',$alreadyExitMaterialsIds)->distinct('name')->select('name','id as reference_id')->get();
-                $response = Material::where('name','ilike','%'.$keyword.'%')->distinct('name')->select('name','id as reference_id')->get();
-            }else{
-                $response = InventoryComponent::where('name','ilike','%'.$keyword.'%')->where('is_material',false)->whereNotIn('reference_id',$alreadyExitMaterialsIds)->distinct('name')->select('name','reference_id')->get();
+                $response = Material::where('name', 'ilike', '%' . $keyword . '%')->distinct('name')->select('name', 'id as reference_id')->get();
+            } else {
+                $response = InventoryComponent::where('name', 'ilike', '%' . $keyword . '%')->where('is_material', false)->whereNotIn('reference_id', $alreadyExitMaterialsIds)->distinct('name')->select('name', 'reference_id')->get();
             }
             $status = 200;
         } catch (\Exception $e) {
