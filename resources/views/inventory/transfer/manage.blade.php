@@ -131,7 +131,7 @@
     $(document).ready(function() {
         RequestComponentListing.init();
 
-        $("#search_to, #search_from, #search_name, #search_qty, #search_amt,#search_grn_out, #search_grn_in").on('keyup', function() {
+        $("#search_challan, #search_to, #search_from, #search_name, #search_qty, #search_amt,#search_grn_out, #search_grn_in").on('keyup', function() {
             if ($("#search_to").val().length > 3 ||
                 $("#search_from").val().length > 3 ||
                 $("#search_name").val().length > 3 ||
