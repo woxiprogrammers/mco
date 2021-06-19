@@ -26,8 +26,8 @@
                                 <div class="pull-right">
                                     <a href="/inventory/manage" class="btn btn-secondary-outline margin-top-15">
                                         < Back</a> <button type="submit" class="btn red margin-top-15">
-                                            <i class="fa fa-check" style="font-size: large"></i>
-                                            Submit
+                                                <i class="fa fa-check" style="font-size: large"></i>
+                                                Submit
                                             </button>
                                 </div>
                             </div>
