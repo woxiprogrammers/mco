@@ -239,7 +239,8 @@ class InventoryTransferChallanController extends Controller
         try {
             $projectSiteId = Session::get('global_project_site');
             $challans = InventoryTransferChallan::join('inventory_component_transfer_statuses', 'inventory_transfer_challan.inventory_component_transfer_status_id', '=', 'inventory_component_transfer_statuses.id')
-                ->where('inventory_component_transfer_statuses.slug', 'open')
+                //->where('inventory_component_transfer_statuses.slug', 'open')
+		->whereIn('inventory_component_transfer_statuses.slug', ['open','re-open'])
                 ->whereNull('project_site_in_date')
                 ->where('project_site_in_id', $projectSiteId)
                 ->select('inventory_transfer_challan.id', 'inventory_transfer_challan.challan_number')
@@ -822,7 +823,8 @@ class InventoryTransferChallanController extends Controller
                 RentalInventoryTransfer::create([
                     'inventory_component_transfer_id'   => $inventoryComponentInTransfer['id'],
                     'quantity'                          => $inventoryComponentInTransfer['quantity'],
-                    'rent_per_day'                      => $inventoryComponentInTransfer['rate_per_unit'],
+                    //'rent_per_day'                      => $inventoryComponentInTransfer['rate_per_unit'],
+	   	    'rent_per_day'                      => ($inventoryComponentInTransfer['rate_per_unit'] != NULL || $inventoryComponentInTransfer['rate_per_unit'] != null) ? $inventoryComponentInTransfer['rate_per_unit'] : 0,
                     'rent_start_date'                   => $currentDate
                 ]);
 
@@ -899,7 +901,8 @@ class InventoryTransferChallanController extends Controller
                         RentalInventoryTransfer::create([
                             'inventory_component_transfer_id'   => $inventoryComponentTransfer['id'],
                             'quantity'                          => $inventoryComponentTransfer['quantity'],
-                            'rent_per_day'                      => $inventoryComponentTransfer['rate_per_unit'],
+                            //'rent_per_day'                      => $inventoryComponentTransfer['rate_per_unit'],
+			    'rent_per_day'                      => ($inventoryComponentTransfer['rate_per_unit'] != NULL || $inventoryComponentTransfer['rate_per_unit'] != null) ? $inventoryComponentTransfer['rate_per_unit'] : 0,
                             'rent_start_date'                   => $rentApplicableDate
                         ]);
                     }

@@ -64,7 +64,12 @@ class SiteTransferBillingController extends Controller
             $projectSiteId = Session::get('global_project_site');
             $iterator = 0;
             $response = array();
-            $alreadyGeneratedBillChallanIds = SiteTransferBill::whereNotNull('inventory_transfer_challan_id')->pluck('inventory_transfer_challan_id')->toArray();
+            //$alreadyGeneratedBillChallanIds = SiteTransferBill::whereNotNull('inventory_transfer_challan_id')->pluck('inventory_transfer_challan_id')->toArray();
+	    $alreadyGeneratedBillChallanIds = SiteTransferBill::join('site_transfer_bill_challans','site_transfer_bill_challans.site_transfer_bill_id','=','site_transfer_bills.id')
+                    ->distinct('site_transfer_bill_challans.inventory_transfer_challan_id')
+                    ->pluck('site_transfer_bill_challans.inventory_transfer_challan_id')
+                    ->toArray();
+	  
             $closeStatusId = InventoryComponentTransferStatus::where('slug', 'close')->pluck('id')->first();
             $challans = InventoryTransferChallan::join('inventory_component_transfers', 'inventory_component_transfers.inventory_transfer_challan_id', '=', 'inventory_transfer_challan.id')
                 ->join('inventory_transfer_types', 'inventory_transfer_types.id', '=', 'inventory_component_transfers.transfer_type_id')

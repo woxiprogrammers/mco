@@ -99,9 +99,9 @@ class InventoryComponent extends Model
         if ($opening_stock != null) {
             $openQty = $opening_stock;
         }
-        $inQuantity = (int)$inQuantity;
-        $openQty = (int) $openQty;
-        $outQuantity = (int)$outQuantity;
+        $inQuantity = $inQuantity;
+        $openQty =  $openQty;
+        $outQuantity = $outQuantity;
         $availableQuantity = ($inQuantity + $openQty) - $outQuantity;
         return $availableQuantity;
     }

@@ -782,7 +782,7 @@
                         });
                     }
                     $('#current_quantity_' + id).rules('add', {
-                        min: 1,
+                        min: 0,
                     });
                     $('#current_quantity_' + id).valid();
                 },
