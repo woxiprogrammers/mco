@@ -238,11 +238,12 @@ class InventoryTransferChallanController extends Controller
     {
         try {
             $projectSiteId = Session::get('global_project_site');
-            $challans = InventoryTransferChallan::join('inventory_component_transfer_statuses', 'inventory_transfer_challan.inventory_component_transfer_status_id', '=', 'inventory_component_transfer_statuses.id')
-                //->where('inventory_component_transfer_statuses.slug', 'open')
-		->whereIn('inventory_component_transfer_statuses.slug', ['open','re-open'])
-                ->whereNull('project_site_in_date')
+            $challans = InventoryTransferChallan::join('inventory_component_transfers', 'inventory_component_transfers.inventory_transfer_challan_id', '=', 'inventory_transfer_challan.id')
+                ->join('inventory_component_transfer_statuses', 'inventory_transfer_challan.inventory_component_transfer_status_id', '=', 'inventory_component_transfer_statuses.id')
+                ->whereIn('inventory_component_transfer_statuses.slug', ['open','re-open'])
+                //->whereNull('project_site_in_date')
                 ->where('project_site_in_id', $projectSiteId)
+                ->distinct('inventory_transfer_challan.id', 'inventory_transfer_challan.challan_number')
                 ->select('inventory_transfer_challan.id', 'inventory_transfer_challan.challan_number')
                 ->get()->toArray();
             return view('inventory/transfer/challan/site/in')->with(compact('challans'));
@@ -476,15 +477,17 @@ class InventoryTransferChallanController extends Controller
     {
         try {
             $paths = array();
-            $sha1challanId = sha1($inventoryComponentTransfer['inventory_transfer_challan_id']);
-            $imageUploadPath = env('INVENTORY_COMPONENT_IMAGE_UPLOAD');
-            if ($inventoryComponentTransfer->transferType->type === 'IN') {
-                $newInUploadPath = $imageUploadPath . DIRECTORY_SEPARATOR . $sha1challanId . DIRECTORY_SEPARATOR . 'in';
-            } else {
-                $newInUploadPath = $imageUploadPath . DIRECTORY_SEPARATOR . $sha1challanId . DIRECTORY_SEPARATOR . 'out';
-            }
-            foreach ($inventoryComponentTransfer->images as $image) {
-                $paths[] = $newInUploadPath . DIRECTORY_SEPARATOR . $image->name;
+            if($inventoryComponentTransfer != null) {
+                $sha1challanId = sha1($inventoryComponentTransfer['inventory_transfer_challan_id']);
+                $imageUploadPath = env('INVENTORY_COMPONENT_IMAGE_UPLOAD');
+                if ($inventoryComponentTransfer->transferType->type === 'IN') {
+                    $newInUploadPath = $imageUploadPath . DIRECTORY_SEPARATOR . $sha1challanId . DIRECTORY_SEPARATOR . 'in';
+                } else {
+                    $newInUploadPath = $imageUploadPath . DIRECTORY_SEPARATOR . $sha1challanId . DIRECTORY_SEPARATOR . 'out';
+                }
+                foreach ($inventoryComponentTransfer->images as $image) {
+                    $paths[] = $newInUploadPath . DIRECTORY_SEPARATOR . $image->name;
+                }
             }
             return $paths;
         } catch (\Exception $e) {
@@ -494,7 +497,6 @@ class InventoryTransferChallanController extends Controller
                 'exception' => $e->getMessage()
             ];
             Log::critical(json_encode($data));
-            abort(500);
         }
     }
 
