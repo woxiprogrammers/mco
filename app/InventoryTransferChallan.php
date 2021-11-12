@@ -56,22 +56,22 @@ class InventoryTransferChallan extends Model
                 $data['vendor_name'] = "";
             }
         }
-        
+
+
         $data['transportation_total'] = $data['transportation_tax_total'] = 0;
-        if ($data['status_of_challan'] != NULL) {
-            if(isset($data['transportation_amount'])) {
-                if ($data['transportation_amount'] != null && $data['transportation_amount'] != "0") {
-                    $transportation_amount = $data['transportation_amount'];
-                    $cgstAmount = $transportation_amount * ($data['transportation_cgst_percent'] / 100) ?? 0;
-                    $sgstAmount = $transportation_amount * ($data['transportation_sgst_percent'] / 100) ?? 0;
-                    $igstAmount = $transportation_amount * ($data['transportation_igst_percent'] / 100) ?? 0;
-                    $data['transportation_tax_total'] = $cgstAmount + $sgstAmount + $igstAmount;
-                    $data['transportation_total'] = $transportation_amount + $cgstAmount + $sgstAmount + $igstAmount;
-                }
+        if(isset($data['transportation_amount'])) {
+            if ($data['transportation_amount'] != null && $data['transportation_amount'] != "0") {
+                $transportation_amount = $data['transportation_amount'];
+                $cgstAmount = $transportation_amount * ($data['transportation_cgst_percent'] / 100) ?? 0;
+                $sgstAmount = $transportation_amount * ($data['transportation_sgst_percent'] / 100) ?? 0;
+                $igstAmount = $transportation_amount * ($data['transportation_igst_percent'] / 100) ?? 0;
+                $data['transportation_tax_total'] = $cgstAmount + $sgstAmount + $igstAmount;
+                $data['transportation_total'] = $transportation_amount + $cgstAmount + $sgstAmount + $igstAmount;
             }
         } else {
             $data['transportation_amount'] = $data['transportation_cgst_percent'] = $data['transportation_sgst_percent'] = $data['transportation_igst_percent'] = 0;
         }
+
         return $data;
     }
 
